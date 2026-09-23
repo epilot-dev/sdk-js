@@ -170,41 +170,20 @@ export declare namespace Components {
         }
         export interface AppendVersionRequest {
             /**
-             * When this version takes effect. Defaults to now.
+             * When this version takes effect. Omit it to mean now; a timestamp read from the caller's
+             * own clock is already a backdate by the time the server judges it, and earns a warning.
              *
-             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
-             * (`2026-01-01T00:00:00Z`), to at most millisecond precision. Deliberately not declared as
-             * `format: date-time`, which would reject the plain-date form that this accepts.
-             *
-             * A date in the past is accepted and answered with warnings, never refused. A date the
-             * variant already has a version at is refused as `VERSION_CONFLICT`.
-             *
-             * **Omit this to mean "now"** — that is the only spelling of now that is reliably silent. A
-             * timestamp taken from the caller's own clock is already some milliseconds old when the
-             * server judges it, which makes it a backdate, however small, and it is answered with the
-             * warnings a backdate earns.
+             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time, to at most
+             * millisecond precision. A date in the past is accepted; one the variant already has a
+             * version at is `VERSION_CONFLICT`.
              *
              * example:
              * 2027-01-01T00:00:00Z
              */
             valid_from?: string;
-            values: /**
-             * The attribute values this version overrides on the base entity, keyed by attribute name.
-             *
-             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-             * attributes present here are ignored rather than rejected, so a client working from a slightly
-             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
-             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
-             * variant may override it.
-             *
-             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
-             * not currently overridable is preserved, so removing and restoring the flag deactivates and
-             * then reactivates the same override.
-             *
-             * A composite price's `price_components` is an ordinary overridable relation attribute: a
-             * composite variant pins its component variants here the same way any other relation value is
-             * set, with no special handling.
+            /**
+             * The overrides this version carries. Attributes the variant may not override are seeded
+             * from the version in effect at this version's own `valid_from`.
              *
              * example:
              * {
@@ -212,11 +191,12 @@ export declare namespace Components {
              *   "unit_amount_decimal": "24.99"
              * }
              */
-            VariantValues;
+            values: {
+                [name: string]: any;
+            };
             /**
-             * Optional, and never applied: a variant's conditions are fixed when it is created. Accepted
-             * only so that a client building its body from the version it loaded is not forced to strip
-             * them out, and refused when they describe a different situation from the stored one.
+             * Accepted only unchanged, so a client can send back the body it loaded. A variant's
+             * conditions are fixed when it is created.
              *
              * example:
              * {
@@ -527,6 +507,12 @@ export declare namespace Components {
              */
             is_composite_price: true;
             /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
+            /**
              * The price creation date
              */
             _created_at?: string;
@@ -607,6 +593,12 @@ export declare namespace Components {
             Currency;
             cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             active?: boolean;
+            /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
             /**
              * Whether the coupon requires a promo code to be applied
              */
@@ -954,6 +946,12 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -1294,6 +1292,12 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -1514,6 +1518,12 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -1607,6 +1617,4736 @@ export declare namespace Components {
              * https://api.example.com
              */
             base_url?: string;
+        }
+        /**
+         * A delete addressing its variant by the situation it applies to.
+         *
+         * `conditions` is optional because the fallback variant pins nothing: address it with
+         * `default: true` and no `conditions`. An item that ends up addressing no variant at all is a
+         * per-item `VARIANT_UNPINNED`, and one marking `default` beside `conditions` is refused per
+         * item with no code.
+         *
+         */
+        export interface BatchDeleteByConditions {
+            /**
+             * The conditional entity the variant belongs to.
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            conditions?: /**
+             * The situation this variant applies to: a flat map keyed by condition name. A condition left
+             * out is a wildcard, which is what makes adding a condition to a schema non-breaking for
+             * existing variants.
+             *
+             * Exact values only; predicates belong to reads. Values are stored canonicalized for their
+             * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
+             * and `until` where an empty string is an open end, a `location` of format `zipcode` the
+             * postal code itself and one of format `zipcode_town` an object carrying both.
+             *
+             * `default` and names beginning with `_` are reserved; use the request's `default` flag.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045"
+             * }
+             */
+            PinnedConditions;
+            /**
+             * Address the entity's fallback variant, the one served when nothing else applies.
+             */
+            default?: boolean;
+            /**
+             * The one version to remove, by the instant it takes effect. Omitted, the whole variant
+             * goes. An RFC 3339 date or date-time, canonicalized before it is matched.
+             *
+             * example:
+             * 2027-01-01T00:00:00Z
+             */
+            valid_from?: string;
+        }
+        /**
+         * A delete addressing its variant by id.
+         */
+        export interface BatchDeleteByVariantId {
+            /**
+             * The conditional entity the variant belongs to. Required: a variant id alone addresses nothing.
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            /**
+             * The variant to remove, or whose version to remove.
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * The one version to remove, by the instant it takes effect. Omitted, the whole variant
+             * goes. An RFC 3339 date or date-time, canonicalized before it is matched.
+             *
+             * example:
+             * 2027-01-01T00:00:00Z
+             */
+            valid_from?: string;
+        }
+        /**
+         * How many items reached each outcome. Keyed by exactly the values of `BatchDeleteOutcome`,
+         * all present, and summing to the length of `results`.
+         *
+         */
+        export interface BatchDeleteCounts {
+            /**
+             * example:
+             * 1
+             */
+            deleted: number;
+            /**
+             * example:
+             * 1
+             */
+            skipped: number;
+            /**
+             * example:
+             * 1
+             */
+            error: number;
+        }
+        /**
+         * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+         * the one version of it to remove. An item carrying both matches neither branch and is an
+         * envelope `400`.
+         *
+         */
+        export type BatchDeleteItem = /**
+         * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+         * the one version of it to remove. An item carrying both matches neither branch and is an
+         * envelope `400`.
+         *
+         */
+        /* A delete addressing its variant by id. */ BatchDeleteByVariantId | /**
+         * A delete addressing its variant by the situation it applies to.
+         *
+         * `conditions` is optional because the fallback variant pins nothing: address it with
+         * `default: true` and no `conditions`. An item that ends up addressing no variant at all is a
+         * per-item `VARIANT_UNPINNED`, and one marking `default` beside `conditions` is refused per
+         * item with no code.
+         *
+         */
+        BatchDeleteByConditions;
+        /**
+         * What one delete item did.
+         *
+         * - `deleted`: the variant, or the one version the item named, is gone
+         * - `skipped`: the item addressed no such variant or version; a missing entity is an `error`
+         * - `error`: this item alone failed, and the entry's `error` says why
+         *
+         */
+        export type BatchDeleteOutcome = "deleted" | "skipped" | "error";
+        /**
+         * What a batch delete did: one entry per item, in request order, and a count per outcome.
+         */
+        export interface BatchDeleteResult {
+            /**
+             * The `correlation_id` the request carried, echoed only when it was sent.
+             * example:
+             * postal-code-cleanup-2026-09
+             */
+            correlation_id?: string;
+            counts: /**
+             * How many items reached each outcome. Keyed by exactly the values of `BatchDeleteOutcome`,
+             * all present, and summing to the length of `results`.
+             *
+             */
+            BatchDeleteCounts;
+            /**
+             * One entry per item, in request order, which is what maps an outcome back to its source row.
+             */
+            results: /* What one delete item did. Position in `results` maps it back to its source row. */ BatchDeleteResultEntry[];
+        }
+        /**
+         * What one delete item did. Position in `results` maps it back to its source row.
+         */
+        export interface BatchDeleteResultEntry {
+            outcome: /**
+             * What one delete item did.
+             *
+             * - `deleted`: the variant, or the one version the item named, is gone
+             * - `skipped`: the item addressed no such variant or version; a missing entity is an `error`
+             * - `error`: this item alone failed, and the entry's `error` says why
+             *
+             */
+            BatchDeleteOutcome;
+            /**
+             * The entity this item removed from, echoed from the item.
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            /**
+             * The variant this item removed, or whose version it removed. Present wherever it is
+             * known, so a `skipped` entry for a tuple no variant pins names none.
+             *
+             * example:
+             * var-46045
+             */
+            variant_id?: string;
+            /**
+             * The version this item removed, canonicalized to millisecond-precision UTC. Absent where
+             * the item removed the whole variant.
+             *
+             * example:
+             * 2027-01-01T00:00:00.000Z
+             */
+            valid_from?: string;
+            /**
+             * Things worth knowing that did not stop this item's delete, chiefly which reads the
+             * removal moved. Always present and possibly empty, on every outcome.
+             *
+             */
+            warnings: /**
+             * Something worth knowing that did not stop a write. One vocabulary for every write; `details`
+             * is typed per `code`, and a write raises each code at most once.
+             *
+             */
+            WriteWarning[];
+            /**
+             * Why this item failed, present only with `outcome: error`:
+             * `LAST_VERSION_UNDELETABLE`, `VARIANT_UNPINNED`, the codes a condition tuple that cannot
+             * be canonicalized raises, `IDENTIFIER_INVALID`, `VALID_FROM_INVALID`, `WRITE_CONFLICT`,
+             * and the per-item `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and
+             * `ENTITY_NOT_CONDITIONAL`. A missing variant or version is `skipped` instead.
+             *
+             */
+            error?: /**
+             * Why this item failed, present only with `outcome: error`:
+             * `LAST_VERSION_UNDELETABLE`, `VARIANT_UNPINNED`, the codes a condition tuple that cannot
+             * be canonicalized raises, `IDENTIFIER_INVALID`, `VALID_FROM_INVALID`, `WRITE_CONFLICT`,
+             * and the per-item `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and
+             * `ENTITY_NOT_CONDITIONAL`. A missing variant or version is `skipped` instead.
+             *
+             */
+            {
+                code: "SCHEMA_NOT_FOUND";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_NOT_FOUND";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_TYPE_MISMATCH";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                    /**
+                     * The entity type that id belongs to. Where it is a conditional entity type,
+                     * it is the slug to send instead.
+                     *
+                     * example:
+                     * product
+                     */
+                    actual_schema: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_NOT_CONDITIONAL";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_NOT_FOUND";
+                details: {
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                    /**
+                     * The variant the request addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VERSION_NOT_FOUND";
+                details: {
+                    /**
+                     * The variant the request addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The version the request addressed, by the instant it takes effect from.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "NO_MATCHES";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the resolve was scoped to.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "NO_ACTIVE_VERSION";
+                details: {
+                    /**
+                     * The variant the request addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The instant a version in effect was asked for at.
+                     * example:
+                     * 2026-06-01T00:00:00.000Z
+                     */
+                    as_of: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "AMBIGUOUS_RESOLUTION";
+                details: {
+                    /**
+                     * Every variant that applied, each with the conditions it pins.
+                     */
+                    candidates: [
+                        {
+                            /**
+                             * The candidate variant.
+                             * example:
+                             * var-46045
+                             */
+                            variant_id: string;
+                            conditions: /**
+                             * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                             * boolean `default` saying whether this is the entity's fallback.
+                             *
+                             * example:
+                             * {
+                             *   "postal_code": "46045",
+                             *   "default": false
+                             * }
+                             */
+                            VariantConditions;
+                        },
+                        {
+                            /**
+                             * The candidate variant.
+                             * example:
+                             * var-46045
+                             */
+                            variant_id: string;
+                            conditions: /**
+                             * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                             * boolean `default` saying whether this is the entity's fallback.
+                             *
+                             * example:
+                             * {
+                             *   "postal_code": "46045",
+                             *   "default": false
+                             * }
+                             */
+                            VariantConditions;
+                        },
+                        ...{
+                            /**
+                             * The candidate variant.
+                             * example:
+                             * var-46045
+                             */
+                            variant_id: string;
+                            conditions: /**
+                             * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                             * boolean `default` saying whether this is the entity's fallback.
+                             *
+                             * example:
+                             * {
+                             *   "postal_code": "46045",
+                             *   "default": false
+                             * }
+                             */
+                            VariantConditions;
+                        }[]
+                    ];
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "TUPLE_CONFLICT";
+                details: {
+                    /**
+                     * The variant the write addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The variant already holding the tuple, where the write read it back.
+                     * example:
+                     * var-50667
+                     */
+                    conflicting_variant_id?: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VERSION_CONFLICT";
+                details: {
+                    /**
+                     * The variant the write addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The instant already claimed by a version of that variant.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITION_UNDEFINED";
+                details: {
+                    /**
+                     * The condition the request named and the schema does not define.
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_PIN_UNDECLARED";
+                details: {
+                    /**
+                     * The condition the variant pins and the schema no longer declares.
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                    /**
+                     * One variant carrying such a pin.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "OPERATOR_UNSUPPORTED";
+                details: {
+                    /**
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                    /**
+                     * The type the schema declares that condition with.
+                     * example:
+                     * location
+                     */
+                    condition_type: string;
+                    /**
+                     * The predicate the context or filter asked for, or `sort` where a listing
+                     * asked to order by a condition whose type has no order.
+                     *
+                     * example:
+                     * between
+                     */
+                    operator: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONTEXT_FORMAT_INVALID";
+                details: {
+                    /**
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                    /**
+                     * What a value for that condition has to be, in prose.
+                     * example:
+                     * a postal code
+                     */
+                    expected: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITION_VALUE_INVALID";
+                details: {
+                    /**
+                     * example:
+                     * segment
+                     */
+                    condition_name: string;
+                    /**
+                     * The value the write pinned, as it arrived.
+                     * example:
+                     * industrial
+                     */
+                    value: any;
+                    /**
+                     * The vocabulary as enforced, after any entries this deploy cannot read have
+                     * been dropped.
+                     *
+                     * example:
+                     * [
+                     *   "private",
+                     *   "commercial"
+                     * ]
+                     */
+                    options: [
+                        string,
+                        ...string[]
+                    ];
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITION_UNCONFIGURED";
+                details: {
+                    /**
+                     * The condition whose vocabulary is not configured yet.
+                     * example:
+                     * segment
+                     */
+                    condition_name: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "TOO_MANY_MATCHES";
+                details: {
+                    /**
+                     * The most variants one resolve may compose.
+                     * example:
+                     * 100
+                     */
+                    limit: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "WRITE_CONFLICT";
+                details: {
+                    /**
+                     * The variant the write addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The version the write addressed, where one was addressed.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from?: string;
+                    /**
+                     * The revision the write required the stored version to still be at.
+                     * example:
+                     * 3
+                     */
+                    expected_revision?: number;
+                    /**
+                     * The revision the version is actually at, where the failed write read it back.
+                     * example:
+                     * 4
+                     */
+                    current_revision?: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "OFFSET_WINDOW_EXCEEDED";
+                details: {
+                    /**
+                     * The offset the request asked for.
+                     * example:
+                     * 24990
+                     */
+                    from: number;
+                    /**
+                     * The page size the request asked for, after clamping.
+                     * example:
+                     * 25
+                     */
+                    size: number;
+                    /**
+                     * The last row this deploy's index will serve from an offset.
+                     * example:
+                     * 25000
+                     */
+                    window: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CURSOR_INVALID";
+                details: {
+                    /**
+                     * Which check the cursor failed, in prose.
+                     * example:
+                     * The cursor was issued for a different sort order
+                     */
+                    reason: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_LIMIT_REACHED";
+                details: {
+                    /**
+                     * Variants this entity already holds.
+                     * example:
+                     * 5000
+                     */
+                    variant_count: number;
+                    /**
+                     * Variants this entity may hold. Configurable per deploy.
+                     * example:
+                     * 5000
+                     */
+                    cap: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "PIN_FORMAT_INVALID";
+                details: {
+                    /**
+                     * example:
+                     * valid_period
+                     */
+                    condition_name: string;
+                    /**
+                     * The type the schema declares that condition with.
+                     * example:
+                     * daterange
+                     */
+                    condition_type: string;
+                    /**
+                     * What a pin for that condition has to be, in prose.
+                     * example:
+                     * an object carrying a from and an until date, either may be open
+                     */
+                    expected: string;
+                    /**
+                     * The value the write pinned, as it arrived.
+                     * example:
+                     * 2027-01-01/2027-12-31
+                     */
+                    value: any;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_UNPINNED";
+                details: {
+                    /**
+                     * The conditional entity the item addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "LAST_VERSION_UNDELETABLE";
+                details: {
+                    /**
+                     * The variant whose last version the delete addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The version the delete addressed, by the instant it takes effect from.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITION_UNREADABLE";
+                details: {
+                    /**
+                     * The condition whose definition this deploy cannot read.
+                     * example:
+                     * delivery_area
+                     */
+                    condition_name: string;
+                    /**
+                     * Which field of the definition cannot be read, named as the schema spells it.
+                     * example:
+                     * format
+                     */
+                    unreadable: "format" | "options";
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "SORT_INVALID";
+                details: {
+                    /**
+                     * What a `sort` has to be, in prose.
+                     * example:
+                     * conditions.<name>:asc or conditions.<name>:desc, naming a string, select, number or date condition
+                     */
+                    expected: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "DEFAULT_MARKER_RESERVED";
+                details: {
+                    /**
+                     * The marker, spelled as the request spelled it.
+                     * example:
+                     * default
+                     */
+                    condition_name: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "DEFAULT_VARIANT_PINS_CONDITIONS";
+                details: {
+                    /**
+                     * The conditions the write pinned beside the marker.
+                     * example:
+                     * [
+                     *   "postal_code"
+                     * ]
+                     */
+                    condition_names: string[];
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VALID_FROM_IMMUTABLE";
+                details: {
+                    /**
+                     * The version the request addressed, by the instant it takes effect from.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    addressed: string;
+                    /**
+                     * The instant the body asked for instead, canonicalized.
+                     * example:
+                     * 2027-04-01T00:00:00.000Z
+                     */
+                    requested: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_CONDITIONS_IMMUTABLE";
+                details: {
+                    /**
+                     * The variant whose conditions the write would have changed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "IDENTIFIER_INVALID";
+                details: {
+                    /**
+                     * Which id could not be keyed by, named as the request names it.
+                     * example:
+                     * entity_id
+                     */
+                    field: "entity_id" | "variant_id";
+                    /**
+                     * Which of the three checks the id failed, in prose.
+                     * example:
+                     * it carries a character this scheme does not admit
+                     */
+                    reason: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VALID_FROM_INVALID";
+                details: {
+                    /**
+                     * What a `valid_from` has to be, in prose.
+                     * example:
+                     * an RFC 3339 date, optionally with a time to at most millisecond precision and an optional UTC offset
+                     */
+                    expected: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VALUE_UNSTORABLE";
+                details: {
+                    /**
+                     * Where the value sits, as a dotted path of the request's own keys, with array
+                     * entries by index.
+                     *
+                     * example:
+                     * values.tiers.0.unit_amount
+                     */
+                    path: string;
+                    /**
+                     * What about the value cannot be stored, in prose.
+                     * example:
+                     * the non-finite number Infinity
+                     */
+                    reason: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                error?: /**
+                 * The `error` field of an error response: the message, or — where the request failed
+                 * validation before any handler ran — the validation errors themselves.
+                 *
+                 */
+                ReportedError;
+            };
+        }
+        /**
+         * A batch of variant and version deletes under one schema, each item naming the entity it removes from.
+         */
+        export interface BatchDeleteVariantsRequest {
+            /**
+             * An opaque string echoed back verbatim when it was sent, and never interpreted.
+             * example:
+             * postal-code-cleanup-2026-09
+             */
+            correlation_id?: string;
+            /**
+             * The deletes to apply, in the order they should apply where two of them address the same
+             * variant — decided after every condition tuple has been resolved to a variant id. At most
+             * 100 per call.
+             *
+             */
+            items: [
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?,
+                /**
+                 * One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+                 * the one version of it to remove. An item carrying both matches neither branch and is an
+                 * envelope `400`.
+                 *
+                 */
+                BatchDeleteItem?
+            ];
+        }
+        /**
+         * How many items reached each outcome. Keyed by exactly the values of `BatchUpsertOutcome`,
+         * all present, and summing to the length of `results`.
+         *
+         */
+        export interface BatchUpsertCounts {
+            /**
+             * example:
+             * 1
+             */
+            variant_created: number;
+            /**
+             * example:
+             * 1
+             */
+            version_created: number;
+            /**
+             * example:
+             * 1
+             */
+            updated: number;
+            /**
+             * example:
+             * 1
+             */
+            skipped: number;
+            /**
+             * example:
+             * 1
+             */
+            error: number;
+        }
+        /**
+         * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+         * existing condition tuple appends a version to the variant holding it rather than conflicting.
+         *
+         */
+        export interface BatchUpsertItem {
+            /**
+             * The conditional entity this item writes to.
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            conditions?: /**
+             * The situation this variant applies to: a flat map keyed by condition name. A condition left
+             * out is a wildcard, which is what makes adding a condition to a schema non-breaking for
+             * existing variants.
+             *
+             * Exact values only; predicates belong to reads. Values are stored canonicalized for their
+             * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
+             * and `until` where an empty string is an open end, a `location` of format `zipcode` the
+             * postal code itself and one of format `zipcode_town` an object carrying both.
+             *
+             * `default` and names beginning with `_` are reserved; use the request's `default` flag.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045"
+             * }
+             */
+            PinnedConditions;
+            /**
+             * Mark this variant as the entity's fallback, as a create does. An item that pins nothing
+             * and is not the default is `VARIANT_UNPINNED`.
+             *
+             */
+            default?: boolean;
+            /**
+             * When the version this item writes takes effect. Omitted, it is a last-write-wins write
+             * with no `skipped` detection; a past instant is accepted and reported in this item's
+             * `warnings`.
+             *
+             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time, to at most
+             * millisecond precision.
+             *
+             * example:
+             * 2027-01-01T00:00:00Z
+             */
+            valid_from?: string;
+            values: /**
+             * The values this version overrides on the base entity, keyed by entity field name.
+             *
+             * A field is overridable if its attribute declares `overridable_attribute` — which readonly,
+             * hidden, computed and metadata fields, and types no variant may override, cannot be given —
+             * or if a capability declaring `overridable_attribute` names it in `managed_fields`, which
+             * excludes only readonly and metadata fields.
+             *
+             * Fields that are not overridable are reported in the write's `warnings` rather than rejected,
+             * and keep whatever value they already had. An append seeds them from the version in effect at
+             * its own `valid_from`.
+             *
+             * A composite price's `price_components` is an ordinary overridable relation attribute,
+             * referencing component entities rather than variants or versions.
+             *
+             * example:
+             * {
+             *   "unit_amount": 2499,
+             *   "unit_amount_decimal": "24.99"
+             * }
+             */
+            VariantValues;
+        }
+        /**
+         * What one upsert item did, derived from what was stored.
+         *
+         * - `variant_created`: the condition tuple was unknown, so a variant and its first version
+         *   were created
+         * - `version_created`: the tuple was known and had no version at the item's `valid_from`
+         * - `updated`: a version existed at that exact instant and was written in place
+         * - `skipped`: the values are identical to what is stored; not detected for an item without
+         *   `valid_from`
+         * - `error`: this item alone failed, and the entry's `error` says why
+         *
+         */
+        export type BatchUpsertOutcome = "variant_created" | "version_created" | "updated" | "skipped" | "error";
+        /**
+         * What a batch upsert did: one entry per item, in request order, and a count per outcome.
+         */
+        export interface BatchUpsertResult {
+            /**
+             * The `correlation_id` the request carried, echoed only when it was sent.
+             * example:
+             * tariff-refresh-2027-01
+             */
+            correlation_id?: string;
+            counts: /**
+             * How many items reached each outcome. Keyed by exactly the values of `BatchUpsertOutcome`,
+             * all present, and summing to the length of `results`.
+             *
+             */
+            BatchUpsertCounts;
+            /**
+             * One entry per item, in request order, which is what maps an outcome back to its source row.
+             */
+            results: /* What one upsert item did. Position in `results` maps it back to its source row. */ BatchUpsertResultEntry[];
+        }
+        /**
+         * What one upsert item did. Position in `results` maps it back to its source row.
+         */
+        export interface BatchUpsertResultEntry {
+            outcome: /**
+             * What one upsert item did, derived from what was stored.
+             *
+             * - `variant_created`: the condition tuple was unknown, so a variant and its first version
+             *   were created
+             * - `version_created`: the tuple was known and had no version at the item's `valid_from`
+             * - `updated`: a version existed at that exact instant and was written in place
+             * - `skipped`: the values are identical to what is stored; not detected for an item without
+             *   `valid_from`
+             * - `error`: this item alone failed, and the entry's `error` says why
+             *
+             */
+            BatchUpsertOutcome;
+            /**
+             * The entity this item wrote to, echoed from the item.
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            /**
+             * The variant this item created or wrote to. Present on every outcome but `error`.
+             * example:
+             * var-46045
+             */
+            variant_id?: string;
+            /**
+             * The version this item wrote, canonicalized to millisecond-precision UTC. Present on
+             * every outcome but `error`, including for an item that sent none.
+             *
+             * example:
+             * 2027-01-01T00:00:00.000Z
+             */
+            valid_from?: string;
+            /**
+             * Things worth knowing that did not stop this item's write. Always present and possibly
+             * empty, on every outcome. Fires per item, with no batch-level deduplication.
+             *
+             */
+            warnings: /**
+             * Something worth knowing that did not stop a write. One vocabulary for every write; `details`
+             * is typed per `code`, and a write raises each code at most once.
+             *
+             */
+            WriteWarning[];
+            /**
+             * Why this item failed, present only with `outcome: error`: the codes a variant create
+             * raises, plus `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and `ENTITY_NOT_CONDITIONAL`,
+             * which are per item because each item names its own entity. Never `TUPLE_CONFLICT` or
+             * `VERSION_CONFLICT`.
+             *
+             */
+            error?: /**
+             * Why this item failed, present only with `outcome: error`: the codes a variant create
+             * raises, plus `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and `ENTITY_NOT_CONDITIONAL`,
+             * which are per item because each item names its own entity. Never `TUPLE_CONFLICT` or
+             * `VERSION_CONFLICT`.
+             *
+             */
+            {
+                code: "SCHEMA_NOT_FOUND";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_NOT_FOUND";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_TYPE_MISMATCH";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                    /**
+                     * The entity type that id belongs to. Where it is a conditional entity type,
+                     * it is the slug to send instead.
+                     *
+                     * example:
+                     * product
+                     */
+                    actual_schema: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_NOT_CONDITIONAL";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_NOT_FOUND";
+                details: {
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                    /**
+                     * The variant the request addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VERSION_NOT_FOUND";
+                details: {
+                    /**
+                     * The variant the request addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The version the request addressed, by the instant it takes effect from.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "NO_MATCHES";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the resolve was scoped to.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "NO_ACTIVE_VERSION";
+                details: {
+                    /**
+                     * The variant the request addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The instant a version in effect was asked for at.
+                     * example:
+                     * 2026-06-01T00:00:00.000Z
+                     */
+                    as_of: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "AMBIGUOUS_RESOLUTION";
+                details: {
+                    /**
+                     * Every variant that applied, each with the conditions it pins.
+                     */
+                    candidates: [
+                        {
+                            /**
+                             * The candidate variant.
+                             * example:
+                             * var-46045
+                             */
+                            variant_id: string;
+                            conditions: /**
+                             * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                             * boolean `default` saying whether this is the entity's fallback.
+                             *
+                             * example:
+                             * {
+                             *   "postal_code": "46045",
+                             *   "default": false
+                             * }
+                             */
+                            VariantConditions;
+                        },
+                        {
+                            /**
+                             * The candidate variant.
+                             * example:
+                             * var-46045
+                             */
+                            variant_id: string;
+                            conditions: /**
+                             * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                             * boolean `default` saying whether this is the entity's fallback.
+                             *
+                             * example:
+                             * {
+                             *   "postal_code": "46045",
+                             *   "default": false
+                             * }
+                             */
+                            VariantConditions;
+                        },
+                        ...{
+                            /**
+                             * The candidate variant.
+                             * example:
+                             * var-46045
+                             */
+                            variant_id: string;
+                            conditions: /**
+                             * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                             * boolean `default` saying whether this is the entity's fallback.
+                             *
+                             * example:
+                             * {
+                             *   "postal_code": "46045",
+                             *   "default": false
+                             * }
+                             */
+                            VariantConditions;
+                        }[]
+                    ];
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "TUPLE_CONFLICT";
+                details: {
+                    /**
+                     * The variant the write addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The variant already holding the tuple, where the write read it back.
+                     * example:
+                     * var-50667
+                     */
+                    conflicting_variant_id?: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VERSION_CONFLICT";
+                details: {
+                    /**
+                     * The variant the write addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The instant already claimed by a version of that variant.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITION_UNDEFINED";
+                details: {
+                    /**
+                     * The condition the request named and the schema does not define.
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_PIN_UNDECLARED";
+                details: {
+                    /**
+                     * The condition the variant pins and the schema no longer declares.
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                    /**
+                     * One variant carrying such a pin.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "OPERATOR_UNSUPPORTED";
+                details: {
+                    /**
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                    /**
+                     * The type the schema declares that condition with.
+                     * example:
+                     * location
+                     */
+                    condition_type: string;
+                    /**
+                     * The predicate the context or filter asked for, or `sort` where a listing
+                     * asked to order by a condition whose type has no order.
+                     *
+                     * example:
+                     * between
+                     */
+                    operator: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONTEXT_FORMAT_INVALID";
+                details: {
+                    /**
+                     * example:
+                     * postal_code
+                     */
+                    condition_name: string;
+                    /**
+                     * What a value for that condition has to be, in prose.
+                     * example:
+                     * a postal code
+                     */
+                    expected: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITION_VALUE_INVALID";
+                details: {
+                    /**
+                     * example:
+                     * segment
+                     */
+                    condition_name: string;
+                    /**
+                     * The value the write pinned, as it arrived.
+                     * example:
+                     * industrial
+                     */
+                    value: any;
+                    /**
+                     * The vocabulary as enforced, after any entries this deploy cannot read have
+                     * been dropped.
+                     *
+                     * example:
+                     * [
+                     *   "private",
+                     *   "commercial"
+                     * ]
+                     */
+                    options: [
+                        string,
+                        ...string[]
+                    ];
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITION_UNCONFIGURED";
+                details: {
+                    /**
+                     * The condition whose vocabulary is not configured yet.
+                     * example:
+                     * segment
+                     */
+                    condition_name: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "TOO_MANY_MATCHES";
+                details: {
+                    /**
+                     * The most variants one resolve may compose.
+                     * example:
+                     * 100
+                     */
+                    limit: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "WRITE_CONFLICT";
+                details: {
+                    /**
+                     * The variant the write addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The version the write addressed, where one was addressed.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from?: string;
+                    /**
+                     * The revision the write required the stored version to still be at.
+                     * example:
+                     * 3
+                     */
+                    expected_revision?: number;
+                    /**
+                     * The revision the version is actually at, where the failed write read it back.
+                     * example:
+                     * 4
+                     */
+                    current_revision?: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "OFFSET_WINDOW_EXCEEDED";
+                details: {
+                    /**
+                     * The offset the request asked for.
+                     * example:
+                     * 24990
+                     */
+                    from: number;
+                    /**
+                     * The page size the request asked for, after clamping.
+                     * example:
+                     * 25
+                     */
+                    size: number;
+                    /**
+                     * The last row this deploy's index will serve from an offset.
+                     * example:
+                     * 25000
+                     */
+                    window: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CURSOR_INVALID";
+                details: {
+                    /**
+                     * Which check the cursor failed, in prose.
+                     * example:
+                     * The cursor was issued for a different sort order
+                     */
+                    reason: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_LIMIT_REACHED";
+                details: {
+                    /**
+                     * Variants this entity already holds.
+                     * example:
+                     * 5000
+                     */
+                    variant_count: number;
+                    /**
+                     * Variants this entity may hold. Configurable per deploy.
+                     * example:
+                     * 5000
+                     */
+                    cap: number;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "PIN_FORMAT_INVALID";
+                details: {
+                    /**
+                     * example:
+                     * valid_period
+                     */
+                    condition_name: string;
+                    /**
+                     * The type the schema declares that condition with.
+                     * example:
+                     * daterange
+                     */
+                    condition_type: string;
+                    /**
+                     * What a pin for that condition has to be, in prose.
+                     * example:
+                     * an object carrying a from and an until date, either may be open
+                     */
+                    expected: string;
+                    /**
+                     * The value the write pinned, as it arrived.
+                     * example:
+                     * 2027-01-01/2027-12-31
+                     */
+                    value: any;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_UNPINNED";
+                details: {
+                    /**
+                     * The conditional entity the item addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "LAST_VERSION_UNDELETABLE";
+                details: {
+                    /**
+                     * The variant whose last version the delete addressed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                    /**
+                     * The version the delete addressed, by the instant it takes effect from.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    valid_from: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITION_UNREADABLE";
+                details: {
+                    /**
+                     * The condition whose definition this deploy cannot read.
+                     * example:
+                     * delivery_area
+                     */
+                    condition_name: string;
+                    /**
+                     * Which field of the definition cannot be read, named as the schema spells it.
+                     * example:
+                     * format
+                     */
+                    unreadable: "format" | "options";
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "SORT_INVALID";
+                details: {
+                    /**
+                     * What a `sort` has to be, in prose.
+                     * example:
+                     * conditions.<name>:asc or conditions.<name>:desc, naming a string, select, number or date condition
+                     */
+                    expected: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "DEFAULT_MARKER_RESERVED";
+                details: {
+                    /**
+                     * The marker, spelled as the request spelled it.
+                     * example:
+                     * default
+                     */
+                    condition_name: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "DEFAULT_VARIANT_PINS_CONDITIONS";
+                details: {
+                    /**
+                     * The conditions the write pinned beside the marker.
+                     * example:
+                     * [
+                     *   "postal_code"
+                     * ]
+                     */
+                    condition_names: string[];
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VALID_FROM_IMMUTABLE";
+                details: {
+                    /**
+                     * The version the request addressed, by the instant it takes effect from.
+                     * example:
+                     * 2027-01-01T00:00:00.000Z
+                     */
+                    addressed: string;
+                    /**
+                     * The instant the body asked for instead, canonicalized.
+                     * example:
+                     * 2027-04-01T00:00:00.000Z
+                     */
+                    requested: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VARIANT_CONDITIONS_IMMUTABLE";
+                details: {
+                    /**
+                     * The variant whose conditions the write would have changed.
+                     * example:
+                     * var-46045
+                     */
+                    variant_id: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "IDENTIFIER_INVALID";
+                details: {
+                    /**
+                     * Which id could not be keyed by, named as the request names it.
+                     * example:
+                     * entity_id
+                     */
+                    field: "entity_id" | "variant_id";
+                    /**
+                     * Which of the three checks the id failed, in prose.
+                     * example:
+                     * it carries a character this scheme does not admit
+                     */
+                    reason: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VALID_FROM_INVALID";
+                details: {
+                    /**
+                     * What a `valid_from` has to be, in prose.
+                     * example:
+                     * an RFC 3339 date, optionally with a time to at most millisecond precision and an optional UTC offset
+                     */
+                    expected: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "VALUE_UNSTORABLE";
+                details: {
+                    /**
+                     * Where the value sits, as a dotted path of the request's own keys, with array
+                     * entries by index.
+                     *
+                     * example:
+                     * values.tiers.0.unit_amount
+                     */
+                    path: string;
+                    /**
+                     * What about the value cannot be stored, in prose.
+                     * example:
+                     * the non-finite number Infinity
+                     */
+                    reason: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                error?: /**
+                 * The `error` field of an error response: the message, or — where the request failed
+                 * validation before any handler ran — the validation errors themselves.
+                 *
+                 */
+                ReportedError;
+            };
+        }
+        /**
+         * A batch of variant writes under one schema, each item naming the entity it writes to.
+         */
+        export interface BatchUpsertVariantsRequest {
+            /**
+             * An opaque string echoed back verbatim when it was sent, and never interpreted.
+             * example:
+             * tariff-refresh-2027-01
+             */
+            correlation_id?: string;
+            /**
+             * The writes to apply, in the order they should apply where two of them address the same
+             * variant. At most 100 per call, which is distinct from the per-entity variant cap.
+             *
+             */
+            items: [
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?,
+                /**
+                 * One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+                 * existing condition tuple appends a version to the variant holding it rather than conflicting.
+                 *
+                 */
+                BatchUpsertItem?
+            ];
         }
         export type BillingPeriod = "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly";
         /**
@@ -3175,6 +7915,12 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -3369,6 +8115,12 @@ export declare namespace Components {
                 Currency;
                 cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
                 active?: boolean;
+                /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
                 /**
                  * Whether the coupon requires a promo code to be applied
                  */
@@ -3779,6 +8531,12 @@ export declare namespace Components {
                 price_options?: {
                     $relation?: EntityRelation[];
                 };
+                /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
                 /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
@@ -4225,17 +8983,20 @@ export declare namespace Components {
             [name: string]: /* The computed price */ ComputedBasePrice;
         }
         /**
-         * One condition dimension, in the shape a schema's `conditions` array holds it — copy it in
-         * verbatim.
-         *
+         * One condition dimension, in the shape a schema's `conditions` array holds it — copy it in verbatim.
          */
         export interface ConditionDefinition {
             /**
-             * How variants and resolve contexts refer to this condition. Independent of attribute
-             * names: a value needed as an attribute too is duplicated onto the variant.
+             * Stable identity of the condition, supplied on creation and round-tripped unchanged. A
+             * catalog condition keeps the id the catalog gives it.
              *
-             * `default`, and any name beginning with `_`, are reserved for the server: a condition
-             * declared under one is ignored, since nothing could pin it and no context could address it.
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id: string; // uuid
+            /**
+             * How variants and resolve contexts refer to this condition, independent of attribute
+             * names. `default` and names beginning with `_` are reserved and are ignored here.
              *
              * example:
              * postal_code
@@ -4248,58 +9009,45 @@ export declare namespace Components {
              */
             label: string;
             type: /**
-             * The kind of value a condition holds, which decides how a variant's pinned value is matched
-             * against a resolve context.
+             * The kind of value a condition holds, which decides how a pinned value is matched against a
+             * resolve context.
              *
              * - `string`: an arbitrary string, matched exactly and case-sensitively
              * - `number`: a numeric value
              * - `date`: a single date
-             * - `daterange`: a window with a from and an until timestamp; both ends may be left open
+             * - `daterange`: a window with a from and an until timestamp; either end may be left open
              * - `boolean`: a true/false value
-             * - `select`: one of the values declared in `options`, unless `allow_any` is set
+             * - `select`: one of the values declared in `options`, which is always a closed vocabulary
              * - `location`: a geographic value, shaped by `format`
-             *
-             * There is no condition type for the fallback variant. Being the entity's fallback is a
-             * property of the variant, set by the `default` flag on a variant write, and needs nothing
-             * declared in the schema.
              *
              */
             ConditionType;
             /**
-             * The declared vocabulary of a `select` condition. Absent for every other type.
+             * The vocabulary of a `select` condition, absent for every other type. Each entry is the
+             * value itself or an object carrying that value and a display `title`, which is never
+             * matched.
              *
-             * The same shape a `select` attribute's `options` has on the Entity API, item for item: an
-             * entry is either the value itself or an object carrying that value and an optional display
-             * `title`. A `title` is never pinned by a variant and never matched — two entries differing
-             * only in their title are one vocabulary entry.
-             *
-             * Enforced on variant writes, unless `allow_any` is true: a pinned value outside the
-             * vocabulary is rejected with `CONDITION_VALUE_INVALID`. It is *not* enforced on resolve —
-             * a vocabulary says what may be stored, not what may be asked for, so a context value
-             * outside it is a query that simply matches nothing.
+             * Always closed: a pinned value outside it is `CONDITION_VALUE_INVALID`, and while
+             * `options` is absent or empty the condition admits no pin at all. Not enforced on
+             * resolve, where a context value outside the vocabulary matches nothing.
              *
              * example:
              * [
              *   "private",
-             *   "commercial"
+             *   {
+             *     "value": "commercial",
+             *     "title": "Commercial customers"
+             *   }
              * ]
              */
-            options?: ((string | null) | {
+            options?: (string | {
                 value: string;
                 title?: string;
             })[];
             /**
-             * Allow arbitrary stored values in addition to the declared `options`. Absent means strict:
-             * a variant may only pin a declared option.
-             *
-             * example:
-             * false
-             */
-            allow_any?: boolean;
-            /**
              * The value shape of a `location` condition. Absent for every other type.
              */
-            format?: "zipcode" | "zipcode + town";
+            format?: "zipcode" | "zipcode_town";
         }
         /**
          * A named bundle of condition definitions, built in for one entity type.
@@ -4324,53 +9072,60 @@ export declare namespace Components {
             /**
              * The condition definitions to copy into the schema's own `conditions` array.
              */
-            conditions: /**
-             * One condition dimension, in the shape a schema's `conditions` array holds it — copy it in
-             * verbatim.
-             *
-             */
-            ConditionDefinition[];
+            conditions: /* One condition dimension, in the shape a schema's `conditions` array holds it — copy it in verbatim. */ ConditionDefinition[];
         }
         export interface ConditionSetCatalog {
             /**
              * The condition sets built in for the requested entity type, in the order they are offered.
-             *
              */
             results: /* A named bundle of condition definitions, built in for one entity type. */ ConditionSet[];
         }
         /**
-         * The kind of value a condition holds, which decides how a variant's pinned value is matched
-         * against a resolve context.
+         * The kind of value a condition holds, which decides how a pinned value is matched against a
+         * resolve context.
          *
          * - `string`: an arbitrary string, matched exactly and case-sensitively
          * - `number`: a numeric value
          * - `date`: a single date
-         * - `daterange`: a window with a from and an until timestamp; both ends may be left open
+         * - `daterange`: a window with a from and an until timestamp; either end may be left open
          * - `boolean`: a true/false value
-         * - `select`: one of the values declared in `options`, unless `allow_any` is set
+         * - `select`: one of the values declared in `options`, which is always a closed vocabulary
          * - `location`: a geographic value, shaped by `format`
-         *
-         * There is no condition type for the fallback variant. Being the entity's fallback is a
-         * property of the variant, set by the `default` flag on a variant write, and needs nothing
-         * declared in the schema.
          *
          */
         export type ConditionType = "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location";
         /**
-         * Schema slug of an entity type that can be conditional — the `{slug}` of every
-         * conditional-pricing route.
-         *
+         * Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route.
          */
         export type ConditionalEntitySlug = "product" | "price" | "coupon";
         /**
-         * An error from a conditional-pricing operation, carrying a machine-readable `code`
-         * from the conditional-pricing vocabulary plus any structured data about the failure,
-         * so a client can branch on the kind of failure rather than parse the message.
-         * Referenced only by the operations that emit these codes; every other operation
-         * keeps the plain `Error` shape.
+         * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+         * that code explains. `details` is typed per code: narrow on `code` and the object under it
+         * declares exactly the fields that code sends.
+         *
+         * A request these schemas reject is answered by the request validator with a message and
+         * carries neither `code` nor `details` — the last member of the union.
          *
          */
-        export interface ConditionalPricingError {
+        export type ConditionalPricingError = /**
+         * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+         * that code explains. `details` is typed per code: narrow on `code` and the object under it
+         * declares exactly the fields that code sends.
+         *
+         * A request these schemas reject is answered by the request validator with a message and
+         * carries neither `code` nor `details` — the last member of the union.
+         *
+         */
+        {
+            code: "SCHEMA_NOT_FOUND";
+            details: {
+                /**
+                 * The entity type the request addressed.
+                 * example:
+                 * price
+                 */
+                schema: string;
+            };
             /**
              * Error message
              */
@@ -4384,62 +9139,1619 @@ export declare namespace Components {
              */
             cause?: string;
             /**
-             * The error message. Carries the same string as `message`, which the shared `Error`
-             * schema requires — `error` is the field responses have always used, and every caller
-             * to date reads. Declared here rather than on the shared `Error` because a request
-             * validation failure puts a list of validation errors in this field instead of a
-             * string, and those responses reference `Error` directly.
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
              *
              */
-            error?: string;
-            code?: /**
-             * Machine-readable failure mode of a conditional-pricing operation, allowing clients
-             * to branch on the kind of failure instead of parsing the error message.
-             *
-             * - `NOT_FOUND` (404): the addressed entity, variant or version does not exist
-             * - `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested
-             * - `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant
-             * - `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant
-             * - `CONDITION_UNDEFINED` (400): the context names a condition the entity's schema does not define
-             * - `OPERATOR_UNSUPPORTED` (400): the requested operator is not applicable to the condition's type
-             * - `CONTEXT_FORMAT_INVALID` (400): a context value is malformed for its condition type
-             * - `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value the condition's declared `options` do not contain
-             * - `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap
-             * - `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`
-             *
-             * Each code is emitted with the HTTP status shown above, and only with that status.
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
              *
              */
-            ConditionalPricingErrorCode;
-            /**
-             * Structured data about the failure, shaped by the accompanying `code`
-             * (e.g. the candidate variants of an `ambiguous-resolution`). Only present
-             * when the failure has structured data to report, and never without a `code`.
-             *
-             */
-            details?: {
+            string | {
                 [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "ENTITY_NOT_FOUND";
+            details: {
+                /**
+                 * The entity type the request addressed.
+                 * example:
+                 * price
+                 */
+                schema: string;
+                /**
+                 * The conditional entity the request addressed.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
             };
-        }
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "ENTITY_TYPE_MISMATCH";
+            details: {
+                /**
+                 * The entity type the request addressed.
+                 * example:
+                 * price
+                 */
+                schema: string;
+                /**
+                 * The conditional entity the request addressed.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+                /**
+                 * The entity type that id belongs to. Where it is a conditional entity type,
+                 * it is the slug to send instead.
+                 *
+                 * example:
+                 * product
+                 */
+                actual_schema: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "ENTITY_NOT_CONDITIONAL";
+            details: {
+                /**
+                 * The entity type the request addressed.
+                 * example:
+                 * price
+                 */
+                schema: string;
+                /**
+                 * The conditional entity the request addressed.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VARIANT_NOT_FOUND";
+            details: {
+                /**
+                 * The conditional entity the request addressed.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+                /**
+                 * The variant the request addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VERSION_NOT_FOUND";
+            details: {
+                /**
+                 * The variant the request addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The version the request addressed, by the instant it takes effect from.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                valid_from: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "NO_MATCHES";
+            details: {
+                /**
+                 * The entity type the request addressed.
+                 * example:
+                 * price
+                 */
+                schema: string;
+                /**
+                 * The conditional entity the resolve was scoped to.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "NO_ACTIVE_VERSION";
+            details: {
+                /**
+                 * The variant the request addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The instant a version in effect was asked for at.
+                 * example:
+                 * 2026-06-01T00:00:00.000Z
+                 */
+                as_of: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "AMBIGUOUS_RESOLUTION";
+            details: {
+                /**
+                 * Every variant that applied, each with the conditions it pins.
+                 */
+                candidates: [
+                    {
+                        /**
+                         * The candidate variant.
+                         * example:
+                         * var-46045
+                         */
+                        variant_id: string;
+                        conditions: /**
+                         * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                         * boolean `default` saying whether this is the entity's fallback.
+                         *
+                         * example:
+                         * {
+                         *   "postal_code": "46045",
+                         *   "default": false
+                         * }
+                         */
+                        VariantConditions;
+                    },
+                    {
+                        /**
+                         * The candidate variant.
+                         * example:
+                         * var-46045
+                         */
+                        variant_id: string;
+                        conditions: /**
+                         * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                         * boolean `default` saying whether this is the entity's fallback.
+                         *
+                         * example:
+                         * {
+                         *   "postal_code": "46045",
+                         *   "default": false
+                         * }
+                         */
+                        VariantConditions;
+                    },
+                    ...{
+                        /**
+                         * The candidate variant.
+                         * example:
+                         * var-46045
+                         */
+                        variant_id: string;
+                        conditions: /**
+                         * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
+                         * boolean `default` saying whether this is the entity's fallback.
+                         *
+                         * example:
+                         * {
+                         *   "postal_code": "46045",
+                         *   "default": false
+                         * }
+                         */
+                        VariantConditions;
+                    }[]
+                ];
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "TUPLE_CONFLICT";
+            details: {
+                /**
+                 * The variant the write addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The variant already holding the tuple, where the write read it back.
+                 * example:
+                 * var-50667
+                 */
+                conflicting_variant_id?: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VERSION_CONFLICT";
+            details: {
+                /**
+                 * The variant the write addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The instant already claimed by a version of that variant.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                valid_from: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CONDITION_UNDEFINED";
+            details: {
+                /**
+                 * The condition the request named and the schema does not define.
+                 * example:
+                 * postal_code
+                 */
+                condition_name: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VARIANT_PIN_UNDECLARED";
+            details: {
+                /**
+                 * The condition the variant pins and the schema no longer declares.
+                 * example:
+                 * postal_code
+                 */
+                condition_name: string;
+                /**
+                 * One variant carrying such a pin.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "OPERATOR_UNSUPPORTED";
+            details: {
+                /**
+                 * example:
+                 * postal_code
+                 */
+                condition_name: string;
+                /**
+                 * The type the schema declares that condition with.
+                 * example:
+                 * location
+                 */
+                condition_type: string;
+                /**
+                 * The predicate the context or filter asked for, or `sort` where a listing
+                 * asked to order by a condition whose type has no order.
+                 *
+                 * example:
+                 * between
+                 */
+                operator: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CONTEXT_FORMAT_INVALID";
+            details: {
+                /**
+                 * example:
+                 * postal_code
+                 */
+                condition_name: string;
+                /**
+                 * What a value for that condition has to be, in prose.
+                 * example:
+                 * a postal code
+                 */
+                expected: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CONDITION_VALUE_INVALID";
+            details: {
+                /**
+                 * example:
+                 * segment
+                 */
+                condition_name: string;
+                /**
+                 * The value the write pinned, as it arrived.
+                 * example:
+                 * industrial
+                 */
+                value: any;
+                /**
+                 * The vocabulary as enforced, after any entries this deploy cannot read have
+                 * been dropped.
+                 *
+                 * example:
+                 * [
+                 *   "private",
+                 *   "commercial"
+                 * ]
+                 */
+                options: [
+                    string,
+                    ...string[]
+                ];
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CONDITION_UNCONFIGURED";
+            details: {
+                /**
+                 * The condition whose vocabulary is not configured yet.
+                 * example:
+                 * segment
+                 */
+                condition_name: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "TOO_MANY_MATCHES";
+            details: {
+                /**
+                 * The most variants one resolve may compose.
+                 * example:
+                 * 100
+                 */
+                limit: number;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "WRITE_CONFLICT";
+            details: {
+                /**
+                 * The variant the write addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The version the write addressed, where one was addressed.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                valid_from?: string;
+                /**
+                 * The revision the write required the stored version to still be at.
+                 * example:
+                 * 3
+                 */
+                expected_revision?: number;
+                /**
+                 * The revision the version is actually at, where the failed write read it back.
+                 * example:
+                 * 4
+                 */
+                current_revision?: number;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "OFFSET_WINDOW_EXCEEDED";
+            details: {
+                /**
+                 * The offset the request asked for.
+                 * example:
+                 * 24990
+                 */
+                from: number;
+                /**
+                 * The page size the request asked for, after clamping.
+                 * example:
+                 * 25
+                 */
+                size: number;
+                /**
+                 * The last row this deploy's index will serve from an offset.
+                 * example:
+                 * 25000
+                 */
+                window: number;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CURSOR_INVALID";
+            details: {
+                /**
+                 * Which check the cursor failed, in prose.
+                 * example:
+                 * The cursor was issued for a different sort order
+                 */
+                reason: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VARIANT_LIMIT_REACHED";
+            details: {
+                /**
+                 * Variants this entity already holds.
+                 * example:
+                 * 5000
+                 */
+                variant_count: number;
+                /**
+                 * Variants this entity may hold. Configurable per deploy.
+                 * example:
+                 * 5000
+                 */
+                cap: number;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "PIN_FORMAT_INVALID";
+            details: {
+                /**
+                 * example:
+                 * valid_period
+                 */
+                condition_name: string;
+                /**
+                 * The type the schema declares that condition with.
+                 * example:
+                 * daterange
+                 */
+                condition_type: string;
+                /**
+                 * What a pin for that condition has to be, in prose.
+                 * example:
+                 * an object carrying a from and an until date, either may be open
+                 */
+                expected: string;
+                /**
+                 * The value the write pinned, as it arrived.
+                 * example:
+                 * 2027-01-01/2027-12-31
+                 */
+                value: any;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VARIANT_UNPINNED";
+            details: {
+                /**
+                 * The conditional entity the item addressed.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "LAST_VERSION_UNDELETABLE";
+            details: {
+                /**
+                 * The variant whose last version the delete addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The version the delete addressed, by the instant it takes effect from.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                valid_from: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CONDITION_UNREADABLE";
+            details: {
+                /**
+                 * The condition whose definition this deploy cannot read.
+                 * example:
+                 * delivery_area
+                 */
+                condition_name: string;
+                /**
+                 * Which field of the definition cannot be read, named as the schema spells it.
+                 * example:
+                 * format
+                 */
+                unreadable: "format" | "options";
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "SORT_INVALID";
+            details: {
+                /**
+                 * What a `sort` has to be, in prose.
+                 * example:
+                 * conditions.<name>:asc or conditions.<name>:desc, naming a string, select, number or date condition
+                 */
+                expected: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "DEFAULT_MARKER_RESERVED";
+            details: {
+                /**
+                 * The marker, spelled as the request spelled it.
+                 * example:
+                 * default
+                 */
+                condition_name: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "DEFAULT_VARIANT_PINS_CONDITIONS";
+            details: {
+                /**
+                 * The conditions the write pinned beside the marker.
+                 * example:
+                 * [
+                 *   "postal_code"
+                 * ]
+                 */
+                condition_names: string[];
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VALID_FROM_IMMUTABLE";
+            details: {
+                /**
+                 * The version the request addressed, by the instant it takes effect from.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                addressed: string;
+                /**
+                 * The instant the body asked for instead, canonicalized.
+                 * example:
+                 * 2027-04-01T00:00:00.000Z
+                 */
+                requested: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VARIANT_CONDITIONS_IMMUTABLE";
+            details: {
+                /**
+                 * The variant whose conditions the write would have changed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "IDENTIFIER_INVALID";
+            details: {
+                /**
+                 * Which id could not be keyed by, named as the request names it.
+                 * example:
+                 * entity_id
+                 */
+                field: "entity_id" | "variant_id";
+                /**
+                 * Which of the three checks the id failed, in prose.
+                 * example:
+                 * it carries a character this scheme does not admit
+                 */
+                reason: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VALID_FROM_INVALID";
+            details: {
+                /**
+                 * What a `valid_from` has to be, in prose.
+                 * example:
+                 * an RFC 3339 date, optionally with a time to at most millisecond precision and an optional UTC offset
+                 */
+                expected: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "VALUE_UNSTORABLE";
+            details: {
+                /**
+                 * Where the value sits, as a dotted path of the request's own keys, with array
+                 * entries by index.
+                 *
+                 * example:
+                 * values.tiers.0.unit_amount
+                 */
+                path: string;
+                /**
+                 * What about the value cannot be stored, in prose.
+                 * example:
+                 * the non-finite number Infinity
+                 */
+                reason: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            error?: /**
+             * The `error` field of an error response: the message, or — where the request failed
+             * validation before any handler ran — the validation errors themselves.
+             *
+             */
+            ReportedError;
+        };
         /**
-         * Machine-readable failure mode of a conditional-pricing operation, allowing clients
-         * to branch on the kind of failure instead of parsing the error message.
+         * Machine-readable failure mode of a conditional-pricing operation, so a client can branch on
+         * the kind of failure instead of parsing the message. A `400` is about the request; a `409` is
+         * about what is already stored. Refusals raised by request validation carry no `code` at all.
          *
-         * - `NOT_FOUND` (404): the addressed entity, variant or version does not exist
+         * - `SCHEMA_NOT_FOUND` (404): no conditional entity type by that slug
+         * - `ENTITY_NOT_FOUND` (404): the schema holds no entity with that id
+         * - `ENTITY_TYPE_MISMATCH` (400): that id belongs to an entity of another type than the slug named
+         * - `ENTITY_NOT_CONDITIONAL` (409): the entity is of the right type but was not created as a conditional one
+         * - `VARIANT_NOT_FOUND` (404): the entity has no such variant
+         * - `VERSION_NOT_FOUND` (404): the variant has no version at that `valid_from`
+         * - `NO_MATCHES` (404): nothing applied to the context and the entity has no `default` variant
+         * - `NO_ACTIVE_VERSION` (404): the variant has no version in effect at the instant asked about
          * - `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested
          * - `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant
          * - `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant
-         * - `CONDITION_UNDEFINED` (400): the context names a condition the entity's schema does not define
-         * - `OPERATOR_UNSUPPORTED` (400): the requested operator is not applicable to the condition's type
-         * - `CONTEXT_FORMAT_INVALID` (400): a context value is malformed for its condition type
-         * - `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value the condition's declared `options` do not contain
+         * - `CONDITION_UNDEFINED` (400): the request names a condition the entity's schema does not define
+         * - `VARIANT_PIN_UNDECLARED` (409): a variant a resolve would compose pins a condition the entity's schema no longer declares
+         * - `OPERATOR_UNSUPPORTED` (400): the requested predicate, or a sort, is not applicable to the condition's type
+         * - `CONTEXT_FORMAT_INVALID` (400): a resolve context or listing filter value is malformed for its condition type
+         * - `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value absent from the condition's declared `options`
+         * - `CONDITION_UNCONFIGURED` (409): a variant write pins a `select` condition whose `options` are absent or empty
          * - `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap
          * - `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`
-         *
-         * Each code is emitted with the HTTP status shown above, and only with that status.
+         * - `OFFSET_WINDOW_EXCEEDED` (400): a listing's `from` plus `size` reaches past the offset window the search index allows
+         * - `CURSOR_INVALID` (400): a paging cursor cannot be read, or does not belong to the read it was sent with
+         * - `VARIANT_LIMIT_REACHED` (409): the entity already holds every variant it may hold
+         * - `PIN_FORMAT_INVALID` (400): a variant pins a value malformed for its condition's type
+         * - `VARIANT_UNPINNED` (400): a variant write pins no condition and is not marked `default`, or a batch delete item addresses no variant
+         * - `LAST_VERSION_UNDELETABLE` (409): the delete would leave the variant with no version at all
+         * - `CONDITION_UNREADABLE` (409): the entity's schema declares a condition in a way this deploy cannot read
+         * - `SORT_INVALID` (400): a listing's `sort` is not `conditions.<name>:asc` or `conditions.<name>:desc`
+         * - `DEFAULT_MARKER_RESERVED` (400): a variant write's pins, or a resolve context, address the fallback marker — `default` or `_default`
+         * - `DEFAULT_VARIANT_PINS_CONDITIONS` (400): a variant marked `default` also pins real conditions
+         * - `VALID_FROM_IMMUTABLE` (400): a version write asks for a different `valid_from` than the version its own address names
+         * - `VARIANT_CONDITIONS_IMMUTABLE` (409): a version write carries a condition tuple other than the one its variant was created with
+         * - `IDENTIFIER_INVALID` (400): an id in the request cannot be used as a storage key — empty, carrying an unsupported character, or longer than 128 characters
+         * - `VALID_FROM_INVALID` (400): a `valid_from` is not one of the timestamp forms a version timeline can be sorted by
+         * - `VALUE_UNSTORABLE` (400): a write carries a value the store cannot hold, such as a non-finite number or one outside the table's numeric range
          *
          */
-        export type ConditionalPricingErrorCode = "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT";
+        export type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE";
         export type ConsumptionTypeGetAg = "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
         /**
          * The coupon entity
@@ -4525,6 +10837,12 @@ export declare namespace Components {
             Currency;
             cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             active?: boolean;
+            /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
             /**
              * Whether the coupon requires a promo code to be applied
              */
@@ -4637,6 +10955,12 @@ export declare namespace Components {
             cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             active?: boolean;
             /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
+            /**
              * Whether the coupon requires a promo code to be applied
              */
             requires_promo_code?: boolean;
@@ -4726,6 +11050,12 @@ export declare namespace Components {
             cashback_period?: /* The cashback period, for now it's limited to either 0 months or 12 months */ CashbackPeriod;
             active?: boolean;
             /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
+            /**
              * Whether the coupon requires a promo code to be applied
              */
             requires_promo_code?: boolean;
@@ -4766,22 +11096,16 @@ export declare namespace Components {
         }
         export interface CreateVariantRequest {
             conditions?: /**
-             * The situation this variant applies to: a flat map keyed by condition name, as the entity's
-             * schema declares them. A condition left out is a wildcard — the variant applies whatever the
-             * context says for it, which is what makes adding a condition to a schema non-breaking for the
-             * variants that already exist.
+             * The situation this variant applies to: a flat map keyed by condition name. A condition left
+             * out is a wildcard, which is what makes adding a condition to a schema non-breaking for
+             * existing variants.
              *
-             * Exact values only. Predicates are accepted in a resolve context and nowhere else, so that
-             * matching is decided in exactly one place.
+             * Exact values only; predicates belong to reads. Values are stored canonicalized for their
+             * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
+             * and `until` where an empty string is an open end, a `location` of format `zipcode` the
+             * postal code itself and one of format `zipcode_town` an object carrying both.
              *
-             * Values are typed by their condition and stored canonicalized for that type: a `date` becomes
-             * millisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty
-             * string is an open end, a `location` of format `zipcode` the postal code itself and one of
-             * format `zipcode + town` an object carrying both. A `select` value must be a string, and must
-             * be one the condition's `options` declare unless it sets `allow_any`.
-             *
-             * `default`, and any name beginning with `_`, are reserved for the server and cannot be pinned
-             * here. Whether a variant is the entity's fallback is set through the request's `default` flag.
+             * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
              * example:
              * {
@@ -4790,47 +11114,34 @@ export declare namespace Components {
              */
             PinnedConditions;
             /**
-             * Mark this variant as the entity's fallback: the one served when no other variant applies.
-             *
-             * A property of the variant, never an entry in `conditions` — a variant claiming a value for
-             * the marker would hold a real condition tuple while being permanently unmatchable, since no
-             * resolve context ever supplies it. A default variant cannot pin anything else, and an
-             * entity can have at most one.
-             *
-             * Available to every conditional entity: nothing has to be declared in the schema first.
-             * The variant is stored pinning one reserved condition, which is what makes the ordinary
-             * condition-tuple guard enforce at-most-one-per-entity with no rule of its own.
+             * Mark this variant as the entity's fallback, served when no other variant applies. It can
+             * pin nothing else, and an entity may have one; a second is `TUPLE_CONFLICT`. Available to
+             * every conditional entity without anything being declared in the schema.
              *
              */
             default?: boolean;
             /**
-             * When the first version takes effect. Defaults to now.
-             *
-             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
-             * (`2026-01-01T00:00:00Z`), to at most millisecond precision. Deliberately not declared as
-             * `format: date-time`, which would reject the plain-date form that this accepts.
+             * When the first version takes effect. Defaults to now. An RFC 3339 date (`2026-01-01`,
+             * read as midnight UTC) or date-time, to at most millisecond precision.
              *
              * example:
              * 2027-01-01T00:00:00Z
              */
             valid_from?: string;
             values: /**
-             * The attribute values this version overrides on the base entity, keyed by attribute name.
+             * The values this version overrides on the base entity, keyed by entity field name.
              *
-             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-             * attributes present here are ignored rather than rejected, so a client working from a slightly
-             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
-             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
-             * variant may override it.
+             * A field is overridable if its attribute declares `overridable_attribute` — which readonly,
+             * hidden, computed and metadata fields, and types no variant may override, cannot be given —
+             * or if a capability declaring `overridable_attribute` names it in `managed_fields`, which
+             * excludes only readonly and metadata fields.
              *
-             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
-             * not currently overridable is preserved, so removing and restoring the flag deactivates and
-             * then reactivates the same override.
+             * Fields that are not overridable are reported in the write's `warnings` rather than rejected,
+             * and keep whatever value they already had. An append seeds them from the version in effect at
+             * its own `valid_from`.
              *
-             * A composite price's `price_components` is an ordinary overridable relation attribute: a
-             * composite variant pins its component variants here the same way any other relation value is
-             * set, with no special handling.
+             * A composite price's `price_components` is an ordinary overridable relation attribute,
+             * referencing component entities rather than variants or versions.
              *
              * example:
              * {
@@ -4842,10 +11153,7 @@ export declare namespace Components {
         }
         export interface CreatedVariant {
             /**
-             * Server-generated, always. This is the durable key orders and contracts pin, so it is never
-             * accepted from a client — a client-suppliable id would risk collisions between independent
-             * importers.
-             *
+             * Server-generated. The durable key orders and contracts pin.
              * example:
              * var-46045
              */
@@ -4855,16 +11163,9 @@ export declare namespace Components {
              * price-sp26d1yo
              */
             entity_id: string;
-            schema: /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            ConditionalEntitySlug;
+            schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
             /**
-             * The situation this variant applies to, plus the boolean `default` discriminator — the
-             * same shape `_conditions` has on a resolved payload.
-             *
+             * The situation this variant applies to, plus the boolean `default` discriminator.
              * example:
              * {
              *   "postal_code": "46045",
@@ -4882,22 +11183,19 @@ export declare namespace Components {
              */
             valid_from: string;
             values: /**
-             * The attribute values this version overrides on the base entity, keyed by attribute name.
+             * The values this version overrides on the base entity, keyed by entity field name.
              *
-             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-             * attributes present here are ignored rather than rejected, so a client working from a slightly
-             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
-             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
-             * variant may override it.
+             * A field is overridable if its attribute declares `overridable_attribute` — which readonly,
+             * hidden, computed and metadata fields, and types no variant may override, cannot be given —
+             * or if a capability declaring `overridable_attribute` names it in `managed_fields`, which
+             * excludes only readonly and metadata fields.
              *
-             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
-             * not currently overridable is preserved, so removing and restoring the flag deactivates and
-             * then reactivates the same override.
+             * Fields that are not overridable are reported in the write's `warnings` rather than rejected,
+             * and keep whatever value they already had. An append seeds them from the version in effect at
+             * its own `valid_from`.
              *
-             * A composite price's `price_components` is an ordinary overridable relation attribute: a
-             * composite variant pins its component variants here the same way any other relation value is
-             * set, with no special handling.
+             * A composite price's `price_components` is an ordinary overridable relation attribute,
+             * referencing component entities rather than variants or versions.
              *
              * example:
              * {
@@ -4915,17 +11213,18 @@ export declare namespace Components {
              */
             _updated_at: string;
             /**
-             * The revision a later write to this version must carry to be accepted. Genuinely current,
-             * unlike one read back later from an eventually-consistent read.
-             *
+             * The revision a later write to this version must carry.
              */
             _revision: number;
             /**
-             * Things worth knowing that did not stop the write. Empty in the ordinary case — a client
-             * reads its length rather than branching on its absence.
+             * Things worth knowing that did not stop the write. Always present, and empty in the ordinary case.
+             */
+            warnings: /**
+             * Something worth knowing that did not stop a write. One vocabulary for every write; `details`
+             * is typed per `code`, and a write raises each code at most once.
              *
              */
-            warnings: VariantWriteWarning[];
+            WriteWarning[];
         }
         /**
          * Three-letter ISO currency code, in lowercase. Must be a supported currency.
@@ -4967,16 +11266,10 @@ export declare namespace Components {
              * price-sp26d1yo
              */
             entity_id: string;
-            schema: /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            ConditionalEntitySlug;
+            schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
             /**
-             * Whether this call is the one that freed the variant's combination of condition values.
-             * `false` where an earlier, interrupted attempt had already freed it — the delete still
-             * succeeded, and the combination was already reusable.
+             * Whether this call freed the variant's combination of condition values. `false` where an
+             * earlier, interrupted attempt had already freed it.
              *
              */
             tuple_released: boolean;
@@ -4996,12 +11289,7 @@ export declare namespace Components {
              * price-sp26d1yo
              */
             entity_id: string;
-            schema: /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            ConditionalEntitySlug;
+            schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
             /**
              * The version removed, canonicalized to millisecond-precision UTC.
              * example:
@@ -5009,16 +11297,14 @@ export declare namespace Components {
              */
             valid_from: string;
             /**
-             * What the delete moved, if anything. Empty when a scheduled version was withdrawn.
+             * What the delete moved. Always present, and empty when a scheduled version was withdrawn.
              */
             warnings: /**
-             * Something a version write moved. A version write is never refused for being late — backdating a
-             * version, and editing or deleting one that has already been superseded, are both accepted — so
-             * what a caller gets instead is a warning naming exactly what changed. One write can carry both
-             * codes.
+             * Something worth knowing that did not stop a write. One vocabulary for every write; `details`
+             * is typed per `code`, and a write raises each code at most once.
              *
              */
-            VersionWriteWarning[];
+            WriteWarning[];
         }
         export interface DiscountAmounts {
             /**
@@ -5790,6 +12076,12 @@ export declare namespace Components {
              */
             is_composite_price: true;
             /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
+            /**
              * The price creation date
              */
             _created_at?: string;
@@ -5814,6 +12106,49 @@ export declare namespace Components {
              */
             _tags?: string[];
         }
+        /**
+         * One override that did not apply, and why — reported by a write for the attributes in its
+         * body, and by a resolved payload for the stored overrides composition passed over.
+         *
+         */
+        export interface InertOverride {
+            /**
+             * The attribute's name, as the request body or the stored version spells it.
+             * example:
+             * unit_amount
+             */
+            attribute: string;
+            reason: /**
+             * Why one override did not apply.
+             *
+             * - `ATTRIBUTE_NOT_OVERRIDABLE`: the schema declares the attribute without
+             *   `overridable_attribute`, which is an ordinary schema edit away
+             * - `ATTRIBUTE_READONLY`: the attribute is readonly, and cannot be granted the flag
+             * - `ATTRIBUTE_HIDDEN`: the attribute is hidden, and cannot be granted the flag
+             * - `ATTRIBUTE_COMPUTED`: the attribute's value is derived rather than stored
+             * - `ATTRIBUTE_UNDECLARED`: the schema declares no attribute of that name
+             * - `TYPE_NOT_OVERRIDABLE`: the attribute's type is not one a variant may override
+             * - `CAPABILITY_NOT_OVERRIDABLE`: the field is managed by a capability that does not declare
+             *   `overridable_attribute`
+             *
+             */
+            InertOverrideReason;
+        }
+        /**
+         * Why one override did not apply.
+         *
+         * - `ATTRIBUTE_NOT_OVERRIDABLE`: the schema declares the attribute without
+         *   `overridable_attribute`, which is an ordinary schema edit away
+         * - `ATTRIBUTE_READONLY`: the attribute is readonly, and cannot be granted the flag
+         * - `ATTRIBUTE_HIDDEN`: the attribute is hidden, and cannot be granted the flag
+         * - `ATTRIBUTE_COMPUTED`: the attribute's value is derived rather than stored
+         * - `ATTRIBUTE_UNDECLARED`: the schema declares no attribute of that name
+         * - `TYPE_NOT_OVERRIDABLE`: the attribute's type is not one a variant may override
+         * - `CAPABILITY_NOT_OVERRIDABLE`: the field is managed by a capability that does not declare
+         *   `overridable_attribute`
+         *
+         */
+        export type InertOverrideReason = "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_READONLY" | "ATTRIBUTE_HIDDEN" | "ATTRIBUTE_COMPUTED" | "ATTRIBUTE_UNDECLARED" | "TYPE_NOT_OVERRIDABLE" | "CAPABILITY_NOT_OVERRIDABLE";
         /**
          * The auth credentials for external integrations
          */
@@ -5890,6 +12225,72 @@ export declare namespace Components {
                     [name: string]: any;
                 };
             }[];
+        }
+        /**
+         * How to narrow and page a variant listing. Every property is optional, so `{}` asks for the
+         * first ten variants in `variant_id` order, but the body itself is required. `conditions` and
+         * `search` narrow independently and a variant must satisfy both.
+         *
+         */
+        export interface ListVariantsRequest {
+            conditions?: /**
+             * Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the
+             * same exact values and predicates a resolve context does. A condition left out is not
+             * filtered on. An `in` list carries at most 50,000 values.
+             *
+             * A variant matches only where it pins the condition — unlike `:resolve`, where an unpinned
+             * condition matches any value. `{ "exists": false }` selects the variants that leave it
+             * unpinned.
+             *
+             * `default` is accepted as an exact boolean and takes no predicate: `true` selects the
+             * entity's fallback variant, `false` every variant that is not it. Names beginning with `_`
+             * are reserved.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "consumption": {
+             *     "lt": 5000
+             *   }
+             * }
+             */
+            VariantConditionFilter;
+            /**
+             * Free text matched against the scalar pins — `string`, `select`, `number` and `date`.
+             * `location` and `daterange` pins are stored structured and are not matched.
+             *
+             * example:
+             * 460
+             */
+            search?: string;
+            /**
+             * `conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`
+             * or `date` pin. `variant_id:asc` is always appended, so the order is total.
+             *
+             * example:
+             * conditions.postal_code:asc
+             */
+            sort?: string;
+            /**
+             * The offset to read from, ignored when a `cursor` is sent. Bounded together with `size`
+             * by the search index's offset window; a page reaching past it is
+             * `OFFSET_WINDOW_EXCEEDED`, which reports the window.
+             *
+             */
+            from?: number;
+            /**
+             * Rows per page. Clamped silently at 1000.
+             */
+            size?: number;
+            /**
+             * Continue from a previous response's `next`, which is where a caller goes when the offset
+             * window runs out. Opaque, and valid only with the `conditions`, `search` and `sort` it
+             * was issued with.
+             *
+             * example:
+             * eyJmcm9tIjoyNSwibGlzdGluZyI6IjNmOWMxZTJhIn0
+             */
+            cursor?: string;
         }
         /**
          * Market participant data
@@ -6089,6 +12490,12 @@ export declare namespace Components {
              * The flag for prices that contain price components.
              */
             is_composite_price: true;
+            /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
             /**
              * The price creation date
              */
@@ -7265,10 +13672,8 @@ export declare namespace Components {
         export type OrderStatus = "draft" | "quote" | "placed" | "cancelled" | "completed";
         export interface PatchVersionRequest {
             /**
-             * Only the attribute overrides to change. Everything not mentioned is left as stored.
-             *
-             * `null` is a value like any other here rather than a deletion; to stop overriding an
-             * attribute, send the complete snapshot without it through the replace operation.
+             * Only the overrides to change; everything not mentioned is left as stored. `null` sets a
+             * value rather than removing an override — use the replace operation to remove one.
              *
              * example:
              * {
@@ -7280,21 +13685,19 @@ export declare namespace Components {
                 [name: string]: any;
             };
             /**
-             * The revision marker read from the version being written. The write is refused with
-             * `WRITE_CONFLICT` if the version has been written since.
+             * The revision read from the version being written. Refused with `WRITE_CONFLICT` if the
+             * version has been written since.
              *
              * example:
              * 3
              */
             _revision: number;
             /**
-             * Optional, never applied, and refused when it names a version other than the one addressed.
+             * Accepted only when it names the version being addressed.
              */
             valid_from?: string;
             /**
-             * Optional, and never applied. A partial update that tries to change a pinned condition value
-             * is refused — this is the path that rule is most likely to be broken on by accident.
-             *
+             * Accepted only unchanged. A variant's conditions are fixed when it is created.
              * example:
              * {
              *   "postal_code": "46045"
@@ -7321,22 +13724,16 @@ export declare namespace Components {
             };
         }
         /**
-         * The situation this variant applies to: a flat map keyed by condition name, as the entity's
-         * schema declares them. A condition left out is a wildcard — the variant applies whatever the
-         * context says for it, which is what makes adding a condition to a schema non-breaking for the
-         * variants that already exist.
+         * The situation this variant applies to: a flat map keyed by condition name. A condition left
+         * out is a wildcard, which is what makes adding a condition to a schema non-breaking for
+         * existing variants.
          *
-         * Exact values only. Predicates are accepted in a resolve context and nowhere else, so that
-         * matching is decided in exactly one place.
+         * Exact values only; predicates belong to reads. Values are stored canonicalized for their
+         * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
+         * and `until` where an empty string is an open end, a `location` of format `zipcode` the
+         * postal code itself and one of format `zipcode_town` an object carrying both.
          *
-         * Values are typed by their condition and stored canonicalized for that type: a `date` becomes
-         * millisecond-precision UTC, a `daterange` an object carrying `from` and `until` where an empty
-         * string is an open end, a `location` of format `zipcode` the postal code itself and one of
-         * format `zipcode + town` an object carrying both. A `select` value must be a string, and must
-         * be one the condition's `options` declare unless it sets `allow_any`.
-         *
-         * `default`, and any name beginning with `_`, are reserved for the server and cannot be pinned
-         * here. Whether a variant is the entity's fallback is set through the request's `default` flag.
+         * `default` and names beginning with `_` are reserved; use the request's `default` flag.
          *
          * example:
          * {
@@ -7345,6 +13742,23 @@ export declare namespace Components {
          */
         export interface PinnedConditions {
             [name: string]: any;
+        }
+        /**
+         * The options a pinned resolve accepts — `hydrate` and nothing else. `resolve_one` has nothing
+         * to change where the answer is one result or a 404, so a body sending it is a `400`.
+         *
+         */
+        export interface PinnedResolveOptions {
+            /**
+             * Return the entities a relation attribute references in place of the references, one
+             * level deep, as an entity read with hydration does. Applied after composition, so a
+             * relation this variant's version replaced is hydrated too.
+             *
+             * A referenced entity that is itself conditional is returned unresolved, carrying its own
+             * flag. Costs one fetch per distinct referenced entity, with no per-attribute limit.
+             *
+             */
+            hydrate?: boolean;
         }
         export interface PortalContext {
             [name: string]: any;
@@ -7496,6 +13910,12 @@ export declare namespace Components {
              * The flag for prices that contain price components.
              */
             is_composite_price?: false;
+            /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
             /**
              * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
              * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
@@ -8182,6 +14602,12 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -8580,6 +15006,12 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 };
                 /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
                  * Stores references to the availability files that define where this product is available.
                  * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
                  *
@@ -8751,6 +15183,12 @@ export declare namespace Components {
                  * The flag for prices that contain price components.
                  */
                 is_composite_price?: false;
+                /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`.
+                 *
+                 */
+                is_conditional?: boolean;
                 /**
                  * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
                  * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
@@ -9601,6 +16039,12 @@ export declare namespace Components {
                 $relation?: EntityRelation[];
             };
             /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`.
+             *
+             */
+            is_conditional?: boolean;
+            /**
              * Stores references to the availability files that define where this product is available.
              * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
              *
@@ -10351,13 +16795,8 @@ export declare namespace Components {
         }
         export interface ReplaceVersionRequest {
             /**
-             * The complete set of attribute overrides this version carries. An overridable attribute
-             * absent from here stops being overridden.
-             *
-             * Attributes the variant may not override are ignored where this carries them, and their
-             * **stored value is kept rather than dropped** — otherwise a routine full-snapshot write
-             * would erase an override the moment its attribute's `overridable_attribute`, `readonly` or
-             * `hidden` flag happened to be off.
+             * The complete set of overrides this version carries. An overridable attribute absent from
+             * here stops being overridden; one the variant may not override keeps its stored value.
              *
              * example:
              * {
@@ -10369,29 +16808,21 @@ export declare namespace Components {
                 [name: string]: any;
             };
             /**
-             * The revision marker read from the version being written. The write is refused with
-             * `WRITE_CONFLICT` if the version has been written since.
-             *
-             * Required rather than optional: an optional one is a guarantee every client can opt out of
-             * by forgetting a field, and the write it protects is the one that overwrites somebody
-             * else's edit.
+             * The revision read from the version being written. Refused with `WRITE_CONFLICT` if the
+             * version has been written since.
              *
              * example:
              * 3
              */
             _revision: number;
             /**
-             * Optional, and never applied. Accepted when it names the version being addressed — so a
-             * client building its body from what it loaded need not strip it out — and refused when it
-             * names another: a version's `valid_from` is its identity, and moving it is an append and a
-             * delete rather than an edit.
+             * Accepted only when it names the version being addressed. Moving a version is an append
+             * and a delete.
              *
              */
             valid_from?: string;
             /**
-             * Optional, and never applied: a variant's conditions are fixed when it is created. Refused
-             * when they describe a different situation from the stored one.
-             *
+             * Accepted only unchanged. A variant's conditions are fixed when it is created.
              * example:
              * {
              *   "postal_code": "46045"
@@ -10401,42 +16832,51 @@ export declare namespace Components {
                 [name: string]: any;
             };
         }
-        export interface ResolveConditionalEntityRequest {
-            schema: /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            ConditionalEntitySlug;
+        /**
+         * The `error` field of an error response: the message, or — where the request failed
+         * validation before any handler ran — the validation errors themselves.
+         *
+         */
+        export type ReportedError = /**
+         * The `error` field of an error response: the message, or — where the request failed
+         * validation before any handler ran — the validation errors themselves.
+         *
+         */
+        string | {
+            [name: string]: any;
+        }[];
+        /**
+         * Resolve by matching a situation: which of this entity's variants apply to `context`, each
+         * composed with the version in effect at `as_of`.
+         *
+         */
+        export interface ResolveByContextRequest {
+            schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
             /**
              * The conditional entity to resolve. Resolution is always scoped to exactly one.
              * example:
              * price-sp26d1yo
              */
             entity_id: string;
-            context?: /**
-             * The situation to resolve for: a flat map keyed by condition name, as the entity's schema
-             * declares them. A condition left out of the map is not a wildcard — it matches only variants
-             * that leave that condition unpinned.
+            context: /**
+             * The situation to resolve for: a flat map keyed by condition name. A condition left out
+             * matches only variants that leave it unpinned; an empty map therefore returns the `default`
+             * variant.
              *
-             * Each value is either an exact value, typed by its condition, or a single-operator predicate
-             * object:
+             * Each value is an exact value, typed by its condition, or a single-operator predicate:
              *
-             * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order against a `number` or
-             *   `date` condition.
-             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition.
-             * - `{ "between": "2026-03-01" }` — the explicit spelling of `daterange` containment; a plain
-             *   date supplied for a `daterange` condition means the same thing.
-             * - `{ "exists": true }` — pinned to any value. `{ "exists": false }` says what leaving the key
-             *   out says.
+             * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
+             *   or `date` condition
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+             * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
+             * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
              *
-             * Exact values are typed by their condition: a `string` or `select` matches exactly and
-             * case-sensitively, with no trimming; a `location` of format `zipcode` is the postal code
-             * itself, and one of format `zipcode + town` an object carrying both, whose town is compared
-             * case- and whitespace-insensitively while its postal code is not.
+             * An `in` list carries at most 50,000 values. A `string` or `select` matches exactly and
+             * case-sensitively. A `location` of format
+             * `zipcode` is the postal code itself; one of format `zipcode_town` is an object carrying
+             * both, whose town is compared case- and whitespace-insensitively.
              *
-             * `default`, and any name beginning with `_`, are reserved for the server and cannot be
-             * supplied here.
+             * `default` and names beginning with `_` are reserved and cannot be supplied.
              *
              * example:
              * {
@@ -10449,42 +16889,94 @@ export declare namespace Components {
             ResolveContext;
             /**
              * The instant the version is selected at — the version with the latest `valid_from` at or
-             * before it. Defaults to now. A variant whose first version is later than this is
-             * scheduled rather than applicable, and is excluded from resolution entirely.
+             * before it. Defaults to now. A variant whose first version is later is excluded from
+             * matching; a pin naming one is answered `NO_ACTIVE_VERSION` instead.
              *
-             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time
-             * (`2026-01-01T00:00:00Z`), to at most millisecond precision. Deliberately not declared as
-             * `format: date-time`, which would reject the plain-date form that this accepts.
+             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time, to at most
+             * millisecond precision.
              *
              * example:
              * 2027-03-15T00:00:00Z
              */
             as_of?: string;
-            options?: ResolveOptions;
+            options?: /* The options a context resolve accepts. A pin takes `PinnedResolveOptions` instead. */ ResolveOptions;
         }
         /**
-         * The situation to resolve for: a flat map keyed by condition name, as the entity's schema
-         * declares them. A condition left out of the map is not a wildcard — it matches only variants
-         * that leave that condition unpinned.
+         * Resolve by naming a variant: compose this one, whatever a context would have matched.
+         */
+        export interface ResolveByPinRequest {
+            schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
+            /**
+             * The conditional entity to resolve. Resolution is always scoped to exactly one.
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            /**
+             * The variant to compose. Condition matching is skipped, the `default` fallback does not
+             * apply, and `results` carries exactly one entry. A variant of another entity is
+             * `VARIANT_NOT_FOUND`.
+             *
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * The instant the version is selected at — the version with the latest `valid_from` at or
+             * before it. Defaults to now. A pinned variant whose first version is later is
+             * `NO_ACTIVE_VERSION`, carrying the instant in `details.as_of`.
+             *
+             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time, to at most
+             * millisecond precision.
+             *
+             * example:
+             * 2027-03-15T00:00:00Z
+             */
+            as_of?: string;
+            options?: /**
+             * The options a pinned resolve accepts — `hydrate` and nothing else. `resolve_one` has nothing
+             * to change where the answer is one result or a 404, so a body sending it is a `400`.
+             *
+             */
+            PinnedResolveOptions;
+        }
+        /**
+         * A resolve names one conditional entity and selects its variants either by `context` or by
+         * `variant_id`, never both. `context: {}` matches nothing and so returns the `default`
+         * variant, which is how to ask for it without knowing its id.
          *
-         * Each value is either an exact value, typed by its condition, or a single-operator predicate
-         * object:
+         */
+        export type ResolveConditionalEntityRequest = /**
+         * A resolve names one conditional entity and selects its variants either by `context` or by
+         * `variant_id`, never both. `context: {}` matches nothing and so returns the `default`
+         * variant, which is how to ask for it without knowing its id.
          *
-         * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order against a `number` or
-         *   `date` condition.
-         * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition.
-         * - `{ "between": "2026-03-01" }` — the explicit spelling of `daterange` containment; a plain
-         *   date supplied for a `daterange` condition means the same thing.
-         * - `{ "exists": true }` — pinned to any value. `{ "exists": false }` says what leaving the key
-         *   out says.
+         */
+        /**
+         * Resolve by matching a situation: which of this entity's variants apply to `context`, each
+         * composed with the version in effect at `as_of`.
          *
-         * Exact values are typed by their condition: a `string` or `select` matches exactly and
-         * case-sensitively, with no trimming; a `location` of format `zipcode` is the postal code
-         * itself, and one of format `zipcode + town` an object carrying both, whose town is compared
-         * case- and whitespace-insensitively while its postal code is not.
+         */
+        ResolveByContextRequest | /* Resolve by naming a variant: compose this one, whatever a context would have matched. */ ResolveByPinRequest;
+        /**
+         * The situation to resolve for: a flat map keyed by condition name. A condition left out
+         * matches only variants that leave it unpinned; an empty map therefore returns the `default`
+         * variant.
          *
-         * `default`, and any name beginning with `_`, are reserved for the server and cannot be
-         * supplied here.
+         * Each value is an exact value, typed by its condition, or a single-operator predicate:
+         *
+         * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
+         *   or `date` condition
+         * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+         * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
+         * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
+         *
+         * An `in` list carries at most 50,000 values. A `string` or `select` matches exactly and
+         * case-sensitively. A `location` of format
+         * `zipcode` is the postal code itself; one of format `zipcode_town` is an object carrying
+         * both, whose town is compared case- and whitespace-insensitively.
+         *
+         * `default` and names beginning with `_` are reserved and cannot be supplied.
          *
          * example:
          * {
@@ -10497,35 +16989,42 @@ export declare namespace Components {
         export interface ResolveContext {
             [name: string]: any;
         }
+        /**
+         * The options a context resolve accepts. A pin takes `PinnedResolveOptions` instead.
+         */
         export interface ResolveOptions {
             /**
-             * Ask for an unambiguous answer. Several applicable variants become `AMBIGUOUS_RESOLUTION`
-             * rather than a set, and nothing applicable becomes `NOT_FOUND` rather than an empty one.
-             * The response shape does not change: `results` simply carries exactly one entry.
+             * Ask for an unambiguous answer: several applicable variants become
+             * `AMBIGUOUS_RESOLUTION`, and none becomes `NO_MATCHES`.
              *
              */
             resolve_one?: boolean;
+            /**
+             * Return the entities a relation attribute references in place of the references, one
+             * level deep, as an entity read with hydration does. Applied after composition, so a
+             * relation this variant's version replaced is hydrated too.
+             *
+             * A referenced entity that is itself conditional is returned unresolved, carrying its own
+             * flag. Costs one fetch per distinct referenced entity, with no per-attribute limit.
+             *
+             */
+            hydrate?: boolean;
         }
         /**
-         * The entity as this variant leaves it — every attribute of a plain entity read, with the
-         * applicable version's overrides applied — plus the discriminators saying where the numbers
-         * came from.
+         * The entity as this variant leaves it — every attribute of a plain entity read with the
+         * applicable version's overrides applied — plus the discriminators below.
          *
          */
         export interface ResolvedVariant {
             [name: string]: any;
             /**
-             * The logical entity's id — the same one a plain entity read returns. Resolution never
-             * mints a new identity; a variant is a set of values for *this* entity, not another one.
-             *
+             * The logical entity's id, the same one a plain entity read returns.
              * example:
              * price-sp26d1yo
              */
             _id: string;
             /**
-             * The variant these values came from. Durable: this is what an order or a contract pins to
-             * read the same numbers back later.
-             *
+             * The variant these values came from — what an order or contract pins.
              * example:
              * var-46045
              */
@@ -10538,10 +17037,6 @@ export declare namespace Components {
             _version_valid_from: string;
             /**
              * The conditions this variant pins, plus the boolean `default` discriminator.
-             *
-             * Underscore-prefixed, like every other discriminator here, so that it cannot collide with
-             * an attribute an organization happens to have called `conditions`.
-             *
              * example:
              * {
              *   "postal_code": "46045",
@@ -10552,18 +17047,29 @@ export declare namespace Components {
                 [name: string]: any;
                 default: boolean;
             };
+            /**
+             * The variant's stored overrides this payload did not apply, and why. Always present, and
+             * empty in the ordinary case. Computed per read against the schema as it stands, so
+             * granting or withdrawing `overridable_attribute` changes it without any data being
+             * rewritten.
+             *
+             */
+            _inert_overrides: /**
+             * One override that did not apply, and why — reported by a write for the attributes in its
+             * body, and by a resolved payload for the stored overrides composition passed over.
+             *
+             */
+            InertOverride[];
         }
         export interface ResolvedVariants {
             /**
-             * One composed payload per applicable variant, capped at 100 — a context selecting more
-             * than that is answered with `TOO_MANY_MATCHES` instead, since each result costs its own
-             * version lookup. No dominance or specificity ordering is applied between them.
+             * One composed payload per applicable variant, capped at 100 — a context selecting more is
+             * `TOO_MANY_MATCHES`. Unordered.
              *
              */
             results: /**
-             * The entity as this variant leaves it — every attribute of a plain entity read, with the
-             * applicable version's overrides applied — plus the discriminators saying where the numbers
-             * came from.
+             * The entity as this variant leaves it — every attribute of a plain entity read with the
+             * applicable version's overrides applied — plus the discriminators below.
              *
              */
             ResolvedVariant[];
@@ -10952,12 +17458,32 @@ export declare namespace Components {
             errors: /* The availability rule error */ ValidateAvailabilityFileError[];
         }
         /**
+         * Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the
+         * same exact values and predicates a resolve context does. A condition left out is not
+         * filtered on. An `in` list carries at most 50,000 values.
+         *
+         * A variant matches only where it pins the condition — unlike `:resolve`, where an unpinned
+         * condition matches any value. `{ "exists": false }` selects the variants that leave it
+         * unpinned.
+         *
+         * `default` is accepted as an exact boolean and takes no predicate: `true` selects the
+         * entity's fallback variant, `false` every variant that is not it. Names beginning with `_`
+         * are reserved.
+         *
+         * example:
+         * {
+         *   "postal_code": "46045",
+         *   "consumption": {
+         *     "lt": 5000
+         *   }
+         * }
+         */
+        export interface VariantConditionFilter {
+            [name: string]: any;
+        }
+        /**
          * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
          * boolean `default` saying whether this is the entity's fallback.
-         *
-         * `default` is always present and always a boolean, so a client can branch on "did I get the
-         * fallback?" without knowing how one is stored. The reserved condition a fallback is actually
-         * pinned under never appears here.
          *
          * example:
          * {
@@ -10969,23 +17495,281 @@ export declare namespace Components {
             [name: string]: any;
             default: boolean;
         }
+        export interface VariantList {
+            /**
+             * How many variants match in total, exactly — not how many this page carries.
+             * example:
+             * 8128
+             */
+            hits: number;
+            results: /* One variant as a listing reports it: which variant it is and what it pins. */ VariantListRow[];
+            /**
+             * The cursor that continues this listing, absent on the last page. Send it back as
+             * `cursor`, with the same filter, search and sort.
+             *
+             * example:
+             * eyJmcm9tIjoyNSwibGlzdGluZyI6IjNmOWMxZTJhIn0
+             */
+            next?: string;
+        }
         /**
-         * The attribute values this version overrides on the base entity, keyed by attribute name.
+         * One variant as a listing reports it: which variant it is and what it pins.
+         */
+        export interface VariantListRow {
+            /**
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
+            /**
+             * The situation this variant applies to, plus the boolean `default` discriminator.
+             * Membership of a page may lag a write by moments; the pins themselves never do.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "default": false
+             * }
+             */
+            conditions: {
+                [name: string]: any;
+                default: boolean;
+            };
+        }
+        export interface VariantTree {
+            /**
+             * How many variants match in total, exactly — not how many this page carries.
+             * example:
+             * 8128
+             */
+            hits: number;
+            /**
+             * One row per matching variant, in the requested order. A variant mid-delete is omitted,
+             * so `results` can be shorter than `hits` implies.
+             *
+             */
+            results: /* A listing row plus the one version the tree shows for it, and the status saying which. */ VariantTreeRow[];
+            /**
+             * The cursor that continues this listing, absent on the last page. Send it back as
+             * `cursor`, with the same filter, search and sort; `as_of` may change between pages.
+             *
+             * example:
+             * eyJmcm9tIjoyNSwibGlzdGluZyI6IjNmOWMxZTJhIn0
+             */
+            next?: string;
+        }
+        /**
+         * The variants list's request plus `as_of`, the instant each row's version is selected at.
+         * `size` is clamped at 100 here; every other property means what it means on the list.
          *
-         * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-         * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-         * attributes present here are ignored rather than rejected, so a client working from a slightly
-         * stale schema snapshot still succeeds instead of failing on fields it could not have known to
-         * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
-         * variant may override it.
+         */
+        export interface VariantTreeRequest {
+            conditions?: /**
+             * Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the
+             * same exact values and predicates a resolve context does. A condition left out is not
+             * filtered on. An `in` list carries at most 50,000 values.
+             *
+             * A variant matches only where it pins the condition — unlike `:resolve`, where an unpinned
+             * condition matches any value. `{ "exists": false }` selects the variants that leave it
+             * unpinned.
+             *
+             * `default` is accepted as an exact boolean and takes no predicate: `true` selects the
+             * entity's fallback variant, `false` every variant that is not it. Names beginning with `_`
+             * are reserved.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "consumption": {
+             *     "lt": 5000
+             *   }
+             * }
+             */
+            VariantConditionFilter;
+            /**
+             * Free text matched against the scalar pins — `string`, `select`, `number` and `date`.
+             * `location` and `daterange` pins are stored structured and are not matched.
+             *
+             * example:
+             * 460
+             */
+            search?: string;
+            /**
+             * `conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`
+             * or `date` pin. `variant_id:asc` is always appended, so the order is total.
+             *
+             * example:
+             * conditions.postal_code:asc
+             */
+            sort?: string;
+            /**
+             * The offset to read from, ignored when a `cursor` is sent. Bounded together with `size`
+             * by the search index's offset window; a page reaching past it is
+             * `OFFSET_WINDOW_EXCEEDED`, which reports the window.
+             *
+             */
+            from?: number;
+            /**
+             * Rows per page. Clamped silently at 100, since every row costs its own version lookup.
+             */
+            size?: number;
+            /**
+             * Continue from a previous response's `next`, which is where a caller goes when the offset
+             * window runs out. Opaque, and valid only with the `conditions`, `search` and `sort` it
+             * was issued with.
+             *
+             * example:
+             * eyJmcm9tIjoyNSwibGlzdGluZyI6IjNmOWMxZTJhIn0
+             */
+            cursor?: string;
+            /**
+             * The instant each row's version is selected at. Defaults to now. A variant whose first
+             * version is later is a row with `status: scheduled` carrying that upcoming version.
+             *
+             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time, to at most
+             * millisecond precision.
+             *
+             * example:
+             * 2027-03-15T00:00:00Z
+             */
+            as_of?: string;
+        }
+        /**
+         * A listing row plus the one version the tree shows for it, and the status saying which.
+         */
+        export interface VariantTreeRow {
+            /**
+             * example:
+             * var-46045
+             */
+            variant_id: string;
+            /**
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
+            /**
+             * The situation this variant applies to, plus the boolean `default` discriminator.
+             * Membership of a page may lag a write by moments; the pins themselves never do.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "default": false
+             * }
+             */
+            conditions: {
+                [name: string]: any;
+                default: boolean;
+            };
+            status: /**
+             * Whether a tree row's version is the one in effect at `as_of`, or one still ahead of it.
+             *
+             * - `active`: the version with the latest `valid_from` at or before `as_of`
+             * - `scheduled`: the variant's first version, which is later than `as_of`
+             *
+             */
+            VariantTreeRowStatus;
+            /**
+             * The version in effect at `as_of`, or the variant's upcoming first one where every
+             * version is still ahead of it. `status` says which. Always present.
+             *
+             */
+            version: {
+                /**
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+                schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
+                /**
+                 * The situation the variant applies to, plus the boolean `default` discriminator. A
+                 * property of the variant: every version carries the same one.
+                 *
+                 * example:
+                 * {
+                 *   "postal_code": "46045",
+                 *   "default": false
+                 * }
+                 */
+                conditions: {
+                    [name: string]: any;
+                    default: boolean;
+                };
+                /**
+                 * When this version takes effect, canonicalized to millisecond-precision UTC. Its identity
+                 * within the variant.
+                 *
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                valid_from: string;
+                values: /**
+                 * The values this version overrides on the base entity, keyed by entity field name.
+                 *
+                 * A field is overridable if its attribute declares `overridable_attribute` — which readonly,
+                 * hidden, computed and metadata fields, and types no variant may override, cannot be given —
+                 * or if a capability declaring `overridable_attribute` names it in `managed_fields`, which
+                 * excludes only readonly and metadata fields.
+                 *
+                 * Fields that are not overridable are reported in the write's `warnings` rather than rejected,
+                 * and keep whatever value they already had. An append seeds them from the version in effect at
+                 * its own `valid_from`.
+                 *
+                 * A composite price's `price_components` is an ordinary overridable relation attribute,
+                 * referencing component entities rather than variants or versions.
+                 *
+                 * example:
+                 * {
+                 *   "unit_amount": 2499,
+                 *   "unit_amount_decimal": "24.99"
+                 * }
+                 */
+                VariantValues;
+                /**
+                 * When this version was created.
+                 */
+                _created_at: string;
+                /**
+                 * When this version was last written.
+                 */
+                _updated_at: string;
+            };
+        }
+        /**
+         * Whether a tree row's version is the one in effect at `as_of`, or one still ahead of it.
          *
-         * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
-         * not currently overridable is preserved, so removing and restoring the flag deactivates and
-         * then reactivates the same override.
+         * - `active`: the version with the latest `valid_from` at or before `as_of`
+         * - `scheduled`: the variant's first version, which is later than `as_of`
          *
-         * A composite price's `price_components` is an ordinary overridable relation attribute: a
-         * composite variant pins its component variants here the same way any other relation value is
-         * set, with no special handling.
+         */
+        export type VariantTreeRowStatus = "active" | "scheduled";
+        /**
+         * The values this version overrides on the base entity, keyed by entity field name.
+         *
+         * A field is overridable if its attribute declares `overridable_attribute` — which readonly,
+         * hidden, computed and metadata fields, and types no variant may override, cannot be given —
+         * or if a capability declaring `overridable_attribute` names it in `managed_fields`, which
+         * excludes only readonly and metadata fields.
+         *
+         * Fields that are not overridable are reported in the write's `warnings` rather than rejected,
+         * and keep whatever value they already had. An append seeds them from the version in effect at
+         * its own `valid_from`.
+         *
+         * A composite price's `price_components` is an ordinary overridable relation attribute,
+         * referencing component entities rather than variants or versions.
          *
          * example:
          * {
@@ -10997,12 +17781,9 @@ export declare namespace Components {
             [name: string]: any;
         }
         /**
-         * One version of one variant: the attribute overrides it carries, the instant it takes effect,
-         * and the variant it belongs to.
-         *
-         * These are the version's **own** overrides, not the base entity overlaid with them — this is
-         * what an editing screen loads and saves, and what it edits is the overrides. Composing them onto
-         * the entity is what `:resolve` answers.
+         * One version of one variant: the overrides it carries, the instant it takes effect, and the
+         * variant it belongs to. These are the version's own overrides; `:resolve` composes them onto
+         * the entity.
          *
          */
         export interface VariantVersion {
@@ -11016,16 +17797,10 @@ export declare namespace Components {
              * price-sp26d1yo
              */
             entity_id: string;
-            schema: /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            ConditionalEntitySlug;
+            schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
             /**
-             * The situation the variant applies to, plus the boolean `default` discriminator. A property
-             * of the variant rather than of this version: every version of a variant carries the same
-             * one, and no version write can change it.
+             * The situation the variant applies to, plus the boolean `default` discriminator. A
+             * property of the variant: every version carries the same one.
              *
              * example:
              * {
@@ -11038,30 +17813,27 @@ export declare namespace Components {
                 default: boolean;
             };
             /**
-             * When this version takes effect, canonicalized to millisecond-precision UTC. A version's
-             * identity within its variant — it never moves.
+             * When this version takes effect, canonicalized to millisecond-precision UTC. Its identity
+             * within the variant.
              *
              * example:
              * 2027-01-01T00:00:00.000Z
              */
             valid_from: string;
             values: /**
-             * The attribute values this version overrides on the base entity, keyed by attribute name.
+             * The values this version overrides on the base entity, keyed by entity field name.
              *
-             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-             * attributes present here are ignored rather than rejected, so a client working from a slightly
-             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
-             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
-             * variant may override it.
+             * A field is overridable if its attribute declares `overridable_attribute` — which readonly,
+             * hidden, computed and metadata fields, and types no variant may override, cannot be given —
+             * or if a capability declaring `overridable_attribute` names it in `managed_fields`, which
+             * excludes only readonly and metadata fields.
              *
-             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
-             * not currently overridable is preserved, so removing and restoring the flag deactivates and
-             * then reactivates the same override.
+             * Fields that are not overridable are reported in the write's `warnings` rather than rejected,
+             * and keep whatever value they already had. An append seeds them from the version in effect at
+             * its own `valid_from`.
              *
-             * A composite price's `price_components` is an ordinary overridable relation attribute: a
-             * composite variant pins its component variants here the same way any other relation value is
-             * set, with no special handling.
+             * A composite price's `price_components` is an ordinary overridable relation attribute,
+             * referencing component entities rather than variants or versions.
              *
              * example:
              * {
@@ -11079,50 +17851,106 @@ export declare namespace Components {
              */
             _updated_at: string;
             /**
-             * The revision a write to this version must carry to be accepted. Always current: every read
-             * that returns one is strongly consistent, so it is never a marker a write would be refused
-             * for having read too early.
-             *
+             * The revision a write to this version must carry. Read from a strongly consistent read.
              * example:
              * 3
              */
             _revision: number;
         }
-        export interface VariantWriteWarning {
+        export interface VariantVersionList {
             /**
-             * - `VARIANT_COUNT_APPROACHING_CAP`: this entity is nearing the number of variants it may
-             *   hold. Surfaced rather than rejected, so an importer finds out with a whole run's notice
-             *   instead of discovering the limit halfway through a refresh.
+             * A page of the variant's timeline, in the requested `order`.
+             */
+            results: /**
+             * One version of one variant as a listing reports it: `VariantVersion` without `_revision`.
+             * Read the version through its own `GET` to get the revision a write must carry.
              *
              */
-            code: "VARIANT_COUNT_APPROACHING_CAP";
-            message: string;
+            VariantVersionSnapshot[];
             /**
-             * Variants this entity holds, including the one just created.
+             * The cursor that continues this timeline, absent only on the last page — the only
+             * end-of-data signal, since a short or empty page can still carry one. Send it back as
+             * `cursor`, against the same variant and `order`.
+             *
+             * example:
+             * eyJzayI6IlYjcHJpY2Utc3AyNmQxeW8jdmFyLTQ2MDQ1IzIwMjYtMDEtMDFUMDA6MDA6MDAuMDAwWiIsIm9yZGVyIjoiYXNjIn0
              */
-            variant_count: number;
-            /**
-             * Variants this entity may hold. Configurable per organization.
-             */
-            cap: number;
+            next?: string;
         }
         /**
-         * Something a version write moved. A version write is never refused for being late — backdating a
-         * version, and editing or deleting one that has already been superseded, are both accepted — so
-         * what a caller gets instead is a warning naming exactly what changed. One write can carry both
-         * codes.
+         * One version of one variant as a listing reports it: `VariantVersion` without `_revision`.
+         * Read the version through its own `GET` to get the revision a write must carry.
          *
          */
-        export interface VersionWriteWarning {
+        export interface VariantVersionSnapshot {
             /**
-             * - `ACTIVE_VERSION_REPLACED`: what resolves **now** changed, other than by a newer version
-             *   taking effect. The version in effect was written behind, or removed.
-             * - `SUPERSEDED_VERSION_WRITTEN`: what a past-dated (`as_of`) read returns changed. The write
-             *   landed on, or created, a version that is not the one currently in effect.
-             *
+             * example:
+             * var-46045
              */
-            code: "ACTIVE_VERSION_REPLACED" | "SUPERSEDED_VERSION_WRITTEN";
-            message: string;
+            variant_id: string;
+            /**
+             * example:
+             * price-sp26d1yo
+             */
+            entity_id: string;
+            schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
+            /**
+             * The situation the variant applies to, plus the boolean `default` discriminator. A
+             * property of the variant: every version carries the same one.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "default": false
+             * }
+             */
+            conditions: {
+                [name: string]: any;
+                default: boolean;
+            };
+            /**
+             * When this version takes effect, canonicalized to millisecond-precision UTC. Its identity
+             * within the variant.
+             *
+             * example:
+             * 2027-01-01T00:00:00.000Z
+             */
+            valid_from: string;
+            values: /**
+             * The values this version overrides on the base entity, keyed by entity field name.
+             *
+             * A field is overridable if its attribute declares `overridable_attribute` — which readonly,
+             * hidden, computed and metadata fields, and types no variant may override, cannot be given —
+             * or if a capability declaring `overridable_attribute` names it in `managed_fields`, which
+             * excludes only readonly and metadata fields.
+             *
+             * Fields that are not overridable are reported in the write's `warnings` rather than rejected,
+             * and keep whatever value they already had. An append seeds them from the version in effect at
+             * its own `valid_from`.
+             *
+             * A composite price's `price_components` is an ordinary overridable relation attribute,
+             * referencing component entities rather than variants or versions.
+             *
+             * example:
+             * {
+             *   "unit_amount": 2499,
+             *   "unit_amount_decimal": "24.99"
+             * }
+             */
+            VariantValues;
+            /**
+             * When this version was created.
+             */
+            _created_at: string;
+            /**
+             * When this version was last written.
+             */
+            _updated_at: string;
+        }
+        /**
+         * Which version a write moved, and which one was in effect while it did.
+         */
+        export interface VersionMoved {
             /**
              * The version this write created, changed or removed.
              * example:
@@ -11131,7 +17959,7 @@ export declare namespace Components {
             valid_from: string;
             /**
              * The version in effect when the write landed, before it did. Absent when the variant had
-             * none — every version of it still scheduled.
+             * none. Advisory, and may lag the timeline by milliseconds.
              *
              * example:
              * 2026-01-01T00:00:00.000Z
@@ -11139,8 +17967,58 @@ export declare namespace Components {
             active_valid_from?: string;
         }
         /**
-         * A version as a write left it, together with anything the write moved.
+         * Something worth knowing that did not stop a write. One vocabulary for every write; `details`
+         * is typed per `code`, and a write raises each code at most once.
          *
+         */
+        export type WriteWarning = /**
+         * Something worth knowing that did not stop a write. One vocabulary for every write; `details`
+         * is typed per `code`, and a write raises each code at most once.
+         *
+         */
+        {
+            code: "VARIANT_COUNT_APPROACHING_CAP";
+            message: string;
+            details: {
+                /**
+                 * Variants this entity holds, including the one just written.
+                 */
+                variant_count: number;
+                /**
+                 * Variants this entity may hold. Configurable per deploy.
+                 */
+                cap: number;
+            };
+        } | {
+            code: "ACTIVE_VERSION_CHANGED";
+            message: string;
+            details: /* Which version a write moved, and which one was in effect while it did. */ VersionMoved;
+        } | {
+            code: "SUPERSEDED_VERSION_WRITTEN";
+            message: string;
+            details: /* Which version a write moved, and which one was in effect while it did. */ VersionMoved;
+        } | {
+            code: "ATTRIBUTES_NOT_APPLIED";
+            message: string;
+            details: {
+                attributes: [
+                    /**
+                     * One override that did not apply, and why — reported by a write for the attributes in its
+                     * body, and by a resolved payload for the stored overrides composition passed over.
+                     *
+                     */
+                    InertOverride,
+                    .../**
+                     * One override that did not apply, and why — reported by a write for the attributes in its
+                     * body, and by a resolved payload for the stored overrides composition passed over.
+                     *
+                     */
+                    InertOverride[]
+                ];
+            };
+        };
+        /**
+         * A version as a write left it, together with anything the write moved.
          */
         export interface WrittenVariantVersion {
             /**
@@ -11153,16 +18031,10 @@ export declare namespace Components {
              * price-sp26d1yo
              */
             entity_id: string;
-            schema: /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            ConditionalEntitySlug;
+            schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
             /**
-             * The situation the variant applies to, plus the boolean `default` discriminator. A property
-             * of the variant rather than of this version: every version of a variant carries the same
-             * one, and no version write can change it.
+             * The situation the variant applies to, plus the boolean `default` discriminator. A
+             * property of the variant: every version carries the same one.
              *
              * example:
              * {
@@ -11175,30 +18047,27 @@ export declare namespace Components {
                 default: boolean;
             };
             /**
-             * When this version takes effect, canonicalized to millisecond-precision UTC. A version's
-             * identity within its variant — it never moves.
+             * When this version takes effect, canonicalized to millisecond-precision UTC. Its identity
+             * within the variant.
              *
              * example:
              * 2027-01-01T00:00:00.000Z
              */
             valid_from: string;
             values: /**
-             * The attribute values this version overrides on the base entity, keyed by attribute name.
+             * The values this version overrides on the base entity, keyed by entity field name.
              *
-             * Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-             * (anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-             * attributes present here are ignored rather than rejected, so a client working from a slightly
-             * stale schema snapshot still succeeds instead of failing on fields it could not have known to
-             * drop. An attribute's `render_condition` says when to show it and has no bearing on whether a
-             * variant may override it.
+             * A field is overridable if its attribute declares `overridable_attribute` — which readonly,
+             * hidden, computed and metadata fields, and types no variant may override, cannot be given —
+             * or if a capability declaring `overridable_attribute` names it in `managed_fields`, which
+             * excludes only readonly and metadata fields.
              *
-             * Ignored means *not updated*, never *removed*: a value already stored for an attribute that is
-             * not currently overridable is preserved, so removing and restoring the flag deactivates and
-             * then reactivates the same override.
+             * Fields that are not overridable are reported in the write's `warnings` rather than rejected,
+             * and keep whatever value they already had. An append seeds them from the version in effect at
+             * its own `valid_from`.
              *
-             * A composite price's `price_components` is an ordinary overridable relation attribute: a
-             * composite variant pins its component variants here the same way any other relation value is
-             * set, with no special handling.
+             * A composite price's `price_components` is an ordinary overridable relation attribute,
+             * referencing component entities rather than variants or versions.
              *
              * example:
              * {
@@ -11216,27 +18085,22 @@ export declare namespace Components {
              */
             _updated_at: string;
             /**
-             * The revision a write to this version must carry to be accepted. Always current: every read
-             * that returns one is strongly consistent, so it is never a marker a write would be refused
-             * for having read too early.
-             *
+             * The revision a write to this version must carry. Read from a strongly consistent read.
              * example:
              * 3
              */
             _revision: number;
             /**
-             * What this write moved, if anything. Empty in the ordinary case — a client reads its
-             * length rather than branching on its absence.
+             * What this write moved, and anything in the body it did not store. Always present,
+             * and empty in the ordinary case.
              *
              */
             warnings: /**
-             * Something a version write moved. A version write is never refused for being late — backdating a
-             * version, and editing or deleting one that has already been superseded, are both accepted — so
-             * what a caller gets instead is a warning naming exactly what changed. One write can carry both
-             * codes.
+             * Something worth knowing that did not stop a write. One vocabulary for every write; `details`
+             * is typed per `code`, and a write raises each code at most once.
              *
              */
-            VersionWriteWarning[];
+            WriteWarning[];
         }
     }
 }
@@ -11244,12 +18108,7 @@ export declare namespace Paths {
     namespace $AppendConditionalVariantVersion {
         namespace Parameters {
             export type EntityId = string;
-            export type Slug = /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            Components.Schemas.ConditionalEntitySlug;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
             export type VariantId = string;
         }
         export interface PathParameters {
@@ -11259,35 +18118,35 @@ export declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.AppendVersionRequest;
         namespace Responses {
-            export type $201 = /**
-             * A version as a write left it, together with anything the write moved.
-             *
-             */
-            Components.Schemas.WrittenVariantVersion;
+            export type $201 = /* A version as a write left it, together with anything the write moved. */ Components.Schemas.WrittenVariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11342,6 +18201,72 @@ export declare namespace Paths {
             export type $404 = Components.Schemas.Error;
         }
     }
+    namespace $BatchDeleteConditionalVariants {
+        namespace Parameters {
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        export type RequestBody = /* A batch of variant and version deletes under one schema, each item naming the entity it removes from. */ Components.Schemas.BatchDeleteVariantsRequest;
+        namespace Responses {
+            export type $200 = /* What a batch delete did: one entry per item, in request order, and a count per outcome. */ Components.Schemas.BatchDeleteResult;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
+    namespace $BatchUpsertConditionalVariants {
+        namespace Parameters {
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        export type RequestBody = /* A batch of variant writes under one schema, each item naming the entity it writes to. */ Components.Schemas.BatchUpsertVariantsRequest;
+        namespace Responses {
+            export type $200 = /* What a batch upsert did: one entry per item, in request order, and a count per outcome. */ Components.Schemas.BatchUpsertResult;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
     namespace $CalculatePricingDetails {
         export interface RequestBody {
             line_items?: /* A valid set of product prices, quantities, (discounts) and taxes from a client. */ Components.Schemas.PriceItemsDto;
@@ -11386,12 +18311,7 @@ export declare namespace Paths {
     namespace $CreateConditionalVariant {
         namespace Parameters {
             export type EntityId = string;
-            export type Slug = /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            Components.Schemas.ConditionalEntitySlug;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -11401,29 +18321,33 @@ export declare namespace Paths {
         namespace Responses {
             export type $201 = Components.Schemas.CreatedVariant;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11432,12 +18356,7 @@ export declare namespace Paths {
     namespace $DeleteConditionalVariant {
         namespace Parameters {
             export type EntityId = string;
-            export type Slug = /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            Components.Schemas.ConditionalEntitySlug;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
             export type VariantId = string;
         }
         export interface PathParameters {
@@ -11448,29 +18367,33 @@ export declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.DeletedVariant;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11480,12 +18403,7 @@ export declare namespace Paths {
         namespace Parameters {
             export type EntityId = string;
             export type Revision = number;
-            export type Slug = /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            Components.Schemas.ConditionalEntitySlug;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
             export type ValidFrom = string;
             export type VariantId = string;
         }
@@ -11501,29 +18419,33 @@ export declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.DeletedVariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11545,12 +18467,7 @@ export declare namespace Paths {
     namespace $GetActiveConditionalVariantVersion {
         namespace Parameters {
             export type EntityId = string;
-            export type Slug = /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            Components.Schemas.ConditionalEntitySlug;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
             export type VariantId = string;
         }
         export interface PathParameters {
@@ -11560,30 +18477,40 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /**
-             * One version of one variant: the attribute overrides it carries, the instant it takes effect,
-             * and the variant it belongs to.
-             *
-             * These are the version's **own** overrides, not the base entity overlaid with them — this is
-             * what an editing screen loads and saves, and what it edits is the overrides. Composing them onto
-             * the entity is what `:resolve` answers.
+             * One version of one variant: the overrides it carries, the instant it takes effect, and the
+             * variant it belongs to. These are the version's own overrides; `:resolve` composes them onto
+             * the entity.
              *
              */
             Components.Schemas.VariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11591,12 +18518,7 @@ export declare namespace Paths {
     }
     namespace $GetConditionSets {
         namespace Parameters {
-            export type Slug = /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            Components.Schemas.ConditionalEntitySlug;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
@@ -11606,15 +18528,60 @@ export declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace $GetConditionalVariantTree {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+        }
+        export type RequestBody = /**
+         * The variants list's request plus `as_of`, the instant each row's version is selected at.
+         * `size` is clamped at 100 here; every other property means what it means on the list.
+         *
+         */
+        Components.Schemas.VariantTreeRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.VariantTree;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
     namespace $GetConditionalVariantVersion {
         namespace Parameters {
             export type EntityId = string;
-            export type Slug = /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            Components.Schemas.ConditionalEntitySlug;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
             export type ValidFrom = string;
             export type VariantId = string;
         }
@@ -11626,30 +18593,40 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /**
-             * One version of one variant: the attribute overrides it carries, the instant it takes effect,
-             * and the variant it belongs to.
-             *
-             * These are the version's **own** overrides, not the base entity overlaid with them — this is
-             * what an editing screen loads and saves, and what it edits is the overrides. Composing them onto
-             * the entity is what `:resolve` answers.
+             * One version of one variant: the overrides it carries, the instant it takes effect, and the
+             * variant it belongs to. These are the version's own overrides; `:resolve` composes them onto
+             * the entity.
              *
              */
             Components.Schemas.VariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11801,15 +18778,115 @@ export declare namespace Paths {
             export type $404 = Components.Schemas.Error;
         }
     }
+    namespace $ListConditionalVariantVersions {
+        namespace Parameters {
+            export type Cursor = string;
+            export type EntityId = string;
+            export type Limit = number;
+            export type Order = "asc" | "desc";
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
+            export type VariantId = string;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+            variant_id: Parameters.VariantId;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            order?: Parameters.Order;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.VariantVersionList;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
+    namespace $ListConditionalVariants {
+        namespace Parameters {
+            export type EntityId = string;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            entity_id: Parameters.EntityId;
+        }
+        export type RequestBody = /**
+         * How to narrow and page a variant listing. Every property is optional, so `{}` asks for the
+         * first ten variants in `variant_id` order, but the body itself is required. `conditions` and
+         * `search` narrow independently and a variant must satisfy both.
+         *
+         */
+        Components.Schemas.ListVariantsRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.VariantList;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
+            export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
     namespace $PatchActiveConditionalVariantVersion {
         namespace Parameters {
             export type EntityId = string;
-            export type Slug = /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            Components.Schemas.ConditionalEntitySlug;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
             export type VariantId = string;
         }
         export interface PathParameters {
@@ -11819,35 +18896,35 @@ export declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.PatchVersionRequest;
         namespace Responses {
-            export type $200 = /**
-             * A version as a write left it, together with anything the write moved.
-             *
-             */
-            Components.Schemas.WrittenVariantVersion;
+            export type $200 = /* A version as a write left it, together with anything the write moved. */ Components.Schemas.WrittenVariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11856,12 +18933,7 @@ export declare namespace Paths {
     namespace $PatchConditionalVariantVersion {
         namespace Parameters {
             export type EntityId = string;
-            export type Slug = /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            Components.Schemas.ConditionalEntitySlug;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
             export type ValidFrom = string;
             export type VariantId = string;
         }
@@ -11873,35 +18945,35 @@ export declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.PatchVersionRequest;
         namespace Responses {
-            export type $200 = /**
-             * A version as a write left it, together with anything the write moved.
-             *
-             */
-            Components.Schemas.WrittenVariantVersion;
+            export type $200 = /* A version as a write left it, together with anything the write moved. */ Components.Schemas.WrittenVariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -11957,12 +19029,7 @@ export declare namespace Paths {
     namespace $ReplaceActiveConditionalVariantVersion {
         namespace Parameters {
             export type EntityId = string;
-            export type Slug = /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            Components.Schemas.ConditionalEntitySlug;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
             export type VariantId = string;
         }
         export interface PathParameters {
@@ -11972,35 +19039,35 @@ export declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.ReplaceVersionRequest;
         namespace Responses {
-            export type $200 = /**
-             * A version as a write left it, together with anything the write moved.
-             *
-             */
-            Components.Schemas.WrittenVariantVersion;
+            export type $200 = /* A version as a write left it, together with anything the write moved. */ Components.Schemas.WrittenVariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -12009,12 +19076,7 @@ export declare namespace Paths {
     namespace $ReplaceConditionalVariantVersion {
         namespace Parameters {
             export type EntityId = string;
-            export type Slug = /**
-             * Schema slug of an entity type that can be conditional — the `{slug}` of every
-             * conditional-pricing route.
-             *
-             */
-            Components.Schemas.ConditionalEntitySlug;
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
             export type ValidFrom = string;
             export type VariantId = string;
         }
@@ -12026,68 +19088,77 @@ export declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.ReplaceVersionRequest;
         namespace Responses {
-            export type $200 = /**
-             * A version as a write left it, together with anything the write moved.
-             *
-             */
-            Components.Schemas.WrittenVariantVersion;
+            export type $200 = /* A version as a write left it, together with anything the write moved. */ Components.Schemas.WrittenVariantVersion;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
+            export type $403 = Components.Schemas.Error;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
         }
     }
     namespace $ResolveConditionalEntity {
-        export type RequestBody = Components.Schemas.ResolveConditionalEntityRequest;
+        export type RequestBody = /**
+         * A resolve names one conditional entity and selects its variants either by `context` or by
+         * `variant_id`, never both. `context: {}` matches nothing and so returns the `default`
+         * variant, which is how to ask for it without knowing its id.
+         *
+         */
+        Components.Schemas.ResolveConditionalEntityRequest;
         namespace Responses {
             export type $200 = Components.Schemas.ResolvedVariants;
             export type $400 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $404 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
             export type $409 = /**
-             * An error from a conditional-pricing operation, carrying a machine-readable `code`
-             * from the conditional-pricing vocabulary plus any structured data about the failure,
-             * so a client can branch on the kind of failure rather than parse the message.
-             * Referenced only by the operations that emit these codes; every other operation
-             * keeps the plain `Error` shape.
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
              *
              */
             Components.Schemas.ConditionalPricingError;
@@ -13640,17 +20711,7 @@ export interface OperationMethods {
   /**
    * $getConditionSets - $getConditionSets
    * 
-   * Returns the condition sets built in for one conditional entity type: the situations a
-   * conditional Product, Price or Coupon is commonly varied by, ready to be copied into that
-   * schema's `conditions` array and extended or modified from there.
-   * 
-   * Which sets exist depends on the schema — an offer window is a Product's dimension, a delivery
-   * area is a Price's and a Coupon's — so only the sets built in for `slug` are returned.
-   * 
-   * Static, read-only reference data. The catalog is the same for every organization and is not
-   * applied to any schema by this endpoint — adding conditions to a schema stays an Entity API
-   * write.
-   * 
+   * Returns the condition sets built in for one conditional entity type, ready to copy into that schema's `conditions` array. Read-only, and the same for every organization.
    */
   '$getConditionSets'(
     parameters?: Parameters<Paths.$GetConditionSets.PathParameters> | null,
@@ -13660,24 +20721,15 @@ export interface OperationMethods {
   /**
    * $resolveConditionalEntity - $resolveConditionalEntity
    * 
-   * Resolves which of a conditional entity's variants apply to a situation, and returns each one
-   * composed: the base entity overlaid with the values of the version in effect at `as_of`.
+   * Returns the variants of one conditional entity that apply, each composed: the base entity
+   * overlaid with the version in effect at `as_of`.
    * 
-   * Resolution is two selections in a fixed order — the variant, by matching `context` against
-   * the conditions each variant pins; then the version, by `as_of`. It is always scoped to one
-   * logical entity, so it stays a cheap, predictable lookup rather than an open search.
+   * Select the variant either by `context`, matched against the conditions each variant pins, or
+   * by `variant_id`. Exactly one of the two. A condition a variant leaves unpinned matches any
+   * value; a condition absent from `context` matches only variants that leave it unpinned.
    * 
-   * Matching follows two rules worth knowing before assembling a context. A condition a variant
-   * does **not** pin matches any value, which is what lets a condition be added to a schema
-   * without breaking the variants that already exist. A condition **missing from `context`**,
-   * however, does not satisfy one a variant pinned: an incomplete integration resolves to
-   * nothing rather than silently matching another segment's variants.
-   * 
-   * When nothing matches, the entity's `default` variant is returned if it has one. There is no
-   * implicit fallback to the unmodified base entity — its values are the ones no variant
-   * overrode, which is not an answer to "what applies here".
-   * 
-   * Availability is a separate mechanism and is never consulted here.
+   * When no variant matches, the entity's `default` variant is returned, or `results` is empty.
+   * `options.hydrate` replaces relation references with the entities they reference.
    * 
    */
   '$resolveConditionalEntity'(
@@ -13688,37 +20740,14 @@ export interface OperationMethods {
   /**
    * $createConditionalVariant - $createConditionalVariant
    * 
-   * Creates one variant of a conditional entity, together with the first version carrying its
-   * values. Never two calls: a variant that existed without a version would be an entity holding
-   * a condition tuple it cannot answer with.
+   * Creates one variant together with its first version.
    * 
-   * The body pins the situation the variant applies to. Pins are exact values only — predicates
-   * are a read-side concept and are rejected here — and are stored canonicalized for their
-   * condition's type, so two spellings of one instant, or one town written two ways, are one
-   * variant rather than two that no context can tell apart.
+   * `conditions` pins the situation the variant applies to, as exact values. A variant must pin
+   * at least one condition or be marked `default`, of which an entity may have one, and its
+   * condition values are fixed once created.
    * 
-   * Three write rules are worth knowing before the first call:
-   * 
-   * - A variant must pin at least one condition or be marked `default`. A variant pinning nothing
-   *   would be a universal wildcard matching every resolve, which is a far more dangerous thing
-   *   than a fallback and far easier to create by accident.
-   * - `default` is a property of the variant, set by the `default` flag, and is never a value in
-   *   `conditions` — not even `false`. A `default` variant cannot pin anything else, and an entity
-   *   can have only one, enforced by the ordinary condition-tuple guard rather than by a rule of
-   *   its own. Any entity may have one; nothing is declared in the schema to allow it.
-   * - Condition values are immutable afterwards. A variant's identity is the situation it applies
-   *   to, and orders and contracts pin it. **A condition added to a schema that already has
-   *   variants is effectively one-way**: every existing variant is a wildcard on the new
-   *   dimension, but the first variant that pins it is ambiguous against all of them, and
-   *   retro-pinning the others is blocked by this same rule.
-   * 
-   * Attribute values are applied only for attributes currently carrying `overridable_attribute`.
-   * Metadata and non-overridable fields present in the body are ignored rather than rejected, so a
-   * client working from a slightly stale schema snapshot still succeeds.
-   * 
-   * `variant_id` is always server-generated and returned, and is not accepted in the body — the
-   * request schema admits no such property. It is the durable key orders and contracts pin, so it
-   * cannot be something two independent importers could collide on.
+   * Values are stored only for attributes carrying `overridable_attribute`; the rest are
+   * reported in `warnings` rather than rejected. `variant_id` is server-generated.
    * 
    */
   '$createConditionalVariant'(
@@ -13727,20 +20756,46 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$CreateConditionalVariant.Responses.$201>
   /**
+   * $listConditionalVariants - $listConditionalVariants
+   * 
+   * Lists a conditional entity's variants and the conditions each one pins. A `POST` because the
+   * condition filter is a structured object; nothing is written. The body is required, so send
+   * `{}` for the first page.
+   * 
+   * `conditions` filters on the pins, taking the same predicates a resolve context does, and
+   * matches a variant only where it pins that condition. `search` is free text over pinned
+   * values; `sort` orders by one pin.
+   * 
+   * Offset paging up to the search index's window, then the `cursor` from `next`.
+   * 
+   */
+  '$listConditionalVariants'(
+    parameters?: Parameters<Paths.$ListConditionalVariants.PathParameters> | null,
+    data?: Paths.$ListConditionalVariants.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ListConditionalVariants.Responses.$200>
+  /**
+   * $getConditionalVariantTree - $getConditionalVariantTree
+   * 
+   * The variants list, each row carrying the version in effect at `as_of` and a `status` saying
+   * whether that version is `active` or still `scheduled`.
+   * 
+   * Takes everything the variants list takes, plus `as_of`. `size` is clamped at 100, and a
+   * variant mid-delete is omitted from `results`.
+   * 
+   */
+  '$getConditionalVariantTree'(
+    parameters?: Parameters<Paths.$GetConditionalVariantTree.PathParameters> | null,
+    data?: Paths.$GetConditionalVariantTree.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$GetConditionalVariantTree.Responses.$200>
+  /**
    * $getActiveConditionalVariantVersion - $getActiveConditionalVariantVersion
    * 
-   * Returns the version of this variant that is currently in effect — the one with the latest
-   * `valid_from` at or before now.
+   * Returns the version of this variant in effect now — the latest `valid_from` at or before now
+   * — with the `_revision` a write to it must carry.
    * 
-   * The "open this variant" read: no date arithmetic is asked of the caller, and what comes back
-   * carries the `_revision` a write to that version has to be sent with, so an editing screen can
-   * load and save without working out which version it is looking at.
-   * 
-   * What is returned is the version's own attribute overrides, not the base entity overlaid with
-   * them. Composing the two is what `:resolve` answers.
-   * 
-   * A variant staged ahead of its launch has versions but none of them in effect, and is reported
-   * as having none rather than as not existing — the two are fixed differently.
+   * These are the version's own overrides; `:resolve` composes them onto the entity.
    * 
    */
   '$getActiveConditionalVariantVersion'(
@@ -13751,20 +20806,11 @@ export interface OperationMethods {
   /**
    * $replaceActiveConditionalVariantVersion - $replaceActiveConditionalVariantVersion
    * 
-   * Replaces the values of the version currently in effect, wholesale.
+   * Replaces the values of the version in effect. The body is the complete set of overrides: an
+   * overridable attribute absent from it stops being overridden, and one the variant may not
+   * override keeps its stored value.
    * 
-   * The body is the complete set of attribute overrides: an attribute the variant may override and
-   * that is absent from it stops being overridden. Attributes the variant may **not** override are
-   * ignored where the body carries them, and their stored value is kept rather than dropped — a
-   * routine full-snapshot write must not erase an override the moment its attribute's flag happens
-   * to be off.
-   * 
-   * Editing the version in effect is the ordinary way a live price is corrected, and warns about
-   * nothing: what changes is what that version *says*, not which version is in effect.
-   * 
-   * Neither `valid_from` nor `conditions` can be changed here. Both are accepted when they match
-   * what is stored, so a client building its body from the version it loaded need not strip them
-   * out first, and both are refused when they name something else.
+   * `valid_from` and `conditions` are accepted only unchanged.
    * 
    */
   '$replaceActiveConditionalVariantVersion'(
@@ -13775,15 +20821,8 @@ export interface OperationMethods {
   /**
    * $patchActiveConditionalVariantVersion - $patchActiveConditionalVariantVersion
    * 
-   * Changes only the fields it names on the version currently in effect.
-   * 
-   * Everything the body does not mention is left as stored — the "just nudge this number" write. A
-   * `null` is a value like any other rather than a deletion; a client that wants an attribute to
-   * stop being overridden sends the complete snapshot without it through `PUT`.
-   * 
-   * Attempting to change a pinned condition value is refused here in particular: a partial update
-   * is the path a caller reaches for by accident, and a variant's conditions are the situation it
-   * applies to, which the orders and contracts pinning it depend on not shifting.
+   * Changes only the fields it names on the version in effect. `null` sets a value rather than
+   * removing an override; use the replace operation to remove one.
    * 
    */
   '$patchActiveConditionalVariantVersion'(
@@ -13794,23 +20833,11 @@ export interface OperationMethods {
   /**
    * $deleteConditionalVariant - $deleteConditionalVariant
    * 
-   * Removes one variant of a conditional entity: the condition tuple it holds, its registration
-   * in the search index, and every version it accumulated.
+   * Removes one variant: its condition tuple, its index entry and all its versions. The tuple
+   * becomes reusable, and an interrupted delete is safe to send again.
    * 
-   * Two phases. The first frees the tuple and deregisters the variant, and is what makes the
-   * combination of condition values immediately reusable — the second removes the version rows in
-   * batches afterwards. A response arrives only once both have finished for this request, but the
-   * tuple is reusable from the moment the first completes, whether or not the second did: a
-   * variant with more versions than one transaction can carry is the ordinary case, not an edge
-   * one. An interrupted delete is safe to send again; it picks up where it stopped.
-   * 
-   * Nothing is archived. A variant an order or contract pins stops resolving, and hydration drops
-   * the reference leniently rather than failing the read.
-   * 
-   * This removes the **variant**, not one of its versions. To remove a single version, name it on
-   * `…/variants/{variant_id}/versions/{valid_from}` — including the one currently in effect, which
-   * deliberately has no "delete whichever is live" shorthand: that is exactly the write nobody
-   * should be able to ask for without saying which version they meant.
+   * Orders and contracts pinning the variant stop resolving. To remove a single version, address
+   * it under `versions/{valid_from}`.
    * 
    */
   '$deleteConditionalVariant'(
@@ -13819,27 +20846,26 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$DeleteConditionalVariant.Responses.$200>
   /**
+   * $listConditionalVariantVersions - $listConditionalVariantVersions
+   * 
+   * Lists one variant's versions. Cursor paging only: a page may be short or empty and still
+   * carry a `next`, so page until `next` is absent. A cursor is bound to one variant and one
+   * `order`.
+   * 
+   */
+  '$listConditionalVariantVersions'(
+    parameters?: Parameters<Paths.$ListConditionalVariantVersions.QueryParameters & Paths.$ListConditionalVariantVersions.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ListConditionalVariantVersions.Responses.$200>
+  /**
    * $appendConditionalVariantVersion - $appendConditionalVariantVersion
    * 
-   * Appends a version to a variant: a new set of values taking effect at its own instant.
+   * Appends a version taking effect at its own instant. The version in effect at any instant is
+   * the one with the latest `valid_from` at or before it; a future one is staged until its date.
    * 
-   * This is how a price changes. No version carries an end date and nothing is superseded
-   * explicitly — the version in effect at an instant is simply the one with the latest `valid_from`
-   * at or before it, so appending a later version is the whole of "this is the new price from then
-   * on". A version dated in the future is staged and excluded from resolution until its date.
-   * 
-   * **A version is never refused for being late.** A `valid_from` in the past is written like any
-   * other and answered with warnings in `warnings` naming what it moved — what resolves now, what a
-   * past-dated read returns, or both. Correcting a price that took effect last week is ordinary
-   * work; the alternative, deleting and recreating the variant, breaks every order and contract
-   * pinning its id.
-   * 
-   * What is refused is appending at a `valid_from` the variant already has: that write means either
-   * "replace it" or "and also this", and only the caller knows which. The two operations both
-   * exist, on the dated version path.
-   * 
-   * The variant's `conditions` are its identity and are fixed at creation; they may be sent back
-   * unchanged but never changed.
+   * A past `valid_from` is accepted and reported in `warnings`. One the variant already has is
+   * refused — replace or patch that version instead.
    * 
    */
   '$appendConditionalVariantVersion'(
@@ -13850,12 +20876,7 @@ export interface OperationMethods {
   /**
    * $getConditionalVariantVersion - $getConditionalVariantVersion
    * 
-   * Returns one specific version of a variant, by the instant it takes effect — what a form editing
-   * that version loads.
-   * 
-   * Exact, never nearest: an instant the variant has no version at is a not-found rather than the
-   * version that would be in effect at it. That question is the shorthand read's, or `:resolve`'s.
-   * 
+   * Returns one version by the instant it takes effect. Exact, never nearest.
    */
   '$getConditionalVariantVersion'(
     parameters?: Parameters<Paths.$GetConditionalVariantVersion.PathParameters> | null,
@@ -13865,16 +20886,8 @@ export interface OperationMethods {
   /**
    * $replaceConditionalVariantVersion - $replaceConditionalVariantVersion
    * 
-   * Replaces one version's values wholesale, addressed by its `valid_from`.
-   * 
-   * Editable whatever its date, at both ends of the timeline: a scheduled version must stay
-   * editable so a staged price can be corrected before it goes live rather than accumulating dead
-   * versions beside it, and a past one must stay editable because correcting history is ordinary
-   * work. Writing a superseded version is answered with a warning naming what a past-dated read now
-   * returns; it is not refused.
-   * 
-   * Attributes the variant may not override are ignored where the body carries them, and their
-   * stored value is preserved rather than dropped.
+   * Replaces one version's values, whatever its date. Attributes the variant may not override
+   * keep their stored value. Writing a superseded version is reported in `warnings`.
    * 
    */
   '$replaceConditionalVariantVersion'(
@@ -13885,12 +20898,7 @@ export interface OperationMethods {
   /**
    * $patchConditionalVariantVersion - $patchConditionalVariantVersion
    * 
-   * Changes only the fields it names on one version, addressed by its `valid_from`.
-   * 
-   * Everything the body does not mention is left as stored. A partial update that tries to change a
-   * pinned condition value is refused: condition values are immutable after a variant is created,
-   * and this is the path that rule is most likely to be broken on by accident.
-   * 
+   * Changes only the fields it names on one version.
    */
   '$patchConditionalVariantVersion'(
     parameters?: Parameters<Paths.$PatchConditionalVariantVersion.PathParameters> | null,
@@ -13900,18 +20908,8 @@ export interface OperationMethods {
   /**
    * $deleteConditionalVariantVersion - $deleteConditionalVariantVersion
    * 
-   * Removes one version of a variant.
-   * 
-   * Withdrawing a scheduled adjustment is what this is for, and deleting a future version warns
-   * about nothing — nothing that has resolved, or could have resolved, changes. Deleting a version
-   * that has taken effect is allowed too and answered with a warning: it changes what a past-dated
-   * read returns, and if it was the version in effect it changes what resolves now.
-   * 
-   * **A variant's last remaining version cannot be deleted.** Such a variant would still hold its
-   * condition tuple and still be selectable, and then resolve to nothing — which is a variant delete
-   * wearing a version delete's clothes. Delete the variant instead; that frees the tuple too.
-   * 
-   * The variant itself is untouched: it keeps its conditions, its tuple and its place in the index.
+   * Removes one version. What the removal moves is reported in `warnings`. A variant's last
+   * remaining version cannot be removed — delete the variant instead.
    * 
    */
   '$deleteConditionalVariantVersion'(
@@ -13919,6 +20917,47 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$DeleteConditionalVariantVersion.Responses.$200>
+  /**
+   * $batchUpsertConditionalVariants - $batchUpsertConditionalVariants
+   * 
+   * Writes up to 100 variants or versions in one call. Each item names its own entity, so one
+   * call can span a tariff hierarchy, and addresses a variant by condition tuple rather than by
+   * id — the id it created or found is on the result entry.
+   * 
+   * Each item's outcome is derived from what is stored: an unknown tuple is `variant_created`, a
+   * known tuple with no version at the item's `valid_from` is `version_created`, an existing
+   * version there is `updated`, and a write matching what is stored is `skipped`. An item
+   * without `valid_from` is a last-write-wins write with no `skipped` detection.
+   * 
+   * Items addressing the same `(entity_id, conditions)` apply in array order; the rest run in
+   * parallel. No cross-item rollback, and no `_revision` guard.
+   * 
+   */
+  '$batchUpsertConditionalVariants'(
+    parameters?: Parameters<Paths.$BatchUpsertConditionalVariants.PathParameters> | null,
+    data?: Paths.$BatchUpsertConditionalVariants.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$BatchUpsertConditionalVariants.Responses.$200>
+  /**
+   * $batchDeleteConditionalVariants - $batchDeleteConditionalVariants
+   * 
+   * Removes up to 100 variants or versions in one call. An item carrying `valid_from` removes
+   * that version; one without it removes the whole variant.
+   * 
+   * Each item addresses its variant by `variant_id` beside its `entity_id`, or by the condition
+   * tuple it pins, never both. Use ids once a condition has left the schema, since its tuple can
+   * no longer be canonicalized.
+   * 
+   * Items addressing the same variant apply in array order, resolved to ids first; the rest run
+   * in parallel. An item addressing a missing variant or version is `skipped`, and the call is
+   * safe to send again.
+   * 
+   */
+  '$batchDeleteConditionalVariants'(
+    parameters?: Parameters<Paths.$BatchDeleteConditionalVariants.PathParameters> | null,
+    data?: Paths.$BatchDeleteConditionalVariants.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$BatchDeleteConditionalVariants.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -14201,17 +21240,7 @@ export interface PathsDictionary {
     /**
      * $getConditionSets - $getConditionSets
      * 
-     * Returns the condition sets built in for one conditional entity type: the situations a
-     * conditional Product, Price or Coupon is commonly varied by, ready to be copied into that
-     * schema's `conditions` array and extended or modified from there.
-     * 
-     * Which sets exist depends on the schema — an offer window is a Product's dimension, a delivery
-     * area is a Price's and a Coupon's — so only the sets built in for `slug` are returned.
-     * 
-     * Static, read-only reference data. The catalog is the same for every organization and is not
-     * applied to any schema by this endpoint — adding conditions to a schema stays an Entity API
-     * write.
-     * 
+     * Returns the condition sets built in for one conditional entity type, ready to copy into that schema's `conditions` array. Read-only, and the same for every organization.
      */
     'get'(
       parameters?: Parameters<Paths.$GetConditionSets.PathParameters> | null,
@@ -14223,24 +21252,15 @@ export interface PathsDictionary {
     /**
      * $resolveConditionalEntity - $resolveConditionalEntity
      * 
-     * Resolves which of a conditional entity's variants apply to a situation, and returns each one
-     * composed: the base entity overlaid with the values of the version in effect at `as_of`.
+     * Returns the variants of one conditional entity that apply, each composed: the base entity
+     * overlaid with the version in effect at `as_of`.
      * 
-     * Resolution is two selections in a fixed order — the variant, by matching `context` against
-     * the conditions each variant pins; then the version, by `as_of`. It is always scoped to one
-     * logical entity, so it stays a cheap, predictable lookup rather than an open search.
+     * Select the variant either by `context`, matched against the conditions each variant pins, or
+     * by `variant_id`. Exactly one of the two. A condition a variant leaves unpinned matches any
+     * value; a condition absent from `context` matches only variants that leave it unpinned.
      * 
-     * Matching follows two rules worth knowing before assembling a context. A condition a variant
-     * does **not** pin matches any value, which is what lets a condition be added to a schema
-     * without breaking the variants that already exist. A condition **missing from `context`**,
-     * however, does not satisfy one a variant pinned: an incomplete integration resolves to
-     * nothing rather than silently matching another segment's variants.
-     * 
-     * When nothing matches, the entity's `default` variant is returned if it has one. There is no
-     * implicit fallback to the unmodified base entity — its values are the ones no variant
-     * overrode, which is not an answer to "what applies here".
-     * 
-     * Availability is a separate mechanism and is never consulted here.
+     * When no variant matches, the entity's `default` variant is returned, or `results` is empty.
+     * `options.hydrate` replaces relation references with the entities they reference.
      * 
      */
     'post'(
@@ -14253,37 +21273,14 @@ export interface PathsDictionary {
     /**
      * $createConditionalVariant - $createConditionalVariant
      * 
-     * Creates one variant of a conditional entity, together with the first version carrying its
-     * values. Never two calls: a variant that existed without a version would be an entity holding
-     * a condition tuple it cannot answer with.
+     * Creates one variant together with its first version.
      * 
-     * The body pins the situation the variant applies to. Pins are exact values only — predicates
-     * are a read-side concept and are rejected here — and are stored canonicalized for their
-     * condition's type, so two spellings of one instant, or one town written two ways, are one
-     * variant rather than two that no context can tell apart.
+     * `conditions` pins the situation the variant applies to, as exact values. A variant must pin
+     * at least one condition or be marked `default`, of which an entity may have one, and its
+     * condition values are fixed once created.
      * 
-     * Three write rules are worth knowing before the first call:
-     * 
-     * - A variant must pin at least one condition or be marked `default`. A variant pinning nothing
-     *   would be a universal wildcard matching every resolve, which is a far more dangerous thing
-     *   than a fallback and far easier to create by accident.
-     * - `default` is a property of the variant, set by the `default` flag, and is never a value in
-     *   `conditions` — not even `false`. A `default` variant cannot pin anything else, and an entity
-     *   can have only one, enforced by the ordinary condition-tuple guard rather than by a rule of
-     *   its own. Any entity may have one; nothing is declared in the schema to allow it.
-     * - Condition values are immutable afterwards. A variant's identity is the situation it applies
-     *   to, and orders and contracts pin it. **A condition added to a schema that already has
-     *   variants is effectively one-way**: every existing variant is a wildcard on the new
-     *   dimension, but the first variant that pins it is ambiguous against all of them, and
-     *   retro-pinning the others is blocked by this same rule.
-     * 
-     * Attribute values are applied only for attributes currently carrying `overridable_attribute`.
-     * Metadata and non-overridable fields present in the body are ignored rather than rejected, so a
-     * client working from a slightly stale schema snapshot still succeeds.
-     * 
-     * `variant_id` is always server-generated and returned, and is not accepted in the body — the
-     * request schema admits no such property. It is the durable key orders and contracts pin, so it
-     * cannot be something two independent importers could collide on.
+     * Values are stored only for attributes carrying `overridable_attribute`; the rest are
+     * reported in `warnings` rather than rejected. `variant_id` is server-generated.
      * 
      */
     'post'(
@@ -14292,22 +21289,52 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$CreateConditionalVariant.Responses.$201>
   }
+  ['/v1/conditional-pricing/{slug}/entities/{entity_id}/variants:list']: {
+    /**
+     * $listConditionalVariants - $listConditionalVariants
+     * 
+     * Lists a conditional entity's variants and the conditions each one pins. A `POST` because the
+     * condition filter is a structured object; nothing is written. The body is required, so send
+     * `{}` for the first page.
+     * 
+     * `conditions` filters on the pins, taking the same predicates a resolve context does, and
+     * matches a variant only where it pins that condition. `search` is free text over pinned
+     * values; `sort` orders by one pin.
+     * 
+     * Offset paging up to the search index's window, then the `cursor` from `next`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.$ListConditionalVariants.PathParameters> | null,
+      data?: Paths.$ListConditionalVariants.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ListConditionalVariants.Responses.$200>
+  }
+  ['/v1/conditional-pricing/{slug}/entities/{entity_id}/variants:tree']: {
+    /**
+     * $getConditionalVariantTree - $getConditionalVariantTree
+     * 
+     * The variants list, each row carrying the version in effect at `as_of` and a `status` saying
+     * whether that version is `active` or still `scheduled`.
+     * 
+     * Takes everything the variants list takes, plus `as_of`. `size` is clamped at 100, and a
+     * variant mid-delete is omitted from `results`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.$GetConditionalVariantTree.PathParameters> | null,
+      data?: Paths.$GetConditionalVariantTree.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$GetConditionalVariantTree.Responses.$200>
+  }
   ['/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}']: {
     /**
      * $getActiveConditionalVariantVersion - $getActiveConditionalVariantVersion
      * 
-     * Returns the version of this variant that is currently in effect — the one with the latest
-     * `valid_from` at or before now.
+     * Returns the version of this variant in effect now — the latest `valid_from` at or before now
+     * — with the `_revision` a write to it must carry.
      * 
-     * The "open this variant" read: no date arithmetic is asked of the caller, and what comes back
-     * carries the `_revision` a write to that version has to be sent with, so an editing screen can
-     * load and save without working out which version it is looking at.
-     * 
-     * What is returned is the version's own attribute overrides, not the base entity overlaid with
-     * them. Composing the two is what `:resolve` answers.
-     * 
-     * A variant staged ahead of its launch has versions but none of them in effect, and is reported
-     * as having none rather than as not existing — the two are fixed differently.
+     * These are the version's own overrides; `:resolve` composes them onto the entity.
      * 
      */
     'get'(
@@ -14318,20 +21345,11 @@ export interface PathsDictionary {
     /**
      * $replaceActiveConditionalVariantVersion - $replaceActiveConditionalVariantVersion
      * 
-     * Replaces the values of the version currently in effect, wholesale.
+     * Replaces the values of the version in effect. The body is the complete set of overrides: an
+     * overridable attribute absent from it stops being overridden, and one the variant may not
+     * override keeps its stored value.
      * 
-     * The body is the complete set of attribute overrides: an attribute the variant may override and
-     * that is absent from it stops being overridden. Attributes the variant may **not** override are
-     * ignored where the body carries them, and their stored value is kept rather than dropped — a
-     * routine full-snapshot write must not erase an override the moment its attribute's flag happens
-     * to be off.
-     * 
-     * Editing the version in effect is the ordinary way a live price is corrected, and warns about
-     * nothing: what changes is what that version *says*, not which version is in effect.
-     * 
-     * Neither `valid_from` nor `conditions` can be changed here. Both are accepted when they match
-     * what is stored, so a client building its body from the version it loaded need not strip them
-     * out first, and both are refused when they name something else.
+     * `valid_from` and `conditions` are accepted only unchanged.
      * 
      */
     'put'(
@@ -14342,15 +21360,8 @@ export interface PathsDictionary {
     /**
      * $patchActiveConditionalVariantVersion - $patchActiveConditionalVariantVersion
      * 
-     * Changes only the fields it names on the version currently in effect.
-     * 
-     * Everything the body does not mention is left as stored — the "just nudge this number" write. A
-     * `null` is a value like any other rather than a deletion; a client that wants an attribute to
-     * stop being overridden sends the complete snapshot without it through `PUT`.
-     * 
-     * Attempting to change a pinned condition value is refused here in particular: a partial update
-     * is the path a caller reaches for by accident, and a variant's conditions are the situation it
-     * applies to, which the orders and contracts pinning it depend on not shifting.
+     * Changes only the fields it names on the version in effect. `null` sets a value rather than
+     * removing an override; use the replace operation to remove one.
      * 
      */
     'patch'(
@@ -14361,23 +21372,11 @@ export interface PathsDictionary {
     /**
      * $deleteConditionalVariant - $deleteConditionalVariant
      * 
-     * Removes one variant of a conditional entity: the condition tuple it holds, its registration
-     * in the search index, and every version it accumulated.
+     * Removes one variant: its condition tuple, its index entry and all its versions. The tuple
+     * becomes reusable, and an interrupted delete is safe to send again.
      * 
-     * Two phases. The first frees the tuple and deregisters the variant, and is what makes the
-     * combination of condition values immediately reusable — the second removes the version rows in
-     * batches afterwards. A response arrives only once both have finished for this request, but the
-     * tuple is reusable from the moment the first completes, whether or not the second did: a
-     * variant with more versions than one transaction can carry is the ordinary case, not an edge
-     * one. An interrupted delete is safe to send again; it picks up where it stopped.
-     * 
-     * Nothing is archived. A variant an order or contract pins stops resolving, and hydration drops
-     * the reference leniently rather than failing the read.
-     * 
-     * This removes the **variant**, not one of its versions. To remove a single version, name it on
-     * `…/variants/{variant_id}/versions/{valid_from}` — including the one currently in effect, which
-     * deliberately has no "delete whichever is live" shorthand: that is exactly the write nobody
-     * should be able to ask for without saying which version they meant.
+     * Orders and contracts pinning the variant stop resolving. To remove a single version, address
+     * it under `versions/{valid_from}`.
      * 
      */
     'delete'(
@@ -14388,27 +21387,26 @@ export interface PathsDictionary {
   }
   ['/v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions']: {
     /**
+     * $listConditionalVariantVersions - $listConditionalVariantVersions
+     * 
+     * Lists one variant's versions. Cursor paging only: a page may be short or empty and still
+     * carry a `next`, so page until `next` is absent. A cursor is bound to one variant and one
+     * `order`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.$ListConditionalVariantVersions.QueryParameters & Paths.$ListConditionalVariantVersions.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ListConditionalVariantVersions.Responses.$200>
+    /**
      * $appendConditionalVariantVersion - $appendConditionalVariantVersion
      * 
-     * Appends a version to a variant: a new set of values taking effect at its own instant.
+     * Appends a version taking effect at its own instant. The version in effect at any instant is
+     * the one with the latest `valid_from` at or before it; a future one is staged until its date.
      * 
-     * This is how a price changes. No version carries an end date and nothing is superseded
-     * explicitly — the version in effect at an instant is simply the one with the latest `valid_from`
-     * at or before it, so appending a later version is the whole of "this is the new price from then
-     * on". A version dated in the future is staged and excluded from resolution until its date.
-     * 
-     * **A version is never refused for being late.** A `valid_from` in the past is written like any
-     * other and answered with warnings in `warnings` naming what it moved — what resolves now, what a
-     * past-dated read returns, or both. Correcting a price that took effect last week is ordinary
-     * work; the alternative, deleting and recreating the variant, breaks every order and contract
-     * pinning its id.
-     * 
-     * What is refused is appending at a `valid_from` the variant already has: that write means either
-     * "replace it" or "and also this", and only the caller knows which. The two operations both
-     * exist, on the dated version path.
-     * 
-     * The variant's `conditions` are its identity and are fixed at creation; they may be sent back
-     * unchanged but never changed.
+     * A past `valid_from` is accepted and reported in `warnings`. One the variant already has is
+     * refused — replace or patch that version instead.
      * 
      */
     'post'(
@@ -14421,12 +21419,7 @@ export interface PathsDictionary {
     /**
      * $getConditionalVariantVersion - $getConditionalVariantVersion
      * 
-     * Returns one specific version of a variant, by the instant it takes effect — what a form editing
-     * that version loads.
-     * 
-     * Exact, never nearest: an instant the variant has no version at is a not-found rather than the
-     * version that would be in effect at it. That question is the shorthand read's, or `:resolve`'s.
-     * 
+     * Returns one version by the instant it takes effect. Exact, never nearest.
      */
     'get'(
       parameters?: Parameters<Paths.$GetConditionalVariantVersion.PathParameters> | null,
@@ -14436,16 +21429,8 @@ export interface PathsDictionary {
     /**
      * $replaceConditionalVariantVersion - $replaceConditionalVariantVersion
      * 
-     * Replaces one version's values wholesale, addressed by its `valid_from`.
-     * 
-     * Editable whatever its date, at both ends of the timeline: a scheduled version must stay
-     * editable so a staged price can be corrected before it goes live rather than accumulating dead
-     * versions beside it, and a past one must stay editable because correcting history is ordinary
-     * work. Writing a superseded version is answered with a warning naming what a past-dated read now
-     * returns; it is not refused.
-     * 
-     * Attributes the variant may not override are ignored where the body carries them, and their
-     * stored value is preserved rather than dropped.
+     * Replaces one version's values, whatever its date. Attributes the variant may not override
+     * keep their stored value. Writing a superseded version is reported in `warnings`.
      * 
      */
     'put'(
@@ -14456,12 +21441,7 @@ export interface PathsDictionary {
     /**
      * $patchConditionalVariantVersion - $patchConditionalVariantVersion
      * 
-     * Changes only the fields it names on one version, addressed by its `valid_from`.
-     * 
-     * Everything the body does not mention is left as stored. A partial update that tries to change a
-     * pinned condition value is refused: condition values are immutable after a variant is created,
-     * and this is the path that rule is most likely to be broken on by accident.
-     * 
+     * Changes only the fields it names on one version.
      */
     'patch'(
       parameters?: Parameters<Paths.$PatchConditionalVariantVersion.PathParameters> | null,
@@ -14471,18 +21451,8 @@ export interface PathsDictionary {
     /**
      * $deleteConditionalVariantVersion - $deleteConditionalVariantVersion
      * 
-     * Removes one version of a variant.
-     * 
-     * Withdrawing a scheduled adjustment is what this is for, and deleting a future version warns
-     * about nothing — nothing that has resolved, or could have resolved, changes. Deleting a version
-     * that has taken effect is allowed too and answered with a warning: it changes what a past-dated
-     * read returns, and if it was the version in effect it changes what resolves now.
-     * 
-     * **A variant's last remaining version cannot be deleted.** Such a variant would still hold its
-     * condition tuple and still be selectable, and then resolve to nothing — which is a variant delete
-     * wearing a version delete's clothes. Delete the variant instead; that frees the tuple too.
-     * 
-     * The variant itself is untouched: it keeps its conditions, its tuple and its place in the index.
+     * Removes one version. What the removal moves is reported in `warnings`. A variant's last
+     * remaining version cannot be removed — delete the variant instead.
      * 
      */
     'delete'(
@@ -14490,6 +21460,51 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$DeleteConditionalVariantVersion.Responses.$200>
+  }
+  ['/v1/conditional-pricing/{slug}/variants:batchUpsert']: {
+    /**
+     * $batchUpsertConditionalVariants - $batchUpsertConditionalVariants
+     * 
+     * Writes up to 100 variants or versions in one call. Each item names its own entity, so one
+     * call can span a tariff hierarchy, and addresses a variant by condition tuple rather than by
+     * id — the id it created or found is on the result entry.
+     * 
+     * Each item's outcome is derived from what is stored: an unknown tuple is `variant_created`, a
+     * known tuple with no version at the item's `valid_from` is `version_created`, an existing
+     * version there is `updated`, and a write matching what is stored is `skipped`. An item
+     * without `valid_from` is a last-write-wins write with no `skipped` detection.
+     * 
+     * Items addressing the same `(entity_id, conditions)` apply in array order; the rest run in
+     * parallel. No cross-item rollback, and no `_revision` guard.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.$BatchUpsertConditionalVariants.PathParameters> | null,
+      data?: Paths.$BatchUpsertConditionalVariants.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$BatchUpsertConditionalVariants.Responses.$200>
+  }
+  ['/v1/conditional-pricing/{slug}/variants:batchDelete']: {
+    /**
+     * $batchDeleteConditionalVariants - $batchDeleteConditionalVariants
+     * 
+     * Removes up to 100 variants or versions in one call. An item carrying `valid_from` removes
+     * that version; one without it removes the whole variant.
+     * 
+     * Each item addresses its variant by `variant_id` beside its `entity_id`, or by the condition
+     * tuple it pins, never both. Use ids once a condition has left the schema, since its tuple can
+     * no longer be canonicalized.
+     * 
+     * Items addressing the same variant apply in array order, resolved to ids first; the rest run
+     * in parallel. An item addressing a missing variant or version is `skipped`, and the call is
+     * safe to send again.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.$BatchDeleteConditionalVariants.PathParameters> | null,
+      data?: Paths.$BatchDeleteConditionalVariants.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$BatchDeleteConditionalVariants.Responses.$200>
   }
 }
 
@@ -14514,6 +21529,20 @@ export type BasePriceItemCommon = Components.Schemas.BasePriceItemCommon;
 export type BasePriceItemDto = Components.Schemas.BasePriceItemDto;
 export type BasicAuthCredentials = Components.Schemas.BasicAuthCredentials;
 export type BasicAuthIntegration = Components.Schemas.BasicAuthIntegration;
+export type BatchDeleteByConditions = Components.Schemas.BatchDeleteByConditions;
+export type BatchDeleteByVariantId = Components.Schemas.BatchDeleteByVariantId;
+export type BatchDeleteCounts = Components.Schemas.BatchDeleteCounts;
+export type BatchDeleteItem = Components.Schemas.BatchDeleteItem;
+export type BatchDeleteOutcome = Components.Schemas.BatchDeleteOutcome;
+export type BatchDeleteResult = Components.Schemas.BatchDeleteResult;
+export type BatchDeleteResultEntry = Components.Schemas.BatchDeleteResultEntry;
+export type BatchDeleteVariantsRequest = Components.Schemas.BatchDeleteVariantsRequest;
+export type BatchUpsertCounts = Components.Schemas.BatchUpsertCounts;
+export type BatchUpsertItem = Components.Schemas.BatchUpsertItem;
+export type BatchUpsertOutcome = Components.Schemas.BatchUpsertOutcome;
+export type BatchUpsertResult = Components.Schemas.BatchUpsertResult;
+export type BatchUpsertResultEntry = Components.Schemas.BatchUpsertResultEntry;
+export type BatchUpsertVariantsRequest = Components.Schemas.BatchUpsertVariantsRequest;
 export type BillingPeriod = Components.Schemas.BillingPeriod;
 export type CartDto = Components.Schemas.CartDto;
 export type CashbackAmount = Components.Schemas.CashbackAmount;
@@ -14579,10 +21608,13 @@ export type GasMarketAreaDetails = Components.Schemas.GasMarketAreaDetails;
 export type HistoricMarketPriceRecord = Components.Schemas.HistoricMarketPriceRecord;
 export type HistoricMarketPricesResult = Components.Schemas.HistoricMarketPricesResult;
 export type HydratedCompositePrice = Components.Schemas.HydratedCompositePrice;
+export type InertOverride = Components.Schemas.InertOverride;
+export type InertOverrideReason = Components.Schemas.InertOverrideReason;
 export type IntegrationAuthCredentials = Components.Schemas.IntegrationAuthCredentials;
 export type IntegrationCredentialsResult = Components.Schemas.IntegrationCredentialsResult;
 export type IntegrationId = Components.Schemas.IntegrationId;
 export type JourneyContext = Components.Schemas.JourneyContext;
+export type ListVariantsRequest = Components.Schemas.ListVariantsRequest;
 export type MarketParticipant = Components.Schemas.MarketParticipant;
 export type MarkupPricingModel = Components.Schemas.MarkupPricingModel;
 export type MetaData = Components.Schemas.MetaData;
@@ -14601,6 +21633,7 @@ export type OrderStatus = Components.Schemas.OrderStatus;
 export type PatchVersionRequest = Components.Schemas.PatchVersionRequest;
 export type PaymentMethod = Components.Schemas.PaymentMethod;
 export type PinnedConditions = Components.Schemas.PinnedConditions;
+export type PinnedResolveOptions = Components.Schemas.PinnedResolveOptions;
 export type PortalContext = Components.Schemas.PortalContext;
 export type PowerMarketAreaDetails = Components.Schemas.PowerMarketAreaDetails;
 export type PowerMeterType = Components.Schemas.PowerMeterType;
@@ -14635,6 +21668,9 @@ export type RecurrenceAmountDto = Components.Schemas.RecurrenceAmountDto;
 export type RecurrenceAmountWithTax = Components.Schemas.RecurrenceAmountWithTax;
 export type RedeemedPromo = Components.Schemas.RedeemedPromo;
 export type ReplaceVersionRequest = Components.Schemas.ReplaceVersionRequest;
+export type ReportedError = Components.Schemas.ReportedError;
+export type ResolveByContextRequest = Components.Schemas.ResolveByContextRequest;
+export type ResolveByPinRequest = Components.Schemas.ResolveByPinRequest;
 export type ResolveConditionalEntityRequest = Components.Schemas.ResolveConditionalEntityRequest;
 export type ResolveContext = Components.Schemas.ResolveContext;
 export type ResolveOptions = Components.Schemas.ResolveOptions;
@@ -14666,9 +21702,18 @@ export type TotalDetails = Components.Schemas.TotalDetails;
 export type TypeGetAg = Components.Schemas.TypeGetAg;
 export type ValidateAvailabilityFileError = Components.Schemas.ValidateAvailabilityFileError;
 export type ValidateAvailabilityFileResult = Components.Schemas.ValidateAvailabilityFileResult;
+export type VariantConditionFilter = Components.Schemas.VariantConditionFilter;
 export type VariantConditions = Components.Schemas.VariantConditions;
+export type VariantList = Components.Schemas.VariantList;
+export type VariantListRow = Components.Schemas.VariantListRow;
+export type VariantTree = Components.Schemas.VariantTree;
+export type VariantTreeRequest = Components.Schemas.VariantTreeRequest;
+export type VariantTreeRow = Components.Schemas.VariantTreeRow;
+export type VariantTreeRowStatus = Components.Schemas.VariantTreeRowStatus;
 export type VariantValues = Components.Schemas.VariantValues;
 export type VariantVersion = Components.Schemas.VariantVersion;
-export type VariantWriteWarning = Components.Schemas.VariantWriteWarning;
-export type VersionWriteWarning = Components.Schemas.VersionWriteWarning;
+export type VariantVersionList = Components.Schemas.VariantVersionList;
+export type VariantVersionSnapshot = Components.Schemas.VariantVersionSnapshot;
+export type VersionMoved = Components.Schemas.VersionMoved;
+export type WriteWarning = Components.Schemas.WriteWarning;
 export type WrittenVariantVersion = Components.Schemas.WrittenVariantVersion;

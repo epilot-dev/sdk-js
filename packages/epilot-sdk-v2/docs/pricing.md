@@ -68,15 +68,20 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`$getConditionSets`](#$getconditionsets)
 - [`$resolveConditionalEntity`](#$resolveconditionalentity)
 - [`$createConditionalVariant`](#$createconditionalvariant)
+- [`$listConditionalVariants`](#$listconditionalvariants)
+- [`$getConditionalVariantTree`](#$getconditionalvarianttree)
 - [`$getActiveConditionalVariantVersion`](#$getactiveconditionalvariantversion)
 - [`$replaceActiveConditionalVariantVersion`](#$replaceactiveconditionalvariantversion)
 - [`$patchActiveConditionalVariantVersion`](#$patchactiveconditionalvariantversion)
 - [`$deleteConditionalVariant`](#$deleteconditionalvariant)
+- [`$listConditionalVariantVersions`](#$listconditionalvariantversions)
 - [`$appendConditionalVariantVersion`](#$appendconditionalvariantversion)
 - [`$getConditionalVariantVersion`](#$getconditionalvariantversion)
 - [`$replaceConditionalVariantVersion`](#$replaceconditionalvariantversion)
 - [`$patchConditionalVariantVersion`](#$patchconditionalvariantversion)
 - [`$deleteConditionalVariantVersion`](#$deleteconditionalvariantversion)
+- [`$batchUpsertConditionalVariants`](#$batchupsertconditionalvariants)
+- [`$batchDeleteConditionalVariants`](#$batchdeleteconditionalvariants)
 
 **Schemas**
 - [`IntegrationId`](#integrationid)
@@ -87,8 +92,11 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`ConditionSetCatalog`](#conditionsetcatalog)
 - [`ConditionalPricingErrorCode`](#conditionalpricingerrorcode)
 - [`ResolveConditionalEntityRequest`](#resolveconditionalentityrequest)
+- [`ResolveByContextRequest`](#resolvebycontextrequest)
+- [`ResolveByPinRequest`](#resolvebypinrequest)
 - [`ResolveContext`](#resolvecontext)
 - [`ResolveOptions`](#resolveoptions)
+- [`PinnedResolveOptions`](#pinnedresolveoptions)
 - [`ResolvedVariants`](#resolvedvariants)
 - [`ResolvedVariant`](#resolvedvariant)
 - [`CreateVariantRequest`](#createvariantrequest)
@@ -96,16 +104,43 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`PinnedConditions`](#pinnedconditions)
 - [`VariantValues`](#variantvalues)
 - [`CreatedVariant`](#createdvariant)
-- [`VariantWriteWarning`](#variantwritewarning)
+- [`WriteWarning`](#writewarning)
+- [`VersionMoved`](#versionmoved)
+- [`InertOverride`](#inertoverride)
+- [`InertOverrideReason`](#inertoverridereason)
 - [`DeletedVariant`](#deletedvariant)
 - [`VariantVersion`](#variantversion)
 - [`WrittenVariantVersion`](#writtenvariantversion)
 - [`DeletedVariantVersion`](#deletedvariantversion)
-- [`VersionWriteWarning`](#versionwritewarning)
 - [`AppendVersionRequest`](#appendversionrequest)
 - [`ReplaceVersionRequest`](#replaceversionrequest)
 - [`PatchVersionRequest`](#patchversionrequest)
+- [`ListVariantsRequest`](#listvariantsrequest)
+- [`VariantTreeRequest`](#varianttreerequest)
+- [`VariantConditionFilter`](#variantconditionfilter)
+- [`VariantList`](#variantlist)
+- [`VariantListRow`](#variantlistrow)
+- [`VariantTree`](#varianttree)
+- [`VariantTreeRow`](#varianttreerow)
+- [`VariantTreeRowStatus`](#varianttreerowstatus)
+- [`VariantVersionSnapshot`](#variantversionsnapshot)
+- [`VariantVersionList`](#variantversionlist)
+- [`BatchUpsertVariantsRequest`](#batchupsertvariantsrequest)
+- [`BatchUpsertItem`](#batchupsertitem)
+- [`BatchDeleteVariantsRequest`](#batchdeletevariantsrequest)
+- [`BatchDeleteItem`](#batchdeleteitem)
+- [`BatchDeleteByVariantId`](#batchdeletebyvariantid)
+- [`BatchDeleteByConditions`](#batchdeletebyconditions)
+- [`BatchUpsertResult`](#batchupsertresult)
+- [`BatchDeleteResult`](#batchdeleteresult)
+- [`BatchUpsertOutcome`](#batchupsertoutcome)
+- [`BatchDeleteOutcome`](#batchdeleteoutcome)
+- [`BatchUpsertCounts`](#batchupsertcounts)
+- [`BatchDeleteCounts`](#batchdeletecounts)
+- [`BatchUpsertResultEntry`](#batchupsertresultentry)
+- [`BatchDeleteResultEntry`](#batchdeleteresultentry)
 - [`Error`](#error)
+- [`ReportedError`](#reportederror)
 - [`ConditionalPricingError`](#conditionalpricingerror)
 - [`Product`](#product)
 - [`Opportunity`](#opportunity)
@@ -1795,9 +1830,7 @@ const { data } = await client.$productRecommendations(
 
 ### `$getConditionSets`
 
-Returns the condition sets built in for one conditional entity type: the situations a
-conditional Product, Price or Coupon is commonly varied by, ready to be copied into that
-schema's `conditions` arr
+Returns the condition sets built in for one conditional entity type, ready to copy into that schema's `conditions` array. Read-only, and the same for every organization.
 
 `GET /v1/conditional-pricing/{slug}/condition-sets`
 
@@ -1819,11 +1852,17 @@ const { data } = await client.$getConditionSets({
       "description": "string",
       "conditions": [
         {
+          "id": "d5839b94-ba20-4225-a78e-76951d352bd6",
           "name": "postal_code",
           "label": "Postal Code",
           "type": "string",
-          "options": ["private", "commercial"],
-          "allow_any": false,
+          "options": [
+            "private",
+            {
+              "value": "commercial",
+              "title": "Commercial customers"
+            }
+          ],
           "format": "zipcode"
         }
       ]
@@ -1838,8 +1877,8 @@ const { data } = await client.$getConditionSets({
 
 ### `$resolveConditionalEntity`
 
-Resolves which of a conditional entity's variants apply to a situation, and returns each one
-composed: the base entity overlaid with the values of the version in effect at `as_of`.
+Returns the variants of one conditional entity that apply, each composed: the base entity
+overlaid with the version in effect at `as_of`.
 
 `POST /v1/conditional-pricing:resolve`
 
@@ -1857,7 +1896,8 @@ const { data } = await client.$resolveConditionalEntity(
     },
     as_of: '2027-03-15T00:00:00Z',
     options: {
-      resolve_one: false
+      resolve_one: false,
+      hydrate: false
     }
   },
 )
@@ -1876,7 +1916,13 @@ const { data } = await client.$resolveConditionalEntity(
       "_conditions": {
         "postal_code": "46045",
         "default": false
-      }
+      },
+      "_inert_overrides": [
+        {
+          "attribute": "unit_amount",
+          "reason": "ATTRIBUTE_NOT_OVERRIDABLE"
+        }
+      ]
     }
   ]
 }
@@ -1888,9 +1934,7 @@ const { data } = await client.$resolveConditionalEntity(
 
 ### `$createConditionalVariant`
 
-Creates one variant of a conditional entity, together with the first version carrying its
-values. Never two calls: a variant that existed without a version would be an entity holding
-a condition tuple
+Creates one variant together with its first version.
 
 `POST /v1/conditional-pricing/{slug}/entities/{entity_id}/variants`
 
@@ -1938,8 +1982,10 @@ const { data } = await client.$createConditionalVariant(
     {
       "code": "VARIANT_COUNT_APPROACHING_CAP",
       "message": "string",
-      "variant_count": 0,
-      "cap": 0
+      "details": {
+        "variant_count": 0,
+        "cap": 0
+      }
     }
   ]
 }
@@ -1949,10 +1995,137 @@ const { data } = await client.$createConditionalVariant(
 
 ---
 
+### `$listConditionalVariants`
+
+Lists a conditional entity's variants and the conditions each one pins. A `POST` because the
+condition filter is a structured object; nothing is written. The body is required, so send
+`{}` for the fir
+
+`POST /v1/conditional-pricing/{slug}/entities/{entity_id}/variants:list`
+
+```ts
+const { data } = await client.$listConditionalVariants(
+  {
+    slug: 'example',
+    entity_id: 'example',
+  },
+  {
+    conditions: {
+      postal_code: '46045',
+      consumption: {
+        lt: 5000
+      }
+    },
+    search: '460',
+    sort: 'conditions.postal_code:asc',
+    from: 0,
+    size: 10,
+    cursor: 'eyJmcm9tIjoyNSwibGlzdGluZyI6IjNmOWMxZTJhIn0'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "hits": 8128,
+  "results": [
+    {
+      "variant_id": "var-46045",
+      "entity_id": "price-sp26d1yo",
+      "schema": "product",
+      "conditions": {
+        "postal_code": "46045",
+        "default": false
+      }
+    }
+  ],
+  "next": "eyJmcm9tIjoyNSwibGlzdGluZyI6IjNmOWMxZTJhIn0"
+}
+```
+
+</details>
+
+---
+
+### `$getConditionalVariantTree`
+
+The variants list, each row carrying the version in effect at `as_of` and a `status` saying
+whether that version is `active` or still `scheduled`.
+
+`POST /v1/conditional-pricing/{slug}/entities/{entity_id}/variants:tree`
+
+```ts
+const { data } = await client.$getConditionalVariantTree(
+  {
+    slug: 'example',
+    entity_id: 'example',
+  },
+  {
+    conditions: {
+      postal_code: '46045',
+      consumption: {
+        lt: 5000
+      }
+    },
+    search: '460',
+    sort: 'conditions.postal_code:asc',
+    from: 0,
+    size: 10,
+    cursor: 'eyJmcm9tIjoyNSwibGlzdGluZyI6IjNmOWMxZTJhIn0',
+    as_of: '2027-03-15T00:00:00Z'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "hits": 8128,
+  "results": [
+    {
+      "variant_id": "var-46045",
+      "entity_id": "price-sp26d1yo",
+      "schema": "product",
+      "conditions": {
+        "postal_code": "46045",
+        "default": false
+      },
+      "status": "active",
+      "version": {
+        "variant_id": "var-46045",
+        "entity_id": "price-sp26d1yo",
+        "schema": "product",
+        "conditions": {
+          "postal_code": "46045",
+          "default": false
+        },
+        "valid_from": "2027-01-01T00:00:00.000Z",
+        "values": {
+          "unit_amount": 2499,
+          "unit_amount_decimal": "24.99"
+        },
+        "_created_at": "string",
+        "_updated_at": "string"
+      }
+    }
+  ],
+  "next": "eyJmcm9tIjoyNSwibGlzdGluZyI6IjNmOWMxZTJhIn0"
+}
+```
+
+</details>
+
+---
+
 ### `$getActiveConditionalVariantVersion`
 
-Returns the version of this variant that is currently in effect — the one with the latest
-`valid_from` at or before now.
+Returns the version of this variant in effect now — the latest `valid_from` at or before now
+— with the `_revision` a write to it must carry.
 
 `GET /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
 
@@ -1993,7 +2166,9 @@ const { data } = await client.$getActiveConditionalVariantVersion({
 
 ### `$replaceActiveConditionalVariantVersion`
 
-Replaces the values of the version currently in effect, wholesale.
+Replaces the values of the version in effect. The body is the complete set of overrides: an
+overridable attribute absent from it stops being overridden, and one the variant may not
+override keeps its 
 
 `PUT /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
 
@@ -2040,10 +2215,12 @@ const { data } = await client.$replaceActiveConditionalVariantVersion(
   "_revision": 3,
   "warnings": [
     {
-      "code": "ACTIVE_VERSION_REPLACED",
+      "code": "VARIANT_COUNT_APPROACHING_CAP",
       "message": "string",
-      "valid_from": "2026-08-01T00:00:00.000Z",
-      "active_valid_from": "2026-01-01T00:00:00.000Z"
+      "details": {
+        "variant_count": 0,
+        "cap": 0
+      }
     }
   ]
 }
@@ -2055,7 +2232,8 @@ const { data } = await client.$replaceActiveConditionalVariantVersion(
 
 ### `$patchActiveConditionalVariantVersion`
 
-Changes only the fields it names on the version currently in effect.
+Changes only the fields it names on the version in effect. `null` sets a value rather than
+removing an override; use the replace operation to remove one.
 
 `PATCH /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
 
@@ -2102,10 +2280,12 @@ const { data } = await client.$patchActiveConditionalVariantVersion(
   "_revision": 3,
   "warnings": [
     {
-      "code": "ACTIVE_VERSION_REPLACED",
+      "code": "VARIANT_COUNT_APPROACHING_CAP",
       "message": "string",
-      "valid_from": "2026-08-01T00:00:00.000Z",
-      "active_valid_from": "2026-01-01T00:00:00.000Z"
+      "details": {
+        "variant_count": 0,
+        "cap": 0
+      }
     }
   ]
 }
@@ -2117,8 +2297,8 @@ const { data } = await client.$patchActiveConditionalVariantVersion(
 
 ### `$deleteConditionalVariant`
 
-Removes one variant of a conditional entity: the condition tuple it holds, its registration
-in the search index, and every version it accumulated.
+Removes one variant: its condition tuple, its index entry and all its versions. The tuple
+becomes reusable, and an interrupted delete is safe to send again.
 
 `DELETE /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
 
@@ -2147,9 +2327,60 @@ const { data } = await client.$deleteConditionalVariant({
 
 ---
 
+### `$listConditionalVariantVersions`
+
+Lists one variant's versions. Cursor paging only: a page may be short or empty and still
+carry a `next`, so page until `next` is absent. A cursor is bound to one variant and one
+`order`.
+
+`GET /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions`
+
+```ts
+const { data } = await client.$listConditionalVariantVersions({
+  slug: 'example',
+  entity_id: 'example',
+  variant_id: 'example',
+  limit: 1,
+  order: 'example',
+  cursor: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "variant_id": "var-46045",
+      "entity_id": "price-sp26d1yo",
+      "schema": "product",
+      "conditions": {
+        "postal_code": "46045",
+        "default": false
+      },
+      "valid_from": "2027-01-01T00:00:00.000Z",
+      "values": {
+        "unit_amount": 2499,
+        "unit_amount_decimal": "24.99"
+      },
+      "_created_at": "string",
+      "_updated_at": "string"
+    }
+  ],
+  "next": "eyJzayI6IlYjcHJpY2Utc3AyNmQxeW8jdmFyLTQ2MDQ1IzIwMjYtMDEtMDFUMDA6MDA6MDAuMDAwWiIsIm9yZGVyIjoiYXNjIn0"
+}
+```
+
+</details>
+
+---
+
 ### `$appendConditionalVariantVersion`
 
-Appends a version to a variant: a new set of values taking effect at its own instant.
+Appends a version taking effect at its own instant. The version in effect at any instant is
+the one with the latest `valid_from` at or before it; a future one is staged until its date.
 
 `POST /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions`
 
@@ -2195,10 +2426,12 @@ const { data } = await client.$appendConditionalVariantVersion(
   "_revision": 3,
   "warnings": [
     {
-      "code": "ACTIVE_VERSION_REPLACED",
+      "code": "VARIANT_COUNT_APPROACHING_CAP",
       "message": "string",
-      "valid_from": "2026-08-01T00:00:00.000Z",
-      "active_valid_from": "2026-01-01T00:00:00.000Z"
+      "details": {
+        "variant_count": 0,
+        "cap": 0
+      }
     }
   ]
 }
@@ -2210,8 +2443,7 @@ const { data } = await client.$appendConditionalVariantVersion(
 
 ### `$getConditionalVariantVersion`
 
-Returns one specific version of a variant, by the instant it takes effect — what a form editing
-that version loads.
+Returns one version by the instant it takes effect. Exact, never nearest.
 
 `GET /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
 
@@ -2253,7 +2485,8 @@ const { data } = await client.$getConditionalVariantVersion({
 
 ### `$replaceConditionalVariantVersion`
 
-Replaces one version's values wholesale, addressed by its `valid_from`.
+Replaces one version's values, whatever its date. Attributes the variant may not override
+keep their stored value. Writing a superseded version is reported in `warnings`.
 
 `PUT /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
 
@@ -2301,10 +2534,12 @@ const { data } = await client.$replaceConditionalVariantVersion(
   "_revision": 3,
   "warnings": [
     {
-      "code": "ACTIVE_VERSION_REPLACED",
+      "code": "VARIANT_COUNT_APPROACHING_CAP",
       "message": "string",
-      "valid_from": "2026-08-01T00:00:00.000Z",
-      "active_valid_from": "2026-01-01T00:00:00.000Z"
+      "details": {
+        "variant_count": 0,
+        "cap": 0
+      }
     }
   ]
 }
@@ -2316,7 +2551,7 @@ const { data } = await client.$replaceConditionalVariantVersion(
 
 ### `$patchConditionalVariantVersion`
 
-Changes only the fields it names on one version, addressed by its `valid_from`.
+Changes only the fields it names on one version.
 
 `PATCH /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
 
@@ -2364,10 +2599,12 @@ const { data } = await client.$patchConditionalVariantVersion(
   "_revision": 3,
   "warnings": [
     {
-      "code": "ACTIVE_VERSION_REPLACED",
+      "code": "VARIANT_COUNT_APPROACHING_CAP",
       "message": "string",
-      "valid_from": "2026-08-01T00:00:00.000Z",
-      "active_valid_from": "2026-01-01T00:00:00.000Z"
+      "details": {
+        "variant_count": 0,
+        "cap": 0
+      }
     }
   ]
 }
@@ -2379,7 +2616,8 @@ const { data } = await client.$patchConditionalVariantVersion(
 
 ### `$deleteConditionalVariantVersion`
 
-Removes one version of a variant.
+Removes one version. What the removal moves is reported in `warnings`. A variant's last
+remaining version cannot be removed — delete the variant instead.
 
 `DELETE /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
 
@@ -2404,10 +2642,156 @@ const { data } = await client.$deleteConditionalVariantVersion({
   "valid_from": "2027-01-01T00:00:00.000Z",
   "warnings": [
     {
-      "code": "ACTIVE_VERSION_REPLACED",
+      "code": "VARIANT_COUNT_APPROACHING_CAP",
       "message": "string",
-      "valid_from": "2026-08-01T00:00:00.000Z",
-      "active_valid_from": "2026-01-01T00:00:00.000Z"
+      "details": {
+        "variant_count": 0,
+        "cap": 0
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$batchUpsertConditionalVariants`
+
+Writes up to 100 variants or versions in one call. Each item names its own entity, so one
+call can span a tariff hierarchy, and addresses a variant by condition tuple rather than by
+id — the id it cre
+
+`POST /v1/conditional-pricing/{slug}/variants:batchUpsert`
+
+```ts
+const { data } = await client.$batchUpsertConditionalVariants(
+  {
+    slug: 'example',
+  },
+  {
+    correlation_id: 'tariff-refresh-2027-01',
+    items: [
+      {
+        entity_id: 'price-sp26d1yo',
+        conditions: {
+          postal_code: '46045'
+        },
+        default: false,
+        valid_from: '2027-01-01T00:00:00Z',
+        values: {
+          unit_amount: 2499,
+          unit_amount_decimal: '24.99'
+        }
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "correlation_id": "tariff-refresh-2027-01",
+  "counts": {
+    "variant_created": 1,
+    "version_created": 1,
+    "updated": 1,
+    "skipped": 1,
+    "error": 1
+  },
+  "results": [
+    {
+      "outcome": "variant_created",
+      "entity_id": "price-sp26d1yo",
+      "variant_id": "var-46045",
+      "valid_from": "2027-01-01T00:00:00.000Z",
+      "warnings": [
+        {
+          "code": "VARIANT_COUNT_APPROACHING_CAP",
+          "message": "string",
+          "details": {
+            "variant_count": 0,
+            "cap": 0
+          }
+        }
+      ],
+      "error": {
+        "code": "SCHEMA_NOT_FOUND",
+        "details": {
+          "schema": "price"
+        }
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$batchDeleteConditionalVariants`
+
+Removes up to 100 variants or versions in one call. An item carrying `valid_from` removes
+that version; one without it removes the whole variant.
+
+`POST /v1/conditional-pricing/{slug}/variants:batchDelete`
+
+```ts
+const { data } = await client.$batchDeleteConditionalVariants(
+  {
+    slug: 'example',
+  },
+  {
+    correlation_id: 'postal-code-cleanup-2026-09',
+    items: [
+      {
+        entity_id: 'price-sp26d1yo',
+        variant_id: 'var-46045',
+        valid_from: '2027-01-01T00:00:00Z'
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "correlation_id": "postal-code-cleanup-2026-09",
+  "counts": {
+    "deleted": 1,
+    "skipped": 1,
+    "error": 1
+  },
+  "results": [
+    {
+      "outcome": "deleted",
+      "entity_id": "price-sp26d1yo",
+      "variant_id": "var-46045",
+      "valid_from": "2027-01-01T00:00:00.000Z",
+      "warnings": [
+        {
+          "code": "VARIANT_COUNT_APPROACHING_CAP",
+          "message": "string",
+          "details": {
+            "variant_count": 0,
+            "cap": 0
+          }
+        }
+      ],
+      "error": {
+        "code": "SCHEMA_NOT_FOUND",
+        "details": {
+          "schema": "price"
+        }
+      }
     }
   ]
 }
@@ -2427,9 +2811,7 @@ type IntegrationId = "getag" | "external-catalog"
 
 ### `ConditionalEntitySlug`
 
-Schema slug of an entity type that can be conditional — the `{slug}` of every
-conditional-pricing route.
-
+Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route.
 
 ```ts
 type ConditionalEntitySlug = "product" | "price" | "coupon"
@@ -2437,13 +2819,13 @@ type ConditionalEntitySlug = "product" | "price" | "coupon"
 
 ### `ConditionType`
 
-The kind of value a condition holds, which decides how a variant's pinned value is matched
-against a resolve context.
+The kind of value a condition holds, which decides how a pinned value is matched against a
+resolve context.
 
 - `string`: an arbitrary string, matched exactly and case-sensitively
 - `number`: a numeric value
 - `date`: a single date
-- `daterange`: a window with a from and an until timestamp;
+- `daterange`: a window with a from and an until timestamp; either en
 
 ```ts
 type ConditionType = "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
@@ -2451,12 +2833,11 @@ type ConditionType = "string" | "number" | "date" | "daterange" | "boolean" | "s
 
 ### `ConditionDefinition`
 
-One condition dimension, in the shape a schema's `conditions` array holds it — copy it in
-verbatim.
-
+One condition dimension, in the shape a schema's `conditions` array holds it — copy it in verbatim.
 
 ```ts
 type ConditionDefinition = {
+  id: string // uuid
   name: string
   label: string
   type: "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
@@ -2464,8 +2845,7 @@ type ConditionDefinition = {
     value: string
     title?: string
   }>
-  allow_any?: boolean
-  format?: "zipcode" | "zipcode + town"
+  format?: "zipcode" | "zipcode_town"
 }
 ```
 
@@ -2479,6 +2859,7 @@ type ConditionSet = {
   label: string
   description: string
   conditions: Array<{
+    id: string // uuid
     name: string
     label: string
     type: "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
@@ -2486,8 +2867,7 @@ type ConditionSet = {
       value: { ... }
       title?: { ... }
     }>
-    allow_any?: boolean
-    format?: "zipcode" | "zipcode + town"
+    format?: "zipcode" | "zipcode_town"
   }>
 }
 ```
@@ -2501,11 +2881,11 @@ type ConditionSetCatalog = {
     label: string
     description: string
     conditions: Array<{
+      id: { ... }
       name: { ... }
       label: { ... }
       type: { ... }
       options?: { ... }
-      allow_any?: { ... }
       format?: { ... }
     }>
   }>
@@ -2514,37 +2894,88 @@ type ConditionSetCatalog = {
 
 ### `ConditionalPricingErrorCode`
 
-Machine-readable failure mode of a conditional-pricing operation, allowing clients
-to branch on the kind of failure instead of parsing the error message.
+Machine-readable failure mode of a conditional-pricing operation, so a client can branch on
+the kind of failure instead of parsing the message. A `400` is about the request; a `409` is
+about what is already stored. Refusals raised by request validation carry no `code` at all.
 
-- `NOT_FOUND` (404): the addressed entity, variant or version does not exist
-- `AMBIGUOUS_RESOLUTION` (409): several variants match the given con
+- `SCHEMA_NOT_FOUND` (
 
 ```ts
-type ConditionalPricingErrorCode = "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT"
+type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE"
 ```
 
 ### `ResolveConditionalEntityRequest`
+
+A resolve names one conditional entity and selects its variants either by `context` or by
+`variant_id`, never both. `context: {}` matches nothing and so returns the `default`
+variant, which is how to ask for it without knowing its id.
+
 
 ```ts
 type ResolveConditionalEntityRequest = {
   schema: "product" | "price" | "coupon"
   entity_id: string
-  context?: Record<string, unknown>
+  context: Record<string, unknown>
   as_of?: string
   options?: {
     resolve_one?: boolean
+    hydrate?: boolean
+  }
+} | {
+  schema: "product" | "price" | "coupon"
+  entity_id: string
+  variant_id: string
+  as_of?: string
+  options?: {
+    hydrate?: boolean
+  }
+}
+```
+
+### `ResolveByContextRequest`
+
+Resolve by matching a situation: which of this entity's variants apply to `context`, each
+composed with the version in effect at `as_of`.
+
+
+```ts
+type ResolveByContextRequest = {
+  schema: "product" | "price" | "coupon"
+  entity_id: string
+  context: Record<string, unknown>
+  as_of?: string
+  options?: {
+    resolve_one?: boolean
+    hydrate?: boolean
+  }
+}
+```
+
+### `ResolveByPinRequest`
+
+Resolve by naming a variant: compose this one, whatever a context would have matched.
+
+```ts
+type ResolveByPinRequest = {
+  schema: "product" | "price" | "coupon"
+  entity_id: string
+  variant_id: string
+  as_of?: string
+  options?: {
+    hydrate?: boolean
   }
 }
 ```
 
 ### `ResolveContext`
 
-The situation to resolve for: a flat map keyed by condition name, as the entity's schema
-declares them. A condition left out of the map is not a wildcard — it matches only variants
-that leave that condition unpinned.
+The situation to resolve for: a flat map keyed by condition name. A condition left out
+matches only variants that leave it unpinned; an empty map therefore returns the `default`
+variant.
 
-Each value is either an exact value, typed by its condition, or a single-operator 
+Each value is an exact value, typed by its condition, or a single-operator predicate:
+
+- `{ "lt": v }`, `{ "lte"
 
 ```ts
 type ResolveContext = Record<string, unknown>
@@ -2552,9 +2983,24 @@ type ResolveContext = Record<string, unknown>
 
 ### `ResolveOptions`
 
+The options a context resolve accepts. A pin takes `PinnedResolveOptions` instead.
+
 ```ts
 type ResolveOptions = {
   resolve_one?: boolean
+  hydrate?: boolean
+}
+```
+
+### `PinnedResolveOptions`
+
+The options a pinned resolve accepts — `hydrate` and nothing else. `resolve_one` has nothing
+to change where the answer is one result or a 404, so a body sending it is a `400`.
+
+
+```ts
+type PinnedResolveOptions = {
+  hydrate?: boolean
 }
 ```
 
@@ -2569,15 +3015,18 @@ type ResolvedVariants = {
     _conditions: {
       default: { ... }
     }
+    _inert_overrides: Array<{
+      attribute: { ... }
+      reason: { ... }
+    }>
   }>
 }
 ```
 
 ### `ResolvedVariant`
 
-The entity as this variant leaves it — every attribute of a plain entity read, with the
-applicable version's overrides applied — plus the discriminators saying where the numbers
-came from.
+The entity as this variant leaves it — every attribute of a plain entity read with the
+applicable version's overrides applied — plus the discriminators below.
 
 
 ```ts
@@ -2588,6 +3037,10 @@ type ResolvedVariant = {
   _conditions: {
     default: boolean
   }
+  _inert_overrides: Array<{
+    attribute: string
+    reason: "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_READONLY" | "ATTRIBUTE_HIDDEN" | "ATTRIBUTE_COMPUTED" | "ATTRIBUTE_UNDECLARED" | "TYPE_NOT_OVERRIDABLE" | "CAPABILITY_NOT_OVERRIDABLE"
+  }>
 }
 ```
 
@@ -2607,8 +3060,6 @@ type CreateVariantRequest = {
 A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
 boolean `default` saying whether this is the entity's fallback.
 
-`default` is always present and always a boolean, so a client can branch on "did I get the
-fallback?" without knowing how one is stored. The rese
 
 ```ts
 type VariantConditions = {
@@ -2618,10 +3069,12 @@ type VariantConditions = {
 
 ### `PinnedConditions`
 
-The situation this variant applies to: a flat map keyed by condition name, as the entity's
-schema declares them. A condition left out is a wildcard — the variant applies whatever the
-context says for it, which is what makes adding a condition to a schema non-breaking for the
-variants that already ex
+The situation this variant applies to: a flat map keyed by condition name. A condition left
+out is a wildcard, which is what makes adding a condition to a schema non-breaking for
+existing variants.
+
+Exact values only; predicates belong to reads. Values are stored canonicalized for their
+type: a `dat
 
 ```ts
 type PinnedConditions = Record<string, unknown>
@@ -2629,11 +3082,11 @@ type PinnedConditions = Record<string, unknown>
 
 ### `VariantValues`
 
-The attribute values this version overrides on the base entity, keyed by attribute name.
+The values this version overrides on the base entity, keyed by entity field name.
 
-Only attributes currently declaring `overridable_attribute` are applied. Metadata fields
-(anything underscore-prefixed), readonly attributes, hidden attributes and non-overridable
-attributes present here are ig
+A field is overridable if its attribute declares `overridable_attribute` — which readonly,
+hidden, computed and metadata fields, and types no variant may override, cannot be given —
+or if a capability declaring `overr
 
 ```ts
 type VariantValues = Record<string, unknown>
@@ -2657,21 +3110,109 @@ type CreatedVariant = {
   warnings: Array<{
     code: "VARIANT_COUNT_APPROACHING_CAP"
     message: string
-    variant_count: number
-    cap: number
+    details: {
+      variant_count: { ... }
+      cap: { ... }
+    }
+  } | {
+    code: "ACTIVE_VERSION_CHANGED"
+    message: string
+    details: {
+      valid_from: { ... }
+      active_valid_from?: { ... }
+    }
+  } | {
+    code: "SUPERSEDED_VERSION_WRITTEN"
+    message: string
+    details: {
+      valid_from: { ... }
+      active_valid_from?: { ... }
+    }
+  } | {
+    code: "ATTRIBUTES_NOT_APPLIED"
+    message: string
+    details: {
+      attributes: { ... }
+    }
   }>
 }
 ```
 
-### `VariantWriteWarning`
+### `WriteWarning`
+
+Something worth knowing that did not stop a write. One vocabulary for every write; `details`
+is typed per `code`, and a write raises each code at most once.
+
 
 ```ts
-type VariantWriteWarning = {
+type WriteWarning = {
   code: "VARIANT_COUNT_APPROACHING_CAP"
   message: string
-  variant_count: number
-  cap: number
+  details: {
+    variant_count: number
+    cap: number
+  }
+} | {
+  code: "ACTIVE_VERSION_CHANGED"
+  message: string
+  details: {
+    valid_from: string
+    active_valid_from?: string
+  }
+} | {
+  code: "SUPERSEDED_VERSION_WRITTEN"
+  message: string
+  details: {
+    valid_from: string
+    active_valid_from?: string
+  }
+} | {
+  code: "ATTRIBUTES_NOT_APPLIED"
+  message: string
+  details: {
+    attributes: Array<{
+      attribute: { ... }
+      reason: { ... }
+    }>
+  }
 }
+```
+
+### `VersionMoved`
+
+Which version a write moved, and which one was in effect while it did.
+
+```ts
+type VersionMoved = {
+  valid_from: string
+  active_valid_from?: string
+}
+```
+
+### `InertOverride`
+
+One override that did not apply, and why — reported by a write for the attributes in its
+body, and by a resolved payload for the stored overrides composition passed over.
+
+
+```ts
+type InertOverride = {
+  attribute: string
+  reason: "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_READONLY" | "ATTRIBUTE_HIDDEN" | "ATTRIBUTE_COMPUTED" | "ATTRIBUTE_UNDECLARED" | "TYPE_NOT_OVERRIDABLE" | "CAPABILITY_NOT_OVERRIDABLE"
+}
+```
+
+### `InertOverrideReason`
+
+Why one override did not apply.
+
+- `ATTRIBUTE_NOT_OVERRIDABLE`: the schema declares the attribute without
+  `overridable_attribute`, which is an ordinary schema edit away
+- `ATTRIBUTE_READONLY`: the attribute is readonly, and cannot be granted the flag
+- `ATTRIBUTE_HIDDEN`: the attribute is hidden, 
+
+```ts
+type InertOverrideReason = "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_READONLY" | "ATTRIBUTE_HIDDEN" | "ATTRIBUTE_COMPUTED" | "ATTRIBUTE_UNDECLARED" | "TYPE_NOT_OVERRIDABLE" | "CAPABILITY_NOT_OVERRIDABLE"
 ```
 
 ### `DeletedVariant`
@@ -2688,11 +3229,10 @@ type DeletedVariant = {
 
 ### `VariantVersion`
 
-One version of one variant: the attribute overrides it carries, the instant it takes effect,
-and the variant it belongs to.
+One version of one variant: the overrides it carries, the instant it takes effect, and the
+variant it belongs to. These are the version's own overrides; `:resolve` composes them onto
+the entity.
 
-These are the version's **own** overrides, not the base entity overlaid with them — this is
-what an editing screen loads and saves, and what it edits is the overrides. Composi
 
 ```ts
 type VariantVersion = {
@@ -2714,7 +3254,6 @@ type VariantVersion = {
 
 A version as a write left it, together with anything the write moved.
 
-
 ```ts
 type WrittenVariantVersion = {
   variant_id: string
@@ -2729,10 +3268,32 @@ type WrittenVariantVersion = {
   _updated_at: string
   _revision: number
   warnings: Array<{
-    code: "ACTIVE_VERSION_REPLACED" | "SUPERSEDED_VERSION_WRITTEN"
+    code: "VARIANT_COUNT_APPROACHING_CAP"
     message: string
-    valid_from: string
-    active_valid_from?: string
+    details: {
+      variant_count: { ... }
+      cap: { ... }
+    }
+  } | {
+    code: "ACTIVE_VERSION_CHANGED"
+    message: string
+    details: {
+      valid_from: { ... }
+      active_valid_from?: { ... }
+    }
+  } | {
+    code: "SUPERSEDED_VERSION_WRITTEN"
+    message: string
+    details: {
+      valid_from: { ... }
+      active_valid_from?: { ... }
+    }
+  } | {
+    code: "ATTRIBUTES_NOT_APPLIED"
+    message: string
+    details: {
+      attributes: { ... }
+    }
   }>
 }
 ```
@@ -2746,28 +3307,33 @@ type DeletedVariantVersion = {
   schema: "product" | "price" | "coupon"
   valid_from: string
   warnings: Array<{
-    code: "ACTIVE_VERSION_REPLACED" | "SUPERSEDED_VERSION_WRITTEN"
+    code: "VARIANT_COUNT_APPROACHING_CAP"
     message: string
-    valid_from: string
-    active_valid_from?: string
+    details: {
+      variant_count: { ... }
+      cap: { ... }
+    }
+  } | {
+    code: "ACTIVE_VERSION_CHANGED"
+    message: string
+    details: {
+      valid_from: { ... }
+      active_valid_from?: { ... }
+    }
+  } | {
+    code: "SUPERSEDED_VERSION_WRITTEN"
+    message: string
+    details: {
+      valid_from: { ... }
+      active_valid_from?: { ... }
+    }
+  } | {
+    code: "ATTRIBUTES_NOT_APPLIED"
+    message: string
+    details: {
+      attributes: { ... }
+    }
   }>
-}
-```
-
-### `VersionWriteWarning`
-
-Something a version write moved. A version write is never refused for being late — backdating a
-version, and editing or deleting one that has already been superseded, are both accepted — so
-what a caller gets instead is a warning naming exactly what changed. One write can carry both
-codes.
-
-
-```ts
-type VersionWriteWarning = {
-  code: "ACTIVE_VERSION_REPLACED" | "SUPERSEDED_VERSION_WRITTEN"
-  message: string
-  valid_from: string
-  active_valid_from?: string
 }
 ```
 
@@ -2803,6 +3369,537 @@ type PatchVersionRequest = {
 }
 ```
 
+### `ListVariantsRequest`
+
+How to narrow and page a variant listing. Every property is optional, so `{}` asks for the
+first ten variants in `variant_id` order, but the body itself is required. `conditions` and
+`search` narrow independently and a variant must satisfy both.
+
+
+```ts
+type ListVariantsRequest = {
+  conditions?: Record<string, unknown>
+  search?: string
+  sort?: string
+  from?: number
+  size?: number
+  cursor?: string
+}
+```
+
+### `VariantTreeRequest`
+
+The variants list's request plus `as_of`, the instant each row's version is selected at.
+`size` is clamped at 100 here; every other property means what it means on the list.
+
+
+```ts
+type VariantTreeRequest = {
+  conditions?: Record<string, unknown>
+  search?: string
+  sort?: string
+  from?: number
+  size?: number
+  cursor?: string
+  as_of?: string
+}
+```
+
+### `VariantConditionFilter`
+
+Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the
+same exact values and predicates a resolve context does. A condition left out is not
+filtered on. An `in` list carries at most 50,000 values.
+
+A variant matches only where it pins the condition — unlike `:re
+
+```ts
+type VariantConditionFilter = Record<string, unknown>
+```
+
+### `VariantList`
+
+```ts
+type VariantList = {
+  hits: number
+  results: Array<{
+    variant_id: string
+    entity_id: string
+    schema: "product" | "price" | "coupon"
+    conditions: {
+      default: { ... }
+    }
+  }>
+  next?: string
+}
+```
+
+### `VariantListRow`
+
+One variant as a listing reports it: which variant it is and what it pins.
+
+```ts
+type VariantListRow = {
+  variant_id: string
+  entity_id: string
+  schema: "product" | "price" | "coupon"
+  conditions: {
+    default: boolean
+  }
+}
+```
+
+### `VariantTree`
+
+```ts
+type VariantTree = {
+  hits: number
+  results: Array<{
+    variant_id: string
+    entity_id: string
+    schema: "product" | "price" | "coupon"
+    conditions: {
+      default: { ... }
+    }
+    status: "active" | "scheduled"
+    version: {
+      variant_id: { ... }
+      entity_id: { ... }
+      schema: { ... }
+      conditions: { ... }
+      valid_from: { ... }
+      values: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+    }
+  }>
+  next?: string
+}
+```
+
+### `VariantTreeRow`
+
+A listing row plus the one version the tree shows for it, and the status saying which.
+
+```ts
+type VariantTreeRow = {
+  variant_id: string
+  entity_id: string
+  schema: "product" | "price" | "coupon"
+  conditions: {
+    default: boolean
+  }
+  status: "active" | "scheduled"
+  version: {
+    variant_id: string
+    entity_id: string
+    schema: "product" | "price" | "coupon"
+    conditions: {
+      default: { ... }
+    }
+    valid_from: string
+    values: Record<string, unknown>
+    _created_at: string
+    _updated_at: string
+  }
+}
+```
+
+### `VariantTreeRowStatus`
+
+Whether a tree row's version is the one in effect at `as_of`, or one still ahead of it.
+
+- `active`: the version with the latest `valid_from` at or before `as_of`
+- `scheduled`: the variant's first version, which is later than `as_of`
+
+
+```ts
+type VariantTreeRowStatus = "active" | "scheduled"
+```
+
+### `VariantVersionSnapshot`
+
+One version of one variant as a listing reports it: `VariantVersion` without `_revision`.
+Read the version through its own `GET` to get the revision a write must carry.
+
+
+```ts
+type VariantVersionSnapshot = {
+  variant_id: string
+  entity_id: string
+  schema: "product" | "price" | "coupon"
+  conditions: {
+    default: boolean
+  }
+  valid_from: string
+  values: Record<string, unknown>
+  _created_at: string
+  _updated_at: string
+}
+```
+
+### `VariantVersionList`
+
+```ts
+type VariantVersionList = {
+  results: Array<{
+    variant_id: string
+    entity_id: string
+    schema: "product" | "price" | "coupon"
+    conditions: {
+      default: { ... }
+    }
+    valid_from: string
+    values: Record<string, unknown>
+    _created_at: string
+    _updated_at: string
+  }>
+  next?: string
+}
+```
+
+### `BatchUpsertVariantsRequest`
+
+A batch of variant writes under one schema, each item naming the entity it writes to.
+
+```ts
+type BatchUpsertVariantsRequest = {
+  correlation_id?: string
+  items: Array<{
+    entity_id: string
+    conditions?: Record<string, unknown>
+    default?: boolean
+    valid_from?: string
+    values: Record<string, unknown>
+  }>
+}
+```
+
+### `BatchUpsertItem`
+
+One variant write: the single-item create's body plus `entity_id`, and no `variant_id`. An
+existing condition tuple appends a version to the variant holding it rather than conflicting.
+
+
+```ts
+type BatchUpsertItem = {
+  entity_id: string
+  conditions?: Record<string, unknown>
+  default?: boolean
+  valid_from?: string
+  values: Record<string, unknown>
+}
+```
+
+### `BatchDeleteVariantsRequest`
+
+A batch of variant and version deletes under one schema, each item naming the entity it removes from.
+
+```ts
+type BatchDeleteVariantsRequest = {
+  correlation_id?: string
+  items: Array<{
+    entity_id: string
+    variant_id: string
+    valid_from?: string
+  } | {
+    entity_id: string
+    conditions?: Record<string, unknown>
+    default?: boolean
+    valid_from?: string
+  }>
+}
+```
+
+### `BatchDeleteItem`
+
+One delete: the variant, addressed by id or by the condition tuple it pins, and optionally
+the one version of it to remove. An item carrying both matches neither branch and is an
+envelope `400`.
+
+
+```ts
+type BatchDeleteItem = {
+  entity_id: string
+  variant_id: string
+  valid_from?: string
+} | {
+  entity_id: string
+  conditions?: Record<string, unknown>
+  default?: boolean
+  valid_from?: string
+}
+```
+
+### `BatchDeleteByVariantId`
+
+A delete addressing its variant by id.
+
+```ts
+type BatchDeleteByVariantId = {
+  entity_id: string
+  variant_id: string
+  valid_from?: string
+}
+```
+
+### `BatchDeleteByConditions`
+
+A delete addressing its variant by the situation it applies to.
+
+`conditions` is optional because the fallback variant pins nothing: address it with
+`default: true` and no `conditions`. An item that ends up addressing no variant at all is a
+per-item `VARIANT_UNPINNED`, and one marking `default` besi
+
+```ts
+type BatchDeleteByConditions = {
+  entity_id: string
+  conditions?: Record<string, unknown>
+  default?: boolean
+  valid_from?: string
+}
+```
+
+### `BatchUpsertResult`
+
+What a batch upsert did: one entry per item, in request order, and a count per outcome.
+
+```ts
+type BatchUpsertResult = {
+  correlation_id?: string
+  counts: {
+    variant_created: number
+    version_created: number
+    updated: number
+    skipped: number
+    error: number
+  }
+  results: Array<{
+    outcome: "variant_created" | "version_created" | "updated" | "skipped" | "error"
+    entity_id: string
+    variant_id?: string
+    valid_from?: string
+    warnings: Array<{
+      code: { ... }
+      message: { ... }
+      details: { ... }
+    } | {
+      code: { ... }
+      message: { ... }
+      details: { ... }
+    } | {
+      code: { ... }
+      message: { ... }
+      details: { ... }
+    } | {
+      code: { ... }
+      message: { ... }
+      details: { ... }
+    }>
+    error?: {
+      message: { ... }
+      status?: { ... }
+      cause?: { ... }
+      error?: { ... }
+    }
+  }>
+}
+```
+
+### `BatchDeleteResult`
+
+What a batch delete did: one entry per item, in request order, and a count per outcome.
+
+```ts
+type BatchDeleteResult = {
+  correlation_id?: string
+  counts: {
+    deleted: number
+    skipped: number
+    error: number
+  }
+  results: Array<{
+    outcome: "deleted" | "skipped" | "error"
+    entity_id: string
+    variant_id?: string
+    valid_from?: string
+    warnings: Array<{
+      code: { ... }
+      message: { ... }
+      details: { ... }
+    } | {
+      code: { ... }
+      message: { ... }
+      details: { ... }
+    } | {
+      code: { ... }
+      message: { ... }
+      details: { ... }
+    } | {
+      code: { ... }
+      message: { ... }
+      details: { ... }
+    }>
+    error?: {
+      message: { ... }
+      status?: { ... }
+      cause?: { ... }
+      error?: { ... }
+    }
+  }>
+}
+```
+
+### `BatchUpsertOutcome`
+
+What one upsert item did, derived from what was stored.
+
+- `variant_created`: the condition tuple was unknown, so a variant and its first version
+  were created
+- `version_created`: the tuple was known and had no version at the item's `valid_from`
+- `updated`: a version existed at that exact instant
+
+```ts
+type BatchUpsertOutcome = "variant_created" | "version_created" | "updated" | "skipped" | "error"
+```
+
+### `BatchDeleteOutcome`
+
+What one delete item did.
+
+- `deleted`: the variant, or the one version the item named, is gone
+- `skipped`: the item addressed no such variant or version; a missing entity is an `error`
+- `error`: this item alone failed, and the entry's `error` says why
+
+
+```ts
+type BatchDeleteOutcome = "deleted" | "skipped" | "error"
+```
+
+### `BatchUpsertCounts`
+
+How many items reached each outcome. Keyed by exactly the values of `BatchUpsertOutcome`,
+all present, and summing to the length of `results`.
+
+
+```ts
+type BatchUpsertCounts = {
+  variant_created: number
+  version_created: number
+  updated: number
+  skipped: number
+  error: number
+}
+```
+
+### `BatchDeleteCounts`
+
+How many items reached each outcome. Keyed by exactly the values of `BatchDeleteOutcome`,
+all present, and summing to the length of `results`.
+
+
+```ts
+type BatchDeleteCounts = {
+  deleted: number
+  skipped: number
+  error: number
+}
+```
+
+### `BatchUpsertResultEntry`
+
+What one upsert item did. Position in `results` maps it back to its source row.
+
+```ts
+type BatchUpsertResultEntry = {
+  outcome: "variant_created" | "version_created" | "updated" | "skipped" | "error"
+  entity_id: string
+  variant_id?: string
+  valid_from?: string
+  warnings: Array<{
+    code: "VARIANT_COUNT_APPROACHING_CAP"
+    message: string
+    details: {
+      variant_count: { ... }
+      cap: { ... }
+    }
+  } | {
+    code: "ACTIVE_VERSION_CHANGED"
+    message: string
+    details: {
+      valid_from: { ... }
+      active_valid_from?: { ... }
+    }
+  } | {
+    code: "SUPERSEDED_VERSION_WRITTEN"
+    message: string
+    details: {
+      valid_from: { ... }
+      active_valid_from?: { ... }
+    }
+  } | {
+    code: "ATTRIBUTES_NOT_APPLIED"
+    message: string
+    details: {
+      attributes: { ... }
+    }
+  }>
+  error?: {
+    message: string
+    status?: number
+    cause?: string
+    error?: string | Record<string, unknown>[]
+  }
+}
+```
+
+### `BatchDeleteResultEntry`
+
+What one delete item did. Position in `results` maps it back to its source row.
+
+```ts
+type BatchDeleteResultEntry = {
+  outcome: "deleted" | "skipped" | "error"
+  entity_id: string
+  variant_id?: string
+  valid_from?: string
+  warnings: Array<{
+    code: "VARIANT_COUNT_APPROACHING_CAP"
+    message: string
+    details: {
+      variant_count: { ... }
+      cap: { ... }
+    }
+  } | {
+    code: "ACTIVE_VERSION_CHANGED"
+    message: string
+    details: {
+      valid_from: { ... }
+      active_valid_from?: { ... }
+    }
+  } | {
+    code: "SUPERSEDED_VERSION_WRITTEN"
+    message: string
+    details: {
+      valid_from: { ... }
+      active_valid_from?: { ... }
+    }
+  } | {
+    code: "ATTRIBUTES_NOT_APPLIED"
+    message: string
+    details: {
+      attributes: { ... }
+    }
+  }>
+  error?: {
+    message: string
+    status?: number
+    cause?: string
+    error?: string | Record<string, unknown>[]
+  }
+}
+```
+
 ### `Error`
 
 ```ts
@@ -2813,21 +3910,30 @@ type Error = {
 }
 ```
 
+### `ReportedError`
+
+The `error` field of an error response: the message, or — where the request failed
+validation before any handler ran — the validation errors themselves.
+
+
+```ts
+type ReportedError = string | Record<string, unknown>[]
+```
+
 ### `ConditionalPricingError`
 
-An error from a conditional-pricing operation, carrying a machine-readable `code`
-from the conditional-pricing vocabulary plus any structured data about the failure,
-so a client can branch on the kind of failure rather than parse the message.
-Referenced only by the operations that emit these codes; 
+An error from a conditional-pricing operation, carrying a `code` plus the structured data
+that code explains. `details` is typed per code: narrow on `code` and the object under it
+declares exactly the fields that code sends.
+
+A request these schemas reject is answered by the request validator with a
 
 ```ts
 type ConditionalPricingError = {
   message: string
   status?: number
   cause?: string
-  error?: string
-  code?: "NOT_FOUND" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT"
-  details?: Record<string, unknown>
+  error?: string | Record<string, unknown>[]
 }
 ```
 
@@ -2902,6 +4008,7 @@ type Product = {
       _tags?: { ... }
     }>
   }
+  is_conditional?: boolean
   _availability_files?: Array<{
     _id: string
     filename: string
@@ -3095,6 +4202,7 @@ type Order = {
       product_images?: { ... }
       product_downloads?: { ... }
       price_options?: { ... }
+      is_conditional?: { ... }
       _availability_files?: { ... }
       _id?: { ... }
       _title?: { ... }
@@ -3105,7 +4213,6 @@ type Order = {
   } | {
     metadata?: Array<{
       key?: { ... }
-      value?: { ... }
   // ...
 }
 ```
@@ -3488,6 +4595,7 @@ type CatalogSearchResult = {
     price_options?: {
       $relation?: { ... }
     }
+    is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
       filename: { ... }
@@ -3532,6 +4640,7 @@ type CatalogSearchResult = {
     fixed_value_currency?: string
     cashback_period?: "0" | "12"
     active?: boolean
+    is_conditional?: boolean
     requires_promo_code?: boolean
   }>
 }
@@ -4694,6 +5803,7 @@ type BasePriceItemCommon = {
     price_options?: {
       $relation?: { ... }
     }
+    is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
       filename: { ... }
@@ -4999,6 +6109,7 @@ type BasePriceItemDto = {
     price_options?: {
       $relation?: { ... }
     }
+    is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
       filename: { ... }
@@ -5433,13 +6544,13 @@ type OrderPayload = {
       fixed_value_currency?: { ... }
       cashback_period?: { ... }
       active?: { ... }
+      is_conditional?: { ... }
       requires_promo_code?: { ... }
     }>
     type?: "one_time" | "recurring"
     billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly"
     unit_amount?: number
     unit_amount_gross?: number
-    unit_amount_currency?: string
   // ...
 }
 ```
@@ -5512,6 +6623,7 @@ type PriceItems = Array<{
     price_options?: {
       $relation?: { ... }
     }
+    is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
       filename: { ... }
@@ -5548,7 +6660,6 @@ type PriceItems = Array<{
     value?: number
     metadata?: Record<string, string>
   }>
-  is_tax_inclusive?: boolean
   // ...
 }
 ```
@@ -5621,6 +6732,7 @@ type CompositePriceItem = {
     price_options?: {
       $relation?: { ... }
     }
+    is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
       filename: { ... }
@@ -5710,6 +6822,7 @@ type BasePriceItem = {
     price_options?: {
       $relation?: { ... }
     }
+    is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
       filename: { ... }
@@ -5859,6 +6972,7 @@ type PriceItem = {
     price_options?: {
       $relation?: { ... }
     }
+    is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
       filename: { ... }
@@ -6075,6 +7189,7 @@ type PricingDetails = {
       product_images?: { ... }
       product_downloads?: { ... }
       price_options?: { ... }
+      is_conditional?: { ... }
       _availability_files?: { ... }
       _id?: { ... }
       _title?: { ... }
@@ -6112,6 +7227,7 @@ type PricingDetails = {
       product_images?: { ... }
       product_downloads?: { ... }
       price_options?: { ... }
+      is_conditional?: { ... }
       _availability_files?: { ... }
       _id?: { ... }
       _title?: { ... }
@@ -6142,8 +7258,6 @@ type PricingDetails = {
       _id: { ... }
       _title: { ... }
       _org: { ... }
-      _schema: { ... }
-      _tags?: { ... }
   // ...
 }
 ```
@@ -6172,6 +7286,7 @@ type PromoCodeValidationResponse = {
     fixed_value_currency?: string
     cashback_period?: "0" | "12"
     active?: boolean
+    is_conditional?: boolean
     requires_promo_code?: boolean
   }>
 }
@@ -6213,6 +7328,7 @@ type PricingDetailsResponse = {
       product_images?: { ... }
       product_downloads?: { ... }
       price_options?: { ... }
+      is_conditional?: { ... }
       _availability_files?: { ... }
       _id?: { ... }
       _title?: { ... }
@@ -6250,6 +7366,7 @@ type PricingDetailsResponse = {
       product_images?: { ... }
       product_downloads?: { ... }
       price_options?: { ... }
+      is_conditional?: { ... }
       _availability_files?: { ... }
       _id?: { ... }
       _title?: { ... }
@@ -6280,8 +7397,6 @@ type PricingDetailsResponse = {
       _id: { ... }
       _title: { ... }
       _org: { ... }
-      _schema: { ... }
-      _tags?: { ... }
   // ...
 }
 ```
@@ -6504,6 +7619,7 @@ type BaseCouponCommon = {
   fixed_value_currency?: string
   cashback_period?: "0" | "12"
   active?: boolean
+  is_conditional?: boolean
   requires_promo_code?: boolean
 }
 ```
@@ -6531,6 +7647,7 @@ type CouponWithoutPromoCodes = {
   fixed_value_currency?: string
   cashback_period?: "0" | "12"
   active?: boolean
+  is_conditional?: boolean
   requires_promo_code?: boolean
 }
 ```
@@ -6558,6 +7675,7 @@ type Coupon = {
   fixed_value_currency?: string
   cashback_period?: "0" | "12"
   active?: boolean
+  is_conditional?: boolean
   requires_promo_code?: boolean
 }
 ```
@@ -6583,6 +7701,7 @@ type CouponItem = {
   fixed_value_currency?: string
   cashback_period?: "0" | "12"
   active?: boolean
+  is_conditional?: boolean
   requires_promo_code?: boolean
 }
 ```
@@ -6621,6 +7740,7 @@ type RedeemedPromo = {
     fixed_value_currency?: string
     cashback_period?: "0" | "12"
     active?: boolean
+    is_conditional?: boolean
     requires_promo_code?: boolean
   }>
 }
