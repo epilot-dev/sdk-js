@@ -2814,10 +2814,9 @@
     },
     "/v1/integrations/{integrationId}/monitoring/inbound-events": {
       "post": {
-        "deprecated": true,
         "operationId": "queryInboundMonitoringEvents",
         "summary": "queryInboundMonitoringEvents",
-        "description": "**Deprecated and no longer implemented.** The `erp_monitoring` table this\nendpoint read has been retired in favour of the unified `erp_monitoring_v2`\ntable. The endpoint is kept only so existing clients do not 404; it always\nresponds `200` with an empty result and never reads any data.\n\nUse `POST /v2/integrations/{integrationId}/monitoring/events` instead,\nfiltered to `use_case_type: inbound`.\n",
+        "description": "Query inbound monitoring events for a specific integration.\nReturns detailed information about inbound sync events from ERP systems,\nincluding success rates, error breakdowns, and processing metrics.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -2865,10 +2864,9 @@
     },
     "/v1/integrations/{integrationId}/monitoring/stats": {
       "post": {
-        "deprecated": true,
         "operationId": "getMonitoringStats",
         "summary": "getMonitoringStats",
-        "description": "**Deprecated and no longer implemented.** The `erp_monitoring` and\n`webhook_events` tables this endpoint aggregated have been retired in favour\nof the unified `erp_monitoring_v2` table. The endpoint is kept only so\nexisting clients do not 404; it always responds `200` with zeroed counters\nand never reads any data.\n\nUse `POST /v2/integrations/{integrationId}/monitoring/stats` instead.\n",
+        "description": "Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.\nReturns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,\nincluding success/error counts and optional breakdowns.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -2916,10 +2914,9 @@
     },
     "/v1/integrations/{integrationId}/monitoring/timeseries": {
       "post": {
-        "deprecated": true,
         "operationId": "getMonitoringTimeSeries",
         "summary": "getMonitoringTimeSeries",
-        "description": "**Deprecated and no longer implemented.** The `erp_monitoring` and\n`webhook_events` tables this endpoint bucketed have been retired in favour\nof the unified `erp_monitoring_v2` table. The endpoint is kept only so\nexisting clients do not 404; it always responds `200` with an empty bucket\nlist and never reads any data.\n\nUse `POST /v2/integrations/{integrationId}/monitoring/time-series` instead.\n",
+        "description": "Get time-series aggregated event counts for monitoring charts.\nReturns pre-bucketed counts at configurable intervals for both inbound and outbound events.\nMaximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -3444,10 +3441,9 @@
     },
     "/v1/integrations/{integrationId}/monitoring/outbound-events": {
       "post": {
-        "deprecated": true,
         "operationId": "queryOutboundMonitoringEvents",
         "summary": "queryOutboundMonitoringEvents",
-        "description": "**Deprecated and no longer implemented.** The `webhook_events` table this\nendpoint read has been retired in favour of the unified `erp_monitoring_v2`\ntable. The endpoint is kept only so existing clients do not 404; it always\nresponds `200` with an empty result and never reads any data.\n\nUse `POST /v2/integrations/{integrationId}/monitoring/events` instead,\nfiltered to `use_case_type: outbound`.\n",
+        "description": "Query outbound monitoring events for a specific integration.\nReturns detailed information about outbound event deliveries,\nfiltered by event_name (event_catalog_event) linked to the integration's outbound use cases.\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -4733,7 +4729,7 @@
       },
       "ErpImportIssue": {
         "type": "object",
-        "description": "A problem found during validation, scoped to the file as a whole rather than to\nindividual rows.\n\n`code` is the translation key and the other fields are its parameters — there is\ndeliberately no message to display. Each code appears at most once, with\neverything it has to say aggregated into that one entry.\n\nThe conditional codes describe a file that cannot be written as variants:\n\n- `TIER_ROWS_NOT_GROUPED` — rows of one variant are spread through the file;\n  `columns` names what to group by.\n- `TIER_BANDS_CONFLICT` — two rows of one variant claim the same band.\n- `CONDITION_VALUE_MISSING` — a condition column is blank in every row.\n- `VARIANT_VALUE_CONFLICT` — rows of one variant disagree on a value that is not\n  the one being folded; the first row's value is what would be written.\n- `ATTRIBUTE_NOT_OVERRIDABLE` — the schema does not let a variant override this\n  attribute, so the mapped value would be discarded.\n- `ATTRIBUTE_NOT_IN_SCHEMA` — the schema does not have the attribute at all.\n\nThe rest reject the mapping against the entity schemas, before the file is read, and\nname the thing at fault in `subject`: `IS_CONDITIONAL_NOT_CONSTANT`,\n`SCHEMA_NOT_CONDITIONABLE`, `SCHEMA_NOT_FOUND`, `SCHEMA_DECLARES_NO_CONDITIONS`,\n`GROUPING_KEY_NOT_A_COLUMN`, `GROUPING_KEY_IS_FOLD_COLUMN`.",
+        "description": "A problem found during validation, scoped to the file as a whole rather than to\nindividual rows.\n\n`code` is the translation key and the other fields are its parameters — there is\ndeliberately no message to display. Each code appears at most once, with\neverything it has to say aggregated into that one entry.\n\nThe conditional codes describe a file that cannot be written as variants:\n\n- `TIER_ROWS_NOT_GROUPED` — rows of one variant are spread through the file;\n  `columns` names what to group by.\n- `TIER_BANDS_CONFLICT` — two rows of one variant claim the same band.\n- `CONDITION_VALUE_MISSING` — a condition column is blank in every row.\n- `VARIANT_VALUE_CONFLICT` — rows of one variant disagree on a value outside\n  `from_rows`; the first row's value is what would be written.\n- `ATTRIBUTE_NOT_OVERRIDABLE` — the schema does not let a variant override this\n  attribute, so the mapped value would be discarded.\n- `ATTRIBUTE_NOT_IN_SCHEMA` — the schema does not have the attribute at all.\n\nThe rest reject the mapping against the entity schemas, before the file is read, and\nname the thing at fault in `subject`: `IS_CONDITIONAL_NOT_CONSTANT`,\n`SCHEMA_NOT_CONDITIONABLE`, `SCHEMA_NOT_FOUND`, `SCHEMA_DECLARES_NO_CONDITIONS`,\n`GROUPING_KEY_NOT_A_COLUMN`, `GROUPING_KEY_IS_SORT_COLUMN`,\n`CONDITIONAL_TARGET_MODE_UNSUPPORTED` (a conditional target with any `mode` other\nthan `upsert` — a row of such a target addresses one variant-version, while every\nother mode acts on whole entities; removing variants through an import is not\nsupported yet, and to remove a whole entity, map it as a non-conditional target).",
         "required": [
           "code",
           "severity"
@@ -4761,7 +4757,8 @@
               "SCHEMA_NOT_FOUND",
               "SCHEMA_DECLARES_NO_CONDITIONS",
               "GROUPING_KEY_NOT_A_COLUMN",
-              "GROUPING_KEY_IS_FOLD_COLUMN"
+              "GROUPING_KEY_IS_SORT_COLUMN",
+              "CONDITIONAL_TARGET_MODE_UNSUPPORTED"
             ]
           },
           "severity": {
@@ -4918,6 +4915,7 @@
               "USE_CASE_NOT_USABLE",
               "IMPORT_NO_PROGRESS",
               "TIER_ROWS_NOT_GROUPED",
+              "CHUNK_TOO_LARGE",
               "INTERNAL_ERROR"
             ]
           },
@@ -6548,23 +6546,23 @@
         "type": "object",
         "description": "Conditional Pricing extras for this target, used when it writes a conditional entity (a Product, Price or Coupon carrying context-dependent variants). The conditions themselves are declared on the entity schema, not here.",
         "required": [
-          "folds"
+          "from_rows"
         ],
         "properties": {
-          "folds": {
+          "from_rows": {
             "type": "array",
             "minItems": 1,
             "maxItems": 1,
-            "description": "Row folds for this target. Exactly one is supported; the array is the shape for later, not a capability claim.",
+            "description": "Array attributes built from the rows of one variant-version. Exactly one is supported; the array is the shape for later, not a capability claim.",
             "items": {
-              "$ref": "#/components/schemas/IntegrationEntityFold"
+              "$ref": "#/components/schemas/IntegrationEntityFromRows"
             }
           }
         }
       },
-      "IntegrationEntityFold": {
+      "IntegrationEntityFromRows": {
         "type": "object",
-        "description": "Collapse the rows of one variant-version into a single array attribute, ordered by a column. A commodity file carries one row per consumption band, while a variant-version holds exactly one `tiers` array.",
+        "description": "Build one array attribute from the rows of one variant-version, ordered by a column. A commodity file carries one row per consumption band, while a variant-version holds exactly one `tiers` array.",
         "required": [
           "attribute",
           "sort_by",
@@ -6573,7 +6571,7 @@
         "properties": {
           "attribute": {
             "type": "string",
-            "description": "The array attribute this fold builds, e.g. `tiers`."
+            "description": "The array attribute built from the rows, e.g. `tiers`."
           },
           "sort_by": {
             "allOf": [
@@ -12069,6 +12067,9 @@
           "ACK_TIMEOUT",
           "ATTACHMENT_NOT_FOUND",
           "ATTRIBUTE_TYPE_MISMATCH",
+          "CONDITIONAL_VARIANTS_WRITTEN",
+          "CONDITIONAL_VARIANT_WRITE_FAILED",
+          "CONDITIONAL_VARIANT_WRITE_WARNING",
           "DEPRECATED_ENDPOINT",
           "DIRECT_ENTITY_NOT_ALLOWED",
           "DIRECT_PAYLOAD_INVALID",

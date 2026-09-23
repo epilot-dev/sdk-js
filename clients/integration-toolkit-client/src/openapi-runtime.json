@@ -600,7 +600,6 @@
     },
     "/v1/integrations/{integrationId}/monitoring/inbound-events": {
       "post": {
-        "deprecated": true,
         "operationId": "queryInboundMonitoringEvents",
         "parameters": [
           {
@@ -620,7 +619,6 @@
     },
     "/v1/integrations/{integrationId}/monitoring/stats": {
       "post": {
-        "deprecated": true,
         "operationId": "getMonitoringStats",
         "parameters": [
           {
@@ -640,7 +638,6 @@
     },
     "/v1/integrations/{integrationId}/monitoring/timeseries": {
       "post": {
-        "deprecated": true,
         "operationId": "getMonitoringTimeSeries",
         "parameters": [
           {
@@ -809,7 +806,6 @@
     },
     "/v1/integrations/{integrationId}/monitoring/outbound-events": {
       "post": {
-        "deprecated": true,
         "operationId": "queryOutboundMonitoringEvents",
         "parameters": [
           {

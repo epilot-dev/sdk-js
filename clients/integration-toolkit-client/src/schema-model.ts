@@ -50,6 +50,21 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     level: 'error',
     description: 'An attribute value did not match the type declared in the entity schema',
   },
+  CONDITIONAL_VARIANT_WRITE_FAILED: {
+    level: 'error',
+    description:
+      'Conditional pricing refused a variant write; the pricing code in details names the reason. VARIANT_LIMIT_REACHED means the entity holds every variant it may, and the import stops for it',
+  },
+  CONDITIONAL_VARIANT_WRITE_WARNING: {
+    level: 'warning',
+    description:
+      'A variant write succeeded but not exactly as sent: a value the schema does not let a variant override was dropped, a live or past-dated version was rewritten, or the entity is near its variant cap. The pricing code in details says which',
+  },
+  CONDITIONAL_VARIANTS_WRITTEN: {
+    level: 'success',
+    description:
+      'Conditional price variants were written for one imported entity: emitted once per chunk, with a per-outcome count and the variant ids in details',
+  },
   DEPRECATED_ENDPOINT: { level: 'error', description: 'This endpoint version is deprecated' },
   DIRECT_ENTITY_NOT_ALLOWED: {
     level: 'error',
