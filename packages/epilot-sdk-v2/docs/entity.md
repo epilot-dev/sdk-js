@@ -493,7 +493,10 @@ const { data } = await client.getSchema({
     "widget_widths": {
       "address_map": "full_width",
       "recent_communications": "one_third_width"
-    }
+    },
+    "custom_tabs": [
+      {}
+    ]
   },
   "capabilities": [
     {
@@ -502,6 +505,7 @@ const { data } = await client.getSchema({
       "title": "Messaging",
       "attributes": [],
       "overridable_attribute": false,
+      "managed_fields": ["status"],
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -654,7 +658,10 @@ const { data } = await client.putSchema(
       widget_widths: {
         address_map: 'full_width',
         recent_communications: 'one_third_width'
-      }
+      },
+      custom_tabs: [
+        { /* ... */ }
+      ]
     },
     capabilities: [
       {
@@ -663,6 +670,7 @@ const { data } = await client.putSchema(
         title: 'Messaging',
         attributes: [ /* ... */ ],
         overridable_attribute: false,
+        managed_fields: ['status'],
         _purpose: ['taxonomy-slug:classification-slug'],
         _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
         app_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -816,7 +824,10 @@ const { data } = await client.putSchema(
     "widget_widths": {
       "address_map": "full_width",
       "recent_communications": "one_third_width"
-    }
+    },
+    "custom_tabs": [
+      {}
+    ]
   },
   "capabilities": [
     {
@@ -825,6 +836,7 @@ const { data } = await client.putSchema(
       "title": "Messaging",
       "attributes": [],
       "overridable_attribute": false,
+      "managed_fields": ["status"],
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -1202,6 +1214,7 @@ const { data } = await client.listAvailableCapabilities({
       "title": "Messaging",
       "attributes": [],
       "overridable_attribute": false,
+      "managed_fields": ["status"],
       "_purpose": ["taxonomy-slug:classification-slug"],
       "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
       "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -2192,7 +2205,7 @@ const { data } = await client.deleteEntity({
 
 ### `autocomplete`
 
-Autocomplete entity attributes
+Autocomplete entity attributes.
 
 `GET /v1/entity:autocomplete`
 
@@ -2203,6 +2216,7 @@ const { data } = await client.autocomplete({
   attribute: 'example',
   slug: 'example',
   size: 1,
+  from: 1,
 })
 ```
 
@@ -4849,6 +4863,7 @@ const { data } = await client.createSchemaCapability(
       /* ... 33 more */
     ],
     overridable_attribute: false,
+    managed_fields: ['status'],
     _purpose: ['taxonomy-slug:classification-slug'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     app_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -4985,6 +5000,7 @@ const { data } = await client.createSchemaCapability(
     }
   ],
   "overridable_attribute": false,
+  "managed_fields": ["status"],
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -5136,6 +5152,7 @@ const { data } = await client.getSchemaCapability({
     }
   ],
   "overridable_attribute": false,
+  "managed_fields": ["status"],
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -5283,6 +5300,7 @@ const { data } = await client.putSchemaCapability(
       /* ... 33 more */
     ],
     overridable_attribute: false,
+    managed_fields: ['status'],
     _purpose: ['taxonomy-slug:classification-slug'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
     app_id: '123e4567-e89b-12d3-a456-426614174000',
@@ -5419,6 +5437,7 @@ const { data } = await client.putSchemaCapability(
     }
   ],
   "overridable_attribute": false,
+  "managed_fields": ["status"],
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -5570,6 +5589,7 @@ const { data } = await client.deleteSchemaCapability({
     }
   ],
   "overridable_attribute": false,
+  "managed_fields": ["status"],
   "_purpose": ["taxonomy-slug:classification-slug"],
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
   "app_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -6133,6 +6153,15 @@ type EntitySchema = {
     widget_order?: string[]
     widget_visibility?: Record<string, boolean>
     widget_widths?: Record<string, "one_third_width" | "half_width" | "two_third_width" | "full_width">
+    custom_tabs?: Array<{
+      id: { ... }
+      slug: { ... }
+      title: { ... }
+      order: { ... }
+      icon?: { ... }
+      type: { ... }
+      widgets?: { ... }
+    }>
   }
   capabilities: Array<{
     id?: string
@@ -6151,15 +6180,6 @@ type EntitySchema = {
       deprecated?: { ... }
       overridable_attribute?: { ... }
       default_value?: { ... }
-      group?: { ... }
-      order?: { ... }
-      layout?: { ... }
-      hide_label?: { ... }
-      icon?: { ... }
-      render_condition?: { ... }
-      data_classification?: { ... }
-      _purpose?: { ... }
-      _manifest?: { ... }
   // ...
 }
 ```
@@ -6251,6 +6271,15 @@ type EntitySchemaItem = {
     widget_order?: string[]
     widget_visibility?: Record<string, boolean>
     widget_widths?: Record<string, "one_third_width" | "half_width" | "two_third_width" | "full_width">
+    custom_tabs?: Array<{
+      id: { ... }
+      slug: { ... }
+      title: { ... }
+      order: { ... }
+      icon?: { ... }
+      type: { ... }
+      widgets?: { ... }
+    }>
   }
   capabilities: Array<{
     id?: string
@@ -6258,15 +6287,6 @@ type EntitySchemaItem = {
     title?: string
     attributes?: Array<{
       id?: { ... }
-      name: { ... }
-      label: { ... }
-      placeholder?: { ... }
-      hidden?: { ... }
-      show_in_table?: { ... }
-      sortable?: { ... }
-      required?: { ... }
-      readonly?: { ... }
-      deprecated?: { ... }
   // ...
 }
 ```
