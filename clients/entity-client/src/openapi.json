@@ -1783,7 +1783,7 @@
       "get": {
         "operationId": "autocomplete",
         "summary": "autocomplete",
-        "description": "Autocomplete entity attributes\n",
+        "description": "Autocomplete entity attributes.\n\nSuggestions are derived from the values **currently stored on entities** the caller is allowed to read.\nA value only shows up while at least one entity carries it, so this endpoint reflects usage, not\nconfiguration.\n\nTo enumerate the label catalogue managed in the Label Builder (including labels that are not\nassigned to any entity yet, and excluding archived ones), use the Taxonomy endpoints instead:\n`POST /v1/entity/taxonomies/classifications:search` (`taxonomiesClassificationsSearch`) or\n`GET /v1/entity/taxonomies/{taxonomySlug}:autocomplete` (`taxonomyAutocomplete`).\n\nFor `attribute=_tags` the distinct values are aggregated across all matching entities, `hits` is the exact\nnumber of distinct values (capped at 1000) and results are ordered by usage. For other attributes the\n1000 most recently updated entities are scanned and `hits` is the number of distinct values found so far.\n",
         "tags": [
           "Entities"
         ],
@@ -1794,7 +1794,7 @@
           {
             "name": "input",
             "in": "query",
-            "description": "Input to autocomplete",
+            "description": "Input to autocomplete (case-insensitive substring match)",
             "schema": {
               "type": "string"
             }
@@ -1827,6 +1827,17 @@
               "minimum": 1,
               "maximum": 250
             }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Number of distinct values to skip, for paging through results when `hits` exceeds `size`.\n`from + size` may not exceed 1000.\n",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0,
+              "maximum": 999
+            }
           }
         ],
         "responses": {
@@ -1839,6 +1850,7 @@
                   "properties": {
                     "hits": {
                       "type": "number",
+                      "description": "Number of distinct values matching the input. Exact (independent of `size`, capped at 1000) for\n`_tags`; for other attributes the number of distinct values collected so far, which may grow with `size`.\n",
                       "example": 1
                     },
                     "results": {
@@ -5132,6 +5144,100 @@
                   "address_map": "full_width",
                   "recent_communications": "one_third_width"
                 }
+              },
+              "custom_tabs": {
+                "type": "array",
+                "description": "Configured tabs that host widgets, shown alongside capability tabs in entity details. Interleaves with capability `EntityDetailsV2:Tab` ui_hooks on a shared `order`: the host merges both lists and sorts by `order`, with capability tabs winning ties. Unlike the header grid, a tab's `widgets` list is the entire membership — a widget's ui_hook `default_visible` is never consulted for tab placement.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "A single configured tab. `type` discriminates the payload shape; readers must skip an entry whose `type` they don't recognize instead of failing, and writers must round-trip such entries unchanged, so a stable host and a canary host can safely share one schema. Mirrors the same skip-unknown/round-trip contract already used for capability `ui_hooks` entries above.",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Generated when the tab is created and never edited afterward, so a blueprint-authored tab and a customer-authored tab can never collide and identity survives a rename.",
+                      "example": "8f14e45f-ceea-467e-a0d6-c8a4ea1c9e6d"
+                    },
+                    "slug": {
+                      "type": "string",
+                      "description": "URL route segment for the tab, derived from `title`. Unique within the schema, and against capability tab ids, since both share one route-segment namespace.",
+                      "example": "sales-overview"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Tab label, authored by the configuring user.",
+                      "example": "Sales Overview"
+                    },
+                    "order": {
+                      "type": "integer",
+                      "description": "Authoritative render position; array position carries no meaning. Shares one ordering space with capability tab ui_hook `order` — at equal `order`, capability tabs sort first.",
+                      "example": 10
+                    },
+                    "icon": {
+                      "type": "string",
+                      "description": "Icon name from the existing entity icon set.",
+                      "example": "person"
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Discriminator for the tab's payload. Currently `widgets`, carried by the `widgets` property below; a future tab kind adds its own payload property rather than reusing this one. Deliberately not an enum, so a type introduced by a newer host still round-trips through an older one instead of failing validation.",
+                      "example": "widgets"
+                    },
+                    "widgets": {
+                      "type": "array",
+                      "description": "Payload for `type: widgets`. Membership in this list IS the tab's widget set, in render order — there is no separate visibility map, and a widget's ui_hook `default_visible` is not consulted.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "Widget id — a capability widget's `component`, or `summary` for the synthesized summary card.",
+                            "example": "next_best_action"
+                          },
+                          "width": {
+                            "type": "string",
+                            "description": "Width for this widget within the tab's grid. Falls back the same way as the header's `widget_widths` when omitted: widget's ui_hook `default_width`, then `full_width`.",
+                            "enum": [
+                              "one_third_width",
+                              "half_width",
+                              "two_third_width",
+                              "full_width"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "slug",
+                    "title",
+                    "order",
+                    "type"
+                  ]
+                },
+                "example": [
+                  {
+                    "id": "8f14e45f-ceea-467e-a0d6-c8a4ea1c9e6d",
+                    "slug": "sales-overview",
+                    "title": "Sales Overview",
+                    "order": 10,
+                    "type": "widgets",
+                    "widgets": [
+                      {
+                        "id": "next_best_action",
+                        "width": "full_width"
+                      },
+                      {
+                        "id": "recent_communications",
+                        "width": "one_third_width"
+                      }
+                    ]
+                  }
+                ]
               }
             }
           },
@@ -7509,7 +7615,16 @@
           "overridable_attribute": {
             "type": "boolean",
             "default": false,
-            "description": "Allow conditional variants of the entity to override the values managed by this\ncapability. Only meaningful on schemas that declare `conditions` and on capabilities\nthat render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.\nAttributes carried by the capability opt in individually via their own\n`overridable_attribute` flag.\n"
+            "description": "Allow conditional variants to override the fields this capability manages. Only\nmeaningful on schemas that declare `conditions`, and requires `managed_fields`: the\nflag covers exactly what that lists, not the capability's name.\n"
+          },
+          "managed_fields": {
+            "type": "array",
+            "description": "Every entity field this capability writes, including one named after the capability\nitself. With `overridable_attribute`, this is the definitive list of what a variant\nmay override through the capability, applied as a single patch.\n\nFields, not attributes: a capability may write entity fields that have no attribute\ndefinition, so entries need not resolve to one. Where an entry does resolve to an\nattribute, `hidden` and `computed` do not disqualify it.\n",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9_]+$",
+              "example": "status"
+            }
           },
           "_purpose": {
             "type": "array",

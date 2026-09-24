@@ -3355,14 +3355,23 @@ declare namespace Components {
             title?: string;
             attributes?: Attribute[];
             /**
-             * Allow conditional variants of the entity to override the values managed by this
-             * capability. Only meaningful on schemas that declare `conditions` and on capabilities
-             * that render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.
-             * Attributes carried by the capability opt in individually via their own
-             * `overridable_attribute` flag.
+             * Allow conditional variants to override the fields this capability manages. Only
+             * meaningful on schemas that declare `conditions`, and requires `managed_fields`: the
+             * flag covers exactly what that lists, not the capability's name.
              *
              */
             overridable_attribute?: boolean;
+            /**
+             * Every entity field this capability writes, including one named after the capability
+             * itself. With `overridable_attribute`, this is the definitive list of what a variant
+             * may override through the capability, applied as a single patch.
+             *
+             * Fields, not attributes: a capability may write entity fields that have no attribute
+             * definition, so entries need not resolve to one. Where an entry does resolve to an
+             * attribute, `hidden` and `computed` do not disqualify it.
+             *
+             */
+            managed_fields?: string /* ^[a-z0-9_]+$ */[];
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -3535,14 +3544,23 @@ declare namespace Components {
             title?: string;
             attributes?: Attribute[];
             /**
-             * Allow conditional variants of the entity to override the values managed by this
-             * capability. Only meaningful on schemas that declare `conditions` and on capabilities
-             * that render an attribute group (`EntityAttributes:Group` ui hook), e.g. pricing tiers.
-             * Attributes carried by the capability opt in individually via their own
-             * `overridable_attribute` flag.
+             * Allow conditional variants to override the fields this capability manages. Only
+             * meaningful on schemas that declare `conditions`, and requires `managed_fields`: the
+             * flag covers exactly what that lists, not the capability's name.
              *
              */
             overridable_attribute?: boolean;
+            /**
+             * Every entity field this capability writes, including one named after the capability
+             * itself. With `overridable_attribute`, this is the definitive list of what a variant
+             * may override through the capability, applied as a single patch.
+             *
+             * Fields, not attributes: a capability may write entity fields that have no attribute
+             * definition, so entries need not resolve to one. Where an entry does resolve to an
+             * attribute, `hidden` and `computed` do not disqualify it.
+             *
+             */
+            managed_fields?: string /* ^[a-z0-9_]+$ */[];
             _purpose?: /**
              * example:
              * taxonomy-slug:classification-slug
@@ -4704,6 +4722,83 @@ declare namespace Components {
                 widget_widths?: {
                     [name: string]: "one_third_width" | "half_width" | "two_third_width" | "full_width";
                 };
+                /**
+                 * Configured tabs that host widgets, shown alongside capability tabs in entity details. Interleaves with capability `EntityDetailsV2:Tab` ui_hooks on a shared `order`: the host merges both lists and sorts by `order`, with capability tabs winning ties. Unlike the header grid, a tab's `widgets` list is the entire membership — a widget's ui_hook `default_visible` is never consulted for tab placement.
+                 * example:
+                 * [
+                 *   {
+                 *     "id": "8f14e45f-ceea-467e-a0d6-c8a4ea1c9e6d",
+                 *     "slug": "sales-overview",
+                 *     "title": "Sales Overview",
+                 *     "order": 10,
+                 *     "type": "widgets",
+                 *     "widgets": [
+                 *       {
+                 *         "id": "next_best_action",
+                 *         "width": "full_width"
+                 *       },
+                 *       {
+                 *         "id": "recent_communications",
+                 *         "width": "one_third_width"
+                 *       }
+                 *     ]
+                 *   }
+                 * ]
+                 */
+                custom_tabs?: {
+                    [name: string]: any;
+                    /**
+                     * Generated when the tab is created and never edited afterward, so a blueprint-authored tab and a customer-authored tab can never collide and identity survives a rename.
+                     * example:
+                     * 8f14e45f-ceea-467e-a0d6-c8a4ea1c9e6d
+                     */
+                    id: string;
+                    /**
+                     * URL route segment for the tab, derived from `title`. Unique within the schema, and against capability tab ids, since both share one route-segment namespace.
+                     * example:
+                     * sales-overview
+                     */
+                    slug: string;
+                    /**
+                     * Tab label, authored by the configuring user.
+                     * example:
+                     * Sales Overview
+                     */
+                    title: string;
+                    /**
+                     * Authoritative render position; array position carries no meaning. Shares one ordering space with capability tab ui_hook `order` — at equal `order`, capability tabs sort first.
+                     * example:
+                     * 10
+                     */
+                    order: number;
+                    /**
+                     * Icon name from the existing entity icon set.
+                     * example:
+                     * person
+                     */
+                    icon?: string;
+                    /**
+                     * Discriminator for the tab's payload. Currently `widgets`, carried by the `widgets` property below; a future tab kind adds its own payload property rather than reusing this one. Deliberately not an enum, so a type introduced by a newer host still round-trips through an older one instead of failing validation.
+                     * example:
+                     * widgets
+                     */
+                    type: string;
+                    /**
+                     * Payload for `type: widgets`. Membership in this list IS the tab's widget set, in render order — there is no separate visibility map, and a widget's ui_hook `default_visible` is not consulted.
+                     */
+                    widgets?: {
+                        /**
+                         * Widget id — a capability widget's `component`, or `summary` for the synthesized summary card.
+                         * example:
+                         * next_best_action
+                         */
+                        id: string;
+                        /**
+                         * Width for this widget within the tab's grid. Falls back the same way as the header's `widget_widths` when omitted: widget's ui_hook `default_width`, then `full_width`.
+                         */
+                        width?: "one_third_width" | "half_width" | "two_third_width" | "full_width";
+                    }[];
+                }[];
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
@@ -5159,6 +5254,83 @@ declare namespace Components {
                 widget_widths?: {
                     [name: string]: "one_third_width" | "half_width" | "two_third_width" | "full_width";
                 };
+                /**
+                 * Configured tabs that host widgets, shown alongside capability tabs in entity details. Interleaves with capability `EntityDetailsV2:Tab` ui_hooks on a shared `order`: the host merges both lists and sorts by `order`, with capability tabs winning ties. Unlike the header grid, a tab's `widgets` list is the entire membership — a widget's ui_hook `default_visible` is never consulted for tab placement.
+                 * example:
+                 * [
+                 *   {
+                 *     "id": "8f14e45f-ceea-467e-a0d6-c8a4ea1c9e6d",
+                 *     "slug": "sales-overview",
+                 *     "title": "Sales Overview",
+                 *     "order": 10,
+                 *     "type": "widgets",
+                 *     "widgets": [
+                 *       {
+                 *         "id": "next_best_action",
+                 *         "width": "full_width"
+                 *       },
+                 *       {
+                 *         "id": "recent_communications",
+                 *         "width": "one_third_width"
+                 *       }
+                 *     ]
+                 *   }
+                 * ]
+                 */
+                custom_tabs?: {
+                    [name: string]: any;
+                    /**
+                     * Generated when the tab is created and never edited afterward, so a blueprint-authored tab and a customer-authored tab can never collide and identity survives a rename.
+                     * example:
+                     * 8f14e45f-ceea-467e-a0d6-c8a4ea1c9e6d
+                     */
+                    id: string;
+                    /**
+                     * URL route segment for the tab, derived from `title`. Unique within the schema, and against capability tab ids, since both share one route-segment namespace.
+                     * example:
+                     * sales-overview
+                     */
+                    slug: string;
+                    /**
+                     * Tab label, authored by the configuring user.
+                     * example:
+                     * Sales Overview
+                     */
+                    title: string;
+                    /**
+                     * Authoritative render position; array position carries no meaning. Shares one ordering space with capability tab ui_hook `order` — at equal `order`, capability tabs sort first.
+                     * example:
+                     * 10
+                     */
+                    order: number;
+                    /**
+                     * Icon name from the existing entity icon set.
+                     * example:
+                     * person
+                     */
+                    icon?: string;
+                    /**
+                     * Discriminator for the tab's payload. Currently `widgets`, carried by the `widgets` property below; a future tab kind adds its own payload property rather than reusing this one. Deliberately not an enum, so a type introduced by a newer host still round-trips through an older one instead of failing validation.
+                     * example:
+                     * widgets
+                     */
+                    type: string;
+                    /**
+                     * Payload for `type: widgets`. Membership in this list IS the tab's widget set, in render order — there is no separate visibility map, and a widget's ui_hook `default_visible` is not consulted.
+                     */
+                    widgets?: {
+                        /**
+                         * Widget id — a capability widget's `component`, or `summary` for the synthesized summary card.
+                         * example:
+                         * next_best_action
+                         */
+                        id: string;
+                        /**
+                         * Width for this widget within the tab's grid. Falls back the same way as the header's `widget_widths` when omitted: widget's ui_hook `default_width`, then `full_width`.
+                         */
+                        width?: "one_third_width" | "half_width" | "two_third_width" | "full_width";
+                    }[];
+                }[];
             };
             capabilities: /* Capabilities the Entity has. Turn features on/off for entities. */ EntityCapability[];
             /**
@@ -13661,6 +13833,7 @@ declare namespace Paths {
              * _tags
              */
             export type Attribute = string;
+            export type From = number;
             export type Input = string;
             export type Size = number;
             export type Slug = /**
@@ -13680,10 +13853,14 @@ declare namespace Paths {
             Parameters.Attribute;
             slug?: Parameters.Slug;
             size?: Parameters.Size;
+            from?: Parameters.From;
         }
         namespace Responses {
             export interface $200 {
                 /**
+                 * Number of distinct values matching the input. Exact (independent of `size`, capped at 1000) for
+                 * `_tags`; for other attributes the number of distinct values collected so far, which may grow with `size`.
+                 *
                  * example:
                  * 1
                  */
@@ -17736,7 +17913,20 @@ export interface OperationMethods {
   /**
    * autocomplete - autocomplete
    * 
-   * Autocomplete entity attributes
+   * Autocomplete entity attributes.
+   * 
+   * Suggestions are derived from the values **currently stored on entities** the caller is allowed to read.
+   * A value only shows up while at least one entity carries it, so this endpoint reflects usage, not
+   * configuration.
+   * 
+   * To enumerate the label catalogue managed in the Label Builder (including labels that are not
+   * assigned to any entity yet, and excluding archived ones), use the Taxonomy endpoints instead:
+   * `POST /v1/entity/taxonomies/classifications:search` (`taxonomiesClassificationsSearch`) or
+   * `GET /v1/entity/taxonomies/{taxonomySlug}:autocomplete` (`taxonomyAutocomplete`).
+   * 
+   * For `attribute=_tags` the distinct values are aggregated across all matching entities, `hits` is the exact
+   * number of distinct values (capped at 1000) and results are ordered by usage. For other attributes the
+   * 1000 most recently updated entities are scanned and `hits` is the number of distinct values found so far.
    * 
    */
   'autocomplete'(
@@ -18974,7 +19164,20 @@ export interface PathsDictionary {
     /**
      * autocomplete - autocomplete
      * 
-     * Autocomplete entity attributes
+     * Autocomplete entity attributes.
+     * 
+     * Suggestions are derived from the values **currently stored on entities** the caller is allowed to read.
+     * A value only shows up while at least one entity carries it, so this endpoint reflects usage, not
+     * configuration.
+     * 
+     * To enumerate the label catalogue managed in the Label Builder (including labels that are not
+     * assigned to any entity yet, and excluding archived ones), use the Taxonomy endpoints instead:
+     * `POST /v1/entity/taxonomies/classifications:search` (`taxonomiesClassificationsSearch`) or
+     * `GET /v1/entity/taxonomies/{taxonomySlug}:autocomplete` (`taxonomyAutocomplete`).
+     * 
+     * For `attribute=_tags` the distinct values are aggregated across all matching entities, `hits` is the exact
+     * number of distinct values (capped at 1000) and results are ordered by usage. For other attributes the
+     * 1000 most recently updated entities are scanned and `hits` is the number of distinct values found so far.
      * 
      */
     'get'(

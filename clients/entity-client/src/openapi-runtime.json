@@ -553,6 +553,10 @@
           {
             "name": "size",
             "in": "query"
+          },
+          {
+            "name": "from",
+            "in": "query"
           }
         ],
         "responses": {}

@@ -1,6 +1,6 @@
 {
   "name": "@epilot/entity-client",
-  "version": "7.5.1",
+  "version": "7.5.2",
   "description": "JavaScript client library for the epilot Core Entity API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,6 +28,7 @@
     "prepublishOnly": "npm run typegen && npm run build",
     "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/entity.yaml",
     "typegen": "openapi typegen src/openapi.json --client > src/openapi.d.ts",
+    "openapi:local": "node ../../scripts/update-openapi.js ../../../entity-api/lambda/ApiHandlerFunction/openapi.yml",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
     "build:watch": "npm run build && tsc -w",
