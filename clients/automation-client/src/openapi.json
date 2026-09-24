@@ -1230,6 +1230,153 @@
           "results"
         ]
       },
+      "JourneyContextUsagesReq": {
+        "type": "object",
+        "required": [
+          "journey_id",
+          "param_keys"
+        ],
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "param_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Context parameter keys to look for, as plain strings."
+          },
+          "param_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Accepted and ignored. This service stores context references by name only; the field keeps one request shape across every adapter.\n"
+          }
+        }
+      },
+      "JourneyContextUsage": {
+        "type": "object",
+        "required": [
+          "kind",
+          "resource",
+          "matched_as",
+          "link_hint"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "automation"
+            ]
+          },
+          "resource": {
+            "type": "object",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "automation_flow"
+                ]
+              },
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "action_id": {
+                "type": "string"
+              },
+              "action_type": {
+                "type": "string"
+              }
+            }
+          },
+          "matched_as": {
+            "type": "object",
+            "required": [
+              "dialect",
+              "token",
+              "at"
+            ],
+            "properties": {
+              "dialect": {
+                "type": "string",
+                "enum": [
+                  "name"
+                ]
+              },
+              "token": {
+                "type": "string"
+              },
+              "at": {
+                "type": "string"
+              }
+            }
+          },
+          "link_hint": {
+            "type": "object",
+            "required": [
+              "route",
+              "params"
+            ],
+            "properties": {
+              "route": {
+                "type": "string",
+                "enum": [
+                  "automation-flow"
+                ]
+              },
+              "params": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "JourneyContextUsagesResp": {
+        "type": "object",
+        "required": [
+          "usages",
+          "status",
+          "scanned"
+        ],
+        "properties": {
+          "usages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JourneyContextUsage"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "partial"
+            ],
+            "description": "partial means the row cap (MAX_USAGES) was reached mid-scan and the scan was aborted: entire flows after the one that tripped the cap may have gone unscanned, not just that some rows were dropped from the one flow being scanned when it tripped.\n"
+          },
+          "scanned": {
+            "type": "integer",
+            "description": "Number of flows actually entered by the scan, including the one flow the scan was aborted part-way through when the row cap tripped. Not a total: when status is partial, flows after the aborted one were never visited and are not counted here.\n"
+          }
+        }
+      },
       "AnyTrigger": {
         "anyOf": [
           {
@@ -2846,6 +2993,15 @@
             "description": "Prefix to add to the original email subject",
             "default": "Fwd: "
           },
+          "language_code": {
+            "type": "string",
+            "description": "Language of the \"Forwarded message\" attribution header\n(From / Date / To / Subject) prepended to the forwarded email.\nDefaults to German.\n",
+            "enum": [
+              "de",
+              "en"
+            ],
+            "default": "de"
+          },
           "mark_as_done": {
             "type": "boolean",
             "description": "When enabled, the email thread will be automatically marked as done after this action completes.",
@@ -2971,7 +3127,7 @@
           },
           "wait_for_journey_submission": {
             "type": "boolean",
-            "description": "Only relevant when this action runs from a workflow automation task. After the email is sent,\nthe workflow task waits for the journey referenced in the email template to be submitted and\nits submission automation to complete (AL-2521).\n\nThe email template should contain a journey link created with the generateJourneyLink variable.\n",
+            "description": "Only relevant when this action runs from a workflow automation task. After the email is sent,\nthe workflow task waits for the journey referenced in the email template to be submitted and\nits submission automation to complete.\n\nThe email template should contain a journey link created with the generateJourneyLink variable.\n",
             "default": false
           },
           "journey_id": {
@@ -3022,6 +3178,16 @@
                       "type": "string",
                       "description": "Match by filename. Regex syntax supported",
                       "example": ".*"
+                    },
+                    "filename": {
+                      "type": "string",
+                      "description": "Match by exact filename",
+                      "example": "Datenblatt_PV.pdf"
+                    },
+                    "filename_pattern": {
+                      "type": "string",
+                      "description": "Match by a filename pattern that may contain template variables. Each\n`{{variable}}` placeholder matches any text, so a pattern written the way a\ngenerated document is named picks up every document produced from that\ntemplate, whatever the variables resolved to.\n",
+                      "example": "{{system.date}}_Summary_{{contact._title}}.docx"
                     },
                     "attribute": {
                       "type": "string",
@@ -3692,7 +3858,7 @@
       },
       "FlowExecutionCancelConfig": {
         "type": "object",
-        "description": "Configuration for cancelling a flow execution with selected reasons",
+        "description": "Configuration for cancelling a flow execution. The selected reasons are optional; a semi-automated step lets the person running it choose them when the execution starts.",
         "properties": {
           "selected_reasons": {
             "type": "array",
@@ -3706,10 +3872,7 @@
             "description": "Additional description or notes for the cancellation",
             "example": "Process completed successfully"
           }
-        },
-        "required": [
-          "configured_reasons"
-        ]
+        }
       },
       "CancellationReason": {
         "type": "object",
@@ -4023,6 +4186,9 @@
               "$ref": "#/components/schemas/AnyAction"
             }
           },
+          "action_inputs": {
+            "$ref": "#/components/schemas/ActionInputs"
+          },
           "resume_token": {
             "$ref": "#/components/schemas/ResumeToken"
           },
@@ -4163,7 +4329,7 @@
       },
       "WorkflowWaitContext": {
         "type": "object",
-        "description": "Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.\n",
+        "description": "Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link. Consumed by svc-workflows to resume a task waiting on this journey submission.\n",
         "required": [
           "workflow_execution_id",
           "workflow_task_id"
@@ -4601,11 +4767,66 @@
             "type": "string",
             "deprecated": true,
             "description": "Use workflow_context.workflow_exec_task_id instead"
+          },
+          "action_inputs": {
+            "$ref": "#/components/schemas/ActionInputs"
           }
         },
         "required": [
           "entity_id",
           "flow_id"
+        ]
+      },
+      "ActionInputs": {
+        "type": "object",
+        "description": "Internal. Run-time inputs for the actions of this execution, keyed by\naction type. An action reads the entry for its own type and treats it\nas replacing the matching configured values; an action whose type has\nno entry runs entirely from its configuration.\n\nOnly the workflows service may set this field, on behalf of the person\nrunning a semi-automated flow task: it forwards what that person chose\nafter checking their permission to run the task. A request carrying\n`action_inputs` under any other token is refused with 403 and nothing\nis stored.\n\nThis is deliberately NOT stored on `actions[].config`. Retrying a step\nrefreshes that action's config from the live flow (see `startAction`),\nwhich would silently drop an override and re-run the action with the\nconfigured values — sending the wrong email, or cancelling a flow\nunder the wrong reason. Keeping the inputs on the execution row means a\nretry replays what the person actually chose.\n",
+        "properties": {
+          "cancel-flow-execution": {
+            "$ref": "#/components/schemas/FlowExecutionCancelInputs"
+          },
+          "send-email": {
+            "$ref": "#/components/schemas/SendEmailInputs"
+          }
+        }
+      },
+      "SendEmailInputs": {
+        "type": "object",
+        "description": "Adjustments a person made to an email before sending it, replacing the rendered values the template produced. The template itself is untouched.\n\n`attachment_entity_ids` is a request, not an instruction: the worker keeps only the ids that are genuinely files of the entity this execution runs on, so a caller cannot attach an arbitrary file.",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "maxLength": 998
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 50000
+          },
+          "attachment_entity_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "FlowExecutionCancelInputs": {
+        "type": "object",
+        "description": "The cancellation reasons a person chose when running a semi-automated cancel step, replacing `selected_reasons` from the action's configuration.",
+        "properties": {
+          "selected_reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CancellationReason"
+            }
+          },
+          "extra_description": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "A note the person added with their choice, replacing the one fixed in the action's configuration."
+          }
+        },
+        "required": [
+          "selected_reasons"
         ]
       },
       "PatchBulkJobRequest": {

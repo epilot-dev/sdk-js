@@ -95,6 +95,35 @@ declare namespace Components {
              */
             ConditionStatement[];
         }
+        /**
+         * Internal. Run-time inputs for the actions of this execution, keyed by
+         * action type. An action reads the entry for its own type and treats it
+         * as replacing the matching configured values; an action whose type has
+         * no entry runs entirely from its configuration.
+         *
+         * Only the workflows service may set this field, on behalf of the person
+         * running a semi-automated flow task: it forwards what that person chose
+         * after checking their permission to run the task. A request carrying
+         * `action_inputs` under any other token is refused with 403 and nothing
+         * is stored.
+         *
+         * This is deliberately NOT stored on `actions[].config`. Retrying a step
+         * refreshes that action's config from the live flow (see `startAction`),
+         * which would silently drop an override and re-run the action with the
+         * configured values — sending the wrong email, or cancelling a flow
+         * under the wrong reason. Keeping the inputs on the execution row means a
+         * retry replays what the person actually chose.
+         *
+         */
+        export interface ActionInputs {
+            "cancel-flow-execution"?: /* The cancellation reasons a person chose when running a semi-automated cancel step, replacing `selected_reasons` from the action's configuration. */ FlowExecutionCancelInputs;
+            "send-email"?: /**
+             * Adjustments a person made to an email before sending it, replacing the rendered values the template produced. The template itself is untouched.
+             *
+             * `attachment_entity_ids` is a request, not an instruction: the worker keeps only the ids that are genuinely files of the entity this execution runs on, so a caller cannot attach an arbitrary file.
+             */
+            SendEmailInputs;
+        }
         export interface ActionSchedule {
             /**
              * Schedule Id
@@ -1396,6 +1425,27 @@ declare namespace Components {
             conditions?: ActionCondition[];
             schedules?: ActionSchedule[];
             actions: AnyAction[];
+            action_inputs?: /**
+             * Internal. Run-time inputs for the actions of this execution, keyed by
+             * action type. An action reads the entry for its own type and treats it
+             * as replacing the matching configured values; an action whose type has
+             * no entry runs entirely from its configuration.
+             *
+             * Only the workflows service may set this field, on behalf of the person
+             * running a semi-automated flow task: it forwards what that person chose
+             * after checking their permission to run the task. A request carrying
+             * `action_inputs` under any other token is refused with 403 and nothing
+             * is stored.
+             *
+             * This is deliberately NOT stored on `actions[].config`. Retrying a step
+             * refreshes that action's config from the live flow (see `startAction`),
+             * which would silently drop an override and re-run the action with the
+             * configured values — sending the wrong email, or cancelling a flow
+             * under the wrong reason. Keeping the inputs on the execution row means a
+             * retry replays what the person actually chose.
+             *
+             */
+            ActionInputs;
             resume_token?: /**
              * A unique token to resume a paused automation execution
              * example:
@@ -1423,7 +1473,7 @@ declare namespace Components {
             TriggerEventEventCatalog;
             workflow_context?: WorkflowExecutionContext;
             workflow_wait_context?: /**
-             * Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.
+             * Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link. Consumed by svc-workflows to resume a task waiting on this journey submission.
              *
              */
             WorkflowWaitContext;
@@ -2911,7 +2961,7 @@ declare namespace Components {
             AutomationActionId;
             name?: string;
             type?: "cancel-flow-execution";
-            config?: /* Configuration for cancelling a flow execution with selected reasons */ FlowExecutionCancelConfig;
+            config?: /* Configuration for cancelling a flow execution. The selected reasons are optional; a semi-automated step lets the person running it choose them when the execution starts. */ FlowExecutionCancelConfig;
             /**
              * Whether to stop execution in a failed state if this action fails
              */
@@ -3003,7 +3053,7 @@ declare namespace Components {
             AutomationActionId;
             name?: string;
             type?: "cancel-flow-execution";
-            config?: /* Configuration for cancelling a flow execution with selected reasons */ FlowExecutionCancelConfig;
+            config?: /* Configuration for cancelling a flow execution. The selected reasons are optional; a semi-automated step lets the person running it choose them when the execution starts. */ FlowExecutionCancelConfig;
             /**
              * Whether to stop execution in a failed state if this action fails
              */
@@ -3045,7 +3095,7 @@ declare namespace Components {
             loop_id?: string;
         }
         /**
-         * Configuration for cancelling a flow execution with selected reasons
+         * Configuration for cancelling a flow execution. The selected reasons are optional; a semi-automated step lets the person running it choose them when the execution starts.
          */
         export interface FlowExecutionCancelConfig {
             /**
@@ -3056,6 +3106,16 @@ declare namespace Components {
              * Additional description or notes for the cancellation
              * example:
              * Process completed successfully
+             */
+            extra_description?: string;
+        }
+        /**
+         * The cancellation reasons a person chose when running a semi-automated cancel step, replacing `selected_reasons` from the action's configuration.
+         */
+        export interface FlowExecutionCancelInputs {
+            selected_reasons: /* A reason for cancelling a flow execution */ CancellationReason[];
+            /**
+             * A note the person added with their choice, replacing the one fixed in the action's configuration.
              */
             extra_description?: string;
         }
@@ -3236,6 +3296,13 @@ declare namespace Components {
              * Prefix to add to the original email subject
              */
             subject_prefix?: string;
+            /**
+             * Language of the "Forwarded message" attribution header
+             * (From / Date / To / Subject) prepended to the forwarded email.
+             * Defaults to German.
+             *
+             */
+            language_code?: "de" | "en";
             /**
              * When enabled, the email thread will be automatically marked as done after this action completes.
              */
@@ -3527,6 +3594,54 @@ declare namespace Components {
          * 8c086140-f33e-4bb7-a993-50c0f2402c7b
          */
         export type JobId = string;
+        export interface JourneyContextUsage {
+            kind: "automation";
+            resource: {
+                type: "automation_flow";
+                id: string;
+                name?: string;
+            };
+            location?: {
+                action_id?: string;
+                action_type?: string;
+            };
+            matched_as: {
+                dialect: "name";
+                token: string;
+                at: string;
+            };
+            link_hint: {
+                route: "automation-flow";
+                params: {
+                    [name: string]: string;
+                };
+            };
+        }
+        export interface JourneyContextUsagesReq {
+            journey_id: string; // uuid
+            /**
+             * Context parameter keys to look for, as plain strings.
+             */
+            param_keys: string[];
+            /**
+             * Accepted and ignored. This service stores context references by name only; the field keeps one request shape across every adapter.
+             *
+             */
+            param_ids?: string[];
+        }
+        export interface JourneyContextUsagesResp {
+            usages: JourneyContextUsage[];
+            /**
+             * partial means the row cap (MAX_USAGES) was reached mid-scan and the scan was aborted: entire flows after the one that tripped the cap may have gone unscanned, not just that some rows were dropped from the one flow being scanned when it tripped.
+             *
+             */
+            status: "ok" | "partial";
+            /**
+             * Number of flows actually entered by the scan, including the one flow the scan was aborted part-way through when the row cap tripped. Not a total: when status is partial, flows after the aborted one were never visited and are not counted here.
+             *
+             */
+            scanned: number;
+        }
         export interface JourneySubmitTrigger {
             /**
              * example:
@@ -4487,7 +4602,7 @@ declare namespace Components {
             /**
              * Only relevant when this action runs from a workflow automation task. After the email is sent,
              * the workflow task waits for the journey referenced in the email template to be submitted and
-             * its submission automation to complete (AL-2521).
+             * its submission automation to complete.
              *
              * The email template should contain a journey link created with the generateJourneyLink variable.
              *
@@ -4544,6 +4659,22 @@ declare namespace Components {
                      */
                     filename_regex?: string;
                     /**
+                     * Match by exact filename
+                     * example:
+                     * Datenblatt_PV.pdf
+                     */
+                    filename?: string;
+                    /**
+                     * Match by a filename pattern that may contain template variables. Each
+                     * `{{variable}}` placeholder matches any text, so a pattern written the way a
+                     * generated document is named picks up every document produced from that
+                     * template, whatever the variables resolved to.
+                     *
+                     * example:
+                     * {{system.date}}_Summary_{{contact._title}}.docx
+                     */
+                    filename_pattern?: string;
+                    /**
                      * Filter by a specific relation attribute on the main entity
                      * example:
                      * _files
@@ -4573,6 +4704,16 @@ declare namespace Components {
              * Conditions necessary to send out email. Otherwise it will be skipped
              */
             conditions?: SendEmailCondition[];
+        }
+        /**
+         * Adjustments a person made to an email before sending it, replacing the rendered values the template produced. The template itself is untouched.
+         *
+         * `attachment_entity_ids` is a request, not an instruction: the worker keeps only the ids that are genuinely files of the entity this execution runs on, so a caller cannot attach an arbitrary file.
+         */
+        export interface SendEmailInputs {
+            subject?: string;
+            body?: string;
+            attachment_entity_ids?: string[];
         }
         export interface SetValueMapper {
             mode: /**
@@ -4611,6 +4752,27 @@ declare namespace Components {
              * Use workflow_context.workflow_exec_task_id instead
              */
             flow_automation_task_id?: string;
+            action_inputs?: /**
+             * Internal. Run-time inputs for the actions of this execution, keyed by
+             * action type. An action reads the entry for its own type and treats it
+             * as replacing the matching configured values; an action whose type has
+             * no entry runs entirely from its configuration.
+             *
+             * Only the workflows service may set this field, on behalf of the person
+             * running a semi-automated flow task: it forwards what that person chose
+             * after checking their permission to run the task. A request carrying
+             * `action_inputs` under any other token is refused with 403 and nothing
+             * is stored.
+             *
+             * This is deliberately NOT stored on `actions[].config`. Retrying a step
+             * refreshes that action's config from the live flow (see `startAction`),
+             * which would silently drop an override and re-run the action with the
+             * configured values — sending the wrong email, or cancelling a flow
+             * under the wrong reason. Keeping the inputs on the execution row means a
+             * retry replays what the person actually chose.
+             *
+             */
+            ActionInputs;
         }
         export interface SuffixCondition {
             suffix?: string;
@@ -5480,7 +5642,7 @@ declare namespace Components {
             trigger_user_id?: string;
         }
         /**
-         * Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.
+         * Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link. Consumed by svc-workflows to resume a task waiting on this journey submission.
          *
          */
         export interface WorkflowWaitContext {
@@ -6362,6 +6524,7 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type ActionCondition = Components.Schemas.ActionCondition;
+export type ActionInputs = Components.Schemas.ActionInputs;
 export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type ActionScheduleSource = Components.Schemas.ActionScheduleSource;
 export type ActivityId = Components.Schemas.ActivityId;
@@ -6430,6 +6593,7 @@ export type FilterConditionOnEvent = Components.Schemas.FilterConditionOnEvent;
 export type FlowExecutionCancelAction = Components.Schemas.FlowExecutionCancelAction;
 export type FlowExecutionCancelActionConfig = Components.Schemas.FlowExecutionCancelActionConfig;
 export type FlowExecutionCancelConfig = Components.Schemas.FlowExecutionCancelConfig;
+export type FlowExecutionCancelInputs = Components.Schemas.FlowExecutionCancelInputs;
 export type FlowsTrigger = Components.Schemas.FlowsTrigger;
 export type ForwardEmailAction = Components.Schemas.ForwardEmailAction;
 export type ForwardEmailActionConfig = Components.Schemas.ForwardEmailActionConfig;
@@ -6446,6 +6610,9 @@ export type InformERPAction = Components.Schemas.InformERPAction;
 export type InformERPActionConfig = Components.Schemas.InformERPActionConfig;
 export type InformERPConfig = Components.Schemas.InformERPConfig;
 export type JobId = Components.Schemas.JobId;
+export type JourneyContextUsage = Components.Schemas.JourneyContextUsage;
+export type JourneyContextUsagesReq = Components.Schemas.JourneyContextUsagesReq;
+export type JourneyContextUsagesResp = Components.Schemas.JourneyContextUsagesResp;
 export type JourneySubmitTrigger = Components.Schemas.JourneySubmitTrigger;
 export type MapEntityAction = Components.Schemas.MapEntityAction;
 export type MapEntityActionConfig = Components.Schemas.MapEntityActionConfig;
@@ -6483,6 +6650,7 @@ export type SendEmailAction = Components.Schemas.SendEmailAction;
 export type SendEmailActionConfig = Components.Schemas.SendEmailActionConfig;
 export type SendEmailCondition = Components.Schemas.SendEmailCondition;
 export type SendEmailConfig = Components.Schemas.SendEmailConfig;
+export type SendEmailInputs = Components.Schemas.SendEmailInputs;
 export type SetValueMapper = Components.Schemas.SetValueMapper;
 export type StartExecutionRequest = Components.Schemas.StartExecutionRequest;
 export type SuffixCondition = Components.Schemas.SuffixCondition;
