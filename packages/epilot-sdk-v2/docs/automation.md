@@ -53,6 +53,9 @@ const { data } = await automationClient.searchFlows(...)
 - [`AutomationFlow`](#automationflow)
 - [`WorkflowContextRole`](#workflowcontextrole)
 - [`SearchAutomationsResp`](#searchautomationsresp)
+- [`JourneyContextUsagesReq`](#journeycontextusagesreq)
+- [`JourneyContextUsage`](#journeycontextusage)
+- [`JourneyContextUsagesResp`](#journeycontextusagesresp)
 - [`AnyTrigger`](#anytrigger)
 - [`AnyAction`](#anyaction)
 - [`AnyActionConfig`](#anyactionconfig)
@@ -154,6 +157,9 @@ const { data } = await automationClient.searchFlows(...)
 - [`SearchExecutionsReq`](#searchexecutionsreq)
 - [`SearchExecutionsResp`](#searchexecutionsresp)
 - [`StartExecutionRequest`](#startexecutionrequest)
+- [`ActionInputs`](#actioninputs)
+- [`SendEmailInputs`](#sendemailinputs)
+- [`FlowExecutionCancelInputs`](#flowexecutioncancelinputs)
 - [`PatchBulkJobRequest`](#patchbulkjobrequest)
 - [`BulkTriggerRequest`](#bulktriggerrequest)
 - [`EntityRef`](#entityref)
@@ -328,6 +334,7 @@ const { data } = await client.getExecutions({
       "conditions": [],
       "schedules": [],
       "actions": [],
+      "action_inputs": {},
       "resume_token": "eyJraWQiOiJrZXkifQ==",
       "trigger_context": {},
       "version": 2,
@@ -378,7 +385,23 @@ const { data } = await client.startExecution(
       trigger_user_id: '10006129'
     },
     flow_execution_id: 'string',
-    flow_automation_task_id: 'string'
+    flow_automation_task_id: 'string',
+    action_inputs: {
+      'cancel-flow-execution': {
+        selected_reasons: [
+          {
+            id: '_6kITMwkv_0Uo4i7fO7Ja',
+            title: 'Process completed successfully'
+          }
+        ],
+        extra_description: 'string'
+      },
+      'send-email': {
+        subject: 'string',
+        body: 'string',
+        attachment_entity_ids: ['string']
+      }
+    }
   },
 )
 ```
@@ -472,6 +495,17 @@ const { data } = await client.startExecution(
       "iterations": []
     }
   ],
+  "action_inputs": {
+    "cancel-flow-execution": {
+      "selected_reasons": [],
+      "extra_description": "string"
+    },
+    "send-email": {
+      "subject": "string",
+      "body": "string",
+      "attachment_entity_ids": ["string"]
+    }
+  },
   "resume_token": "eyJraWQiOiJrZXkifQ==",
   "trigger_context": {
     "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
@@ -566,6 +600,7 @@ const { data } = await client.searchExecutions(
       "conditions": [],
       "schedules": [],
       "actions": [],
+      "action_inputs": {},
       "resume_token": "eyJraWQiOiJrZXkifQ==",
       "trigger_context": {},
       "version": 2,
@@ -846,6 +881,17 @@ const { data } = await client.getExecution({
       "iterations": []
     }
   ],
+  "action_inputs": {
+    "cancel-flow-execution": {
+      "selected_reasons": [],
+      "extra_description": "string"
+    },
+    "send-email": {
+      "subject": "string",
+      "body": "string",
+      "attachment_entity_ids": ["string"]
+    }
+  },
   "resume_token": "eyJraWQiOiJrZXkifQ==",
   "trigger_context": {
     "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
@@ -998,6 +1044,17 @@ const { data } = await client.cancelExecution({
       "iterations": []
     }
   ],
+  "action_inputs": {
+    "cancel-flow-execution": {
+      "selected_reasons": [],
+      "extra_description": "string"
+    },
+    "send-email": {
+      "subject": "string",
+      "body": "string",
+      "attachment_entity_ids": ["string"]
+    }
+  },
   "resume_token": "eyJraWQiOiJrZXkifQ==",
   "trigger_context": {
     "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
@@ -1120,6 +1177,10 @@ const { data } = await client.resumeExecutionWithToken(
       {},
       {}
     ],
+    "action_inputs": {
+      "cancel-flow-execution": {},
+      "send-email": {}
+    },
     "resume_token": "eyJraWQiOiJrZXkifQ==",
     "trigger_context": {
       "entity_id": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
@@ -1469,6 +1530,72 @@ type SearchAutomationsResp = {
       type?: { ... }
       config?: { ... }
   // ...
+}
+```
+
+### `JourneyContextUsagesReq`
+
+```ts
+type JourneyContextUsagesReq = {
+  journey_id: string // uuid
+  param_keys: string[]
+  param_ids?: string[]
+}
+```
+
+### `JourneyContextUsage`
+
+```ts
+type JourneyContextUsage = {
+  kind: "automation"
+  resource: {
+    type: "automation_flow"
+    id: string
+    name?: string
+  }
+  location?: {
+    action_id?: string
+    action_type?: string
+  }
+  matched_as: {
+    dialect: "name"
+    token: string
+    at: string
+  }
+  link_hint: {
+    route: "automation-flow"
+    params: Record<string, string>
+  }
+}
+```
+
+### `JourneyContextUsagesResp`
+
+```ts
+type JourneyContextUsagesResp = {
+  usages: Array<{
+    kind: "automation"
+    resource: {
+      type: { ... }
+      id: { ... }
+      name?: { ... }
+    }
+    location?: {
+      action_id?: { ... }
+      action_type?: { ... }
+    }
+    matched_as: {
+      dialect: { ... }
+      token: { ... }
+      at: { ... }
+    }
+    link_hint: {
+      route: { ... }
+      params: { ... }
+    }
+  }>
+  status: "ok" | "partial"
+  scanned: number
 }
 ```
 
@@ -2840,6 +2967,7 @@ type ForwardEmailActionConfig = {
     }>
     include_attachments?: boolean
     subject_prefix?: string
+    language_code?: "de" | "en"
     mark_as_done?: boolean
     mark_as_read?: boolean
   }
@@ -2868,6 +2996,7 @@ type ForwardEmailAction = {
     }>
     include_attachments?: boolean
     subject_prefix?: string
+    language_code?: "de" | "en"
     mark_as_done?: boolean
     mark_as_read?: boolean
   }
@@ -2884,6 +3013,7 @@ type ForwardEmailConfig = {
   }>
   include_attachments?: boolean
   subject_prefix?: string
+  language_code?: "de" | "en"
   mark_as_done?: boolean
   mark_as_read?: boolean
 }
@@ -2963,6 +3093,8 @@ type SendEmailConfig = {
     source_filter?: {
       limit?: { ... }
       filename_regex?: { ... }
+      filename?: { ... }
+      filename_pattern?: { ... }
       attribute?: { ... }
       relation_tag?: { ... }
       tag?: { ... }
@@ -3391,7 +3523,7 @@ type FlowExecutionCancelAction = {
 
 ### `FlowExecutionCancelConfig`
 
-Configuration for cancelling a flow execution with selected reasons
+Configuration for cancelling a flow execution. The selected reasons are optional; a semi-automated step lets the person running it choose them when the execution starts.
 
 ```ts
 type FlowExecutionCancelConfig = {
@@ -3647,7 +3779,7 @@ type WorkflowExecutionContext = {
 
 ### `WorkflowWaitContext`
 
-Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link (AL-2521). Consumed by svc-workflows to resume a task waiting on this journey submission.
+Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link. Consumed by svc-workflows to resume a task waiting on this journey submission.
 
 
 ```ts
@@ -4055,6 +4187,71 @@ type StartExecutionRequest = {
   }
   flow_execution_id?: string
   flow_automation_task_id?: string
+  action_inputs?: {
+    cancel-flow-execution?: {
+      selected_reasons: { ... }
+      extra_description?: { ... }
+    }
+    send-email?: {
+      subject?: { ... }
+      body?: { ... }
+      attachment_entity_ids?: { ... }
+    }
+  }
+}
+```
+
+### `ActionInputs`
+
+Internal. Run-time inputs for the actions of this execution, keyed by
+action type. An action reads the entry for its own type and treats it
+as replacing the matching configured values; an action whose type has
+no entry runs entirely from its configuration.
+
+Only the workflows service may set this fi
+
+```ts
+type ActionInputs = {
+  cancel-flow-execution?: {
+    selected_reasons: Array<{
+      id: { ... }
+      title: { ... }
+    }>
+    extra_description?: string
+  }
+  send-email?: {
+    subject?: string
+    body?: string
+    attachment_entity_ids?: string[]
+  }
+}
+```
+
+### `SendEmailInputs`
+
+Adjustments a person made to an email before sending it, replacing the rendered values the template produced. The template itself is untouched.
+
+`attachment_entity_ids` is a request, not an instruction: the worker keeps only the ids that are genuinely files of the entity this execution runs on, so a
+
+```ts
+type SendEmailInputs = {
+  subject?: string
+  body?: string
+  attachment_entity_ids?: string[]
+}
+```
+
+### `FlowExecutionCancelInputs`
+
+The cancellation reasons a person chose when running a semi-automated cancel step, replacing `selected_reasons` from the action's configuration.
+
+```ts
+type FlowExecutionCancelInputs = {
+  selected_reasons: Array<{
+    id: string
+    title: string
+  }>
+  extra_description?: string
 }
 ```
 
