@@ -118,6 +118,52 @@ declare namespace Components {
             base_event_version: string;
         }
         /**
+         * A pending successor to a published custom event, with the version it would become.
+         *
+         */
+        export interface CustomEventVersionDraft {
+            config: /* Event configuration with required fields */ EventConfig;
+            /**
+             * How the draft differs from the live version.
+             * - `none`: nothing changed, so there is nothing to publish.
+             * - `minor`: purely additive — new payload fields or new graph nodes. Pinned consumers keep
+             *   their exact shape once the additions are stripped.
+             * - `major`: an existing field's projection changed. The schema is unchanged, so only a
+             *   version bump tells a pinned consumer that familiar fields now carry different values.
+             * - `blocked`: removals, retypes or loosened requiredness. These need a transformer only a
+             *   human can author, or data that no longer travels with the event.
+             *
+             */
+            change_class: "none" | "minor" | "major" | "blocked";
+            /**
+             * The version this draft would be published as. Null when `change_class` is none or blocked.
+             * example:
+             * 1.1
+             */
+            next_version?: string | null;
+            /**
+             * Declared field-level changes against the live version.
+             */
+            changes: /**
+             * A field-level change descriptor. Powers the declarative half of the
+             * version DSL.
+             *
+             */
+            FieldChange[];
+            /**
+             * Fields whose projection changed while their schema stayed identical.
+             */
+            remapped_fields: string[];
+            /**
+             * Entity-graph nodes this draft adds, which surface as new top-level payload keys.
+             */
+            added_nodes: string[];
+            /**
+             * Why the draft cannot be versioned automatically. Present only when `change_class` is `blocked`.
+             */
+            blocked_reason?: string;
+        }
+        /**
          * Custom v1 fields support graph-projected JSON Schema values and context entities; attachment semantics are built-in-only.
          */
         export type CustomSchemaField = /* Custom v1 fields support graph-projected JSON Schema values and context entities; attachment semantics are built-in-only. */ /* A primitive JSON Schema field definition */ PrimitiveField | ContextEntity;
@@ -1175,6 +1221,18 @@ declare namespace Components {
              */
             base_auto_trigger_enabled?: boolean;
         }
+        export interface PublishCustomEventVersionPayload {
+            /**
+             * One line describing what changed, shown on the event's version timeline. Derived from the
+             * diff when omitted.
+             *
+             */
+            change_summary?: string;
+            /**
+             * Optional longer-form prose (markdown) for the version timeline.
+             */
+            change_notes?: string;
+        }
         export interface PurposeFilterSnapshot {
             id: string;
             display_name: string;
@@ -1485,6 +1543,20 @@ declare namespace Paths {
             }
         }
     }
+    namespace DeleteCustomEventVersionDraft {
+        namespace Parameters {
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace DeprecateCustomEvent {
         namespace Parameters {
             export type EventName = string;
@@ -1498,6 +1570,23 @@ declare namespace Paths {
             export interface $404 {
             }
             export interface $409 {
+            }
+        }
+    }
+    namespace GetCustomEventVersionDraft {
+        namespace Parameters {
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * A pending successor to a published custom event, with the version it would become.
+             *
+             */
+            Components.Schemas.CustomEventVersionDraft;
+            export interface $404 {
             }
         }
     }
@@ -1812,6 +1901,48 @@ declare namespace Paths {
             }
         }
     }
+    namespace PublishCustomEventVersion {
+        namespace Parameters {
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+        }
+        export type RequestBody = Components.Schemas.PublishCustomEventVersionPayload;
+        namespace Responses {
+            export type $200 = /* Event configuration with required fields */ Components.Schemas.EventConfig;
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+        }
+    }
+    namespace PutCustomEventVersionDraft {
+        namespace Parameters {
+            export type EventName = string;
+        }
+        export interface PathParameters {
+            event_name: Parameters.EventName;
+        }
+        export type RequestBody = /* Complete immutable custom-event v1.0 definition projected from a required entity graph. Publication is a separate conditional action. */ Components.Schemas.CreateCustomEventPayload;
+        namespace Responses {
+            export type $200 = /**
+             * A pending successor to a published custom event, with the version it would become.
+             *
+             */
+            Components.Schemas.CustomEventVersionDraft;
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $422 {
+            }
+        }
+    }
     namespace ReplaceCustomEventDraft {
         namespace Parameters {
             export type EventName = string;
@@ -2069,6 +2200,61 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublishCustomEventDefinition.Responses.$200>
   /**
+   * getCustomEventVersionDraft - getCustomEventVersionDraft
+   * 
+   * Read the in-progress successor of a published custom event, together with the version it
+   * would be published as. The live version keeps firing while the successor is authored.
+   * 
+   */
+  'getCustomEventVersionDraft'(
+    parameters?: Parameters<Paths.GetCustomEventVersionDraft.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCustomEventVersionDraft.Responses.$200>
+  /**
+   * putCustomEventVersionDraft - putCustomEventVersionDraft
+   * 
+   * Create or replace the successor of a published custom event. The published definition stays
+   * immutable and keeps firing; only publishing the draft promotes it.
+   * 
+   * The response classifies the change against the live version: additive changes mint a MINOR,
+   * a changed projection mints a MAJOR (the schema is identical, so nothing else would warn a
+   * pinned consumer that the values moved), and removals, retypes and loosened requiredness are
+   * rejected as `blocked` because no sound downgrade can be generated for them.
+   * 
+   */
+  'putCustomEventVersionDraft'(
+    parameters?: Parameters<Paths.PutCustomEventVersionDraft.PathParameters> | null,
+    data?: Paths.PutCustomEventVersionDraft.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutCustomEventVersionDraft.Responses.$200>
+  /**
+   * deleteCustomEventVersionDraft - deleteCustomEventVersionDraft
+   * 
+   * Discard the next-version draft. The published version is untouched.
+   */
+  'deleteCustomEventVersionDraft'(
+    parameters?: Parameters<Paths.DeleteCustomEventVersionDraft.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteCustomEventVersionDraft.Responses.$204>
+  /**
+   * publishCustomEventVersion - publishCustomEventVersion
+   * 
+   * Publish the next-version draft as the event's new live version.
+   * 
+   * The version label, the declared field changes and the JSONata downgrade back to the previous
+   * version are all derived from the diff — never supplied by the caller — so the downgrade
+   * cannot disagree with the definition it accompanies. Consumers pinned to an earlier version
+   * keep receiving their own shape through the stamped downgrade chain.
+   * 
+   */
+  'publishCustomEventVersion'(
+    parameters?: Parameters<Paths.PublishCustomEventVersion.PathParameters> | null,
+    data?: Paths.PublishCustomEventVersion.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublishCustomEventVersion.Responses.$200>
+  /**
    * getEventJSONSchema - getEventJSONSchema
    * 
    * Retrieve the JSON Schema of a specific business event. Pass an optional
@@ -2258,6 +2444,65 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublishCustomEventDefinition.Responses.$200>
   }
+  ['/v1/events/{event_name}/version_draft']: {
+    /**
+     * getCustomEventVersionDraft - getCustomEventVersionDraft
+     * 
+     * Read the in-progress successor of a published custom event, together with the version it
+     * would be published as. The live version keeps firing while the successor is authored.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetCustomEventVersionDraft.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCustomEventVersionDraft.Responses.$200>
+    /**
+     * putCustomEventVersionDraft - putCustomEventVersionDraft
+     * 
+     * Create or replace the successor of a published custom event. The published definition stays
+     * immutable and keeps firing; only publishing the draft promotes it.
+     * 
+     * The response classifies the change against the live version: additive changes mint a MINOR,
+     * a changed projection mints a MAJOR (the schema is identical, so nothing else would warn a
+     * pinned consumer that the values moved), and removals, retypes and loosened requiredness are
+     * rejected as `blocked` because no sound downgrade can be generated for them.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.PutCustomEventVersionDraft.PathParameters> | null,
+      data?: Paths.PutCustomEventVersionDraft.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutCustomEventVersionDraft.Responses.$200>
+    /**
+     * deleteCustomEventVersionDraft - deleteCustomEventVersionDraft
+     * 
+     * Discard the next-version draft. The published version is untouched.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteCustomEventVersionDraft.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteCustomEventVersionDraft.Responses.$204>
+  }
+  ['/v1/events/{event_name}/version_draft:publish']: {
+    /**
+     * publishCustomEventVersion - publishCustomEventVersion
+     * 
+     * Publish the next-version draft as the event's new live version.
+     * 
+     * The version label, the declared field changes and the JSONata downgrade back to the previous
+     * version are all derived from the diff — never supplied by the caller — so the downgrade
+     * cannot disagree with the definition it accompanies. Consumers pinned to an earlier version
+     * keep receiving their own shape through the stamped downgrade chain.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.PublishCustomEventVersion.PathParameters> | null,
+      data?: Paths.PublishCustomEventVersion.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublishCustomEventVersion.Responses.$200>
+  }
   ['/v1/events/{event_name}/json_schema']: {
     /**
      * getEventJSONSchema - getEventJSONSchema
@@ -2378,6 +2623,7 @@ export type CommonEventMetadata = Components.Schemas.CommonEventMetadata;
 export type ContextEntity = Components.Schemas.ContextEntity;
 export type CreateCustomEventPayload = Components.Schemas.CreateCustomEventPayload;
 export type CustomEventLineage = Components.Schemas.CustomEventLineage;
+export type CustomEventVersionDraft = Components.Schemas.CustomEventVersionDraft;
 export type CustomSchemaField = Components.Schemas.CustomSchemaField;
 export type EntityOperationTrigger = Components.Schemas.EntityOperationTrigger;
 export type Event = Components.Schemas.Event;
@@ -2397,6 +2643,7 @@ export type InlineDowngradeStep = Components.Schemas.InlineDowngradeStep;
 export type PreviewEventResponse = Components.Schemas.PreviewEventResponse;
 export type PrimitiveField = Components.Schemas.PrimitiveField;
 export type PublishCustomEventPayload = Components.Schemas.PublishCustomEventPayload;
+export type PublishCustomEventVersionPayload = Components.Schemas.PublishCustomEventVersionPayload;
 export type PurposeFilterSnapshot = Components.Schemas.PurposeFilterSnapshot;
 export type SchemaField = Components.Schemas.SchemaField;
 export type SearchOptions = Components.Schemas.SearchOptions;

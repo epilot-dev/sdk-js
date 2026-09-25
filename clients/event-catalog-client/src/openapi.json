@@ -23,6 +23,11 @@
     "/v1/events": {
       "get": {
         "operationId": "listEvents",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:view_definitions"
+          }
+        ],
         "summary": "listEvents",
         "description": "Retrieve list of available business events",
         "tags": [
@@ -51,6 +56,11 @@
       },
       "post": {
         "operationId": "createCustomEvent",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:manage"
+          }
+        ],
         "summary": "createCustomEvent",
         "description": "Reserve an org-scoped custom event name and persist its immutable v1.0 draft definition. Custom events are always projected from an entity graph: entity_graph is required and, in guided mapping mode, every schema field needs a graph_source expression. Caller-supplied trigger fields are ignored for custom events.",
         "tags": [
@@ -86,6 +96,11 @@
     "/v1/events/{event_name}": {
       "get": {
         "operationId": "getEvent",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:view_definitions"
+          }
+        ],
         "summary": "getEvent",
         "description": "Retrieve the configuration of a specific business event",
         "tags": [
@@ -117,6 +132,11 @@
       },
       "patch": {
         "operationId": "patchEvent",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:manage"
+          }
+        ],
         "summary": "patchEvent",
         "description": "Update the configuration of a specific business event for the organization",
         "tags": [
@@ -161,6 +181,11 @@
       },
       "put": {
         "operationId": "replaceCustomEventDraft",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:manage"
+          }
+        ],
         "summary": "replaceCustomEventDraft",
         "description": "Replace the complete v1.0 definition of an org-scoped custom event while it is still an\nunpublished draft. Drafts have no consumers, so their definition is not yet immutable;\nthe event name is the identity and cannot change. Publication remains a separate action.\n",
         "tags": [
@@ -213,6 +238,11 @@
       },
       "delete": {
         "operationId": "deprecateCustomEvent",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:manage"
+          }
+        ],
         "summary": "deprecateCustomEvent",
         "description": "Soft-deprecate an org-scoped custom event. Definitions and v1.0 history remain readable.",
         "tags": [
@@ -244,6 +274,11 @@
     "/v1/events/{event_name}:preview": {
       "post": {
         "operationId": "previewCustomEvent",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:manage"
+          }
+        ],
         "summary": "previewCustomEvent",
         "description": "Assemble and fully validate a persisted custom-event draft without publishing it.",
         "tags": [
@@ -292,6 +327,11 @@
     "/v1/events/{event_name}:publish": {
       "post": {
         "operationId": "publishCustomEventDefinition",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:manage"
+          }
+        ],
         "summary": "publishCustomEventDefinition",
         "description": "Conditionally activate an immutable custom-event v1.0 definition.",
         "tags": [
@@ -333,9 +373,177 @@
         }
       }
     },
+    "/v1/events/{event_name}/version_draft": {
+      "get": {
+        "operationId": "getCustomEventVersionDraft",
+        "summary": "getCustomEventVersionDraft",
+        "description": "Read the in-progress successor of a published custom event, together with the version it\nwould be published as. The live version keeps firing while the successor is authored.\n",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The next-version draft and its classification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomEventVersionDraft"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Custom event not found, or it has no next-version draft"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putCustomEventVersionDraft",
+        "summary": "putCustomEventVersionDraft",
+        "description": "Create or replace the successor of a published custom event. The published definition stays\nimmutable and keeps firing; only publishing the draft promotes it.\n\nThe response classifies the change against the live version: additive changes mint a MINOR,\na changed projection mints a MAJOR (the schema is identical, so nothing else would warn a\npinned consumer that the values moved), and removals, retypes and loosened requiredness are\nrejected as `blocked` because no sound downgrade can be generated for them.\n",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomEventPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The stored draft and its classification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomEventVersionDraft"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Definition is invalid or the body event_name differs from the path"
+          },
+          "404": {
+            "description": "Custom event not found"
+          },
+          "409": {
+            "description": "Event is built-in, or is not published"
+          },
+          "422": {
+            "description": "Definition could not be stored"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteCustomEventVersionDraft",
+        "summary": "deleteCustomEventVersionDraft",
+        "description": "Discard the next-version draft. The published version is untouched.",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Draft discarded"
+          },
+          "404": {
+            "description": "Custom event not found"
+          }
+        }
+      }
+    },
+    "/v1/events/{event_name}/version_draft:publish": {
+      "post": {
+        "operationId": "publishCustomEventVersion",
+        "summary": "publishCustomEventVersion",
+        "description": "Publish the next-version draft as the event's new live version.\n\nThe version label, the declared field changes and the JSONata downgrade back to the previous\nversion are all derived from the diff — never supplied by the caller — so the downgrade\ncannot disagree with the definition it accompanies. Consumers pinned to an earlier version\nkeep receiving their own shape through the stamped downgrade chain.\n",
+        "tags": [
+          "Event Catalog"
+        ],
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishCustomEventVersionPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The newly live event configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The draft changes nothing, or cannot be versioned automatically"
+          },
+          "404": {
+            "description": "Custom event or draft not found"
+          },
+          "409": {
+            "description": "The live version moved while the draft was being authored"
+          }
+        }
+      }
+    },
     "/v1/events/{event_name}/json_schema": {
       "get": {
         "operationId": "getEventJSONSchema",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:view_definitions"
+          }
+        ],
         "summary": "getEventJSONSchema",
         "description": "Retrieve the JSON Schema of a specific business event. Pass an optional\n`Epilot-Event-Version` header to retrieve a specific version's schema;\nwhen omitted, the event's latest version is returned.\n",
         "tags": [
@@ -381,6 +589,11 @@
     "/v1/events/{event_name}/example": {
       "get": {
         "operationId": "getEventExample",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:view_definitions"
+          }
+        ],
         "summary": "getEventExample",
         "description": "Generate a sample event payload based on the event's JSON Schema. Pass an\noptional `Epilot-Event-Version` header to generate the example for a\nspecific version; when omitted, the event's latest version is used.\n",
         "tags": [
@@ -427,6 +640,11 @@
     "/v1/events/{event_name}/versions": {
       "get": {
         "operationId": "listEventVersions",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:view_definitions"
+          }
+        ],
         "summary": "listEventVersions",
         "description": "List every known version of an event, along with the `latest`\nand the set of currently `active` versions. See §3.2 of the\nEvent Payload Versioning RFC.\n",
         "tags": [
@@ -463,6 +681,11 @@
     "/v1/events/{event_name}:history": {
       "post": {
         "operationId": "searchEventHistory",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:view"
+          }
+        ],
         "summary": "searchEventHistory",
         "description": "Paginated history of events",
         "tags": [
@@ -530,6 +753,11 @@
     "/v2/events/{event_name}:history": {
       "post": {
         "operationId": "searchEventHistoryV2",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:view"
+          }
+        ],
         "summary": "searchEventHistoryV2",
         "description": "Paginated history of events with projected/lightweight payload (v2).\n\nReturns `EventSummary` objects instead of fully hydrated `Event` objects:\nhydrated entity objects (values carrying `_schema`/`_id`) are reduced to\nreference stubs `{_schema, _id, _title}` — the full entity is recoverable\nvia GET /v2/events/{event_name}/history/{event_id} or by hitting\nentity-api directly with the `_id`.\n",
         "tags": [
@@ -597,6 +825,11 @@
     "/v2/events/{event_name}/history/{event_id}": {
       "get": {
         "operationId": "getHistoricalEvent",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:view"
+          }
+        ],
         "summary": "getHistoricalEvent",
         "description": "Fetch a single historical event by id with full hydration",
         "tags": [
@@ -642,6 +875,11 @@
     "/v1/events/{event_name}:trigger": {
       "post": {
         "operationId": "triggerEvent",
+        "x-epilot-permissions": [
+          {
+            "action": "event_catalog:manage"
+          }
+        ],
         "summary": "triggerEvent",
         "description": "Explicitly trigger an event by providing input field values and an optional entity seed\nfor graph hydration. The event must be enabled for the organization.\n\n- For events with an entity_graph, a seed (entity_id + node_id) is required\n- For events without an entity_graph, only fields are needed\n- Entity operation context fields (operation, trigger_entity, activity_id, activity_type)\n  are not included when triggering via API\n- Events marked `automation_trigger_only` require `_trigger_source_type: automation` and a\n  stable execution/action ID in `_trigger_source`; retries with that ID return the same\n  logical event, including while durable delivery is pending\n",
         "tags": [
@@ -683,7 +921,7 @@
             "description": "Invalid input (validation error, missing seed, or missing required fields)"
           },
           "403": {
-            "description": "Event is disabled for this organization"
+            "description": "Event is disabled for this organization, or the user is not allowed to trigger events"
           },
           "404": {
             "description": "Event not found"
@@ -1034,6 +1272,77 @@
           "base_auto_trigger_enabled": {
             "type": "boolean",
             "description": "Optional publication choice. False disables only the named lineage base event's org auto-trigger overlay."
+          }
+        }
+      },
+      "CustomEventVersionDraft": {
+        "type": "object",
+        "description": "A pending successor to a published custom event, with the version it would become.\n",
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/EventConfig"
+          },
+          "change_class": {
+            "type": "string",
+            "enum": [
+              "none",
+              "minor",
+              "major",
+              "blocked"
+            ],
+            "description": "How the draft differs from the live version.\n- `none`: nothing changed, so there is nothing to publish.\n- `minor`: purely additive — new payload fields or new graph nodes. Pinned consumers keep\n  their exact shape once the additions are stripped.\n- `major`: an existing field's projection changed. The schema is unchanged, so only a\n  version bump tells a pinned consumer that familiar fields now carry different values.\n- `blocked`: removals, retypes or loosened requiredness. These need a transformer only a\n  human can author, or data that no longer travels with the event.\n"
+          },
+          "next_version": {
+            "type": "string",
+            "nullable": true,
+            "description": "The version this draft would be published as. Null when `change_class` is none or blocked.",
+            "example": "1.1"
+          },
+          "changes": {
+            "type": "array",
+            "description": "Declared field-level changes against the live version.",
+            "items": {
+              "$ref": "#/components/schemas/FieldChange"
+            }
+          },
+          "remapped_fields": {
+            "type": "array",
+            "description": "Fields whose projection changed while their schema stayed identical.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "added_nodes": {
+            "type": "array",
+            "description": "Entity-graph nodes this draft adds, which surface as new top-level payload keys.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blocked_reason": {
+            "type": "string",
+            "description": "Why the draft cannot be versioned automatically. Present only when `change_class` is `blocked`."
+          }
+        },
+        "required": [
+          "config",
+          "change_class",
+          "changes",
+          "remapped_fields",
+          "added_nodes"
+        ]
+      },
+      "PublishCustomEventVersionPayload": {
+        "type": "object",
+        "properties": {
+          "change_summary": {
+            "type": "string",
+            "maxLength": 280,
+            "description": "One line describing what changed, shown on the event's version timeline. Derived from the\ndiff when omitted.\n"
+          },
+          "change_notes": {
+            "type": "string",
+            "description": "Optional longer-form prose (markdown) for the version timeline."
           }
         }
       },

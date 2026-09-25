@@ -116,6 +116,65 @@
         "responses": {}
       }
     },
+    "/v1/events/{event_name}/version_draft": {
+      "get": {
+        "operationId": "getCustomEventVersionDraft",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putCustomEventVersionDraft",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteCustomEventVersionDraft",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/events/{event_name}/version_draft:publish": {
+      "post": {
+        "operationId": "publishCustomEventVersion",
+        "parameters": [
+          {
+            "name": "event_name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/events/{event_name}/json_schema": {
       "get": {
         "operationId": "getEventJSONSchema",
