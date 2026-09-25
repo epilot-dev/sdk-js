@@ -1,6 +1,6 @@
 # @epilot/chat-client
 
-Generated TypeScript client for epilot Chat API widget management and public chat.
+Generated TypeScript client for epilot Chat API Website Chat management and public chat.
 
 ## Usage
 
@@ -9,13 +9,13 @@ import { createClient } from '@epilot/chat-client';
 
 const chat = createClient();
 chat.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-const { data } = await chat.listChatWidgets();
-const { data: widget } = await chat.getChatWidget({ widget_id });
+const { data } = await chat.listWebsiteChats();
+const { data: websiteChat } = await chat.getWebsiteChat({ website_chat_id });
 
-await chat.updateChatWidget({ widget_id }, {
-  version: widget.version,
-  website_chat: {
-    ...widget.website_chat,
+await chat.updateWebsiteChat({ website_chat_id }, {
+  version: websiteChat.version,
+  settings: {
+    ...websiteChat.settings,
     design_id,
     authentication: { email_code: { email_template_id } },
   },
@@ -27,10 +27,12 @@ The same API is available as `epilot.chat` from `@epilot/sdk`, or through the
 for callers that want a shared singleton.
 
 Use a separate `createClient()` instance for anonymous chat. Bootstrap and session
-creation use no epilot access token; `sendAnonymousChatMessage` uses the anonymous
-session token. Its response is SSE: request `responseType: 'stream'` in Node and
-consume the stream, or use a streaming fetch transport in the browser. The client
-does not parse SSE events or implement the host/iframe handoff protocol.
+creation use no epilot access token; `sendAnonymousChatMessage` and the email
+verification operations (`getChatVerification`, `startChatEmailVerification`,
+`verifyChatEmailCode`, `cancelChatVerification`) use the anonymous session token.
+`sendAnonymousChatMessage` responds with SSE: request `responseType: 'stream'` in
+Node and consume the stream, or use a streaming fetch transport in the browser. The
+client does not parse SSE events or implement the host/iframe handoff protocol.
 
 ## Regeneration
 

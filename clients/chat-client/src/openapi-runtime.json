@@ -10,9 +10,9 @@
     }
   ],
   "paths": {
-    "/v1/widgets": {
+    "/v1/website-chats": {
       "get": {
-        "operationId": "listChatWidgets",
+        "operationId": "listWebsiteChats",
         "responses": {},
         "parameters": [
           {
@@ -22,7 +22,7 @@
         ]
       },
       "post": {
-        "operationId": "createChatWidget",
+        "operationId": "createWebsiteChat",
         "responses": {},
         "requestBody": {
           "required": true,
@@ -32,20 +32,20 @@
         }
       }
     },
-    "/v1/widgets/{widget_id}": {
+    "/v1/website-chats/{website_chat_id}": {
       "parameters": [
         {
           "in": "path",
-          "name": "widget_id",
+          "name": "website_chat_id",
           "required": true
         }
       ],
       "get": {
-        "operationId": "getChatWidget",
+        "operationId": "getWebsiteChat",
         "responses": {}
       },
       "put": {
-        "operationId": "updateChatWidget",
+        "operationId": "updateWebsiteChat",
         "responses": {},
         "requestBody": {
           "required": true,
@@ -55,7 +55,7 @@
         }
       },
       "delete": {
-        "operationId": "deleteChatWidget",
+        "operationId": "deleteWebsiteChat",
         "responses": {},
         "parameters": [
           {
@@ -66,13 +66,13 @@
         ]
       }
     },
-    "/v1/widgets/{widget_id}/configuration": {
+    "/v1/website-chats/{website_chat_id}/configuration": {
       "get": {
-        "operationId": "getPublicChatWidget",
+        "operationId": "getPublicWebsiteChat",
         "parameters": [
           {
             "in": "path",
-            "name": "widget_id",
+            "name": "website_chat_id",
             "required": true
           }
         ],
@@ -112,6 +112,42 @@
             "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v1/verification": {
+      "get": {
+        "operationId": "getChatVerification",
+        "responses": {}
+      }
+    },
+    "/v1/verification/email": {
+      "post": {
+        "operationId": "startChatEmailVerification",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/verification/code": {
+      "post": {
+        "operationId": "verifyChatEmailCode",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/verification/cancel": {
+      "post": {
+        "operationId": "cancelChatVerification",
         "responses": {}
       }
     }

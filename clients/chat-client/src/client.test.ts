@@ -9,33 +9,38 @@ describe('Chat client', () => {
     expect(client.defaults.baseURL).toBe('https://chat.sls.epilot.io');
     expect(client.api.getOperations().map((operation) => operation.operationId)).toEqual(
       expect.arrayContaining([
-        'listChatWidgets',
-        'createChatWidget',
-        'getChatWidget',
-        'updateChatWidget',
-        'deleteChatWidget',
-        'getPublicChatWidget',
+        'listWebsiteChats',
+        'createWebsiteChat',
+        'getWebsiteChat',
+        'updateWebsiteChat',
+        'deleteWebsiteChat',
+        'getPublicWebsiteChat',
         'createPublicChatGrant',
         'createAnonymousChatSession',
         'sendAnonymousChatMessage',
+        'getChatVerification',
+        'startChatEmailVerification',
+        'verifyChatEmailCode',
+        'cancelChatVerification',
       ]),
     );
-    expect(definition.paths['/v1/widgets'].get.security).toEqual([{ EpilotAuth: [] }]);
+    expect(definition.paths['/v1/website-chats'].get.security).toEqual([{ EpilotAuth: [] }]);
     expect(definition.paths['/v1/bootstrap'].post.security).toEqual([]);
     expect(definition.paths['/v1/sessions'].post.security).toEqual([]);
-    expect(definition.paths['/v1/widgets/{widget_id}/configuration'].get.security).toEqual([]);
+    expect(definition.paths['/v1/website-chats/{website_chat_id}/configuration'].get.security).toEqual([]);
     expect(definition.paths['/v1/messages'].post.security).toEqual([{ AnonymousSession: [] }]);
+    expect(definition.paths['/v1/verification/code'].post.security).toEqual([{ AnonymousSession: [] }]);
     expect(definition.components.responses.Error.content['application/json'].schema.properties.code.enum).toContain(
       'SESSION_EXPIRED',
     );
     expect(definition.components.schemas.Error.properties).not.toHaveProperty('code');
   });
 
-  it('encodes a widget update and preserves design and email verification settings', async () => {
+  it('encodes a Website Chat update and preserves design and email verification settings', async () => {
     const client = createClient();
-    const payload: Components.Schemas.UpdateChatWidgetRequest = {
+    const payload: Components.Schemas.UpdateWebsiteChatRequest = {
       version: 1,
-      website_chat: {
+      settings: {
         allowed_origins: ['https://example.com'],
         organisation_name: 'Example Energy',
         default_locale: 'en',
@@ -45,12 +50,18 @@ describe('Chat client', () => {
     };
     client.defaults.adapter = async (config) => {
       expect(config.method).toBe('put');
-      expect(config.url).toBe('/v1/widgets/widget-1');
+      expect(config.url).toBe('/v1/website-chats/website-chat-1');
       expect(JSON.parse(config.data)).toEqual(payload);
-      return { config, data: { widget_id: 'widget-1', ...payload }, status: 200, statusText: 'OK', headers: {} };
+      return {
+        config,
+        data: { website_chat_id: 'website-chat-1', ...payload },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+      };
     };
-    const response = await client.updateChatWidget({ widget_id: 'widget-1' }, payload);
-    expect(response.data.website_chat.design_id).toBe(payload.website_chat?.design_id);
+    const response = await client.updateWebsiteChat({ website_chat_id: 'website-chat-1' }, payload);
+    expect(response.data.settings.design_id).toBe(payload.settings?.design_id);
   });
 
   it('can isolate an anonymous session from the authenticated management singleton', () => {

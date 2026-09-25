@@ -3,7 +3,7 @@
   "info": {
     "title": "epilot Chat API",
     "version": "0.1.0",
-    "description": "Widget management and anonymous browser chat."
+    "description": "Website Chat management and anonymous browser chat."
   },
   "servers": [
     {
@@ -16,12 +16,12 @@
     }
   ],
   "paths": {
-    "/v1/widgets": {
+    "/v1/website-chats": {
       "get": {
         "tags": [
-          "Chat widgets"
+          "Website Chats"
         ],
-        "operationId": "listChatWidgets",
+        "operationId": "listWebsiteChats",
         "security": [
           {
             "EpilotAuth": []
@@ -29,28 +29,28 @@
         ],
         "responses": {
           "200": {
-            "description": "Widget response",
+            "description": "Website Chat response",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "required": [
-                    "widgets"
+                    "website_chats"
                   ],
                   "properties": {
-                    "widgets": {
+                    "website_chats": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "required": [
-                          "widget_id",
+                          "website_chat_id",
                           "org_id",
                           "agent_id",
                           "binding_id",
                           "version",
                           "name",
-                          "website_chat",
-                          "website_chat_embed",
+                          "settings",
+                          "embed",
                           "created_at",
                           "updated_at"
                         ],
@@ -65,7 +65,7 @@
                             "format": "uuid",
                             "nullable": true
                           },
-                          "website_chat": {
+                          "settings": {
                             "type": "object",
                             "additionalProperties": false,
                             "required": [
@@ -78,7 +78,7 @@
                                 "type": "array",
                                 "maxItems": 50,
                                 "uniqueItems": true,
-                                "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                                "description": "Exact HTTPS origins. Empty means the Website Chat cannot start sessions.",
                                 "items": {
                                   "type": "string",
                                   "maxLength": 2048
@@ -100,7 +100,7 @@
                                 "type": "string",
                                 "format": "uuid",
                                 "nullable": true,
-                                "description": "Design Builder configuration for the widget only."
+                                "description": "Design Builder configuration for the Website Chat only."
                               },
                               "authentication": {
                                 "type": "object",
@@ -126,7 +126,7 @@
                               }
                             }
                           },
-                          "widget_id": {
+                          "website_chat_id": {
                             "type": "string",
                             "format": "uuid",
                             "readOnly": true,
@@ -157,7 +157,7 @@
                             "format": "date-time",
                             "readOnly": true
                           },
-                          "website_chat_embed": {
+                          "embed": {
                             "type": "object",
                             "readOnly": true,
                             "required": [
@@ -192,7 +192,7 @@
             }
           },
           "400": {
-            "description": "Invalid widget settings",
+            "description": "Invalid Website Chat settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -213,7 +213,7 @@
             }
           },
           "404": {
-            "description": "Widget not found in this organisation",
+            "description": "Website Chat not found in this organisation",
             "content": {
               "application/json": {
                 "schema": {
@@ -234,7 +234,7 @@
             }
           },
           "409": {
-            "description": "Widget or assigned agent changed; reload before retrying",
+            "description": "Website Chat or assigned agent changed; reload before retrying",
             "content": {
               "application/json": {
                 "schema": {
@@ -268,9 +268,9 @@
       },
       "post": {
         "tags": [
-          "Chat widgets"
+          "Website Chats"
         ],
-        "operationId": "createChatWidget",
+        "operationId": "createWebsiteChat",
         "security": [
           {
             "EpilotAuth": []
@@ -278,20 +278,20 @@
         ],
         "responses": {
           "201": {
-            "description": "Widget response",
+            "description": "Website Chat response",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "required": [
-                    "widget_id",
+                    "website_chat_id",
                     "org_id",
                     "agent_id",
                     "binding_id",
                     "version",
                     "name",
-                    "website_chat",
-                    "website_chat_embed",
+                    "settings",
+                    "embed",
                     "created_at",
                     "updated_at"
                   ],
@@ -306,7 +306,7 @@
                       "format": "uuid",
                       "nullable": true
                     },
-                    "website_chat": {
+                    "settings": {
                       "type": "object",
                       "additionalProperties": false,
                       "required": [
@@ -319,7 +319,7 @@
                           "type": "array",
                           "maxItems": 50,
                           "uniqueItems": true,
-                          "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                          "description": "Exact HTTPS origins. Empty means the Website Chat cannot start sessions.",
                           "items": {
                             "type": "string",
                             "maxLength": 2048
@@ -341,7 +341,7 @@
                           "type": "string",
                           "format": "uuid",
                           "nullable": true,
-                          "description": "Design Builder configuration for the widget only."
+                          "description": "Design Builder configuration for the Website Chat only."
                         },
                         "authentication": {
                           "type": "object",
@@ -367,7 +367,7 @@
                         }
                       }
                     },
-                    "widget_id": {
+                    "website_chat_id": {
                       "type": "string",
                       "format": "uuid",
                       "readOnly": true,
@@ -398,7 +398,7 @@
                       "format": "date-time",
                       "readOnly": true
                     },
-                    "website_chat_embed": {
+                    "embed": {
                       "type": "object",
                       "readOnly": true,
                       "required": [
@@ -427,7 +427,7 @@
             }
           },
           "400": {
-            "description": "Invalid widget settings",
+            "description": "Invalid Website Chat settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -448,7 +448,7 @@
             }
           },
           "404": {
-            "description": "Widget not found in this organisation",
+            "description": "Website Chat not found in this organisation",
             "content": {
               "application/json": {
                 "schema": {
@@ -469,7 +469,7 @@
             }
           },
           "409": {
-            "description": "Widget or assigned agent changed; reload before retrying",
+            "description": "Website Chat or assigned agent changed; reload before retrying",
             "content": {
               "application/json": {
                 "schema": {
@@ -500,7 +500,7 @@
                 "required": [
                   "name",
                   "agent_id",
-                  "website_chat"
+                  "settings"
                 ],
                 "properties": {
                   "name": {
@@ -513,7 +513,7 @@
                     "format": "uuid",
                     "nullable": true
                   },
-                  "website_chat": {
+                  "settings": {
                     "type": "object",
                     "additionalProperties": false,
                     "required": [
@@ -526,7 +526,7 @@
                         "type": "array",
                         "maxItems": 50,
                         "uniqueItems": true,
-                        "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                        "description": "Exact HTTPS origins. Empty means the Website Chat cannot start sessions.",
                         "items": {
                           "type": "string",
                           "maxLength": 2048
@@ -548,7 +548,7 @@
                         "type": "string",
                         "format": "uuid",
                         "nullable": true,
-                        "description": "Design Builder configuration for the widget only."
+                        "description": "Design Builder configuration for the Website Chat only."
                       },
                       "authentication": {
                         "type": "object",
@@ -581,11 +581,11 @@
         }
       }
     },
-    "/v1/widgets/{widget_id}": {
+    "/v1/website-chats/{website_chat_id}": {
       "parameters": [
         {
           "in": "path",
-          "name": "widget_id",
+          "name": "website_chat_id",
           "required": true,
           "schema": {
             "type": "string",
@@ -595,9 +595,9 @@
       ],
       "get": {
         "tags": [
-          "Chat widgets"
+          "Website Chats"
         ],
-        "operationId": "getChatWidget",
+        "operationId": "getWebsiteChat",
         "security": [
           {
             "EpilotAuth": []
@@ -605,20 +605,20 @@
         ],
         "responses": {
           "200": {
-            "description": "Widget response",
+            "description": "Website Chat response",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "required": [
-                    "widget_id",
+                    "website_chat_id",
                     "org_id",
                     "agent_id",
                     "binding_id",
                     "version",
                     "name",
-                    "website_chat",
-                    "website_chat_embed",
+                    "settings",
+                    "embed",
                     "created_at",
                     "updated_at"
                   ],
@@ -633,7 +633,7 @@
                       "format": "uuid",
                       "nullable": true
                     },
-                    "website_chat": {
+                    "settings": {
                       "type": "object",
                       "additionalProperties": false,
                       "required": [
@@ -646,7 +646,7 @@
                           "type": "array",
                           "maxItems": 50,
                           "uniqueItems": true,
-                          "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                          "description": "Exact HTTPS origins. Empty means the Website Chat cannot start sessions.",
                           "items": {
                             "type": "string",
                             "maxLength": 2048
@@ -668,7 +668,7 @@
                           "type": "string",
                           "format": "uuid",
                           "nullable": true,
-                          "description": "Design Builder configuration for the widget only."
+                          "description": "Design Builder configuration for the Website Chat only."
                         },
                         "authentication": {
                           "type": "object",
@@ -694,7 +694,7 @@
                         }
                       }
                     },
-                    "widget_id": {
+                    "website_chat_id": {
                       "type": "string",
                       "format": "uuid",
                       "readOnly": true,
@@ -725,7 +725,7 @@
                       "format": "date-time",
                       "readOnly": true
                     },
-                    "website_chat_embed": {
+                    "embed": {
                       "type": "object",
                       "readOnly": true,
                       "required": [
@@ -754,7 +754,7 @@
             }
           },
           "400": {
-            "description": "Invalid widget settings",
+            "description": "Invalid Website Chat settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -775,7 +775,7 @@
             }
           },
           "404": {
-            "description": "Widget not found in this organisation",
+            "description": "Website Chat not found in this organisation",
             "content": {
               "application/json": {
                 "schema": {
@@ -796,7 +796,7 @@
             }
           },
           "409": {
-            "description": "Widget or assigned agent changed; reload before retrying",
+            "description": "Website Chat or assigned agent changed; reload before retrying",
             "content": {
               "application/json": {
                 "schema": {
@@ -820,9 +820,9 @@
       },
       "put": {
         "tags": [
-          "Chat widgets"
+          "Website Chats"
         ],
-        "operationId": "updateChatWidget",
+        "operationId": "updateWebsiteChat",
         "security": [
           {
             "EpilotAuth": []
@@ -830,20 +830,20 @@
         ],
         "responses": {
           "200": {
-            "description": "Widget response",
+            "description": "Website Chat response",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "required": [
-                    "widget_id",
+                    "website_chat_id",
                     "org_id",
                     "agent_id",
                     "binding_id",
                     "version",
                     "name",
-                    "website_chat",
-                    "website_chat_embed",
+                    "settings",
+                    "embed",
                     "created_at",
                     "updated_at"
                   ],
@@ -858,7 +858,7 @@
                       "format": "uuid",
                       "nullable": true
                     },
-                    "website_chat": {
+                    "settings": {
                       "type": "object",
                       "additionalProperties": false,
                       "required": [
@@ -871,7 +871,7 @@
                           "type": "array",
                           "maxItems": 50,
                           "uniqueItems": true,
-                          "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                          "description": "Exact HTTPS origins. Empty means the Website Chat cannot start sessions.",
                           "items": {
                             "type": "string",
                             "maxLength": 2048
@@ -893,7 +893,7 @@
                           "type": "string",
                           "format": "uuid",
                           "nullable": true,
-                          "description": "Design Builder configuration for the widget only."
+                          "description": "Design Builder configuration for the Website Chat only."
                         },
                         "authentication": {
                           "type": "object",
@@ -919,7 +919,7 @@
                         }
                       }
                     },
-                    "widget_id": {
+                    "website_chat_id": {
                       "type": "string",
                       "format": "uuid",
                       "readOnly": true,
@@ -950,7 +950,7 @@
                       "format": "date-time",
                       "readOnly": true
                     },
-                    "website_chat_embed": {
+                    "embed": {
                       "type": "object",
                       "readOnly": true,
                       "required": [
@@ -979,7 +979,7 @@
             }
           },
           "400": {
-            "description": "Invalid widget settings",
+            "description": "Invalid Website Chat settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -1000,7 +1000,7 @@
             }
           },
           "404": {
-            "description": "Widget not found in this organisation",
+            "description": "Website Chat not found in this organisation",
             "content": {
               "application/json": {
                 "schema": {
@@ -1021,7 +1021,7 @@
             }
           },
           "409": {
-            "description": "Widget or assigned agent changed; reload before retrying",
+            "description": "Website Chat or assigned agent changed; reload before retrying",
             "content": {
               "application/json": {
                 "schema": {
@@ -1063,7 +1063,7 @@
                     "format": "uuid",
                     "nullable": true
                   },
-                  "website_chat": {
+                  "settings": {
                     "type": "object",
                     "additionalProperties": false,
                     "required": [
@@ -1076,7 +1076,7 @@
                         "type": "array",
                         "maxItems": 50,
                         "uniqueItems": true,
-                        "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                        "description": "Exact HTTPS origins. Empty means the Website Chat cannot start sessions.",
                         "items": {
                           "type": "string",
                           "maxLength": 2048
@@ -1098,7 +1098,7 @@
                         "type": "string",
                         "format": "uuid",
                         "nullable": true,
-                        "description": "Design Builder configuration for the widget only."
+                        "description": "Design Builder configuration for the Website Chat only."
                       },
                       "authentication": {
                         "type": "object",
@@ -1137,9 +1137,9 @@
       },
       "delete": {
         "tags": [
-          "Chat widgets"
+          "Website Chats"
         ],
-        "operationId": "deleteChatWidget",
+        "operationId": "deleteWebsiteChat",
         "security": [
           {
             "EpilotAuth": []
@@ -1147,10 +1147,10 @@
         ],
         "responses": {
           "204": {
-            "description": "Widget deleted"
+            "description": "Website Chat deleted"
           },
           "400": {
-            "description": "Invalid widget settings",
+            "description": "Invalid Website Chat settings",
             "content": {
               "application/json": {
                 "schema": {
@@ -1171,7 +1171,7 @@
             }
           },
           "404": {
-            "description": "Widget not found in this organisation",
+            "description": "Website Chat not found in this organisation",
             "content": {
               "application/json": {
                 "schema": {
@@ -1192,7 +1192,7 @@
             }
           },
           "409": {
-            "description": "Widget or assigned agent changed; reload before retrying",
+            "description": "Website Chat or assigned agent changed; reload before retrying",
             "content": {
               "application/json": {
                 "schema": {
@@ -1226,15 +1226,15 @@
         ]
       }
     },
-    "/v1/widgets/{widget_id}/configuration": {
+    "/v1/website-chats/{website_chat_id}/configuration": {
       "get": {
-        "operationId": "getPublicChatWidget",
-        "description": "Resolve visitor-facing configuration for an independent widget and its current agent assignment. The widget ID is not an organisation ID or a destination such as website or portal.",
+        "operationId": "getPublicWebsiteChat",
+        "description": "Resolve visitor-facing configuration for an independent Website Chat and its current agent assignment. The Website Chat ID is not an organisation ID or a destination such as website or portal.",
         "parameters": [
           {
             "in": "path",
-            "name": "widget_id",
-            "description": "Public widget ID, also used as widget_key in bootstrap and data-epilot-chat in the embed.",
+            "name": "website_chat_id",
+            "description": "Public Website Chat ID, also used as website_chat_id in bootstrap and data-epilot-chat in the embed.",
             "example": "550e8400-e29b-41d4-a716-446655440000",
             "required": true,
             "schema": {
@@ -1273,6 +1273,18 @@
                         "en",
                         "de"
                       ]
+                    },
+                    "authentication": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "email_code"
+                      ],
+                      "properties": {
+                        "email_code": {
+                          "type": "boolean"
+                        }
+                      }
                     },
                     "design": {
                       "type": "object",
@@ -1423,7 +1435,7 @@
             }
           },
           "default": {
-            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished widget, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1435,6 +1447,12 @@
                     "code": {
                       "type": "string",
                       "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
                         "INVALID_REQUEST",
                         "ORIGIN_DENIED",
                         "NOT_FOUND",
@@ -1461,7 +1479,7 @@
     "/v1/bootstrap": {
       "post": {
         "operationId": "createPublicChatGrant",
-        "description": "Called by the host website with its widget_key. Checks the saved website origin allowlist and issues a single-use grant for the iframe to exchange at POST /v1/sessions within 60 seconds. This deadline does not limit the resulting session.",
+        "description": "Called by the host website with its website_chat_id. Checks the saved website origin allowlist and issues a single-use grant for the iframe to exchange at POST /v1/sessions within 60 seconds. This deadline does not limit the resulting session.",
         "requestBody": {
           "required": true,
           "content": {
@@ -1470,10 +1488,10 @@
                 "type": "object",
                 "additionalProperties": false,
                 "required": [
-                  "widget_key"
+                  "website_chat_id"
                 ],
                 "properties": {
-                  "widget_key": {
+                  "website_chat_id": {
                     "type": "string",
                     "pattern": "^[a-zA-Z0-9_-]{1,100}$"
                   }
@@ -1492,7 +1510,7 @@
                   "required": [
                     "grant",
                     "expires_in",
-                    "widget_origin"
+                    "frame_origin"
                   ],
                   "properties": {
                     "grant": {
@@ -1502,7 +1520,7 @@
                       "type": "integer",
                       "example": 60
                     },
-                    "widget_origin": {
+                    "frame_origin": {
                       "type": "string",
                       "format": "uri"
                     }
@@ -1512,7 +1530,7 @@
             }
           },
           "default": {
-            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished widget, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1524,6 +1542,12 @@
                     "code": {
                       "type": "string",
                       "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
                         "INVALID_REQUEST",
                         "ORIGIN_DENIED",
                         "NOT_FOUND",
@@ -1582,7 +1606,7 @@
                     "token",
                     "conversation_id",
                     "expires_at",
-                    "widget"
+                    "website_chat"
                   ],
                   "properties": {
                     "token": {
@@ -1596,7 +1620,7 @@
                       "type": "integer",
                       "description": "Unix seconds"
                     },
-                    "widget": {
+                    "website_chat": {
                       "type": "object",
                       "required": [
                         "key",
@@ -1621,6 +1645,18 @@
                             "en",
                             "de"
                           ]
+                        },
+                        "authentication": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "email_code"
+                          ],
+                          "properties": {
+                            "email_code": {
+                              "type": "boolean"
+                            }
+                          }
                         },
                         "design": {
                           "type": "object",
@@ -1773,7 +1809,7 @@
             }
           },
           "default": {
-            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished widget, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1785,6 +1821,12 @@
                     "code": {
                       "type": "string",
                       "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
                         "INVALID_REQUEST",
                         "ORIGIN_DENIED",
                         "NOT_FOUND",
@@ -1870,7 +1912,7 @@
             }
           },
           "default": {
-            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished widget, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1882,6 +1924,511 @@
                     "code": {
                       "type": "string",
                       "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/verification": {
+      "get": {
+        "operationId": "getChatVerification",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Read this session's verification state. No contact IDs or candidate records are exposed.",
+        "responses": {
+          "200": {
+            "description": "Current verification state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "available",
+                    "conversation_id",
+                    "status"
+                  ],
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "anonymous",
+                        "sending",
+                        "pending",
+                        "verified"
+                      ]
+                    },
+                    "challenge_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "code_expires_at": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "resend_after": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "maxLength": 254
+                    },
+                    "contact_resolution": {
+                      "type": "string",
+                      "enum": [
+                        "matched",
+                        "ambiguous",
+                        "not_found"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/verification/email": {
+      "post": {
+        "operationId": "startChatEmailVerification",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Start or resend an email challenge using the template saved on this session's Website Chat. Repeating the same request_id and payload does not send another email. Codes must never be sent as chat messages.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "request_id",
+                  "email",
+                  "locale"
+                ],
+                "properties": {
+                  "request_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 254
+                  },
+                  "locale": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "de"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Current verification state; pending does not reveal whether an email is registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "available",
+                    "conversation_id",
+                    "status"
+                  ],
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "anonymous",
+                        "sending",
+                        "pending",
+                        "verified"
+                      ]
+                    },
+                    "challenge_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "code_expires_at": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "resend_after": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "maxLength": 254
+                    },
+                    "contact_resolution": {
+                      "type": "string",
+                      "enum": [
+                        "matched",
+                        "ambiguous",
+                        "not_found"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/verification/code": {
+      "post": {
+        "operationId": "verifyChatEmailCode",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Verify a code for this session's current challenge. Success binds email proof and contact resolution to this session and starts a new conversation. It grants no account-tool permission.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "challenge_id",
+                  "code"
+                ],
+                "properties": {
+                  "challenge_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification result; duplicate contacts remain unresolved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "available",
+                    "conversation_id",
+                    "status"
+                  ],
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "anonymous",
+                        "sending",
+                        "pending",
+                        "verified"
+                      ]
+                    },
+                    "challenge_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "code_expires_at": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "resend_after": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "maxLength": 254
+                    },
+                    "contact_resolution": {
+                      "type": "string",
+                      "enum": [
+                        "matched",
+                        "ambiguous",
+                        "not_found"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/verification/cancel": {
+      "post": {
+        "operationId": "cancelChatVerification",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Cancel a pending challenge or clear verified identity. Clearing verified identity starts a new anonymous conversation. In-flight verification cannot restore the cleared identity.",
+        "responses": {
+          "200": {
+            "description": "Anonymous session state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "available",
+                    "conversation_id",
+                    "status"
+                  ],
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "anonymous",
+                        "sending",
+                        "pending",
+                        "verified"
+                      ]
+                    },
+                    "challenge_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "code_expires_at": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "resend_after": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "maxLength": 254
+                    },
+                    "contact_resolution": {
+                      "type": "string",
+                      "enum": [
+                        "matched",
+                        "ambiguous",
+                        "not_found"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
                         "INVALID_REQUEST",
                         "ORIGIN_DENIED",
                         "NOT_FOUND",
@@ -1914,29 +2461,29 @@
       "AnonymousSession": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Opaque, expiring anonymous session token; never an epilot user access token."
+        "description": "Opaque, expiring Chat session token; never an epilot user or Portal access token."
       }
     },
     "schemas": {
-      "ListChatWidgetsResponse": {
+      "ListWebsiteChatsResponse": {
         "type": "object",
         "required": [
-          "widgets"
+          "website_chats"
         ],
         "properties": {
-          "widgets": {
+          "website_chats": {
             "type": "array",
             "items": {
               "type": "object",
               "required": [
-                "widget_id",
+                "website_chat_id",
                 "org_id",
                 "agent_id",
                 "binding_id",
                 "version",
                 "name",
-                "website_chat",
-                "website_chat_embed",
+                "settings",
+                "embed",
                 "created_at",
                 "updated_at"
               ],
@@ -1951,7 +2498,7 @@
                   "format": "uuid",
                   "nullable": true
                 },
-                "website_chat": {
+                "settings": {
                   "type": "object",
                   "additionalProperties": false,
                   "required": [
@@ -1964,7 +2511,7 @@
                       "type": "array",
                       "maxItems": 50,
                       "uniqueItems": true,
-                      "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                      "description": "Exact HTTPS origins. Empty means the Website Chat cannot start sessions.",
                       "items": {
                         "type": "string",
                         "maxLength": 2048
@@ -1986,7 +2533,7 @@
                       "type": "string",
                       "format": "uuid",
                       "nullable": true,
-                      "description": "Design Builder configuration for the widget only."
+                      "description": "Design Builder configuration for the Website Chat only."
                     },
                     "authentication": {
                       "type": "object",
@@ -2012,7 +2559,7 @@
                     }
                   }
                 },
-                "widget_id": {
+                "website_chat_id": {
                   "type": "string",
                   "format": "uuid",
                   "readOnly": true,
@@ -2043,7 +2590,7 @@
                   "format": "date-time",
                   "readOnly": true
                 },
-                "website_chat_embed": {
+                "embed": {
                   "type": "object",
                   "readOnly": true,
                   "required": [
@@ -2074,17 +2621,17 @@
           }
         }
       },
-      "ChatWidget": {
+      "WebsiteChat": {
         "type": "object",
         "required": [
-          "widget_id",
+          "website_chat_id",
           "org_id",
           "agent_id",
           "binding_id",
           "version",
           "name",
-          "website_chat",
-          "website_chat_embed",
+          "settings",
+          "embed",
           "created_at",
           "updated_at"
         ],
@@ -2099,7 +2646,7 @@
             "format": "uuid",
             "nullable": true
           },
-          "website_chat": {
+          "settings": {
             "type": "object",
             "additionalProperties": false,
             "required": [
@@ -2112,7 +2659,7 @@
                 "type": "array",
                 "maxItems": 50,
                 "uniqueItems": true,
-                "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                "description": "Exact HTTPS origins. Empty means the Website Chat cannot start sessions.",
                 "items": {
                   "type": "string",
                   "maxLength": 2048
@@ -2134,7 +2681,7 @@
                 "type": "string",
                 "format": "uuid",
                 "nullable": true,
-                "description": "Design Builder configuration for the widget only."
+                "description": "Design Builder configuration for the Website Chat only."
               },
               "authentication": {
                 "type": "object",
@@ -2160,7 +2707,7 @@
               }
             }
           },
-          "widget_id": {
+          "website_chat_id": {
             "type": "string",
             "format": "uuid",
             "readOnly": true,
@@ -2191,7 +2738,7 @@
             "format": "date-time",
             "readOnly": true
           },
-          "website_chat_embed": {
+          "embed": {
             "type": "object",
             "readOnly": true,
             "required": [
@@ -2229,7 +2776,7 @@
             "type": "array",
             "maxItems": 50,
             "uniqueItems": true,
-            "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+            "description": "Exact HTTPS origins. Empty means the Website Chat cannot start sessions.",
             "items": {
               "type": "string",
               "maxLength": 2048
@@ -2251,7 +2798,7 @@
             "type": "string",
             "format": "uuid",
             "nullable": true,
-            "description": "Design Builder configuration for the widget only."
+            "description": "Design Builder configuration for the Website Chat only."
           },
           "authentication": {
             "type": "object",
@@ -2291,13 +2838,13 @@
           }
         }
       },
-      "CreateChatWidgetRequest": {
+      "CreateWebsiteChatRequest": {
         "type": "object",
         "additionalProperties": false,
         "required": [
           "name",
           "agent_id",
-          "website_chat"
+          "settings"
         ],
         "properties": {
           "name": {
@@ -2310,7 +2857,7 @@
             "format": "uuid",
             "nullable": true
           },
-          "website_chat": {
+          "settings": {
             "type": "object",
             "additionalProperties": false,
             "required": [
@@ -2323,7 +2870,7 @@
                 "type": "array",
                 "maxItems": 50,
                 "uniqueItems": true,
-                "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                "description": "Exact HTTPS origins. Empty means the Website Chat cannot start sessions.",
                 "items": {
                   "type": "string",
                   "maxLength": 2048
@@ -2345,7 +2892,7 @@
                 "type": "string",
                 "format": "uuid",
                 "nullable": true,
-                "description": "Design Builder configuration for the widget only."
+                "description": "Design Builder configuration for the Website Chat only."
               },
               "authentication": {
                 "type": "object",
@@ -2373,7 +2920,7 @@
           }
         }
       },
-      "UpdateChatWidgetRequest": {
+      "UpdateWebsiteChatRequest": {
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -2390,7 +2937,7 @@
             "format": "uuid",
             "nullable": true
           },
-          "website_chat": {
+          "settings": {
             "type": "object",
             "additionalProperties": false,
             "required": [
@@ -2403,7 +2950,7 @@
                 "type": "array",
                 "maxItems": 50,
                 "uniqueItems": true,
-                "description": "Exact HTTPS origins. Empty means the widget cannot start sessions.",
+                "description": "Exact HTTPS origins. Empty means the Website Chat cannot start sessions.",
                 "items": {
                   "type": "string",
                   "maxLength": 2048
@@ -2425,7 +2972,7 @@
                 "type": "string",
                 "format": "uuid",
                 "nullable": true,
-                "description": "Design Builder configuration for the widget only."
+                "description": "Design Builder configuration for the Website Chat only."
               },
               "authentication": {
                 "type": "object",
@@ -2458,7 +3005,59 @@
           }
         }
       },
-      "Widget": {
+      "VerificationState": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "available",
+          "conversation_id",
+          "status"
+        ],
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "anonymous",
+              "sending",
+              "pending",
+              "verified"
+            ]
+          },
+          "challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code_expires_at": {
+            "type": "integer",
+            "description": "Unix seconds"
+          },
+          "resend_after": {
+            "type": "integer",
+            "description": "Unix seconds"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "contact_resolution": {
+            "type": "string",
+            "enum": [
+              "matched",
+              "ambiguous",
+              "not_found"
+            ]
+          }
+        }
+      },
+      "PublicWebsiteChat": {
         "type": "object",
         "required": [
           "key",
@@ -2483,6 +3082,18 @@
               "en",
               "de"
             ]
+          },
+          "authentication": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "email_code"
+            ],
+            "properties": {
+              "email_code": {
+                "type": "boolean"
+              }
+            }
           },
           "design": {
             "type": "object",
@@ -2629,7 +3240,7 @@
           }
         }
       },
-      "WidgetDesign": {
+      "WebsiteChatDesign": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
@@ -2854,6 +3465,12 @@
           "code": {
             "type": "string",
             "enum": [
+              "INVALID_VERIFICATION_CODE",
+              "VERIFICATION_EXPIRED",
+              "VERIFICATION_CONFLICT",
+              "VERIFICATION_DISABLED",
+              "VERIFICATION_UNAVAILABLE",
+              "IDENTITY_CHANGED",
               "INVALID_REQUEST",
               "ORIGIN_DENIED",
               "NOT_FOUND",
@@ -2873,7 +3490,7 @@
     },
     "responses": {
       "Error": {
-        "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished widget, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+        "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
         "content": {
           "application/json": {
             "schema": {
@@ -2885,6 +3502,12 @@
                 "code": {
                   "type": "string",
                   "enum": [
+                    "INVALID_VERIFICATION_CODE",
+                    "VERIFICATION_EXPIRED",
+                    "VERIFICATION_CONFLICT",
+                    "VERIFICATION_DISABLED",
+                    "VERIFICATION_UNAVAILABLE",
+                    "IDENTITY_CHANGED",
                     "INVALID_REQUEST",
                     "ORIGIN_DENIED",
                     "NOT_FOUND",
