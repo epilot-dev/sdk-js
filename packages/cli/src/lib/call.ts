@@ -7,7 +7,7 @@ const OpenAPIClientAxios =
   OpenAPIClientAxiosModule;
 
 import { loadDefinition } from './definition-loader.js';
-import { resolveToken } from './auth-store.js';
+import { resolveTokenAsync } from './auth-store.js';
 import { getResolvedProfile, getStage } from './profiles.js';
 import { collectParams, getOperationParams, getMissingRequired } from './param-collector.js';
 import { resolveBody, getRequestBodyInfo } from './body-handler.js';
@@ -427,7 +427,7 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
   }
 
   // Resolve auth (--token > EPILOT_TOKEN > profile > credentials.json > interactive prompt)
-  let token = resolveToken(args.token, args.profile);
+  let token = await resolveTokenAsync(args.token, args.profile);
   if (!token) {
     if (isInteractive({ interactive: args.interactive })) {
       const { promptToken } = await import('./interactive.js');
