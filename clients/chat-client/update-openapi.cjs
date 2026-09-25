@@ -8,7 +8,7 @@ const { resolve, join } = require('node:path');
 const serviceDir = process.argv[2];
 if (!serviceDir) throw new Error('Usage: npm run openapi -- /path/to/chat-api');
 const read = (path) => JSON.parse(readFileSync(resolve(serviceDir, path), 'utf8'));
-const management = read('lambda/ApiHandlerFunction/src/widgets/definition.json');
+const management = read('lambda/ApiHandlerFunction/src/website-chats/definition.json');
 const publicApi = read('lambda/ApiHandlerFunction/src/openapi/definition.json');
 
 // Both documents define Error with different payloads. Preserve the public error
@@ -41,7 +41,11 @@ for (const key of new Set([...Object.keys(management.components), ...Object.keys
 }
 const definition = {
   ...management,
-  info: { ...management.info, title: 'epilot Chat API', description: 'Widget management and anonymous browser chat.' },
+  info: {
+    ...management.info,
+    title: 'epilot Chat API',
+    description: 'Website Chat management and anonymous browser chat.',
+  },
   paths: mergeUnique(management.paths, publicApi.paths),
   components,
 };

@@ -19,7 +19,7 @@
   "keywords": [
     "epilot",
     "chat",
-    "widgets"
+    "website-chat"
   ],
   "scripts": {
     "test": "vitest run",
