@@ -785,6 +785,25 @@
         "responses": {}
       }
     },
+    "/v1/integrations/{integrationId}/outbound/mapping-simulation": {
+      "post": {
+        "operationId": "simulateOutboundMapping",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/integrations/{integrationId}/monitoring/access-logs": {
       "post": {
         "operationId": "queryAccessLogs",
@@ -1203,6 +1222,14 @@
         }
       },
       "ERPUpdatesResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ERPUpdatesRetryableResponse": {
+        "headers": {
+          "Retry-After": {}
+        },
         "content": {
           "application/json": {}
         }

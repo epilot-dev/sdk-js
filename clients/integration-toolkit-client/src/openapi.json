@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.33.1",
+    "version": "1.35.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -234,6 +234,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "429": {
+            "$ref": "#/components/responses/ERPUpdatesRetryableResponse"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -294,6 +297,9 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "429": {
+            "$ref": "#/components/responses/ERPUpdatesRetryableResponse"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -350,6 +356,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/ERPUpdatesRetryableResponse"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3223,7 +3232,7 @@
           }
         ],
         "summary": "pollOutboundMessages",
-        "description": "Poll outbound messages for an integration's poll-mode use cases.\nTakes a lease on the head-of-line batch of the integration's FIFO stream:\nthe returned messages stay invisible to subsequent polls until they are\nacknowledged or the visibility timeout elapses. POST because taking a\nlease mutates server state — auto-retrying middleware must not burn\nleases. One in-flight batch per stream: while a lease is active (or\nanother poll wins the race), the response is an empty batch\n(`messages: []`), not an error. Requires the `integration:consume` grant.\n",
+        "description": "Poll outbound messages for an integration's poll-mode use cases.\nTakes a lease on the head-of-line batch of the integration's FIFO stream:\nthe returned messages stay invisible to subsequent polls until they are\nacknowledged or the visibility timeout elapses. POST because taking a\nlease mutates server state — auto-retrying middleware must not burn\nleases. One in-flight batch per stream: while a lease is active (or\nanother poll wins the race), the response is an empty batch\n(`messages: []`), not an error. Each message's `payload` is the\nuse case's JSONata transformation of the event when it has one\n(`mapping_version` identifies the transform), otherwise the raw\nevent. Requires the `integration:consume` grant.\n\nOrdering: messages are delivered in stream order, which follows the\nevent time. An event that arrives after the consumer was already handed\nevents with a later event time is not inserted behind them (it would\nnever be delivered); it is appended at the end of the stream and a\n`MSG_LATE_ARRIVAL` warning is recorded. Delivery is at-least-once: a\nmessage whose lease expires is delivered again, and in rare races the\nsame event can be delivered twice under different message ids, so\nconsumers should deduplicate by `event_id`.\n",
         "tags": [
           "integrations"
         ],
@@ -3444,7 +3453,7 @@
           }
         ],
         "summary": "redriveOutboundDlqMessages",
-        "description": "Redrive selected dead-lettered messages back into the live stream.\nOperator endpoint — requires the `integration:manage` grant.\nA redriven message is re-enqueued at the tail with a new id and\nsequence — it is delivered out of its original per-entity order (the\nstream has moved on); this is inherent to redrive and matches SQS DLQ\nsemantics. The redriven copy starts with zero delivery attempts and a\nfresh retention window; the original DLQ entry is removed. Per-id\nresults report `redriven` or `not_found` (unknown ids, or entries\nconcurrently redriven/expired).\n",
+        "description": "Redrive selected dead-lettered messages back into the live stream.\nOperator endpoint — requires the `integration:manage` grant.\nA redriven message is re-enqueued at the tail with a new id and\nsequence — it is delivered out of its original per-entity order (the\nstream has moved on); this is inherent to redrive and matches SQS DLQ\nsemantics. The redriven copy starts with zero delivery attempts and a\nfresh retention window; the original DLQ entry is removed.\nWith `reapply_mapping`, the raw event is re-mapped with the use case's\ncurrent `jsonata_expression`; entries whose mapping failed are always\nre-mapped. Per-id results report `redriven`, `not_found` (unknown ids,\nor entries concurrently redriven/expired) or `mapping_failed` (the\nre-mapping failed again and the entry stays in the DLQ).\n",
         "tags": [
           "integrations"
         ],
@@ -3514,7 +3523,7 @@
           }
         ],
         "summary": "unblockOutboundStream",
-        "description": "Unblock an integration's outbound stream halted by the `block`\npoison policy: skips (dead-letters) the current blocked head message,\nemitting MSG_DEAD_LETTERED and letting the next message become the\nhead. Operator endpoint — requires the `integration:manage` grant.\nReturns `unblocked: false` as a no-op when the stream is not\ncurrently blocked (or the state moved concurrently) — safe to retry.\n",
+        "description": "Unblock an integration's outbound stream halted by the `block`\npoison policy: skips (dead-letters) the current blocked head message,\nemitting MSG_DEAD_LETTERED and letting the next message become the\nhead. A head blocked because its `jsonata_expression` failed at\nenqueue is skipped the same way (its DLQ reason defaults to\n`mapping_failed`); fix the expression, then redrive the entry to\nre-map it. Operator endpoint — requires the `integration:manage` grant.\nReturns `unblocked: false` as a no-op when the stream is not\ncurrently blocked (or the state moved concurrently) — safe to retry.\n",
         "tags": [
           "integrations"
         ],
@@ -3552,6 +3561,76 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UnblockOutboundStreamResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/integrations/{integrationId}/outbound/mapping-simulation": {
+      "post": {
+        "operationId": "simulateOutboundMapping",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integrationId}"
+          }
+        ],
+        "summary": "simulateOutboundMapping",
+        "description": "Preview a poll delivery's `jsonata_expression` without saving or\nenqueueing anything. The expression is checked and evaluated exactly\nas at enqueue time: the same length, syntax and binding checks, the\nsame `$env`/`$mapValue`/`$mapKey` bindings resolved server-side from\nthe org's non-secret environment variables and key/value maps, the\nsame evaluation limits, and the same rule that the output must be a\nJSON object.\n\nProvide exactly one input: `payload` (an event to map as-is), or\n`event_id` (with `event_catalog_event`) to load a historical\nevent-catalog event and hydrate it exactly as enqueue does — the\npreview is then exact, and the hydrated event is echoed as `input`.\n\nMapping failures are a `200` with `valid: false` and an `error`;\n`4xx` is reserved for malformed requests. Requires the\n`integration:view` grant.\n",
+        "tags": [
+          "integrations"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulateOutboundMappingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Simulation outcome (mapping failures included)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulateOutboundMappingResponse"
                 }
               }
             }
@@ -10328,7 +10407,7 @@
           "enabled",
           "delivery"
         ],
-        "description": "A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out)",
+        "description": "A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (the raw event payload, or its JSONata transformation when the mapping carries one), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out)",
         "properties": {
           "id": {
             "type": "string",
@@ -10342,7 +10421,7 @@
           },
           "jsonata_expression": {
             "type": "string",
-            "description": "JSONata expression to transform the event payload. Required for webhook delivery, ignored for poll delivery, and rejected for file_proxy delivery — a file_proxy payload is built by the referenced use case's steps, so accepting an expression here would silently do nothing.",
+            "description": "JSONata expression transforming the event payload. Required for webhook delivery (evaluated by the webhook service). Optional for poll delivery: evaluated at enqueue time against the standardized event-catalog event with `$env`/`$mapValue`/`$mapKey` bindings; must return a JSON object; empty = raw event payload is delivered. Rejected for file_proxy delivery.",
             "example": "{ \"id\": entity._id, \"customer\": entity.customer_name }"
           },
           "enabled": {
@@ -10366,7 +10445,7 @@
         }
       },
       "DeliveryConfig": {
-        "description": "Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes)",
+        "description": "Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload, or its JSONata transformation when the mapping carries a jsonata_expression); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes)",
         "oneOf": [
           {
             "$ref": "#/components/schemas/WebhookDeliveryConfig"
@@ -10421,7 +10500,7 @@
         "required": [
           "type"
         ],
-        "description": "Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API.",
+        "description": "Pull-based queue delivery. Consumers fetch and acknowledge items via the poll API. When the mapping carries a `jsonata_expression`, it is evaluated once at enqueue time against the standardized event-catalog event (with `$env`/`$mapValue`/`$mapKey` bindings) and its output — a JSON object — is the delivered payload; without one, items carry the raw standardized event-catalog payload. An item whose expression fails at enqueue is never delivered: when it reaches the head of the stream the poison_policy applies to it at once, without waiting for max_delivery_attempts.",
         "properties": {
           "type": {
             "type": "string",
@@ -10444,7 +10523,7 @@
               "block"
             ],
             "default": "dead_letter",
-            "description": "What happens when an item exhausts max_delivery_attempts: dead_letter routes the exhausted item to the dead-letter queue and advances past it so the stream keeps flowing; block halts the queue at that item until operator/consumer action removes it."
+            "description": "What happens when an item exhausts max_delivery_attempts, or its jsonata_expression failed at enqueue: dead_letter routes the item to the dead-letter queue and advances past it so the stream keeps flowing; block halts the queue at that item until operator/consumer action removes it."
           },
           "max_delivery_attempts": {
             "type": "integer",
@@ -10839,10 +10918,19 @@
             "type": "string",
             "description": "Ordering group — messages sharing a group are strictly ordered,\ndistinct groups are independent. Constant \"0\" in v1.\n"
           },
+          "org_id": {
+            "type": "string",
+            "description": "The epilot org the message belongs to. Always populated — lets one\nconsumer that polls many orgs attribute every message.\n"
+          },
           "payload": {
             "type": "object",
             "additionalProperties": true,
-            "description": "The raw standardized event-catalog event, always inlined as-is"
+            "description": "The mapped output when the use case has a `jsonata_expression`,\notherwise the raw standardized event-catalog event. Always inlined.\n"
+          },
+          "mapping_version": {
+            "type": "string",
+            "description": "Version of the transform that produced the payload — the first 16\nhex characters of sha256 over the trimmed expression. Absent for\nraw payloads.\n",
+            "example": "3f2a9c1b7d4e8f60"
           },
           "enqueued_at": {
             "type": "string",
@@ -10994,7 +11082,15 @@
           },
           "reason": {
             "type": "string",
-            "description": "Why the message was dead-lettered (policy or operator reason)"
+            "description": "Why the message was dead-lettered (policy or operator reason) —\n`max_delivery_attempts_exhausted`, `mapping_failed`, or the\noperator's own reason\n"
+          },
+          "mapping_error": {
+            "type": "string",
+            "description": "Why the message's transform failed, prefixed with the error code\n(e.g. `invalid_output: ...`). Present on entries whose mapping\nfailed — at enqueue, or again on a re-mapping redrive.\n"
+          },
+          "mapping_version": {
+            "type": "string",
+            "description": "Version of the transform that produced (or failed to produce) the payload"
           },
           "expires_at": {
             "type": "string",
@@ -11037,6 +11133,11 @@
               "type": "string"
             },
             "description": "Message ids (msg_…) of the DLQ entries to redrive"
+          },
+          "reapply_mapping": {
+            "type": "boolean",
+            "default": false,
+            "description": "Re-apply the use case's CURRENT `jsonata_expression` to the raw\nevent instead of re-sending the stored payload. Entries whose\nmapping failed are always re-mapped, whatever this says. When the\nuse case no longer has an expression, the raw event is redriven.\n"
           }
         }
       },
@@ -11055,9 +11156,14 @@
             "type": "string",
             "enum": [
               "redriven",
-              "not_found"
+              "not_found",
+              "mapping_failed"
             ],
-            "description": "Outcome — `redriven` re-enqueued at the tail; `not_found` for\nunknown ids or entries concurrently redriven/expired\n"
+            "description": "Outcome — `redriven` re-enqueued at the tail; `not_found` for\nunknown ids or entries concurrently redriven/expired;\n`mapping_failed` when re-mapping failed again (the entry stays in\nthe DLQ with the updated mapping_error and mapping_version)\n"
+          },
+          "mapping_error": {
+            "type": "string",
+            "description": "Why re-mapping failed — present only when status is mapping_failed"
           }
         }
       },
@@ -11100,6 +11206,96 @@
           "dead_lettered_id": {
             "type": "string",
             "description": "Message id of the skipped head — present only when unblocked is true"
+          }
+        }
+      },
+      "SimulateOutboundMappingRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "jsonata_expression"
+        ],
+        "description": "Exactly one of `payload` or `event_id` is required. `event_id` needs\n`event_catalog_event` to name the event it belongs to.\n",
+        "properties": {
+          "jsonata_expression": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The poll mapping expression to preview",
+            "example": "{ \"contract_number\": contract.contract_number, \"status\": $mapValue($env.erp.statuses, contract.status) }"
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "A standardized event-catalog event to map as-is"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Id of a historical event-catalog event to load, hydrate and map"
+          },
+          "event_catalog_event": {
+            "type": "string",
+            "description": "Event-catalog event name of `event_id` (required with `event_id`)",
+            "example": "contract.updated"
+          }
+        }
+      },
+      "OutboundMappingSimulationError": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "syntax_error",
+              "unknown_binding",
+              "evaluation_error",
+              "timeout",
+              "invalid_output",
+              "expression_too_long"
+            ],
+            "description": "`syntax_error` — the expression does not parse; `unknown_binding` —\nit reads a `$` name that is never bound; `evaluation_error` — it\nfailed while evaluating; `timeout` — it exceeded the evaluation\ntime or depth limit; `invalid_output` — it did not return a JSON\nobject; `expression_too_long` — it exceeds 10,000 characters\n"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable explanation"
+          },
+          "position": {
+            "type": "integer",
+            "description": "Character position of the failure in the expression, when known"
+          }
+        }
+      },
+      "SimulateOutboundMappingResponse": {
+        "type": "object",
+        "required": [
+          "valid",
+          "mapping_version"
+        ],
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "Whether the expression produced a deliverable payload"
+          },
+          "output": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "The payload a consumer would receive — present when valid"
+          },
+          "error": {
+            "$ref": "#/components/schemas/OutboundMappingSimulationError"
+          },
+          "mapping_version": {
+            "type": "string",
+            "description": "The `mapping_version` messages mapped by this expression carry",
+            "example": "3f2a9c1b7d4e8f60"
+          },
+          "input": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "The hydrated event the expression ran against — present when `event_id` was used"
           }
         }
       },
@@ -12384,6 +12580,7 @@
           "MSG_ENQUEUED",
           "MSG_EXPIRED_UNPOLLED",
           "MSG_HEAD_BLOCKED",
+          "MSG_LATE_ARRIVAL",
           "OAUTH2_TOKEN_FAILURE",
           "PAYLOAD_TOO_LARGE",
           "PRUNE_SCOPE_COMPLETED",
@@ -13173,6 +13370,55 @@
       },
       "ERPUpdatesResponse": {
         "description": "Some events failed to process",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "event_id",
+                      "status"
+                    ],
+                    "properties": {
+                      "event_id": {
+                        "type": "string",
+                        "description": "ID of the processed event"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "success",
+                          "error",
+                          "skipped",
+                          "ignored"
+                        ],
+                        "description": "Processing status for the event (skipped indicates duplicate deduplication_id, ignored indicates unconfigured event)"
+                      },
+                      "message": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ERPUpdatesRetryableResponse": {
+        "description": "Some events could not be processed right now but will succeed on a retry: their\ndeduplication check was throttled, or another request carrying the same\ndeduplication_id is still being processed. Those events have status `error`.\nRetry the whole request after the `Retry-After` interval: events that were\naccepted by this request are recorded and come back as `skipped` on the retry.\n",
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds to wait before retrying the request",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
         "content": {
           "application/json": {
             "schema": {

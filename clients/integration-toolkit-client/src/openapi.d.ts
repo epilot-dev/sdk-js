@@ -23,6 +23,19 @@ declare namespace Components {
                 message?: string;
             }[];
         }
+        export interface ERPUpdatesRetryableResponse {
+            results?: {
+                /**
+                 * ID of the processed event
+                 */
+                event_id: string;
+                /**
+                 * Processing status for the event (skipped indicates duplicate deduplication_id, ignored indicates unconfigured event)
+                 */
+                status: "success" | "error" | "skipped" | "ignored";
+                message?: string;
+            }[];
+        }
         export type Forbidden = Schemas.ErrorResponseBase;
         export interface GetAssociatedMonitoringEventsResponse {
             /**
@@ -1583,9 +1596,9 @@ declare namespace Components {
             component_id: string; // uuid
         }
         /**
-         * Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes)
+         * Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload, or its JSONata transformation when the mapping carries a jsonata_expression); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes)
          */
-        export type DeliveryConfig = /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes) */ /* Push delivery of the transformed event to a webhook via svc-webhooks */ WebhookDeliveryConfig | /* Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API. */ PollDeliveryConfig | /**
+        export type DeliveryConfig = /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload, or its JSONata transformation when the mapping carries a jsonata_expression); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes) */ /* Push delivery of the transformed event to a webhook via svc-webhooks */ WebhookDeliveryConfig | /* Pull-based queue delivery. Consumers fetch and acknowledge items via the poll API. When the mapping carries a `jsonata_expression`, it is evaluated once at enqueue time against the standardized event-catalog event (with `$env`/`$mapValue`/`$mapKey` bindings) and its output — a JSON object — is the delivered payload; without one, items carry the raw standardized event-catalog payload. An item whose expression fails at enqueue is never delivered: when it reaches the head of the stream the poison_policy applies to it at once, without waiting for max_delivery_attempts. */ PollDeliveryConfig | /**
          * Push delivery to an external document system through a `file_proxy` use case.
          *
          * A pure pointer, deliberately. The outbound use case decides WHEN to deliver — its event
@@ -5751,7 +5764,7 @@ declare namespace Components {
          * `monitoring-code-enum.test.ts`, which fails if the two diverge.
          *
          */
-        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED";
+        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED";
         export interface MonitoringEventV2 {
             /**
              * Unique monitoring event ID
@@ -6265,9 +6278,23 @@ declare namespace Components {
              */
             delivery_attempts: number;
             /**
-             * Why the message was dead-lettered (policy or operator reason)
+             * Why the message was dead-lettered (policy or operator reason) —
+             * `max_delivery_attempts_exhausted`, `mapping_failed`, or the
+             * operator's own reason
+             *
              */
             reason?: string;
+            /**
+             * Why the message's transform failed, prefixed with the error code
+             * (e.g. `invalid_output: ...`). Present on entries whose mapping
+             * failed — at enqueue, or again on a re-mapping redrive.
+             *
+             */
+            mapping_error?: string;
+            /**
+             * Version of the transform that produced (or failed to produce) the payload
+             */
+            mapping_version?: string;
             /**
              * When the DLQ entry expires (retention window re-armed at dead-letter time)
              */
@@ -6345,8 +6372,8 @@ declare namespace Components {
              * List of mappings that transform and deliver the event
              */
             mappings: [
-                /* A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out) */ OutboundMapping,
-                .../* A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out) */ OutboundMapping[]
+                /* A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (the raw event payload, or its JSONata transformation when the mapping carries one), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out) */ OutboundMapping,
+                .../* A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (the raw event payload, or its JSONata transformation when the mapping carries one), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out) */ OutboundMapping[]
             ];
             /**
              * Whether this use case participates in the acknowledgement protocol.
@@ -6368,7 +6395,7 @@ declare namespace Components {
             ack_tracking?: "on" | "off";
         }
         /**
-         * A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out)
+         * A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (the raw event payload, or its JSONata transformation when the mapping carries one), or handed to a file_proxy use case that uploads files to an external document system (a pointer only; the referenced use case owns the payload and the fan-out)
          */
         export interface OutboundMapping {
             /**
@@ -6382,7 +6409,7 @@ declare namespace Components {
              */
             name: string;
             /**
-             * JSONata expression to transform the event payload. Required for webhook delivery, ignored for poll delivery, and rejected for file_proxy delivery — a file_proxy payload is built by the referenced use case's steps, so accepting an expression here would silently do nothing.
+             * JSONata expression transforming the event payload. Required for webhook delivery (evaluated by the webhook service). Optional for poll delivery: evaluated at enqueue time against the standardized event-catalog event with `$env`/`$mapValue`/`$mapKey` bindings; must return a JSON object; empty = raw event payload is delivered. Rejected for file_proxy delivery.
              * example:
              * { "id": entity._id, "customer": entity.customer_name }
              */
@@ -6391,7 +6418,7 @@ declare namespace Components {
              * Whether this mapping is active
              */
             enabled: boolean;
-            delivery: /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes) */ DeliveryConfig;
+            delivery: /* Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload, or its JSONata transformation when the mapping carries a jsonata_expression); file_proxy = one push per event attachment to an external document system, through a file_proxy use case (JSONata-transformed payload carrying the file bytes) */ DeliveryConfig;
             /**
              * Timestamp when the mapping was created
              */
@@ -6400,6 +6427,25 @@ declare namespace Components {
              * Timestamp when the mapping was last updated
              */
             updated_at?: string; // date-time
+        }
+        export interface OutboundMappingSimulationError {
+            /**
+             * `syntax_error` — the expression does not parse; `unknown_binding` —
+             * it reads a `$` name that is never bound; `evaluation_error` — it
+             * failed while evaluating; `timeout` — it exceeded the evaluation
+             * time or depth limit; `invalid_output` — it did not return a JSON
+             * object; `expression_too_long` — it exceeds 10,000 characters
+             *
+             */
+            code: "syntax_error" | "unknown_binding" | "evaluation_error" | "timeout" | "invalid_output" | "expression_too_long";
+            /**
+             * Human-readable explanation
+             */
+            message: string;
+            /**
+             * Character position of the failure in the expression, when known
+             */
+            position?: number;
         }
         export interface OutboundMessage {
             /**
@@ -6429,11 +6475,28 @@ declare namespace Components {
              */
             group: string;
             /**
-             * The raw standardized event-catalog event, always inlined as-is
+             * The epilot org the message belongs to. Always populated — lets one
+             * consumer that polls many orgs attribute every message.
+             *
+             */
+            org_id?: string;
+            /**
+             * The mapped output when the use case has a `jsonata_expression`,
+             * otherwise the raw standardized event-catalog event. Always inlined.
+             *
              */
             payload: {
                 [name: string]: any;
             };
+            /**
+             * Version of the transform that produced the payload — the first 16
+             * hex characters of sha256 over the trimmed expression. Absent for
+             * raw payloads.
+             *
+             * example:
+             * 3f2a9c1b7d4e8f60
+             */
+            mapping_version?: string;
             /**
              * When the message was enqueued
              */
@@ -6693,7 +6756,7 @@ declare namespace Components {
             OutboundFileProxyTargetStatus[];
         }
         /**
-         * Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API.
+         * Pull-based queue delivery. Consumers fetch and acknowledge items via the poll API. When the mapping carries a `jsonata_expression`, it is evaluated once at enqueue time against the standardized event-catalog event (with `$env`/`$mapValue`/`$mapKey` bindings) and its output — a JSON object — is the delivered payload; without one, items carry the raw standardized event-catalog payload. An item whose expression fails at enqueue is never delivered: when it reaches the head of the stream the poison_policy applies to it at once, without waiting for max_delivery_attempts.
          */
         export interface PollDeliveryConfig {
             /**
@@ -6705,7 +6768,7 @@ declare namespace Components {
              */
             retention_days?: number;
             /**
-             * What happens when an item exhausts max_delivery_attempts: dead_letter routes the exhausted item to the dead-letter queue and advances past it so the stream keeps flowing; block halts the queue at that item until operator/consumer action removes it.
+             * What happens when an item exhausts max_delivery_attempts, or its jsonata_expression failed at enqueue: dead_letter routes the item to the dead-letter queue and advances past it so the stream keeps flowing; block halts the queue at that item until operator/consumer action removes it.
              */
             poison_policy?: "dead_letter" | "block";
             /**
@@ -7232,6 +7295,14 @@ declare namespace Components {
                 string?,
                 string?
             ];
+            /**
+             * Re-apply the use case's CURRENT `jsonata_expression` to the raw
+             * event instead of re-sending the stored payload. Entries whose
+             * mapping failed are always re-mapped, whatever this says. When the
+             * use case no longer has an expression, the raw event is redriven.
+             *
+             */
+            reapply_mapping?: boolean;
         }
         export interface RedriveOutboundDlqResponse {
             /**
@@ -7246,10 +7317,16 @@ declare namespace Components {
             id: string;
             /**
              * Outcome — `redriven` re-enqueued at the tail; `not_found` for
-             * unknown ids or entries concurrently redriven/expired
+             * unknown ids or entries concurrently redriven/expired;
+             * `mapping_failed` when re-mapping failed again (the entry stays in
+             * the DLQ with the updated mapping_error and mapping_version)
              *
              */
-            status: "redriven" | "not_found";
+            status: "redriven" | "not_found" | "mapping_failed";
+            /**
+             * Why re-mapping failed — present only when status is mapping_failed
+             */
+            mapping_error?: string;
         }
         export interface RelationConfig {
             /**
@@ -7803,6 +7880,60 @@ declare namespace Components {
              * If true, overwrites existing mapping. If false and mapping exists, returns 409 Conflict.
              */
             overwrite?: boolean;
+        }
+        /**
+         * Exactly one of `payload` or `event_id` is required. `event_id` needs
+         * `event_catalog_event` to name the event it belongs to.
+         *
+         */
+        export interface SimulateOutboundMappingRequest {
+            /**
+             * The poll mapping expression to preview
+             * example:
+             * { "contract_number": contract.contract_number, "status": $mapValue($env.erp.statuses, contract.status) }
+             */
+            jsonata_expression: string;
+            /**
+             * A standardized event-catalog event to map as-is
+             */
+            payload?: {
+                [name: string]: any;
+            };
+            /**
+             * Id of a historical event-catalog event to load, hydrate and map
+             */
+            event_id?: string;
+            /**
+             * Event-catalog event name of `event_id` (required with `event_id`)
+             * example:
+             * contract.updated
+             */
+            event_catalog_event?: string;
+        }
+        export interface SimulateOutboundMappingResponse {
+            /**
+             * Whether the expression produced a deliverable payload
+             */
+            valid: boolean;
+            /**
+             * The payload a consumer would receive — present when valid
+             */
+            output?: {
+                [name: string]: any;
+            };
+            error?: OutboundMappingSimulationError;
+            /**
+             * The `mapping_version` messages mapped by this expression carry
+             * example:
+             * 3f2a9c1b7d4e8f60
+             */
+            mapping_version: string;
+            /**
+             * The hydrated event the expression ran against — present when `event_id` was used
+             */
+            input?: {
+                [name: string]: any;
+            };
         }
         export interface SuggestErpImportUseCasesResponse {
             /**
@@ -9266,6 +9397,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.ERPUpdatesResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $429 = Components.Responses.ERPUpdatesRetryableResponse;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -9276,6 +9408,7 @@ declare namespace Paths {
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
+            export type $429 = Components.Responses.ERPUpdatesRetryableResponse;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -9286,6 +9419,7 @@ declare namespace Paths {
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
+            export type $429 = Components.Responses.ERPUpdatesRetryableResponse;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -9475,6 +9609,28 @@ declare namespace Paths {
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $422 = Components.Schemas.ErrorResponseBase;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace SimulateOutboundMapping {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = /**
+         * Exactly one of `payload` or `event_id` is required. `event_id` needs
+         * `event_catalog_event` to name the event it belongs to.
+         *
+         */
+        Components.Schemas.SimulateOutboundMappingRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.SimulateOutboundMappingResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -10228,7 +10384,19 @@ export interface OperationMethods {
    * lease mutates server state — auto-retrying middleware must not burn
    * leases. One in-flight batch per stream: while a lease is active (or
    * another poll wins the race), the response is an empty batch
-   * (`messages: []`), not an error. Requires the `integration:consume` grant.
+   * (`messages: []`), not an error. Each message's `payload` is the
+   * use case's JSONata transformation of the event when it has one
+   * (`mapping_version` identifies the transform), otherwise the raw
+   * event. Requires the `integration:consume` grant.
+   * 
+   * Ordering: messages are delivered in stream order, which follows the
+   * event time. An event that arrives after the consumer was already handed
+   * events with a later event time is not inserted behind them (it would
+   * never be delivered); it is appended at the end of the stream and a
+   * `MSG_LATE_ARRIVAL` warning is recorded. Delivery is at-least-once: a
+   * message whose lease expires is delivered again, and in rare races the
+   * same event can be delivered twice under different message ids, so
+   * consumers should deduplicate by `event_id`.
    * 
    */
   'pollOutboundMessages'(
@@ -10278,9 +10446,12 @@ export interface OperationMethods {
    * sequence — it is delivered out of its original per-entity order (the
    * stream has moved on); this is inherent to redrive and matches SQS DLQ
    * semantics. The redriven copy starts with zero delivery attempts and a
-   * fresh retention window; the original DLQ entry is removed. Per-id
-   * results report `redriven` or `not_found` (unknown ids, or entries
-   * concurrently redriven/expired).
+   * fresh retention window; the original DLQ entry is removed.
+   * With `reapply_mapping`, the raw event is re-mapped with the use case's
+   * current `jsonata_expression`; entries whose mapping failed are always
+   * re-mapped. Per-id results report `redriven`, `not_found` (unknown ids,
+   * or entries concurrently redriven/expired) or `mapping_failed` (the
+   * re-mapping failed again and the entry stays in the DLQ).
    * 
    */
   'redriveOutboundDlqMessages'(
@@ -10294,7 +10465,10 @@ export interface OperationMethods {
    * Unblock an integration's outbound stream halted by the `block`
    * poison policy: skips (dead-letters) the current blocked head message,
    * emitting MSG_DEAD_LETTERED and letting the next message become the
-   * head. Operator endpoint — requires the `integration:manage` grant.
+   * head. A head blocked because its `jsonata_expression` failed at
+   * enqueue is skipped the same way (its DLQ reason defaults to
+   * `mapping_failed`); fix the expression, then redrive the entry to
+   * re-map it. Operator endpoint — requires the `integration:manage` grant.
    * Returns `unblocked: false` as a no-op when the stream is not
    * currently blocked (or the state moved concurrently) — safe to retry.
    * 
@@ -10304,6 +10478,32 @@ export interface OperationMethods {
     data?: Paths.UnblockOutboundStream.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UnblockOutboundStream.Responses.$200>
+  /**
+   * simulateOutboundMapping - simulateOutboundMapping
+   * 
+   * Preview a poll delivery's `jsonata_expression` without saving or
+   * enqueueing anything. The expression is checked and evaluated exactly
+   * as at enqueue time: the same length, syntax and binding checks, the
+   * same `$env`/`$mapValue`/`$mapKey` bindings resolved server-side from
+   * the org's non-secret environment variables and key/value maps, the
+   * same evaluation limits, and the same rule that the output must be a
+   * JSON object.
+   * 
+   * Provide exactly one input: `payload` (an event to map as-is), or
+   * `event_id` (with `event_catalog_event`) to load a historical
+   * event-catalog event and hydrate it exactly as enqueue does — the
+   * preview is then exact, and the hydrated event is echoed as `input`.
+   * 
+   * Mapping failures are a `200` with `valid: false` and an `error`;
+   * `4xx` is reserved for malformed requests. Requires the
+   * `integration:view` grant.
+   * 
+   */
+  'simulateOutboundMapping'(
+    parameters?: Parameters<Paths.SimulateOutboundMapping.PathParameters> | null,
+    data?: Paths.SimulateOutboundMapping.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SimulateOutboundMapping.Responses.$200>
   /**
    * queryAccessLogs - queryAccessLogs
    * 
@@ -11203,7 +11403,19 @@ export interface PathsDictionary {
      * lease mutates server state — auto-retrying middleware must not burn
      * leases. One in-flight batch per stream: while a lease is active (or
      * another poll wins the race), the response is an empty batch
-     * (`messages: []`), not an error. Requires the `integration:consume` grant.
+     * (`messages: []`), not an error. Each message's `payload` is the
+     * use case's JSONata transformation of the event when it has one
+     * (`mapping_version` identifies the transform), otherwise the raw
+     * event. Requires the `integration:consume` grant.
+     * 
+     * Ordering: messages are delivered in stream order, which follows the
+     * event time. An event that arrives after the consumer was already handed
+     * events with a later event time is not inserted behind them (it would
+     * never be delivered); it is appended at the end of the stream and a
+     * `MSG_LATE_ARRIVAL` warning is recorded. Delivery is at-least-once: a
+     * message whose lease expires is delivered again, and in rare races the
+     * same event can be delivered twice under different message ids, so
+     * consumers should deduplicate by `event_id`.
      * 
      */
     'post'(
@@ -11259,9 +11471,12 @@ export interface PathsDictionary {
      * sequence — it is delivered out of its original per-entity order (the
      * stream has moved on); this is inherent to redrive and matches SQS DLQ
      * semantics. The redriven copy starts with zero delivery attempts and a
-     * fresh retention window; the original DLQ entry is removed. Per-id
-     * results report `redriven` or `not_found` (unknown ids, or entries
-     * concurrently redriven/expired).
+     * fresh retention window; the original DLQ entry is removed.
+     * With `reapply_mapping`, the raw event is re-mapped with the use case's
+     * current `jsonata_expression`; entries whose mapping failed are always
+     * re-mapped. Per-id results report `redriven`, `not_found` (unknown ids,
+     * or entries concurrently redriven/expired) or `mapping_failed` (the
+     * re-mapping failed again and the entry stays in the DLQ).
      * 
      */
     'post'(
@@ -11277,7 +11492,10 @@ export interface PathsDictionary {
      * Unblock an integration's outbound stream halted by the `block`
      * poison policy: skips (dead-letters) the current blocked head message,
      * emitting MSG_DEAD_LETTERED and letting the next message become the
-     * head. Operator endpoint — requires the `integration:manage` grant.
+     * head. A head blocked because its `jsonata_expression` failed at
+     * enqueue is skipped the same way (its DLQ reason defaults to
+     * `mapping_failed`); fix the expression, then redrive the entry to
+     * re-map it. Operator endpoint — requires the `integration:manage` grant.
      * Returns `unblocked: false` as a no-op when the stream is not
      * currently blocked (or the state moved concurrently) — safe to retry.
      * 
@@ -11287,6 +11505,34 @@ export interface PathsDictionary {
       data?: Paths.UnblockOutboundStream.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UnblockOutboundStream.Responses.$200>
+  }
+  ['/v1/integrations/{integrationId}/outbound/mapping-simulation']: {
+    /**
+     * simulateOutboundMapping - simulateOutboundMapping
+     * 
+     * Preview a poll delivery's `jsonata_expression` without saving or
+     * enqueueing anything. The expression is checked and evaluated exactly
+     * as at enqueue time: the same length, syntax and binding checks, the
+     * same `$env`/`$mapValue`/`$mapKey` bindings resolved server-side from
+     * the org's non-secret environment variables and key/value maps, the
+     * same evaluation limits, and the same rule that the output must be a
+     * JSON object.
+     * 
+     * Provide exactly one input: `payload` (an event to map as-is), or
+     * `event_id` (with `event_catalog_event`) to load a historical
+     * event-catalog event and hydrate it exactly as enqueue does — the
+     * preview is then exact, and the hydrated event is echoed as `input`.
+     * 
+     * Mapping failures are a `200` with `valid: false` and an `error`;
+     * `4xx` is reserved for malformed requests. Requires the
+     * `integration:view` grant.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.SimulateOutboundMapping.PathParameters> | null,
+      data?: Paths.SimulateOutboundMapping.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SimulateOutboundMapping.Responses.$200>
   }
   ['/v1/integrations/{integrationId}/monitoring/access-logs']: {
     /**
@@ -11754,6 +12000,7 @@ export type OutboundDlqMessage = Components.Schemas.OutboundDlqMessage;
 export type OutboundFileProxyTargetStatus = Components.Schemas.OutboundFileProxyTargetStatus;
 export type OutboundIntegrationEventConfiguration = Components.Schemas.OutboundIntegrationEventConfiguration;
 export type OutboundMapping = Components.Schemas.OutboundMapping;
+export type OutboundMappingSimulationError = Components.Schemas.OutboundMappingSimulationError;
 export type OutboundMessage = Components.Schemas.OutboundMessage;
 export type OutboundMonitoringEvent = Components.Schemas.OutboundMonitoringEvent;
 export type OutboundPollStatus = Components.Schemas.OutboundPollStatus;
@@ -11797,6 +12044,8 @@ export type SecureProxyUseCaseHistoryEntry = Components.Schemas.SecureProxyUseCa
 export type SecureProxyWhitelist = Components.Schemas.SecureProxyWhitelist;
 export type SecureProxyWhitelistUpdate = Components.Schemas.SecureProxyWhitelistUpdate;
 export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationAppMappingRequest;
+export type SimulateOutboundMappingRequest = Components.Schemas.SimulateOutboundMappingRequest;
+export type SimulateOutboundMappingResponse = Components.Schemas.SimulateOutboundMappingResponse;
 export type SuggestErpImportUseCasesResponse = Components.Schemas.SuggestErpImportUseCasesResponse;
 export type TestNotificationRequest = Components.Schemas.TestNotificationRequest;
 export type TestNotificationResponse = Components.Schemas.TestNotificationResponse;
