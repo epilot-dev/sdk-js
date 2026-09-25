@@ -9,7 +9,7 @@
 import { epilot } from '@epilot/sdk'
 
 epilot.authorize(() => '<token>')
-const { data } = await epilot.chat.listChatWidgets(...)
+const { data } = await epilot.chat.listWebsiteChats(...)
 ```
 
 ### Tree-shakeable import
@@ -19,42 +19,47 @@ import { getClient, authorize } from '@epilot/sdk/chat'
 
 const chatClient = getClient()
 authorize(chatClient, () => '<token>')
-const { data } = await chatClient.listChatWidgets(...)
+const { data } = await chatClient.listWebsiteChats(...)
 ```
 
 ## Operations
 
-**Chat widgets**
-- [`listChatWidgets`](#listchatwidgets)
-- [`createChatWidget`](#createchatwidget)
-- [`getChatWidget`](#getchatwidget)
-- [`updateChatWidget`](#updatechatwidget)
-- [`deleteChatWidget`](#deletechatwidget)
+**Website Chats**
+- [`listWebsiteChats`](#listwebsitechats)
+- [`createWebsiteChat`](#createwebsitechat)
+- [`getWebsiteChat`](#getwebsitechat)
+- [`updateWebsiteChat`](#updatewebsitechat)
+- [`deleteWebsiteChat`](#deletewebsitechat)
 
 **Other**
-- [`getPublicChatWidget`](#getpublicchatwidget)
+- [`getPublicWebsiteChat`](#getpublicwebsitechat)
 - [`createPublicChatGrant`](#createpublicchatgrant)
 - [`createAnonymousChatSession`](#createanonymouschatsession)
 - [`sendAnonymousChatMessage`](#sendanonymouschatmessage)
+- [`getChatVerification`](#getchatverification)
+- [`startChatEmailVerification`](#startchatemailverification)
+- [`verifyChatEmailCode`](#verifychatemailcode)
+- [`cancelChatVerification`](#cancelchatverification)
 
 **Schemas**
-- [`ListChatWidgetsResponse`](#listchatwidgetsresponse)
-- [`ChatWidget`](#chatwidget)
+- [`ListWebsiteChatsResponse`](#listwebsitechatsresponse)
+- [`WebsiteChat`](#websitechat)
 - [`WebsiteChatSettings`](#websitechatsettings)
 - [`Error`](#error)
-- [`CreateChatWidgetRequest`](#createchatwidgetrequest)
-- [`UpdateChatWidgetRequest`](#updatechatwidgetrequest)
-- [`Widget`](#widget)
-- [`WidgetDesign`](#widgetdesign)
+- [`CreateWebsiteChatRequest`](#createwebsitechatrequest)
+- [`UpdateWebsiteChatRequest`](#updatewebsitechatrequest)
+- [`VerificationState`](#verificationstate)
+- [`PublicWebsiteChat`](#publicwebsitechat)
+- [`WebsiteChatDesign`](#websitechatdesign)
 - [`PublicEvent`](#publicevent)
 - [`PublicChatError`](#publicchaterror)
 
-### `listChatWidgets`
+### `listWebsiteChats`
 
-`GET /v1/widgets`
+`GET /v1/website-chats`
 
 ```ts
-const { data } = await client.listChatWidgets({
+const { data } = await client.listWebsiteChats({
   cursor: 'example',
 })
 ```
@@ -64,11 +69,11 @@ const { data } = await client.listChatWidgets({
 
 ```json
 {
-  "widgets": [
+  "website_chats": [
     {
       "name": "string",
       "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "website_chat": {
+      "settings": {
         "allowed_origins": ["string"],
         "organisation_name": "string",
         "default_locale": "en",
@@ -79,13 +84,13 @@ const { data } = await client.listChatWidgets({
           }
         }
       },
-      "widget_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "website_chat_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "org_id": "string",
       "binding_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "version": 1,
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
-      "website_chat_embed": {
+      "embed": {
         "script_url": "https://example.com/path",
         "chat_api_origin": "https://example.com/path",
         "demo_url": "https://example.com/path"
@@ -100,17 +105,17 @@ const { data } = await client.listChatWidgets({
 
 ---
 
-### `createChatWidget`
+### `createWebsiteChat`
 
-`POST /v1/widgets`
+`POST /v1/website-chats`
 
 ```ts
-const { data } = await client.createChatWidget(
+const { data } = await client.createWebsiteChat(
   null,
   {
     name: 'string',
     agent_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-    website_chat: {
+    settings: {
       allowed_origins: ['string'],
       organisation_name: 'string',
       default_locale: 'en',
@@ -132,7 +137,7 @@ const { data } = await client.createChatWidget(
 {
   "name": "string",
   "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "website_chat": {
+  "settings": {
     "allowed_origins": ["string"],
     "organisation_name": "string",
     "default_locale": "en",
@@ -143,13 +148,13 @@ const { data } = await client.createChatWidget(
       }
     }
   },
-  "widget_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "website_chat_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "org_id": "string",
   "binding_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "version": 1,
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
-  "website_chat_embed": {
+  "embed": {
     "script_url": "https://example.com/path",
     "chat_api_origin": "https://example.com/path",
     "demo_url": "https://example.com/path"
@@ -161,13 +166,13 @@ const { data } = await client.createChatWidget(
 
 ---
 
-### `getChatWidget`
+### `getWebsiteChat`
 
-`GET /v1/widgets/{widget_id}`
+`GET /v1/website-chats/{website_chat_id}`
 
 ```ts
-const { data } = await client.getChatWidget({
-  widget_id: 'example',
+const { data } = await client.getWebsiteChat({
+  website_chat_id: 'example',
 })
 ```
 
@@ -178,7 +183,7 @@ const { data } = await client.getChatWidget({
 {
   "name": "string",
   "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "website_chat": {
+  "settings": {
     "allowed_origins": ["string"],
     "organisation_name": "string",
     "default_locale": "en",
@@ -189,13 +194,13 @@ const { data } = await client.getChatWidget({
       }
     }
   },
-  "widget_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "website_chat_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "org_id": "string",
   "binding_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "version": 1,
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
-  "website_chat_embed": {
+  "embed": {
     "script_url": "https://example.com/path",
     "chat_api_origin": "https://example.com/path",
     "demo_url": "https://example.com/path"
@@ -207,19 +212,19 @@ const { data } = await client.getChatWidget({
 
 ---
 
-### `updateChatWidget`
+### `updateWebsiteChat`
 
-`PUT /v1/widgets/{widget_id}`
+`PUT /v1/website-chats/{website_chat_id}`
 
 ```ts
-const { data } = await client.updateChatWidget(
+const { data } = await client.updateWebsiteChat(
   {
-    widget_id: 'example',
+    website_chat_id: 'example',
   },
   {
     name: 'string',
     agent_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-    website_chat: {
+    settings: {
       allowed_origins: ['string'],
       organisation_name: 'string',
       default_locale: 'en',
@@ -242,7 +247,7 @@ const { data } = await client.updateChatWidget(
 {
   "name": "string",
   "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "website_chat": {
+  "settings": {
     "allowed_origins": ["string"],
     "organisation_name": "string",
     "default_locale": "en",
@@ -253,13 +258,13 @@ const { data } = await client.updateChatWidget(
       }
     }
   },
-  "widget_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "website_chat_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "org_id": "string",
   "binding_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "version": 1,
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
-  "website_chat_embed": {
+  "embed": {
     "script_url": "https://example.com/path",
     "chat_api_origin": "https://example.com/path",
     "demo_url": "https://example.com/path"
@@ -271,26 +276,26 @@ const { data } = await client.updateChatWidget(
 
 ---
 
-### `deleteChatWidget`
+### `deleteWebsiteChat`
 
-`DELETE /v1/widgets/{widget_id}`
+`DELETE /v1/website-chats/{website_chat_id}`
 
 ```ts
-const { data } = await client.deleteChatWidget({
-  widget_id: 'example',
+const { data } = await client.deleteWebsiteChat({
+  website_chat_id: 'example',
   version: 1,
 })
 ```
 
 ---
 
-### `getPublicChatWidget`
+### `getPublicWebsiteChat`
 
-`GET /v1/widgets/{widget_id}/configuration`
+`GET /v1/website-chats/{website_chat_id}/configuration`
 
 ```ts
-const { data } = await client.getPublicChatWidget({
-  widget_id: 'example',
+const { data } = await client.getPublicWebsiteChat({
+  website_chat_id: 'example',
 })
 ```
 
@@ -303,6 +308,9 @@ const { data } = await client.getPublicChatWidget({
   "organisationName": "string",
   "assistantName": "string",
   "defaultLocale": "en",
+  "authentication": {
+    "email_code": true
+  },
   "design": {
     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "last_modified_at": "string",
@@ -355,7 +363,7 @@ const { data } = await client.getPublicChatWidget({
 const { data } = await client.createPublicChatGrant(
   null,
   {
-    widget_key: 'string'
+    website_chat_id: 'string'
   },
 )
 ```
@@ -367,7 +375,7 @@ const { data } = await client.createPublicChatGrant(
 {
   "grant": "string",
   "expires_in": 60,
-  "widget_origin": "https://example.com/path"
+  "frame_origin": "https://example.com/path"
 }
 ```
 
@@ -396,11 +404,14 @@ const { data } = await client.createAnonymousChatSession(
   "token": "string",
   "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "expires_at": 0,
-  "widget": {
+  "website_chat": {
     "key": "string",
     "organisationName": "string",
     "assistantName": "string",
     "defaultLocale": "en",
+    "authentication": {
+      "email_code": true
+    },
     "design": {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "last_modified_at": "string",
@@ -464,29 +475,154 @@ const { data } = await client.sendAnonymousChatMessage(
 
 ---
 
-## Schemas
+### `getChatVerification`
 
-### `ListChatWidgetsResponse`
+`GET /v1/verification`
 
 ```ts
-type ListChatWidgetsResponse = {
-  widgets: Array<{
+const { data } = await client.getChatVerification()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "available": true,
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "anonymous",
+  "challenge_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "code_expires_at": 0,
+  "resend_after": 0,
+  "email": "user@example.com",
+  "contact_resolution": "matched"
+}
+```
+
+</details>
+
+---
+
+### `startChatEmailVerification`
+
+`POST /v1/verification/email`
+
+```ts
+const { data } = await client.startChatEmailVerification(
+  null,
+  {
+    request_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    email: 'user@example.com',
+    locale: 'en'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "available": true,
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "anonymous",
+  "challenge_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "code_expires_at": 0,
+  "resend_after": 0,
+  "email": "user@example.com",
+  "contact_resolution": "matched"
+}
+```
+
+</details>
+
+---
+
+### `verifyChatEmailCode`
+
+`POST /v1/verification/code`
+
+```ts
+const { data } = await client.verifyChatEmailCode(
+  null,
+  {
+    challenge_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    code: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "available": true,
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "anonymous",
+  "challenge_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "code_expires_at": 0,
+  "resend_after": 0,
+  "email": "user@example.com",
+  "contact_resolution": "matched"
+}
+```
+
+</details>
+
+---
+
+### `cancelChatVerification`
+
+`POST /v1/verification/cancel`
+
+```ts
+const { data } = await client.cancelChatVerification()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "available": true,
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "anonymous",
+  "challenge_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "code_expires_at": 0,
+  "resend_after": 0,
+  "email": "user@example.com",
+  "contact_resolution": "matched"
+}
+```
+
+</details>
+
+---
+
+## Schemas
+
+### `ListWebsiteChatsResponse`
+
+```ts
+type ListWebsiteChatsResponse = {
+  website_chats: Array<{
     name: string
     agent_id: string // uuid
-    website_chat: {
+    settings: {
       allowed_origins: { ... }
       organisation_name: { ... }
       default_locale: { ... }
       design_id?: { ... }
       authentication?: { ... }
     }
-    widget_id: string // uuid
+    website_chat_id: string // uuid
     org_id: string
     binding_id: string // uuid
     version: number
     created_at: string // date-time
     updated_at: string // date-time
-    website_chat_embed: {
+    embed: {
       script_url: { ... }
       chat_api_origin: { ... }
       demo_url: { ... }
@@ -496,13 +632,13 @@ type ListChatWidgetsResponse = {
 }
 ```
 
-### `ChatWidget`
+### `WebsiteChat`
 
 ```ts
-type ChatWidget = {
+type WebsiteChat = {
   name: string
   agent_id: string // uuid
-  website_chat: {
+  settings: {
     allowed_origins: string[]
     organisation_name: string
     default_locale: "en" | "de"
@@ -511,13 +647,13 @@ type ChatWidget = {
       email_code: { ... }
     }
   }
-  widget_id: string // uuid
+  website_chat_id: string // uuid
   org_id: string
   binding_id: string // uuid
   version: number
   created_at: string // date-time
   updated_at: string // date-time
-  website_chat_embed: {
+  embed: {
     script_url: string // uri
     chat_api_origin: string // uri
     demo_url: string // uri
@@ -551,13 +687,13 @@ type Error = {
 }
 ```
 
-### `CreateChatWidgetRequest`
+### `CreateWebsiteChatRequest`
 
 ```ts
-type CreateChatWidgetRequest = {
+type CreateWebsiteChatRequest = {
   name: string
   agent_id: string // uuid
-  website_chat: {
+  settings: {
     allowed_origins: string[]
     organisation_name: string
     default_locale: "en" | "de"
@@ -569,13 +705,13 @@ type CreateChatWidgetRequest = {
 }
 ```
 
-### `UpdateChatWidgetRequest`
+### `UpdateWebsiteChatRequest`
 
 ```ts
-type UpdateChatWidgetRequest = {
+type UpdateWebsiteChatRequest = {
   name?: string
   agent_id?: string // uuid
-  website_chat?: {
+  settings?: {
     allowed_origins: string[]
     organisation_name: string
     default_locale: "en" | "de"
@@ -588,14 +724,32 @@ type UpdateChatWidgetRequest = {
 }
 ```
 
-### `Widget`
+### `VerificationState`
 
 ```ts
-type Widget = {
+type VerificationState = {
+  available: boolean
+  conversation_id: string // uuid
+  status: "anonymous" | "sending" | "pending" | "verified"
+  challenge_id?: string // uuid
+  code_expires_at?: number
+  resend_after?: number
+  email?: string // email
+  contact_resolution?: "matched" | "ambiguous" | "not_found"
+}
+```
+
+### `PublicWebsiteChat`
+
+```ts
+type PublicWebsiteChat = {
   key: string
   organisationName: string
   assistantName: string
   defaultLocale: "en" | "de"
+  authentication?: {
+    email_code: boolean
+  }
   design?: {
     id: string // uuid
     last_modified_at?: string
@@ -627,10 +781,10 @@ type Widget = {
 }
 ```
 
-### `WidgetDesign`
+### `WebsiteChatDesign`
 
 ```ts
-type WidgetDesign = {
+type WebsiteChatDesign = {
   id: string // uuid
   last_modified_at?: string
   style?: {
@@ -690,6 +844,6 @@ type PublicEvent = {
 
 ```ts
 type PublicChatError = {
-  code: "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE"
+  code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE"
 }
 ```

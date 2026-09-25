@@ -10,16 +10,16 @@ import type {
 export declare namespace Components {
     namespace Responses {
         export interface Error {
-            code: "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+            code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
         }
     }
     namespace Schemas {
-        export interface ChatWidget {
+        export interface CreateWebsiteChatRequest {
             name: string;
             agent_id: string | null; // uuid
-            website_chat: {
+            settings: {
                 /**
-                 * Exact HTTPS origins. Empty means the widget cannot start sessions.
+                 * Exact HTTPS origins. Empty means the Website Chat cannot start sessions.
                  */
                 allowed_origins: [
                     string?,
@@ -76,99 +76,7 @@ export declare namespace Components {
                 organisation_name: string;
                 default_locale: "en" | "de";
                 /**
-                 * Design Builder configuration for the widget only.
-                 */
-                design_id?: string | null; // uuid
-                /**
-                 * Email Builder template selection. Does not enable verification by itself.
-                 */
-                authentication?: {
-                    email_code: {
-                        email_template_id?: string | null; // uuid
-                    };
-                } | null;
-            };
-            /**
-             * Stable public embed identifier, independent of the assigned agent. Not a credential.
-             */
-            widget_id: string; // uuid
-            org_id: string;
-            /**
-             * Server-owned session binding; changes on reassignment or allowed-origin changes.
-             */
-            binding_id: string; // uuid
-            version: number;
-            created_at: string; // date-time
-            updated_at: string; // date-time
-            website_chat_embed: {
-                script_url: string; // uri
-                chat_api_origin: string; // uri
-                demo_url: string; // uri
-            };
-        }
-        export interface CreateChatWidgetRequest {
-            name: string;
-            agent_id: string | null; // uuid
-            website_chat: {
-                /**
-                 * Exact HTTPS origins. Empty means the widget cannot start sessions.
-                 */
-                allowed_origins: [
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?,
-                    string?
-                ];
-                organisation_name: string;
-                default_locale: "en" | "de";
-                /**
-                 * Design Builder configuration for the widget only.
+                 * Design Builder configuration for the Website Chat only.
                  */
                 design_id?: string | null; // uuid
                 /**
@@ -188,13 +96,13 @@ export declare namespace Components {
                 [key: string]: any;
             };
         }
-        export interface ListChatWidgetsResponse {
-            widgets: {
+        export interface ListWebsiteChatsResponse {
+            website_chats: {
                 name: string;
                 agent_id: string | null; // uuid
-                website_chat: {
+                settings: {
                     /**
-                     * Exact HTTPS origins. Empty means the widget cannot start sessions.
+                     * Exact HTTPS origins. Empty means the Website Chat cannot start sessions.
                      */
                     allowed_origins: [
                         string?,
@@ -251,7 +159,7 @@ export declare namespace Components {
                     organisation_name: string;
                     default_locale: "en" | "de";
                     /**
-                     * Design Builder configuration for the widget only.
+                     * Design Builder configuration for the Website Chat only.
                      */
                     design_id?: string | null; // uuid
                     /**
@@ -266,7 +174,7 @@ export declare namespace Components {
                 /**
                  * Stable public embed identifier, independent of the assigned agent. Not a credential.
                  */
-                widget_id: string; // uuid
+                website_chat_id: string; // uuid
                 org_id: string;
                 /**
                  * Server-owned session binding; changes on reassignment or allowed-origin changes.
@@ -275,7 +183,7 @@ export declare namespace Components {
                 version: number;
                 created_at: string; // date-time
                 updated_at: string; // date-time
-                website_chat_embed: {
+                embed: {
                     script_url: string; // uri
                     chat_api_origin: string; // uri
                     demo_url: string; // uri
@@ -284,7 +192,7 @@ export declare namespace Components {
             next_cursor?: string;
         }
         export interface PublicChatError {
-            code: "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+            code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
         }
         /**
          * JSON payload of one SSE data frame from sendAnonymousChatMessage.
@@ -302,12 +210,58 @@ export declare namespace Components {
             code: "UNAVAILABLE";
             request_id: string; // uuid
         };
-        export interface UpdateChatWidgetRequest {
+        export interface PublicWebsiteChat {
+            key: string;
+            organisationName: string;
+            assistantName: string;
+            defaultLocale: "en" | "de";
+            authentication?: {
+                email_code: boolean;
+            };
+            design?: {
+                id: string; // uuid
+                last_modified_at?: string;
+                style?: {
+                    palette?: {
+                        primary?: string;
+                        background?: string;
+                    };
+                    typography?: {
+                        font?: {
+                            font_family?: string;
+                        };
+                    };
+                    shape?: {
+                        border_radius?: number;
+                    };
+                };
+                spark_theme?: {
+                    accentColor?: string;
+                    backgroundColor?: string;
+                    fontBody?: string;
+                    fontHeading?: string;
+                    radius?: string;
+                    scaling?: string;
+                    spacing?: string;
+                    appearance?: string;
+                    neutralColor?: string;
+                    styleVariant?: string;
+                    labelPosition?: string;
+                    inputStyle?: string;
+                    inputColor?: string;
+                    cardVariant?: string;
+                    cardColor?: string;
+                    highContrast?: boolean;
+                };
+            };
+            locales: ("en" | "de")[];
+        }
+        export interface UpdateWebsiteChatRequest {
             name?: string;
             agent_id?: string | null; // uuid
-            website_chat?: {
+            settings?: {
                 /**
-                 * Exact HTTPS origins. Empty means the widget cannot start sessions.
+                 * Exact HTTPS origins. Empty means the Website Chat cannot start sessions.
                  */
                 allowed_origins: [
                     string?,
@@ -364,7 +318,7 @@ export declare namespace Components {
                 organisation_name: string;
                 default_locale: "en" | "de";
                 /**
-                 * Design Builder configuration for the widget only.
+                 * Design Builder configuration for the Website Chat only.
                  */
                 design_id?: string | null; // uuid
                 /**
@@ -381,9 +335,153 @@ export declare namespace Components {
              */
             version: number;
         }
+        export interface VerificationState {
+            available: boolean;
+            conversation_id: string; // uuid
+            status: "anonymous" | "sending" | "pending" | "verified";
+            challenge_id?: string; // uuid
+            /**
+             * Unix seconds
+             */
+            code_expires_at?: number;
+            /**
+             * Unix seconds
+             */
+            resend_after?: number;
+            email?: string; // email
+            contact_resolution?: "matched" | "ambiguous" | "not_found";
+        }
+        export interface WebsiteChat {
+            name: string;
+            agent_id: string | null; // uuid
+            settings: {
+                /**
+                 * Exact HTTPS origins. Empty means the Website Chat cannot start sessions.
+                 */
+                allowed_origins: [
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?
+                ];
+                organisation_name: string;
+                default_locale: "en" | "de";
+                /**
+                 * Design Builder configuration for the Website Chat only.
+                 */
+                design_id?: string | null; // uuid
+                /**
+                 * Email Builder template selection. Does not enable verification by itself.
+                 */
+                authentication?: {
+                    email_code: {
+                        email_template_id?: string | null; // uuid
+                    };
+                } | null;
+            };
+            /**
+             * Stable public embed identifier, independent of the assigned agent. Not a credential.
+             */
+            website_chat_id: string; // uuid
+            org_id: string;
+            /**
+             * Server-owned session binding; changes on reassignment or allowed-origin changes.
+             */
+            binding_id: string; // uuid
+            version: number;
+            created_at: string; // date-time
+            updated_at: string; // date-time
+            embed: {
+                script_url: string; // uri
+                chat_api_origin: string; // uri
+                demo_url: string; // uri
+            };
+        }
+        export interface WebsiteChatDesign {
+            id: string; // uuid
+            last_modified_at?: string;
+            style?: {
+                palette?: {
+                    primary?: string;
+                    background?: string;
+                };
+                typography?: {
+                    font?: {
+                        font_family?: string;
+                    };
+                };
+                shape?: {
+                    border_radius?: number;
+                };
+            };
+            spark_theme?: {
+                accentColor?: string;
+                backgroundColor?: string;
+                fontBody?: string;
+                fontHeading?: string;
+                radius?: string;
+                scaling?: string;
+                spacing?: string;
+                appearance?: string;
+                neutralColor?: string;
+                styleVariant?: string;
+                labelPosition?: string;
+                inputStyle?: string;
+                inputColor?: string;
+                cardVariant?: string;
+                cardColor?: string;
+                highContrast?: boolean;
+            };
+        }
         export interface WebsiteChatSettings {
             /**
-             * Exact HTTPS origins. Empty means the widget cannot start sessions.
+             * Exact HTTPS origins. Empty means the Website Chat cannot start sessions.
              */
             allowed_origins: [
                 string?,
@@ -440,7 +538,7 @@ export declare namespace Components {
             organisation_name: string;
             default_locale: "en" | "de";
             /**
-             * Design Builder configuration for the widget only.
+             * Design Builder configuration for the Website Chat only.
              */
             design_id?: string | null; // uuid
             /**
@@ -452,88 +550,32 @@ export declare namespace Components {
                 };
             } | null;
         }
-        export interface Widget {
-            key: string;
-            organisationName: string;
-            assistantName: string;
-            defaultLocale: "en" | "de";
-            design?: {
-                id: string; // uuid
-                last_modified_at?: string;
-                style?: {
-                    palette?: {
-                        primary?: string;
-                        background?: string;
-                    };
-                    typography?: {
-                        font?: {
-                            font_family?: string;
-                        };
-                    };
-                    shape?: {
-                        border_radius?: number;
-                    };
-                };
-                spark_theme?: {
-                    accentColor?: string;
-                    backgroundColor?: string;
-                    fontBody?: string;
-                    fontHeading?: string;
-                    radius?: string;
-                    scaling?: string;
-                    spacing?: string;
-                    appearance?: string;
-                    neutralColor?: string;
-                    styleVariant?: string;
-                    labelPosition?: string;
-                    inputStyle?: string;
-                    inputColor?: string;
-                    cardVariant?: string;
-                    cardColor?: string;
-                    highContrast?: boolean;
-                };
-            };
-            locales: ("en" | "de")[];
-        }
-        export interface WidgetDesign {
-            id: string; // uuid
-            last_modified_at?: string;
-            style?: {
-                palette?: {
-                    primary?: string;
-                    background?: string;
-                };
-                typography?: {
-                    font?: {
-                        font_family?: string;
-                    };
-                };
-                shape?: {
-                    border_radius?: number;
-                };
-            };
-            spark_theme?: {
-                accentColor?: string;
-                backgroundColor?: string;
-                fontBody?: string;
-                fontHeading?: string;
-                radius?: string;
-                scaling?: string;
-                spacing?: string;
-                appearance?: string;
-                neutralColor?: string;
-                styleVariant?: string;
-                labelPosition?: string;
-                inputStyle?: string;
-                inputColor?: string;
-                cardVariant?: string;
-                cardColor?: string;
-                highContrast?: boolean;
-            };
-        }
     }
 }
 export declare namespace Paths {
+    namespace CancelChatVerification {
+        namespace Responses {
+            export interface $200 {
+                available: boolean;
+                conversation_id: string; // uuid
+                status: "anonymous" | "sending" | "pending" | "verified";
+                challenge_id?: string; // uuid
+                /**
+                 * Unix seconds
+                 */
+                code_expires_at?: number;
+                /**
+                 * Unix seconds
+                 */
+                resend_after?: number;
+                email?: string; // email
+                contact_resolution?: "matched" | "ambiguous" | "not_found";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+            }
+        }
+    }
     namespace CreateAnonymousChatSession {
         export interface RequestBody {
             grant: string; // ^[A-Za-z0-9_-]{43}$
@@ -546,11 +588,14 @@ export declare namespace Paths {
                  * Unix seconds
                  */
                 expires_at: number;
-                widget: {
+                website_chat: {
                     key: string;
                     organisationName: string;
                     assistantName: string;
                     defaultLocale: "en" | "de";
+                    authentication?: {
+                        email_code: boolean;
+                    };
                     design?: {
                         id: string; // uuid
                         last_modified_at?: string;
@@ -591,17 +636,36 @@ export declare namespace Paths {
                 };
             }
             export interface Default {
-                code: "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
             }
         }
     }
-    namespace CreateChatWidget {
+    namespace CreatePublicChatGrant {
+        export interface RequestBody {
+            website_chat_id: string; // ^[a-zA-Z0-9_-]{1,100}$
+        }
+        namespace Responses {
+            export interface $201 {
+                grant: string;
+                /**
+                 * example:
+                 * 60
+                 */
+                expires_in: number;
+                frame_origin: string; // uri
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+            }
+        }
+    }
+    namespace CreateWebsiteChat {
         export interface RequestBody {
             name: string;
             agent_id: string | null; // uuid
-            website_chat: {
+            settings: {
                 /**
-                 * Exact HTTPS origins. Empty means the widget cannot start sessions.
+                 * Exact HTTPS origins. Empty means the Website Chat cannot start sessions.
                  */
                 allowed_origins: [
                     string?,
@@ -658,7 +722,7 @@ export declare namespace Paths {
                 organisation_name: string;
                 default_locale: "en" | "de";
                 /**
-                 * Design Builder configuration for the widget only.
+                 * Design Builder configuration for the Website Chat only.
                  */
                 design_id?: string | null; // uuid
                 /**
@@ -675,9 +739,9 @@ export declare namespace Paths {
             export interface $201 {
                 name: string;
                 agent_id: string | null; // uuid
-                website_chat: {
+                settings: {
                     /**
-                     * Exact HTTPS origins. Empty means the widget cannot start sessions.
+                     * Exact HTTPS origins. Empty means the Website Chat cannot start sessions.
                      */
                     allowed_origins: [
                         string?,
@@ -734,7 +798,7 @@ export declare namespace Paths {
                     organisation_name: string;
                     default_locale: "en" | "de";
                     /**
-                     * Design Builder configuration for the widget only.
+                     * Design Builder configuration for the Website Chat only.
                      */
                     design_id?: string | null; // uuid
                     /**
@@ -749,7 +813,7 @@ export declare namespace Paths {
                 /**
                  * Stable public embed identifier, independent of the assigned agent. Not a credential.
                  */
-                widget_id: string; // uuid
+                website_chat_id: string; // uuid
                 org_id: string;
                 /**
                  * Server-owned session binding; changes on reassignment or allowed-origin changes.
@@ -758,7 +822,7 @@ export declare namespace Paths {
                 version: number;
                 created_at: string; // date-time
                 updated_at: string; // date-time
-                website_chat_embed: {
+                embed: {
                     script_url: string; // uri
                     chat_api_origin: string; // uri
                     demo_url: string; // uri
@@ -787,26 +851,7 @@ export declare namespace Paths {
             }
         }
     }
-    namespace CreatePublicChatGrant {
-        export interface RequestBody {
-            widget_key: string; // ^[a-zA-Z0-9_-]{1,100}$
-        }
-        namespace Responses {
-            export interface $201 {
-                grant: string;
-                /**
-                 * example:
-                 * 60
-                 */
-                expires_in: number;
-                widget_origin: string; // uri
-            }
-            export interface Default {
-                code: "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
-            }
-        }
-    }
-    namespace DeleteChatWidget {
+    namespace DeleteWebsiteChat {
         namespace Parameters {
             export type Version = number;
         }
@@ -839,129 +884,35 @@ export declare namespace Paths {
             }
         }
     }
-    namespace GetChatWidget {
+    namespace GetChatVerification {
         namespace Responses {
             export interface $200 {
-                name: string;
-                agent_id: string | null; // uuid
-                website_chat: {
-                    /**
-                     * Exact HTTPS origins. Empty means the widget cannot start sessions.
-                     */
-                    allowed_origins: [
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?,
-                        string?
-                    ];
-                    organisation_name: string;
-                    default_locale: "en" | "de";
-                    /**
-                     * Design Builder configuration for the widget only.
-                     */
-                    design_id?: string | null; // uuid
-                    /**
-                     * Email Builder template selection. Does not enable verification by itself.
-                     */
-                    authentication?: {
-                        email_code: {
-                            email_template_id?: string | null; // uuid
-                        };
-                    } | null;
-                };
+                available: boolean;
+                conversation_id: string; // uuid
+                status: "anonymous" | "sending" | "pending" | "verified";
+                challenge_id?: string; // uuid
                 /**
-                 * Stable public embed identifier, independent of the assigned agent. Not a credential.
+                 * Unix seconds
                  */
-                widget_id: string; // uuid
-                org_id: string;
+                code_expires_at?: number;
                 /**
-                 * Server-owned session binding; changes on reassignment or allowed-origin changes.
+                 * Unix seconds
                  */
-                binding_id: string; // uuid
-                version: number;
-                created_at: string; // date-time
-                updated_at: string; // date-time
-                website_chat_embed: {
-                    script_url: string; // uri
-                    chat_api_origin: string; // uri
-                    demo_url: string; // uri
-                };
+                resend_after?: number;
+                email?: string; // email
+                contact_resolution?: "matched" | "ambiguous" | "not_found";
             }
-            export interface $400 {
-                error?: string;
-                message?: string;
-                details?: {
-                    [key: string]: any;
-                };
-            }
-            export interface $404 {
-                error?: string;
-                message?: string;
-                details?: {
-                    [key: string]: any;
-                };
-            }
-            export interface $409 {
-                error?: string;
-                message?: string;
-                details?: {
-                    [key: string]: any;
-                };
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
             }
         }
     }
-    namespace GetPublicChatWidget {
+    namespace GetPublicWebsiteChat {
         namespace Parameters {
-            export type WidgetId = string; // ^[a-zA-Z0-9_-]{1,100}$
+            export type WebsiteChatId = string; // ^[a-zA-Z0-9_-]{1,100}$
         }
         export interface PathParameters {
-            widget_id: Parameters.WidgetId /* ^[a-zA-Z0-9_-]{1,100}$ */;
+            website_chat_id: Parameters.WebsiteChatId /* ^[a-zA-Z0-9_-]{1,100}$ */;
         }
         namespace Responses {
             export interface $200 {
@@ -969,6 +920,9 @@ export declare namespace Paths {
                 organisationName: string;
                 assistantName: string;
                 defaultLocale: "en" | "de";
+                authentication?: {
+                    email_code: boolean;
+                };
                 design?: {
                     id: string; // uuid
                     last_modified_at?: string;
@@ -1008,11 +962,128 @@ export declare namespace Paths {
                 locales: ("en" | "de")[];
             }
             export interface Default {
-                code: "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
             }
         }
     }
-    namespace ListChatWidgets {
+    namespace GetWebsiteChat {
+        namespace Responses {
+            export interface $200 {
+                name: string;
+                agent_id: string | null; // uuid
+                settings: {
+                    /**
+                     * Exact HTTPS origins. Empty means the Website Chat cannot start sessions.
+                     */
+                    allowed_origins: [
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?,
+                        string?
+                    ];
+                    organisation_name: string;
+                    default_locale: "en" | "de";
+                    /**
+                     * Design Builder configuration for the Website Chat only.
+                     */
+                    design_id?: string | null; // uuid
+                    /**
+                     * Email Builder template selection. Does not enable verification by itself.
+                     */
+                    authentication?: {
+                        email_code: {
+                            email_template_id?: string | null; // uuid
+                        };
+                    } | null;
+                };
+                /**
+                 * Stable public embed identifier, independent of the assigned agent. Not a credential.
+                 */
+                website_chat_id: string; // uuid
+                org_id: string;
+                /**
+                 * Server-owned session binding; changes on reassignment or allowed-origin changes.
+                 */
+                binding_id: string; // uuid
+                version: number;
+                created_at: string; // date-time
+                updated_at: string; // date-time
+                embed: {
+                    script_url: string; // uri
+                    chat_api_origin: string; // uri
+                    demo_url: string; // uri
+                };
+            }
+            export interface $400 {
+                error?: string;
+                message?: string;
+                details?: {
+                    [key: string]: any;
+                };
+            }
+            export interface $404 {
+                error?: string;
+                message?: string;
+                details?: {
+                    [key: string]: any;
+                };
+            }
+            export interface $409 {
+                error?: string;
+                message?: string;
+                details?: {
+                    [key: string]: any;
+                };
+            }
+        }
+    }
+    namespace ListWebsiteChats {
         namespace Parameters {
             export type Cursor = string;
         }
@@ -1021,12 +1092,12 @@ export declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                widgets: {
+                website_chats: {
                     name: string;
                     agent_id: string | null; // uuid
-                    website_chat: {
+                    settings: {
                         /**
-                         * Exact HTTPS origins. Empty means the widget cannot start sessions.
+                         * Exact HTTPS origins. Empty means the Website Chat cannot start sessions.
                          */
                         allowed_origins: [
                             string?,
@@ -1083,7 +1154,7 @@ export declare namespace Paths {
                         organisation_name: string;
                         default_locale: "en" | "de";
                         /**
-                         * Design Builder configuration for the widget only.
+                         * Design Builder configuration for the Website Chat only.
                          */
                         design_id?: string | null; // uuid
                         /**
@@ -1098,7 +1169,7 @@ export declare namespace Paths {
                     /**
                      * Stable public embed identifier, independent of the assigned agent. Not a credential.
                      */
-                    widget_id: string; // uuid
+                    website_chat_id: string; // uuid
                     org_id: string;
                     /**
                      * Server-owned session binding; changes on reassignment or allowed-origin changes.
@@ -1107,7 +1178,7 @@ export declare namespace Paths {
                     version: number;
                     created_at: string; // date-time
                     updated_at: string; // date-time
-                    website_chat_embed: {
+                    embed: {
                         script_url: string; // uri
                         chat_api_origin: string; // uri
                         demo_url: string; // uri
@@ -1148,17 +1219,45 @@ export declare namespace Paths {
         namespace Responses {
             export type $200 = string;
             export interface Default {
-                code: "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
             }
         }
     }
-    namespace UpdateChatWidget {
+    namespace StartChatEmailVerification {
+        export interface RequestBody {
+            request_id: string; // uuid
+            email: string; // email
+            locale: "en" | "de";
+        }
+        namespace Responses {
+            export interface $200 {
+                available: boolean;
+                conversation_id: string; // uuid
+                status: "anonymous" | "sending" | "pending" | "verified";
+                challenge_id?: string; // uuid
+                /**
+                 * Unix seconds
+                 */
+                code_expires_at?: number;
+                /**
+                 * Unix seconds
+                 */
+                resend_after?: number;
+                email?: string; // email
+                contact_resolution?: "matched" | "ambiguous" | "not_found";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+            }
+        }
+    }
+    namespace UpdateWebsiteChat {
         export interface RequestBody {
             name?: string;
             agent_id?: string | null; // uuid
-            website_chat?: {
+            settings?: {
                 /**
-                 * Exact HTTPS origins. Empty means the widget cannot start sessions.
+                 * Exact HTTPS origins. Empty means the Website Chat cannot start sessions.
                  */
                 allowed_origins: [
                     string?,
@@ -1215,7 +1314,7 @@ export declare namespace Paths {
                 organisation_name: string;
                 default_locale: "en" | "de";
                 /**
-                 * Design Builder configuration for the widget only.
+                 * Design Builder configuration for the Website Chat only.
                  */
                 design_id?: string | null; // uuid
                 /**
@@ -1236,9 +1335,9 @@ export declare namespace Paths {
             export interface $200 {
                 name: string;
                 agent_id: string | null; // uuid
-                website_chat: {
+                settings: {
                     /**
-                     * Exact HTTPS origins. Empty means the widget cannot start sessions.
+                     * Exact HTTPS origins. Empty means the Website Chat cannot start sessions.
                      */
                     allowed_origins: [
                         string?,
@@ -1295,7 +1394,7 @@ export declare namespace Paths {
                     organisation_name: string;
                     default_locale: "en" | "de";
                     /**
-                     * Design Builder configuration for the widget only.
+                     * Design Builder configuration for the Website Chat only.
                      */
                     design_id?: string | null; // uuid
                     /**
@@ -1310,7 +1409,7 @@ export declare namespace Paths {
                 /**
                  * Stable public embed identifier, independent of the assigned agent. Not a credential.
                  */
-                widget_id: string; // uuid
+                website_chat_id: string; // uuid
                 org_id: string;
                 /**
                  * Server-owned session binding; changes on reassignment or allowed-origin changes.
@@ -1319,7 +1418,7 @@ export declare namespace Paths {
                 version: number;
                 created_at: string; // date-time
                 updated_at: string; // date-time
-                website_chat_embed: {
+                embed: {
                     script_url: string; // uri
                     chat_api_origin: string; // uri
                     demo_url: string; // uri
@@ -1348,12 +1447,39 @@ export declare namespace Paths {
             }
         }
     }
-    namespace V1Widgets$WidgetId {
+    namespace V1WebsiteChats$WebsiteChatId {
         namespace Parameters {
-            export type WidgetId = string; // uuid
+            export type WebsiteChatId = string; // uuid
         }
         export interface PathParameters {
-            widget_id: Parameters.WidgetId /* uuid */;
+            website_chat_id: Parameters.WebsiteChatId /* uuid */;
+        }
+    }
+    namespace VerifyChatEmailCode {
+        export interface RequestBody {
+            challenge_id: string; // uuid
+            code: string; // ^\d{6}$
+        }
+        namespace Responses {
+            export interface $200 {
+                available: boolean;
+                conversation_id: string; // uuid
+                status: "anonymous" | "sending" | "pending" | "verified";
+                challenge_id?: string; // uuid
+                /**
+                 * Unix seconds
+                 */
+                code_expires_at?: number;
+                /**
+                 * Unix seconds
+                 */
+                resend_after?: number;
+                email?: string; // email
+                contact_resolution?: "matched" | "ambiguous" | "not_found";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+            }
         }
     }
 }
@@ -1361,55 +1487,55 @@ export declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * listChatWidgets
+   * listWebsiteChats
    */
-  'listChatWidgets'(
-    parameters?: Parameters<Paths.ListChatWidgets.QueryParameters> | null,
+  'listWebsiteChats'(
+    parameters?: Parameters<Paths.ListWebsiteChats.QueryParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListChatWidgets.Responses.$200>
+  ): OperationResponse<Paths.ListWebsiteChats.Responses.$200>
   /**
-   * createChatWidget
+   * createWebsiteChat
    */
-  'createChatWidget'(
+  'createWebsiteChat'(
     parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.CreateChatWidget.RequestBody,
+    data?: Paths.CreateWebsiteChat.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreateChatWidget.Responses.$201>
+  ): OperationResponse<Paths.CreateWebsiteChat.Responses.$201>
   /**
-   * getChatWidget
+   * getWebsiteChat
    */
-  'getChatWidget'(
-    parameters?: Parameters<Paths.V1Widgets$WidgetId.PathParameters> | null,
+  'getWebsiteChat'(
+    parameters?: Parameters<Paths.V1WebsiteChats$WebsiteChatId.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetChatWidget.Responses.$200>
+  ): OperationResponse<Paths.GetWebsiteChat.Responses.$200>
   /**
-   * updateChatWidget
+   * updateWebsiteChat
    */
-  'updateChatWidget'(
-    parameters?: Parameters<Paths.V1Widgets$WidgetId.PathParameters> | null,
-    data?: Paths.UpdateChatWidget.RequestBody,
+  'updateWebsiteChat'(
+    parameters?: Parameters<Paths.V1WebsiteChats$WebsiteChatId.PathParameters> | null,
+    data?: Paths.UpdateWebsiteChat.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpdateChatWidget.Responses.$200>
+  ): OperationResponse<Paths.UpdateWebsiteChat.Responses.$200>
   /**
-   * deleteChatWidget
+   * deleteWebsiteChat
    */
-  'deleteChatWidget'(
-    parameters?: Parameters<Paths.DeleteChatWidget.QueryParameters & Paths.V1Widgets$WidgetId.PathParameters> | null,
+  'deleteWebsiteChat'(
+    parameters?: Parameters<Paths.DeleteWebsiteChat.QueryParameters & Paths.V1WebsiteChats$WebsiteChatId.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteChatWidget.Responses.$204>
+  ): OperationResponse<Paths.DeleteWebsiteChat.Responses.$204>
   /**
-   * getPublicChatWidget - Resolve visitor-facing configuration for an independent widget and its current agent assignment. The widget ID is not an organisation ID or a destination such as website or portal.
+   * getPublicWebsiteChat - Resolve visitor-facing configuration for an independent Website Chat and its current agent assignment. The Website Chat ID is not an organisation ID or a destination such as website or portal.
    */
-  'getPublicChatWidget'(
-    parameters?: Parameters<Paths.GetPublicChatWidget.PathParameters> | null,
+  'getPublicWebsiteChat'(
+    parameters?: Parameters<Paths.GetPublicWebsiteChat.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetPublicChatWidget.Responses.$200 | Paths.GetPublicChatWidget.Responses.Default>
+  ): OperationResponse<Paths.GetPublicWebsiteChat.Responses.$200 | Paths.GetPublicWebsiteChat.Responses.Default>
   /**
-   * createPublicChatGrant - Called by the host website with its widget_key. Checks the saved website origin allowlist and issues a single-use grant for the iframe to exchange at POST /v1/sessions within 60 seconds. This deadline does not limit the resulting session.
+   * createPublicChatGrant - Called by the host website with its website_chat_id. Checks the saved website origin allowlist and issues a single-use grant for the iframe to exchange at POST /v1/sessions within 60 seconds. This deadline does not limit the resulting session.
    */
   'createPublicChatGrant'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1437,66 +1563,98 @@ export interface OperationMethods {
     data?: Paths.SendAnonymousChatMessage.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SendAnonymousChatMessage.Responses.$200 | Paths.SendAnonymousChatMessage.Responses.Default>
+  /**
+   * getChatVerification - Read this session's verification state. No contact IDs or candidate records are exposed.
+   */
+  'getChatVerification'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetChatVerification.Responses.$200 | Paths.GetChatVerification.Responses.Default>
+  /**
+   * startChatEmailVerification - Start or resend an email challenge using the template saved on this session's Website Chat. Repeating the same request_id and payload does not send another email. Codes must never be sent as chat messages.
+   */
+  'startChatEmailVerification'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.StartChatEmailVerification.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.StartChatEmailVerification.Responses.$200 | Paths.StartChatEmailVerification.Responses.Default>
+  /**
+   * verifyChatEmailCode - Verify a code for this session's current challenge. Success binds email proof and contact resolution to this session and starts a new conversation. It grants no account-tool permission.
+   */
+  'verifyChatEmailCode'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.VerifyChatEmailCode.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.VerifyChatEmailCode.Responses.$200 | Paths.VerifyChatEmailCode.Responses.Default>
+  /**
+   * cancelChatVerification - Cancel a pending challenge or clear verified identity. Clearing verified identity starts a new anonymous conversation. In-flight verification cannot restore the cleared identity.
+   */
+  'cancelChatVerification'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelChatVerification.Responses.$200 | Paths.CancelChatVerification.Responses.Default>
 }
 
 export interface PathsDictionary {
-  ['/v1/widgets']: {
+  ['/v1/website-chats']: {
     /**
-     * listChatWidgets
+     * listWebsiteChats
      */
     'get'(
-      parameters?: Parameters<Paths.ListChatWidgets.QueryParameters> | null,
+      parameters?: Parameters<Paths.ListWebsiteChats.QueryParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListChatWidgets.Responses.$200>
+    ): OperationResponse<Paths.ListWebsiteChats.Responses.$200>
     /**
-     * createChatWidget
+     * createWebsiteChat
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.CreateChatWidget.RequestBody,
+      data?: Paths.CreateWebsiteChat.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreateChatWidget.Responses.$201>
+    ): OperationResponse<Paths.CreateWebsiteChat.Responses.$201>
   }
-  ['/v1/widgets/{widget_id}']: {
+  ['/v1/website-chats/{website_chat_id}']: {
     /**
-     * getChatWidget
+     * getWebsiteChat
      */
     'get'(
-      parameters?: Parameters<Paths.V1Widgets$WidgetId.PathParameters> | null,
+      parameters?: Parameters<Paths.V1WebsiteChats$WebsiteChatId.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetChatWidget.Responses.$200>
+    ): OperationResponse<Paths.GetWebsiteChat.Responses.$200>
     /**
-     * updateChatWidget
+     * updateWebsiteChat
      */
     'put'(
-      parameters?: Parameters<Paths.V1Widgets$WidgetId.PathParameters> | null,
-      data?: Paths.UpdateChatWidget.RequestBody,
+      parameters?: Parameters<Paths.V1WebsiteChats$WebsiteChatId.PathParameters> | null,
+      data?: Paths.UpdateWebsiteChat.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpdateChatWidget.Responses.$200>
+    ): OperationResponse<Paths.UpdateWebsiteChat.Responses.$200>
     /**
-     * deleteChatWidget
+     * deleteWebsiteChat
      */
     'delete'(
-      parameters?: Parameters<Paths.DeleteChatWidget.QueryParameters & Paths.V1Widgets$WidgetId.PathParameters> | null,
+      parameters?: Parameters<Paths.DeleteWebsiteChat.QueryParameters & Paths.V1WebsiteChats$WebsiteChatId.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteChatWidget.Responses.$204>
+    ): OperationResponse<Paths.DeleteWebsiteChat.Responses.$204>
   }
-  ['/v1/widgets/{widget_id}/configuration']: {
+  ['/v1/website-chats/{website_chat_id}/configuration']: {
     /**
-     * getPublicChatWidget - Resolve visitor-facing configuration for an independent widget and its current agent assignment. The widget ID is not an organisation ID or a destination such as website or portal.
+     * getPublicWebsiteChat - Resolve visitor-facing configuration for an independent Website Chat and its current agent assignment. The Website Chat ID is not an organisation ID or a destination such as website or portal.
      */
     'get'(
-      parameters?: Parameters<Paths.GetPublicChatWidget.PathParameters> | null,
+      parameters?: Parameters<Paths.GetPublicWebsiteChat.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetPublicChatWidget.Responses.$200 | Paths.GetPublicChatWidget.Responses.Default>
+    ): OperationResponse<Paths.GetPublicWebsiteChat.Responses.$200 | Paths.GetPublicWebsiteChat.Responses.Default>
   }
   ['/v1/bootstrap']: {
     /**
-     * createPublicChatGrant - Called by the host website with its widget_key. Checks the saved website origin allowlist and issues a single-use grant for the iframe to exchange at POST /v1/sessions within 60 seconds. This deadline does not limit the resulting session.
+     * createPublicChatGrant - Called by the host website with its website_chat_id. Checks the saved website origin allowlist and issues a single-use grant for the iframe to exchange at POST /v1/sessions within 60 seconds. This deadline does not limit the resulting session.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1529,18 +1687,59 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SendAnonymousChatMessage.Responses.$200 | Paths.SendAnonymousChatMessage.Responses.Default>
   }
+  ['/v1/verification']: {
+    /**
+     * getChatVerification - Read this session's verification state. No contact IDs or candidate records are exposed.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetChatVerification.Responses.$200 | Paths.GetChatVerification.Responses.Default>
+  }
+  ['/v1/verification/email']: {
+    /**
+     * startChatEmailVerification - Start or resend an email challenge using the template saved on this session's Website Chat. Repeating the same request_id and payload does not send another email. Codes must never be sent as chat messages.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.StartChatEmailVerification.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.StartChatEmailVerification.Responses.$200 | Paths.StartChatEmailVerification.Responses.Default>
+  }
+  ['/v1/verification/code']: {
+    /**
+     * verifyChatEmailCode - Verify a code for this session's current challenge. Success binds email proof and contact resolution to this session and starts a new conversation. It grants no account-tool permission.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.VerifyChatEmailCode.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.VerifyChatEmailCode.Responses.$200 | Paths.VerifyChatEmailCode.Responses.Default>
+  }
+  ['/v1/verification/cancel']: {
+    /**
+     * cancelChatVerification - Cancel a pending challenge or clear verified identity. Clearing verified identity starts a new anonymous conversation. In-flight verification cannot restore the cleared identity.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelChatVerification.Responses.$200 | Paths.CancelChatVerification.Responses.Default>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
-export type ChatWidget = Components.Schemas.ChatWidget;
-export type CreateChatWidgetRequest = Components.Schemas.CreateChatWidgetRequest;
+export type CreateWebsiteChatRequest = Components.Schemas.CreateWebsiteChatRequest;
 export type Error = Components.Schemas.Error;
-export type ListChatWidgetsResponse = Components.Schemas.ListChatWidgetsResponse;
+export type ListWebsiteChatsResponse = Components.Schemas.ListWebsiteChatsResponse;
 export type PublicChatError = Components.Schemas.PublicChatError;
 export type PublicEvent = Components.Schemas.PublicEvent;
-export type UpdateChatWidgetRequest = Components.Schemas.UpdateChatWidgetRequest;
+export type PublicWebsiteChat = Components.Schemas.PublicWebsiteChat;
+export type UpdateWebsiteChatRequest = Components.Schemas.UpdateWebsiteChatRequest;
+export type VerificationState = Components.Schemas.VerificationState;
+export type WebsiteChat = Components.Schemas.WebsiteChat;
+export type WebsiteChatDesign = Components.Schemas.WebsiteChatDesign;
 export type WebsiteChatSettings = Components.Schemas.WebsiteChatSettings;
-export type Widget = Components.Schemas.Widget;
-export type WidgetDesign = Components.Schemas.WidgetDesign;
