@@ -853,7 +853,9 @@ declare namespace Components {
              */
             counter_id?: EntityId /* uuid */;
             /**
-             * The direction of the reading (feed-in or feed-out)
+             * The direction of the reading. Optional, but **strongly recommended**: readings are keyed by direction in storage, so every reading is stored with one.
+             * Resolution order: the value sent here, else the `direction` of the reading's counter, else a value derived from the counter's `obis_number` — `2.x.x` on an electricity counter is `feed-in`, and everything else (including heat, gas and water, which have no meaningful direction) is `feed-out`.
+             * Relying on the derived fallback is fine for single-flow media. For electricity, set `direction` on the reading or on the counter: an electricity export counter that carries neither, and whose OBIS code does not say `2.x.x`, will be stored as `feed-out`.
              */
             direction?: Direction;
             /**
@@ -1839,6 +1841,7 @@ declare namespace Paths {
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $413 = Components.Schemas.ErrorResp;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -2153,7 +2156,10 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteMeterReading.Responses.$200>
   /**
-   * getReadingChangesets - List pending reading changesets for a counter
+   * getReadingChangesets - getReadingChangesets
+   * 
+   * Lists the pending reading changesets for a counter.
+   * 
    */
   'getReadingChangesets'(
     parameters?: Parameters<Paths.GetReadingChangesets.PathParameters> | null,
@@ -2161,9 +2167,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetReadingChangesets.Responses.$200>
   /**
-   * applyReadingChangeset - Apply (approve) a pending reading changeset
+   * applyReadingChangeset - applyReadingChangeset
    * 
-   * Applies the proposed reading value to ClickHouse and removes the pending changeset.
+   * Applies (approves) a pending reading changeset: the proposed reading value is written to ClickHouse and the pending changeset is removed.
    * 
    * Requires `meter_reading:edit` permission (approval workflow action on the reading's approval state).
    * 
@@ -2174,9 +2180,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ApplyReadingChangeset.Responses.$200>
   /**
-   * dismissReadingChangeset - Dismiss (reject) a pending reading changeset
+   * dismissReadingChangeset - dismissReadingChangeset
    * 
-   * Removes the pending changeset without applying it. The reading value remains unchanged.
+   * Dismisses (rejects) a pending reading changeset: the changeset is removed without being applied. The reading value remains unchanged.
    * 
    * Requires `meter_reading:edit` permission (approval workflow action on the reading's approval state).
    * 
@@ -2187,9 +2193,9 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DismissReadingChangeset.Responses.$200>
   /**
-   * updateReadingChangeset - Edit a pending reading changeset
+   * updateReadingChangeset - updateReadingChangeset
    * 
-   * Updates the proposed value of a pending changeset without going through the normal write path.
+   * Edits a pending reading changeset by updating its proposed value, without going through the normal write path.
    * 
    */
   'updateReadingChangeset'(
@@ -2462,7 +2468,10 @@ export interface PathsDictionary {
   }
   ['/v1/metering/reading/{meter_id}/{counter_id}/changesets']: {
     /**
-     * getReadingChangesets - List pending reading changesets for a counter
+     * getReadingChangesets - getReadingChangesets
+     * 
+     * Lists the pending reading changesets for a counter.
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetReadingChangesets.PathParameters> | null,
@@ -2472,9 +2481,9 @@ export interface PathsDictionary {
   }
   ['/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:apply']: {
     /**
-     * applyReadingChangeset - Apply (approve) a pending reading changeset
+     * applyReadingChangeset - applyReadingChangeset
      * 
-     * Applies the proposed reading value to ClickHouse and removes the pending changeset.
+     * Applies (approves) a pending reading changeset: the proposed reading value is written to ClickHouse and the pending changeset is removed.
      * 
      * Requires `meter_reading:edit` permission (approval workflow action on the reading's approval state).
      * 
@@ -2487,9 +2496,9 @@ export interface PathsDictionary {
   }
   ['/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:dismiss']: {
     /**
-     * dismissReadingChangeset - Dismiss (reject) a pending reading changeset
+     * dismissReadingChangeset - dismissReadingChangeset
      * 
-     * Removes the pending changeset without applying it. The reading value remains unchanged.
+     * Dismisses (rejects) a pending reading changeset: the changeset is removed without being applied. The reading value remains unchanged.
      * 
      * Requires `meter_reading:edit` permission (approval workflow action on the reading's approval state).
      * 
@@ -2502,9 +2511,9 @@ export interface PathsDictionary {
   }
   ['/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}']: {
     /**
-     * updateReadingChangeset - Edit a pending reading changeset
+     * updateReadingChangeset - updateReadingChangeset
      * 
-     * Updates the proposed value of a pending changeset without going through the normal write path.
+     * Edits a pending reading changeset by updating its proposed value, without going through the normal write path.
      * 
      */
     'patch'(

@@ -880,6 +880,16 @@
           "403": {
             "$ref": "#/components/responses/Forbidden"
           },
+          "413": {
+            "description": "The prune scope (meter_id, optionally narrowed by counter_id/source) matches more readings than can be processed in a single request. Narrow the request with counter_id and/or source.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -1432,7 +1442,8 @@
     "/v1/metering/reading/{meter_id}/{counter_id}/changesets": {
       "get": {
         "operationId": "getReadingChangesets",
-        "summary": "List pending reading changesets for a counter",
+        "summary": "getReadingChangesets",
+        "description": "Lists the pending reading changesets for a counter.\n",
         "tags": [
           "Metering"
         ],
@@ -1483,8 +1494,8 @@
     "/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:apply": {
       "post": {
         "operationId": "applyReadingChangeset",
-        "summary": "Apply (approve) a pending reading changeset",
-        "description": "Applies the proposed reading value to ClickHouse and removes the pending changeset.\n\nRequires `meter_reading:edit` permission (approval workflow action on the reading's approval state).\n",
+        "summary": "applyReadingChangeset",
+        "description": "Applies (approves) a pending reading changeset: the proposed reading value is written to ClickHouse and the pending changeset is removed.\n\nRequires `meter_reading:edit` permission (approval workflow action on the reading's approval state).\n",
         "tags": [
           "Metering"
         ],
@@ -1546,8 +1557,8 @@
     "/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:dismiss": {
       "post": {
         "operationId": "dismissReadingChangeset",
-        "summary": "Dismiss (reject) a pending reading changeset",
-        "description": "Removes the pending changeset without applying it. The reading value remains unchanged.\n\nRequires `meter_reading:edit` permission (approval workflow action on the reading's approval state).\n",
+        "summary": "dismissReadingChangeset",
+        "description": "Dismisses (rejects) a pending reading changeset: the changeset is removed without being applied. The reading value remains unchanged.\n\nRequires `meter_reading:edit` permission (approval workflow action on the reading's approval state).\n",
         "tags": [
           "Metering"
         ],
@@ -1616,8 +1627,8 @@
     "/v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}": {
       "patch": {
         "operationId": "updateReadingChangeset",
-        "summary": "Edit a pending reading changeset",
-        "description": "Updates the proposed value of a pending changeset without going through the normal write path.\n",
+        "summary": "updateReadingChangeset",
+        "description": "Edits a pending reading changeset by updating its proposed value, without going through the normal write path.\n",
         "tags": [
           "Metering"
         ],
@@ -2241,7 +2252,7 @@
           },
           "direction": {
             "$ref": "#/components/schemas/Direction",
-            "description": "The direction of the reading (feed-in or feed-out)"
+            "description": "The direction of the reading. Optional, but **strongly recommended**: readings are keyed by direction in storage, so every reading is stored with one.\nResolution order: the value sent here, else the `direction` of the reading's counter, else a value derived from the counter's `obis_number` — `2.x.x` on an electricity counter is `feed-in`, and everything else (including heat, gas and water, which have no meaningful direction) is `feed-out`.\nRelying on the derived fallback is fine for single-flow media. For electricity, set `direction` on the reading or on the counter: an electricity export counter that carries neither, and whose OBIS code does not say `2.x.x`, will be stored as `feed-out`."
           },
           "timestamp": {
             "type": "string",
