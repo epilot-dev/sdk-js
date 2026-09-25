@@ -40,7 +40,7 @@ const HTTP_STATUS_CODE_PATTERN = /^HTTP_\d{3}$/;
 
 /** Level and description per taxonomy code. */
 export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
-  ACK_CONFIRMED: { level: 'info', description: 'Acknowledgement was confirmed by the ERP system' },
+  ACK_CONFIRMED: { level: 'success', description: 'Acknowledgement was confirmed by the ERP system' },
   ACK_PENDING: { level: 'info', description: 'Acknowledgement is pending from the ERP system' },
   ACK_TIMEOUT: { level: 'warning', description: 'Acknowledgement timed out waiting for the ERP system' },
   ATTACHMENT_NOT_FOUND: {
@@ -54,7 +54,7 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   CONDITIONAL_VARIANT_WRITE_FAILED: {
     level: 'error',
     description:
-      'Conditional pricing refused a variant write; the pricing code in details names the reason. VARIANT_LIMIT_REACHED means the entity holds every variant it may, and the import stops for it',
+      'Conditional pricing refused one variant write. The item is dropped and not retried; the rest of the batch and the run continue. details.code names the reason where pricing gave one — UNKNOWN_ERROR means it did not',
   },
   CONDITIONAL_VARIANT_WRITE_WARNING: {
     level: 'warning',
@@ -181,11 +181,11 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     description: 'The event is missing the unique identifier field(s) required to match an entity',
   },
   MSG_ACKED: {
-    level: 'info',
-    description: 'Outbound message acknowledged by the polling consumer and removed from the queue',
+    level: 'success',
+    description: 'Outbound message delivered: the polling consumer acknowledged it and it was removed from the queue',
   },
   MSG_DEAD_LETTERED: {
-    level: 'info',
+    level: 'error',
     description:
       'Outbound message moved to the dead-letter queue after exhausting delivery attempts, or via an operator skip',
   },
@@ -194,13 +194,18 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     description: 'Outbound message enqueued to the poll queue, awaiting consumption by the ERP',
   },
   MSG_EXPIRED_UNPOLLED: {
-    level: 'info',
+    level: 'error',
     description: 'Outbound message expired before being consumed — retention elapsed without a successful poll',
   },
   MSG_HEAD_BLOCKED: {
-    level: 'info',
+    level: 'error',
     description:
       'Outbound stream halted by a poison head message (block policy) — requires operator unblock or consumer acknowledgement',
+  },
+  MSG_LATE_ARRIVAL: {
+    level: 'warning',
+    description:
+      'An event arrived after the poll consumer had already received later events, so it was placed at the end of the stream instead of at its event time — it is delivered, but out of event-time order',
   },
   OAUTH2_TOKEN_FAILURE: { level: 'error', description: 'Failed to obtain an OAuth2 access token' },
   PAYLOAD_TOO_LARGE: {

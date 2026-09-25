@@ -70,6 +70,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`listOutboundDlqMessages`](#listoutbounddlqmessages)
 - [`redriveOutboundDlqMessages`](#redriveoutbounddlqmessages)
 - [`unblockOutboundStream`](#unblockoutboundstream)
+- [`simulateOutboundMapping`](#simulateoutboundmapping)
 - [`listSecureProxies`](#listsecureproxies)
 - [`generateTypesPreview`](#generatetypespreview)
 - [`generateTypes`](#generatetypes)
@@ -284,6 +285,9 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`RedriveOutboundDlqResponse`](#redriveoutbounddlqresponse)
 - [`UnblockOutboundStreamRequest`](#unblockoutboundstreamrequest)
 - [`UnblockOutboundStreamResponse`](#unblockoutboundstreamresponse)
+- [`SimulateOutboundMappingRequest`](#simulateoutboundmappingrequest)
+- [`OutboundMappingSimulationError`](#outboundmappingsimulationerror)
+- [`SimulateOutboundMappingResponse`](#simulateoutboundmappingresponse)
 - [`RelationConfig`](#relationconfig)
 - [`RelationItemConfig`](#relationitemconfig)
 - [`RelationUniqueIdField`](#relationuniqueidfield)
@@ -2815,7 +2819,9 @@ const { data } = await client.pollOutboundMessages(
       "event_name": "string",
       "event_id": "string",
       "group": "string",
+      "org_id": "string",
       "payload": {},
+      "mapping_version": "3f2a9c1b7d4e8f60",
       "enqueued_at": "1970-01-01T00:00:00.000Z"
     }
   ],
@@ -2903,6 +2909,8 @@ const { data } = await client.listOutboundDlqMessages({
       "dead_lettered_at": "1970-01-01T00:00:00.000Z",
       "delivery_attempts": 0,
       "reason": "string",
+      "mapping_error": "string",
+      "mapping_version": "string",
       "expires_at": "1970-01-01T00:00:00.000Z"
     }
   ],
@@ -2929,7 +2937,8 @@ const { data } = await client.redriveOutboundDlqMessages(
     integrationId: 'example',
   },
   {
-    ids: ['string']
+    ids: ['string'],
+    reapply_mapping: false
   },
 )
 ```
@@ -2942,7 +2951,8 @@ const { data } = await client.redriveOutboundDlqMessages(
   "results": [
     {
       "id": "string",
-      "status": "redriven"
+      "status": "redriven",
+      "mapping_error": "string"
     }
   ]
 }
@@ -2979,6 +2989,49 @@ const { data } = await client.unblockOutboundStream(
 {
   "unblocked": true,
   "dead_lettered_id": "string"
+}
+```
+
+</details>
+
+---
+
+### `simulateOutboundMapping`
+
+Preview a poll delivery's `jsonata_expression` without saving or
+enqueueing anything. The expression is checked and evaluated exactly
+as at enqueue time: the same length, syntax and binding checks, th
+
+`POST /v1/integrations/{integrationId}/outbound/mapping-simulation`
+
+```ts
+const { data } = await client.simulateOutboundMapping(
+  {
+    integrationId: 'example',
+  },
+  {
+    jsonata_expression: '{ "contract_number": contract.contract_number, "status": $mapValue($env.erp.statuses, contract.status) }',
+    payload: {},
+    event_id: 'string',
+    event_catalog_event: 'contract.updated'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "valid": true,
+  "output": {},
+  "error": {
+    "code": "syntax_error",
+    "message": "string",
+    "position": 0
+  },
+  "mapping_version": "3f2a9c1b7d4e8f60",
+  "input": {}
 }
 ```
 
@@ -8532,7 +8585,7 @@ type IntegrationConfigurationV2 = {
 
 ### `OutboundMapping`
 
-A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (raw event payload, no transformation), or handed to a file_proxy use case that uploads files to an external do
+A mapping that delivers an event to an external system by one of three mechanisms — pushed to a webhook (with a JSONata payload transformation), made available on the pull-based poll queue (the raw event payload, or its JSONata transformation when the mapping carries one), or handed to a file_proxy 
 
 ```ts
 type OutboundMapping = {
@@ -8561,7 +8614,7 @@ type OutboundMapping = {
 
 ### `DeliveryConfig`
 
-Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload); file_proxy = one push per event attachment to an external document syst
+Configuration for how the event should be delivered. webhook = push delivery via svc-webhooks (JSONata-transformed payload); poll = pull-based queue delivery where the consumer fetches items via the poll API (raw event payload, or its JSONata transformation when the mapping carries a jsonata_express
 
 ```ts
 type DeliveryConfig = {
@@ -8595,7 +8648,7 @@ type WebhookDeliveryConfig = {
 
 ### `PollDeliveryConfig`
 
-Pull-based queue delivery. Items carry the raw standardized event-catalog payload; no JSONata mapping is applied in poll mode. Consumers fetch and acknowledge items via the poll API.
+Pull-based queue delivery. Consumers fetch and acknowledge items via the poll API. When the mapping carries a `jsonata_expression`, it is evaluated once at enqueue time against the standardized event-catalog event (with `$env`/`$mapValue`/`$mapKey` bindings) and its output — a JSON object — is the d
 
 ```ts
 type PollDeliveryConfig = {
@@ -8824,7 +8877,9 @@ type OutboundMessage = {
   event_name: string
   event_id: string
   group: string
+  org_id?: string
   payload: Record<string, unknown>
+  mapping_version?: string
   enqueued_at: string // date-time
 }
 ```
@@ -8840,7 +8895,9 @@ type PollOutboundMessagesResponse = {
     event_name: string
     event_id: string
     group: string
+    org_id?: string
     payload: Record<string, unknown>
+    mapping_version?: string
     enqueued_at: string // date-time
   }>
   visibility_timeout_seconds: number
@@ -8893,6 +8950,8 @@ type OutboundDlqMessage = {
   dead_lettered_at: string // date-time
   delivery_attempts: number
   reason?: string
+  mapping_error?: string
+  mapping_version?: string
   expires_at?: string // date-time
 }
 ```
@@ -8910,6 +8969,8 @@ type OutboundDlqListResponse = {
     dead_lettered_at: string // date-time
     delivery_attempts: number
     reason?: string
+    mapping_error?: string
+    mapping_version?: string
     expires_at?: string // date-time
   }>
   next_token?: string
@@ -8921,6 +8982,7 @@ type OutboundDlqListResponse = {
 ```ts
 type RedriveOutboundDlqRequest = {
   ids: string[]
+  reapply_mapping?: boolean
 }
 ```
 
@@ -8929,7 +8991,8 @@ type RedriveOutboundDlqRequest = {
 ```ts
 type RedriveOutboundDlqResult = {
   id: string
-  status: "redriven" | "not_found"
+  status: "redriven" | "not_found" | "mapping_failed"
+  mapping_error?: string
 }
 ```
 
@@ -8939,7 +9002,8 @@ type RedriveOutboundDlqResult = {
 type RedriveOutboundDlqResponse = {
   results: Array<{
     id: string
-    status: "redriven" | "not_found"
+    status: "redriven" | "not_found" | "mapping_failed"
+    mapping_error?: string
   }>
 }
 ```
@@ -8958,6 +9022,47 @@ type UnblockOutboundStreamRequest = {
 type UnblockOutboundStreamResponse = {
   unblocked: boolean
   dead_lettered_id?: string
+}
+```
+
+### `SimulateOutboundMappingRequest`
+
+Exactly one of `payload` or `event_id` is required. `event_id` needs
+`event_catalog_event` to name the event it belongs to.
+
+
+```ts
+type SimulateOutboundMappingRequest = {
+  jsonata_expression: string
+  payload?: Record<string, unknown>
+  event_id?: string
+  event_catalog_event?: string
+}
+```
+
+### `OutboundMappingSimulationError`
+
+```ts
+type OutboundMappingSimulationError = {
+  code: "syntax_error" | "unknown_binding" | "evaluation_error" | "timeout" | "invalid_output" | "expression_too_long"
+  message: string
+  position?: number
+}
+```
+
+### `SimulateOutboundMappingResponse`
+
+```ts
+type SimulateOutboundMappingResponse = {
+  valid: boolean
+  output?: Record<string, unknown>
+  error?: {
+    code: "syntax_error" | "unknown_binding" | "evaluation_error" | "timeout" | "invalid_output" | "expression_too_long"
+    message: string
+    position?: number
+  }
+  mapping_version: string
+  input?: Record<string, unknown>
 }
 ```
 
@@ -9409,7 +9514,7 @@ This schema exists so consumers can import the union as a type. It is
 deliberately 
 
 ```ts
-type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED"
+type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED"
 ```
 
 ### `MonitoringEventV2`
