@@ -1131,7 +1131,7 @@ const { data } = await client.deleteMeterReading({
 
 ### `getReadingChangesets`
 
-List pending reading changesets for a counter
+Lists the pending reading changesets for a counter.
 
 `GET /v1/metering/reading/{meter_id}/{counter_id}/changesets`
 
@@ -1198,7 +1198,7 @@ const { data } = await client.getReadingChangesets({
 
 ### `applyReadingChangeset`
 
-Apply (approve) a pending reading changeset
+Applies (approves) a pending reading changeset: the proposed reading value is written to ClickHouse and the pending changeset is removed.
 
 `POST /v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:apply`
 
@@ -1283,7 +1283,7 @@ const { data } = await client.applyReadingChangeset({
 
 ### `dismissReadingChangeset`
 
-Dismiss (reject) a pending reading changeset
+Dismisses (rejects) a pending reading changeset: the changeset is removed without being applied. The reading value remains unchanged.
 
 `POST /v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}:dismiss`
 
@@ -1352,7 +1352,7 @@ const { data } = await client.dismissReadingChangeset(
 
 ### `updateReadingChangeset`
 
-Edit a pending reading changeset
+Edits a pending reading changeset by updating its proposed value, without going through the normal write path.
 
 `PATCH /v1/metering/reading/{meter_id}/{counter_id}/changesets/{changeset_id}`
 

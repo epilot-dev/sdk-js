@@ -33,6 +33,10 @@ const { data } = await eventCatalogClient.listEvents(...)
 - [`deprecateCustomEvent`](#deprecatecustomevent)
 - [`previewCustomEvent`](#previewcustomevent)
 - [`publishCustomEventDefinition`](#publishcustomeventdefinition)
+- [`getCustomEventVersionDraft`](#getcustomeventversiondraft)
+- [`putCustomEventVersionDraft`](#putcustomeventversiondraft)
+- [`deleteCustomEventVersionDraft`](#deletecustomeventversiondraft)
+- [`publishCustomEventVersion`](#publishcustomeventversion)
 - [`getEventJSONSchema`](#geteventjsonschema)
 - [`getEventExample`](#geteventexample)
 - [`listEventVersions`](#listeventversions)
@@ -49,6 +53,8 @@ const { data } = await eventCatalogClient.listEvents(...)
 - [`CustomEventLineage`](#customeventlineage)
 - [`PurposeFilterSnapshot`](#purposefiltersnapshot)
 - [`PublishCustomEventPayload`](#publishcustomeventpayload)
+- [`CustomEventVersionDraft`](#customeventversiondraft)
+- [`PublishCustomEventVersionPayload`](#publishcustomeventversionpayload)
 - [`ValidationIssue`](#validationissue)
 - [`PreviewEventResponse`](#previeweventresponse)
 - [`UpdateEventPayload`](#updateeventpayload)
@@ -681,6 +687,360 @@ const { data } = await client.publishCustomEventDefinition(
     enabled: true,
     auto_trigger: true,
     base_auto_trigger_enabled: true
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "event_name": "AddMeterReading",
+  "event_title": "Add Meter Reading",
+  "event_description": "Triggered when a new meter reading is added",
+  "event_version": "1.0",
+  "event_status": "active",
+  "event_tags": ["builtin", "metering", "erp"],
+  "schema_fields": {},
+  "entity_graph": {
+    "nodes": [
+      {
+        "id": "contact",
+        "schema": "contact",
+        "cardinality": "one",
+        "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"]
+      }
+    ],
+    "edges": [
+      {
+        "from": "contact",
+        "to": "billing_account"
+      }
+    ]
+  },
+  "entity_operation": {
+    "operation": ["createEntity", "updateEntity"],
+    "schema": ["contact", "contract", "order"],
+    "attribute": ["email", "phone", "status"],
+    "purpose": ["Kündigung", "Umzug/Auszug"],
+    "purpose_filters": [
+      {
+        "id": "string",
+        "display_name": "string"
+      }
+    ]
+  },
+  "enabled": true,
+  "auto_trigger": true,
+  "automation_trigger": true,
+  "api_trigger": true,
+  "automation_trigger_only": true,
+  "automation_trigger_seed_node": "ticket",
+  "event_origin": "builtin",
+  "mapping": {
+    "mode": "guided",
+    "jsonata": "string"
+  },
+  "lineage": {
+    "base_event_name": "string",
+    "base_event_version": "string"
+  },
+  "success_criteria": [
+    {
+      "entity_schema": "contract",
+      "attribute": "installment_amount"
+    },
+    {
+      "entity_schema": "billing_account",
+      "attribute": "due_date"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getCustomEventVersionDraft`
+
+Read the in-progress successor of a published custom event, together with the version it
+would be published as. The live version keeps firing while the successor is authored.
+
+`GET /v1/events/{event_name}/version_draft`
+
+```ts
+const { data } = await client.getCustomEventVersionDraft({
+  event_name: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "config": {
+    "event_name": "AddMeterReading",
+    "event_title": "Add Meter Reading",
+    "event_description": "Triggered when a new meter reading is added",
+    "event_version": "1.0",
+    "event_status": "active",
+    "event_tags": ["builtin", "metering", "erp"],
+    "schema_fields": {},
+    "entity_graph": {
+      "nodes": [
+        {
+          "id": "contact",
+          "schema": "contact",
+          "cardinality": "one",
+          "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"]
+        }
+      ],
+      "edges": [
+        {
+          "from": "contact",
+          "to": "billing_account"
+        }
+      ]
+    },
+    "entity_operation": {
+      "operation": ["createEntity", "updateEntity"],
+      "schema": ["contact", "contract", "order"],
+      "attribute": ["email", "phone", "status"],
+      "purpose": ["Kündigung", "Umzug/Auszug"],
+      "purpose_filters": [
+        {
+          "id": "string",
+          "display_name": "string"
+        }
+      ]
+    },
+    "enabled": true,
+    "auto_trigger": true,
+    "automation_trigger": true,
+    "api_trigger": true,
+    "automation_trigger_only": true,
+    "automation_trigger_seed_node": "ticket",
+    "event_origin": "builtin",
+    "mapping": {
+      "mode": "guided",
+      "jsonata": "string"
+    },
+    "lineage": {
+      "base_event_name": "string",
+      "base_event_version": "string"
+    },
+    "success_criteria": [
+      {
+        "entity_schema": "contract",
+        "attribute": "installment_amount"
+      },
+      {
+        "entity_schema": "billing_account",
+        "attribute": "due_date"
+      }
+    ]
+  },
+  "change_class": "none",
+  "next_version": "1.1",
+  "changes": [
+    {
+      "field": "reading",
+      "op": "added",
+      "type_old": "string",
+      "type_new": "string"
+    }
+  ],
+  "remapped_fields": ["string"],
+  "added_nodes": ["string"],
+  "blocked_reason": "string"
+}
+```
+
+</details>
+
+---
+
+### `putCustomEventVersionDraft`
+
+Create or replace the successor of a published custom event. The published definition stays
+immutable and keeps firing; only publishing the draft promotes it.
+
+`PUT /v1/events/{event_name}/version_draft`
+
+```ts
+const { data } = await client.putCustomEventVersionDraft(
+  {
+    event_name: 'example',
+  },
+  {
+    event_name: 'string',
+    event_title: 'string',
+    event_description: 'string',
+    event_tags: ['string'],
+    schema_fields: {},
+    entity_graph: {
+      nodes: [
+        {
+          id: 'contact',
+          schema: 'contact',
+          cardinality: 'one',
+          fields: ['_id', '_title', 'first_name', 'account', '!account.*._files', '**._product']
+        }
+      ],
+      edges: [
+        {
+          from: 'contact',
+          to: 'billing_account'
+        }
+      ]
+    },
+    entity_operation: {
+      operation: ['createEntity', 'updateEntity'],
+      schema: ['contact', 'contract', 'order'],
+      attribute: ['email', 'phone', 'status'],
+      purpose: ['Kündigung', 'Umzug/Auszug'],
+      purpose_filters: [
+        {
+          id: 'string',
+          display_name: 'string'
+        }
+      ]
+    },
+    automation_trigger: true,
+    api_trigger: true,
+    automation_trigger_only: false,
+    automation_trigger_seed_node: 'string',
+    mapping: {
+      mode: 'guided',
+      jsonata: 'string'
+    },
+    lineage: {
+      base_event_name: 'string',
+      base_event_version: 'string'
+    },
+    example: {}
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "config": {
+    "event_name": "AddMeterReading",
+    "event_title": "Add Meter Reading",
+    "event_description": "Triggered when a new meter reading is added",
+    "event_version": "1.0",
+    "event_status": "active",
+    "event_tags": ["builtin", "metering", "erp"],
+    "schema_fields": {},
+    "entity_graph": {
+      "nodes": [
+        {
+          "id": "contact",
+          "schema": "contact",
+          "cardinality": "one",
+          "fields": ["_id", "_title", "first_name", "account", "!account.*._files", "**._product"]
+        }
+      ],
+      "edges": [
+        {
+          "from": "contact",
+          "to": "billing_account"
+        }
+      ]
+    },
+    "entity_operation": {
+      "operation": ["createEntity", "updateEntity"],
+      "schema": ["contact", "contract", "order"],
+      "attribute": ["email", "phone", "status"],
+      "purpose": ["Kündigung", "Umzug/Auszug"],
+      "purpose_filters": [
+        {
+          "id": "string",
+          "display_name": "string"
+        }
+      ]
+    },
+    "enabled": true,
+    "auto_trigger": true,
+    "automation_trigger": true,
+    "api_trigger": true,
+    "automation_trigger_only": true,
+    "automation_trigger_seed_node": "ticket",
+    "event_origin": "builtin",
+    "mapping": {
+      "mode": "guided",
+      "jsonata": "string"
+    },
+    "lineage": {
+      "base_event_name": "string",
+      "base_event_version": "string"
+    },
+    "success_criteria": [
+      {
+        "entity_schema": "contract",
+        "attribute": "installment_amount"
+      },
+      {
+        "entity_schema": "billing_account",
+        "attribute": "due_date"
+      }
+    ]
+  },
+  "change_class": "none",
+  "next_version": "1.1",
+  "changes": [
+    {
+      "field": "reading",
+      "op": "added",
+      "type_old": "string",
+      "type_new": "string"
+    }
+  ],
+  "remapped_fields": ["string"],
+  "added_nodes": ["string"],
+  "blocked_reason": "string"
+}
+```
+
+</details>
+
+---
+
+### `deleteCustomEventVersionDraft`
+
+Discard the next-version draft. The published version is untouched.
+
+`DELETE /v1/events/{event_name}/version_draft`
+
+```ts
+const { data } = await client.deleteCustomEventVersionDraft({
+  event_name: 'example',
+})
+```
+
+---
+
+### `publishCustomEventVersion`
+
+Publish the next-version draft as the event's new live version.
+
+`POST /v1/events/{event_name}/version_draft:publish`
+
+```ts
+const { data } = await client.publishCustomEventVersion(
+  {
+    event_name: 'example',
+  },
+  {
+    change_summary: 'string',
+    change_notes: 'string'
   },
 )
 ```
@@ -1405,6 +1765,85 @@ type PublishCustomEventPayload = {
   enabled?: boolean
   auto_trigger?: boolean
   base_auto_trigger_enabled?: boolean
+}
+```
+
+### `CustomEventVersionDraft`
+
+A pending successor to a published custom event, with the version it would become.
+
+
+```ts
+type CustomEventVersionDraft = {
+  config: {
+    event_name: string
+    event_title?: string
+    event_description?: string
+    event_version: string
+    event_status?: "active" | "deprecated" | "draft" | "disabled"
+    event_tags?: string[]
+    schema_fields: Record<string, {
+      json_schema: { ... }
+      required?: { ... }
+      graph_source?: { ... }
+    } | {
+      entity_schema: { ... }
+      required?: { ... }
+    } | {
+      items: { ... }
+      required?: { ... }
+    }>
+    entity_graph?: {
+      nodes: { ... }
+      edges: { ... }
+    }
+    entity_operation?: {
+      operation: { ... }
+      schema: { ... }
+      attribute?: { ... }
+      purpose?: { ... }
+      purpose_filters?: { ... }
+    }
+    enabled?: boolean
+    auto_trigger?: boolean
+    automation_trigger?: boolean
+    api_trigger?: boolean
+    automation_trigger_only?: boolean
+    automation_trigger_seed_node?: string
+    event_origin?: "builtin" | "custom"
+    mapping?: {
+      mode: { ... }
+      jsonata?: { ... }
+    }
+    lineage?: {
+      base_event_name: { ... }
+      base_event_version: { ... }
+    }
+    success_criteria?: Array<{
+      entity_schema: { ... }
+      attribute: { ... }
+    }>
+  }
+  change_class: "none" | "minor" | "major" | "blocked"
+  next_version?: string
+  changes: Array<{
+    field: string
+    op: "added" | "removed" | "type-changed"
+    type_old?: string
+    type_new?: string
+  }>
+  remapped_fields: string[]
+  added_nodes: string[]
+  blocked_reason?: string
+}
+```
+
+### `PublishCustomEventVersionPayload`
+
+```ts
+type PublishCustomEventVersionPayload = {
+  change_summary?: string
+  change_notes?: string
 }
 ```
 
