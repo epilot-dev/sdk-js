@@ -3,7 +3,7 @@
 - **Base URL:** `https://chat.sls.epilot.io`
 - **API Docs:** [https://docs.epilot.io/api/chat](https://docs.epilot.io/api/chat)
 
-Website Chat management and anonymous browser chat.
+Widget management and anonymous browser chat.
 
 ## Quick Start
 
@@ -12,7 +12,7 @@ Website Chat management and anonymous browser chat.
 epilot chat
 
 # Call an operation
-epilot chat listWebsiteChats
+epilot chat listChatWidgets
 ```
 
 ## Common Flags
@@ -35,26 +35,22 @@ epilot chat listWebsiteChats
 
 ## Operations
 
-**Website Chats**
-- [`listWebsiteChats`](#listwebsitechats) — GET /v1/website-chats
-- [`createWebsiteChat`](#createwebsitechat) — POST /v1/website-chats
-- [`getWebsiteChat`](#getwebsitechat) — GET /v1/website-chats/{website_chat_id}
-- [`updateWebsiteChat`](#updatewebsitechat) — PUT /v1/website-chats/{website_chat_id}
-- [`deleteWebsiteChat`](#deletewebsitechat) — DELETE /v1/website-chats/{website_chat_id}
+**Chat widgets**
+- [`listChatWidgets`](#listchatwidgets) — GET /v1/widgets
+- [`createChatWidget`](#createchatwidget) — POST /v1/widgets
+- [`getChatWidget`](#getchatwidget) — GET /v1/widgets/{widget_id}
+- [`updateChatWidget`](#updatechatwidget) — PUT /v1/widgets/{widget_id}
+- [`deleteChatWidget`](#deletechatwidget) — DELETE /v1/widgets/{widget_id}
 
 **Other**
-- [`getPublicWebsiteChat`](#getpublicwebsitechat) — Resolve visitor-facing configuration for an independent Website Chat and its current agent assignment. The Website Chat 
-- [`createPublicChatGrant`](#createpublicchatgrant) — Called by the host website with its website_chat_id. Checks the saved website origin allowlist and issues a single-use g
+- [`getPublicChatWidget`](#getpublicchatwidget) — Resolve visitor-facing configuration for an independent widget and its current agent assignment. The widget ID is not an
+- [`createPublicChatGrant`](#createpublicchatgrant) — Called by the host website with its widget_key. Checks the saved website origin allowlist and issues a single-use grant 
 - [`createAnonymousChatSession`](#createanonymouschatsession) — Exchanges an unexpired grant once for an independent 30-minute session. Expired or previously used grants return 401 INV
 - [`sendAnonymousChatMessage`](#sendanonymouschatmessage) — Creates a turn or replays its persisted result. Reuse request_id and the exact
-- [`getChatVerification`](#getchatverification) — Read this session's verification state. No contact IDs or candidate records are exposed.
-- [`startChatEmailVerification`](#startchatemailverification) — Start or resend an email challenge using the template saved on this session's Website Chat. Repeating the same request_i
-- [`verifyChatEmailCode`](#verifychatemailcode) — Verify a code for this session's current challenge. Success binds email proof and contact resolution to this session and
-- [`cancelChatVerification`](#cancelchatverification) — Cancel a pending challenge or clear verified identity. Clearing verified identity starts a new anonymous conversation. I
 
-### `listWebsiteChats`
+### `listChatWidgets`
 
-`GET /v1/website-chats`
+`GET /v1/widgets`
 
 **Parameters**
 
@@ -65,13 +61,13 @@ epilot chat listWebsiteChats
 **Sample Call**
 
 ```bash
-epilot chat listWebsiteChats
+epilot chat listChatWidgets
 ```
 
 With JSONata filter:
 
 ```bash
-epilot chat listWebsiteChats --jsonata 'website_chats'
+epilot chat listChatWidgets --jsonata 'widgets'
 ```
 
 <details>
@@ -79,11 +75,11 @@ epilot chat listWebsiteChats --jsonata 'website_chats'
 
 ```json
 {
-  "website_chats": [
+  "widgets": [
     {
       "name": "string",
       "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "settings": {
+      "website_chat": {
         "allowed_origins": ["string"],
         "organisation_name": "string",
         "default_locale": "en",
@@ -94,13 +90,13 @@ epilot chat listWebsiteChats --jsonata 'website_chats'
           }
         }
       },
-      "website_chat_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "widget_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "org_id": "string",
       "binding_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "version": 1,
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
-      "embed": {
+      "website_chat_embed": {
         "script_url": "https://example.com/path",
         "chat_api_origin": "https://example.com/path",
         "demo_url": "https://example.com/path"
@@ -115,26 +111,26 @@ epilot chat listWebsiteChats --jsonata 'website_chats'
 
 ---
 
-### `createWebsiteChat`
+### `createChatWidget`
 
-`POST /v1/website-chats`
+`POST /v1/widgets`
 
 **Request Body** (required)
 
 **Sample Call**
 
 ```bash
-epilot chat createWebsiteChat
+epilot chat createChatWidget
 ```
 
 With request body:
 
 ```bash
-epilot chat createWebsiteChat \
+epilot chat createChatWidget \
   -d '{
   "name": "string",
   "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "settings": {
+  "website_chat": {
     "allowed_origins": ["string"],
     "organisation_name": "string",
     "default_locale": "en",
@@ -151,13 +147,13 @@ epilot chat createWebsiteChat \
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot chat createWebsiteChat
+cat body.json | epilot chat createChatWidget
 ```
 
 With JSONata filter:
 
 ```bash
-epilot chat createWebsiteChat --jsonata 'name'
+epilot chat createChatWidget --jsonata 'name'
 ```
 
 <details>
@@ -167,7 +163,7 @@ epilot chat createWebsiteChat --jsonata 'name'
 {
   "name": "string",
   "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "settings": {
+  "website_chat": {
     "allowed_origins": ["string"],
     "organisation_name": "string",
     "default_locale": "en",
@@ -178,13 +174,13 @@ epilot chat createWebsiteChat --jsonata 'name'
       }
     }
   },
-  "website_chat_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "widget_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "org_id": "string",
   "binding_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "version": 1,
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
-  "embed": {
+  "website_chat_embed": {
     "script_url": "https://example.com/path",
     "chat_api_origin": "https://example.com/path",
     "demo_url": "https://example.com/path"
@@ -196,33 +192,33 @@ epilot chat createWebsiteChat --jsonata 'name'
 
 ---
 
-### `getWebsiteChat`
+### `getChatWidget`
 
-`GET /v1/website-chats/{website_chat_id}`
+`GET /v1/widgets/{widget_id}`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `website_chat_id` | path | string (uuid) | Yes |  |
+| `widget_id` | path | string (uuid) | Yes |  |
 
 **Sample Call**
 
 ```bash
-epilot chat getWebsiteChat \
-  -p website_chat_id=123e4567-e89b-12d3-a456-426614174000
+epilot chat getChatWidget \
+  -p widget_id=123e4567-e89b-12d3-a456-426614174000
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot chat getWebsiteChat 123e4567-e89b-12d3-a456-426614174000
+epilot chat getChatWidget 123e4567-e89b-12d3-a456-426614174000
 ```
 
 With JSONata filter:
 
 ```bash
-epilot chat getWebsiteChat -p website_chat_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'name'
+epilot chat getChatWidget -p widget_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'name'
 ```
 
 <details>
@@ -232,7 +228,7 @@ epilot chat getWebsiteChat -p website_chat_id=123e4567-e89b-12d3-a456-4266141740
 {
   "name": "string",
   "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "settings": {
+  "website_chat": {
     "allowed_origins": ["string"],
     "organisation_name": "string",
     "default_locale": "en",
@@ -243,13 +239,13 @@ epilot chat getWebsiteChat -p website_chat_id=123e4567-e89b-12d3-a456-4266141740
       }
     }
   },
-  "website_chat_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "widget_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "org_id": "string",
   "binding_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "version": 1,
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
-  "embed": {
+  "website_chat_embed": {
     "script_url": "https://example.com/path",
     "chat_api_origin": "https://example.com/path",
     "demo_url": "https://example.com/path"
@@ -261,34 +257,34 @@ epilot chat getWebsiteChat -p website_chat_id=123e4567-e89b-12d3-a456-4266141740
 
 ---
 
-### `updateWebsiteChat`
+### `updateChatWidget`
 
-`PUT /v1/website-chats/{website_chat_id}`
+`PUT /v1/widgets/{widget_id}`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `website_chat_id` | path | string (uuid) | Yes |  |
+| `widget_id` | path | string (uuid) | Yes |  |
 
 **Request Body** (required)
 
 **Sample Call**
 
 ```bash
-epilot chat updateWebsiteChat \
-  -p website_chat_id=123e4567-e89b-12d3-a456-426614174000
+epilot chat updateChatWidget \
+  -p widget_id=123e4567-e89b-12d3-a456-426614174000
 ```
 
 With request body:
 
 ```bash
-epilot chat updateWebsiteChat \
-  -p website_chat_id=123e4567-e89b-12d3-a456-426614174000 \
+epilot chat updateChatWidget \
+  -p widget_id=123e4567-e89b-12d3-a456-426614174000 \
   -d '{
   "name": "string",
   "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "settings": {
+  "website_chat": {
     "allowed_origins": ["string"],
     "organisation_name": "string",
     "default_locale": "en",
@@ -306,19 +302,19 @@ epilot chat updateWebsiteChat \
 Using positional args for path parameters:
 
 ```bash
-epilot chat updateWebsiteChat 123e4567-e89b-12d3-a456-426614174000
+epilot chat updateChatWidget 123e4567-e89b-12d3-a456-426614174000
 ```
 
 Using stdin pipe:
 
 ```bash
-cat body.json | epilot chat updateWebsiteChat -p website_chat_id=123e4567-e89b-12d3-a456-426614174000
+cat body.json | epilot chat updateChatWidget -p widget_id=123e4567-e89b-12d3-a456-426614174000
 ```
 
 With JSONata filter:
 
 ```bash
-epilot chat updateWebsiteChat -p website_chat_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'name'
+epilot chat updateChatWidget -p widget_id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'name'
 ```
 
 <details>
@@ -328,7 +324,7 @@ epilot chat updateWebsiteChat -p website_chat_id=123e4567-e89b-12d3-a456-4266141
 {
   "name": "string",
   "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "settings": {
+  "website_chat": {
     "allowed_origins": ["string"],
     "organisation_name": "string",
     "default_locale": "en",
@@ -339,13 +335,13 @@ epilot chat updateWebsiteChat -p website_chat_id=123e4567-e89b-12d3-a456-4266141
       }
     }
   },
-  "website_chat_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "widget_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "org_id": "string",
   "binding_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "version": 1,
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
-  "embed": {
+  "website_chat_embed": {
     "script_url": "https://example.com/path",
     "chat_api_origin": "https://example.com/path",
     "demo_url": "https://example.com/path"
@@ -357,68 +353,68 @@ epilot chat updateWebsiteChat -p website_chat_id=123e4567-e89b-12d3-a456-4266141
 
 ---
 
-### `deleteWebsiteChat`
+### `deleteChatWidget`
 
-`DELETE /v1/website-chats/{website_chat_id}`
+`DELETE /v1/widgets/{widget_id}`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `website_chat_id` | path | string (uuid) | Yes |  |
+| `widget_id` | path | string (uuid) | Yes |  |
 | `version` | query | number | Yes |  |
 
 **Sample Call**
 
 ```bash
-epilot chat deleteWebsiteChat \
-  -p website_chat_id=123e4567-e89b-12d3-a456-426614174000 \
+epilot chat deleteChatWidget \
+  -p widget_id=123e4567-e89b-12d3-a456-426614174000 \
   -p version=1
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot chat deleteWebsiteChat 123e4567-e89b-12d3-a456-426614174000
+epilot chat deleteChatWidget 123e4567-e89b-12d3-a456-426614174000
 ```
 
 With JSONata filter:
 
 ```bash
-epilot chat deleteWebsiteChat -p website_chat_id=123e4567-e89b-12d3-a456-426614174000 -p version=1 --jsonata '$'
+epilot chat deleteChatWidget -p widget_id=123e4567-e89b-12d3-a456-426614174000 -p version=1 --jsonata '$'
 ```
 
 ---
 
-### `getPublicWebsiteChat`
+### `getPublicChatWidget`
 
-Resolve visitor-facing configuration for an independent Website Chat and its current agent assignment. The Website Chat 
+Resolve visitor-facing configuration for an independent widget and its current agent assignment. The widget ID is not an
 
-`GET /v1/website-chats/{website_chat_id}/configuration`
+`GET /v1/widgets/{widget_id}/configuration`
 
 **Parameters**
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `website_chat_id` | path | string | Yes | Public Website Chat ID, also used as website_chat_id in bootstrap and data-epilot-chat in the embed. |
+| `widget_id` | path | string | Yes | Public widget ID, also used as widget_key in bootstrap and data-epilot-chat in the embed. |
 
 **Sample Call**
 
 ```bash
-epilot chat getPublicWebsiteChat \
-  -p website_chat_id=550e8400-e29b-41d4-a716-446655440000
+epilot chat getPublicChatWidget \
+  -p widget_id=550e8400-e29b-41d4-a716-446655440000
 ```
 
 Using positional args for path parameters:
 
 ```bash
-epilot chat getPublicWebsiteChat 550e8400-e29b-41d4-a716-446655440000
+epilot chat getPublicChatWidget 550e8400-e29b-41d4-a716-446655440000
 ```
 
 With JSONata filter:
 
 ```bash
-epilot chat getPublicWebsiteChat -p website_chat_id=550e8400-e29b-41d4-a716-446655440000 --jsonata 'key'
+epilot chat getPublicChatWidget -p widget_id=550e8400-e29b-41d4-a716-446655440000 --jsonata 'key'
 ```
 
 <details>
@@ -430,9 +426,6 @@ epilot chat getPublicWebsiteChat -p website_chat_id=550e8400-e29b-41d4-a716-4466
   "organisationName": "string",
   "assistantName": "string",
   "defaultLocale": "en",
-  "authentication": {
-    "email_code": true
-  },
   "design": {
     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "last_modified_at": "string",
@@ -479,7 +472,7 @@ epilot chat getPublicWebsiteChat -p website_chat_id=550e8400-e29b-41d4-a716-4466
 
 ### `createPublicChatGrant`
 
-Called by the host website with its website_chat_id. Checks the saved website origin allowlist and issues a single-use g
+Called by the host website with its widget_key. Checks the saved website origin allowlist and issues a single-use grant 
 
 `POST /v1/bootstrap`
 
@@ -489,7 +482,7 @@ Called by the host website with its website_chat_id. Checks the saved website or
 
 ```bash
 epilot chat createPublicChatGrant \
-  -d '{"website_chat_id":"string"}'
+  -d '{"widget_key":"string"}'
 ```
 
 Using stdin pipe:
@@ -511,7 +504,7 @@ epilot chat createPublicChatGrant --jsonata 'grant'
 {
   "grant": "string",
   "expires_in": 60,
-  "frame_origin": "https://example.com/path"
+  "widget_origin": "https://example.com/path"
 }
 ```
 
@@ -554,14 +547,11 @@ epilot chat createAnonymousChatSession --jsonata 'token'
   "token": "string",
   "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "expires_at": 0,
-  "website_chat": {
+  "widget": {
     "key": "string",
     "organisationName": "string",
     "assistantName": "string",
     "defaultLocale": "en",
-    "authentication": {
-      "email_code": true
-    },
     "design": {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "last_modified_at": "string",
@@ -633,175 +623,5 @@ With JSONata filter:
 ```bash
 epilot chat sendAnonymousChatMessage --jsonata '$'
 ```
-
----
-
-### `getChatVerification`
-
-Read this session's verification state. No contact IDs or candidate records are exposed.
-
-`GET /v1/verification`
-
-**Sample Call**
-
-```bash
-epilot chat getChatVerification
-```
-
-With JSONata filter:
-
-```bash
-epilot chat getChatVerification --jsonata 'email'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "available": true,
-  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "status": "anonymous",
-  "challenge_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "code_expires_at": 0,
-  "resend_after": 0,
-  "email": "user@example.com",
-  "contact_resolution": "matched"
-}
-```
-
-</details>
-
----
-
-### `startChatEmailVerification`
-
-Start or resend an email challenge using the template saved on this session's Website Chat. Repeating the same request_i
-
-`POST /v1/verification/email`
-
-**Request Body** (required)
-
-**Sample Call**
-
-```bash
-epilot chat startChatEmailVerification \
-  -d '{"request_id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","email":"user@example.com","locale":"en"}'
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot chat startChatEmailVerification
-```
-
-With JSONata filter:
-
-```bash
-epilot chat startChatEmailVerification --jsonata 'email'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "available": true,
-  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "status": "anonymous",
-  "challenge_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "code_expires_at": 0,
-  "resend_after": 0,
-  "email": "user@example.com",
-  "contact_resolution": "matched"
-}
-```
-
-</details>
-
----
-
-### `verifyChatEmailCode`
-
-Verify a code for this session's current challenge. Success binds email proof and contact resolution to this session and
-
-`POST /v1/verification/code`
-
-**Request Body** (required)
-
-**Sample Call**
-
-```bash
-epilot chat verifyChatEmailCode \
-  -d '{"challenge_id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","code":"string"}'
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot chat verifyChatEmailCode
-```
-
-With JSONata filter:
-
-```bash
-epilot chat verifyChatEmailCode --jsonata 'email'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "available": true,
-  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "status": "anonymous",
-  "challenge_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "code_expires_at": 0,
-  "resend_after": 0,
-  "email": "user@example.com",
-  "contact_resolution": "matched"
-}
-```
-
-</details>
-
----
-
-### `cancelChatVerification`
-
-Cancel a pending challenge or clear verified identity. Clearing verified identity starts a new anonymous conversation. I
-
-`POST /v1/verification/cancel`
-
-**Sample Call**
-
-```bash
-epilot chat cancelChatVerification
-```
-
-With JSONata filter:
-
-```bash
-epilot chat cancelChatVerification --jsonata 'email'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "available": true,
-  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "status": "anonymous",
-  "challenge_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "code_expires_at": 0,
-  "resend_after": 0,
-  "email": "user@example.com",
-  "contact_resolution": "matched"
-}
-```
-
-</details>
 
 ---

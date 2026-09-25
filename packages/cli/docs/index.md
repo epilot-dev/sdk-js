@@ -22,7 +22,7 @@ npx epilot auth login
 | Billing API | `epilot billing` | 14 | [billing.md](./billing.md) |
 | Blueprint Manifest API | `epilot blueprint-manifest` | 73 | [blueprint-manifest.md](./blueprint-manifest.md) |
 | Calendar API | `epilot calendar` | 28 | [calendar.md](./calendar.md) |
-| epilot Chat API | `epilot chat` | 13 | [chat.md](./chat.md) |
+| epilot Chat API | `epilot chat` | 9 | [chat.md](./chat.md) |
 | Configuration Hub API | `epilot configuration-hub` | 21 | [configuration-hub.md](./configuration-hub.md) |
 | Consent API | `epilot consent` | 3 | [consent.md](./consent.md) |
 | Portal API | `epilot customer-portal` | 173 | [customer-portal.md](./customer-portal.md) |

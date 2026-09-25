@@ -1,7 +1,5 @@
 ---
 "@epilot/chat-client": minor
-"@epilot/sdk": minor
-"@epilot/cli": patch
 ---
 
 Regenerate the chat client from the Chat API spec after the `widgets` resource was renamed to Website Chats (the embeddable chat product is now called Website Chat).
