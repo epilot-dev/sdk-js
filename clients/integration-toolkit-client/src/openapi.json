@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.35.0",
+    "version": "1.36.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -12710,6 +12710,22 @@
             "description": "End of the time range",
             "example": "2025-01-31T23:59:59Z"
           },
+          "correlation_id": {
+            "type": "string",
+            "description": "Count only the events of ONE run. Every span a run produces carries its `correlation_id` (for a file import, the `import_id`), so this turns the stats call into an exact per-run readout — no time range to guess at, no pagination, and no 2000-span cap as on `/monitoring/traces/{correlationId}`. Applies to the `monitoring` source; the `incoming` feed is counted per received event and ignores it.",
+            "example": "imp_01M3799K98B6TG7GV7Q2DQT554"
+          },
+          "correlation_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Count the events of THESE runs (matches any). Takes precedence over `correlation_id` when both are present. With `group_by=correlation_id` this returns one row per run, which is how a list of jobs gets a per-row readout in a single query instead of one call per row.",
+            "example": [
+              "imp_01M3799K98B6TG7GV7Q2DQT554",
+              "imp_01M374YPQ0E7ZB0VYJZSK72M4E"
+            ]
+          },
           "use_case_type": {
             "type": "string",
             "enum": [
@@ -12742,9 +12758,10 @@
               "use_case_type",
               "level",
               "code",
+              "correlation_id",
               "date"
             ],
-            "description": "Field to group the breakdown by"
+            "description": "Field to group the breakdown by. `correlation_id` gives one row per run — pair it with `correlation_ids` to bound the result to the runs on screen."
           },
           "source": {
             "type": "string",
@@ -12807,6 +12824,12 @@
             "format": "date-time",
             "nullable": true,
             "description": "Timestamp of the most recent error"
+          },
+          "last_event_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Timestamp of the most recent event of ANY level — \"is this still moving?\", which is a different question from when it last broke. Null when the filter matched nothing."
           },
           "breakdown": {
             "type": "array",
