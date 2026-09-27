@@ -4060,6 +4060,21 @@ export declare namespace Components {
              */
             to_date?: string; // date-time
             /**
+             * Count only the events of ONE run. Every span a run produces carries its `correlation_id` (for a file import, the `import_id`), so this turns the stats call into an exact per-run readout — no time range to guess at, no pagination, and no 2000-span cap as on `/monitoring/traces/{correlationId}`. Applies to the `monitoring` source; the `incoming` feed is counted per received event and ignores it.
+             * example:
+             * imp_01M3799K98B6TG7GV7Q2DQT554
+             */
+            correlation_id?: string;
+            /**
+             * Count the events of THESE runs (matches any). Takes precedence over `correlation_id` when both are present. With `group_by=correlation_id` this returns one row per run, which is how a list of jobs gets a per-row readout in a single query instead of one call per row.
+             * example:
+             * [
+             *   "imp_01M3799K98B6TG7GV7Q2DQT554",
+             *   "imp_01M374YPQ0E7ZB0VYJZSK72M4E"
+             * ]
+             */
+            correlation_ids?: string[];
+            /**
              * Filter stats by a single use case type
              */
             use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy";
@@ -4068,9 +4083,9 @@ export declare namespace Components {
              */
             use_case_types?: ("inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy")[];
             /**
-             * Field to group the breakdown by
+             * Field to group the breakdown by. `correlation_id` gives one row per run — pair it with `correlation_ids` to bound the result to the runs on screen.
              */
-            group_by?: "use_case_id" | "use_case_type" | "level" | "code" | "date";
+            group_by?: "use_case_id" | "use_case_type" | "level" | "code" | "correlation_id" | "date";
             /**
              * Data source for the stats. "monitoring" (default) aggregates processed events from erp_monitoring_v2 — this counts every event produced throughout the processing tree (fan-out children, post-actions, relation resolutions, etc.). "incoming" counts only the initial inbound events actually received (distinct event_id from erp_incoming_events); only group_by=use_case_id is supported and status/level breakdown is not available for this source (success/error/warning/skipped counts are returned as 0).
              *
@@ -5935,6 +5950,10 @@ export declare namespace Components {
              * Timestamp of the most recent error
              */
             last_error_at?: string | null; // date-time
+            /**
+             * Timestamp of the most recent event of ANY level — "is this still moving?", which is a different question from when it last broke. Null when the filter matched nothing.
+             */
+            last_event_at?: string | null; // date-time
             /**
              * Statistics breakdown by requested group_by field
              */

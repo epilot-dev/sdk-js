@@ -3244,6 +3244,8 @@ const { data } = await client.getMonitoringStatsV2(
   {
     from_date: '2025-01-01T00:00:00Z',
     to_date: '2025-01-31T23:59:59Z',
+    correlation_id: 'imp_01M3799K98B6TG7GV7Q2DQT554',
+    correlation_ids: ['imp_01M3799K98B6TG7GV7Q2DQT554', 'imp_01M374YPQ0E7ZB0VYJZSK72M4E'],
     use_case_type: 'inbound',
     use_case_types: ['inbound'],
     group_by: 'use_case_id',
@@ -3266,6 +3268,7 @@ const { data } = await client.getMonitoringStatsV2(
   "ack_timeout_count": 0,
   "success_rate": 0,
   "last_error_at": "1970-01-01T00:00:00.000Z",
+  "last_event_at": "1970-01-01T00:00:00.000Z",
   "breakdown": [
     {}
   ]
@@ -9542,9 +9545,11 @@ type MonitoringEventV2 = {
 type GetMonitoringStatsV2Request = {
   from_date?: string // date-time
   to_date?: string // date-time
+  correlation_id?: string
+  correlation_ids?: string[]
   use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
   use_case_types?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"[]
-  group_by?: "use_case_id" | "use_case_type" | "level" | "code" | "date"
+  group_by?: "use_case_id" | "use_case_type" | "level" | "code" | "correlation_id" | "date"
   source?: "monitoring" | "incoming"
 }
 ```
@@ -9562,6 +9567,7 @@ type MonitoringStatsV2 = {
   ack_timeout_count?: number
   success_rate?: number
   last_error_at?: string // date-time
+  last_event_at?: string // date-time
   breakdown?: Record<string, unknown>[]
 }
 ```
