@@ -90,6 +90,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`ConditionDefinition`](#conditiondefinition)
 - [`ConditionSet`](#conditionset)
 - [`ConditionSetCatalog`](#conditionsetcatalog)
+- [`ConditionalPricingOptIn`](#conditionalpricingoptin)
 - [`ConditionalPricingErrorCode`](#conditionalpricingerrorcode)
 - [`ResolveConditionalEntityRequest`](#resolveconditionalentityrequest)
 - [`ResolveByContextRequest`](#resolvebycontextrequest)
@@ -2892,6 +2893,14 @@ type ConditionSetCatalog = {
 }
 ```
 
+### `ConditionalPricingOptIn`
+
+```ts
+type ConditionalPricingOptIn = {
+  status: "PROVISIONING" | "ACTIVE"
+}
+```
+
 ### `ConditionalPricingErrorCode`
 
 Machine-readable failure mode of a conditional-pricing operation, so a client can branch on
@@ -2901,7 +2910,7 @@ about what is already stored. Refusals raised by request validation carry no `co
 - `SCHEMA_NOT_FOUND` (
 
 ```ts
-type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE"
+type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE" | "CONDITIONAL_PRICING_NOT_ENABLED" | "CONDITIONAL_PRICING_NOT_READY"
 ```
 
 ### `ResolveConditionalEntityRequest`
@@ -3134,6 +3143,12 @@ type CreatedVariant = {
     details: {
       attributes: { ... }
     }
+  } | {
+    code: "VARIANT_NOT_INDEXED"
+    message: string
+    details: {
+      reason: { ... }
+    }
   }>
 }
 ```
@@ -3174,6 +3189,12 @@ type WriteWarning = {
       attribute: { ... }
       reason: { ... }
     }>
+  }
+} | {
+  code: "VARIANT_NOT_INDEXED"
+  message: string
+  details: {
+    reason: "INDEX_WRITE_FAILED"
   }
 }
 ```
@@ -3294,6 +3315,12 @@ type WrittenVariantVersion = {
     details: {
       attributes: { ... }
     }
+  } | {
+    code: "VARIANT_NOT_INDEXED"
+    message: string
+    details: {
+      reason: { ... }
+    }
   }>
 }
 ```
@@ -3332,6 +3359,12 @@ type DeletedVariantVersion = {
     message: string
     details: {
       attributes: { ... }
+    }
+  } | {
+    code: "VARIANT_NOT_INDEXED"
+    message: string
+    details: {
+      reason: { ... }
     }
   }>
 }
@@ -3695,6 +3728,10 @@ type BatchUpsertResult = {
       code: { ... }
       message: { ... }
       details: { ... }
+    } | {
+      code: { ... }
+      message: { ... }
+      details: { ... }
     }>
     error?: {
       message: { ... }
@@ -3724,6 +3761,10 @@ type BatchDeleteResult = {
     variant_id?: string
     valid_from?: string
     warnings: Array<{
+      code: { ... }
+      message: { ... }
+      details: { ... }
+    } | {
       code: { ... }
       message: { ... }
       details: { ... }
@@ -3843,6 +3884,12 @@ type BatchUpsertResultEntry = {
     details: {
       attributes: { ... }
     }
+  } | {
+    code: "VARIANT_NOT_INDEXED"
+    message: string
+    details: {
+      reason: { ... }
+    }
   }>
   error?: {
     message: string
@@ -3889,6 +3936,12 @@ type BatchDeleteResultEntry = {
     message: string
     details: {
       attributes: { ... }
+    }
+  } | {
+    code: "VARIANT_NOT_INDEXED"
+    message: string
+    details: {
+      reason: { ... }
     }
   }>
   error?: {
