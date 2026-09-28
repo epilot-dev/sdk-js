@@ -1068,35 +1068,7 @@ export declare namespace Components {
              * false
              */
             user_account_self_management?: boolean;
-            /**
-             * Feature settings for the portal
-             */
-            feature_settings?: {
-                /**
-                 * Start page feature flag
-                 */
-                start_page?: boolean;
-                /**
-                 * Billing feature flag
-                 */
-                billing?: boolean;
-                /**
-                 * Change due date feature flag
-                 */
-                change_due_date?: boolean;
-                /**
-                 * Enable or disable the new design for the portal
-                 */
-                new_design?: boolean;
-                /**
-                 * Enable the MCP (AI agent) connector channel for this portal
-                 */
-                mcp_enabled?: boolean;
-                /**
-                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
-                 */
-                mcp_grant_version?: number;
-            };
+            feature_settings?: /* Feature settings for the portal */ PortalFeatureSettings;
             /**
              * Access token for the portal
              */
@@ -1636,35 +1608,7 @@ export declare namespace Components {
              * false
              */
             user_account_self_management?: boolean;
-            /**
-             * Feature settings for the portal
-             */
-            feature_settings?: {
-                /**
-                 * Start page feature flag
-                 */
-                start_page?: boolean;
-                /**
-                 * Billing feature flag
-                 */
-                billing?: boolean;
-                /**
-                 * Change due date feature flag
-                 */
-                change_due_date?: boolean;
-                /**
-                 * Enable or disable the new design for the portal
-                 */
-                new_design?: boolean;
-                /**
-                 * Enable the MCP (AI agent) connector channel for this portal
-                 */
-                mcp_enabled?: boolean;
-                /**
-                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
-                 */
-                mcp_grant_version?: number;
-            };
+            feature_settings?: /* Feature settings for the portal */ PortalFeatureSettings;
             /**
              * Access token for the portal
              */
@@ -2232,7 +2176,7 @@ export declare namespace Components {
             trigger_identifiers_check?: boolean;
         }
         /**
-         * ContactExistsRequest plus the surface the token is requested for.
+         * ContactExistsRequest plus the surface the token is requested for. `registration_identifiers` carries the values of the surface's effective identifiers (keyed by schema, then attribute name): the surface's own `identifiers` when it configures any, otherwise the portal's `registration_identifiers`.
          *
          */
         export interface ContactIdentifyRequest {
@@ -3524,6 +3468,15 @@ export declare namespace Components {
              */
             targets?: string /* uuid */[];
             /**
+             * The entity must match at least one of these targets. Combined with `targets` (all of which must match) using AND.
+             * example:
+             * [
+             *   "3ec28ab5-8598-41ef-9486-b57fca1d5e2a",
+             *   "5f2c1e7a-6b0d-4a8e-9c3f-1d2e3f4a5b6c"
+             * ]
+             */
+            match_any_targets?: string /* uuid */[];
+            /**
              * Optional enrichment data to side-load alongside results under the `includes` response key.
              * example:
              * [
@@ -3555,6 +3508,10 @@ export declare namespace Components {
              */
             EntitySlug;
             targets?: string /* uuid */[];
+            /**
+             * The entity must match at least one of these targets. Combined with `targets` (all of which must match) using AND.
+             */
+            match_any_targets?: string /* uuid */[];
             /**
              * DEPRECATED — client-supplied Handlebars templates. Use `templates_ref` instead so templates are derived server-side from admin-authored portal configuration. Ignored when `templates_ref` is present; rejected once the org has the `portals-reject-client-templates` flag enabled.
              */
@@ -5220,6 +5177,46 @@ export declare namespace Components {
             slug?: string | null;
             rules?: Rule[] | null;
         }
+        export interface JourneyContextUsagesRequest {
+            /**
+             * Journey whose context parameters are being looked up
+             */
+            journey_id: string;
+            /**
+             * Context parameter names (the `paramKey` of each parameter)
+             */
+            param_keys: string[];
+            /**
+             * Accepted for a uniform adapter request shape; portals reference parameters by name only, so this is ignored.
+             */
+            param_ids?: string[];
+        }
+        export interface JourneyContextUsagesResponse {
+            /**
+             * partial when the row cap, the soft deadline or a failed portal truncated the result
+             */
+            status: "ok" | "partial";
+            /**
+             * Portals examined
+             */
+            scanned: number;
+            usages: {
+                kind: "portal-config" | "portal-block" | "portal-widget";
+                resource: {
+                    type: "portal";
+                    id: string;
+                    name?: string;
+                };
+                location: {
+                    [name: string]: any;
+                };
+                matched_as: {
+                    dialect: "name";
+                    token: string;
+                    at?: string;
+                };
+            }[];
+        }
         export interface JuiceSettings {
             /**
              * Whether the org is in dummy mode
@@ -5646,6 +5643,27 @@ export declare namespace Components {
              * 123456
              */
             client_secret?: string;
+        }
+        export interface NewDesignMigrationResult {
+            org_id?: string;
+            portal_id?: string;
+            origin?: string;
+            name?: string;
+            is_v3_item?: boolean;
+            dry_run?: boolean;
+            /**
+             * True when the migration was written (false for dry_run)
+             */
+            migrated?: boolean;
+            summary?: {
+                [name: string]: any;
+            };
+            /**
+             * Stored feature_settings and pages before the migration, for rollback
+             */
+            before?: {
+                [name: string]: any;
+            };
         }
         export interface NotificationTriggerConfig {
             /**
@@ -6452,35 +6470,7 @@ export declare namespace Components {
              * false
              */
             user_account_self_management?: boolean;
-            /**
-             * Feature settings for the portal
-             */
-            feature_settings?: {
-                /**
-                 * Start page feature flag
-                 */
-                start_page?: boolean;
-                /**
-                 * Billing feature flag
-                 */
-                billing?: boolean;
-                /**
-                 * Change due date feature flag
-                 */
-                change_due_date?: boolean;
-                /**
-                 * Enable or disable the new design for the portal
-                 */
-                new_design?: boolean;
-                /**
-                 * Enable the MCP (AI agent) connector channel for this portal
-                 */
-                mcp_enabled?: boolean;
-                /**
-                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
-                 */
-                mcp_grant_version?: number;
-            };
+            feature_settings?: /* Feature settings for the portal */ PortalFeatureSettings;
             /**
              * Access token for the portal
              */
@@ -6989,6 +6979,106 @@ export declare namespace Components {
             grants?: Grant[];
             identity_providers?: ProviderPublicConfig[];
         }
+        /**
+         * Lightweight view of a portal config for lists and pickers. Carries the identifying,
+         * display and registration fields only. Pages, email templates, grants, feature flags,
+         * identity providers and certificate details are left out; read them per portal with
+         * `getPortalConfigV3`.
+         *
+         */
+        export interface PortalConfigSummaryV3 {
+            portal_id?: /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            PortalId;
+            /**
+             * ID of the organization
+             * example:
+             * 12345
+             */
+            organization_id?: string;
+            origin?: /* Origin of the portal */ Origin;
+            /**
+             * Name of the portal
+             */
+            name?: string;
+            /**
+             * Whether the portal is enabled
+             */
+            enabled?: boolean;
+            /**
+             * Custom domain of the portal
+             */
+            domain?: string;
+            /**
+             * epilot-hosted domain of the portal
+             */
+            epilot_domain?: string;
+            is_epilot_domain?: boolean;
+            /**
+             * Status of the custom domain setup, when a custom domain is configured
+             */
+            dnsStatus?: "CONFIGURING" | "PENDING" | "SUCCEED" | "EXPIRED" | "NEW_CERT_IN_PROGRESS";
+            design_id?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * Default 360 user to notify upon an internal notification
+             */
+            default_user_to_notify?: {
+                /**
+                 * Default admin users for pending user notification to notify
+                 */
+                onPendingUser?: AdminUser[];
+            };
+            feature_settings?: /* Feature settings for the portal */ PortalFeatureSettings;
+            self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS";
+            self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY";
+            block_registration_if_portal_user_exists?: boolean;
+            /**
+             * Entity type used as the primary identifier for self-registration
+             */
+            self_registration_entity?: "contact" | "account";
+            /**
+             * Enable or disable user account self management
+             */
+            user_account_self_management?: boolean;
+            /**
+             * Identifiers to identify a contact of a portal user during the registration.
+             */
+            registration_identifiers?: ContractIdentifier[];
+            /**
+             * Surfaces this portal's data is reached from besides the portal UI itself.
+             */
+            surfaces?: /**
+             * One surface a portal's data is reached from (see `surfaces` on the portal config).
+             *
+             * A surface names how callers authenticate on it and what they may reach once they
+             * have. Data access is always a subset of the portal's own: a schema not in
+             * `allowed_portal_entities` cannot be opened up by a surface, and the portal's
+             * contact-relation rules still apply underneath the surface's own.
+             *
+             * Tokens minted for a surface (currently: contact identification tokens for
+             * `registration_identifiers` surfaces) carry the surface id. The surface's data
+             * access is resolved from the portal config on every request, not baked into the
+             * token, so tightening a surface applies to tokens already in circulation.
+             *
+             */
+            PortalSurface[];
+            is_dummy?: boolean;
+            is_v3_item?: boolean;
+            /**
+             * ID of the currently published revision, if the portal has been published
+             */
+            published_revision_id?: string;
+            _created_at?: string; // date-time
+            _updated_at?: string; // date-time
+        }
         export interface PortalConfigV3 {
             /**
              * Journey actions allowed on an entity by a portal user
@@ -7113,35 +7203,7 @@ export declare namespace Components {
              * false
              */
             user_account_self_management?: boolean;
-            /**
-             * Feature settings for the portal
-             */
-            feature_settings?: {
-                /**
-                 * Start page feature flag
-                 */
-                start_page?: boolean;
-                /**
-                 * Billing feature flag
-                 */
-                billing?: boolean;
-                /**
-                 * Change due date feature flag
-                 */
-                change_due_date?: boolean;
-                /**
-                 * Enable or disable the new design for the portal
-                 */
-                new_design?: boolean;
-                /**
-                 * Enable the MCP (AI agent) connector channel for this portal
-                 */
-                mcp_enabled?: boolean;
-                /**
-                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
-                 */
-                mcp_grant_version?: number;
-            };
+            feature_settings?: /* Feature settings for the portal */ PortalFeatureSettings;
             /**
              * Access token for the portal
              */
@@ -7691,11 +7753,76 @@ export declare namespace Components {
             };
         }
         /**
+         * Portal-facing overrides of a stage description, configured per portal
+         * audience in the Flows Hub. Served unresolved for the same reason as
+         * `PortalNameOverrides`; a block falls back to `description` when its
+         * audience's key is absent. The values are rich text, like `description`
+         * itself.
+         *
+         */
+        export interface PortalDescriptionOverrides {
+            /**
+             * Description shown in the End Customer Portal
+             */
+            ecp?: string;
+            /**
+             * Description shown in the Installer Portal
+             */
+            installer?: string;
+        }
+        /**
+         * Feature settings for the portal
+         */
+        export interface PortalFeatureSettings {
+            /**
+             * Start page feature flag
+             */
+            start_page?: boolean;
+            /**
+             * Billing feature flag
+             */
+            billing?: boolean;
+            /**
+             * Change due date feature flag
+             */
+            change_due_date?: boolean;
+            /**
+             * Enable or disable the new design for the portal
+             */
+            new_design?: boolean;
+            /**
+             * Enable the MCP (AI agent) connector channel for this portal
+             */
+            mcp_enabled?: boolean;
+            /**
+             * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
+             */
+            mcp_grant_version?: number;
+        }
+        /**
          * ID of the portal
          * example:
          * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
          */
         export type PortalId = string;
+        /**
+         * Portal-facing overrides of a flow or stage title, configured per portal
+         * audience in the Flows Hub. Served unresolved because this endpoint asks
+         * the Workflows API for audience `all` — one cached response feeds blocks
+         * of both audiences, so each block picks its own override and falls back
+         * to `name` when the key is absent.
+         *
+         */
+        export interface PortalNameOverrides {
+            /**
+             * Title shown in the End Customer Portal
+             */
+            ecp?: string;
+            /**
+             * Title shown in the Installer Portal
+             */
+            installer?: string;
+        }
         /**
          * A 360 notification addressed to a portal user.
          */
@@ -8022,35 +8149,7 @@ export declare namespace Components {
              * false
              */
             user_account_self_management?: boolean;
-            /**
-             * Feature settings for the portal
-             */
-            feature_settings?: {
-                /**
-                 * Start page feature flag
-                 */
-                start_page?: boolean;
-                /**
-                 * Billing feature flag
-                 */
-                billing?: boolean;
-                /**
-                 * Change due date feature flag
-                 */
-                change_due_date?: boolean;
-                /**
-                 * Enable or disable the new design for the portal
-                 */
-                new_design?: boolean;
-                /**
-                 * Enable the MCP (AI agent) connector channel for this portal
-                 */
-                mcp_enabled?: boolean;
-                /**
-                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
-                 */
-                mcp_grant_version?: number;
-            };
+            feature_settings?: /* Feature settings for the portal */ PortalFeatureSettings;
             /**
              * Access token for the portal
              */
@@ -8576,10 +8675,11 @@ export declare namespace Components {
              * How a caller on this surface proves who they are.
              *
              * - `login`: a logged-in portal user token (the portal's own authentication).
-             * - `registration_identifiers`: the caller supplies the portal's
-             *   `registration_identifiers` to `identifyContact` and receives a short-lived
-             *   contact identification token. Anyone who knows or guesses those values can
-             *   use this surface, so its data access should be as narrow as the use case allows.
+             * - `registration_identifiers`: the caller supplies the values of the surface's
+             *   identifiers (its own `identifiers`, or the portal's `registration_identifiers`
+             *   when it sets none) to `identifyContact` and receives a short-lived contact
+             *   identification token. Anyone who knows or guesses those values can use this
+             *   surface, so its data access should be as narrow as the use case allows.
              *
              * `anonymous` (no proof of identity at all) is planned and not accepted yet.
              *
@@ -8589,6 +8689,30 @@ export declare namespace Components {
              * Lifetime of tokens minted for this surface. Only used with `registration_identifiers`.
              */
             token_ttl_seconds?: number; // int32
+            /**
+             * Identifier attributes a caller must supply on this surface to be identified. Only
+             * used with `authentication: registration_identifiers`.
+             *
+             * Omitted or empty means the surface uses the portal's `registration_identifiers`.
+             * When set, these replace the portal's `registration_identifiers` on this surface
+             * only: `identifyContact` requires a value for each of them (400 listing the missing
+             * ones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`
+             * hook on them, and refuses to issue tokens (403) unless there are at least two.
+             * Entries without `name` or `schema` are ignored.
+             *
+             * example:
+             * [
+             *   {
+             *     "name": "customer_number",
+             *     "schema": "contact"
+             *   },
+             *   {
+             *     "name": "meter_number",
+             *     "schema": "meter"
+             *   }
+             * ]
+             */
+            identifiers?: RegistrationIdentifier[];
             data_access?: /* What a caller on a surface may reach. Every property is optional; omitting all of them is the portal's default scope. */ PortalSurfaceDataAccess;
         }
         /**
@@ -8643,6 +8767,10 @@ export declare namespace Components {
                 id?: string;
                 journeyId?: string;
                 name?: string;
+                /**
+                 * Portal-facing label configured in the Flows Hub that replaces the portal's default "Start now" button for this journey.
+                 */
+                portal_button_label?: string;
                 complete_task_automatically?: boolean;
             };
         }
@@ -8782,6 +8910,15 @@ export declare namespace Components {
              *
              */
             PortalWorkflowStage[];
+            portal_titles?: /**
+             * Portal-facing overrides of a flow or stage title, configured per portal
+             * audience in the Flows Hub. Served unresolved because this endpoint asks
+             * the Workflows API for audience `all` — one cached response feeds blocks
+             * of both audiences, so each block picks its own override and falls back
+             * to `name` when the key is absent.
+             *
+             */
+            PortalNameOverrides;
         }
         /**
          * A customer-facing stage of a flow execution, with a progress status derived
@@ -8807,15 +8944,34 @@ export declare namespace Components {
              * - COMPLETED: every task of the stage is done, and the flow has moved past it
              * - IN_PROGRESS: the flow's current work is inside this stage
              * - UPCOMING: the flow has not reached this stage yet
+             * - NOT_REACHED: the flow finished (DONE or CLOSED) before reaching this stage — a run may legitimately end at any stage
              *
              */
-            status: "COMPLETED" | "IN_PROGRESS" | "UPCOMING";
+            status: "COMPLETED" | "IN_PROGRESS" | "UPCOMING" | "NOT_REACHED";
             /**
              * Latest completion timestamp among the stage's tasks; set only when the
              * stage is COMPLETED and at least one of its tasks recorded one
              *
              */
             completed_at?: string;
+            portal_names?: /**
+             * Portal-facing overrides of a flow or stage title, configured per portal
+             * audience in the Flows Hub. Served unresolved because this endpoint asks
+             * the Workflows API for audience `all` — one cached response feeds blocks
+             * of both audiences, so each block picks its own override and falls back
+             * to `name` when the key is absent.
+             *
+             */
+            PortalNameOverrides;
+            portal_descriptions?: /**
+             * Portal-facing overrides of a stage description, configured per portal
+             * audience in the Flows Hub. Served unresolved for the same reason as
+             * `PortalNameOverrides`; a block falls back to `description` when its
+             * audience's key is absent. The values are rich text, like `description`
+             * itself.
+             *
+             */
+            PortalDescriptionOverrides;
         }
         /**
          * A single portal-visible task of a linearized workflow execution
@@ -8857,6 +9013,10 @@ export declare namespace Components {
                 id?: string;
                 journeyId?: string;
                 name?: string;
+                /**
+                 * Portal-facing label configured in the Flows Hub that replaces the portal's default "Start now" button for this journey. Blank or absent means the portal keeps its own translated default.
+                 */
+                portal_button_label?: string;
                 /**
                  * If true, the task is auto completed when the journey is completed
                  */
@@ -10172,35 +10332,7 @@ export declare namespace Components {
              * false
              */
             user_account_self_management?: boolean;
-            /**
-             * Feature settings for the portal
-             */
-            feature_settings?: {
-                /**
-                 * Start page feature flag
-                 */
-                start_page?: boolean;
-                /**
-                 * Billing feature flag
-                 */
-                billing?: boolean;
-                /**
-                 * Change due date feature flag
-                 */
-                change_due_date?: boolean;
-                /**
-                 * Enable or disable the new design for the portal
-                 */
-                new_design?: boolean;
-                /**
-                 * Enable the MCP (AI agent) connector channel for this portal
-                 */
-                mcp_enabled?: boolean;
-                /**
-                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
-                 */
-                mcp_grant_version?: number;
-            };
+            feature_settings?: /* Feature settings for the portal */ PortalFeatureSettings;
             /**
              * Access token for the portal
              */
@@ -10801,35 +10933,7 @@ export declare namespace Components {
              * false
              */
             user_account_self_management?: boolean;
-            /**
-             * Feature settings for the portal
-             */
-            feature_settings?: {
-                /**
-                 * Start page feature flag
-                 */
-                start_page?: boolean;
-                /**
-                 * Billing feature flag
-                 */
-                billing?: boolean;
-                /**
-                 * Change due date feature flag
-                 */
-                change_due_date?: boolean;
-                /**
-                 * Enable or disable the new design for the portal
-                 */
-                new_design?: boolean;
-                /**
-                 * Enable the MCP (AI agent) connector channel for this portal
-                 */
-                mcp_enabled?: boolean;
-                /**
-                 * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
-                 */
-                mcp_grant_version?: number;
-            };
+            feature_settings?: /* Feature settings for the portal */ PortalFeatureSettings;
             /**
              * Access token for the portal
              */
@@ -14843,35 +14947,7 @@ export declare namespace Paths {
                  * false
                  */
                 user_account_self_management?: boolean;
-                /**
-                 * Feature settings for the portal
-                 */
-                feature_settings?: {
-                    /**
-                     * Start page feature flag
-                     */
-                    start_page?: boolean;
-                    /**
-                     * Billing feature flag
-                     */
-                    billing?: boolean;
-                    /**
-                     * Change due date feature flag
-                     */
-                    change_due_date?: boolean;
-                    /**
-                     * Enable or disable the new design for the portal
-                     */
-                    new_design?: boolean;
-                    /**
-                     * Enable the MCP (AI agent) connector channel for this portal
-                     */
-                    mcp_enabled?: boolean;
-                    /**
-                     * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
-                     */
-                    mcp_grant_version?: number;
-                };
+                feature_settings?: /* Feature settings for the portal */ Components.Schemas.PortalFeatureSettings;
                 /**
                  * Access token for the portal
                  */
@@ -15502,35 +15578,7 @@ export declare namespace Paths {
                  * false
                  */
                 user_account_self_management?: boolean;
-                /**
-                 * Feature settings for the portal
-                 */
-                feature_settings?: {
-                    /**
-                     * Start page feature flag
-                     */
-                    start_page?: boolean;
-                    /**
-                     * Billing feature flag
-                     */
-                    billing?: boolean;
-                    /**
-                     * Change due date feature flag
-                     */
-                    change_due_date?: boolean;
-                    /**
-                     * Enable or disable the new design for the portal
-                     */
-                    new_design?: boolean;
-                    /**
-                     * Enable the MCP (AI agent) connector channel for this portal
-                     */
-                    mcp_enabled?: boolean;
-                    /**
-                     * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
-                     */
-                    mcp_grant_version?: number;
-                };
+                feature_settings?: /* Feature settings for the portal */ Components.Schemas.PortalFeatureSettings;
                 /**
                  * Access token for the portal
                  */
@@ -16715,35 +16763,7 @@ export declare namespace Paths {
                  * false
                  */
                 user_account_self_management?: boolean;
-                /**
-                 * Feature settings for the portal
-                 */
-                feature_settings?: {
-                    /**
-                     * Start page feature flag
-                     */
-                    start_page?: boolean;
-                    /**
-                     * Billing feature flag
-                     */
-                    billing?: boolean;
-                    /**
-                     * Change due date feature flag
-                     */
-                    change_due_date?: boolean;
-                    /**
-                     * Enable or disable the new design for the portal
-                     */
-                    new_design?: boolean;
-                    /**
-                     * Enable the MCP (AI agent) connector channel for this portal
-                     */
-                    mcp_enabled?: boolean;
-                    /**
-                     * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
-                     */
-                    mcp_grant_version?: number;
-                };
+                feature_settings?: /* Feature settings for the portal */ Components.Schemas.PortalFeatureSettings;
                 /**
                  * Access token for the portal
                  */
@@ -17975,7 +17995,7 @@ export declare namespace Paths {
             domain?: Parameters.Domain;
         }
         export type RequestBody = /**
-         * ContactExistsRequest plus the surface the token is requested for.
+         * ContactExistsRequest plus the surface the token is requested for. `registration_identifiers` carries the values of the surface's effective identifiers (keyed by schema, then attribute name): the surface's own `identifiers` when it configures any, otherwise the portal's `registration_identifiers`.
          *
          */
         Components.Schemas.ContactIdentifyRequest;
@@ -18093,6 +18113,23 @@ export declare namespace Paths {
                      */
                     name?: string | null;
                 }[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListPortalConfigSummaries {
+        namespace Responses {
+            export interface $200 {
+                data?: /**
+                 * Lightweight view of a portal config for lists and pickers. Carries the identifying,
+                 * display and registration fields only. Pages, email templates, grants, feature flags,
+                 * identity providers and certificate details are left out; read them per portal with
+                 * `getPortalConfigV3`.
+                 *
+                 */
+                Components.Schemas.PortalConfigSummaryV3[];
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -20425,14 +20462,23 @@ export interface OperationMethods {
   /**
    * identifyContact - identifyContact
    * 
-   * Identify a contact by the portal's configured registration identifiers and, on a match,
-   * issue a short-lived bearer token that acts as that contact.
+   * Identify a contact by the surface's identifiers and, on a match, issue a short-lived
+   * bearer token that acts as that contact.
    * 
-   * Resolution is identical to `checkContactExistsV3`. The token does not grant a portal
+   * The identifiers checked are the surface's own `identifiers` when it configures any,
+   * otherwise the portal's `registration_identifiers`. Their values are sent in the
+   * `registration_identifiers` request property. Resolution is otherwise identical to
+   * `checkContactExistsV3`: the same lookup, `registrationIdentifiersCheck` hook and
+   * TIMEOUT semantics, run on the surface's identifiers. The token does not grant a portal
    * session; it is accepted only on the operations listed in `allowed_operations`, and
    * expires at `expires_at`. Requires `surface_id` to name a surface of the portal whose
    * `authentication` is `registration_identifiers`; returns 403 otherwise. The token is
    * confined to that surface's data access. Requests may be rate limited (429).
+   * 
+   * No portal session is expected, but the caller must present a public access token
+   * (`token_type: journey` or `token_type: portal`) as the bearer, minted for the same
+   * `org_id`; the request is rejected with 401 otherwise. It binds the call to the journey
+   * or portal it comes from — the token is public, so it proves origin, not identity.
    * 
    */
   'identifyContact'(
@@ -21519,7 +21565,10 @@ export interface OperationMethods {
   /**
    * deletePortalConfig - deletePortalConfig
    * 
-   * Deletes a specific portal configuration by ID.
+   * Deletes a specific portal configuration by ID, together with everything the portal owns:
+   * its pages, revisions, email templates and widget configuration. The custom domain network
+   * setup is torn down asynchronously afterwards.
+   * 
    */
   'deletePortalConfig'(
     parameters?: Parameters<Paths.DeletePortalConfig.PathParameters> | null,
@@ -21596,6 +21645,22 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListAllPortalConfigs.Responses.$200>
+  /**
+   * listPortalConfigSummaries - listPortalConfigSummaries
+   * 
+   * Lists the portals of the organization as lightweight summaries: the identifying,
+   * display and registration fields of each portal config, without pages, email
+   * templates, grants, feature flags, identity providers or certificate details.
+   * 
+   * Use it for portal overviews and pickers. Read a single portal with
+   * `getPortalConfigV3` when the full configuration is needed.
+   * 
+   */
+  'listPortalConfigSummaries'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPortalConfigSummaries.Responses.$200>
   /**
    * swapPortalConfig - swapPortalConfig
    * 
@@ -22423,14 +22488,23 @@ export interface PathsDictionary {
     /**
      * identifyContact - identifyContact
      * 
-     * Identify a contact by the portal's configured registration identifiers and, on a match,
-     * issue a short-lived bearer token that acts as that contact.
+     * Identify a contact by the surface's identifiers and, on a match, issue a short-lived
+     * bearer token that acts as that contact.
      * 
-     * Resolution is identical to `checkContactExistsV3`. The token does not grant a portal
+     * The identifiers checked are the surface's own `identifiers` when it configures any,
+     * otherwise the portal's `registration_identifiers`. Their values are sent in the
+     * `registration_identifiers` request property. Resolution is otherwise identical to
+     * `checkContactExistsV3`: the same lookup, `registrationIdentifiersCheck` hook and
+     * TIMEOUT semantics, run on the surface's identifiers. The token does not grant a portal
      * session; it is accepted only on the operations listed in `allowed_operations`, and
      * expires at `expires_at`. Requires `surface_id` to name a surface of the portal whose
      * `authentication` is `registration_identifiers`; returns 403 otherwise. The token is
      * confined to that surface's data access. Requests may be rate limited (429).
+     * 
+     * No portal session is expected, but the caller must present a public access token
+     * (`token_type: journey` or `token_type: portal`) as the bearer, minted for the same
+     * `org_id`; the request is rejected with 401 otherwise. It binds the call to the journey
+     * or portal it comes from — the token is public, so it proves origin, not identity.
      * 
      */
     'post'(
@@ -23687,7 +23761,10 @@ export interface PathsDictionary {
     /**
      * deletePortalConfig - deletePortalConfig
      * 
-     * Deletes a specific portal configuration by ID.
+     * Deletes a specific portal configuration by ID, together with everything the portal owns:
+     * its pages, revisions, email templates and widget configuration. The custom domain network
+     * setup is torn down asynchronously afterwards.
+     * 
      */
     'delete'(
       parameters?: Parameters<Paths.DeletePortalConfig.PathParameters> | null,
@@ -23772,6 +23849,24 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListAllPortalConfigs.Responses.$200>
+  }
+  ['/v3/portal/configs/summaries']: {
+    /**
+     * listPortalConfigSummaries - listPortalConfigSummaries
+     * 
+     * Lists the portals of the organization as lightweight summaries: the identifying,
+     * display and registration fields of each portal config, without pages, email
+     * templates, grants, feature flags, identity providers or certificate details.
+     * 
+     * Use it for portal overviews and pickers. Read a single portal with
+     * `getPortalConfigV3` when the full configuration is needed.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPortalConfigSummaries.Responses.$200>
   }
   ['/v3/portal/config/swap']: {
     /**
@@ -24017,6 +24112,8 @@ export type Grant = Components.Schemas.Grant;
 export type IdentifierAttribute = Components.Schemas.IdentifierAttribute;
 export type InstallmentEvent = Components.Schemas.InstallmentEvent;
 export type JourneyActions = Components.Schemas.JourneyActions;
+export type JourneyContextUsagesRequest = Components.Schemas.JourneyContextUsagesRequest;
+export type JourneyContextUsagesResponse = Components.Schemas.JourneyContextUsagesResponse;
 export type JuiceSettings = Components.Schemas.JuiceSettings;
 export type Meter = Components.Schemas.Meter;
 export type MeterChartWidget = Components.Schemas.MeterChartWidget;
@@ -24030,6 +24127,7 @@ export type MobileConfig = Components.Schemas.MobileConfig;
 export type MobileConfigUpdate = Components.Schemas.MobileConfigUpdate;
 export type MobileOtaConfig = Components.Schemas.MobileOtaConfig;
 export type MoblieOIDCConfig = Components.Schemas.MoblieOIDCConfig;
+export type NewDesignMigrationResult = Components.Schemas.NewDesignMigrationResult;
 export type NotificationTriggerConfig = Components.Schemas.NotificationTriggerConfig;
 export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
 export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;
@@ -24043,9 +24141,13 @@ export type Page = Components.Schemas.Page;
 export type PageRequest = Components.Schemas.PageRequest;
 export type PaymentWidget = Components.Schemas.PaymentWidget;
 export type PortalConfig = Components.Schemas.PortalConfig;
+export type PortalConfigSummaryV3 = Components.Schemas.PortalConfigSummaryV3;
 export type PortalConfigV3 = Components.Schemas.PortalConfigV3;
 export type PortalDataExportColumn = Components.Schemas.PortalDataExportColumn;
+export type PortalDescriptionOverrides = Components.Schemas.PortalDescriptionOverrides;
+export type PortalFeatureSettings = Components.Schemas.PortalFeatureSettings;
 export type PortalId = Components.Schemas.PortalId;
+export type PortalNameOverrides = Components.Schemas.PortalNameOverrides;
 export type PortalNotification = Components.Schemas.PortalNotification;
 export type PortalRevision = Components.Schemas.PortalRevision;
 export type PortalRevisionCreated = Components.Schemas.PortalRevisionCreated;
