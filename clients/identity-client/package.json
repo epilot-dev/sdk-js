@@ -1,6 +1,6 @@
 {
   "name": "@epilot/identity-client",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Client for epilot Identity API (Sign in with epilot: operator client registry and 360 session hop)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
