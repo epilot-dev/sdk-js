@@ -20975,6 +20975,21 @@
           "design_id": {
             "$ref": "#/components/schemas/EntityId"
           },
+          "logo_image": {
+            "type": "object",
+            "description": "The logo to show for the portal in lists: the `logoImage` of the first page\nthat sets one. Absent when no page carries a logo; fall back to the design.\n",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "Logo for the light theme",
+                "example": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/logo.png"
+              },
+              "dark_url": {
+                "type": "string",
+                "description": "Logo for the dark theme"
+              }
+            }
+          },
           "default_user_to_notify": {
             "type": "object",
             "description": "Default 360 user to notify upon an internal notification",
