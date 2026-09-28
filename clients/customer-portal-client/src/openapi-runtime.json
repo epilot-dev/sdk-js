@@ -2717,6 +2717,12 @@
         "responses": {}
       }
     },
+    "/v3/portal/configs/summaries": {
+      "get": {
+        "operationId": "listPortalConfigSummaries",
+        "responses": {}
+      }
+    },
     "/v3/portal/config/swap": {
       "post": {
         "operationId": "swapPortalConfig",
