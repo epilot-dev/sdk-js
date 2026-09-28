@@ -3264,6 +3264,66 @@ declare namespace Components {
                     [name: string]: any;
                 }[];
             } | {
+                code: "CONDITIONAL_PRICING_NOT_ENABLED";
+                details: {
+                    [key: string]: never;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITIONAL_PRICING_NOT_READY";
+                details: {
+                    [key: string]: never;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
                 /**
                  * Error message
                  */
@@ -5680,6 +5740,70 @@ declare namespace Components {
                      * the non-finite number Infinity
                      */
                     reason: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITIONAL_PRICING_NOT_ENABLED";
+                details: {
+                    [key: string]: never;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITIONAL_PRICING_NOT_READY";
+                details: {
+                    [key: string]: never;
                 };
                 /**
                  * Error message
@@ -10690,6 +10814,74 @@ declare namespace Components {
                 [name: string]: any;
             }[];
         } | {
+            code: "CONDITIONAL_PRICING_NOT_ENABLED";
+            details: {
+                [key: string]: never;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CONDITIONAL_PRICING_NOT_READY";
+            details: {
+                [key: string]: never;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
             /**
              * Error message
              */
@@ -10748,9 +10940,20 @@ declare namespace Components {
          * - `IDENTIFIER_INVALID` (400): an id in the request cannot be used as a storage key — empty, carrying an unsupported character, or longer than 128 characters
          * - `VALID_FROM_INVALID` (400): a `valid_from` is not one of the timestamp forms a version timeline can be sorted by
          * - `VALUE_UNSTORABLE` (400): a write carries a value the store cannot hold, such as a non-finite number or one outside the table's numeric range
+         * - `CONDITIONAL_PRICING_NOT_ENABLED` (403): the organization has not opted in to Conditional Pricing
+         * - `CONDITIONAL_PRICING_NOT_READY` (409): the organization opted in minutes ago and a variant cannot be created until its setup finishes
          *
          */
-        export type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE";
+        export type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE" | "CONDITIONAL_PRICING_NOT_ENABLED" | "CONDITIONAL_PRICING_NOT_READY";
+        export interface ConditionalPricingOptIn {
+            /**
+             * - `PROVISIONING`: the organization's search collection is still being set up, and
+             *   creating a variant is refused with `CONDITIONAL_PRICING_NOT_READY`.
+             * - `ACTIVE`: setup has finished.
+             *
+             */
+            status: "PROVISIONING" | "ACTIVE";
+        }
         export type ConsumptionTypeGetAg = "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
         /**
          * The coupon entity
@@ -18015,6 +18218,16 @@ declare namespace Components {
                     InertOverride[]
                 ];
             };
+        } | {
+            code: "VARIANT_NOT_INDEXED";
+            message: string;
+            details: {
+                /**
+                 * - `INDEX_WRITE_FAILED`: the index write was attempted and did not succeed.
+                 *
+                 */
+                reason: "INDEX_WRITE_FAILED";
+            };
         };
         /**
          * A version as a write left it, together with anything the write moved.
@@ -18128,7 +18341,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -18220,7 +18442,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -18253,8 +18484,27 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
              * declares exactly the fields that code sends.
@@ -18329,7 +18579,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -18375,7 +18634,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -18427,7 +18695,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -18492,7 +18769,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -18525,6 +18811,16 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.ConditionSetCatalog;
             export type $400 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
         }
     }
     namespace $GetConditionalVariantTree {
@@ -18554,7 +18850,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -18608,7 +18913,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -18808,7 +19122,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -18859,7 +19182,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -18906,7 +19238,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -18955,7 +19296,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -19049,7 +19399,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -19098,7 +19457,16 @@ declare namespace Paths {
              *
              */
             Components.Schemas.ConditionalPricingError;
-            export type $403 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
             export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
@@ -19132,6 +19500,16 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.ResolvedVariants;
             export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $403 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
              * declares exactly the fields that code sends.
@@ -20730,6 +21108,12 @@ export interface OperationMethods {
    * When no variant matches, the entity's `default` variant is returned, or `results` is empty.
    * `options.hydrate` replaces relation references with the entities they reference.
    * 
+   * Selection by `context` may lag a write by moments. For about ten seconds after a variant is
+   * created, a context it matches can still resolve to the entity's `default` variant, or to no
+   * result, rather than to the new variant; a variant just deleted can still be selected for as
+   * long. Selection by `variant_id`, and the versions a resolve composes, are not subject to this
+   * lag.
+   * 
    */
   '$resolveConditionalEntity'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -21261,6 +21645,12 @@ export interface PathsDictionary {
      * When no variant matches, the entity's `default` variant is returned, or `results` is empty.
      * `options.hydrate` replaces relation references with the entities they reference.
      * 
+     * Selection by `context` may lag a write by moments. For about ten seconds after a variant is
+     * created, a context it matches can still resolve to the entity's `default` variant, or to no
+     * result, rather than to the new variant; a variant just deleted can still be selected for as
+     * long. Selection by `variant_id`, and the versions a resolve composes, are not subject to this
+     * lag.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -21572,6 +21962,7 @@ export type ConditionType = Components.Schemas.ConditionType;
 export type ConditionalEntitySlug = Components.Schemas.ConditionalEntitySlug;
 export type ConditionalPricingError = Components.Schemas.ConditionalPricingError;
 export type ConditionalPricingErrorCode = Components.Schemas.ConditionalPricingErrorCode;
+export type ConditionalPricingOptIn = Components.Schemas.ConditionalPricingOptIn;
 export type ConsumptionTypeGetAg = Components.Schemas.ConsumptionTypeGetAg;
 export type Coupon = Components.Schemas.Coupon;
 export type CouponItem = Components.Schemas.CouponItem;

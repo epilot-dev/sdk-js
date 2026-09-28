@@ -3460,13 +3460,23 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
           }
         }
       }
     },
     "/v1/conditional-pricing:resolve": {
       "post": {
-        "description": "Returns the variants of one conditional entity that apply, each composed: the base entity\noverlaid with the version in effect at `as_of`.\n\nSelect the variant either by `context`, matched against the conditions each variant pins, or\nby `variant_id`. Exactly one of the two. A condition a variant leaves unpinned matches any\nvalue; a condition absent from `context` matches only variants that leave it unpinned.\n\nWhen no variant matches, the entity's `default` variant is returned, or `results` is empty.\n`options.hydrate` replaces relation references with the entities they reference.\n",
+        "description": "Returns the variants of one conditional entity that apply, each composed: the base entity\noverlaid with the version in effect at `as_of`.\n\nSelect the variant either by `context`, matched against the conditions each variant pins, or\nby `variant_id`. Exactly one of the two. A condition a variant leaves unpinned matches any\nvalue; a condition absent from `context` matches only variants that leave it unpinned.\n\nWhen no variant matches, the entity's `default` variant is returned, or `results` is empty.\n`options.hydrate` replaces relation references with the entities they reference.\n\nSelection by `context` may lag a write by moments. For about ten seconds after a variant is\ncreated, a context it matches can still resolve to the entity's `default` variant, or to no\nresult, rather than to the new variant; a variant just deleted can still be selected for as\nlong. Selection by `variant_id`, and the versions a resolve composes, are not subject to this\nlag.\n",
         "operationId": "$resolveConditionalEntity",
         "summary": "$resolveConditionalEntity",
         "tags": [
@@ -3607,6 +3617,16 @@
               }
             }
           },
+          "403": {
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
           "404": {
             "description": "`SCHEMA_NOT_FOUND`, `ENTITY_NOT_FOUND`, and on the pinned branch `VARIANT_NOT_FOUND` or\n`NO_ACTIVE_VERSION`. With `resolve_one`, `NO_MATCHES`; without it, no match is a `200`\ncarrying an empty `results`.\n",
             "content": {
@@ -3731,11 +3751,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -3751,7 +3771,7 @@
             }
           },
           "409": {
-            "description": "`TUPLE_CONFLICT` (also how a second `default` variant is refused), `WRITE_CONFLICT`,\n`CONDITION_UNREADABLE`, `CONDITION_UNCONFIGURED`, `VARIANT_LIMIT_REACHED`,\n`ENTITY_NOT_CONDITIONAL`.\n",
+            "description": "`TUPLE_CONFLICT` (also how a second `default` variant is refused), `WRITE_CONFLICT`,\n`CONDITION_UNREADABLE`, `CONDITION_UNCONFIGURED`, `VARIANT_LIMIT_REACHED`,\n`ENTITY_NOT_CONDITIONAL`, `CONDITIONAL_PRICING_NOT_READY`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -3895,11 +3915,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -4076,11 +4096,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -4170,11 +4190,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -4272,11 +4292,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -4374,11 +4394,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -4466,11 +4486,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -4646,11 +4666,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -4748,11 +4768,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -4852,11 +4872,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -4964,11 +4984,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -5076,11 +5096,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -5189,11 +5209,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -5424,17 +5444,27 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
           },
           "404": {
             "description": "`SCHEMA_NOT_FOUND`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`CONDITIONAL_PRICING_NOT_READY`: the organization's setup has not finished, so no item is\nwritten. An individual item's failure is on its own result entry.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -5577,11 +5607,11 @@
             }
           },
           "403": {
-            "description": "The token names no organization this API can act for",
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -5763,9 +5793,26 @@
           }
         }
       },
+      "ConditionalPricingOptIn": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "- `PROVISIONING`: the organization's search collection is still being set up, and\n  creating a variant is refused with `CONDITIONAL_PRICING_NOT_READY`.\n- `ACTIVE`: setup has finished.\n",
+            "enum": [
+              "PROVISIONING",
+              "ACTIVE"
+            ]
+          }
+        }
+      },
       "ConditionalPricingErrorCode": {
         "type": "string",
-        "description": "Machine-readable failure mode of a conditional-pricing operation, so a client can branch on\nthe kind of failure instead of parsing the message. A `400` is about the request; a `409` is\nabout what is already stored. Refusals raised by request validation carry no `code` at all.\n\n- `SCHEMA_NOT_FOUND` (404): no conditional entity type by that slug\n- `ENTITY_NOT_FOUND` (404): the schema holds no entity with that id\n- `ENTITY_TYPE_MISMATCH` (400): that id belongs to an entity of another type than the slug named\n- `ENTITY_NOT_CONDITIONAL` (409): the entity is of the right type but was not created as a conditional one\n- `VARIANT_NOT_FOUND` (404): the entity has no such variant\n- `VERSION_NOT_FOUND` (404): the variant has no version at that `valid_from`\n- `NO_MATCHES` (404): nothing applied to the context and the entity has no `default` variant\n- `NO_ACTIVE_VERSION` (404): the variant has no version in effect at the instant asked about\n- `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested\n- `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant\n- `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant\n- `CONDITION_UNDEFINED` (400): the request names a condition the entity's schema does not define\n- `VARIANT_PIN_UNDECLARED` (409): a variant a resolve would compose pins a condition the entity's schema no longer declares\n- `OPERATOR_UNSUPPORTED` (400): the requested predicate, or a sort, is not applicable to the condition's type\n- `CONTEXT_FORMAT_INVALID` (400): a resolve context or listing filter value is malformed for its condition type\n- `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value absent from the condition's declared `options`\n- `CONDITION_UNCONFIGURED` (409): a variant write pins a `select` condition whose `options` are absent or empty\n- `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap\n- `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`\n- `OFFSET_WINDOW_EXCEEDED` (400): a listing's `from` plus `size` reaches past the offset window the search index allows\n- `CURSOR_INVALID` (400): a paging cursor cannot be read, or does not belong to the read it was sent with\n- `VARIANT_LIMIT_REACHED` (409): the entity already holds every variant it may hold\n- `PIN_FORMAT_INVALID` (400): a variant pins a value malformed for its condition's type\n- `VARIANT_UNPINNED` (400): a variant write pins no condition and is not marked `default`, or a batch delete item addresses no variant\n- `LAST_VERSION_UNDELETABLE` (409): the delete would leave the variant with no version at all\n- `CONDITION_UNREADABLE` (409): the entity's schema declares a condition in a way this deploy cannot read\n- `SORT_INVALID` (400): a listing's `sort` is not `conditions.<name>:asc` or `conditions.<name>:desc`\n- `DEFAULT_MARKER_RESERVED` (400): a variant write's pins, or a resolve context, address the fallback marker — `default` or `_default`\n- `DEFAULT_VARIANT_PINS_CONDITIONS` (400): a variant marked `default` also pins real conditions\n- `VALID_FROM_IMMUTABLE` (400): a version write asks for a different `valid_from` than the version its own address names\n- `VARIANT_CONDITIONS_IMMUTABLE` (409): a version write carries a condition tuple other than the one its variant was created with\n- `IDENTIFIER_INVALID` (400): an id in the request cannot be used as a storage key — empty, carrying an unsupported character, or longer than 128 characters\n- `VALID_FROM_INVALID` (400): a `valid_from` is not one of the timestamp forms a version timeline can be sorted by\n- `VALUE_UNSTORABLE` (400): a write carries a value the store cannot hold, such as a non-finite number or one outside the table's numeric range\n",
+        "description": "Machine-readable failure mode of a conditional-pricing operation, so a client can branch on\nthe kind of failure instead of parsing the message. A `400` is about the request; a `409` is\nabout what is already stored. Refusals raised by request validation carry no `code` at all.\n\n- `SCHEMA_NOT_FOUND` (404): no conditional entity type by that slug\n- `ENTITY_NOT_FOUND` (404): the schema holds no entity with that id\n- `ENTITY_TYPE_MISMATCH` (400): that id belongs to an entity of another type than the slug named\n- `ENTITY_NOT_CONDITIONAL` (409): the entity is of the right type but was not created as a conditional one\n- `VARIANT_NOT_FOUND` (404): the entity has no such variant\n- `VERSION_NOT_FOUND` (404): the variant has no version at that `valid_from`\n- `NO_MATCHES` (404): nothing applied to the context and the entity has no `default` variant\n- `NO_ACTIVE_VERSION` (404): the variant has no version in effect at the instant asked about\n- `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested\n- `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant\n- `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant\n- `CONDITION_UNDEFINED` (400): the request names a condition the entity's schema does not define\n- `VARIANT_PIN_UNDECLARED` (409): a variant a resolve would compose pins a condition the entity's schema no longer declares\n- `OPERATOR_UNSUPPORTED` (400): the requested predicate, or a sort, is not applicable to the condition's type\n- `CONTEXT_FORMAT_INVALID` (400): a resolve context or listing filter value is malformed for its condition type\n- `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value absent from the condition's declared `options`\n- `CONDITION_UNCONFIGURED` (409): a variant write pins a `select` condition whose `options` are absent or empty\n- `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap\n- `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`\n- `OFFSET_WINDOW_EXCEEDED` (400): a listing's `from` plus `size` reaches past the offset window the search index allows\n- `CURSOR_INVALID` (400): a paging cursor cannot be read, or does not belong to the read it was sent with\n- `VARIANT_LIMIT_REACHED` (409): the entity already holds every variant it may hold\n- `PIN_FORMAT_INVALID` (400): a variant pins a value malformed for its condition's type\n- `VARIANT_UNPINNED` (400): a variant write pins no condition and is not marked `default`, or a batch delete item addresses no variant\n- `LAST_VERSION_UNDELETABLE` (409): the delete would leave the variant with no version at all\n- `CONDITION_UNREADABLE` (409): the entity's schema declares a condition in a way this deploy cannot read\n- `SORT_INVALID` (400): a listing's `sort` is not `conditions.<name>:asc` or `conditions.<name>:desc`\n- `DEFAULT_MARKER_RESERVED` (400): a variant write's pins, or a resolve context, address the fallback marker — `default` or `_default`\n- `DEFAULT_VARIANT_PINS_CONDITIONS` (400): a variant marked `default` also pins real conditions\n- `VALID_FROM_IMMUTABLE` (400): a version write asks for a different `valid_from` than the version its own address names\n- `VARIANT_CONDITIONS_IMMUTABLE` (409): a version write carries a condition tuple other than the one its variant was created with\n- `IDENTIFIER_INVALID` (400): an id in the request cannot be used as a storage key — empty, carrying an unsupported character, or longer than 128 characters\n- `VALID_FROM_INVALID` (400): a `valid_from` is not one of the timestamp forms a version timeline can be sorted by\n- `VALUE_UNSTORABLE` (400): a write carries a value the store cannot hold, such as a non-finite number or one outside the table's numeric range\n- `CONDITIONAL_PRICING_NOT_ENABLED` (403): the organization has not opted in to Conditional Pricing\n- `CONDITIONAL_PRICING_NOT_READY` (409): the organization opted in minutes ago and a variant cannot be created until its setup finishes\n",
         "enum": [
           "SCHEMA_NOT_FOUND",
           "ENTITY_NOT_FOUND",
@@ -5800,7 +5847,9 @@
           "VARIANT_CONDITIONS_IMMUTABLE",
           "IDENTIFIER_INVALID",
           "VALID_FROM_INVALID",
-          "VALUE_UNSTORABLE"
+          "VALUE_UNSTORABLE",
+          "CONDITIONAL_PRICING_NOT_ENABLED",
+          "CONDITIONAL_PRICING_NOT_READY"
         ]
       },
       "ResolveConditionalEntityRequest": {
@@ -6225,6 +6274,43 @@
                     "items": {
                       "$ref": "#/components/schemas/InertOverride"
                     }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "The variant was stored, and its versions resolve once it is found, but its index entry was\nnot written. `:resolve`, `variants:list` and `variants:tree` do not find it until it is\nrepaired, within about a minute and a half. Inside that time a resolve its pins would\nmatch returns the entity's default variant. Retrying the write does not help, since it\nappends a version and does not repair anything.\n\nRaised by a write that creates a variant, when the index write failed.\n",
+            "required": [
+              "code",
+              "message",
+              "details"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "VARIANT_NOT_INDEXED"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "details": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "reason"
+                ],
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "description": "- `INDEX_WRITE_FAILED`: the index write was attempted and did not succeed.\n",
+                    "enum": [
+                      "INDEX_WRITE_FAILED"
+                    ]
                   }
                 }
               }
@@ -8483,7 +8569,49 @@
               },
               {
                 "type": "object",
-                "description": "A refusal the request validator raises, answered before any handler runs. The\nmessage says what to fix, and no code is sent — which is how a client tells this\nmember from the coded ones.\n",
+                "description": "The organization has not opted in to Conditional Pricing. Opting in is done once, by\nepilot, from the organization's settings; nothing in this API enables it.\n",
+                "required": [
+                  "code",
+                  "details"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "CONDITIONAL_PRICING_NOT_ENABLED"
+                    ]
+                  },
+                  "details": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {}
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "description": "The organization opted in, and its setup, which takes minutes, has not finished. No\nvariant can be created until it has; try again in a few minutes.\n",
+                "required": [
+                  "code",
+                  "details"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "CONDITIONAL_PRICING_NOT_READY"
+                    ]
+                  },
+                  "details": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {}
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "description": "A refusal that carries no code: one the request validator raises before any handler\nruns, or a token that names no organization this API can act for. The message says\nwhat to fix, and no code is sent — which is how a client tells this member from the\ncoded ones.\n",
                 "additionalProperties": false,
                 "required": [
                   "message"
