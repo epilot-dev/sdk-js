@@ -33,6 +33,10 @@ Register and look up applications with `identityClient.createOidcClient()` and
 `identityClient.getOidcClient()`. The package's `getClient()` and `createClient()` helpers
 return SDK HTTP client instances.
 
+The session endpoints (`createIdentitySession`, `deleteIdentitySession`) exist for the epilot portal: the
+`identity_session` cookie has to be set on the portal host, so the portal calls them through its own origin
+(`/v1/identity/session`), not through this client. Calling them here against `id.epilot.cloud` sets no usable cookie.
+
 ## Documentation:
 
 https://docs.epilot.io/api/identity
