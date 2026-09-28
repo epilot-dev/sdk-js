@@ -76,6 +76,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.eventCatalog` | `@epilot/sdk/event-catalog` | [docs](./packages/epilot-sdk-v2/docs/event-catalog.md) |
 | `epilot.file` | `@epilot/sdk/file` | [docs](./packages/epilot-sdk-v2/docs/file.md) |
 | `epilot.iban` | `@epilot/sdk/iban` | [docs](./packages/epilot-sdk-v2/docs/iban.md) |
+| `epilot.identity` | `@epilot/sdk/identity` | [docs](./packages/epilot-sdk-v2/docs/identity.md) |
 | `epilot.integrationToolkit` | `@epilot/sdk/integration-toolkit` | [docs](./packages/epilot-sdk-v2/docs/integration-toolkit.md) |
 | `epilot.journey` | `@epilot/sdk/journey` | [docs](./packages/epilot-sdk-v2/docs/journey.md) |
 | `epilot.kanban` | `@epilot/sdk/kanban` | [docs](./packages/epilot-sdk-v2/docs/kanban.md) |

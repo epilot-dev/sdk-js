@@ -27,6 +27,7 @@ CLIENTS=(
   "entity-mapping-client"
   "erp-integration-client"
   "file-client"
+  "identity-client"
   "journey-client"
   "kanban-client"
   "message-client"

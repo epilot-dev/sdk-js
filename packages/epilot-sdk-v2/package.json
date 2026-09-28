@@ -177,6 +177,12 @@
       "require": "./dist/apis/iban.cjs"
     },
     "./iban/openapi.json": "./definitions/iban.json",
+    "./identity": {
+      "types": "./dist/apis/identity.d.ts",
+      "import": "./dist/apis/identity.js",
+      "require": "./dist/apis/identity.cjs"
+    },
+    "./identity/openapi.json": "./definitions/identity.json",
     "./integration-toolkit": {
       "types": "./dist/apis/integration-toolkit.d.ts",
       "import": "./dist/apis/integration-toolkit.js",
@@ -457,6 +463,9 @@
       ],
       "iban": [
         "./dist/apis/iban.d.ts"
+      ],
+      "identity": [
+        "./dist/apis/identity.d.ts"
       ],
       "integration-toolkit": [
         "./dist/apis/integration-toolkit.d.ts"

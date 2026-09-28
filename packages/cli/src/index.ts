@@ -3,7 +3,7 @@ import { defineCommand } from 'citty';
 export const main = defineCommand({
   meta: {
     name: 'epilot',
-    version: '0.1.168',
+    version: '0.1.170',
     description: 'CLI for epilot APIs',
   },
   args: {
@@ -51,6 +51,7 @@ export const main = defineCommand({
     'event-catalog': () => import('./commands/apis/event-catalog.js').then((m) => m.default),
     file: () => import('./commands/apis/file.js').then((m) => m.default),
     iban: () => import('./commands/apis/iban.js').then((m) => m.default),
+    identity: () => import('./commands/apis/identity.js').then((m) => m.default),
     'integration-toolkit': () => import('./commands/apis/integration-toolkit.js').then((m) => m.default),
     journey: () => import('./commands/apis/journey.js').then((m) => m.default),
     kanban: () => import('./commands/apis/kanban.js').then((m) => m.default),
