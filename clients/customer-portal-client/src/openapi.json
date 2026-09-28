@@ -4036,7 +4036,7 @@
       "post": {
         "operationId": "identifyContact",
         "summary": "identifyContact",
-        "description": "Identify a contact by the portal's configured registration identifiers and, on a match,\nissue a short-lived bearer token that acts as that contact.\n\nResolution is identical to `checkContactExistsV3`. The token does not grant a portal\nsession; it is accepted only on the operations listed in `allowed_operations`, and\nexpires at `expires_at`. Requires `surface_id` to name a surface of the portal whose\n`authentication` is `registration_identifiers`; returns 403 otherwise. The token is\nconfined to that surface's data access. Requests may be rate limited (429).\n",
+        "description": "Identify a contact by the surface's identifiers and, on a match, issue a short-lived\nbearer token that acts as that contact.\n\nThe identifiers checked are the surface's own `identifiers` when it configures any,\notherwise the portal's `registration_identifiers`. Their values are sent in the\n`registration_identifiers` request property. Resolution is otherwise identical to\n`checkContactExistsV3`: the same lookup, `registrationIdentifiersCheck` hook and\nTIMEOUT semantics, run on the surface's identifiers. The token does not grant a portal\nsession; it is accepted only on the operations listed in `allowed_operations`, and\nexpires at `expires_at`. Requires `surface_id` to name a surface of the portal whose\n`authentication` is `registration_identifiers`; returns 403 otherwise. The token is\nconfined to that surface's data access. Requests may be rate limited (429).\n\nNo portal session is expected, but the caller must present a public access token\n(`token_type: journey` or `token_type: portal`) as the bearer, minted for the same\n`org_id`; the request is rejected with 401 otherwise. It binds the call to the journey\nor portal it comes from — the token is public, so it proves origin, not identity.\n",
         "security": [],
         "tags": [
           "Public"
@@ -10747,7 +10747,7 @@
       "delete": {
         "operationId": "deletePortalConfig",
         "summary": "deletePortalConfig",
-        "description": "Deletes a specific portal configuration by ID.",
+        "description": "Deletes a specific portal configuration by ID, together with everything the portal owns:\nits pages, revisions, email templates and widget configuration. The custom domain network\nsetup is torn down asynchronously afterwards.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -12477,6 +12477,42 @@
           }
         }
       },
+      "NewDesignMigrationResult": {
+        "type": "object",
+        "properties": {
+          "org_id": {
+            "type": "string"
+          },
+          "portal_id": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_v3_item": {
+            "type": "boolean"
+          },
+          "dry_run": {
+            "type": "boolean"
+          },
+          "migrated": {
+            "type": "boolean",
+            "description": "True when the migration was written (false for dry_run)"
+          },
+          "summary": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "before": {
+            "type": "object",
+            "description": "Stored feature_settings and pages before the migration, for rollback",
+            "additionalProperties": true
+          }
+        }
+      },
       "OtaPortal": {
         "type": "object",
         "description": "A portal that has mobile OTA updates enabled.",
@@ -14104,7 +14140,7 @@
         }
       },
       "ContactIdentifyRequest": {
-        "description": "ContactExistsRequest plus the surface the token is requested for.\n",
+        "description": "ContactExistsRequest plus the surface the token is requested for. `registration_identifiers` carries the values of the surface's effective identifiers (keyed by schema, then attribute name): the surface's own `identifiers` when it configures any, otherwise the portal's `registration_identifiers`.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/ContactExistsRequest"
@@ -14553,6 +14589,14 @@
           },
           "targets": {
             "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "match_any_targets": {
+            "type": "array",
+            "description": "The entity must match at least one of these targets. Combined with `targets` (all of which must match) using AND.",
             "items": {
               "type": "string",
               "format": "uuid"
@@ -15695,7 +15739,7 @@
               "login",
               "registration_identifiers"
             ],
-            "description": "How a caller on this surface proves who they are.\n\n- `login`: a logged-in portal user token (the portal's own authentication).\n- `registration_identifiers`: the caller supplies the portal's\n  `registration_identifiers` to `identifyContact` and receives a short-lived\n  contact identification token. Anyone who knows or guesses those values can\n  use this surface, so its data access should be as narrow as the use case allows.\n\n`anonymous` (no proof of identity at all) is planned and not accepted yet.\n"
+            "description": "How a caller on this surface proves who they are.\n\n- `login`: a logged-in portal user token (the portal's own authentication).\n- `registration_identifiers`: the caller supplies the values of the surface's\n  identifiers (its own `identifiers`, or the portal's `registration_identifiers`\n  when it sets none) to `identifyContact` and receives a short-lived contact\n  identification token. Anyone who knows or guesses those values can use this\n  surface, so its data access should be as narrow as the use case allows.\n\n`anonymous` (no proof of identity at all) is planned and not accepted yet.\n"
           },
           "token_ttl_seconds": {
             "type": "integer",
@@ -15704,6 +15748,23 @@
             "minimum": 60,
             "maximum": 900,
             "description": "Lifetime of tokens minted for this surface. Only used with `registration_identifiers`."
+          },
+          "identifiers": {
+            "type": "array",
+            "description": "Identifier attributes a caller must supply on this surface to be identified. Only\nused with `authentication: registration_identifiers`.\n\nOmitted or empty means the surface uses the portal's `registration_identifiers`.\nWhen set, these replace the portal's `registration_identifiers` on this surface\nonly: `identifyContact` requires a value for each of them (400 listing the missing\nones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`\nhook on them, and refuses to issue tokens (403) unless there are at least two.\nEntries without `name` or `schema` are ignored.\n",
+            "items": {
+              "$ref": "#/components/schemas/RegistrationIdentifier"
+            },
+            "example": [
+              {
+                "name": "customer_number",
+                "schema": "contact"
+              },
+              {
+                "name": "meter_number",
+                "schema": "meter"
+              }
+            ]
           },
           "data_access": {
             "$ref": "#/components/schemas/PortalSurfaceDataAccess"
@@ -15828,6 +15889,123 @@
               "$ref": "#/components/schemas/Rule"
             },
             "nullable": true
+          }
+        }
+      },
+      "JourneyContextUsagesRequest": {
+        "type": "object",
+        "required": [
+          "journey_id",
+          "param_keys"
+        ],
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "description": "Journey whose context parameters are being looked up"
+          },
+          "param_keys": {
+            "type": "array",
+            "description": "Context parameter names (the `paramKey` of each parameter)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "param_ids": {
+            "type": "array",
+            "description": "Accepted for a uniform adapter request shape; portals reference parameters by name only, so this is ignored.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "JourneyContextUsagesResponse": {
+        "type": "object",
+        "required": [
+          "usages",
+          "status",
+          "scanned"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "partial"
+            ],
+            "description": "partial when the row cap, the soft deadline or a failed portal truncated the result"
+          },
+          "scanned": {
+            "type": "integer",
+            "description": "Portals examined"
+          },
+          "usages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "kind",
+                "resource",
+                "location",
+                "matched_as"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "portal-config",
+                    "portal-block",
+                    "portal-widget"
+                  ]
+                },
+                "resource": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "id"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "portal"
+                      ]
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "location": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "matched_as": {
+                  "type": "object",
+                  "required": [
+                    "dialect",
+                    "token"
+                  ],
+                  "properties": {
+                    "dialect": {
+                      "type": "string",
+                      "enum": [
+                        "name"
+                      ]
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "at": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -16122,6 +16300,9 @@
             "items": {
               "$ref": "#/components/schemas/PortalWorkflowStage"
             }
+          },
+          "portal_titles": {
+            "$ref": "#/components/schemas/PortalNameOverrides"
           }
         },
         "required": [
@@ -16154,13 +16335,20 @@
             "enum": [
               "COMPLETED",
               "IN_PROGRESS",
-              "UPCOMING"
+              "UPCOMING",
+              "NOT_REACHED"
             ],
-            "description": "Derived progress status:\n- COMPLETED: every task of the stage is done, and the flow has moved past it\n- IN_PROGRESS: the flow's current work is inside this stage\n- UPCOMING: the flow has not reached this stage yet\n"
+            "description": "Derived progress status:\n- COMPLETED: every task of the stage is done, and the flow has moved past it\n- IN_PROGRESS: the flow's current work is inside this stage\n- UPCOMING: the flow has not reached this stage yet\n- NOT_REACHED: the flow finished (DONE or CLOSED) before reaching this stage — a run may legitimately end at any stage\n"
           },
           "completed_at": {
             "type": "string",
             "description": "Latest completion timestamp among the stage's tasks; set only when the\nstage is COMPLETED and at least one of its tasks recorded one\n"
+          },
+          "portal_names": {
+            "$ref": "#/components/schemas/PortalNameOverrides"
+          },
+          "portal_descriptions": {
+            "$ref": "#/components/schemas/PortalDescriptionOverrides"
           }
         },
         "required": [
@@ -16168,6 +16356,34 @@
           "name",
           "status"
         ]
+      },
+      "PortalNameOverrides": {
+        "type": "object",
+        "description": "Portal-facing overrides of a flow or stage title, configured per portal\naudience in the Flows Hub. Served unresolved because this endpoint asks\nthe Workflows API for audience `all` — one cached response feeds blocks\nof both audiences, so each block picks its own override and falls back\nto `name` when the key is absent.\n",
+        "properties": {
+          "ecp": {
+            "type": "string",
+            "description": "Title shown in the End Customer Portal"
+          },
+          "installer": {
+            "type": "string",
+            "description": "Title shown in the Installer Portal"
+          }
+        }
+      },
+      "PortalDescriptionOverrides": {
+        "type": "object",
+        "description": "Portal-facing overrides of a stage description, configured per portal\naudience in the Flows Hub. Served unresolved for the same reason as\n`PortalNameOverrides`; a block falls back to `description` when its\naudience's key is absent. The values are rich text, like `description`\nitself.\n",
+        "properties": {
+          "ecp": {
+            "type": "string",
+            "description": "Description shown in the End Customer Portal"
+          },
+          "installer": {
+            "type": "string",
+            "description": "Description shown in the Installer Portal"
+          }
+        }
       },
       "PortalWorkflowTask": {
         "type": "object",
@@ -16217,6 +16433,10 @@
               },
               "name": {
                 "type": "string"
+              },
+              "portal_button_label": {
+                "type": "string",
+                "description": "Portal-facing label configured in the Flows Hub that replaces the portal's default \"Start now\" button for this journey. Blank or absent means the portal keeps its own translated default."
               },
               "complete_task_automatically": {
                 "type": "boolean",
@@ -16303,6 +16523,10 @@
               },
               "name": {
                 "type": "string"
+              },
+              "portal_button_label": {
+                "type": "string",
+                "description": "Portal-facing label configured in the Flows Hub that replaces the portal's default \"Start now\" button for this journey."
               },
               "complete_task_automatically": {
                 "type": "boolean"
@@ -16872,6 +17096,18 @@
             },
             "example": [
               "3ec28ab5-8598-41ef-9486-b57fca1d5e2a"
+            ]
+          },
+          "match_any_targets": {
+            "type": "array",
+            "description": "The entity must match at least one of these targets. Combined with `targets` (all of which must match) using AND.",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": [
+              "3ec28ab5-8598-41ef-9486-b57fca1d5e2a",
+              "5f2c1e7a-6b0d-4a8e-9c3f-1d2e3f4a5b6c"
             ]
           },
           "include": {
