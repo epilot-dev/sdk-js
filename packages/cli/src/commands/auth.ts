@@ -1,6 +1,6 @@
 import { defineCommand } from 'citty';
 import { loadCredentials, removeCredentials } from '../lib/auth-store.js';
-import { BOLD, RESET, GREEN, RED, DIM, YELLOW } from '../lib/utils.js';
+import { ANONYMIZATION_DOCS_URL, BOLD, RESET, GREEN, RED, DIM, YELLOW } from '../lib/utils.js';
 
 export default defineCommand({
   meta: {
@@ -59,7 +59,10 @@ export default defineCommand({
         if (tokenUse) process.stdout.write(`  Use:     ${tokenUse}\n`);
         if (roles?.length) process.stdout.write(`  Roles:   ${roles.join(', ')}\n`);
         process.stdout.write(`  Access:  ${readOnly ? `${YELLOW}read-only${RESET}` : `${GREEN}read-write${RESET}`}\n`);
-        if (anonymize) process.stdout.write(`  Data:    ${YELLOW}anonymized${RESET}\n`);
+        if (anonymize)
+          process.stdout.write(
+            `  Data:    ${YELLOW}anonymized${RESET} ${DIM}(best effort, see ${ANONYMIZATION_DOCS_URL})${RESET}\n`,
+          );
 
         // Expiry
         if (creds.expires_at) {

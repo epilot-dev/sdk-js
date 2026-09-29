@@ -131,3 +131,6 @@ export const highlightJson = (jsonStr: string): string =>
       return match;
     },
   );
+
+/** What `--anonymize` masks, its best-effort limits, and how to mark custom attributes as PII */
+export const ANONYMIZATION_DOCS_URL = 'https://docs.epilot.io/docs/auth/anonymization';
