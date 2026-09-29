@@ -7538,8 +7538,8 @@
                 "type": "string",
                 "description": "The shape of the location value. Immutable once the condition has been saved.",
                 "enum": [
-                  "zipcode",
-                  "zipcode_town"
+                  "postal_code",
+                  "postal_code_city"
                 ]
               }
             },
