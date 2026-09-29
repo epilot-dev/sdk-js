@@ -1641,8 +1641,9 @@ export declare namespace Components {
              *
              * Exact values only; predicates belong to reads. Values are stored canonicalized for their
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
-             * and `until` where an empty string is an open end, a `location` of format `zipcode` the
-             * postal code itself and one of format `zipcode_town` an object carrying both.
+             * and `until` where an empty string is an open end, a `location` of format `postal_code` the
+             * postal code itself and one of format `postal_code_city` an object carrying `postal_code` and
+             * `city`.
              *
              * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
@@ -4115,8 +4116,9 @@ export declare namespace Components {
              *
              * Exact values only; predicates belong to reads. Values are stored canonicalized for their
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
-             * and `until` where an empty string is an open end, a `location` of format `zipcode` the
-             * postal code itself and one of format `zipcode_town` an object carrying both.
+             * and `until` where an empty string is an open end, a `location` of format `postal_code` the
+             * postal code itself and one of format `postal_code_city` an object carrying `postal_code` and
+             * `city`.
              *
              * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
@@ -9171,7 +9173,7 @@ export declare namespace Components {
             /**
              * The value shape of a `location` condition. Absent for every other type.
              */
-            format?: "zipcode" | "zipcode_town";
+            format?: "postal_code" | "postal_code_city";
         }
         /**
          * A named bundle of condition definitions, built in for one entity type.
@@ -11305,8 +11307,9 @@ export declare namespace Components {
              *
              * Exact values only; predicates belong to reads. Values are stored canonicalized for their
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
-             * and `until` where an empty string is an open end, a `location` of format `zipcode` the
-             * postal code itself and one of format `zipcode_town` an object carrying both.
+             * and `until` where an empty string is an open end, a `location` of format `postal_code` the
+             * postal code itself and one of format `postal_code_city` an object carrying `postal_code` and
+             * `city`.
              *
              * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
@@ -13933,8 +13936,9 @@ export declare namespace Components {
          *
          * Exact values only; predicates belong to reads. Values are stored canonicalized for their
          * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
-         * and `until` where an empty string is an open end, a `location` of format `zipcode` the
-         * postal code itself and one of format `zipcode_town` an object carrying both.
+         * and `until` where an empty string is an open end, a `location` of format `postal_code` the
+         * postal code itself and one of format `postal_code_city` an object carrying `postal_code` and
+         * `city`.
          *
          * `default` and names beginning with `_` are reserved; use the request's `default` flag.
          *
@@ -17076,8 +17080,9 @@ export declare namespace Components {
              *
              * An `in` list carries at most 50,000 values. A `string` or `select` matches exactly and
              * case-sensitively. A `location` of format
-             * `zipcode` is the postal code itself; one of format `zipcode_town` is an object carrying
-             * both, whose town is compared case- and whitespace-insensitively.
+             * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
+             * `postal_code` and `city`, named as an entity address names them, whose city is compared
+             * case- and whitespace-insensitively.
              *
              * `default` and names beginning with `_` are reserved and cannot be supplied.
              *
@@ -17176,8 +17181,9 @@ export declare namespace Components {
          *
          * An `in` list carries at most 50,000 values. A `string` or `select` matches exactly and
          * case-sensitively. A `location` of format
-         * `zipcode` is the postal code itself; one of format `zipcode_town` is an object carrying
-         * both, whose town is compared case- and whitespace-insensitively.
+         * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
+         * `postal_code` and `city`, named as an entity address names them, whose city is compared
+         * case- and whitespace-insensitively.
          *
          * `default` and names beginning with `_` are reserved and cannot be supplied.
          *
