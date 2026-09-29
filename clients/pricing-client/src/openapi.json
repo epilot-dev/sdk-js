@@ -5739,8 +5739,8 @@
             "type": "string",
             "description": "The value shape of a `location` condition. Absent for every other type.",
             "enum": [
-              "zipcode",
-              "zipcode_town"
+              "postal_code",
+              "postal_code_city"
             ]
           }
         }
@@ -5930,7 +5930,7 @@
       "ResolveContext": {
         "type": "object",
         "additionalProperties": true,
-        "description": "The situation to resolve for: a flat map keyed by condition name. A condition left out\nmatches only variants that leave it unpinned; an empty map therefore returns the `default`\nvariant.\n\nEach value is an exact value, typed by its condition, or a single-operator predicate:\n\n- `{ \"lt\": v }`, `{ \"lte\": v }`, `{ \"gt\": v }`, `{ \"gte\": v }` — order, against a `number`\n  or `date` condition\n- `{ \"in\": [...] }` — membership, against a `string`, `select` or `number` condition\n- `{ \"between\": \"2026-03-01\" }` — `daterange` containment, which a plain date also means\n- `{ \"exists\": true }` — pinned to any value; `{ \"exists\": false }` — left unpinned\n\nAn `in` list carries at most 50,000 values. A `string` or `select` matches exactly and\ncase-sensitively. A `location` of format\n`zipcode` is the postal code itself; one of format `zipcode_town` is an object carrying\nboth, whose town is compared case- and whitespace-insensitively.\n\n`default` and names beginning with `_` are reserved and cannot be supplied.\n",
+        "description": "The situation to resolve for: a flat map keyed by condition name. A condition left out\nmatches only variants that leave it unpinned; an empty map therefore returns the `default`\nvariant.\n\nEach value is an exact value, typed by its condition, or a single-operator predicate:\n\n- `{ \"lt\": v }`, `{ \"lte\": v }`, `{ \"gt\": v }`, `{ \"gte\": v }` — order, against a `number`\n  or `date` condition\n- `{ \"in\": [...] }` — membership, against a `string`, `select` or `number` condition\n- `{ \"between\": \"2026-03-01\" }` — `daterange` containment, which a plain date also means\n- `{ \"exists\": true }` — pinned to any value; `{ \"exists\": false }` — left unpinned\n\nAn `in` list carries at most 50,000 values. A `string` or `select` matches exactly and\ncase-sensitively. A `location` of format\n`postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying\n`postal_code` and `city`, named as an entity address names them, whose city is compared\ncase- and whitespace-insensitively.\n\n`default` and names beginning with `_` are reserved and cannot be supplied.\n",
         "example": {
           "postal_code": "46045",
           "consumption": {
@@ -6071,7 +6071,7 @@
       "PinnedConditions": {
         "type": "object",
         "additionalProperties": true,
-        "description": "The situation this variant applies to: a flat map keyed by condition name. A condition left\nout is a wildcard, which is what makes adding a condition to a schema non-breaking for\nexisting variants.\n\nExact values only; predicates belong to reads. Values are stored canonicalized for their\ntype: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`\nand `until` where an empty string is an open end, a `location` of format `zipcode` the\npostal code itself and one of format `zipcode_town` an object carrying both.\n\n`default` and names beginning with `_` are reserved; use the request's `default` flag.\n",
+        "description": "The situation this variant applies to: a flat map keyed by condition name. A condition left\nout is a wildcard, which is what makes adding a condition to a schema non-breaking for\nexisting variants.\n\nExact values only; predicates belong to reads. Values are stored canonicalized for their\ntype: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`\nand `until` where an empty string is an open end, a `location` of format `postal_code` the\npostal code itself and one of format `postal_code_city` an object carrying `postal_code` and\n`city`.\n\n`default` and names beginning with `_` are reserved; use the request's `default` flag.\n",
         "example": {
           "postal_code": "46045"
         }
@@ -6282,7 +6282,7 @@
           {
             "type": "object",
             "additionalProperties": false,
-            "description": "The variant was stored, and its versions resolve once it is found, but its index entry was\nnot written. `:resolve`, `variants:list` and `variants:tree` do not find it until it is\nrepaired, within about a minute and a half. Inside that time a resolve its pins would\nmatch returns the entity's default variant. Retrying the write does not help, since it\nappends a version and does not repair anything.\n\nRaised by a write that creates a variant, when the index write failed.\n",
+            "description": "The variant was stored but its index entry was not written. `:resolve`, `variants:list` and\n`variants:tree` miss it until it is repaired, within about a minute and a half; until then a\nresolve it would match returns the entity's default variant. Retrying the write does not help.\n",
             "required": [
               "code",
               "message",
