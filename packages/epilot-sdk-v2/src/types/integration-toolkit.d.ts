@@ -2913,6 +2913,17 @@ export declare namespace Components {
              */
             correlation_id?: string;
         };
+        export interface ErpImportDownload {
+            /**
+             * Presigned URL serving the file as an attachment. Valid until `expires_at`.
+             */
+            download_url: string; // uri
+            /**
+             * The filename the file was uploaded with.
+             */
+            filename: string;
+            expires_at: string; // date-time
+        }
         /**
          * One entity instance the import will write, attributed to the mapping target that produces it.
          */
@@ -8848,6 +8859,20 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace DownloadErpImportFile {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ErpImportDownload;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Schemas.ErrorResponseBase;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ExecuteErpImport {
         namespace Parameters {
             export type ImportId = string;
@@ -8958,6 +8983,21 @@ export declare namespace Paths {
             export type $200 = Components.Schemas.ErpImportJob;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetErpImportPreview {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export type $200 = /* Sample of the file's first rows, using the same parser as `:validate`. Registration refuses a file it cannot read, so a created job always includes this. */ Components.Schemas.ErpImportFilePreview;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Schemas.ErrorResponseBase;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -10760,6 +10800,27 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteErpImport.Responses.$204>
   /**
+   * getErpImportPreview - getErpImportPreview
+   * 
+   * The file preview of an existing import: its columns and first data rows, the same sample `createErpImport` returns with `include_preview`. Lets a client that opens a job later show its file, and is independent of GET /v2/erp/imports/{importId}, so the two can be fetched in parallel.
+   * Read fresh from the import's file on every call. CSV only — an xlsx import returns 400.
+   */
+  'getErpImportPreview'(
+    parameters?: Parameters<Paths.GetErpImportPreview.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetErpImportPreview.Responses.$200>
+  /**
+   * downloadErpImportFile - downloadErpImportFile
+   * 
+   * A short-lived presigned URL that downloads the file this import was registered with — the import's own copy, so exactly what `:validate` and `:execute` read. The URL serves the file as an attachment under its original filename.
+   */
+  'downloadErpImportFile'(
+    parameters?: Parameters<Paths.DownloadErpImportFile.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DownloadErpImportFile.Responses.$200>
+  /**
    * validateErpImport - validateErpImport
    * 
    * Choose the use case to read this file with, and start the validate phase.
@@ -11821,6 +11882,31 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteErpImport.Responses.$204>
   }
+  ['/v2/erp/imports/{importId}/preview']: {
+    /**
+     * getErpImportPreview - getErpImportPreview
+     * 
+     * The file preview of an existing import: its columns and first data rows, the same sample `createErpImport` returns with `include_preview`. Lets a client that opens a job later show its file, and is independent of GET /v2/erp/imports/{importId}, so the two can be fetched in parallel.
+     * Read fresh from the import's file on every call. CSV only — an xlsx import returns 400.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetErpImportPreview.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetErpImportPreview.Responses.$200>
+  }
+  ['/v2/erp/imports/{importId}/download']: {
+    /**
+     * downloadErpImportFile - downloadErpImportFile
+     * 
+     * A short-lived presigned URL that downloads the file this import was registered with — the import's own copy, so exactly what `:validate` and `:execute` read. The URL serves the file as an attachment under its original filename.
+     */
+    'get'(
+      parameters?: Parameters<Paths.DownloadErpImportFile.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DownloadErpImportFile.Responses.$200>
+  }
   ['/v2/erp/imports/{importId}:validate']: {
     /**
      * validateErpImport - validateErpImport
@@ -11927,6 +12013,7 @@ export type EnvVarRefConfig = Components.Schemas.EnvVarRefConfig;
 export type EnvironmentFieldConfig = Components.Schemas.EnvironmentFieldConfig;
 export type ErpEvent = Components.Schemas.ErpEvent;
 export type ErpEventV3 = Components.Schemas.ErpEventV3;
+export type ErpImportDownload = Components.Schemas.ErpImportDownload;
 export type ErpImportEntityDetail = Components.Schemas.ErpImportEntityDetail;
 export type ErpImportError = Components.Schemas.ErpImportError;
 export type ErpImportFilePreview = Components.Schemas.ErpImportFilePreview;

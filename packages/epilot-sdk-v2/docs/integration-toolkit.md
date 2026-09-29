@@ -100,6 +100,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`listErpImports`](#listerpimports)
 - [`getErpImport`](#geterpimport)
 - [`deleteErpImport`](#deleteerpimport)
+- [`getErpImportPreview`](#geterpimportpreview)
+- [`downloadErpImportFile`](#downloaderpimportfile)
 - [`validateErpImport`](#validateerpimport)
 - [`suggestErpImportUseCases`](#suggesterpimportusecases)
 - [`executeErpImport`](#executeerpimport)
@@ -118,6 +120,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`ErpImportProgress`](#erpimportprogress)
 - [`ErpImportError`](#erpimporterror)
 - [`ErpImportFilePreview`](#erpimportfilepreview)
+- [`ErpImportDownload`](#erpimportdownload)
 - [`CreateErpImportResponse`](#createerpimportresponse)
 - [`ErpImportJob`](#erpimportjob)
 - [`ErpImportList`](#erpimportlist)
@@ -3927,6 +3930,61 @@ const { data } = await client.deleteErpImport({
 
 ---
 
+### `getErpImportPreview`
+
+The file preview of an existing import: its columns and first data rows, the same sample `createErpImport` returns with `include_preview`. Lets a client that opens a job later show its file, and is in
+
+`GET /v2/erp/imports/{importId}/preview`
+
+```ts
+const { data } = await client.getErpImportPreview({
+  importId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "columns": ["string"],
+  "rows": [
+    ["string"]
+  ]
+}
+```
+
+</details>
+
+---
+
+### `downloadErpImportFile`
+
+A short-lived presigned URL that downloads the file this import was registered with — the import's own copy, so exactly what `:validate` and `:execute` read. The URL serves the file as an attachment u
+
+`GET /v2/erp/imports/{importId}/download`
+
+```ts
+const { data } = await client.downloadErpImportFile({
+  importId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "download_url": "https://example.com/path",
+  "filename": "string",
+  "expires_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
 ### `validateErpImport`
 
 Choose the use case to read this file with, and start the validate phase.
@@ -4190,6 +4248,16 @@ Sample of the file's first rows, using the same parser as `:validate`. Registrat
 type ErpImportFilePreview = {
   columns: string[]
   rows: string[][]
+}
+```
+
+### `ErpImportDownload`
+
+```ts
+type ErpImportDownload = {
+  download_url: string // uri
+  filename: string
+  expires_at: string // date-time
 }
 ```
 
