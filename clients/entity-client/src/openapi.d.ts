@@ -7800,7 +7800,7 @@ declare namespace Components {
             /**
              * The shape of the location value. Immutable once the condition has been saved.
              */
-            format?: "zipcode" | "zipcode_town";
+            format?: "postal_code" | "postal_code_city";
         }
         /**
          * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute

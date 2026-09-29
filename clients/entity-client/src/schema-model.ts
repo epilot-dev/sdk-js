@@ -1,4 +1,4 @@
-import type { Attribute } from './openapi';
+import type { Attribute, LocationConditionDefinition } from './openapi';
 
 /** Every `type` an entity schema attribute can have. */
 export type AttributeType = NonNullable<Attribute['type']>;
@@ -50,3 +50,17 @@ export const OVERRIDABLE_ATTRIBUTE_TYPE_LIST = [
 
 /** `string`, not a literal union, so callers can test an unnarrowed `attribute.type`. */
 export const OVERRIDABLE_ATTRIBUTE_TYPES: ReadonlySet<string> = new Set(OVERRIDABLE_ATTRIBUTE_TYPE_LIST);
+
+/** Every `format` a `location` condition can declare: the shape of its values. */
+export type LocationFormat = NonNullable<LocationConditionDefinition['format']>;
+
+/** Every location format, in the order a picker should offer them. */
+export const LOCATION_FORMAT_LIST = ['postal_code', 'postal_code_city'] as const satisfies readonly LocationFormat[];
+
+/** `satisfies` rejects a stale entry; this rejects a missing one, so the list cannot lag the spec. */
+const _everyLocationFormatListed: [Exclude<LocationFormat, (typeof LOCATION_FORMAT_LIST)[number]>] extends [never]
+  ? true
+  : never = true;
+
+/** `string`, not a literal union, so callers can test an unnarrowed `condition.format`. */
+export const LOCATION_FORMATS: ReadonlySet<string> = new Set(LOCATION_FORMAT_LIST);
