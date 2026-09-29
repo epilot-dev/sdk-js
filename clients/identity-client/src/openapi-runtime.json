@@ -1,0 +1,322 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://id.epilot.cloud"
+    }
+  ],
+  "paths": {
+    "/v1/identity/operator/clients": {
+      "get": {
+        "operationId": "listClients",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerKeyQuery"
+          },
+          {
+            "$ref": "#/components/parameters/ClientStatusQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          },
+          {
+            "$ref": "#/components/parameters/CursorQuery"
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createOidcClient",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "get": {
+        "operationId": "getOidcClient",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateClient",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "retireClient",
+        "responses": {}
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}:activate": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "post": {
+        "operationId": "activateClient",
+        "responses": {}
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}:suspend": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "post": {
+        "operationId": "suspendClient",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}:rotateSecret": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "post": {
+        "operationId": "rotateClientSecret",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}/organizations": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "get": {
+        "operationId": "listClientOrganizations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrgEnablementStatusQuery"
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "enableClientOrganization",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}/organizations/{org_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        },
+        {
+          "$ref": "#/components/parameters/OrgIdPath"
+        }
+      ],
+      "get": {
+        "operationId": "getClientOrganization",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateClientOrganization",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "revokeClientOrganization",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}/organizations/{org_id}:suspend": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        },
+        {
+          "$ref": "#/components/parameters/OrgIdPath"
+        }
+      ],
+      "post": {
+        "operationId": "suspendClientOrganization",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}/organizations/{org_id}:activate": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        },
+        {
+          "$ref": "#/components/parameters/OrgIdPath"
+        }
+      ],
+      "post": {
+        "operationId": "activateClientOrganization",
+        "responses": {}
+      }
+    },
+    "/v1/identity/session": {
+      "get": {
+        "operationId": "createIdentitySession",
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteIdentitySession",
+        "responses": {}
+      }
+    },
+    "/v1/identity/interaction/{interaction_id}": {
+      "parameters": [
+        {
+          "name": "interaction_id",
+          "in": "path",
+          "required": true,
+          "description": "Opaque identifier of the parked authorization request"
+        }
+      ]
+    },
+    "/v1/identity/launch/{client_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "get": {
+        "operationId": "launchClient",
+        "parameters": [
+          {
+            "name": "target",
+            "in": "query",
+            "required": false
+          },
+          {
+            "$ref": "#/components/parameters/AnyOtherQueryParameters"
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "AnyOtherQueryParameters": {
+        "name": "extra",
+        "in": "query",
+        "required": false,
+        "style": "form",
+        "explode": true
+      },
+      "ClientIdPath": {
+        "name": "client_id",
+        "in": "path",
+        "required": true
+      },
+      "OrgIdPath": {
+        "name": "org_id",
+        "in": "path",
+        "required": true
+      },
+      "PartnerKeyQuery": {
+        "name": "partner_key",
+        "in": "query",
+        "required": false
+      },
+      "ClientStatusQuery": {
+        "name": "status",
+        "in": "query",
+        "required": false
+      },
+      "OrgEnablementStatusQuery": {
+        "name": "status",
+        "in": "query",
+        "required": false
+      },
+      "SizeQuery": {
+        "name": "size",
+        "in": "query",
+        "required": false
+      },
+      "CursorQuery": {
+        "name": "cursor",
+        "in": "query",
+        "required": false
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Conflict": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  }
+}

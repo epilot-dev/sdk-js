@@ -88,6 +88,7 @@ APIs
   event-catalog        Event Catalog API
   file                 File API
   iban                 Iban API
+  identity             Identity API
   integration-toolkit  Integration Toolkit API
   journey              Journey API
   kanban               Kanban API
@@ -346,6 +347,7 @@ Full documentation with sample calls and responses for all APIs:
 | Event Catalog API | `epilot event-catalog` | [docs](./docs/event-catalog.md) |
 | File API | `epilot file` | [docs](./docs/file.md) |
 | Iban API | `epilot iban` | [docs](./docs/iban.md) |
+| Identity API | `epilot identity` | [docs](./docs/identity.md) |
 | Integration Toolkit API | `epilot integration-toolkit` | [docs](./docs/integration-toolkit.md) |
 | Journey API | `epilot journey` | [docs](./docs/journey.md) |
 | Kanban API | `epilot kanban` | [docs](./docs/kanban.md) |

@@ -147,6 +147,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'identity',
+    loader: () => expandDef(require('../definitions/identity-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'integrationToolkit',
     loader: () => expandDef(require('../definitions/integration-toolkit-runtime.json')),
   });

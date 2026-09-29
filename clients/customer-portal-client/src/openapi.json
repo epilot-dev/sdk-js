@@ -11115,6 +11115,50 @@
         }
       }
     },
+    "/v3/portal/configs/summaries": {
+      "get": {
+        "operationId": "listPortalConfigSummaries",
+        "summary": "listPortalConfigSummaries",
+        "description": "Lists the portals of the organization as lightweight summaries: the identifying,\ndisplay and registration fields of each portal config, without pages, email\ntemplates, grants, feature flags, identity providers or certificate details.\n\nUse it for portal overviews and pickers. Read a single portal with\n`getPortalConfigV3` when the full configuration is needed.\n",
+        "tags": [
+          "ECP Admin"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal config summaries retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PortalConfigSummaryV3"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v3/portal/config/swap": {
       "post": {
         "operationId": "swapPortalConfig",
@@ -13105,37 +13149,7 @@
             "example": false
           },
           "feature_settings": {
-            "type": "object",
-            "description": "Feature settings for the portal",
-            "properties": {
-              "start_page": {
-                "type": "boolean",
-                "description": "Start page feature flag"
-              },
-              "billing": {
-                "type": "boolean",
-                "description": "Billing feature flag"
-              },
-              "change_due_date": {
-                "type": "boolean",
-                "description": "Change due date feature flag"
-              },
-              "new_design": {
-                "type": "boolean",
-                "description": "Enable or disable the new design for the portal"
-              },
-              "mcp_enabled": {
-                "type": "boolean",
-                "description": "Enable the MCP (AI agent) connector channel for this portal"
-              },
-              "mcp_grant_version": {
-                "type": "integer",
-                "minimum": 0,
-                "default": 0,
-                "readOnly": true,
-                "description": "Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled"
-              }
-            }
+            "$ref": "#/components/schemas/PortalFeatureSettings"
           },
           "accessToken": {
             "type": "string",
@@ -20221,37 +20235,7 @@
             "example": false
           },
           "feature_settings": {
-            "type": "object",
-            "description": "Feature settings for the portal",
-            "properties": {
-              "start_page": {
-                "type": "boolean",
-                "description": "Start page feature flag"
-              },
-              "billing": {
-                "type": "boolean",
-                "description": "Billing feature flag"
-              },
-              "change_due_date": {
-                "type": "boolean",
-                "description": "Change due date feature flag"
-              },
-              "new_design": {
-                "type": "boolean",
-                "description": "Enable or disable the new design for the portal"
-              },
-              "mcp_enabled": {
-                "type": "boolean",
-                "description": "Enable the MCP (AI agent) connector channel for this portal"
-              },
-              "mcp_grant_version": {
-                "type": "integer",
-                "minimum": 0,
-                "default": 0,
-                "readOnly": true,
-                "description": "Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled"
-              }
-            }
+            "$ref": "#/components/schemas/PortalFeatureSettings"
           },
           "accessToken": {
             "type": "string",
@@ -20909,6 +20893,191 @@
             }
           }
         ]
+      },
+      "PortalFeatureSettings": {
+        "type": "object",
+        "description": "Feature settings for the portal",
+        "properties": {
+          "start_page": {
+            "type": "boolean",
+            "description": "Start page feature flag"
+          },
+          "billing": {
+            "type": "boolean",
+            "description": "Billing feature flag"
+          },
+          "change_due_date": {
+            "type": "boolean",
+            "description": "Change due date feature flag"
+          },
+          "new_design": {
+            "type": "boolean",
+            "description": "Enable or disable the new design for the portal"
+          },
+          "mcp_enabled": {
+            "type": "boolean",
+            "description": "Enable the MCP (AI agent) connector channel for this portal"
+          },
+          "mcp_grant_version": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "readOnly": true,
+            "description": "Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled"
+          }
+        }
+      },
+      "PortalConfigSummaryV3": {
+        "type": "object",
+        "description": "Lightweight view of a portal config for lists and pickers. Carries the identifying,\ndisplay and registration fields only. Pages, email templates, grants, feature flags,\nidentity providers and certificate details are left out; read them per portal with\n`getPortalConfigV3`.\n",
+        "properties": {
+          "portal_id": {
+            "$ref": "#/components/schemas/PortalId"
+          },
+          "organization_id": {
+            "type": "string",
+            "example": 12345,
+            "description": "ID of the organization"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the portal"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the portal is enabled"
+          },
+          "domain": {
+            "type": "string",
+            "description": "Custom domain of the portal"
+          },
+          "epilot_domain": {
+            "type": "string",
+            "description": "epilot-hosted domain of the portal"
+          },
+          "is_epilot_domain": {
+            "type": "boolean"
+          },
+          "dnsStatus": {
+            "type": "string",
+            "description": "Status of the custom domain setup, when a custom domain is configured",
+            "enum": [
+              "CONFIGURING",
+              "PENDING",
+              "SUCCEED",
+              "EXPIRED",
+              "NEW_CERT_IN_PROGRESS"
+            ]
+          },
+          "design_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "logo_image": {
+            "type": "object",
+            "description": "The logo to show for the portal in lists: the `logoImage` of the first page\nthat sets one. Absent when no page carries a logo; fall back to the design.\n",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "Logo for the light theme",
+                "example": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/logo.png"
+              },
+              "dark_url": {
+                "type": "string",
+                "description": "Logo for the dark theme"
+              }
+            }
+          },
+          "default_user_to_notify": {
+            "type": "object",
+            "description": "Default 360 user to notify upon an internal notification",
+            "properties": {
+              "onPendingUser": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AdminUser"
+                },
+                "description": "Default admin users for pending user notification to notify"
+              }
+            }
+          },
+          "feature_settings": {
+            "$ref": "#/components/schemas/PortalFeatureSettings"
+          },
+          "self_registration_setting": {
+            "type": "string",
+            "enum": [
+              "ALLOW_WITH_CONTACT_CREATION",
+              "ALLOW_WITHOUT_CONTACT_CREATION",
+              "DENY",
+              "ALWAYS_CREATE_CONTACT",
+              "DISALLOW_COMPLETELY",
+              "BLOCK_IF_PORTAL_USER_EXISTS"
+            ]
+          },
+          "self_registration_account_setting": {
+            "type": "string",
+            "enum": [
+              "ALLOW_WITH_CREATION",
+              "DENY",
+              "ALWAYS_CREATE",
+              "BLOCK_IF_PORTAL_USER_EXISTS",
+              "DISALLOW_COMPLETELY"
+            ]
+          },
+          "block_registration_if_portal_user_exists": {
+            "type": "boolean"
+          },
+          "self_registration_entity": {
+            "type": "string",
+            "description": "Entity type used as the primary identifier for self-registration",
+            "enum": [
+              "contact",
+              "account"
+            ]
+          },
+          "user_account_self_management": {
+            "type": "boolean",
+            "description": "Enable or disable user account self management"
+          },
+          "registration_identifiers": {
+            "type": "array",
+            "description": "Identifiers to identify a contact of a portal user during the registration.",
+            "items": {
+              "$ref": "#/components/schemas/ContractIdentifier"
+            }
+          },
+          "surfaces": {
+            "type": "array",
+            "description": "Surfaces this portal's data is reached from besides the portal UI itself.",
+            "items": {
+              "$ref": "#/components/schemas/PortalSurface"
+            }
+          },
+          "is_dummy": {
+            "type": "boolean"
+          },
+          "is_v3_item": {
+            "type": "boolean"
+          },
+          "published_revision_id": {
+            "type": "string",
+            "readOnly": true,
+            "description": "ID of the currently published revision, if the portal has been published"
+          },
+          "_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
       },
       "JuiceSettings": {
         "type": "object",

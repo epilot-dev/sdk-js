@@ -1,28 +1,33 @@
 {
-  "name": "@epilot/customer-portal-client",
-  "version": "0.47.2",
-  "description": "API Client for epilot portal API",
+  "name": "@epilot/identity-client",
+  "version": "0.1.0",
+  "description": "Client for epilot Identity API (Sign in with epilot: operator client registry and 360 session hop)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "epilot GmbH",
+  "license": "MIT",
+  "private": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/epilot-dev/sdk-js.git",
-    "directory": "clients/customer-portal-client"
+    "directory": "clients/identity-client"
   },
   "bugs": {
     "url": "https://github.com/epilot-dev/sdk-js/issues"
   },
-  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/customer-portal-client#readme",
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/clients/identity-client#readme",
   "keywords": [
     "epilot",
-    "sdk",
-    "customer-portal"
+    "identity",
+    "oidc",
+    "openid-connect",
+    "sso"
   ],
   "scripts": {
     "test": "vitest",
-    "typescript": "tsc",
     "bundle-definition": "webpack",
-    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/customer-portal.yaml",
+    "openapi": "node ../../scripts/update-openapi.js https://docs.api.epilot.io/identity.yaml",
+    "openapi:local": "node ../../scripts/update-openapi.js ../../../auth/identity-api/openapi.yml",
     "typegen": "openapi typegen src/openapi.json --client > src/openapi.d.ts",
     "build": "tsc && npm run build:patch && npm run bundle-definition",
     "build:patch": "sed -i'' -e '/^__exportStar.*openapi.*$/d' dist/index.js",
@@ -33,23 +38,21 @@
   "files": [
     "*.js",
     "*.d.ts",
-    "**/*.json",
     "**/*.js",
     "**/*.d.ts",
+    "**/*.json",
     "!*.test.*",
     "!**/*.test.*",
     "!node_modules",
     "!src",
-    "**/*.json",
+    "!src/**",
     "!*.config.js"
   ],
-  "author": "epilot GmbH",
-  "license": "MIT",
-  "private": false,
   "peerDependencies": {
     "axios": "^1.0.0 || >=0.25.0 <1.0.0"
   },
   "dependencies": {
+    "@dazn/lambda-powertools-correlation-ids": "^1.28.1",
     "buffer": "^6.0.3",
     "https-browserify": "^1.0.0",
     "openapi-client-axios": "^7.8.0",

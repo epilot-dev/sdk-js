@@ -77,6 +77,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`getPortalRevision`](#getportalrevision)
 - [`publishPortalRevision`](#publishportalrevision)
 - [`listAllPortalConfigs`](#listallportalconfigs)
+- [`listPortalConfigSummaries`](#listportalconfigsummaries)
 - [`swapPortalConfig`](#swapportalconfig)
 - [`clonePortalConfig`](#cloneportalconfig)
 - [`verifyDns`](#verifydns)
@@ -193,6 +194,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`MobileConfig`](#mobileconfig)
 - [`MobileConfigUpdate`](#mobileconfigupdate)
 - [`MobileOtaConfig`](#mobileotaconfig)
+- [`NewDesignMigrationResult`](#newdesignmigrationresult)
 - [`OtaPortal`](#otaportal)
 - [`ContextEntity`](#contextentity)
 - [`ContextEntities`](#contextentities)
@@ -273,12 +275,16 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ActionLabel`](#actionlabel)
 - [`Rule`](#rule)
 - [`JourneyActions`](#journeyactions)
+- [`JourneyContextUsagesRequest`](#journeycontextusagesrequest)
+- [`JourneyContextUsagesResponse`](#journeycontextusagesresponse)
 - [`ExternalLink`](#externallink)
 - [`OutstandingTask`](#outstandingtask)
 - [`WorkflowExecution`](#workflowexecution)
 - [`WorkflowStep`](#workflowstep)
 - [`PortalWorkflow`](#portalworkflow)
 - [`PortalWorkflowStage`](#portalworkflowstage)
+- [`PortalNameOverrides`](#portalnameoverrides)
+- [`PortalDescriptionOverrides`](#portaldescriptionoverrides)
 - [`PortalWorkflowTask`](#portalworkflowtask)
 - [`EntityPortalWorkflows`](#entityportalworkflows)
 - [`PortalTaskConfig`](#portaltaskconfig)
@@ -365,6 +371,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`PortalDataExportColumn`](#portaldataexportcolumn)
 - [`UpsertPortalConfigV3`](#upsertportalconfigv3)
 - [`PortalConfigV3`](#portalconfigv3)
+- [`PortalFeatureSettings`](#portalfeaturesettings)
+- [`PortalConfigSummaryV3`](#portalconfigsummaryv3)
 - [`JuiceSettings`](#juicesettings)
 - [`RevisionPageRequest`](#revisionpagerequest)
 - [`PortalRevisionRequest`](#portalrevisionrequest)
@@ -594,6 +602,7 @@ const { data } = await client.upsertPortal(
         description: 'string',
         authentication: 'login',
         token_ttl_seconds: 300,
+        identifiers: [ /* ... */ ],
         data_access: { /* ... */ }
       }
     ],
@@ -843,6 +852,7 @@ const { data } = await client.upsertPortal(
       "description": "string",
       "authentication": "login",
       "token_ttl_seconds": 300,
+      "identifiers": [],
       "data_access": {}
     }
   ],
@@ -1230,6 +1240,7 @@ const { data } = await client.getPortalConfigByDomain({
       "description": "string",
       "authentication": "login",
       "token_ttl_seconds": 300,
+      "identifiers": [],
       "data_access": {}
     }
   ],
@@ -1520,6 +1531,7 @@ const { data } = await client.getPortalConfig({
       "description": "string",
       "authentication": "login",
       "token_ttl_seconds": 300,
+      "identifiers": [],
       "data_access": {}
     }
   ],
@@ -2703,6 +2715,7 @@ const { data } = await client.getPublicPortalConfig({
       "description": "string",
       "authentication": "login",
       "token_ttl_seconds": 300,
+      "identifiers": [],
       "data_access": {}
     }
   ],
@@ -2993,6 +3006,7 @@ const { data } = await client.getOrgPortalConfig({
       "description": "string",
       "authentication": "login",
       "token_ttl_seconds": 300,
+      "identifiers": [],
       "data_access": {}
     }
   ],
@@ -3292,6 +3306,7 @@ const { data } = await client.getPublicPortalConfigV3({
       "description": "string",
       "authentication": "login",
       "token_ttl_seconds": 300,
+      "identifiers": [],
       "data_access": {}
     }
   ],
@@ -3582,6 +3597,7 @@ const { data } = await client.getOrgPortalConfigV3({
       "description": "string",
       "authentication": "login",
       "token_ttl_seconds": 300,
+      "identifiers": [],
       "data_access": {}
     }
   ],
@@ -4883,8 +4899,8 @@ const { data } = await client.checkContactExistsV3(
 
 ### `identifyContact`
 
-Identify a contact by the portal's configured registration identifiers and, on a match,
-issue a short-lived bearer token that acts as that contact.
+Identify a contact by the surface's identifiers and, on a match, issue a short-lived
+bearer token that acts as that contact.
 
 `POST /v3/portal/public/contact/identify`
 
@@ -6549,6 +6565,7 @@ const { data } = await client.searchPortalUserEntities(
       /* ... 1 more */
     ],
     targets: ['3ec28ab5-8598-41ef-9486-b57fca1d5e2a'],
+    match_any_targets: ['3ec28ab5-8598-41ef-9486-b57fca1d5e2a', '5f2c1e7a-6b0d-4a8e-9c3f-1d2e3f4a5b6c'],
     include: ['active_workflow'],
     highlight: {}
   },
@@ -6861,6 +6878,7 @@ const { data } = await client.getEntityPortalWorkflows({
               "id": "string",
               "journeyId": "string",
               "name": "string",
+              "portal_button_label": "string",
               "complete_task_automatically": true
             }
           },
@@ -6872,6 +6890,7 @@ const { data } = await client.getEntityPortalWorkflows({
               "id": "string",
               "journeyId": "string",
               "name": "string",
+              "portal_button_label": "string",
               "complete_task_automatically": true
             }
           },
@@ -6879,6 +6898,7 @@ const { data } = await client.getEntityPortalWorkflows({
             "id": "string",
             "journeyId": "string",
             "name": "string",
+            "portal_button_label": "string",
             "complete_task_automatically": true
           },
           "assigned_to": ["string"],
@@ -6895,9 +6915,21 @@ const { data } = await client.getEntityPortalWorkflows({
           "name": "string",
           "description": "string",
           "status": "COMPLETED",
-          "completed_at": "string"
+          "completed_at": "string",
+          "portal_names": {
+            "ecp": "string",
+            "installer": "string"
+          },
+          "portal_descriptions": {
+            "ecp": "string",
+            "installer": "string"
+          }
         }
-      ]
+      ],
+      "portal_titles": {
+        "ecp": "string",
+        "installer": "string"
+      }
     }
   ]
 }
@@ -6972,6 +7004,7 @@ const { data } = await client.getEntityPortalWorkflowsBatch(
                   "id": "string",
                   "journeyId": "string",
                   "name": "string",
+                  "portal_button_label": "string",
                   "complete_task_automatically": true
                 }
               },
@@ -6983,6 +7016,7 @@ const { data } = await client.getEntityPortalWorkflowsBatch(
                   "id": "string",
                   "journeyId": "string",
                   "name": "string",
+                  "portal_button_label": "string",
                   "complete_task_automatically": true
                 }
               },
@@ -6990,6 +7024,7 @@ const { data } = await client.getEntityPortalWorkflowsBatch(
                 "id": "string",
                 "journeyId": "string",
                 "name": "string",
+                "portal_button_label": "string",
                 "complete_task_automatically": true
               },
               "assigned_to": ["string"],
@@ -7006,9 +7041,21 @@ const { data } = await client.getEntityPortalWorkflowsBatch(
               "name": "string",
               "description": "string",
               "status": "COMPLETED",
-              "completed_at": "string"
+              "completed_at": "string",
+              "portal_names": {
+                "ecp": "string",
+                "installer": "string"
+              },
+              "portal_descriptions": {
+                "ecp": "string",
+                "installer": "string"
+              }
             }
-          ]
+          ],
+          "portal_titles": {
+            "ecp": "string",
+            "installer": "string"
+          }
         }
       ]
     }
@@ -8657,6 +8704,7 @@ const { data } = await client.createPortalConfig(
         description: 'string',
         authentication: 'login',
         token_ttl_seconds: 300,
+        identifiers: [ /* ... */ ],
         data_access: { /* ... */ }
       }
     ],
@@ -8948,6 +8996,7 @@ const { data } = await client.createPortalConfig(
       "description": "string",
       "authentication": "login",
       "token_ttl_seconds": 300,
+      "identifiers": [],
       "data_access": {}
     }
   ],
@@ -9275,6 +9324,7 @@ const { data } = await client.getPortalConfigV3({
       "description": "string",
       "authentication": "login",
       "token_ttl_seconds": 300,
+      "identifiers": [],
       "data_access": {}
     }
   ],
@@ -9599,6 +9649,7 @@ const { data } = await client.putPortalConfig(
         description: 'string',
         authentication: 'login',
         token_ttl_seconds: 300,
+        identifiers: [ /* ... */ ],
         data_access: { /* ... */ }
       }
     ],
@@ -9911,6 +9962,7 @@ const { data } = await client.putPortalConfig(
       "description": "string",
       "authentication": "login",
       "token_ttl_seconds": 300,
+      "identifiers": [],
       "data_access": {}
     }
   ],
@@ -10027,7 +10079,9 @@ const { data } = await client.putPortalConfig(
 
 ### `deletePortalConfig`
 
-Deletes a specific portal configuration by ID.
+Deletes a specific portal configuration by ID, together with everything the portal owns:
+its pages, revisions, email templates and widget configuration. The custom domain network
+setup is torn down as
 
 `DELETE /v3/portal/config/{portal_id}`
 
@@ -10248,6 +10302,7 @@ const { data } = await client.createPortalRevision(
         description: 'string',
         authentication: 'login',
         token_ttl_seconds: 300,
+        identifiers: [ /* ... */ ],
         data_access: { /* ... */ }
       }
     ],
@@ -10665,6 +10720,118 @@ const { data } = await client.listAllPortalConfigs()
 
 ---
 
+### `listPortalConfigSummaries`
+
+Lists the portals of the organization as lightweight summaries: the identifying,
+display and registration fields of each portal config, without pages, email
+templates, grants, feature flags, identity 
+
+`GET /v3/portal/configs/summaries`
+
+```ts
+const { data } = await client.listPortalConfigSummaries()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "organization_id": 12345,
+      "origin": "string",
+      "name": "string",
+      "enabled": true,
+      "domain": "string",
+      "epilot_domain": "string",
+      "is_epilot_domain": true,
+      "dnsStatus": "CONFIGURING",
+      "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "logo_image": {
+        "url": "https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/logo.png",
+        "dark_url": "string"
+      },
+      "default_user_to_notify": {
+        "onPendingUser": [
+          {
+            "type": "user",
+            "user_id": "123456",
+            "display_name": "John",
+            "image_uri": {
+              "original": "https://fuafjvoHKsu.cloudimg.io/v7/e-mage-sam-bucket-dev.s3.eu-central-1.amazonaws.com/files/fuafjvoHKsudhfagweucjasdvga/original",
+              "thumbnail_32": "https://fuafjvoHKsu.cloudimg.io/v7/e-mage-sam-bucket-dev.s3.eu-central-1.amazonaws.com/files/fuafjvoHKsudhfagweucjasdvga/original?w=32&h=32",
+              "thumbnail_64": "https://fuafjvoHKsu.cloudimg.io/v7/e-mage-sam-bucket-dev.s3.eu-central-1.amazonaws.com/files/fuafjvoHKsudhfagweucjasdvga/original?w=64&h=64",
+              "key": "fuafjvoHKsudhfagweucjasdvga"
+            },
+            "org_id": "123",
+            "email": "j.doe@epilot.cloud",
+            "phone": "12345 67890"
+          }
+        ]
+      },
+      "feature_settings": {
+        "start_page": true,
+        "billing": true,
+        "change_due_date": true,
+        "new_design": true,
+        "mcp_enabled": true,
+        "mcp_grant_version": 0
+      },
+      "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
+      "self_registration_account_setting": "ALLOW_WITH_CREATION",
+      "block_registration_if_portal_user_exists": true,
+      "self_registration_entity": "contact",
+      "user_account_self_management": true,
+      "registration_identifiers": [
+        {
+          "name": "string",
+          "schema": "contact"
+        }
+      ],
+      "surfaces": [
+        {
+          "id": "website-journeys",
+          "name": "Website journeys",
+          "description": "string",
+          "authentication": "login",
+          "token_ttl_seconds": 300,
+          "identifiers": [
+            {
+              "name": "customer_number",
+              "schema": "contact"
+            },
+            {
+              "name": "meter_number",
+              "schema": "meter"
+            }
+          ],
+          "data_access": {
+            "entities": [
+              {
+                "schema": "contract",
+                "target_ids": ["string"]
+              }
+            ],
+            "role_id": "728:public_journeys_readonly"
+          }
+        }
+      ],
+      "is_dummy": true,
+      "is_v3_item": true,
+      "published_revision_id": "string",
+      "_created_at": "1970-01-01T00:00:00.000Z",
+      "_updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `swapPortalConfig`
 
 Swaps the portal configuration of two portals.
@@ -10912,6 +11079,7 @@ const { data } = await client.clonePortalConfig(
       "description": "string",
       "authentication": "login",
       "token_ttl_seconds": 300,
+      "identifiers": [],
       "data_access": {}
     }
   ],
@@ -11584,6 +11752,22 @@ type MobileOtaConfig = {
   auto_update?: boolean
   update_strategy?: "next-launch" | "immediate"
   min_native_version?: string
+}
+```
+
+### `NewDesignMigrationResult`
+
+```ts
+type NewDesignMigrationResult = {
+  org_id?: string
+  portal_id?: string
+  origin?: string
+  name?: string
+  is_v3_item?: boolean
+  dry_run?: boolean
+  migrated?: boolean
+  summary?: Record<string, unknown>
+  before?: Record<string, unknown>
 }
 ```
 
@@ -12616,7 +12800,7 @@ type ContactExistsRequest = {
 
 ### `ContactIdentifyRequest`
 
-ContactExistsRequest plus the surface the token is requested for.
+ContactExistsRequest plus the surface the token is requested for. `registration_identifiers` carries the values of the surface's effective identifiers (keyed by schema, then attribute name): the surface's own `identifiers` when it configures any, otherwise the portal's `registration_identifiers`.
 
 
 ```ts
@@ -12781,6 +12965,7 @@ Per-slug search configuration with scoped targets and templates
 type EntitySlugConfig = {
   slug: string
   targets?: string // uuid[]
+  match_any_targets?: string // uuid[]
   templates?: Record<string, string>
   templates_ref?: {
     page_id?: string
@@ -13330,6 +13515,10 @@ type PortalSurface = {
   description?: string
   authentication: "login" | "registration_identifiers"
   token_ttl_seconds?: number
+  identifiers?: Array<{
+    name?: string
+    schema?: string
+  }>
   data_access?: {
     entities?: Array<{
       schema: { ... }
@@ -13408,6 +13597,39 @@ type JourneyActions = {
     entity?: string
     attribute?: string
     attribute_value?: string
+  }>
+}
+```
+
+### `JourneyContextUsagesRequest`
+
+```ts
+type JourneyContextUsagesRequest = {
+  journey_id: string
+  param_keys: string[]
+  param_ids?: string[]
+}
+```
+
+### `JourneyContextUsagesResponse`
+
+```ts
+type JourneyContextUsagesResponse = {
+  status: "ok" | "partial"
+  scanned: number
+  usages: Array<{
+    kind: "portal-config" | "portal-block" | "portal-widget"
+    resource: {
+      type: { ... }
+      id: { ... }
+      name?: { ... }
+    }
+    location: Record<string, unknown>
+    matched_as: {
+      dialect: { ... }
+      token: { ... }
+      at?: { ... }
+    }
   }>
 }
 ```
@@ -13508,6 +13730,7 @@ type PortalWorkflow = {
       id?: { ... }
       journeyId?: { ... }
       name?: { ... }
+      portal_button_label?: { ... }
       complete_task_automatically?: { ... }
     }
     assigned_to?: string[]
@@ -13521,9 +13744,21 @@ type PortalWorkflow = {
     id: string
     name: string
     description?: string
-    status: "COMPLETED" | "IN_PROGRESS" | "UPCOMING"
+    status: "COMPLETED" | "IN_PROGRESS" | "UPCOMING" | "NOT_REACHED"
     completed_at?: string
+    portal_names?: {
+      ecp?: { ... }
+      installer?: { ... }
+    }
+    portal_descriptions?: {
+      ecp?: { ... }
+      installer?: { ... }
+    }
   }>
+  portal_titles?: {
+    ecp?: string
+    installer?: string
+  }
 }
 ```
 
@@ -13539,8 +13774,47 @@ type PortalWorkflowStage = {
   id: string
   name: string
   description?: string
-  status: "COMPLETED" | "IN_PROGRESS" | "UPCOMING"
+  status: "COMPLETED" | "IN_PROGRESS" | "UPCOMING" | "NOT_REACHED"
   completed_at?: string
+  portal_names?: {
+    ecp?: string
+    installer?: string
+  }
+  portal_descriptions?: {
+    ecp?: string
+    installer?: string
+  }
+}
+```
+
+### `PortalNameOverrides`
+
+Portal-facing overrides of a flow or stage title, configured per portal
+audience in the Flows Hub. Served unresolved because this endpoint asks
+the Workflows API for audience `all` — one cached response feeds blocks
+of both audiences, so each block picks its own override and falls back
+to `name` whe
+
+```ts
+type PortalNameOverrides = {
+  ecp?: string
+  installer?: string
+}
+```
+
+### `PortalDescriptionOverrides`
+
+Portal-facing overrides of a stage description, configured per portal
+audience in the Flows Hub. Served unresolved for the same reason as
+`PortalNameOverrides`; a block falls back to `description` when its
+audience's key is absent. The values are rich text, like `description`
+itself.
+
+
+```ts
+type PortalDescriptionOverrides = {
+  ecp?: string
+  installer?: string
 }
 ```
 
@@ -13563,6 +13837,7 @@ type PortalWorkflowTask = {
       id?: { ... }
       journeyId?: { ... }
       name?: { ... }
+      portal_button_label?: { ... }
       complete_task_automatically?: { ... }
     }
   }
@@ -13574,6 +13849,7 @@ type PortalWorkflowTask = {
       id?: { ... }
       journeyId?: { ... }
       name?: { ... }
+      portal_button_label?: { ... }
       complete_task_automatically?: { ... }
     }
   }
@@ -13581,6 +13857,7 @@ type PortalWorkflowTask = {
     id?: string
     journeyId?: string
     name?: string
+    portal_button_label?: string
     complete_task_automatically?: boolean
   }
   assigned_to?: string[]
@@ -13638,7 +13915,13 @@ type EntityPortalWorkflows = {
       description?: { ... }
       status: { ... }
       completed_at?: { ... }
+      portal_names?: { ... }
+      portal_descriptions?: { ... }
     }>
+    portal_titles?: {
+      ecp?: { ... }
+      installer?: { ... }
+    }
   }>
 }
 ```
@@ -13656,6 +13939,7 @@ type PortalTaskConfig = {
     id?: string
     journeyId?: string
     name?: string
+    portal_button_label?: string
     complete_task_automatically?: boolean
   }
 }
@@ -13823,6 +14107,7 @@ type EntitySearchParams = {
   slug: string | string[] | Array<{
     slug: string
     targets?: string // uuid[]
+    match_any_targets?: string // uuid[]
     templates?: Record<string, string>
     templates_ref?: {
       page_id?: { ... }
@@ -13853,6 +14138,7 @@ type EntitySearchParams = {
   filters?: object[]
   filters_context?: Record<string, boolean | string>[]
   targets?: string // uuid[]
+  match_any_targets?: string // uuid[]
   include?: "active_workflow"[]
   highlight?: object
 }
@@ -15730,6 +16016,96 @@ type PortalConfigV3 = {
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
   self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
   // ...
+}
+```
+
+### `PortalFeatureSettings`
+
+Feature settings for the portal
+
+```ts
+type PortalFeatureSettings = {
+  start_page?: boolean
+  billing?: boolean
+  change_due_date?: boolean
+  new_design?: boolean
+  mcp_enabled?: boolean
+  mcp_grant_version?: number
+}
+```
+
+### `PortalConfigSummaryV3`
+
+Lightweight view of a portal config for lists and pickers. Carries the identifying,
+display and registration fields only. Pages, email templates, grants, feature flags,
+identity providers and certificate details are left out; read them per portal with
+`getPortalConfigV3`.
+
+
+```ts
+type PortalConfigSummaryV3 = {
+  portal_id?: string
+  organization_id?: string
+  origin?: string
+  name?: string
+  enabled?: boolean
+  domain?: string
+  epilot_domain?: string
+  is_epilot_domain?: boolean
+  dnsStatus?: "CONFIGURING" | "PENDING" | "SUCCEED" | "EXPIRED" | "NEW_CERT_IN_PROGRESS"
+  design_id?: string // uuid
+  logo_image?: {
+    url?: string
+    dark_url?: string
+  }
+  default_user_to_notify?: {
+    onPendingUser?: Array<{
+      type?: { ... }
+      user_id?: { ... }
+      display_name?: { ... }
+      image_uri?: { ... }
+      org_id?: { ... }
+      email?: { ... }
+      phone?: { ... }
+    }>
+  }
+  feature_settings?: {
+    start_page?: boolean
+    billing?: boolean
+    change_due_date?: boolean
+    new_design?: boolean
+    mcp_enabled?: boolean
+    mcp_grant_version?: number
+  }
+  self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
+  self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
+  block_registration_if_portal_user_exists?: boolean
+  self_registration_entity?: "contact" | "account"
+  user_account_self_management?: boolean
+  registration_identifiers?: Array<{
+    name?: string
+    schema?: string
+  }>
+  surfaces?: Array<{
+    id: string
+    name: string
+    description?: string
+    authentication: "login" | "registration_identifiers"
+    token_ttl_seconds?: number
+    identifiers?: Array<{
+      name?: { ... }
+      schema?: { ... }
+    }>
+    data_access?: {
+      entities?: { ... }
+      role_id?: { ... }
+    }
+  }>
+  is_dummy?: boolean
+  is_v3_item?: boolean
+  published_revision_id?: string
+  _created_at?: string // date-time
+  _updated_at?: string // date-time
 }
 ```
 
