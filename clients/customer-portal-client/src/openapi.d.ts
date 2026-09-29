@@ -7027,6 +7027,23 @@ declare namespace Components {
              */
             EntityId /* uuid */;
             /**
+             * The logo to show for the portal in lists: the `logoImage` of the first page
+             * that sets one. Absent when no page carries a logo; fall back to the design.
+             *
+             */
+            logo_image?: {
+                /**
+                 * Logo for the light theme
+                 * example:
+                 * https://epilot-bucket.s3.eu-central-1.amazonaws.com/12344/logo.png
+                 */
+                url?: string;
+                /**
+                 * Logo for the dark theme
+                 */
+                dark_url?: string;
+            };
+            /**
              * Default 360 user to notify upon an internal notification
              */
             default_user_to_notify?: {
