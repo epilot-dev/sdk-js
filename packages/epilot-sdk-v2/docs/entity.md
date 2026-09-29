@@ -9227,7 +9227,7 @@ type LocationConditionDefinition = {
   name: string
   label: string
   type: "location"
-  format?: "zipcode" | "zipcode_town"
+  format?: "postal_code" | "postal_code_city"
 }
 ```
 
@@ -9258,7 +9258,7 @@ type ConditionDefinition = {
   name: string
   label: string
   type: "location"
-  format?: "zipcode" | "zipcode_town"
+  format?: "postal_code" | "postal_code_city"
 }
 ```
 
