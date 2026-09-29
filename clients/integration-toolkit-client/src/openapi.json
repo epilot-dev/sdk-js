@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.36.0",
+    "version": "1.37.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -4706,6 +4706,115 @@
         }
       }
     },
+    "/v2/erp/imports/{importId}/preview": {
+      "get": {
+        "operationId": "getErpImportPreview",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "getErpImportPreview",
+        "description": "The file preview of an existing import: its columns and first data rows, the same sample `createErpImport` returns with `include_preview`. Lets a client that opens a job later show its file, and is independent of GET /v2/erp/imports/{importId}, so the two can be fetched in parallel.\nRead fresh from the import's file on every call. CSV only — an xlsx import returns 400.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportFilePreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "The import does not exist, or its file is no longer available.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/erp/imports/{importId}/download": {
+      "get": {
+        "operationId": "downloadErpImportFile",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "downloadErpImportFile",
+        "description": "A short-lived presigned URL that downloads the file this import was registered with — the import's own copy, so exactly what `:validate` and `:execute` read. The URL serves the file as an attachment under its original filename.",
+        "tags": [
+          "erp-imports"
+        ],
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A download link for the import's file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpImportDownload"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "The import does not exist, or its file is no longer available.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/erp/imports/{importId}:validate": {
       "post": {
         "operationId": "validateErpImport",
@@ -5299,6 +5408,29 @@
                 "type": "string"
               }
             }
+          }
+        }
+      },
+      "ErpImportDownload": {
+        "type": "object",
+        "required": [
+          "download_url",
+          "filename",
+          "expires_at"
+        ],
+        "properties": {
+          "download_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Presigned URL serving the file as an attachment. Valid until `expires_at`."
+          },
+          "filename": {
+            "type": "string",
+            "description": "The filename the file was uploaded with."
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

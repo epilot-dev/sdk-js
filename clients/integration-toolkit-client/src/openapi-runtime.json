@@ -1094,6 +1094,32 @@
         "responses": {}
       }
     },
+    "/v2/erp/imports/{importId}/preview": {
+      "get": {
+        "operationId": "getErpImportPreview",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/erp/imports/{importId}/download": {
+      "get": {
+        "operationId": "downloadErpImportFile",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/erp/imports/{importId}:validate": {
       "post": {
         "operationId": "validateErpImport",
