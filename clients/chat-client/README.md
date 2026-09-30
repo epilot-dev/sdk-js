@@ -17,7 +17,8 @@ await chat.updateWebsiteChat({ website_chat_id }, {
   settings: {
     ...websiteChat.settings,
     design_id,
-    authentication: { email_code: { email_template_id } },
+    // Each login method merges separately; send null to remove one.
+    authentication: { email_code: { email_template_id }, portal: { portal_id } },
   },
 });
 ```
@@ -27,9 +28,12 @@ The same API is available as `epilot.chat` from `@epilot/sdk`, or through the
 for callers that want a shared singleton.
 
 Use a separate `createClient()` instance for anonymous chat. Bootstrap and session
-creation use no epilot access token; `sendAnonymousChatMessage` and the email
+creation use no epilot access token; `sendAnonymousChatMessage`, the email
 verification operations (`getChatVerification`, `startChatEmailVerification`,
-`verifyChatEmailCode`, `cancelChatVerification`) use the anonymous session token.
+`verifyChatEmailCode`, `cancelChatVerification`), the portal login operations
+(`getChatPortalLogin`, `startChatPortalLogin`, `verifyChatPortalLogin`,
+`cancelChatPortalLogin`), `signOutChatCustomer` and the guided action operations
+use the anonymous session token.
 `sendAnonymousChatMessage` responds with SSE: request `responseType: 'stream'` in
 Node and consume the stream, or use a streaming fetch transport in the browser. The
 client does not parse SSE events or implement the host/iframe handoff protocol.

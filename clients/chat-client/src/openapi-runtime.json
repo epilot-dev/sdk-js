@@ -150,9 +150,131 @@
         "operationId": "cancelChatVerification",
         "responses": {}
       }
+    },
+    "/v1/login/portal": {
+      "get": {
+        "operationId": "getChatPortalLogin",
+        "responses": {}
+      }
+    },
+    "/v1/login/portal/start": {
+      "post": {
+        "operationId": "startChatPortalLogin",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/login/portal/verify": {
+      "post": {
+        "operationId": "verifyChatPortalLogin",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/login/portal/cancel": {
+      "post": {
+        "operationId": "cancelChatPortalLogin",
+        "responses": {}
+      }
+    },
+    "/v1/login/sign-out": {
+      "post": {
+        "operationId": "signOutChatCustomer",
+        "responses": {}
+      }
+    },
+    "/v1/actions": {
+      "get": {
+        "operationId": "getChatAction",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "startChatAction",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/actions/{action_id}/submit": {
+      "post": {
+        "operationId": "submitChatAction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/actions/{action_id}/confirm": {
+      "post": {
+        "operationId": "confirmChatAction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/actions/{action_id}/cancel": {
+      "post": {
+        "operationId": "cancelChatAction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
+    "parameters": {
+      "ActionId": {
+        "in": "path",
+        "name": "action_id",
+        "required": true
+      }
+    },
     "responses": {
       "Error": {
         "content": {
