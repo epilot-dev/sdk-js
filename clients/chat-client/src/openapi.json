@@ -109,6 +109,8 @@
                                   "email_code": {
                                     "type": "object",
                                     "additionalProperties": false,
+                                    "nullable": true,
+                                    "description": "Email code verification. On update, omit to keep the current setting or send null to remove it.",
                                     "properties": {
                                       "email_template_id": {
                                         "type": "string",
@@ -116,13 +118,25 @@
                                         "nullable": true
                                       }
                                     }
+                                  },
+                                  "portal": {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "nullable": true,
+                                    "description": "Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.",
+                                    "required": [
+                                      "portal_id"
+                                    ],
+                                    "properties": {
+                                      "portal_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                      }
+                                    }
                                   }
                                 },
                                 "nullable": true,
-                                "description": "Email Builder template selection. Does not enable verification by itself.",
-                                "required": [
-                                  "email_code"
-                                ]
+                                "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
                               }
                             }
                           },
@@ -350,6 +364,8 @@
                             "email_code": {
                               "type": "object",
                               "additionalProperties": false,
+                              "nullable": true,
+                              "description": "Email code verification. On update, omit to keep the current setting or send null to remove it.",
                               "properties": {
                                 "email_template_id": {
                                   "type": "string",
@@ -357,13 +373,25 @@
                                   "nullable": true
                                 }
                               }
+                            },
+                            "portal": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "nullable": true,
+                              "description": "Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.",
+                              "required": [
+                                "portal_id"
+                              ],
+                              "properties": {
+                                "portal_id": {
+                                  "type": "string",
+                                  "format": "uuid"
+                                }
+                              }
                             }
                           },
                           "nullable": true,
-                          "description": "Email Builder template selection. Does not enable verification by itself.",
-                          "required": [
-                            "email_code"
-                          ]
+                          "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
                         }
                       }
                     },
@@ -557,6 +585,8 @@
                           "email_code": {
                             "type": "object",
                             "additionalProperties": false,
+                            "nullable": true,
+                            "description": "Email code verification. On update, omit to keep the current setting or send null to remove it.",
                             "properties": {
                               "email_template_id": {
                                 "type": "string",
@@ -564,13 +594,25 @@
                                 "nullable": true
                               }
                             }
+                          },
+                          "portal": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "nullable": true,
+                            "description": "Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.",
+                            "required": [
+                              "portal_id"
+                            ],
+                            "properties": {
+                              "portal_id": {
+                                "type": "string",
+                                "format": "uuid"
+                              }
+                            }
                           }
                         },
                         "nullable": true,
-                        "description": "Email Builder template selection. Does not enable verification by itself.",
-                        "required": [
-                          "email_code"
-                        ]
+                        "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
                       }
                     }
                   }
@@ -677,6 +719,8 @@
                             "email_code": {
                               "type": "object",
                               "additionalProperties": false,
+                              "nullable": true,
+                              "description": "Email code verification. On update, omit to keep the current setting or send null to remove it.",
                               "properties": {
                                 "email_template_id": {
                                   "type": "string",
@@ -684,13 +728,25 @@
                                   "nullable": true
                                 }
                               }
+                            },
+                            "portal": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "nullable": true,
+                              "description": "Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.",
+                              "required": [
+                                "portal_id"
+                              ],
+                              "properties": {
+                                "portal_id": {
+                                  "type": "string",
+                                  "format": "uuid"
+                                }
+                              }
                             }
                           },
                           "nullable": true,
-                          "description": "Email Builder template selection. Does not enable verification by itself.",
-                          "required": [
-                            "email_code"
-                          ]
+                          "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
                         }
                       }
                     },
@@ -902,6 +958,8 @@
                             "email_code": {
                               "type": "object",
                               "additionalProperties": false,
+                              "nullable": true,
+                              "description": "Email code verification. On update, omit to keep the current setting or send null to remove it.",
                               "properties": {
                                 "email_template_id": {
                                   "type": "string",
@@ -909,13 +967,25 @@
                                   "nullable": true
                                 }
                               }
+                            },
+                            "portal": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "nullable": true,
+                              "description": "Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.",
+                              "required": [
+                                "portal_id"
+                              ],
+                              "properties": {
+                                "portal_id": {
+                                  "type": "string",
+                                  "format": "uuid"
+                                }
+                              }
                             }
                           },
                           "nullable": true,
-                          "description": "Email Builder template selection. Does not enable verification by itself.",
-                          "required": [
-                            "email_code"
-                          ]
+                          "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
                         }
                       }
                     },
@@ -1107,6 +1177,8 @@
                           "email_code": {
                             "type": "object",
                             "additionalProperties": false,
+                            "nullable": true,
+                            "description": "Email code verification. On update, omit to keep the current setting or send null to remove it.",
                             "properties": {
                               "email_template_id": {
                                 "type": "string",
@@ -1114,13 +1186,25 @@
                                 "nullable": true
                               }
                             }
+                          },
+                          "portal": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "nullable": true,
+                            "description": "Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.",
+                            "required": [
+                              "portal_id"
+                            ],
+                            "properties": {
+                              "portal_id": {
+                                "type": "string",
+                                "format": "uuid"
+                              }
+                            }
                           }
                         },
                         "nullable": true,
-                        "description": "Email Builder template selection. Does not enable verification by itself.",
-                        "required": [
-                          "email_code"
-                        ]
+                        "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
                       }
                     }
                   },
@@ -1255,7 +1339,8 @@
                     "organisationName",
                     "assistantName",
                     "defaultLocale",
-                    "locales"
+                    "locales",
+                    "login_methods"
                   ],
                   "properties": {
                     "key": {
@@ -1274,15 +1359,29 @@
                         "de"
                       ]
                     },
-                    "authentication": {
+                    "login_methods": {
+                      "type": "array",
+                      "description": "Login methods currently available to the customer.",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "email_code",
+                          "portal_login"
+                        ],
+                        "description": "How a customer can log in or verify themselves in the chat."
+                      }
+                    },
+                    "actions": {
                       "type": "object",
                       "additionalProperties": false,
-                      "required": [
-                        "email_code"
-                      ],
+                      "description": "Prototype Guided Actions offered by this Website Chat.",
                       "properties": {
-                        "email_code": {
+                        "meter_reading": {
                           "type": "boolean"
+                        },
+                        "meter_reading_journey_id": {
+                          "type": "string",
+                          "format": "uuid"
                         }
                       }
                     },
@@ -1464,8 +1563,23 @@
                         "REQUEST_CONFLICT",
                         "IN_PROGRESS",
                         "UNAVAILABLE",
-                        "TEMPORARILY_UNAVAILABLE"
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
                       ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
                     }
                   }
                 }
@@ -1559,8 +1673,23 @@
                         "REQUEST_CONFLICT",
                         "IN_PROGRESS",
                         "UNAVAILABLE",
-                        "TEMPORARILY_UNAVAILABLE"
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
                       ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
                     }
                   }
                 }
@@ -1627,7 +1756,8 @@
                         "organisationName",
                         "assistantName",
                         "defaultLocale",
-                        "locales"
+                        "locales",
+                        "login_methods"
                       ],
                       "properties": {
                         "key": {
@@ -1646,15 +1776,29 @@
                             "de"
                           ]
                         },
-                        "authentication": {
+                        "login_methods": {
+                          "type": "array",
+                          "description": "Login methods currently available to the customer.",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "email_code",
+                              "portal_login"
+                            ],
+                            "description": "How a customer can log in or verify themselves in the chat."
+                          }
+                        },
+                        "actions": {
                           "type": "object",
                           "additionalProperties": false,
-                          "required": [
-                            "email_code"
-                          ],
+                          "description": "Prototype Guided Actions offered by this Website Chat.",
                           "properties": {
-                            "email_code": {
+                            "meter_reading": {
                               "type": "boolean"
+                            },
+                            "meter_reading_journey_id": {
+                              "type": "string",
+                              "format": "uuid"
                             }
                           }
                         },
@@ -1838,8 +1982,23 @@
                         "REQUEST_CONFLICT",
                         "IN_PROGRESS",
                         "UNAVAILABLE",
-                        "TEMPORARILY_UNAVAILABLE"
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
                       ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
                     }
                   }
                 }
@@ -1941,8 +2100,23 @@
                         "REQUEST_CONFLICT",
                         "IN_PROGRESS",
                         "UNAVAILABLE",
-                        "TEMPORARILY_UNAVAILABLE"
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
                       ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
                     }
                   }
                 }
@@ -1972,7 +2146,8 @@
                   "required": [
                     "available",
                     "conversation_id",
-                    "status"
+                    "status",
+                    "access"
                   ],
                   "properties": {
                     "available": {
@@ -2015,6 +2190,32 @@
                         "ambiguous",
                         "not_found"
                       ]
+                    },
+                    "access": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "tier"
+                      ],
+                      "properties": {
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "email_code",
+                            "portal_login"
+                          ],
+                          "description": "How a customer can log in or verify themselves in the chat."
+                        }
+                      }
                     }
                   }
                 }
@@ -2051,8 +2252,23 @@
                         "REQUEST_CONFLICT",
                         "IN_PROGRESS",
                         "UNAVAILABLE",
-                        "TEMPORARILY_UNAVAILABLE"
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
                       ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
                     }
                   }
                 }
@@ -2116,7 +2332,8 @@
                   "required": [
                     "available",
                     "conversation_id",
-                    "status"
+                    "status",
+                    "access"
                   ],
                   "properties": {
                     "available": {
@@ -2159,6 +2376,32 @@
                         "ambiguous",
                         "not_found"
                       ]
+                    },
+                    "access": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "tier"
+                      ],
+                      "properties": {
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "email_code",
+                            "portal_login"
+                          ],
+                          "description": "How a customer can log in or verify themselves in the chat."
+                        }
+                      }
                     }
                   }
                 }
@@ -2195,8 +2438,23 @@
                         "REQUEST_CONFLICT",
                         "IN_PROGRESS",
                         "UNAVAILABLE",
-                        "TEMPORARILY_UNAVAILABLE"
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
                       ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
                     }
                   }
                 }
@@ -2251,7 +2509,8 @@
                   "required": [
                     "available",
                     "conversation_id",
-                    "status"
+                    "status",
+                    "access"
                   ],
                   "properties": {
                     "available": {
@@ -2294,6 +2553,32 @@
                         "ambiguous",
                         "not_found"
                       ]
+                    },
+                    "access": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "tier"
+                      ],
+                      "properties": {
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "email_code",
+                            "portal_login"
+                          ],
+                          "description": "How a customer can log in or verify themselves in the chat."
+                        }
+                      }
                     }
                   }
                 }
@@ -2330,8 +2615,23 @@
                         "REQUEST_CONFLICT",
                         "IN_PROGRESS",
                         "UNAVAILABLE",
-                        "TEMPORARILY_UNAVAILABLE"
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
                       ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
                     }
                   }
                 }
@@ -2361,7 +2661,8 @@
                   "required": [
                     "available",
                     "conversation_id",
-                    "status"
+                    "status",
+                    "access"
                   ],
                   "properties": {
                     "available": {
@@ -2404,6 +2705,32 @@
                         "ambiguous",
                         "not_found"
                       ]
+                    },
+                    "access": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "tier"
+                      ],
+                      "properties": {
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "email_code",
+                            "portal_login"
+                          ],
+                          "description": "How a customer can log in or verify themselves in the chat."
+                        }
+                      }
                     }
                   }
                 }
@@ -2440,8 +2767,1968 @@
                         "REQUEST_CONFLICT",
                         "IN_PROGRESS",
                         "UNAVAILABLE",
-                        "TEMPORARILY_UNAVAILABLE"
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
                       ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/login/portal": {
+      "get": {
+        "operationId": "getChatPortalLogin",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Read this session's portal login state. Tokens never leave the server.",
+        "responses": {
+          "200": {
+            "description": "Current portal login state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "available",
+                    "conversation_id",
+                    "status",
+                    "access"
+                  ],
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "anonymous",
+                        "pending",
+                        "verified"
+                      ]
+                    },
+                    "challenge_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "code_expires_at": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "maxLength": 254
+                    },
+                    "contact_resolution": {
+                      "type": "string",
+                      "enum": [
+                        "matched",
+                        "not_found"
+                      ]
+                    },
+                    "access": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "tier"
+                      ],
+                      "properties": {
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "email_code",
+                            "portal_login"
+                          ],
+                          "description": "How a customer can log in or verify themselves in the chat."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
+                      ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/login/portal/start": {
+      "post": {
+        "operationId": "startChatPortalLogin",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Send a one-time code for the customer portal account with this email, using the portal\nconfigured on this session's Website Chat. The response is pending whether or not an\naccount exists. Repeating the same request_id and email does not send another email.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "request_id",
+                  "email"
+                ],
+                "properties": {
+                  "request_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 254
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pending portal login state; does not reveal whether an account exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "available",
+                    "conversation_id",
+                    "status",
+                    "access"
+                  ],
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "anonymous",
+                        "pending",
+                        "verified"
+                      ]
+                    },
+                    "challenge_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "code_expires_at": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "maxLength": 254
+                    },
+                    "contact_resolution": {
+                      "type": "string",
+                      "enum": [
+                        "matched",
+                        "not_found"
+                      ]
+                    },
+                    "access": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "tier"
+                      ],
+                      "properties": {
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "email_code",
+                            "portal_login"
+                          ],
+                          "description": "How a customer can log in or verify themselves in the chat."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
+                      ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/login/portal/verify": {
+      "post": {
+        "operationId": "verifyChatPortalLogin",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Answer the current portal login challenge. Success logs the customer in with their\nportal account and starts a new conversation. A wrong code returns 400\nINVALID_LOGIN_CODE with attempts_left (the Portal emails a new code while attempts\nremain); an expired or replaced challenge returns 409 LOGIN_EXPIRED.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "challenge_id",
+                  "code"
+                ],
+                "properties": {
+                  "challenge_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verified portal login state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "available",
+                    "conversation_id",
+                    "status",
+                    "access"
+                  ],
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "anonymous",
+                        "pending",
+                        "verified"
+                      ]
+                    },
+                    "challenge_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "code_expires_at": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "maxLength": 254
+                    },
+                    "contact_resolution": {
+                      "type": "string",
+                      "enum": [
+                        "matched",
+                        "not_found"
+                      ]
+                    },
+                    "access": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "tier"
+                      ],
+                      "properties": {
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "email_code",
+                            "portal_login"
+                          ],
+                          "description": "How a customer can log in or verify themselves in the chat."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
+                      ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/login/portal/cancel": {
+      "post": {
+        "operationId": "cancelChatPortalLogin",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Cancel a pending portal login or end a portal login. Ending it starts a new anonymous conversation.",
+        "responses": {
+          "200": {
+            "description": "Anonymous portal login state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "available",
+                    "conversation_id",
+                    "status",
+                    "access"
+                  ],
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "anonymous",
+                        "pending",
+                        "verified"
+                      ]
+                    },
+                    "challenge_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "code_expires_at": {
+                      "type": "integer",
+                      "description": "Unix seconds"
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "maxLength": 254
+                    },
+                    "contact_resolution": {
+                      "type": "string",
+                      "enum": [
+                        "matched",
+                        "not_found"
+                      ]
+                    },
+                    "access": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "tier"
+                      ],
+                      "properties": {
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "email_code",
+                            "portal_login"
+                          ],
+                          "description": "How a customer can log in or verify themselves in the chat."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
+                      ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/login/sign-out": {
+      "post": {
+        "operationId": "signOutChatCustomer",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Clear the customer identity of any login method and pending challenges. Clearing an identity starts a new anonymous conversation.",
+        "responses": {
+          "200": {
+            "description": "Anonymous access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "conversation_id",
+                    "access"
+                  ],
+                  "properties": {
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "access": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "tier"
+                      ],
+                      "properties": {
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "email_code",
+                            "portal_login"
+                          ],
+                          "description": "How a customer can log in or verify themselves in the chat."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
+                      ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/actions": {
+      "get": {
+        "operationId": "getChatAction",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Prototype. Read this session's current Guided Action. Values never reach the AI or the host page.",
+        "responses": {
+          "200": {
+            "description": "Current Guided Action state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "conversation_id",
+                    "status"
+                  ],
+                  "properties": {
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "needs_input",
+                        "needs_confirmation",
+                        "executing",
+                        "completed",
+                        "pending",
+                        "rejected",
+                        "handoff"
+                      ]
+                    },
+                    "action_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "options": {
+                      "type": "array",
+                      "maxItems": 50,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "meter_id",
+                          "counter_id",
+                          "meter_number",
+                          "label",
+                          "unit"
+                        ],
+                        "properties": {
+                          "meter_id": {
+                            "type": "string"
+                          },
+                          "counter_id": {
+                            "type": "string"
+                          },
+                          "meter_number": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "unit": {
+                            "type": "string"
+                          },
+                          "min_value": {
+                            "type": "number"
+                          },
+                          "max_value": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "values": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "meter_id",
+                        "counter_id",
+                        "value"
+                      ],
+                      "properties": {
+                        "meter_id": {
+                          "type": "string"
+                        },
+                        "counter_id": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "field_error": {
+                      "type": "string",
+                      "enum": [
+                        "VALUE_INVALID",
+                        "VALUE_OUT_OF_RANGE",
+                        "TARGET_UNAVAILABLE"
+                      ]
+                    },
+                    "receipt": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "reference",
+                        "meter_number",
+                        "value",
+                        "unit",
+                        "submitted_at"
+                      ],
+                      "properties": {
+                        "reference": {
+                          "type": "string"
+                        },
+                        "meter_number": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "submitted_at": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "NO_METERS",
+                        "SUBMISSION_REJECTED",
+                        "SUBMISSION_UNCERTAIN"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
+                      ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "startChatAction",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Prototype. Start a Guided Action for the verified Contact. The eligible targets are resolved on the server.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "request_id",
+                  "action_type"
+                ],
+                "properties": {
+                  "request_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "action_type": {
+                    "type": "string",
+                    "enum": [
+                      "submit_meter_reading"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The started action",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "conversation_id",
+                    "status"
+                  ],
+                  "properties": {
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "needs_input",
+                        "needs_confirmation",
+                        "executing",
+                        "completed",
+                        "pending",
+                        "rejected",
+                        "handoff"
+                      ]
+                    },
+                    "action_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "options": {
+                      "type": "array",
+                      "maxItems": 50,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "meter_id",
+                          "counter_id",
+                          "meter_number",
+                          "label",
+                          "unit"
+                        ],
+                        "properties": {
+                          "meter_id": {
+                            "type": "string"
+                          },
+                          "counter_id": {
+                            "type": "string"
+                          },
+                          "meter_number": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "unit": {
+                            "type": "string"
+                          },
+                          "min_value": {
+                            "type": "number"
+                          },
+                          "max_value": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "values": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "meter_id",
+                        "counter_id",
+                        "value"
+                      ],
+                      "properties": {
+                        "meter_id": {
+                          "type": "string"
+                        },
+                        "counter_id": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "field_error": {
+                      "type": "string",
+                      "enum": [
+                        "VALUE_INVALID",
+                        "VALUE_OUT_OF_RANGE",
+                        "TARGET_UNAVAILABLE"
+                      ]
+                    },
+                    "receipt": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "reference",
+                        "meter_number",
+                        "value",
+                        "unit",
+                        "submitted_at"
+                      ],
+                      "properties": {
+                        "reference": {
+                          "type": "string"
+                        },
+                        "meter_number": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "submitted_at": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "NO_METERS",
+                        "SUBMISSION_REJECTED",
+                        "SUBMISSION_UNCERTAIN"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
+                      ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/actions/{action_id}/submit": {
+      "post": {
+        "operationId": "submitChatAction",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Prototype. Submit values for review. Targets must be one of the server-offered options; values are validated before confirmation.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "expected_revision",
+                  "meter_id",
+                  "counter_id",
+                  "value"
+                ],
+                "properties": {
+                  "expected_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "meter_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "counter_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "value": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1000000000000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Input errors or the values awaiting confirmation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "conversation_id",
+                    "status"
+                  ],
+                  "properties": {
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "needs_input",
+                        "needs_confirmation",
+                        "executing",
+                        "completed",
+                        "pending",
+                        "rejected",
+                        "handoff"
+                      ]
+                    },
+                    "action_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "options": {
+                      "type": "array",
+                      "maxItems": 50,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "meter_id",
+                          "counter_id",
+                          "meter_number",
+                          "label",
+                          "unit"
+                        ],
+                        "properties": {
+                          "meter_id": {
+                            "type": "string"
+                          },
+                          "counter_id": {
+                            "type": "string"
+                          },
+                          "meter_number": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "unit": {
+                            "type": "string"
+                          },
+                          "min_value": {
+                            "type": "number"
+                          },
+                          "max_value": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "values": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "meter_id",
+                        "counter_id",
+                        "value"
+                      ],
+                      "properties": {
+                        "meter_id": {
+                          "type": "string"
+                        },
+                        "counter_id": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "field_error": {
+                      "type": "string",
+                      "enum": [
+                        "VALUE_INVALID",
+                        "VALUE_OUT_OF_RANGE",
+                        "TARGET_UNAVAILABLE"
+                      ]
+                    },
+                    "receipt": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "reference",
+                        "meter_number",
+                        "value",
+                        "unit",
+                        "submitted_at"
+                      ],
+                      "properties": {
+                        "reference": {
+                          "type": "string"
+                        },
+                        "meter_number": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "submitted_at": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "NO_METERS",
+                        "SUBMISSION_REJECTED",
+                        "SUBMISSION_UNCERTAIN"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
+                      ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/actions/{action_id}/confirm": {
+      "post": {
+        "operationId": "confirmChatAction",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Prototype. Execute the confirmed values once. Ownership is checked again before the domain write. Repeating a completed confirmation returns the same receipt.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "expected_revision"
+                ],
+                "properties": {
+                  "expected_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Completed, pending or rejected action",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "conversation_id",
+                    "status"
+                  ],
+                  "properties": {
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "needs_input",
+                        "needs_confirmation",
+                        "executing",
+                        "completed",
+                        "pending",
+                        "rejected",
+                        "handoff"
+                      ]
+                    },
+                    "action_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "options": {
+                      "type": "array",
+                      "maxItems": 50,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "meter_id",
+                          "counter_id",
+                          "meter_number",
+                          "label",
+                          "unit"
+                        ],
+                        "properties": {
+                          "meter_id": {
+                            "type": "string"
+                          },
+                          "counter_id": {
+                            "type": "string"
+                          },
+                          "meter_number": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "unit": {
+                            "type": "string"
+                          },
+                          "min_value": {
+                            "type": "number"
+                          },
+                          "max_value": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "values": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "meter_id",
+                        "counter_id",
+                        "value"
+                      ],
+                      "properties": {
+                        "meter_id": {
+                          "type": "string"
+                        },
+                        "counter_id": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "field_error": {
+                      "type": "string",
+                      "enum": [
+                        "VALUE_INVALID",
+                        "VALUE_OUT_OF_RANGE",
+                        "TARGET_UNAVAILABLE"
+                      ]
+                    },
+                    "receipt": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "reference",
+                        "meter_number",
+                        "value",
+                        "unit",
+                        "submitted_at"
+                      ],
+                      "properties": {
+                        "reference": {
+                          "type": "string"
+                        },
+                        "meter_number": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "submitted_at": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "NO_METERS",
+                        "SUBMISSION_REJECTED",
+                        "SUBMISSION_UNCERTAIN"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
+                      ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/actions/{action_id}/cancel": {
+      "post": {
+        "operationId": "cancelChatAction",
+        "security": [
+          {
+            "AnonymousSession": []
+          }
+        ],
+        "description": "Prototype. Cancel an unfinished action.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "expected_revision"
+                ],
+                "properties": {
+                  "expected_revision": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "No current action",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "conversation_id",
+                    "status"
+                  ],
+                  "properties": {
+                    "conversation_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "needs_input",
+                        "needs_confirmation",
+                        "executing",
+                        "completed",
+                        "pending",
+                        "rejected",
+                        "handoff"
+                      ]
+                    },
+                    "action_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "options": {
+                      "type": "array",
+                      "maxItems": 50,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "meter_id",
+                          "counter_id",
+                          "meter_number",
+                          "label",
+                          "unit"
+                        ],
+                        "properties": {
+                          "meter_id": {
+                            "type": "string"
+                          },
+                          "counter_id": {
+                            "type": "string"
+                          },
+                          "meter_number": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "unit": {
+                            "type": "string"
+                          },
+                          "min_value": {
+                            "type": "number"
+                          },
+                          "max_value": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "values": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "meter_id",
+                        "counter_id",
+                        "value"
+                      ],
+                      "properties": {
+                        "meter_id": {
+                          "type": "string"
+                        },
+                        "counter_id": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "field_error": {
+                      "type": "string",
+                      "enum": [
+                        "VALUE_INVALID",
+                        "VALUE_OUT_OF_RANGE",
+                        "TARGET_UNAVAILABLE"
+                      ]
+                    },
+                    "receipt": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "reference",
+                        "meter_number",
+                        "value",
+                        "unit",
+                        "submitted_at"
+                      ],
+                      "properties": {
+                        "reference": {
+                          "type": "string"
+                        },
+                        "meter_number": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "number"
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "submitted_at": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "NO_METERS",
+                        "SUBMISSION_REJECTED",
+                        "SUBMISSION_UNCERTAIN"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "400 invalid input, 401 expired capability, 403 origin denied, 404 unpublished Website Chat, 409 conflict, 413 too large, 429 rate limit, or 503 unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_VERIFICATION_CODE",
+                        "VERIFICATION_EXPIRED",
+                        "VERIFICATION_CONFLICT",
+                        "VERIFICATION_DISABLED",
+                        "VERIFICATION_UNAVAILABLE",
+                        "IDENTITY_CHANGED",
+                        "INVALID_REQUEST",
+                        "ORIGIN_DENIED",
+                        "NOT_FOUND",
+                        "INVALID_GRANT",
+                        "SESSION_EXPIRED",
+                        "RATE_LIMITED",
+                        "SESSION_LIMIT",
+                        "USAGE_LIMIT",
+                        "REQUEST_CONFLICT",
+                        "IN_PROGRESS",
+                        "UNAVAILABLE",
+                        "TEMPORARILY_UNAVAILABLE",
+                        "IDENTITY_REQUIRED",
+                        "ACTION_UNAVAILABLE",
+                        "ACTION_CONFLICT",
+                        "ACTION_TARGET_DENIED",
+                        "INVALID_LOGIN_CODE",
+                        "LOGIN_EXPIRED",
+                        "LOGIN_DISABLED",
+                        "LOGIN_UNAVAILABLE",
+                        "LOGIN_CONFLICT",
+                        "LOGIN_REJECTED"
+                      ]
+                    },
+                    "attempts_left": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
                     }
                   }
                 }
@@ -2542,6 +4829,8 @@
                         "email_code": {
                           "type": "object",
                           "additionalProperties": false,
+                          "nullable": true,
+                          "description": "Email code verification. On update, omit to keep the current setting or send null to remove it.",
                           "properties": {
                             "email_template_id": {
                               "type": "string",
@@ -2549,13 +4838,25 @@
                               "nullable": true
                             }
                           }
+                        },
+                        "portal": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "nullable": true,
+                          "description": "Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.",
+                          "required": [
+                            "portal_id"
+                          ],
+                          "properties": {
+                            "portal_id": {
+                              "type": "string",
+                              "format": "uuid"
+                            }
+                          }
                         }
                       },
                       "nullable": true,
-                      "description": "Email Builder template selection. Does not enable verification by itself.",
-                      "required": [
-                        "email_code"
-                      ]
+                      "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
                     }
                   }
                 },
@@ -2690,6 +4991,8 @@
                   "email_code": {
                     "type": "object",
                     "additionalProperties": false,
+                    "nullable": true,
+                    "description": "Email code verification. On update, omit to keep the current setting or send null to remove it.",
                     "properties": {
                       "email_template_id": {
                         "type": "string",
@@ -2697,13 +5000,25 @@
                         "nullable": true
                       }
                     }
+                  },
+                  "portal": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "nullable": true,
+                    "description": "Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.",
+                    "required": [
+                      "portal_id"
+                    ],
+                    "properties": {
+                      "portal_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
                   }
                 },
                 "nullable": true,
-                "description": "Email Builder template selection. Does not enable verification by itself.",
-                "required": [
-                  "email_code"
-                ]
+                "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
               }
             }
           },
@@ -2807,6 +5122,8 @@
               "email_code": {
                 "type": "object",
                 "additionalProperties": false,
+                "nullable": true,
+                "description": "Email code verification. On update, omit to keep the current setting or send null to remove it.",
                 "properties": {
                   "email_template_id": {
                     "type": "string",
@@ -2814,13 +5131,25 @@
                     "nullable": true
                   }
                 }
+              },
+              "portal": {
+                "type": "object",
+                "additionalProperties": false,
+                "nullable": true,
+                "description": "Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.",
+                "required": [
+                  "portal_id"
+                ],
+                "properties": {
+                  "portal_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
               }
             },
             "nullable": true,
-            "description": "Email Builder template selection. Does not enable verification by itself.",
-            "required": [
-              "email_code"
-            ]
+            "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
           }
         }
       },
@@ -2901,6 +5230,8 @@
                   "email_code": {
                     "type": "object",
                     "additionalProperties": false,
+                    "nullable": true,
+                    "description": "Email code verification. On update, omit to keep the current setting or send null to remove it.",
                     "properties": {
                       "email_template_id": {
                         "type": "string",
@@ -2908,13 +5239,25 @@
                         "nullable": true
                       }
                     }
+                  },
+                  "portal": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "nullable": true,
+                    "description": "Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.",
+                    "required": [
+                      "portal_id"
+                    ],
+                    "properties": {
+                      "portal_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
                   }
                 },
                 "nullable": true,
-                "description": "Email Builder template selection. Does not enable verification by itself.",
-                "required": [
-                  "email_code"
-                ]
+                "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
               }
             }
           }
@@ -2981,6 +5324,8 @@
                   "email_code": {
                     "type": "object",
                     "additionalProperties": false,
+                    "nullable": true,
+                    "description": "Email code verification. On update, omit to keep the current setting or send null to remove it.",
                     "properties": {
                       "email_template_id": {
                         "type": "string",
@@ -2988,13 +5333,25 @@
                         "nullable": true
                       }
                     }
+                  },
+                  "portal": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "nullable": true,
+                    "description": "Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.",
+                    "required": [
+                      "portal_id"
+                    ],
+                    "properties": {
+                      "portal_id": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
                   }
                 },
                 "nullable": true,
-                "description": "Email Builder template selection. Does not enable verification by itself.",
-                "required": [
-                  "email_code"
-                ]
+                "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
               }
             }
           },
@@ -3005,13 +5362,163 @@
           }
         }
       },
+      "ActionRevision": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expected_revision"
+        ],
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "ActionState": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "conversation_id",
+          "status"
+        ],
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "none",
+              "needs_input",
+              "needs_confirmation",
+              "executing",
+              "completed",
+              "pending",
+              "rejected",
+              "handoff"
+            ]
+          },
+          "action_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "options": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "meter_id",
+                "counter_id",
+                "meter_number",
+                "label",
+                "unit"
+              ],
+              "properties": {
+                "meter_id": {
+                  "type": "string"
+                },
+                "counter_id": {
+                  "type": "string"
+                },
+                "meter_number": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "unit": {
+                  "type": "string"
+                },
+                "min_value": {
+                  "type": "number"
+                },
+                "max_value": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "meter_id",
+              "counter_id",
+              "value"
+            ],
+            "properties": {
+              "meter_id": {
+                "type": "string"
+              },
+              "counter_id": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              }
+            }
+          },
+          "field_error": {
+            "type": "string",
+            "enum": [
+              "VALUE_INVALID",
+              "VALUE_OUT_OF_RANGE",
+              "TARGET_UNAVAILABLE"
+            ]
+          },
+          "receipt": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "reference",
+              "meter_number",
+              "value",
+              "unit",
+              "submitted_at"
+            ],
+            "properties": {
+              "reference": {
+                "type": "string"
+              },
+              "meter_number": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "submitted_at": {
+                "type": "string"
+              }
+            }
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "NO_METERS",
+              "SUBMISSION_REJECTED",
+              "SUBMISSION_UNCERTAIN"
+            ]
+          }
+        }
+      },
       "VerificationState": {
         "type": "object",
         "additionalProperties": false,
         "required": [
           "available",
           "conversation_id",
-          "status"
+          "status",
+          "access"
         ],
         "properties": {
           "available": {
@@ -3054,6 +5561,152 @@
               "ambiguous",
               "not_found"
             ]
+          },
+          "access": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tier"
+            ],
+            "properties": {
+              "tier": {
+                "type": "string",
+                "enum": [
+                  "anonymous",
+                  "identified",
+                  "verified"
+                ],
+                "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "email_code",
+                  "portal_login"
+                ],
+                "description": "How a customer can log in or verify themselves in the chat."
+              }
+            }
+          }
+        }
+      },
+      "PortalLoginState": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "available",
+          "conversation_id",
+          "status",
+          "access"
+        ],
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "anonymous",
+              "pending",
+              "verified"
+            ]
+          },
+          "challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code_expires_at": {
+            "type": "integer",
+            "description": "Unix seconds"
+          },
+          "attempts_left": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "contact_resolution": {
+            "type": "string",
+            "enum": [
+              "matched",
+              "not_found"
+            ]
+          },
+          "access": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tier"
+            ],
+            "properties": {
+              "tier": {
+                "type": "string",
+                "enum": [
+                  "anonymous",
+                  "identified",
+                  "verified"
+                ],
+                "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "email_code",
+                  "portal_login"
+                ],
+                "description": "How a customer can log in or verify themselves in the chat."
+              }
+            }
+          }
+        }
+      },
+      "LoginMethod": {
+        "type": "string",
+        "enum": [
+          "email_code",
+          "portal_login"
+        ],
+        "description": "How a customer can log in or verify themselves in the chat."
+      },
+      "AccessTier": {
+        "type": "string",
+        "enum": [
+          "anonymous",
+          "identified",
+          "verified"
+        ],
+        "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+      },
+      "CustomerAccess": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tier"
+        ],
+        "properties": {
+          "tier": {
+            "type": "string",
+            "enum": [
+              "anonymous",
+              "identified",
+              "verified"
+            ],
+            "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "email_code",
+              "portal_login"
+            ],
+            "description": "How a customer can log in or verify themselves in the chat."
           }
         }
       },
@@ -3064,7 +5717,8 @@
           "organisationName",
           "assistantName",
           "defaultLocale",
-          "locales"
+          "locales",
+          "login_methods"
         ],
         "properties": {
           "key": {
@@ -3083,15 +5737,29 @@
               "de"
             ]
           },
-          "authentication": {
+          "login_methods": {
+            "type": "array",
+            "description": "Login methods currently available to the customer.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "email_code",
+                "portal_login"
+              ],
+              "description": "How a customer can log in or verify themselves in the chat."
+            }
+          },
+          "actions": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "email_code"
-            ],
+            "description": "Prototype Guided Actions offered by this Website Chat.",
             "properties": {
-              "email_code": {
+              "meter_reading": {
                 "type": "boolean"
+              },
+              "meter_reading_journey_id": {
+                "type": "string",
+                "format": "uuid"
               }
             }
           },
@@ -3482,9 +6150,35 @@
               "REQUEST_CONFLICT",
               "IN_PROGRESS",
               "UNAVAILABLE",
-              "TEMPORARILY_UNAVAILABLE"
+              "TEMPORARILY_UNAVAILABLE",
+              "IDENTITY_REQUIRED",
+              "ACTION_UNAVAILABLE",
+              "ACTION_CONFLICT",
+              "ACTION_TARGET_DENIED",
+              "INVALID_LOGIN_CODE",
+              "LOGIN_EXPIRED",
+              "LOGIN_DISABLED",
+              "LOGIN_UNAVAILABLE",
+              "LOGIN_CONFLICT",
+              "LOGIN_REJECTED"
             ]
+          },
+          "attempts_left": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
           }
+        }
+      }
+    },
+    "parameters": {
+      "ActionId": {
+        "in": "path",
+        "name": "action_id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
         }
       }
     },
@@ -3519,8 +6213,23 @@
                     "REQUEST_CONFLICT",
                     "IN_PROGRESS",
                     "UNAVAILABLE",
-                    "TEMPORARILY_UNAVAILABLE"
+                    "TEMPORARILY_UNAVAILABLE",
+                    "IDENTITY_REQUIRED",
+                    "ACTION_UNAVAILABLE",
+                    "ACTION_CONFLICT",
+                    "ACTION_TARGET_DENIED",
+                    "INVALID_LOGIN_CODE",
+                    "LOGIN_EXPIRED",
+                    "LOGIN_DISABLED",
+                    "LOGIN_UNAVAILABLE",
+                    "LOGIN_CONFLICT",
+                    "LOGIN_REJECTED"
                   ]
+                },
+                "attempts_left": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Remaining code attempts; only with INVALID_LOGIN_CODE."
                 }
               }
             }

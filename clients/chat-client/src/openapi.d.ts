@@ -7,12 +7,503 @@ import type {
 } from 'openapi-client-axios';
 
 declare namespace Components {
+    namespace Parameters {
+        export type ActionId = string; // uuid
+    }
+    export interface PathParameters {
+        ActionId?: Parameters.ActionId /* uuid */;
+    }
     namespace Responses {
         export interface Error {
-            code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+            code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+            /**
+             * Remaining code attempts; only with INVALID_LOGIN_CODE.
+             */
+            attempts_left?: number;
         }
     }
     namespace Schemas {
+        /**
+         * anonymous: no customer identity. identified: the Contact is known but ownership
+         * is not proven. verified: ownership is proven (an email code or a portal login).
+         *
+         */
+        export type AccessTier = "anonymous" | "identified" | "verified";
+        export interface ActionRevision {
+            expected_revision: number;
+        }
+        export interface ActionState {
+            conversation_id: string; // uuid
+            status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff";
+            action_id?: string; // uuid
+            revision?: number;
+            options?: [
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?
+            ];
+            values?: {
+                meter_id: string;
+                counter_id: string;
+                value: number;
+            };
+            field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE";
+            receipt?: {
+                reference: string;
+                meter_number: string;
+                value: number;
+                unit: string;
+                submitted_at: string;
+            };
+            reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
+        }
         export interface CreateWebsiteChatRequest {
             name: string;
             agent_id: string | null; // uuid
@@ -79,14 +570,35 @@ declare namespace Components {
                  */
                 design_id?: string | null; // uuid
                 /**
-                 * Email Builder template selection. Does not enable verification by itself.
+                 * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                  */
                 authentication?: {
-                    email_code: {
+                    /**
+                     * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    email_code?: {
                         email_template_id?: string | null; // uuid
-                    };
+                    } | null;
+                    /**
+                     * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    portal?: {
+                        portal_id: string; // uuid
+                    } | null;
                 } | null;
             };
+        }
+        export interface CustomerAccess {
+            /**
+             * anonymous: no customer identity. identified: the Contact is known but ownership
+             * is not proven. verified: ownership is proven (an email code or a portal login).
+             *
+             */
+            tier: "anonymous" | "identified" | "verified";
+            /**
+             * How a customer can log in or verify themselves in the chat.
+             */
+            method?: "email_code" | "portal_login";
         }
         export interface Error {
             error?: string;
@@ -162,12 +674,21 @@ declare namespace Components {
                      */
                     design_id?: string | null; // uuid
                     /**
-                     * Email Builder template selection. Does not enable verification by itself.
+                     * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                      */
                     authentication?: {
-                        email_code: {
+                        /**
+                         * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        email_code?: {
                             email_template_id?: string | null; // uuid
-                        };
+                        } | null;
+                        /**
+                         * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        portal?: {
+                            portal_id: string; // uuid
+                        } | null;
                     } | null;
                 };
                 /**
@@ -190,8 +711,41 @@ declare namespace Components {
             }[];
             next_cursor?: string;
         }
+        /**
+         * How a customer can log in or verify themselves in the chat.
+         */
+        export type LoginMethod = "email_code" | "portal_login";
+        export interface PortalLoginState {
+            available: boolean;
+            conversation_id: string; // uuid
+            status: "anonymous" | "pending" | "verified";
+            challenge_id?: string; // uuid
+            /**
+             * Unix seconds
+             */
+            code_expires_at?: number;
+            attempts_left?: number;
+            email?: string; // email
+            contact_resolution?: "matched" | "not_found";
+            access: {
+                /**
+                 * anonymous: no customer identity. identified: the Contact is known but ownership
+                 * is not proven. verified: ownership is proven (an email code or a portal login).
+                 *
+                 */
+                tier: "anonymous" | "identified" | "verified";
+                /**
+                 * How a customer can log in or verify themselves in the chat.
+                 */
+                method?: "email_code" | "portal_login";
+            };
+        }
         export interface PublicChatError {
-            code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+            code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+            /**
+             * Remaining code attempts; only with INVALID_LOGIN_CODE.
+             */
+            attempts_left?: number;
         }
         /**
          * JSON payload of one SSE data frame from sendAnonymousChatMessage.
@@ -214,8 +768,16 @@ declare namespace Components {
             organisationName: string;
             assistantName: string;
             defaultLocale: "en" | "de";
-            authentication?: {
-                email_code: boolean;
+            /**
+             * Login methods currently available to the customer.
+             */
+            login_methods: ("email_code" | "portal_login")[];
+            /**
+             * Prototype Guided Actions offered by this Website Chat.
+             */
+            actions?: {
+                meter_reading?: boolean;
+                meter_reading_journey_id?: string; // uuid
             };
             design?: {
                 id: string; // uuid
@@ -321,12 +883,21 @@ declare namespace Components {
                  */
                 design_id?: string | null; // uuid
                 /**
-                 * Email Builder template selection. Does not enable verification by itself.
+                 * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                  */
                 authentication?: {
-                    email_code: {
+                    /**
+                     * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    email_code?: {
                         email_template_id?: string | null; // uuid
-                    };
+                    } | null;
+                    /**
+                     * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    portal?: {
+                        portal_id: string; // uuid
+                    } | null;
                 } | null;
             };
             /**
@@ -349,6 +920,18 @@ declare namespace Components {
             resend_after?: number;
             email?: string; // email
             contact_resolution?: "matched" | "ambiguous" | "not_found";
+            access: {
+                /**
+                 * anonymous: no customer identity. identified: the Contact is known but ownership
+                 * is not proven. verified: ownership is proven (an email code or a portal login).
+                 *
+                 */
+                tier: "anonymous" | "identified" | "verified";
+                /**
+                 * How a customer can log in or verify themselves in the chat.
+                 */
+                method?: "email_code" | "portal_login";
+            };
         }
         export interface WebsiteChat {
             name: string;
@@ -416,12 +999,21 @@ declare namespace Components {
                  */
                 design_id?: string | null; // uuid
                 /**
-                 * Email Builder template selection. Does not enable verification by itself.
+                 * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                  */
                 authentication?: {
-                    email_code: {
+                    /**
+                     * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    email_code?: {
                         email_template_id?: string | null; // uuid
-                    };
+                    } | null;
+                    /**
+                     * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    portal?: {
+                        portal_id: string; // uuid
+                    } | null;
                 } | null;
             };
             /**
@@ -541,17 +1133,554 @@ declare namespace Components {
              */
             design_id?: string | null; // uuid
             /**
-             * Email Builder template selection. Does not enable verification by itself.
+             * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
              */
             authentication?: {
-                email_code: {
+                /**
+                 * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                 */
+                email_code?: {
                     email_template_id?: string | null; // uuid
-                };
+                } | null;
+                /**
+                 * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                 */
+                portal?: {
+                    portal_id: string; // uuid
+                } | null;
             } | null;
         }
     }
 }
 declare namespace Paths {
+    namespace CancelChatAction {
+        namespace Parameters {
+            export type ActionId = string; // uuid
+        }
+        export interface PathParameters {
+            action_id: Parameters.ActionId /* uuid */;
+        }
+        export interface RequestBody {
+            expected_revision: number;
+        }
+        namespace Responses {
+            export interface $200 {
+                conversation_id: string; // uuid
+                status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff";
+                action_id?: string; // uuid
+                revision?: number;
+                options?: [
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?
+                ];
+                values?: {
+                    meter_id: string;
+                    counter_id: string;
+                    value: number;
+                };
+                field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE";
+                receipt?: {
+                    reference: string;
+                    meter_number: string;
+                    value: number;
+                    unit: string;
+                    submitted_at: string;
+                };
+                reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace CancelChatPortalLogin {
+        namespace Responses {
+            export interface $200 {
+                available: boolean;
+                conversation_id: string; // uuid
+                status: "anonymous" | "pending" | "verified";
+                challenge_id?: string; // uuid
+                /**
+                 * Unix seconds
+                 */
+                code_expires_at?: number;
+                attempts_left?: number;
+                email?: string; // email
+                contact_resolution?: "matched" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How a customer can log in or verify themselves in the chat.
+                     */
+                    method?: "email_code" | "portal_login";
+                };
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
     namespace CancelChatVerification {
         namespace Responses {
             export interface $200 {
@@ -569,9 +1698,517 @@ declare namespace Paths {
                 resend_after?: number;
                 email?: string; // email
                 contact_resolution?: "matched" | "ambiguous" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How a customer can log in or verify themselves in the chat.
+                     */
+                    method?: "email_code" | "portal_login";
+                };
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace ConfirmChatAction {
+        namespace Parameters {
+            export type ActionId = string; // uuid
+        }
+        export interface PathParameters {
+            action_id: Parameters.ActionId /* uuid */;
+        }
+        export interface RequestBody {
+            expected_revision: number;
+        }
+        namespace Responses {
+            export interface $200 {
+                conversation_id: string; // uuid
+                status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff";
+                action_id?: string; // uuid
+                revision?: number;
+                options?: [
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?
+                ];
+                values?: {
+                    meter_id: string;
+                    counter_id: string;
+                    value: number;
+                };
+                field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE";
+                receipt?: {
+                    reference: string;
+                    meter_number: string;
+                    value: number;
+                    unit: string;
+                    submitted_at: string;
+                };
+                reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -592,8 +2229,16 @@ declare namespace Paths {
                     organisationName: string;
                     assistantName: string;
                     defaultLocale: "en" | "de";
-                    authentication?: {
-                        email_code: boolean;
+                    /**
+                     * Login methods currently available to the customer.
+                     */
+                    login_methods: ("email_code" | "portal_login")[];
+                    /**
+                     * Prototype Guided Actions offered by this Website Chat.
+                     */
+                    actions?: {
+                        meter_reading?: boolean;
+                        meter_reading_journey_id?: string; // uuid
                     };
                     design?: {
                         id: string; // uuid
@@ -635,7 +2280,11 @@ declare namespace Paths {
                 };
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -654,7 +2303,11 @@ declare namespace Paths {
                 frame_origin: string; // uri
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -725,12 +2378,21 @@ declare namespace Paths {
                  */
                 design_id?: string | null; // uuid
                 /**
-                 * Email Builder template selection. Does not enable verification by itself.
+                 * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                  */
                 authentication?: {
-                    email_code: {
+                    /**
+                     * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    email_code?: {
                         email_template_id?: string | null; // uuid
-                    };
+                    } | null;
+                    /**
+                     * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    portal?: {
+                        portal_id: string; // uuid
+                    } | null;
                 } | null;
             };
         }
@@ -801,12 +2463,21 @@ declare namespace Paths {
                      */
                     design_id?: string | null; // uuid
                     /**
-                     * Email Builder template selection. Does not enable verification by itself.
+                     * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                      */
                     authentication?: {
-                        email_code: {
+                        /**
+                         * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        email_code?: {
                             email_template_id?: string | null; // uuid
-                        };
+                        } | null;
+                        /**
+                         * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        portal?: {
+                            portal_id: string; // uuid
+                        } | null;
                     } | null;
                 };
                 /**
@@ -883,6 +2554,525 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetChatAction {
+        namespace Responses {
+            export interface $200 {
+                conversation_id: string; // uuid
+                status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff";
+                action_id?: string; // uuid
+                revision?: number;
+                options?: [
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?
+                ];
+                values?: {
+                    meter_id: string;
+                    counter_id: string;
+                    value: number;
+                };
+                field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE";
+                receipt?: {
+                    reference: string;
+                    meter_number: string;
+                    value: number;
+                    unit: string;
+                    submitted_at: string;
+                };
+                reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace GetChatPortalLogin {
+        namespace Responses {
+            export interface $200 {
+                available: boolean;
+                conversation_id: string; // uuid
+                status: "anonymous" | "pending" | "verified";
+                challenge_id?: string; // uuid
+                /**
+                 * Unix seconds
+                 */
+                code_expires_at?: number;
+                attempts_left?: number;
+                email?: string; // email
+                contact_resolution?: "matched" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How a customer can log in or verify themselves in the chat.
+                     */
+                    method?: "email_code" | "portal_login";
+                };
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
     namespace GetChatVerification {
         namespace Responses {
             export interface $200 {
@@ -900,9 +3090,25 @@ declare namespace Paths {
                 resend_after?: number;
                 email?: string; // email
                 contact_resolution?: "matched" | "ambiguous" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How a customer can log in or verify themselves in the chat.
+                     */
+                    method?: "email_code" | "portal_login";
+                };
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -919,8 +3125,16 @@ declare namespace Paths {
                 organisationName: string;
                 assistantName: string;
                 defaultLocale: "en" | "de";
-                authentication?: {
-                    email_code: boolean;
+                /**
+                 * Login methods currently available to the customer.
+                 */
+                login_methods: ("email_code" | "portal_login")[];
+                /**
+                 * Prototype Guided Actions offered by this Website Chat.
+                 */
+                actions?: {
+                    meter_reading?: boolean;
+                    meter_reading_journey_id?: string; // uuid
                 };
                 design?: {
                     id: string; // uuid
@@ -961,7 +3175,11 @@ declare namespace Paths {
                 locales: ("en" | "de")[];
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -1033,12 +3251,21 @@ declare namespace Paths {
                      */
                     design_id?: string | null; // uuid
                     /**
-                     * Email Builder template selection. Does not enable verification by itself.
+                     * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                      */
                     authentication?: {
-                        email_code: {
+                        /**
+                         * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        email_code?: {
                             email_template_id?: string | null; // uuid
-                        };
+                        } | null;
+                        /**
+                         * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        portal?: {
+                            portal_id: string; // uuid
+                        } | null;
                     } | null;
                 };
                 /**
@@ -1157,12 +3384,21 @@ declare namespace Paths {
                          */
                         design_id?: string | null; // uuid
                         /**
-                         * Email Builder template selection. Does not enable verification by itself.
+                         * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                          */
                         authentication?: {
-                            email_code: {
+                            /**
+                             * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                             */
+                            email_code?: {
                                 email_template_id?: string | null; // uuid
-                            };
+                            } | null;
+                            /**
+                             * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                             */
+                            portal?: {
+                                portal_id: string; // uuid
+                            } | null;
                         } | null;
                     };
                     /**
@@ -1218,7 +3454,524 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = string;
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace SignOutChatCustomer {
+        namespace Responses {
+            export interface $200 {
+                conversation_id: string; // uuid
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How a customer can log in or verify themselves in the chat.
+                     */
+                    method?: "email_code" | "portal_login";
+                };
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace StartChatAction {
+        export interface RequestBody {
+            request_id: string; // uuid
+            action_type: "submit_meter_reading";
+        }
+        namespace Responses {
+            export interface $200 {
+                conversation_id: string; // uuid
+                status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff";
+                action_id?: string; // uuid
+                revision?: number;
+                options?: [
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?
+                ];
+                values?: {
+                    meter_id: string;
+                    counter_id: string;
+                    value: number;
+                };
+                field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE";
+                receipt?: {
+                    reference: string;
+                    meter_number: string;
+                    value: number;
+                    unit: string;
+                    submitted_at: string;
+                };
+                reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -1244,9 +3997,560 @@ declare namespace Paths {
                 resend_after?: number;
                 email?: string; // email
                 contact_resolution?: "matched" | "ambiguous" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How a customer can log in or verify themselves in the chat.
+                     */
+                    method?: "email_code" | "portal_login";
+                };
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace StartChatPortalLogin {
+        export interface RequestBody {
+            request_id: string; // uuid
+            email: string; // email
+        }
+        namespace Responses {
+            export interface $200 {
+                available: boolean;
+                conversation_id: string; // uuid
+                status: "anonymous" | "pending" | "verified";
+                challenge_id?: string; // uuid
+                /**
+                 * Unix seconds
+                 */
+                code_expires_at?: number;
+                attempts_left?: number;
+                email?: string; // email
+                contact_resolution?: "matched" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How a customer can log in or verify themselves in the chat.
+                     */
+                    method?: "email_code" | "portal_login";
+                };
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace SubmitChatAction {
+        namespace Parameters {
+            export type ActionId = string; // uuid
+        }
+        export interface PathParameters {
+            action_id: Parameters.ActionId /* uuid */;
+        }
+        export interface RequestBody {
+            expected_revision: number;
+            meter_id: string;
+            counter_id: string;
+            value: number;
+        }
+        namespace Responses {
+            export interface $200 {
+                conversation_id: string; // uuid
+                status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff";
+                action_id?: string; // uuid
+                revision?: number;
+                options?: [
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?
+                ];
+                values?: {
+                    meter_id: string;
+                    counter_id: string;
+                    value: number;
+                };
+                field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE";
+                receipt?: {
+                    reference: string;
+                    meter_number: string;
+                    value: number;
+                    unit: string;
+                    submitted_at: string;
+                };
+                reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -1317,12 +4621,21 @@ declare namespace Paths {
                  */
                 design_id?: string | null; // uuid
                 /**
-                 * Email Builder template selection. Does not enable verification by itself.
+                 * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                  */
                 authentication?: {
-                    email_code: {
+                    /**
+                     * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    email_code?: {
                         email_template_id?: string | null; // uuid
-                    };
+                    } | null;
+                    /**
+                     * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    portal?: {
+                        portal_id: string; // uuid
+                    } | null;
                 } | null;
             };
             /**
@@ -1397,12 +4710,21 @@ declare namespace Paths {
                      */
                     design_id?: string | null; // uuid
                     /**
-                     * Email Builder template selection. Does not enable verification by itself.
+                     * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                      */
                     authentication?: {
-                        email_code: {
+                        /**
+                         * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        email_code?: {
                             email_template_id?: string | null; // uuid
-                        };
+                        } | null;
+                        /**
+                         * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        portal?: {
+                            portal_id: string; // uuid
+                        } | null;
                     } | null;
                 };
                 /**
@@ -1475,9 +4797,65 @@ declare namespace Paths {
                 resend_after?: number;
                 email?: string; // email
                 contact_resolution?: "matched" | "ambiguous" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How a customer can log in or verify themselves in the chat.
+                     */
+                    method?: "email_code" | "portal_login";
+                };
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace VerifyChatPortalLogin {
+        export interface RequestBody {
+            challenge_id: string; // uuid
+            code: string; // ^\d{6}$
+        }
+        namespace Responses {
+            export interface $200 {
+                available: boolean;
+                conversation_id: string; // uuid
+                status: "anonymous" | "pending" | "verified";
+                challenge_id?: string; // uuid
+                /**
+                 * Unix seconds
+                 */
+                code_expires_at?: number;
+                attempts_left?: number;
+                email?: string; // email
+                contact_resolution?: "matched" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How a customer can log in or verify themselves in the chat.
+                     */
+                    method?: "email_code" | "portal_login";
+                };
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -1594,6 +4972,93 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CancelChatVerification.Responses.$200 | Paths.CancelChatVerification.Responses.Default>
+  /**
+   * getChatPortalLogin - Read this session's portal login state. Tokens never leave the server.
+   */
+  'getChatPortalLogin'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetChatPortalLogin.Responses.$200 | Paths.GetChatPortalLogin.Responses.Default>
+  /**
+   * startChatPortalLogin - Send a one-time code for the customer portal account with this email, using the portal
+   * configured on this session's Website Chat. The response is pending whether or not an
+   * account exists. Repeating the same request_id and email does not send another email.
+   * 
+   */
+  'startChatPortalLogin'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.StartChatPortalLogin.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.StartChatPortalLogin.Responses.$200 | Paths.StartChatPortalLogin.Responses.Default>
+  /**
+   * verifyChatPortalLogin - Answer the current portal login challenge. Success logs the customer in with their
+   * portal account and starts a new conversation. A wrong code returns 400
+   * INVALID_LOGIN_CODE with attempts_left (the Portal emails a new code while attempts
+   * remain); an expired or replaced challenge returns 409 LOGIN_EXPIRED.
+   * 
+   */
+  'verifyChatPortalLogin'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.VerifyChatPortalLogin.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.VerifyChatPortalLogin.Responses.$200 | Paths.VerifyChatPortalLogin.Responses.Default>
+  /**
+   * cancelChatPortalLogin - Cancel a pending portal login or end a portal login. Ending it starts a new anonymous conversation.
+   */
+  'cancelChatPortalLogin'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelChatPortalLogin.Responses.$200 | Paths.CancelChatPortalLogin.Responses.Default>
+  /**
+   * signOutChatCustomer - Clear the customer identity of any login method and pending challenges. Clearing an identity starts a new anonymous conversation.
+   */
+  'signOutChatCustomer'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SignOutChatCustomer.Responses.$200 | Paths.SignOutChatCustomer.Responses.Default>
+  /**
+   * getChatAction - Prototype. Read this session's current Guided Action. Values never reach the AI or the host page.
+   */
+  'getChatAction'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetChatAction.Responses.$200 | Paths.GetChatAction.Responses.Default>
+  /**
+   * startChatAction - Prototype. Start a Guided Action for the verified Contact. The eligible targets are resolved on the server.
+   */
+  'startChatAction'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.StartChatAction.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.StartChatAction.Responses.$200 | Paths.StartChatAction.Responses.Default>
+  /**
+   * submitChatAction - Prototype. Submit values for review. Targets must be one of the server-offered options; values are validated before confirmation.
+   */
+  'submitChatAction'(
+    parameters?: Parameters<Paths.SubmitChatAction.PathParameters> | null,
+    data?: Paths.SubmitChatAction.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SubmitChatAction.Responses.$200 | Paths.SubmitChatAction.Responses.Default>
+  /**
+   * confirmChatAction - Prototype. Execute the confirmed values once. Ownership is checked again before the domain write. Repeating a completed confirmation returns the same receipt.
+   */
+  'confirmChatAction'(
+    parameters?: Parameters<Paths.ConfirmChatAction.PathParameters> | null,
+    data?: Paths.ConfirmChatAction.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ConfirmChatAction.Responses.$200 | Paths.ConfirmChatAction.Responses.Default>
+  /**
+   * cancelChatAction - Prototype. Cancel an unfinished action.
+   */
+  'cancelChatAction'(
+    parameters?: Parameters<Paths.CancelChatAction.PathParameters> | null,
+    data?: Paths.CancelChatAction.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelChatAction.Responses.$200 | Paths.CancelChatAction.Responses.Default>
 }
 
 export interface PathsDictionary {
@@ -1726,14 +5191,125 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CancelChatVerification.Responses.$200 | Paths.CancelChatVerification.Responses.Default>
   }
+  ['/v1/login/portal']: {
+    /**
+     * getChatPortalLogin - Read this session's portal login state. Tokens never leave the server.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetChatPortalLogin.Responses.$200 | Paths.GetChatPortalLogin.Responses.Default>
+  }
+  ['/v1/login/portal/start']: {
+    /**
+     * startChatPortalLogin - Send a one-time code for the customer portal account with this email, using the portal
+     * configured on this session's Website Chat. The response is pending whether or not an
+     * account exists. Repeating the same request_id and email does not send another email.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.StartChatPortalLogin.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.StartChatPortalLogin.Responses.$200 | Paths.StartChatPortalLogin.Responses.Default>
+  }
+  ['/v1/login/portal/verify']: {
+    /**
+     * verifyChatPortalLogin - Answer the current portal login challenge. Success logs the customer in with their
+     * portal account and starts a new conversation. A wrong code returns 400
+     * INVALID_LOGIN_CODE with attempts_left (the Portal emails a new code while attempts
+     * remain); an expired or replaced challenge returns 409 LOGIN_EXPIRED.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.VerifyChatPortalLogin.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.VerifyChatPortalLogin.Responses.$200 | Paths.VerifyChatPortalLogin.Responses.Default>
+  }
+  ['/v1/login/portal/cancel']: {
+    /**
+     * cancelChatPortalLogin - Cancel a pending portal login or end a portal login. Ending it starts a new anonymous conversation.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelChatPortalLogin.Responses.$200 | Paths.CancelChatPortalLogin.Responses.Default>
+  }
+  ['/v1/login/sign-out']: {
+    /**
+     * signOutChatCustomer - Clear the customer identity of any login method and pending challenges. Clearing an identity starts a new anonymous conversation.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SignOutChatCustomer.Responses.$200 | Paths.SignOutChatCustomer.Responses.Default>
+  }
+  ['/v1/actions']: {
+    /**
+     * getChatAction - Prototype. Read this session's current Guided Action. Values never reach the AI or the host page.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetChatAction.Responses.$200 | Paths.GetChatAction.Responses.Default>
+    /**
+     * startChatAction - Prototype. Start a Guided Action for the verified Contact. The eligible targets are resolved on the server.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.StartChatAction.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.StartChatAction.Responses.$200 | Paths.StartChatAction.Responses.Default>
+  }
+  ['/v1/actions/{action_id}/submit']: {
+    /**
+     * submitChatAction - Prototype. Submit values for review. Targets must be one of the server-offered options; values are validated before confirmation.
+     */
+    'post'(
+      parameters?: Parameters<Paths.SubmitChatAction.PathParameters> | null,
+      data?: Paths.SubmitChatAction.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SubmitChatAction.Responses.$200 | Paths.SubmitChatAction.Responses.Default>
+  }
+  ['/v1/actions/{action_id}/confirm']: {
+    /**
+     * confirmChatAction - Prototype. Execute the confirmed values once. Ownership is checked again before the domain write. Repeating a completed confirmation returns the same receipt.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ConfirmChatAction.PathParameters> | null,
+      data?: Paths.ConfirmChatAction.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ConfirmChatAction.Responses.$200 | Paths.ConfirmChatAction.Responses.Default>
+  }
+  ['/v1/actions/{action_id}/cancel']: {
+    /**
+     * cancelChatAction - Prototype. Cancel an unfinished action.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CancelChatAction.PathParameters> | null,
+      data?: Paths.CancelChatAction.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelChatAction.Responses.$200 | Paths.CancelChatAction.Responses.Default>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AccessTier = Components.Schemas.AccessTier;
+export type ActionRevision = Components.Schemas.ActionRevision;
+export type ActionState = Components.Schemas.ActionState;
 export type CreateWebsiteChatRequest = Components.Schemas.CreateWebsiteChatRequest;
+export type CustomerAccess = Components.Schemas.CustomerAccess;
 export type Error = Components.Schemas.Error;
 export type ListWebsiteChatsResponse = Components.Schemas.ListWebsiteChatsResponse;
+export type LoginMethod = Components.Schemas.LoginMethod;
+export type PortalLoginState = Components.Schemas.PortalLoginState;
 export type PublicChatError = Components.Schemas.PublicChatError;
 export type PublicEvent = Components.Schemas.PublicEvent;
 export type PublicWebsiteChat = Components.Schemas.PublicWebsiteChat;
