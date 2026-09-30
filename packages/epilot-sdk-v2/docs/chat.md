@@ -40,6 +40,16 @@ const { data } = await chatClient.listWebsiteChats(...)
 - [`startChatEmailVerification`](#startchatemailverification)
 - [`verifyChatEmailCode`](#verifychatemailcode)
 - [`cancelChatVerification`](#cancelchatverification)
+- [`getChatPortalLogin`](#getchatportallogin)
+- [`startChatPortalLogin`](#startchatportallogin)
+- [`verifyChatPortalLogin`](#verifychatportallogin)
+- [`cancelChatPortalLogin`](#cancelchatportallogin)
+- [`signOutChatCustomer`](#signoutchatcustomer)
+- [`getChatAction`](#getchataction)
+- [`startChatAction`](#startchataction)
+- [`submitChatAction`](#submitchataction)
+- [`confirmChatAction`](#confirmchataction)
+- [`cancelChatAction`](#cancelchataction)
 
 **Schemas**
 - [`ListWebsiteChatsResponse`](#listwebsitechatsresponse)
@@ -48,7 +58,13 @@ const { data } = await chatClient.listWebsiteChats(...)
 - [`Error`](#error)
 - [`CreateWebsiteChatRequest`](#createwebsitechatrequest)
 - [`UpdateWebsiteChatRequest`](#updatewebsitechatrequest)
+- [`ActionRevision`](#actionrevision)
+- [`ActionState`](#actionstate)
 - [`VerificationState`](#verificationstate)
+- [`PortalLoginState`](#portalloginstate)
+- [`LoginMethod`](#loginmethod)
+- [`AccessTier`](#accesstier)
+- [`CustomerAccess`](#customeraccess)
 - [`PublicWebsiteChat`](#publicwebsitechat)
 - [`WebsiteChatDesign`](#websitechatdesign)
 - [`PublicEvent`](#publicevent)
@@ -81,6 +97,9 @@ const { data } = await client.listWebsiteChats({
         "authentication": {
           "email_code": {
             "email_template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "portal": {
+            "portal_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
           }
         }
       },
@@ -123,6 +142,9 @@ const { data } = await client.createWebsiteChat(
       authentication: {
         email_code: {
           email_template_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+        },
+        portal: {
+          portal_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
         }
       }
     }
@@ -145,6 +167,9 @@ const { data } = await client.createWebsiteChat(
     "authentication": {
       "email_code": {
         "email_template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      },
+      "portal": {
+        "portal_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
       }
     }
   },
@@ -191,6 +216,9 @@ const { data } = await client.getWebsiteChat({
     "authentication": {
       "email_code": {
         "email_template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      },
+      "portal": {
+        "portal_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
       }
     }
   },
@@ -232,6 +260,9 @@ const { data } = await client.updateWebsiteChat(
       authentication: {
         email_code: {
           email_template_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+        },
+        portal: {
+          portal_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
         }
       }
     },
@@ -255,6 +286,9 @@ const { data } = await client.updateWebsiteChat(
     "authentication": {
       "email_code": {
         "email_template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      },
+      "portal": {
+        "portal_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
       }
     }
   },
@@ -308,8 +342,10 @@ const { data } = await client.getPublicWebsiteChat({
   "organisationName": "string",
   "assistantName": "string",
   "defaultLocale": "en",
-  "authentication": {
-    "email_code": true
+  "login_methods": ["email_code"],
+  "actions": {
+    "meter_reading": true,
+    "meter_reading_journey_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
   },
   "design": {
     "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -409,8 +445,10 @@ const { data } = await client.createAnonymousChatSession(
     "organisationName": "string",
     "assistantName": "string",
     "defaultLocale": "en",
-    "authentication": {
-      "email_code": true
+    "login_methods": ["email_code"],
+    "actions": {
+      "meter_reading": true,
+      "meter_reading_journey_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
     },
     "design": {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -495,7 +533,11 @@ const { data } = await client.getChatVerification()
   "code_expires_at": 0,
   "resend_after": 0,
   "email": "user@example.com",
-  "contact_resolution": "matched"
+  "contact_resolution": "matched",
+  "access": {
+    "tier": "anonymous",
+    "method": "email_code"
+  }
 }
 ```
 
@@ -530,7 +572,11 @@ const { data } = await client.startChatEmailVerification(
   "code_expires_at": 0,
   "resend_after": 0,
   "email": "user@example.com",
-  "contact_resolution": "matched"
+  "contact_resolution": "matched",
+  "access": {
+    "tier": "anonymous",
+    "method": "email_code"
+  }
 }
 ```
 
@@ -564,7 +610,11 @@ const { data } = await client.verifyChatEmailCode(
   "code_expires_at": 0,
   "resend_after": 0,
   "email": "user@example.com",
-  "contact_resolution": "matched"
+  "contact_resolution": "matched",
+  "access": {
+    "tier": "anonymous",
+    "method": "email_code"
+  }
 }
 ```
 
@@ -592,7 +642,451 @@ const { data } = await client.cancelChatVerification()
   "code_expires_at": 0,
   "resend_after": 0,
   "email": "user@example.com",
-  "contact_resolution": "matched"
+  "contact_resolution": "matched",
+  "access": {
+    "tier": "anonymous",
+    "method": "email_code"
+  }
+}
+```
+
+</details>
+
+---
+
+### `getChatPortalLogin`
+
+`GET /v1/login/portal`
+
+```ts
+const { data } = await client.getChatPortalLogin()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "available": true,
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "anonymous",
+  "challenge_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "code_expires_at": 0,
+  "attempts_left": 0,
+  "email": "user@example.com",
+  "contact_resolution": "matched",
+  "access": {
+    "tier": "anonymous",
+    "method": "email_code"
+  }
+}
+```
+
+</details>
+
+---
+
+### `startChatPortalLogin`
+
+`POST /v1/login/portal/start`
+
+```ts
+const { data } = await client.startChatPortalLogin(
+  null,
+  {
+    request_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    email: 'user@example.com'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "available": true,
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "anonymous",
+  "challenge_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "code_expires_at": 0,
+  "attempts_left": 0,
+  "email": "user@example.com",
+  "contact_resolution": "matched",
+  "access": {
+    "tier": "anonymous",
+    "method": "email_code"
+  }
+}
+```
+
+</details>
+
+---
+
+### `verifyChatPortalLogin`
+
+`POST /v1/login/portal/verify`
+
+```ts
+const { data } = await client.verifyChatPortalLogin(
+  null,
+  {
+    challenge_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    code: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "available": true,
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "anonymous",
+  "challenge_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "code_expires_at": 0,
+  "attempts_left": 0,
+  "email": "user@example.com",
+  "contact_resolution": "matched",
+  "access": {
+    "tier": "anonymous",
+    "method": "email_code"
+  }
+}
+```
+
+</details>
+
+---
+
+### `cancelChatPortalLogin`
+
+`POST /v1/login/portal/cancel`
+
+```ts
+const { data } = await client.cancelChatPortalLogin()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "available": true,
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "anonymous",
+  "challenge_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "code_expires_at": 0,
+  "attempts_left": 0,
+  "email": "user@example.com",
+  "contact_resolution": "matched",
+  "access": {
+    "tier": "anonymous",
+    "method": "email_code"
+  }
+}
+```
+
+</details>
+
+---
+
+### `signOutChatCustomer`
+
+`POST /v1/login/sign-out`
+
+```ts
+const { data } = await client.signOutChatCustomer()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "access": {
+    "tier": "anonymous",
+    "method": "email_code"
+  }
+}
+```
+
+</details>
+
+---
+
+### `getChatAction`
+
+`GET /v1/actions`
+
+```ts
+const { data } = await client.getChatAction()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "none",
+  "action_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "revision": 0,
+  "options": [
+    {
+      "meter_id": "string",
+      "counter_id": "string",
+      "meter_number": "string",
+      "label": "string",
+      "unit": "string",
+      "min_value": 0,
+      "max_value": 0
+    }
+  ],
+  "values": {
+    "meter_id": "string",
+    "counter_id": "string",
+    "value": 0
+  },
+  "field_error": "VALUE_INVALID",
+  "receipt": {
+    "reference": "string",
+    "meter_number": "string",
+    "value": 0,
+    "unit": "string",
+    "submitted_at": "string"
+  },
+  "reason": "NO_METERS"
+}
+```
+
+</details>
+
+---
+
+### `startChatAction`
+
+`POST /v1/actions`
+
+```ts
+const { data } = await client.startChatAction(
+  null,
+  {
+    request_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    action_type: 'submit_meter_reading'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "none",
+  "action_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "revision": 0,
+  "options": [
+    {
+      "meter_id": "string",
+      "counter_id": "string",
+      "meter_number": "string",
+      "label": "string",
+      "unit": "string",
+      "min_value": 0,
+      "max_value": 0
+    }
+  ],
+  "values": {
+    "meter_id": "string",
+    "counter_id": "string",
+    "value": 0
+  },
+  "field_error": "VALUE_INVALID",
+  "receipt": {
+    "reference": "string",
+    "meter_number": "string",
+    "value": 0,
+    "unit": "string",
+    "submitted_at": "string"
+  },
+  "reason": "NO_METERS"
+}
+```
+
+</details>
+
+---
+
+### `submitChatAction`
+
+`POST /v1/actions/{action_id}/submit`
+
+```ts
+const { data } = await client.submitChatAction(
+  {
+    action_id: 'example',
+  },
+  {
+    expected_revision: 1,
+    meter_id: 'string',
+    counter_id: 'string',
+    value: 0
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "none",
+  "action_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "revision": 0,
+  "options": [
+    {
+      "meter_id": "string",
+      "counter_id": "string",
+      "meter_number": "string",
+      "label": "string",
+      "unit": "string",
+      "min_value": 0,
+      "max_value": 0
+    }
+  ],
+  "values": {
+    "meter_id": "string",
+    "counter_id": "string",
+    "value": 0
+  },
+  "field_error": "VALUE_INVALID",
+  "receipt": {
+    "reference": "string",
+    "meter_number": "string",
+    "value": 0,
+    "unit": "string",
+    "submitted_at": "string"
+  },
+  "reason": "NO_METERS"
+}
+```
+
+</details>
+
+---
+
+### `confirmChatAction`
+
+`POST /v1/actions/{action_id}/confirm`
+
+```ts
+const { data } = await client.confirmChatAction(
+  {
+    action_id: 'example',
+  },
+  {
+    expected_revision: 1
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "none",
+  "action_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "revision": 0,
+  "options": [
+    {
+      "meter_id": "string",
+      "counter_id": "string",
+      "meter_number": "string",
+      "label": "string",
+      "unit": "string",
+      "min_value": 0,
+      "max_value": 0
+    }
+  ],
+  "values": {
+    "meter_id": "string",
+    "counter_id": "string",
+    "value": 0
+  },
+  "field_error": "VALUE_INVALID",
+  "receipt": {
+    "reference": "string",
+    "meter_number": "string",
+    "value": 0,
+    "unit": "string",
+    "submitted_at": "string"
+  },
+  "reason": "NO_METERS"
+}
+```
+
+</details>
+
+---
+
+### `cancelChatAction`
+
+`POST /v1/actions/{action_id}/cancel`
+
+```ts
+const { data } = await client.cancelChatAction(
+  {
+    action_id: 'example',
+  },
+  {
+    expected_revision: 1
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "conversation_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "none",
+  "action_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "revision": 0,
+  "options": [
+    {
+      "meter_id": "string",
+      "counter_id": "string",
+      "meter_number": "string",
+      "label": "string",
+      "unit": "string",
+      "min_value": 0,
+      "max_value": 0
+    }
+  ],
+  "values": {
+    "meter_id": "string",
+    "counter_id": "string",
+    "value": 0
+  },
+  "field_error": "VALUE_INVALID",
+  "receipt": {
+    "reference": "string",
+    "meter_number": "string",
+    "value": 0,
+    "unit": "string",
+    "submitted_at": "string"
+  },
+  "reason": "NO_METERS"
 }
 ```
 
@@ -644,7 +1138,8 @@ type WebsiteChat = {
     default_locale: "en" | "de"
     design_id?: string // uuid
     authentication?: {
-      email_code: { ... }
+      email_code?: { ... }
+      portal?: { ... }
     }
   }
   website_chat_id: string // uuid
@@ -670,8 +1165,11 @@ type WebsiteChatSettings = {
   default_locale: "en" | "de"
   design_id?: string // uuid
   authentication?: {
-    email_code: {
+    email_code?: {
       email_template_id?: { ... }
+    }
+    portal?: {
+      portal_id: { ... }
     }
   }
 }
@@ -699,7 +1197,8 @@ type CreateWebsiteChatRequest = {
     default_locale: "en" | "de"
     design_id?: string // uuid
     authentication?: {
-      email_code: { ... }
+      email_code?: { ... }
+      portal?: { ... }
     }
   }
 }
@@ -717,10 +1216,53 @@ type UpdateWebsiteChatRequest = {
     default_locale: "en" | "de"
     design_id?: string // uuid
     authentication?: {
-      email_code: { ... }
+      email_code?: { ... }
+      portal?: { ... }
     }
   }
   version: number
+}
+```
+
+### `ActionRevision`
+
+```ts
+type ActionRevision = {
+  expected_revision: number
+}
+```
+
+### `ActionState`
+
+```ts
+type ActionState = {
+  conversation_id: string // uuid
+  status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff"
+  action_id?: string // uuid
+  revision?: number
+  options?: Array<{
+    meter_id: string
+    counter_id: string
+    meter_number: string
+    label: string
+    unit: string
+    min_value?: number
+    max_value?: number
+  }>
+  values?: {
+    meter_id: string
+    counter_id: string
+    value: number
+  }
+  field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE"
+  receipt?: {
+    reference: string
+    meter_number: string
+    value: number
+    unit: string
+    submitted_at: string
+  }
+  reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN"
 }
 ```
 
@@ -736,6 +1278,56 @@ type VerificationState = {
   resend_after?: number
   email?: string // email
   contact_resolution?: "matched" | "ambiguous" | "not_found"
+  access: {
+    tier: "anonymous" | "identified" | "verified"
+    method?: "email_code" | "portal_login"
+  }
+}
+```
+
+### `PortalLoginState`
+
+```ts
+type PortalLoginState = {
+  available: boolean
+  conversation_id: string // uuid
+  status: "anonymous" | "pending" | "verified"
+  challenge_id?: string // uuid
+  code_expires_at?: number
+  attempts_left?: number
+  email?: string // email
+  contact_resolution?: "matched" | "not_found"
+  access: {
+    tier: "anonymous" | "identified" | "verified"
+    method?: "email_code" | "portal_login"
+  }
+}
+```
+
+### `LoginMethod`
+
+How a customer can log in or verify themselves in the chat.
+
+```ts
+type LoginMethod = "email_code" | "portal_login"
+```
+
+### `AccessTier`
+
+anonymous: no customer identity. identified: the Contact is known but ownership
+is not proven. verified: ownership is proven (an email code or a portal login).
+
+
+```ts
+type AccessTier = "anonymous" | "identified" | "verified"
+```
+
+### `CustomerAccess`
+
+```ts
+type CustomerAccess = {
+  tier: "anonymous" | "identified" | "verified"
+  method?: "email_code" | "portal_login"
 }
 ```
 
@@ -747,8 +1339,10 @@ type PublicWebsiteChat = {
   organisationName: string
   assistantName: string
   defaultLocale: "en" | "de"
-  authentication?: {
-    email_code: boolean
+  login_methods: "email_code" | "portal_login"[]
+  actions?: {
+    meter_reading?: boolean
+    meter_reading_journey_id?: string // uuid
   }
   design?: {
     id: string // uuid
@@ -844,6 +1438,7 @@ type PublicEvent = {
 
 ```ts
 type PublicChatError = {
-  code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE"
+  code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED"
+  attempts_left?: number
 }
 ```
