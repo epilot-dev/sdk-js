@@ -217,7 +217,7 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   RELATION_REF_ITEM_NOT_FOUND: {
     level: 'error',
     description:
-      'The relation_ref target entity exists but the referenced item/value could not be matched — skipped as non-retryable. Check the mapping configuration and the entity data.',
+      'The relation_ref value could not be matched on the target entity (invalid mapped value, or still no match after writing it to the target) — skipped as non-retryable. Check the mapping configuration and the entity data.',
   },
   RELATION_REF_VALUE_UNDEFINED: {
     level: 'error',
