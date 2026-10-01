@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.37.0",
+    "version": "1.38.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -5286,14 +5286,10 @@
           },
           "entity_details": {
             "type": "array",
-            "description": "What this import will write, one entry per entity instance, capped at 20 in first-appearance order. `entities` stays exact regardless.",
+            "description": "What this import will write, one entry per entity instance, capped at 6 per mapping target in first-appearance order, so no target crowds another out. `entities` stays exact regardless: `entities[slug]` minus the entries listed for that slug is how many are not shown.",
             "items": {
               "$ref": "#/components/schemas/ErpImportEntityDetail"
             }
-          },
-          "entity_details_truncated": {
-            "type": "boolean",
-            "description": "More entities exist than `entity_details` lists."
           },
           "issues": {
             "type": "array",
@@ -5333,7 +5329,22 @@
           },
           "versions": {
             "type": "integer",
-            "description": "Version writes — one per variant per effective date. Absent when the entity is not conditional."
+            "description": "Version writes — one per variant per effective date. Absent when the entity is not conditional. A total across variants that need not have the same number of dates each, so it says nothing about any one variant; use `version_attribute` to tell dated variants from ones effective now."
+          },
+          "condition_attributes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The schema conditions this entity's variants are split by — those the mapping reads from the file, in schema order. A condition left unmapped matches any value and one mapped as a constant pins every variant alike, so neither is listed. Absent when the entity is not conditional.",
+            "example": [
+              "grid_area"
+            ]
+          },
+          "version_attribute": {
+            "type": "string",
+            "description": "The attribute versions are dated by (`valid_from`) when the mapping sets it. Absent when the entity is not conditional, or when every variant is effective now.",
+            "example": "valid_from"
           }
         }
       },

@@ -2943,9 +2943,23 @@ declare namespace Components {
              */
             variants?: number;
             /**
-             * Version writes — one per variant per effective date. Absent when the entity is not conditional.
+             * Version writes — one per variant per effective date. Absent when the entity is not conditional. A total across variants that need not have the same number of dates each, so it says nothing about any one variant; use `version_attribute` to tell dated variants from ones effective now.
              */
             versions?: number;
+            /**
+             * The schema conditions this entity's variants are split by — those the mapping reads from the file, in schema order. A condition left unmapped matches any value and one mapped as a constant pins every variant alike, so neither is listed. Absent when the entity is not conditional.
+             * example:
+             * [
+             *   "grid_area"
+             * ]
+             */
+            condition_attributes?: string[];
+            /**
+             * The attribute versions are dated by (`valid_from`) when the mapping sets it. Absent when the entity is not conditional, or when every variant is effective now.
+             * example:
+             * valid_from
+             */
+            version_attribute?: string;
         }
         /**
          * Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.
@@ -3136,13 +3150,9 @@ declare namespace Components {
                 [name: string]: number;
             };
             /**
-             * What this import will write, one entry per entity instance, capped at 20 in first-appearance order. `entities` stays exact regardless.
+             * What this import will write, one entry per entity instance, capped at 6 per mapping target in first-appearance order, so no target crowds another out. `entities` stays exact regardless: `entities[slug]` minus the entries listed for that slug is how many are not shown.
              */
             entity_details?: /* One entity instance the import will write, attributed to the mapping target that produces it. */ ErpImportEntityDetail[];
-            /**
-             * More entities exist than `entity_details` lists.
-             */
-            entity_details_truncated?: boolean;
             /**
              * Whole-file issues, at most one per `code`. Do not expect the length to match blocking + warnings: those also count per-row problems, which are recorded for support but never listed here. Warnings here are what `ack_warnings` on `:execute` acknowledges.
              */
