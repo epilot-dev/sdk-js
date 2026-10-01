@@ -3707,10 +3707,11 @@ const { data } = await client.createErpImport(
           "entity_schema": "string",
           "business_key": {},
           "variants": 0,
-          "versions": 0
+          "versions": 0,
+          "condition_attributes": ["grid_area"],
+          "version_attribute": "valid_from"
         }
       ],
-      "entity_details_truncated": true,
       "issues": [
         {
           "code": "UNIQUE_ID_COLUMN_MISSING",
@@ -3796,10 +3797,11 @@ const { data } = await client.listErpImports({
             "entity_schema": "string",
             "business_key": {},
             "variants": 0,
-            "versions": 0
+            "versions": 0,
+            "condition_attributes": ["grid_area"],
+            "version_attribute": "valid_from"
           }
         ],
-        "entity_details_truncated": true,
         "issues": [
           {
             "code": "UNIQUE_ID_COLUMN_MISSING",
@@ -3878,10 +3880,11 @@ const { data } = await client.getErpImport({
         "entity_schema": "string",
         "business_key": {},
         "variants": 0,
-        "versions": 0
+        "versions": 0,
+        "condition_attributes": ["grid_area"],
+        "version_attribute": "valid_from"
       }
     ],
-    "entity_details_truncated": true,
     "issues": [
       {
         "code": "UNIQUE_ID_COLUMN_MISSING",
@@ -4188,8 +4191,9 @@ type ErpImportValidation = {
     business_key: Record<string, string>
     variants?: number
     versions?: number
+    condition_attributes?: string[]
+    version_attribute?: string
   }>
-  entity_details_truncated?: boolean
   issues?: Array<{
     code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED"
     severity: "warning" | "blocking"
@@ -4214,6 +4218,8 @@ type ErpImportEntityDetail = {
   business_key: Record<string, string>
   variants?: number
   versions?: number
+  condition_attributes?: string[]
+  version_attribute?: string
 }
 ```
 
@@ -4285,7 +4291,6 @@ type CreateErpImportResponse = {
       warnings: { ... }
       entities: { ... }
       entity_details?: { ... }
-      entity_details_truncated?: { ... }
       issues?: { ... }
     }
     progress?: {
@@ -4336,8 +4341,9 @@ type ErpImportJob = {
       business_key: { ... }
       variants?: { ... }
       versions?: { ... }
+      condition_attributes?: { ... }
+      version_attribute?: { ... }
     }>
-    entity_details_truncated?: boolean
     issues?: Array<{
       code: { ... }
       severity: { ... }
@@ -4385,7 +4391,6 @@ type ErpImportList = {
       warnings: { ... }
       entities: { ... }
       entity_details?: { ... }
-      entity_details_truncated?: { ... }
       issues?: { ... }
     }
     progress?: {
