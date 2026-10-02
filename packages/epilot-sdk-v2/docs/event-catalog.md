@@ -105,6 +105,7 @@ const { data } = await client.listEvents()
       "event_description": "Triggered when a new meter reading is added",
       "event_version": "1.0",
       "event_status": "active",
+      "deprecated_at": "2026-09-30T12:00:00.000Z",
       "event_tags": ["builtin", "metering", "erp"],
       "schema_fields": {},
       "entity_graph": {
@@ -144,7 +145,8 @@ const { data } = await client.listEvents()
       "event_origin": "builtin",
       "mapping": {
         "mode": "guided",
-        "jsonata": "string"
+        "jsonata": "string",
+        "payload": "extend"
       },
       "lineage": {
         "base_event_name": "string",
@@ -218,7 +220,8 @@ const { data } = await client.createCustomEvent(
     automation_trigger_seed_node: 'string',
     mapping: {
       mode: 'guided',
-      jsonata: 'string'
+      jsonata: 'string',
+      payload: 'extend'
     },
     lineage: {
       base_event_name: 'string',
@@ -239,6 +242,7 @@ const { data } = await client.createCustomEvent(
   "event_description": "Triggered when a new meter reading is added",
   "event_version": "1.0",
   "event_status": "active",
+  "deprecated_at": "2026-09-30T12:00:00.000Z",
   "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
   "entity_graph": {
@@ -278,7 +282,8 @@ const { data } = await client.createCustomEvent(
   "event_origin": "builtin",
   "mapping": {
     "mode": "guided",
-    "jsonata": "string"
+    "jsonata": "string",
+    "payload": "extend"
   },
   "lineage": {
     "base_event_name": "string",
@@ -323,6 +328,7 @@ const { data } = await client.getEvent({
   "event_description": "Triggered when a new meter reading is added",
   "event_version": "1.0",
   "event_status": "active",
+  "deprecated_at": "2026-09-30T12:00:00.000Z",
   "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
   "entity_graph": {
@@ -362,7 +368,8 @@ const { data } = await client.getEvent({
   "event_origin": "builtin",
   "mapping": {
     "mode": "guided",
-    "jsonata": "string"
+    "jsonata": "string",
+    "payload": "extend"
   },
   "lineage": {
     "base_event_name": "string",
@@ -419,6 +426,7 @@ const { data } = await client.patchEvent(
   "event_description": "Triggered when a new meter reading is added",
   "event_version": "1.0",
   "event_status": "active",
+  "deprecated_at": "2026-09-30T12:00:00.000Z",
   "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
   "entity_graph": {
@@ -458,7 +466,8 @@ const { data } = await client.patchEvent(
   "event_origin": "builtin",
   "mapping": {
     "mode": "guided",
-    "jsonata": "string"
+    "jsonata": "string",
+    "payload": "extend"
   },
   "lineage": {
     "base_event_name": "string",
@@ -534,7 +543,8 @@ const { data } = await client.replaceCustomEventDraft(
     automation_trigger_seed_node: 'string',
     mapping: {
       mode: 'guided',
-      jsonata: 'string'
+      jsonata: 'string',
+      payload: 'extend'
     },
     lineage: {
       base_event_name: 'string',
@@ -555,6 +565,7 @@ const { data } = await client.replaceCustomEventDraft(
   "event_description": "Triggered when a new meter reading is added",
   "event_version": "1.0",
   "event_status": "active",
+  "deprecated_at": "2026-09-30T12:00:00.000Z",
   "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
   "entity_graph": {
@@ -594,7 +605,8 @@ const { data } = await client.replaceCustomEventDraft(
   "event_origin": "builtin",
   "mapping": {
     "mode": "guided",
-    "jsonata": "string"
+    "jsonata": "string",
+    "payload": "extend"
   },
   "lineage": {
     "base_event_name": "string",
@@ -701,6 +713,7 @@ const { data } = await client.publishCustomEventDefinition(
   "event_description": "Triggered when a new meter reading is added",
   "event_version": "1.0",
   "event_status": "active",
+  "deprecated_at": "2026-09-30T12:00:00.000Z",
   "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
   "entity_graph": {
@@ -740,7 +753,8 @@ const { data } = await client.publishCustomEventDefinition(
   "event_origin": "builtin",
   "mapping": {
     "mode": "guided",
-    "jsonata": "string"
+    "jsonata": "string",
+    "payload": "extend"
   },
   "lineage": {
     "base_event_name": "string",
@@ -787,6 +801,7 @@ const { data } = await client.getCustomEventVersionDraft({
     "event_description": "Triggered when a new meter reading is added",
     "event_version": "1.0",
     "event_status": "active",
+    "deprecated_at": "2026-09-30T12:00:00.000Z",
     "event_tags": ["builtin", "metering", "erp"],
     "schema_fields": {},
     "entity_graph": {
@@ -826,7 +841,8 @@ const { data } = await client.getCustomEventVersionDraft({
     "event_origin": "builtin",
     "mapping": {
       "mode": "guided",
-      "jsonata": "string"
+      "jsonata": "string",
+      "payload": "extend"
     },
     "lineage": {
       "base_event_name": "string",
@@ -915,7 +931,8 @@ const { data } = await client.putCustomEventVersionDraft(
     automation_trigger_seed_node: 'string',
     mapping: {
       mode: 'guided',
-      jsonata: 'string'
+      jsonata: 'string',
+      payload: 'extend'
     },
     lineage: {
       base_event_name: 'string',
@@ -937,6 +954,7 @@ const { data } = await client.putCustomEventVersionDraft(
     "event_description": "Triggered when a new meter reading is added",
     "event_version": "1.0",
     "event_status": "active",
+    "deprecated_at": "2026-09-30T12:00:00.000Z",
     "event_tags": ["builtin", "metering", "erp"],
     "schema_fields": {},
     "entity_graph": {
@@ -976,7 +994,8 @@ const { data } = await client.putCustomEventVersionDraft(
     "event_origin": "builtin",
     "mapping": {
       "mode": "guided",
-      "jsonata": "string"
+      "jsonata": "string",
+      "payload": "extend"
     },
     "lineage": {
       "base_event_name": "string",
@@ -1055,6 +1074,7 @@ const { data } = await client.publishCustomEventVersion(
   "event_description": "Triggered when a new meter reading is added",
   "event_version": "1.0",
   "event_status": "active",
+  "deprecated_at": "2026-09-30T12:00:00.000Z",
   "event_tags": ["builtin", "metering", "erp"],
   "schema_fields": {},
   "entity_graph": {
@@ -1094,7 +1114,8 @@ const { data } = await client.publishCustomEventVersion(
   "event_origin": "builtin",
   "mapping": {
     "mode": "guided",
-    "jsonata": "string"
+    "jsonata": "string",
+    "payload": "extend"
   },
   "lineage": {
     "base_event_name": "string",
@@ -1532,6 +1553,7 @@ type EventConfigBase = {
   event_description?: string
   event_version?: string
   event_status?: "active" | "deprecated" | "draft" | "disabled"
+  deprecated_at?: string // date-time
   event_tags?: string[]
   schema_fields?: Record<string, {
     json_schema: object
@@ -1584,6 +1606,7 @@ type EventConfigBase = {
   mapping?: {
     mode: "guided" | "jsonata"
     jsonata?: string
+    payload?: "extend" | "replace"
   }
   lineage?: {
     base_event_name: string
@@ -1607,6 +1630,7 @@ type EventConfig = {
   event_description?: string
   event_version: string
   event_status?: "active" | "deprecated" | "draft" | "disabled"
+  deprecated_at?: string // date-time
   event_tags?: string[]
   schema_fields: Record<string, {
     json_schema: object
@@ -1659,6 +1683,7 @@ type EventConfig = {
   mapping?: {
     mode: "guided" | "jsonata"
     jsonata?: string
+    payload?: "extend" | "replace"
   }
   lineage?: {
     base_event_name: string
@@ -1718,6 +1743,7 @@ type CreateCustomEventPayload = {
   mapping?: {
     mode: "guided" | "jsonata"
     jsonata?: string
+    payload?: "extend" | "replace"
   }
   lineage?: {
     base_event_name: string
@@ -1735,6 +1761,7 @@ Guided mappings use schema_fields graph_source expressions; raw mode evaluates o
 type EventMapping = {
   mode: "guided" | "jsonata"
   jsonata?: string
+  payload?: "extend" | "replace"
 }
 ```
 
@@ -1781,6 +1808,7 @@ type CustomEventVersionDraft = {
     event_description?: string
     event_version: string
     event_status?: "active" | "deprecated" | "draft" | "disabled"
+    deprecated_at?: string // date-time
     event_tags?: string[]
     schema_fields: Record<string, {
       json_schema: { ... }
@@ -1814,6 +1842,7 @@ type CustomEventVersionDraft = {
     mapping?: {
       mode: { ... }
       jsonata?: { ... }
+      payload?: { ... }
     }
     lineage?: {
       base_event_name: { ... }

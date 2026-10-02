@@ -256,6 +256,11 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
       'A request step\'s "run this step when" expression returned false, so this step and every step after it were skipped. This is the configuration working as written, not a fault.',
   },
   TIMEOUT: { level: 'error', description: 'The operation timed out' },
+  UNIQUE_ID_LOOKUP_UNRESOLVABLE: {
+    level: 'error',
+    description:
+      'A related entity created for this event still could not be found by its unique ID, so the relation was skipped instead of creating a duplicate. Check that the unique ID value type matches the entity schema.',
+  },
   UNIQUE_ID_MULTIPLE_MATCHES: { level: 'error', description: 'Multiple entities matched the unique ID' },
   UNIQUE_ID_NOT_IN_SCHEMA: {
     level: 'error',
