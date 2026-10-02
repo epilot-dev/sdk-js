@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.38.0",
+    "version": "1.38.1",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -12748,6 +12748,7 @@
           "SOFT_DELETED_ENTITY_MATCHED",
           "STEP_DISABLED",
           "TIMEOUT",
+          "UNIQUE_ID_LOOKUP_UNRESOLVABLE",
           "UNIQUE_ID_MULTIPLE_MATCHES",
           "UNIQUE_ID_NOT_IN_SCHEMA",
           "UNKNOWN_ERROR",
