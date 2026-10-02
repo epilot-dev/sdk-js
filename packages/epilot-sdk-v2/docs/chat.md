@@ -55,6 +55,8 @@ const { data } = await chatClient.listWebsiteChats(...)
 - [`ListWebsiteChatsResponse`](#listwebsitechatsresponse)
 - [`WebsiteChat`](#websitechat)
 - [`WebsiteChatSettings`](#websitechatsettings)
+- [`SelfServiceSettings`](#selfservicesettings)
+- [`SelfServiceAction`](#selfserviceaction)
 - [`Error`](#error)
 - [`CreateWebsiteChatRequest`](#createwebsitechatrequest)
 - [`UpdateWebsiteChatRequest`](#updatewebsitechatrequest)
@@ -68,6 +70,7 @@ const { data } = await chatClient.listWebsiteChats(...)
 - [`PublicWebsiteChat`](#publicwebsitechat)
 - [`WebsiteChatDesign`](#websitechatdesign)
 - [`PublicEvent`](#publicevent)
+- [`SelfServiceDirective`](#selfservicedirective)
 - [`PublicChatError`](#publicchaterror)
 
 ### `listWebsiteChats`
@@ -101,6 +104,19 @@ const { data } = await client.listWebsiteChats({
           "portal": {
             "portal_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
           }
+        },
+        "self_service": {
+          "actions": [
+            {
+              "action": "submit_meter_reading",
+              "enabled": true,
+              "fulfilment": "in_chat",
+              "journey_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "url": "string",
+              "access": "anonymous",
+              "guidance": "string"
+            }
+          ]
         }
       },
       "website_chat_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -146,6 +162,19 @@ const { data } = await client.createWebsiteChat(
         portal: {
           portal_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
         }
+      },
+      self_service: {
+        actions: [
+          {
+            action: 'submit_meter_reading',
+            enabled: true,
+            fulfilment: 'in_chat',
+            journey_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+            url: 'string',
+            access: 'anonymous',
+            guidance: 'string'
+          }
+        ]
       }
     }
   },
@@ -171,6 +200,19 @@ const { data } = await client.createWebsiteChat(
       "portal": {
         "portal_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
       }
+    },
+    "self_service": {
+      "actions": [
+        {
+          "action": "submit_meter_reading",
+          "enabled": true,
+          "fulfilment": "in_chat",
+          "journey_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "url": "string",
+          "access": "anonymous",
+          "guidance": "string"
+        }
+      ]
     }
   },
   "website_chat_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -220,6 +262,19 @@ const { data } = await client.getWebsiteChat({
       "portal": {
         "portal_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
       }
+    },
+    "self_service": {
+      "actions": [
+        {
+          "action": "submit_meter_reading",
+          "enabled": true,
+          "fulfilment": "in_chat",
+          "journey_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "url": "string",
+          "access": "anonymous",
+          "guidance": "string"
+        }
+      ]
     }
   },
   "website_chat_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -264,6 +319,19 @@ const { data } = await client.updateWebsiteChat(
         portal: {
           portal_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
         }
+      },
+      self_service: {
+        actions: [
+          {
+            action: 'submit_meter_reading',
+            enabled: true,
+            fulfilment: 'in_chat',
+            journey_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+            url: 'string',
+            access: 'anonymous',
+            guidance: 'string'
+          }
+        ]
       }
     },
     version: 1
@@ -290,6 +358,19 @@ const { data } = await client.updateWebsiteChat(
       "portal": {
         "portal_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
       }
+    },
+    "self_service": {
+      "actions": [
+        {
+          "action": "submit_meter_reading",
+          "enabled": true,
+          "fulfilment": "in_chat",
+          "journey_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "url": "string",
+          "access": "anonymous",
+          "guidance": "string"
+        }
+      ]
     }
   },
   "website_chat_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1109,6 +1190,7 @@ type ListWebsiteChatsResponse = {
       default_locale: { ... }
       design_id?: { ... }
       authentication?: { ... }
+      self_service?: { ... }
     }
     website_chat_id: string // uuid
     org_id: string
@@ -1141,6 +1223,9 @@ type WebsiteChat = {
       email_code?: { ... }
       portal?: { ... }
     }
+    self_service?: {
+      actions: { ... }
+    }
   }
   website_chat_id: string // uuid
   org_id: string
@@ -1172,6 +1257,51 @@ type WebsiteChatSettings = {
       portal_id: { ... }
     }
   }
+  self_service?: {
+    actions: Array<{
+      action: { ... }
+      enabled: { ... }
+      fulfilment: { ... }
+      journey_id?: { ... }
+      url?: { ... }
+      access: { ... }
+      guidance?: { ... }
+    }>
+  }
+}
+```
+
+### `SelfServiceSettings`
+
+Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+
+```ts
+type SelfServiceSettings = {
+  actions: Array<{
+    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract"
+    enabled: boolean
+    fulfilment: "in_chat" | "journey" | "link"
+    journey_id?: string // uuid
+    url?: string
+    access: "anonymous" | "identified" | "verified"
+    guidance?: string
+  }>
+}
+```
+
+### `SelfServiceAction`
+
+How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.
+
+```ts
+type SelfServiceAction = {
+  action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract"
+  enabled: boolean
+  fulfilment: "in_chat" | "journey" | "link"
+  journey_id?: string // uuid
+  url?: string
+  access: "anonymous" | "identified" | "verified"
+  guidance?: string
 }
 ```
 
@@ -1200,6 +1330,9 @@ type CreateWebsiteChatRequest = {
       email_code?: { ... }
       portal?: { ... }
     }
+    self_service?: {
+      actions: { ... }
+    }
   }
 }
 ```
@@ -1218,6 +1351,9 @@ type UpdateWebsiteChatRequest = {
     authentication?: {
       email_code?: { ... }
       portal?: { ... }
+    }
+    self_service?: {
+      actions: { ... }
     }
   }
   version: number
@@ -1431,6 +1567,28 @@ type PublicEvent = {
   type: "error"
   code: "UNAVAILABLE"
   request_id: string // uuid
+} | {
+  type: "action"
+  action: {
+    action: string
+    fulfilment: "in_chat" | "journey" | "link"
+    journey_id?: string // uuid
+    url?: string
+    access: "anonymous" | "identified" | "verified"
+  }
+  request_id: string // uuid
+}
+```
+
+### `SelfServiceDirective`
+
+```ts
+type SelfServiceDirective = {
+  action: string
+  fulfilment: "in_chat" | "journey" | "link"
+  journey_id?: string // uuid
+  url?: string
+  access: "anonymous" | "identified" | "verified"
 }
 ```
 

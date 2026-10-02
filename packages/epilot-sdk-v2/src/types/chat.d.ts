@@ -587,6 +587,436 @@ export declare namespace Components {
                         portal_id: string; // uuid
                     } | null;
                 } | null;
+                /**
+                 * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                 */
+                self_service?: {
+                    /**
+                     * Each action can be added once.
+                     */
+                    actions: [
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?
+                    ];
+                } | null;
             };
         }
         export interface CustomerAccess {
@@ -691,6 +1121,436 @@ export declare namespace Components {
                             portal_id: string; // uuid
                         } | null;
                     } | null;
+                    /**
+                     * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                     */
+                    self_service?: {
+                        /**
+                         * Each action can be added once.
+                         */
+                        actions: [
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?
+                        ];
+                    } | null;
                 };
                 /**
                  * Stable public embed identifier, independent of the assigned agent. Not a credential.
@@ -763,6 +1623,22 @@ export declare namespace Components {
             type: "error";
             code: "UNAVAILABLE";
             request_id: string; // uuid
+        } | {
+            type: "action";
+            action: {
+                action: string; // ^[a-z][a-z_]{0,59}$
+                /**
+                 * in_chat uses the guided action endpoints; journey embeds journey_id; link opens url.
+                 */
+                fulfilment: "in_chat" | "journey" | "link";
+                journey_id?: string; // uuid
+                url?: string; // ^https://
+                /**
+                 * The least the customer must have before the action opens. Log in first when below it.
+                 */
+                access: "anonymous" | "identified" | "verified";
+            };
+            request_id: string; // uuid
         };
         export interface PublicWebsiteChat {
             key: string;
@@ -818,6 +1694,473 @@ export declare namespace Components {
             };
             locales: ("en" | "de")[];
         }
+        /**
+         * How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.
+         */
+        export interface SelfServiceAction {
+            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+            enabled: boolean;
+            fulfilment: "in_chat" | "journey" | "link";
+            /**
+             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+             */
+            journey_id?: string; // uuid
+            /**
+             * HTTPS address to open; only for link.
+             */
+            url?: string;
+            /**
+             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+             */
+            access: "anonymous" | "identified" | "verified";
+            /**
+             * When the assistant should start this action.
+             */
+            guidance?: string;
+        }
+        export interface SelfServiceDirective {
+            action: string; // ^[a-z][a-z_]{0,59}$
+            /**
+             * in_chat uses the guided action endpoints; journey embeds journey_id; link opens url.
+             */
+            fulfilment: "in_chat" | "journey" | "link";
+            journey_id?: string; // uuid
+            url?: string; // ^https://
+            /**
+             * The least the customer must have before the action opens. Log in first when below it.
+             */
+            access: "anonymous" | "identified" | "verified";
+        }
+        /**
+         * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+         */
+        export type SelfServiceSettings = {
+            /**
+             * Each action can be added once.
+             */
+            actions: [
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?
+            ];
+        } | null;
         export interface UpdateWebsiteChatRequest {
             name?: string;
             agent_id?: string | null; // uuid
@@ -899,6 +2242,436 @@ export declare namespace Components {
                     portal?: {
                         portal_id: string; // uuid
                     } | null;
+                } | null;
+                /**
+                 * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                 */
+                self_service?: {
+                    /**
+                     * Each action can be added once.
+                     */
+                    actions: [
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?
+                    ];
                 } | null;
             };
             /**
@@ -1015,6 +2788,436 @@ export declare namespace Components {
                     portal?: {
                         portal_id: string; // uuid
                     } | null;
+                } | null;
+                /**
+                 * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                 */
+                self_service?: {
+                    /**
+                     * Each action can be added once.
+                     */
+                    actions: [
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?
+                    ];
                 } | null;
             };
             /**
@@ -1149,6 +3352,436 @@ export declare namespace Components {
                 portal?: {
                     portal_id: string; // uuid
                 } | null;
+            } | null;
+            /**
+             * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+             */
+            self_service?: {
+                /**
+                 * Each action can be added once.
+                 */
+                actions: [
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?
+                ];
             } | null;
         }
     }
@@ -2395,6 +5028,436 @@ export declare namespace Paths {
                         portal_id: string; // uuid
                     } | null;
                 } | null;
+                /**
+                 * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                 */
+                self_service?: {
+                    /**
+                     * Each action can be added once.
+                     */
+                    actions: [
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?
+                    ];
+                } | null;
             };
         }
         namespace Responses {
@@ -2479,6 +5542,436 @@ export declare namespace Paths {
                         portal?: {
                             portal_id: string; // uuid
                         } | null;
+                    } | null;
+                    /**
+                     * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                     */
+                    self_service?: {
+                        /**
+                         * Each action can be added once.
+                         */
+                        actions: [
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?
+                        ];
                     } | null;
                 };
                 /**
@@ -3268,6 +6761,436 @@ export declare namespace Paths {
                             portal_id: string; // uuid
                         } | null;
                     } | null;
+                    /**
+                     * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                     */
+                    self_service?: {
+                        /**
+                         * Each action can be added once.
+                         */
+                        actions: [
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?
+                        ];
+                    } | null;
                 };
                 /**
                  * Stable public embed identifier, independent of the assigned agent. Not a credential.
@@ -3400,6 +7323,436 @@ export declare namespace Paths {
                             portal?: {
                                 portal_id: string; // uuid
                             } | null;
+                        } | null;
+                        /**
+                         * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                         */
+                        self_service?: {
+                            /**
+                             * Each action can be added once.
+                             */
+                            actions: [
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?
+                            ];
                         } | null;
                     };
                     /**
@@ -4638,6 +8991,436 @@ export declare namespace Paths {
                         portal_id: string; // uuid
                     } | null;
                 } | null;
+                /**
+                 * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                 */
+                self_service?: {
+                    /**
+                     * Each action can be added once.
+                     */
+                    actions: [
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?
+                    ];
+                } | null;
             };
             /**
              * Version read by the editor; stale writes return 409.
@@ -4726,6 +9509,436 @@ export declare namespace Paths {
                         portal?: {
                             portal_id: string; // uuid
                         } | null;
+                    } | null;
+                    /**
+                     * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                     */
+                    self_service?: {
+                        /**
+                         * Each action can be added once.
+                         */
+                        actions: [
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?
+                        ];
                     } | null;
                 };
                 /**
@@ -5314,6 +10527,9 @@ export type PortalLoginState = Components.Schemas.PortalLoginState;
 export type PublicChatError = Components.Schemas.PublicChatError;
 export type PublicEvent = Components.Schemas.PublicEvent;
 export type PublicWebsiteChat = Components.Schemas.PublicWebsiteChat;
+export type SelfServiceAction = Components.Schemas.SelfServiceAction;
+export type SelfServiceDirective = Components.Schemas.SelfServiceDirective;
+export type SelfServiceSettings = Components.Schemas.SelfServiceSettings;
 export type UpdateWebsiteChatRequest = Components.Schemas.UpdateWebsiteChatRequest;
 export type VerificationState = Components.Schemas.VerificationState;
 export type WebsiteChat = Components.Schemas.WebsiteChat;
