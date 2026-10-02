@@ -96,7 +96,7 @@ jobs:
       - name: Build and test CLI
         if: steps.check.outputs.cli == 'true'
         run: |
-          pnpm --filter @epilot/cli build
+          pnpm --filter @epilot/cli... build
           pnpm --filter @epilot/cli test
 
       - name: Bump versions, commit, tag and push
@@ -230,7 +230,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @epilot/cli build
+      - run: pnpm --filter @epilot/cli... build
 
       - name: Publish @epilot/cli
         run: pnpm publish --ignore-scripts --no-git-checks || true
