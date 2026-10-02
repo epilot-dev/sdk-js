@@ -1008,6 +1008,13 @@
             ],
             "example": "active"
           },
+          "deprecated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "When a custom event was deprecated. Only present on deprecated custom events.",
+            "example": "2026-09-30T12:00:00.000Z"
+          },
           "event_tags": {
             "type": "array",
             "description": "Tags associated with the event for categorization and filtering\n\nThe \"builtin\" tag indicates events that are built into the epilot system.\n",
@@ -1219,6 +1226,15 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 20000
+          },
+          "payload": {
+            "type": "string",
+            "enum": [
+              "extend",
+              "replace"
+            ],
+            "default": "extend",
+            "description": "How the mapped fields relate to the entity data. `extend` emits the mapped fields followed by\nevery graph node; `replace` emits only the mapped fields, so the graph is hydrated to compute\nthem but never travels with the event. A replace-mode event can only gain fields in later\nversions, because remapping an existing field needs the entity data in the payload to\nrebuild its previous value.\n"
           }
         },
         "required": [
