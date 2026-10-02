@@ -2319,7 +2319,7 @@
       },
       "RelativeDateValue": {
         "type": "object",
-        "description": "A date relative to the evaluation moment, e.g. \"today minus 30 days\". Only valid for date rules.",
+        "description": "A date relative to an anchor, e.g. \"today minus 30 days\" or \"4 days before the next billing\ndate\". The anchor is `today` by default, or a billing cycle date derived from other\nattributes (see `BillingCycleAnchor`). Only valid for date rules.\n",
         "required": [
           "source",
           "offset",
@@ -2348,13 +2348,77 @@
             ]
           },
           "anchor": {
-            "type": "string",
-            "enum": [
-              "today"
-            ],
-            "default": "today"
+            "description": "The date the offset is applied to. Defaults to the evaluation day.",
+            "default": "today",
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "today"
+                ]
+              },
+              {
+                "$ref": "#/components/schemas/BillingCycleAnchor"
+              }
+            ]
           }
         }
+      },
+      "BillingCycleAnchor": {
+        "type": "object",
+        "description": "A date derived from a billing cycle: the day of the month billing is due, how often it\nrecurs, and optionally the date the cycle started (its phase). Day and interval are ordinary\nscalars, so they can come from a contract (`contract.billing_due_day`,\n`contract.billing_period`), a fixed value, an environment variable or an external value.\n\nResolution at evaluation time:\n- `day` clamps to the last day of the month (31 in February resolves to the 28th/29th).\n- Without `cycle_start`, non-monthly cycles are calendar aligned (quarters start in\n  January, April, July and October; half-years in January and July; yearly in January).\n  `weekly` needs a `cycle_start` and resolves as unavailable without one.\n- `occurrence` picks the cycle date: `current` is the one in the period that contains the\n  evaluation day, `next` the first on or after it, `previous` the last before it.\n- Any part that cannot be resolved (missing attribute, day outside 1-31, unknown interval)\n  makes the whole value unavailable and the condition fails.\n",
+        "required": [
+          "type",
+          "day",
+          "interval"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "billing_cycle"
+            ]
+          },
+          "day": {
+            "description": "Day of the month billing is due (1-31). Numeric strings are accepted at evaluation time. Weekly cycles recur from `cycle_start` and ignore it.",
+            "$ref": "#/components/schemas/AnchorScalar"
+          },
+          "interval": {
+            "description": "How often billing recurs, one of `weekly`, `monthly`, `every_quarter`, `every_6_months`, `yearly`.",
+            "$ref": "#/components/schemas/AnchorScalar"
+          },
+          "cycle_start": {
+            "description": "The date the billing cycle started, e.g. `contract.start_date`. Sets the phase of non-monthly cycles.",
+            "$ref": "#/components/schemas/AnchorScalar"
+          },
+          "occurrence": {
+            "type": "string",
+            "enum": [
+              "current",
+              "next",
+              "previous"
+            ],
+            "default": "current"
+          }
+        }
+      },
+      "AnchorScalar": {
+        "description": "A part of a derived date - a fixed value or one resolved at evaluation time. Carries no adjustment; shift the result with the relative date's offset instead.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/StaticValue"
+          },
+          {
+            "$ref": "#/components/schemas/ContextValue"
+          },
+          {
+            "$ref": "#/components/schemas/EnvironmentValue"
+          },
+          {
+            "$ref": "#/components/schemas/ExternalValue"
+          }
+        ]
       },
       "RangeValue": {
         "type": "object",
