@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto';
 import { createServer } from 'node:http';
 import { saveCredentials } from '../lib/auth-store.js';
 import { type Environment, getPortalUrl, resolveEnvironment } from '../lib/environment.js';
-import { BOLD, RESET, GREEN, RED, DIM, YELLOW, CYAN } from '../lib/utils.js';
+import { ANONYMIZATION_DOCS_URL, BOLD, RESET, GREEN, RED, DIM, YELLOW, CYAN } from '../lib/utils.js';
 
 export default defineCommand({
   meta: { name: 'login', description: 'Authenticate with epilot' },
@@ -13,7 +13,7 @@ export default defineCommand({
     readonly: { type: 'boolean', description: 'Generate a read-only token (cannot perform write actions)' },
     anonymize: {
       type: 'boolean',
-      description: 'Generate an anonymized token (personal data is masked in all API responses)',
+      description: `Generate an anonymized token (personal data in entity responses is masked, best effort; see ${ANONYMIZATION_DOCS_URL})`,
     },
     'use-dev': { type: 'boolean', description: 'Use dev environment (portal.dev.epilot.cloud)' },
     'use-staging': { type: 'boolean', description: 'Use staging environment (portal.staging.epilot.cloud)' },
@@ -73,7 +73,10 @@ const browserLogin = async (
   }
   if (anonymize) {
     process.stdout.write(
-      `${YELLOW}Anonymize mode: personal data will be masked in all API responses for this CLI session.${RESET}\n`,
+      `${YELLOW}Anonymize mode: personal data in entity responses will be masked for this CLI session.${RESET}\n`,
+    );
+    process.stdout.write(
+      `${DIM}Best effort: custom attributes are only masked if Anonymize is checked for them in the Entity Builder. See ${ANONYMIZATION_DOCS_URL}${RESET}\n`,
     );
   }
   process.stdout.write('\n');
