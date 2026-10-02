@@ -137,6 +137,83 @@
                                 },
                                 "nullable": true,
                                 "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
+                              },
+                              "self_service": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "nullable": true,
+                                "description": "Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.",
+                                "required": [
+                                  "actions"
+                                ],
+                                "properties": {
+                                  "actions": {
+                                    "type": "array",
+                                    "maxItems": 20,
+                                    "description": "Each action can be added once.",
+                                    "items": {
+                                      "type": "object",
+                                      "additionalProperties": false,
+                                      "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+                                      "required": [
+                                        "action",
+                                        "enabled",
+                                        "fulfilment",
+                                        "access"
+                                      ],
+                                      "properties": {
+                                        "action": {
+                                          "type": "string",
+                                          "enum": [
+                                            "submit_meter_reading",
+                                            "change_installment_rate",
+                                            "update_payment_method",
+                                            "change_billing_address",
+                                            "update_customer_details",
+                                            "change_tariff",
+                                            "report_move",
+                                            "terminate_contract"
+                                          ]
+                                        },
+                                        "enabled": {
+                                          "type": "boolean"
+                                        },
+                                        "fulfilment": {
+                                          "type": "string",
+                                          "enum": [
+                                            "in_chat",
+                                            "journey",
+                                            "link"
+                                          ]
+                                        },
+                                        "journey_id": {
+                                          "type": "string",
+                                          "format": "uuid",
+                                          "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+                                        },
+                                        "url": {
+                                          "type": "string",
+                                          "maxLength": 2048,
+                                          "description": "HTTPS address to open; only for link."
+                                        },
+                                        "access": {
+                                          "type": "string",
+                                          "enum": [
+                                            "anonymous",
+                                            "identified",
+                                            "verified"
+                                          ],
+                                          "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+                                        },
+                                        "guidance": {
+                                          "type": "string",
+                                          "maxLength": 500,
+                                          "description": "When the assistant should start this action."
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
                               }
                             }
                           },
@@ -392,6 +469,83 @@
                           },
                           "nullable": true,
                           "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
+                        },
+                        "self_service": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "nullable": true,
+                          "description": "Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.",
+                          "required": [
+                            "actions"
+                          ],
+                          "properties": {
+                            "actions": {
+                              "type": "array",
+                              "maxItems": 20,
+                              "description": "Each action can be added once.",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+                                "required": [
+                                  "action",
+                                  "enabled",
+                                  "fulfilment",
+                                  "access"
+                                ],
+                                "properties": {
+                                  "action": {
+                                    "type": "string",
+                                    "enum": [
+                                      "submit_meter_reading",
+                                      "change_installment_rate",
+                                      "update_payment_method",
+                                      "change_billing_address",
+                                      "update_customer_details",
+                                      "change_tariff",
+                                      "report_move",
+                                      "terminate_contract"
+                                    ]
+                                  },
+                                  "enabled": {
+                                    "type": "boolean"
+                                  },
+                                  "fulfilment": {
+                                    "type": "string",
+                                    "enum": [
+                                      "in_chat",
+                                      "journey",
+                                      "link"
+                                    ]
+                                  },
+                                  "journey_id": {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+                                  },
+                                  "url": {
+                                    "type": "string",
+                                    "maxLength": 2048,
+                                    "description": "HTTPS address to open; only for link."
+                                  },
+                                  "access": {
+                                    "type": "string",
+                                    "enum": [
+                                      "anonymous",
+                                      "identified",
+                                      "verified"
+                                    ],
+                                    "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+                                  },
+                                  "guidance": {
+                                    "type": "string",
+                                    "maxLength": 500,
+                                    "description": "When the assistant should start this action."
+                                  }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     },
@@ -613,6 +767,83 @@
                         },
                         "nullable": true,
                         "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
+                      },
+                      "self_service": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "description": "Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.",
+                        "required": [
+                          "actions"
+                        ],
+                        "properties": {
+                          "actions": {
+                            "type": "array",
+                            "maxItems": 20,
+                            "description": "Each action can be added once.",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+                              "required": [
+                                "action",
+                                "enabled",
+                                "fulfilment",
+                                "access"
+                              ],
+                              "properties": {
+                                "action": {
+                                  "type": "string",
+                                  "enum": [
+                                    "submit_meter_reading",
+                                    "change_installment_rate",
+                                    "update_payment_method",
+                                    "change_billing_address",
+                                    "update_customer_details",
+                                    "change_tariff",
+                                    "report_move",
+                                    "terminate_contract"
+                                  ]
+                                },
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "fulfilment": {
+                                  "type": "string",
+                                  "enum": [
+                                    "in_chat",
+                                    "journey",
+                                    "link"
+                                  ]
+                                },
+                                "journey_id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+                                },
+                                "url": {
+                                  "type": "string",
+                                  "maxLength": 2048,
+                                  "description": "HTTPS address to open; only for link."
+                                },
+                                "access": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anonymous",
+                                    "identified",
+                                    "verified"
+                                  ],
+                                  "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+                                },
+                                "guidance": {
+                                  "type": "string",
+                                  "maxLength": 500,
+                                  "description": "When the assistant should start this action."
+                                }
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                   }
@@ -747,6 +978,83 @@
                           },
                           "nullable": true,
                           "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
+                        },
+                        "self_service": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "nullable": true,
+                          "description": "Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.",
+                          "required": [
+                            "actions"
+                          ],
+                          "properties": {
+                            "actions": {
+                              "type": "array",
+                              "maxItems": 20,
+                              "description": "Each action can be added once.",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+                                "required": [
+                                  "action",
+                                  "enabled",
+                                  "fulfilment",
+                                  "access"
+                                ],
+                                "properties": {
+                                  "action": {
+                                    "type": "string",
+                                    "enum": [
+                                      "submit_meter_reading",
+                                      "change_installment_rate",
+                                      "update_payment_method",
+                                      "change_billing_address",
+                                      "update_customer_details",
+                                      "change_tariff",
+                                      "report_move",
+                                      "terminate_contract"
+                                    ]
+                                  },
+                                  "enabled": {
+                                    "type": "boolean"
+                                  },
+                                  "fulfilment": {
+                                    "type": "string",
+                                    "enum": [
+                                      "in_chat",
+                                      "journey",
+                                      "link"
+                                    ]
+                                  },
+                                  "journey_id": {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+                                  },
+                                  "url": {
+                                    "type": "string",
+                                    "maxLength": 2048,
+                                    "description": "HTTPS address to open; only for link."
+                                  },
+                                  "access": {
+                                    "type": "string",
+                                    "enum": [
+                                      "anonymous",
+                                      "identified",
+                                      "verified"
+                                    ],
+                                    "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+                                  },
+                                  "guidance": {
+                                    "type": "string",
+                                    "maxLength": 500,
+                                    "description": "When the assistant should start this action."
+                                  }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     },
@@ -986,6 +1294,83 @@
                           },
                           "nullable": true,
                           "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
+                        },
+                        "self_service": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "nullable": true,
+                          "description": "Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.",
+                          "required": [
+                            "actions"
+                          ],
+                          "properties": {
+                            "actions": {
+                              "type": "array",
+                              "maxItems": 20,
+                              "description": "Each action can be added once.",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+                                "required": [
+                                  "action",
+                                  "enabled",
+                                  "fulfilment",
+                                  "access"
+                                ],
+                                "properties": {
+                                  "action": {
+                                    "type": "string",
+                                    "enum": [
+                                      "submit_meter_reading",
+                                      "change_installment_rate",
+                                      "update_payment_method",
+                                      "change_billing_address",
+                                      "update_customer_details",
+                                      "change_tariff",
+                                      "report_move",
+                                      "terminate_contract"
+                                    ]
+                                  },
+                                  "enabled": {
+                                    "type": "boolean"
+                                  },
+                                  "fulfilment": {
+                                    "type": "string",
+                                    "enum": [
+                                      "in_chat",
+                                      "journey",
+                                      "link"
+                                    ]
+                                  },
+                                  "journey_id": {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+                                  },
+                                  "url": {
+                                    "type": "string",
+                                    "maxLength": 2048,
+                                    "description": "HTTPS address to open; only for link."
+                                  },
+                                  "access": {
+                                    "type": "string",
+                                    "enum": [
+                                      "anonymous",
+                                      "identified",
+                                      "verified"
+                                    ],
+                                    "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+                                  },
+                                  "guidance": {
+                                    "type": "string",
+                                    "maxLength": 500,
+                                    "description": "When the assistant should start this action."
+                                  }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     },
@@ -1205,6 +1590,83 @@
                         },
                         "nullable": true,
                         "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
+                      },
+                      "self_service": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "nullable": true,
+                        "description": "Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.",
+                        "required": [
+                          "actions"
+                        ],
+                        "properties": {
+                          "actions": {
+                            "type": "array",
+                            "maxItems": 20,
+                            "description": "Each action can be added once.",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+                              "required": [
+                                "action",
+                                "enabled",
+                                "fulfilment",
+                                "access"
+                              ],
+                              "properties": {
+                                "action": {
+                                  "type": "string",
+                                  "enum": [
+                                    "submit_meter_reading",
+                                    "change_installment_rate",
+                                    "update_payment_method",
+                                    "change_billing_address",
+                                    "update_customer_details",
+                                    "change_tariff",
+                                    "report_move",
+                                    "terminate_contract"
+                                  ]
+                                },
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "fulfilment": {
+                                  "type": "string",
+                                  "enum": [
+                                    "in_chat",
+                                    "journey",
+                                    "link"
+                                  ]
+                                },
+                                "journey_id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+                                },
+                                "url": {
+                                  "type": "string",
+                                  "maxLength": 2048,
+                                  "description": "HTTPS address to open; only for link."
+                                },
+                                "access": {
+                                  "type": "string",
+                                  "enum": [
+                                    "anonymous",
+                                    "identified",
+                                    "verified"
+                                  ],
+                                  "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+                                },
+                                "guidance": {
+                                  "type": "string",
+                                  "maxLength": 500,
+                                  "description": "When the assistant should start this action."
+                                }
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                   },
@@ -2060,7 +2522,7 @@
         },
         "responses": {
           "200": {
-            "description": "SSE data frames whose JSON payload follows the PublicEvent component schema.\nOnly delta, complete and error events are public. Completion follows persistence.\n",
+            "description": "SSE data frames whose JSON payload follows the PublicEvent component schema.\nOnly delta, action, complete and error events are public. Completion follows persistence.\n",
             "content": {
               "text/event-stream": {
                 "schema": {
@@ -4857,6 +5319,83 @@
                       },
                       "nullable": true,
                       "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
+                    },
+                    "self_service": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "description": "Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.",
+                      "required": [
+                        "actions"
+                      ],
+                      "properties": {
+                        "actions": {
+                          "type": "array",
+                          "maxItems": 20,
+                          "description": "Each action can be added once.",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+                            "required": [
+                              "action",
+                              "enabled",
+                              "fulfilment",
+                              "access"
+                            ],
+                            "properties": {
+                              "action": {
+                                "type": "string",
+                                "enum": [
+                                  "submit_meter_reading",
+                                  "change_installment_rate",
+                                  "update_payment_method",
+                                  "change_billing_address",
+                                  "update_customer_details",
+                                  "change_tariff",
+                                  "report_move",
+                                  "terminate_contract"
+                                ]
+                              },
+                              "enabled": {
+                                "type": "boolean"
+                              },
+                              "fulfilment": {
+                                "type": "string",
+                                "enum": [
+                                  "in_chat",
+                                  "journey",
+                                  "link"
+                                ]
+                              },
+                              "journey_id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+                              },
+                              "url": {
+                                "type": "string",
+                                "maxLength": 2048,
+                                "description": "HTTPS address to open; only for link."
+                              },
+                              "access": {
+                                "type": "string",
+                                "enum": [
+                                  "anonymous",
+                                  "identified",
+                                  "verified"
+                                ],
+                                "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+                              },
+                              "guidance": {
+                                "type": "string",
+                                "maxLength": 500,
+                                "description": "When the assistant should start this action."
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 },
@@ -5019,6 +5558,83 @@
                 },
                 "nullable": true,
                 "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
+              },
+              "self_service": {
+                "type": "object",
+                "additionalProperties": false,
+                "nullable": true,
+                "description": "Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.",
+                "required": [
+                  "actions"
+                ],
+                "properties": {
+                  "actions": {
+                    "type": "array",
+                    "maxItems": 20,
+                    "description": "Each action can be added once.",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+                      "required": [
+                        "action",
+                        "enabled",
+                        "fulfilment",
+                        "access"
+                      ],
+                      "properties": {
+                        "action": {
+                          "type": "string",
+                          "enum": [
+                            "submit_meter_reading",
+                            "change_installment_rate",
+                            "update_payment_method",
+                            "change_billing_address",
+                            "update_customer_details",
+                            "change_tariff",
+                            "report_move",
+                            "terminate_contract"
+                          ]
+                        },
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "fulfilment": {
+                          "type": "string",
+                          "enum": [
+                            "in_chat",
+                            "journey",
+                            "link"
+                          ]
+                        },
+                        "journey_id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+                        },
+                        "url": {
+                          "type": "string",
+                          "maxLength": 2048,
+                          "description": "HTTPS address to open; only for link."
+                        },
+                        "access": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+                        },
+                        "guidance": {
+                          "type": "string",
+                          "maxLength": 500,
+                          "description": "When the assistant should start this action."
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -5150,6 +5766,221 @@
             },
             "nullable": true,
             "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
+          },
+          "self_service": {
+            "type": "object",
+            "additionalProperties": false,
+            "nullable": true,
+            "description": "Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.",
+            "required": [
+              "actions"
+            ],
+            "properties": {
+              "actions": {
+                "type": "array",
+                "maxItems": 20,
+                "description": "Each action can be added once.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+                  "required": [
+                    "action",
+                    "enabled",
+                    "fulfilment",
+                    "access"
+                  ],
+                  "properties": {
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "submit_meter_reading",
+                        "change_installment_rate",
+                        "update_payment_method",
+                        "change_billing_address",
+                        "update_customer_details",
+                        "change_tariff",
+                        "report_move",
+                        "terminate_contract"
+                      ]
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "fulfilment": {
+                      "type": "string",
+                      "enum": [
+                        "in_chat",
+                        "journey",
+                        "link"
+                      ]
+                    },
+                    "journey_id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+                    },
+                    "url": {
+                      "type": "string",
+                      "maxLength": 2048,
+                      "description": "HTTPS address to open; only for link."
+                    },
+                    "access": {
+                      "type": "string",
+                      "enum": [
+                        "anonymous",
+                        "identified",
+                        "verified"
+                      ],
+                      "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+                    },
+                    "guidance": {
+                      "type": "string",
+                      "maxLength": 500,
+                      "description": "When the assistant should start this action."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "SelfServiceSettings": {
+        "type": "object",
+        "additionalProperties": false,
+        "nullable": true,
+        "description": "Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.",
+        "required": [
+          "actions"
+        ],
+        "properties": {
+          "actions": {
+            "type": "array",
+            "maxItems": 20,
+            "description": "Each action can be added once.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+              "required": [
+                "action",
+                "enabled",
+                "fulfilment",
+                "access"
+              ],
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "submit_meter_reading",
+                    "change_installment_rate",
+                    "update_payment_method",
+                    "change_billing_address",
+                    "update_customer_details",
+                    "change_tariff",
+                    "report_move",
+                    "terminate_contract"
+                  ]
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "fulfilment": {
+                  "type": "string",
+                  "enum": [
+                    "in_chat",
+                    "journey",
+                    "link"
+                  ]
+                },
+                "journey_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+                },
+                "url": {
+                  "type": "string",
+                  "maxLength": 2048,
+                  "description": "HTTPS address to open; only for link."
+                },
+                "access": {
+                  "type": "string",
+                  "enum": [
+                    "anonymous",
+                    "identified",
+                    "verified"
+                  ],
+                  "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+                },
+                "guidance": {
+                  "type": "string",
+                  "maxLength": 500,
+                  "description": "When the assistant should start this action."
+                }
+              }
+            }
+          }
+        }
+      },
+      "SelfServiceAction": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+        "required": [
+          "action",
+          "enabled",
+          "fulfilment",
+          "access"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "submit_meter_reading",
+              "change_installment_rate",
+              "update_payment_method",
+              "change_billing_address",
+              "update_customer_details",
+              "change_tariff",
+              "report_move",
+              "terminate_contract"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "fulfilment": {
+            "type": "string",
+            "enum": [
+              "in_chat",
+              "journey",
+              "link"
+            ]
+          },
+          "journey_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2048,
+            "description": "HTTPS address to open; only for link."
+          },
+          "access": {
+            "type": "string",
+            "enum": [
+              "anonymous",
+              "identified",
+              "verified"
+            ],
+            "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+          },
+          "guidance": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "When the assistant should start this action."
           }
         }
       },
@@ -5258,6 +6089,83 @@
                 },
                 "nullable": true,
                 "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
+              },
+              "self_service": {
+                "type": "object",
+                "additionalProperties": false,
+                "nullable": true,
+                "description": "Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.",
+                "required": [
+                  "actions"
+                ],
+                "properties": {
+                  "actions": {
+                    "type": "array",
+                    "maxItems": 20,
+                    "description": "Each action can be added once.",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+                      "required": [
+                        "action",
+                        "enabled",
+                        "fulfilment",
+                        "access"
+                      ],
+                      "properties": {
+                        "action": {
+                          "type": "string",
+                          "enum": [
+                            "submit_meter_reading",
+                            "change_installment_rate",
+                            "update_payment_method",
+                            "change_billing_address",
+                            "update_customer_details",
+                            "change_tariff",
+                            "report_move",
+                            "terminate_contract"
+                          ]
+                        },
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "fulfilment": {
+                          "type": "string",
+                          "enum": [
+                            "in_chat",
+                            "journey",
+                            "link"
+                          ]
+                        },
+                        "journey_id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+                        },
+                        "url": {
+                          "type": "string",
+                          "maxLength": 2048,
+                          "description": "HTTPS address to open; only for link."
+                        },
+                        "access": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+                        },
+                        "guidance": {
+                          "type": "string",
+                          "maxLength": 500,
+                          "description": "When the assistant should start this action."
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -5352,6 +6260,83 @@
                 },
                 "nullable": true,
                 "description": "Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings."
+              },
+              "self_service": {
+                "type": "object",
+                "additionalProperties": false,
+                "nullable": true,
+                "description": "Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.",
+                "required": [
+                  "actions"
+                ],
+                "properties": {
+                  "actions": {
+                    "type": "array",
+                    "maxItems": 20,
+                    "description": "Each action can be added once.",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.",
+                      "required": [
+                        "action",
+                        "enabled",
+                        "fulfilment",
+                        "access"
+                      ],
+                      "properties": {
+                        "action": {
+                          "type": "string",
+                          "enum": [
+                            "submit_meter_reading",
+                            "change_installment_rate",
+                            "update_payment_method",
+                            "change_billing_address",
+                            "update_customer_details",
+                            "change_tariff",
+                            "report_move",
+                            "terminate_contract"
+                          ]
+                        },
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "fulfilment": {
+                          "type": "string",
+                          "enum": [
+                            "in_chat",
+                            "journey",
+                            "link"
+                          ]
+                        },
+                        "journey_id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Journey to open; only for journey. Must be a journey of this organisation that the saving user can access."
+                        },
+                        "url": {
+                          "type": "string",
+                          "maxLength": 2048,
+                          "description": "HTTPS address to open; only for link."
+                        },
+                        "access": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected."
+                        },
+                        "guidance": {
+                          "type": "string",
+                          "maxLength": 500,
+                          "description": "When the assistant should start this action."
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           },
@@ -6121,8 +7106,114 @@
                 "format": "uuid"
               }
             }
+          },
+          {
+            "type": "object",
+            "description": "The assistant started a self-service action. Sent at most once per reply, just before complete. How it is done comes from the Website Chat's settings, never from the model. Clients should ignore event types they do not know.",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "action",
+              "request_id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "action"
+                ]
+              },
+              "action": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "action",
+                  "fulfilment",
+                  "access"
+                ],
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z_]{0,59}$"
+                  },
+                  "fulfilment": {
+                    "type": "string",
+                    "enum": [
+                      "in_chat",
+                      "journey",
+                      "link"
+                    ],
+                    "description": "in_chat uses the guided action endpoints; journey embeds journey_id; link opens url."
+                  },
+                  "journey_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "url": {
+                    "type": "string",
+                    "pattern": "^https://",
+                    "maxLength": 2048
+                  },
+                  "access": {
+                    "type": "string",
+                    "enum": [
+                      "anonymous",
+                      "identified",
+                      "verified"
+                    ],
+                    "description": "The least the customer must have before the action opens. Log in first when below it."
+                  }
+                }
+              },
+              "request_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
           }
         ]
+      },
+      "SelfServiceDirective": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "fulfilment",
+          "access"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "pattern": "^[a-z][a-z_]{0,59}$"
+          },
+          "fulfilment": {
+            "type": "string",
+            "enum": [
+              "in_chat",
+              "journey",
+              "link"
+            ],
+            "description": "in_chat uses the guided action endpoints; journey embeds journey_id; link opens url."
+          },
+          "journey_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "url": {
+            "type": "string",
+            "pattern": "^https://",
+            "maxLength": 2048
+          },
+          "access": {
+            "type": "string",
+            "enum": [
+              "anonymous",
+              "identified",
+              "verified"
+            ],
+            "description": "The least the customer must have before the action opens. Log in first when below it."
+          }
+        }
       },
       "PublicChatError": {
         "type": "object",
