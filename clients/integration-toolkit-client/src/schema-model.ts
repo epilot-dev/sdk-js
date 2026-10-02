@@ -58,7 +58,7 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   CONDITIONAL_VARIANT_WRITE_WARNING: {
     level: 'warning',
     description:
-      'A variant write succeeded but not exactly as sent: a value the schema does not let a variant override was dropped, a live or past-dated version was rewritten, or the entity is near its variant cap. The pricing code in details says which',
+      'One variant write succeeded with a warning. The variant is stored and the rest of the batch and the run continue. details.code names the warning',
   },
   CONDITIONAL_VARIANTS_WRITTEN: {
     level: 'success',
@@ -217,7 +217,7 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   RELATION_REF_ITEM_NOT_FOUND: {
     level: 'error',
     description:
-      'The relation_ref target entity exists but the referenced item/value could not be matched — skipped as non-retryable. Check the mapping configuration and the entity data.',
+      'The relation_ref value could not be matched on the target entity (invalid mapped value, or still no match after writing it to the target) — skipped as non-retryable. Check the mapping configuration and the entity data.',
   },
   RELATION_REF_VALUE_UNDEFINED: {
     level: 'error',
