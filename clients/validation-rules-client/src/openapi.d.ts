@@ -83,13 +83,16 @@ declare namespace Components {
             operator: /**
              * Predefined comparison operator. Compatibility (enforced at write time):
              * - number: equal, notEqual, greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, regexMatch,
-             *   maxDigits, maxDecimals
+             *   matchesFormat, maxDigits, maxDecimals
              * - date: dateBefore, dateOnOrBefore, dateAfter, dateOnOrAfter, dateBetween, notInFuture, notInPast, regexMatch
-             * - text: equal, notEqual, contains, doesNotContain, startsWith, endsWith, regexMatch, lengthBetween,
+             * - text: equal, notEqual, contains, doesNotContain, startsWith, endsWith, regexMatch, matchesFormat, lengthBetween,
              *   greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, maxDigits, maxDecimals
              * Range operators (between, dateBetween, lengthBetween) require a `range` value;
              * unary operators (notInFuture, notInPast) require a `none` value; all others require a scalar value.
              * regexMatch validates the raw input string's format and always takes a static string pattern.
+             * matchesFormat validates the raw input against a known identifier format (checksum, length,
+             * characters) and always takes a static value naming a `FormatId`. The input is normalized
+             * (whitespace stripped, IBAN upper-cased) before checking; the operator never bounds the value domain.
              * Numeric comparison operators on text rules parse the input as a number at evaluation time
              * (free-text fields often hold numbers); unparsable input fails the condition.
              * maxDigits limits how many digits the written input may contain in total (grouping
@@ -422,6 +425,19 @@ declare namespace Components {
             ];
         }
         /**
+         * A known identifier format, the static comparison value of a `matchesFormat` condition.
+         * The raw input is normalized (whitespace stripped, IBAN upper-cased) and then checked for
+         * checksum, length and allowed characters:
+         * - iban: ISO 13616 IBAN with ISO 7064 mod 97-10 checksum and the per-country length
+         *   from the SWIFT registry. Example: `DE89 3704 0044 0532 0130 00`
+         * - malo_id: German Marktlokations-ID - 11 digits, issuer digit 1-9, BDEW check digit.
+         *   Example: `41373567898`
+         *
+         * example:
+         * iban
+         */
+        export type FormatId = "iban" | "malo_id";
+        /**
          * Response envelope for listing all validation rules within an organization.
          */
         export interface GetValidationRulesResponse {
@@ -568,13 +584,16 @@ declare namespace Components {
         /**
          * Predefined comparison operator. Compatibility (enforced at write time):
          * - number: equal, notEqual, greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, regexMatch,
-         *   maxDigits, maxDecimals
+         *   matchesFormat, maxDigits, maxDecimals
          * - date: dateBefore, dateOnOrBefore, dateAfter, dateOnOrAfter, dateBetween, notInFuture, notInPast, regexMatch
-         * - text: equal, notEqual, contains, doesNotContain, startsWith, endsWith, regexMatch, lengthBetween,
+         * - text: equal, notEqual, contains, doesNotContain, startsWith, endsWith, regexMatch, matchesFormat, lengthBetween,
          *   greaterThan, greaterThanInclusive, lessThan, lessThanInclusive, between, maxDigits, maxDecimals
          * Range operators (between, dateBetween, lengthBetween) require a `range` value;
          * unary operators (notInFuture, notInPast) require a `none` value; all others require a scalar value.
          * regexMatch validates the raw input string's format and always takes a static string pattern.
+         * matchesFormat validates the raw input against a known identifier format (checksum, length,
+         * characters) and always takes a static value naming a `FormatId`. The input is normalized
+         * (whitespace stripped, IBAN upper-cased) before checking; the operator never bounds the value domain.
          * Numeric comparison operators on text rules parse the input as a number at evaluation time
          * (free-text fields often hold numbers); unparsable input fails the condition.
          * maxDigits limits how many digits the written input may contain in total (grouping
@@ -583,7 +602,7 @@ declare namespace Components {
          * and, like the other numeric operators, are also allowed on text rules.
          *
          */
-        export type Operator = "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "between" | "dateBefore" | "dateOnOrBefore" | "dateAfter" | "dateOnOrAfter" | "dateBetween" | "notInFuture" | "notInPast" | "contains" | "doesNotContain" | "startsWith" | "endsWith" | "regexMatch" | "lengthBetween" | "maxDigits" | "maxDecimals";
+        export type Operator = "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "between" | "dateBefore" | "dateOnOrBefore" | "dateAfter" | "dateOnOrAfter" | "dateBetween" | "notInFuture" | "notInPast" | "contains" | "doesNotContain" | "startsWith" | "endsWith" | "regexMatch" | "matchesFormat" | "lengthBetween" | "maxDigits" | "maxDecimals";
         /**
          * Condition definition for a pattern-based validation rule (2 levels deep)
          */
@@ -1643,6 +1662,7 @@ export type DocumentRuleType = Components.Schemas.DocumentRuleType;
 export type EnvironmentValue = Components.Schemas.EnvironmentValue;
 export type ExternalValue = Components.Schemas.ExternalValue;
 export type FileTypesValue = Components.Schemas.FileTypesValue;
+export type FormatId = Components.Schemas.FormatId;
 export type GetValidationRulesResponse = Components.Schemas.GetValidationRulesResponse;
 export type NoValue = Components.Schemas.NoValue;
 export type NumericCondition = Components.Schemas.NumericCondition;
