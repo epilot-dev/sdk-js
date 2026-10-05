@@ -6134,7 +6134,9 @@
       },
       "ResolveContext": {
         "type": "object",
-        "additionalProperties": true,
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ContextConditionValue"
+        },
         "description": "The situation to resolve for: a flat map keyed by condition name. A condition left out\nmatches only variants that leave it unpinned; an empty map therefore returns the `default`\nvariant.\n\nEach value is an exact value, typed by its condition, or a single-operator predicate:\n\n- `{ \"lt\": v }`, `{ \"lte\": v }`, `{ \"gt\": v }`, `{ \"gte\": v }` — order, against a `number`\n  or `date` condition\n- `{ \"in\": [...] }` — membership, against a `string`, `select` or `number` condition\n- `{ \"between\": \"2026-03-01\" }` — `daterange` containment, which a plain date also means\n- `{ \"exists\": true }` — pinned to any value; `{ \"exists\": false }` — left unpinned\n\nAn `in` list carries at most 50,000 values. A `string` or `select` matches exactly and\ncase-sensitively. A `location` of format\n`postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying\n`postal_code` and `city`, named as an entity address names them, whose city is compared\ncase- and whitespace-insensitively.\n\n`default` and names beginning with `_` are reserved and cannot be supplied.\n",
         "example": {
           "postal_code": "46045",
@@ -6258,7 +6260,9 @@
       },
       "VariantConditions": {
         "type": "object",
-        "additionalProperties": true,
+        "additionalProperties": {
+          "$ref": "#/components/schemas/PinnedConditionValue"
+        },
         "required": [
           "default"
         ],
@@ -6275,11 +6279,203 @@
       },
       "PinnedConditions": {
         "type": "object",
-        "additionalProperties": true,
+        "additionalProperties": {
+          "$ref": "#/components/schemas/PinnedConditionValue"
+        },
         "description": "The situation this variant applies to: a flat map keyed by condition name. A condition left\nout is a wildcard, which is what makes adding a condition to a schema non-breaking for\nexisting variants.\n\nExact values only; predicates belong to reads. Values are stored canonicalized for their\ntype: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`\nand `until` where an empty string is an open end, a `location` of format `postal_code` the\npostal code itself and one of format `postal_code_city` an object carrying `postal_code` and\n`city`.\n\n`default` and names beginning with `_` are reserved; use the request's `default` flag.\n",
         "example": {
           "postal_code": "46045"
         }
+      },
+      "PinnedConditionValue": {
+        "description": "One condition's exact value. Which of these shapes a condition takes is set by its type in the\nentity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.\n",
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "$ref": "#/components/schemas/ConditionDateRange"
+          },
+          {
+            "$ref": "#/components/schemas/PostalCodeCity"
+          }
+        ]
+      },
+      "ConditionDateRange": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "The value of a `daterange` condition. A bound that is absent, `null` or an empty string is an\nopen end; stored, an open end is an empty string.\n",
+        "properties": {
+          "from": {
+            "type": "string",
+            "nullable": true,
+            "example": "2026-01-01"
+          },
+          "until": {
+            "type": "string",
+            "nullable": true,
+            "example": "2027-01-01"
+          }
+        }
+      },
+      "PostalCodeCity": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "The value of a `location` condition of format `postal_code_city`, its parts named as an entity\naddress names them.\n",
+        "required": [
+          "postal_code",
+          "city"
+        ],
+        "properties": {
+          "postal_code": {
+            "type": "string",
+            "minLength": 1,
+            "example": "50667"
+          },
+          "city": {
+            "type": "string",
+            "minLength": 1,
+            "example": "Köln"
+          }
+        }
+      },
+      "ContextConditionValue": {
+        "description": "One condition's value in a resolve context or listing filter: an exact value, or a predicate.\nWhich of these a condition takes is set by its type in the entity's schema, and a value of\nanother shape is refused with `CONTEXT_FORMAT_INVALID`, or `OPERATOR_UNSUPPORTED` for a\npredicate its type does not support.\n",
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "$ref": "#/components/schemas/PostalCodeCity"
+          },
+          {
+            "$ref": "#/components/schemas/ConditionPredicate"
+          }
+        ]
+      },
+      "ConditionPredicate": {
+        "description": "A single-operator predicate.",
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "lt"
+            ],
+            "properties": {
+              "lt": {
+                "$ref": "#/components/schemas/OrderedConditionOperand"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "lte"
+            ],
+            "properties": {
+              "lte": {
+                "$ref": "#/components/schemas/OrderedConditionOperand"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "gt"
+            ],
+            "properties": {
+              "gt": {
+                "$ref": "#/components/schemas/OrderedConditionOperand"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "gte"
+            ],
+            "properties": {
+              "gte": {
+                "$ref": "#/components/schemas/OrderedConditionOperand"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "in"
+            ],
+            "properties": {
+              "in": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "between"
+            ],
+            "properties": {
+              "between": {
+                "type": "string",
+                "description": "The instant a `daterange` condition's range must contain."
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "exists"
+            ],
+            "properties": {
+              "exists": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "OrderedConditionOperand": {
+        "description": "A number, or a date as an RFC 3339 date or date-time.",
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          }
+        ]
       },
       "VariantValues": {
         "type": "object",
@@ -6907,7 +7103,9 @@
       },
       "VariantConditionFilter": {
         "type": "object",
-        "additionalProperties": true,
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ContextConditionValue"
+        },
         "description": "Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the\nsame exact values and predicates a resolve context does. A condition left out is not\nfiltered on. An `in` list carries at most 50,000 values.\n\nA variant matches only where it pins the condition — unlike `:resolve`, where an unpinned\ncondition matches any value. `{ \"exists\": false }` selects the variants that leave it\nunpinned.\n\n`default` is accepted as an exact boolean and takes no predicate: `true` selects the\nentity's fallback variant, `false` every variant that is not it. Names beginning with `_`\nare reserved.\n",
         "example": {
           "postal_code": "46045",
@@ -11276,7 +11474,7 @@
       "CatalogContext": {
         "type": "object",
         "additionalProperties": false,
-        "description": "One context per entity type, each the authenticated resolve's context and checked against\nthat type's schema alone. A product resolves against `product`, a price and each of a\ncomposite's components against `price`, and a coupon against `coupon`. A type left out\nresolves against an empty context, which serves the `default` variant.\n",
+        "description": "One context per entity type, each the authenticated resolve's context and checked against\nthat type's schema alone. A product resolves against `product`, and a price and each of a\ncomposite's components against `price`. A type left out resolves against an empty context,\nwhich serves the `default` variant.\n",
         "properties": {
           "product": {
             "$ref": "#/components/schemas/ResolveContext"
@@ -11424,7 +11622,7 @@
       },
       "ResolvedPriceComponents": {
         "type": "object",
-        "description": "The components of a composite price as the v2 catalog serves them: hydrated in place, and\na component that is itself conditional resolved against the same context, carrying the\ndiscriminators a resolved payload carries. A conditional component with no variant in\neffect — nothing matches and there is no default — is left out, as a deleted component is\n(ADR 0048).\n",
+        "description": "The components of a composite price as the v2 catalog serves them: hydrated in place, and\na component that is itself conditional resolved against the same context, carrying the\ndiscriminators a resolved payload carries. A conditional component with no variant in\neffect — nothing matches and there is no default — is left out, as a deleted component is.\n",
         "properties": {
           "price_components": {
             "type": "array",
@@ -11575,14 +11773,14 @@
           },
           "price_components": {
             "type": "array",
-            "description": "Present for a composite price that serves at least one component: the components this\npair is the combination of, each with its variant where one produced it. A conditional\ncomponent with no variant in effect is left out of the composite and is not named here\n(ADR 0048). A component line item carries no reference of its own.\n",
+            "description": "Present for a composite price that serves at least one component: the components this\npair is the combination of, each with its variant where one produced it. A conditional\ncomponent with no variant in effect is left out of the composite and is not named here.\nA component line item carries no reference of its own.\n",
             "items": {
               "$ref": "#/components/schemas/CatalogReferenceMember"
             }
           },
           "coupons": {
             "type": "array",
-            "description": "Present when coupons apply to the price. A coupon's `variant` exists only once coupons\ncan be conditional.\n",
+            "description": "Present when coupons apply to the price. Coupons are served as stored, so a coupon member\ncarries no `variant`.\n",
             "items": {
               "$ref": "#/components/schemas/CatalogReferenceMember"
             }
