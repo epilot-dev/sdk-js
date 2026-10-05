@@ -432,11 +432,13 @@ declare namespace Components {
          *   from the SWIFT registry. Example: `DE89 3704 0044 0532 0130 00`
          * - malo_id: German Marktlokations-ID - 11 digits, issuer digit 1-9, BDEW check digit.
          *   Example: `41373567898`
+         * - phone: a valid national or international phone number per the national numbering plan
+         *   (libphonenumber); numbers without country code are read as German. Example: `0221 1234567`
          *
          * example:
          * iban
          */
-        export type FormatId = "iban" | "malo_id";
+        export type FormatId = "iban" | "malo_id" | "phone";
         /**
          * Response envelope for listing all validation rules within an organization.
          */
