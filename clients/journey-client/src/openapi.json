@@ -527,10 +527,13 @@
       "get": {
         "operationId": "getJourneyEnvironment",
         "summary": "getJourneyEnvironment",
-        "description": "Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.",
+        "description": "Resolve the environment variables referenced by this journey: the environment-backed datasources declared in its steps, whether they source a block's options or supply the value an attached validation rule compares against, answered per datasource id; and the variables its logic conditions read, keyed by variable key (`variables` / `variableErrors`). Only browser-safe value types are returned; validation-rule values additionally exclude `Map`. Accepts either the public journey access token bound to this journey, or the caller's own portal (ECP) or epilot user token. A PRIVATE journey is served only to a portal or user token permitted to view it, the same rule getJourney applies.",
         "security": [
           {
             "EpilotAuth": []
+          },
+          {
+            "PortalAuth": []
           }
         ],
         "tags": [
@@ -540,7 +543,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "Journey ID bound to the supplied journey access token",
+            "description": "Journey ID",
             "required": true,
             "schema": {
               "type": "string",
@@ -550,7 +553,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Resolved environment-backed datasources",
+            "description": "Resolved environment-backed datasources and validation-rule environment values",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -568,13 +571,76 @@
             }
           },
           "401": {
-            "description": "Journey access token missing"
+            "description": "Token missing, invalid, or naming no organization"
           },
           "403": {
-            "description": "Journey access token does not match the journey"
+            "description": "Journey access token does not match the journey, or the journey is PRIVATE and the token is not permitted to view it"
           },
           "502": {
             "description": "Environment resolver unavailable"
+          }
+        }
+      }
+    },
+    "/v1/journey/configuration/{id}/external-values": {
+      "post": {
+        "operationId": "resolveJourneyExternalValues",
+        "summary": "resolveJourneyExternalValues",
+        "description": "Resolve the External Values hooks this journey's validation rules compare against.\n\nThe journey runtime never calls external-values-api itself. A request names a datasource\nid declared by the saved journey config; the app and hook it resolves are read from that\nconfig, so a visitor cannot aim an installed app's integration at an arbitrary hook.\n\nRequires a portal token: a hook call reaches the organization's third-party system, so it\nstays behind the identified-customer boundary. Public journeys skip these conditions.\n\nAnswers 200 whenever the request itself was valid, including when a hook failed — per\ndatasource, so one unreachable system never fails the rules that did resolve.\n",
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "tags": [
+          "Journeys"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JourneyExternalValuesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resolution result per requested datasource",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Always private, no-store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyExternalValuesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed request body"
+          },
+          "403": {
+            "description": "Not an identified portal user, or not permitted to read this journey"
           }
         }
       }
@@ -583,7 +649,7 @@
       "get": {
         "operationId": "getJourneyEnvironmentVariables",
         "summary": "getJourneyEnvironmentVariables",
-        "description": "List the organization's environment variables that a journey block may use as an options source. Only Map variables that currently hold a valid value are returned. Intended for the journey builder's authoring UI; requires a journey authoring token, not an environments token.",
+        "description": "List the organization's client-safe environment variables a journey may use: Map and List<Link> as an options source; Text, Number, Boolean and lists of them in logic conditions. Only variables that currently hold a valid value are returned. Intended for the journey builder's authoring UI; requires a journey authoring token, not an environments token.",
         "security": [
           {
             "EpilotAuth": []
@@ -594,7 +660,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Map environment variables available as an options source",
+            "description": "Environment variables available to journeys",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -1476,6 +1542,40 @@
           }
         }
       },
+      "EnvironmentScalarList": {
+        "description": "A list of scalars, served under this service's own `List<Text>`,\n`List<Number>` or `List<Boolean>` token (ER-5455). Read by logic\nconditions; flattened to `items` by the journey runtime.\n",
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "Text",
+              "Number",
+              "Boolean"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          }
+        }
+      },
       "JourneyEnvironmentResponse": {
         "type": "object",
         "required": [
@@ -1552,6 +1652,194 @@
                 }
               }
             }
+          },
+          "variables": {
+            "description": "Values read by logic conditions, keyed by variable key.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "type",
+                "value"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "Text",
+                    "Number",
+                    "Boolean",
+                    "List<Text>",
+                    "List<Number>",
+                    "List<Boolean>"
+                  ]
+                },
+                "value": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EnvironmentScalarList"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "variableErrors": {
+            "description": "Logic-condition keys that did not resolve, keyed by variable key.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "code"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "not_found",
+                    "unsupported_type",
+                    "not_set",
+                    "invalid_value"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "JourneyExternalValuesRequest": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "description": "The External Values datasources to resolve. A datasource is named by the id the journey config declares; the app and hook it points at are read from that config, never from this request.",
+            "items": {
+              "type": "object",
+              "required": [
+                "datasourceId",
+                "context"
+              ],
+              "properties": {
+                "datasourceId": {
+                  "type": "string"
+                },
+                "context": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Everything the hook reads, as one named map passed to it as `Context`: the validated value under `input`, plus each configured context binding under the name it was bound as."
+                }
+              }
+            }
+          }
+        }
+      },
+      "JourneyExternalValuesResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "errors"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "datasourceId",
+                "values"
+              ],
+              "properties": {
+                "datasourceId": {
+                  "type": "string"
+                },
+                "values": {
+                  "type": "object",
+                  "description": "Successfully extracted and coerced results, keyed by `result_id` and narrowed to the results the journey declares.",
+                  "additionalProperties": true
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalValueError"
+                  }
+                },
+                "policy": {
+                  "type": "object",
+                  "properties": {
+                    "on_unavailable": {
+                      "type": "string",
+                      "enum": [
+                        "skip",
+                        "block"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": "array",
+            "description": "Datasources that produced no result at all.",
+            "items": {
+              "type": "object",
+              "required": [
+                "datasourceId",
+                "code"
+              ],
+              "properties": {
+                "datasourceId": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "unknown_datasource",
+                    "resolver_unavailable"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "ExternalValueError": {
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "result_id": {
+            "type": "string",
+            "description": "Absent for hook-level failures, when no result was produced."
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
           }
         }
       },
@@ -1577,17 +1865,35 @@
                 "type": {
                   "type": "string",
                   "enum": [
+                    "Text",
+                    "Number",
+                    "Boolean",
                     "Map",
-                    "List<Link>"
+                    "List<Link>",
+                    "List<Text>",
+                    "List<Number>",
+                    "List<Boolean>"
                   ]
                 },
                 "value": {
                   "oneOf": [
                     {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
                       "$ref": "#/components/schemas/EnvironmentMap"
                     },
                     {
                       "$ref": "#/components/schemas/EnvironmentLinkList"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EnvironmentScalarList"
                     }
                   ]
                 },
@@ -1733,6 +2039,10 @@
                   ]
                 },
                 "hideNextButton": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "guestVisible": {
                   "type": "boolean",
                   "nullable": true
                 },
@@ -1889,7 +2199,7 @@
                             },
                             "referenceType": {
                               "type": "string",
-                              "description": "Indicates reference type (block or context parameter)"
+                              "description": "Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)"
                             },
                             "referenceId": {
                               "type": "string",
@@ -2198,6 +2508,17 @@
               "thirdPartyCookies": {
                 "type": "boolean",
                 "description": "If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent."
+              },
+              "betaFeatures": {
+                "type": "object",
+                "description": "Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.\n",
+                "additionalProperties": false,
+                "properties": {
+                  "modernProducts": {
+                    "type": "boolean",
+                    "description": "Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.\n"
+                  }
+                }
               }
             },
             "required": [
@@ -2216,6 +2537,11 @@
               "format": "uuid",
               "example": "123e4567-e89b-12d3-a456-426614174000"
             }
+          },
+          "blueprint_customization": {
+            "type": "object",
+            "description": "Blueprint field-locking contract (server-managed). Carries the\nauthor plane (locks, default level) and the org plane (server-derived\noverlay). Public writes never persist client-supplied values — the\nstored contract is authoritative; it is written only by the\nBlueprints install pipeline.\n",
+            "additionalProperties": true
           },
           "createdBy": {
             "type": "string"
@@ -2287,6 +2613,10 @@
                   ]
                 },
                 "hideNextButton": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "guestVisible": {
                   "type": "boolean",
                   "nullable": true
                 },
@@ -2443,7 +2773,7 @@
                             },
                             "referenceType": {
                               "type": "string",
-                              "description": "Indicates reference type (block or context parameter)"
+                              "description": "Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)"
                             },
                             "referenceId": {
                               "type": "string",
@@ -2734,6 +3064,17 @@
                     "type": "number"
                   }
                 }
+              },
+              "betaFeatures": {
+                "type": "object",
+                "description": "Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.\n",
+                "additionalProperties": false,
+                "properties": {
+                  "modernProducts": {
+                    "type": "boolean",
+                    "description": "Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.\n"
+                  }
+                }
               }
             },
             "additionalProperties": false
@@ -2749,6 +3090,11 @@
               "format": "uuid",
               "example": "123e4567-e89b-12d3-a456-426614174000"
             }
+          },
+          "blueprint_customization": {
+            "type": "object",
+            "description": "Blueprint field-locking contract (server-managed). Carries the\nauthor plane (locks, default level) and the org plane (server-derived\noverlay). Public writes never persist client-supplied values — the\nstored contract is authoritative; it is written only by the\nBlueprints install pipeline.\n",
+            "additionalProperties": true
           }
         },
         "required": [
