@@ -35,6 +35,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 **Catalog API**
 - [`$searchCatalog`](#$searchcatalog)
 - [`$privateSearchCatalog`](#$privatesearchcatalog)
+- [`$resolveCatalog`](#$resolvecatalog)
 
 **Promo Codes API**
 - [`$validatePromoCodes`](#$validatepromocodes)
@@ -141,9 +142,14 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`BatchUpsertResultEntry`](#batchupsertresultentry)
 - [`BatchDeleteResultEntry`](#batchdeleteresultentry)
 - [`Error`](#error)
+- [`RefusedLineItem`](#refusedlineitem)
 - [`ReportedError`](#reportederror)
 - [`ConditionalPricingError`](#conditionalpricingerror)
+- [`CatalogReferenceErrorCode`](#catalogreferenceerrorcode)
+- [`CatalogReferenceError`](#catalogreferenceerror)
+- [`BaseProduct`](#baseproduct)
 - [`Product`](#product)
+- [`HydratedProduct`](#hydratedproduct)
 - [`Opportunity`](#opportunity)
 - [`Order`](#order)
 - [`Price`](#price)
@@ -164,6 +170,15 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`CatalogSearch`](#catalogsearch)
 - [`CatalogFieldsParam`](#catalogfieldsparam)
 - [`CatalogSearchResult`](#catalogsearchresult)
+- [`ResolveCatalogRequest`](#resolvecatalogrequest)
+- [`CatalogContext`](#catalogcontext)
+- [`CatalogEntry`](#catalogentry)
+- [`ResolveCatalogResult`](#resolvecatalogresult)
+- [`CatalogPair`](#catalogpair)
+- [`ResolvedPriceComponents`](#resolvedpricecomponents)
+- [`CatalogWarning`](#catalogwarning)
+- [`CatalogReference`](#catalogreference)
+- [`CatalogReferenceMember`](#catalogreferencemember)
 - [`SearchProvidersParams`](#searchprovidersparams)
 - [`SearchStreetsParams`](#searchstreetsparams)
 - [`AvailabilityCheckParams`](#availabilitycheckparams)
@@ -401,6 +416,7 @@ const { data } = await client.createOrder(
         price_mappings: [ /* ... */ ],
         is_tax_inclusive: true,
         _product: { /* ... */ },
+        catalog_reference: { /* ... */ },
         type: 'one_time',
         billing_period: 'weekly',
         unit_amount: 0,
@@ -431,6 +447,7 @@ const { data } = await client.createOrder(
         price_mappings: [ /* ... */ ],
         is_tax_inclusive: true,
         _product: { /* ... */ },
+        catalog_reference: { /* ... */ },
         is_composite_price: true,
         item_components: [ /* ... */ ],
         selected_price_component_ids: ['string'],
@@ -634,6 +651,7 @@ const { data } = await client.putOrder(
         price_mappings: [ /* ... */ ],
         is_tax_inclusive: true,
         _product: { /* ... */ },
+        catalog_reference: { /* ... */ },
         type: 'one_time',
         billing_period: 'weekly',
         unit_amount: 0,
@@ -664,6 +682,7 @@ const { data } = await client.putOrder(
         price_mappings: [ /* ... */ ],
         is_tax_inclusive: true,
         _product: { /* ... */ },
+        catalog_reference: { /* ... */ },
         is_composite_price: true,
         item_components: [ /* ... */ ],
         selected_price_component_ids: ['string'],
@@ -1014,6 +1033,64 @@ const { data } = await client.$privateSearchCatalog(
     {
       "schema": "price",
       "unit_amount_decimal": "124.342343434"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$resolveCatalog`
+
+Returns the products and prices a journey block shows as catalog pairs, each member resolved
+for its own entity type's context at `as_of`. A pair carries the product, one of its prices, the coupons th
+
+`POST /v2/public/catalog`
+
+```ts
+const { data } = await client.$resolveCatalog(
+  null,
+  {
+    entries: [
+      {
+        product_id: 'product-pv-2027',
+        price_id: 'price-sp26d1yo'
+      }
+    ],
+    context: {
+      product: {
+        postal_code: '46045',
+        channel: 'direct'
+      },
+      price: {
+        postal_code: '46045'
+      }
+    },
+    as_of: '2026-12-20T10:15:00Z'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "pairs": [
+    {
+      "product": {},
+      "price": {},
+      "coupons": [],
+      "catalog_reference": {}
+    }
+  ],
+  "warnings": [
+    {
+      "code": "CATALOG_ENTRY_NOT_FOUND",
+      "message": "string",
+      "details": {}
     }
   ]
 }
@@ -3963,6 +4040,17 @@ type Error = {
 }
 ```
 
+### `RefusedLineItem`
+
+The line item a checkout refusal is about, named as the item names itself.
+
+```ts
+type RefusedLineItem = {
+  price_id: string
+  product_id?: string
+}
+```
+
 ### `ReportedError`
 
 The `error` field of an error response: the message, or — where the request failed
@@ -3990,12 +4078,40 @@ type ConditionalPricingError = {
 }
 ```
 
-### `Product`
+### `CatalogReferenceErrorCode`
 
-The product entity
+Why an order operation refused a catalog reference. Other refusals carry no `code`.
+
+- `CATALOG_REFERENCE_MISSING` (400): a line item whose product or price is conditional carries no `catalog_reference`, or one with no variant for that member
+- `CATALOG_REFERENCE_SIGNATURE_INVALID` (400): a `catalog
 
 ```ts
-type Product = {
+type CatalogReferenceErrorCode = "CATALOG_REFERENCE_MISSING" | "CATALOG_REFERENCE_SIGNATURE_INVALID" | "CATALOG_REFERENCE_UNRESOLVABLE"
+```
+
+### `CatalogReferenceError`
+
+An error from an order operation that prices line items. A catalog-reference refusal carries
+`code` and `details`, typed per code. Every other refusal carries neither.
+
+
+```ts
+type CatalogReferenceError = {
+  message: string
+  status?: number
+  cause?: string
+  error?: string | Record<string, unknown>[]
+}
+```
+
+### `BaseProduct`
+
+The product's own attributes — everything but the two relations whose shape depends on
+whether the product was hydrated, which `Product` and `HydratedProduct` add.
+
+
+```ts
+type BaseProduct = {
   description?: string
   code?: string
   type?: "product" | "service"
@@ -4005,12 +4121,6 @@ type Product = {
     _tags?: string[]
     feature?: string
   }>
-  cross_sellable_products?: {
-    $relation?: Array<{
-      entity_id?: { ... }
-      _tags?: { ... }
-    }>
-  }
   product_images?: {
     $relation?: Array<{
       entity_id?: { ... }
@@ -4055,12 +4165,178 @@ type Product = {
       _tags?: { ... }
     }
   }>
-  price_options?: {
+  is_conditional?: boolean
+  _availability_files?: Array<{
+    _id: string
+    filename: string
+    mime_type: string
+    versions: Array<{
+      s3ref: { ... }
+    }>
+    _schema: string
+    _org: string
+    _created_at: string // date-time
+    _updated_at: string // date-time
+    _title?: string
+    $relation?: {
+      entity_id?: { ... }
+      _tags?: { ... }
+    }
+  }>
+  _id?: string
+  _title?: string
+  _org_id?: string
+  _created_at?: string
+  _updated_at?: string
+}
+```
+
+### `Product`
+
+The product entity, its relations as stored.
+
+```ts
+type Product = {
+  description?: string
+  code?: string
+  type?: "product" | "service"
+  name?: string
+  categories?: string[]
+  feature?: Array<{
+    _tags?: string[]
+    feature?: string
+  }>
+  product_images?: {
     $relation?: Array<{
       entity_id?: { ... }
       _tags?: { ... }
     }>
-  }
+  } | Array<{
+    _id: string
+    filename: string
+    mime_type: string
+    versions: Array<{
+      s3ref: { ... }
+    }>
+    _schema: string
+    _org: string
+    _created_at: string // date-time
+    _updated_at: string // date-time
+    _title?: string
+    $relation?: {
+      entity_id?: { ... }
+      _tags?: { ... }
+    }
+  }>
+  product_downloads?: {
+    $relation?: Array<{
+      entity_id?: { ... }
+      _tags?: { ... }
+    }>
+  } | Array<{
+    _id: string
+    filename: string
+    mime_type: string
+    versions: Array<{
+      s3ref: { ... }
+    }>
+    _schema: string
+    _org: string
+    _created_at: string // date-time
+    _updated_at: string // date-time
+    _title?: string
+    $relation?: {
+      entity_id?: { ... }
+      _tags?: { ... }
+    }
+  }>
+  is_conditional?: boolean
+  _availability_files?: Array<{
+    _id: string
+    filename: string
+    mime_type: string
+    versions: Array<{
+      s3ref: { ... }
+    }>
+    _schema: string
+    _org: string
+    _created_at: string // date-time
+    _updated_at: string // date-time
+    _title?: string
+    $relation?: {
+      entity_id?: { ... }
+      _tags?: { ... }
+    }
+  }>
+  _id?: string
+  _title?: string
+  _org_id?: string
+  _created_at?: string
+  _updated_at?: string
+}
+```
+
+### `HydratedProduct`
+
+The product entity hydrated one level deep, as the v2 public catalog serves it: each
+relation holds the entities it referenced, sanitised, with their own relations as stored.
+
+
+```ts
+type HydratedProduct = {
+  description?: string
+  code?: string
+  type?: "product" | "service"
+  name?: string
+  categories?: string[]
+  feature?: Array<{
+    _tags?: string[]
+    feature?: string
+  }>
+  product_images?: {
+    $relation?: Array<{
+      entity_id?: { ... }
+      _tags?: { ... }
+    }>
+  } | Array<{
+    _id: string
+    filename: string
+    mime_type: string
+    versions: Array<{
+      s3ref: { ... }
+    }>
+    _schema: string
+    _org: string
+    _created_at: string // date-time
+    _updated_at: string // date-time
+    _title?: string
+    $relation?: {
+      entity_id?: { ... }
+      _tags?: { ... }
+    }
+  }>
+  product_downloads?: {
+    $relation?: Array<{
+      entity_id?: { ... }
+      _tags?: { ... }
+    }>
+  } | Array<{
+    _id: string
+    filename: string
+    mime_type: string
+    versions: Array<{
+      s3ref: { ... }
+    }>
+    _schema: string
+    _org: string
+    _created_at: string // date-time
+    _updated_at: string // date-time
+    _title?: string
+    $relation?: {
+      entity_id?: { ... }
+      _tags?: { ... }
+    }
+  }>
   is_conditional?: boolean
   _availability_files?: Array<{
     _id: string
@@ -4251,10 +4527,8 @@ type Order = {
       name?: { ... }
       categories?: { ... }
       feature?: { ... }
-      cross_sellable_products?: { ... }
       product_images?: { ... }
       product_downloads?: { ... }
-      price_options?: { ... }
       is_conditional?: { ... }
       _availability_files?: { ... }
       _id?: { ... }
@@ -4263,9 +4537,11 @@ type Order = {
       _created_at?: { ... }
       _updated_at?: { ... }
     }
-  } | {
-    metadata?: Array<{
-      key?: { ... }
+    catalog_reference?: {
+      product: { ... }
+      price: { ... }
+      price_components?: { ... }
+      coupons?: { ... }
   // ...
 }
 ```
@@ -4614,9 +4890,6 @@ type CatalogSearchResult = {
       _tags?: { ... }
       feature?: { ... }
     }>
-    cross_sellable_products?: {
-      $relation?: { ... }
-    }
     product_images?: {
       $relation?: { ... }
     } | Array<{
@@ -4645,9 +4918,6 @@ type CatalogSearchResult = {
       _title?: { ... }
       $relation?: { ... }
     }>
-    price_options?: {
-      $relation?: { ... }
-    }
     is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
@@ -4696,6 +4966,461 @@ type CatalogSearchResult = {
     is_conditional?: boolean
     requires_promo_code?: boolean
   }>
+}
+```
+
+### `ResolveCatalogRequest`
+
+The entries of one journey block, and the situation to resolve them for. Every member of
+every pair is resolved for its entity type's context at the same `as_of`.
+
+
+```ts
+type ResolveCatalogRequest = {
+  entries: Array<{
+    product_id: string
+    price_id?: string
+  }>
+  context: {
+    product?: Record<string, unknown>
+    price?: Record<string, unknown>
+    coupon?: Record<string, unknown>
+  }
+  as_of?: string
+}
+```
+
+### `CatalogContext`
+
+One context per entity type, each the authenticated resolve's context and checked against
+that type's schema alone. A product resolves against `product`, a price and each of a
+composite's components against `price`, and a coupon against `coupon`. A type left out
+resolves against an empty context, wh
+
+```ts
+type CatalogContext = {
+  product?: Record<string, unknown>
+  price?: Record<string, unknown>
+  coupon?: Record<string, unknown>
+}
+```
+
+### `CatalogEntry`
+
+A product and, optionally, one of its prices. With `price_id` the entry is the author's
+pair, served as named; without it the entry is served from the resolved product's
+`price_options`, one pair per price.
+
+
+```ts
+type CatalogEntry = {
+  product_id: string
+  price_id?: string
+}
+```
+
+### `ResolveCatalogResult`
+
+```ts
+type ResolveCatalogResult = {
+  pairs: Array<{
+    product: {
+      cross_sellable_products?: { ... }
+      price_options?: { ... }
+      _id: { ... }
+      _variant_id: { ... }
+      _version_valid_from: { ... }
+      _conditions: { ... }
+      _inert_overrides: { ... }
+    } | {
+      description?: { ... }
+      code?: { ... }
+      type?: { ... }
+      name?: { ... }
+      categories?: { ... }
+      feature?: { ... }
+      product_images?: { ... }
+      product_downloads?: { ... }
+      is_conditional?: { ... }
+      _availability_files?: { ... }
+      _id?: { ... }
+      _title?: { ... }
+      _org_id?: { ... }
+      _created_at?: { ... }
+      _updated_at?: { ... }
+    }
+    price: {
+      active?: { ... }
+      is_composite_price?: { ... }
+      is_conditional?: { ... }
+      pricing_model: { ... }
+      tiers?: { ... }
+      description?: { ... }
+      long_description?: { ... }
+      sales_tax?: { ... }
+      tax?: { ... }
+      is_tax_inclusive?: { ... }
+      type?: { ... }
+      billing_period?: { ... }
+      unit_amount?: { ... }
+      unit_amount_decimal?: { ... }
+      unit_amount_currency?: { ... }
+      price_display_in_journeys?: { ... }
+      variable_price?: { ... }
+      unit?: { ... }
+      get_ag?: { ... }
+      dynamic_tariff?: { ... }
+      _created_at?: { ... }
+      _id: { ... }
+      _title?: { ... }
+      _updated_at?: { ... }
+      _org_id?: { ... }
+      _tags?: { ... }
+      _variant_id: { ... }
+      _version_valid_from: { ... }
+      _conditions: { ... }
+      _inert_overrides: { ... }
+    } | {
+      price_components?: { ... }
+      _id: { ... }
+      _variant_id: { ... }
+      _version_valid_from: { ... }
+      _conditions: { ... }
+      _inert_overrides: { ... }
+    } | {
+      billing_duration_amount?: { ... }
+      billing_duration_unit?: { ... }
+      notice_time_amount?: { ... }
+      notice_time_unit?: { ... }
+      termination_time_amount?: { ... }
+      termination_time_unit?: { ... }
+      renewal_duration_amount?: { ... }
+      renewal_duration_unit?: { ... }
+    } | {
+      price_components?: { ... }
+    }
+    coupons: Array<{
+      _id: { ... }
+      _title: { ... }
+      _org: { ... }
+      _schema: { ... }
+      _tags?: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      name: { ... }
+      description?: { ... }
+      type: { ... }
+      category: { ... }
+      percentage_value?: { ... }
+      fixed_value?: { ... }
+      fixed_value_decimal?: { ... }
+      fixed_value_currency?: { ... }
+      cashback_period?: { ... }
+      active?: { ... }
+      is_conditional?: { ... }
+      requires_promo_code?: { ... }
+    }>
+    catalog_reference: {
+      product: { ... }
+  // ...
+}
+```
+
+### `CatalogPair`
+
+A product and one of its prices, resolved for the request's `context` at its `as_of`, with
+the coupons that apply and the reference checkout prices from.
+
+
+```ts
+type CatalogPair = {
+  product: {
+    cross_sellable_products?: Array<{
+      description?: { ... }
+      code?: { ... }
+      type?: { ... }
+      name?: { ... }
+      categories?: { ... }
+      feature?: { ... }
+      product_images?: { ... }
+      product_downloads?: { ... }
+      is_conditional?: { ... }
+      _availability_files?: { ... }
+      _id?: { ... }
+      _title?: { ... }
+      _org_id?: { ... }
+      _created_at?: { ... }
+      _updated_at?: { ... }
+    }>
+    price_options?: Array<{
+      billing_duration_amount?: { ... }
+      billing_duration_unit?: { ... }
+      notice_time_amount?: { ... }
+      notice_time_unit?: { ... }
+      termination_time_amount?: { ... }
+      termination_time_unit?: { ... }
+      renewal_duration_amount?: { ... }
+      renewal_duration_unit?: { ... }
+    } | {
+      billing_duration_amount?: { ... }
+      billing_duration_unit?: { ... }
+      notice_time_amount?: { ... }
+      notice_time_unit?: { ... }
+      termination_time_amount?: { ... }
+      termination_time_unit?: { ... }
+      renewal_duration_amount?: { ... }
+      renewal_duration_unit?: { ... }
+    } | {
+      billing_duration_amount?: { ... }
+      billing_duration_unit?: { ... }
+      notice_time_amount?: { ... }
+      notice_time_unit?: { ... }
+      termination_time_amount?: { ... }
+      termination_time_unit?: { ... }
+      renewal_duration_amount?: { ... }
+      renewal_duration_unit?: { ... }
+    }>
+    _id: string
+    _variant_id: string
+    _version_valid_from: string
+    _conditions: {
+      default: { ... }
+    }
+    _inert_overrides: Array<{
+      attribute: { ... }
+      reason: { ... }
+    }>
+  } | {
+    description?: string
+    code?: string
+    type?: "product" | "service"
+    name?: string
+    categories?: string[]
+    feature?: Array<{
+      _tags?: { ... }
+      feature?: { ... }
+    }>
+    product_images?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    product_downloads?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+      versions: { ... }
+      _schema: { ... }
+      _org: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      _title?: { ... }
+      $relation?: { ... }
+    }>
+    is_conditional?: boolean
+    _availability_files?: Array<{
+      _id: { ... }
+      filename: { ... }
+      mime_type: { ... }
+  // ...
+}
+```
+
+### `ResolvedPriceComponents`
+
+The components of a composite price as the v2 catalog serves them: hydrated in place, and
+a component that is itself conditional resolved against the same context, carrying the
+discriminators a resolved payload carries. A conditional component with no variant in
+effect — nothing matches and there is
+
+```ts
+type ResolvedPriceComponents = {
+  price_components?: Array<{
+    active?: boolean
+    is_composite_price?: false
+    is_conditional?: boolean
+    pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "dynamic_tariff" | "external_getag"
+    tiers?: Array<{
+      up_to?: { ... }
+      flat_fee_amount?: { ... }
+      flat_fee_amount_decimal?: { ... }
+      unit_amount?: { ... }
+      unit_amount_decimal?: { ... }
+      display_mode?: { ... }
+    }>
+    description?: string
+    long_description?: string
+    sales_tax?: "nontaxable" | "reduced" | "standard"
+    tax?: {
+      $relation?: { ... }
+    } | Array<{
+      _id: { ... }
+      _title: { ... }
+      _org: { ... }
+      _schema: { ... }
+      _tags?: { ... }
+      _created_at: { ... }
+      _updated_at: { ... }
+      type: { ... }
+      description?: { ... }
+      rate: { ... }
+      active?: { ... }
+      region?: { ... }
+      region_label?: { ... }
+    }>
+    is_tax_inclusive?: boolean
+    type?: "one_time" | "recurring"
+    billing_period?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly"
+    unit_amount?: number
+    unit_amount_decimal?: string
+    unit_amount_currency?: string
+    price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request" | "estimated_price"
+    variable_price?: boolean
+    unit?: "kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp" | string
+    get_ag?: {
+      category: { ... }
+      markup_pricing_model?: { ... }
+      type?: { ... }
+      tariff_type?: { ... }
+      consumption_type?: { ... }
+      concession_type?: { ... }
+      meter_type?: { ... }
+      markup_tiers?: { ... }
+      markup_amount: { ... }
+      markup_amount_decimal: { ... }
+      markup_amount_net?: { ... }
+      markup_amount_net_decimal?: { ... }
+      markup_amount_gross?: { ... }
+      markup_amount_gross_decimal?: { ... }
+      markup_total_amount_net?: { ... }
+      markup_total_amount_net_decimal?: { ... }
+      markup_total_amount_gross?: { ... }
+      markup_total_amount_gross_decimal?: { ... }
+      additional_markups_enabled?: { ... }
+      additional_markups?: { ... }
+      unit_amount_gross: { ... }
+      unit_amount_gross_decimal?: { ... }
+      unit_amount_net: { ... }
+      unit_amount_net_decimal?: { ... }
+    }
+    dynamic_tariff?: {
+      mode: { ... }
+      interval?: { ... }
+      average_price: { ... }
+      average_price_decimal: { ... }
+      markup_amount?: { ... }
+      markup_amount_decimal?: { ... }
+      markup_amount_net?: { ... }
+      markup_amount_net_decimal?: { ... }
+      markup_amount_gross?: { ... }
+      markup_amount_gross_decimal?: { ... }
+      unit_amount_net?: { ... }
+      unit_amount_net_decimal?: { ... }
+      unit_amount_gross?: { ... }
+      unit_amount_gross_decimal?: { ... }
+    }
+    _created_at?: string
+    _id: string
+    _title?: string
+    _updated_at?: string
+    _org_id?: string
+    _tags?: string[]
+    _variant_id: string
+    _version_valid_from: string
+    _conditions: {
+      default: { ... }
+    }
+    _inert_overrides: Array<{
+      attribute: { ... }
+      reason: { ... }
+    }>
+  // ...
+}
+```
+
+### `CatalogWarning`
+
+An entry the v2 catalog could not answer, and why. `details` is typed per `code`: narrow on
+`code` and the object under it declares exactly the fields that code sends.
+
+
+```ts
+type CatalogWarning = {
+  code: "CATALOG_ENTRY_NOT_FOUND"
+  message: string
+  details: {
+    product_id: string
+    price_id?: string
+    missing: "product" | "price"
+  }
+} | {
+  code: "CATALOG_ENTRY_TYPE_MISMATCH"
+  message: string
+  details: {
+    product_id: string
+    price_id?: string
+    mismatched: "product" | "price"
+    actual_schema: string
+  }
+}
+```
+
+### `CatalogReference`
+
+Names the variant each member of a catalog pair was resolved from, and the instant `as_of`
+they were resolved at. Checkout prices each conditional member from that variant, using the
+version in effect at `as_of`.
+
+The catalog signs every reference, classic pair or not: `_meta` signs the rest of the
+
+
+```ts
+type CatalogReference = {
+  product: {
+    id: string
+    variant?: string
+  }
+  price: {
+    id: string
+    variant?: string
+  }
+  price_components?: Array<{
+    id: string
+    variant?: string
+  }>
+  coupons?: Array<{
+    id: string
+    variant?: string
+  }>
+  as_of: string
+  _meta?: {
+    signature: string
+    timestamp: number
+  }
+}
+```
+
+### `CatalogReferenceMember`
+
+One member of a catalog reference: the entity, and the variant that produced it. `variant`
+is absent for a classic entity.
+
+
+```ts
+type CatalogReferenceMember = {
+  id: string
+  variant?: string
 }
 ```
 
@@ -5731,6 +6456,7 @@ type CheckoutCartResult = {
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     } | {
       metadata?: { ... }
       quantity?: { ... }
@@ -5742,6 +6468,7 @@ type CheckoutCartResult = {
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     }>
     products?: {
       $relation?: { ... }
@@ -5761,8 +6488,6 @@ type CheckoutCartResult = {
     }
     _org_id?: string
     _id?: string
-    _created_at?: string
-    _updated_at?: string
   // ...
 }
 ```
@@ -5822,9 +6547,6 @@ type BasePriceItemCommon = {
       _tags?: { ... }
       feature?: { ... }
     }>
-    cross_sellable_products?: {
-      $relation?: { ... }
-    }
     product_images?: {
       $relation?: { ... }
     } | Array<{
@@ -5853,9 +6575,6 @@ type BasePriceItemCommon = {
       _title?: { ... }
       $relation?: { ... }
     }>
-    price_options?: {
-      $relation?: { ... }
-    }
     is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
@@ -5874,6 +6593,29 @@ type BasePriceItemCommon = {
     _org_id?: string
     _created_at?: string
     _updated_at?: string
+  }
+  catalog_reference?: {
+    product: {
+      id: { ... }
+      variant?: { ... }
+    }
+    price: {
+      id: { ... }
+      variant?: { ... }
+    }
+    price_components?: Array<{
+      id: { ... }
+      variant?: { ... }
+    }>
+    coupons?: Array<{
+      id: { ... }
+      variant?: { ... }
+    }>
+    as_of: string
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
   }
 }
 ```
@@ -5965,6 +6707,7 @@ type PriceItemDtoUnion = {
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     } | {
       metadata?: { ... }
       quantity?: { ... }
@@ -5976,11 +6719,10 @@ type PriceItemDtoUnion = {
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     }>
     amount_subtotal?: number
     amount_total?: number
-    unit_amount_gross?: number
-    unit_amount_net?: number
   // ...
 }
 ```
@@ -6074,6 +6816,7 @@ type PriceItemsDto = Array<{
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     } | {
       metadata?: { ... }
       quantity?: { ... }
@@ -6085,11 +6828,10 @@ type PriceItemsDto = Array<{
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     }>
     amount_subtotal?: number
     amount_total?: number
-    unit_amount_gross?: number
-    unit_amount_net?: number
   // ...
 }
 ```
@@ -6128,9 +6870,6 @@ type BasePriceItemDto = {
       _tags?: { ... }
       feature?: { ... }
     }>
-    cross_sellable_products?: {
-      $relation?: { ... }
-    }
     product_images?: {
       $relation?: { ... }
     } | Array<{
@@ -6159,9 +6898,6 @@ type BasePriceItemDto = {
       _title?: { ... }
       $relation?: { ... }
     }>
-    price_options?: {
-      $relation?: { ... }
-    }
     is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
@@ -6180,6 +6916,29 @@ type BasePriceItemDto = {
     _org_id?: string
     _created_at?: string
     _updated_at?: string
+  }
+  catalog_reference?: {
+    product: {
+      id: { ... }
+      variant?: { ... }
+    }
+    price: {
+      id: { ... }
+      variant?: { ... }
+    }
+    price_components?: Array<{
+      id: { ... }
+      variant?: { ... }
+    }>
+    coupons?: Array<{
+      id: { ... }
+      variant?: { ... }
+    }>
+    as_of: string
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
   }
 }
 ```
@@ -6273,6 +7032,7 @@ type PriceItemDto = {
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     } | {
       metadata?: { ... }
       quantity?: { ... }
@@ -6284,11 +7044,10 @@ type PriceItemDto = {
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     }>
     amount_subtotal?: number
     amount_total?: number
-    unit_amount_gross?: number
-    unit_amount_net?: number
   // ...
 }
 ```
@@ -6382,6 +7141,7 @@ type CompositePriceItemDto = {
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     } | {
       metadata?: { ... }
       quantity?: { ... }
@@ -6393,11 +7153,10 @@ type CompositePriceItemDto = {
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     }>
     amount_subtotal?: number
     amount_total?: number
-    unit_amount_gross?: number
-    unit_amount_net?: number
   // ...
 }
 ```
@@ -6642,9 +7401,6 @@ type PriceItems = Array<{
       _tags?: { ... }
       feature?: { ... }
     }>
-    cross_sellable_products?: {
-      $relation?: { ... }
-    }
     product_images?: {
       $relation?: { ... }
     } | Array<{
@@ -6673,9 +7429,6 @@ type PriceItems = Array<{
       _title?: { ... }
       $relation?: { ... }
     }>
-    price_options?: {
-      $relation?: { ... }
-    }
     is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
@@ -6695,24 +7448,30 @@ type PriceItems = Array<{
     _created_at?: string
     _updated_at?: string
   }
+  catalog_reference?: {
+    product: {
+      id: { ... }
+      variant?: { ... }
+    }
+    price: {
+      id: { ... }
+      variant?: { ... }
+    }
+    price_components?: Array<{
+      id: { ... }
+      variant?: { ... }
+    }>
+    coupons?: Array<{
+      id: { ... }
+      variant?: { ... }
+    }>
+    as_of: string
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
+  }
 } | {
-  metadata?: Array<{
-    key?: string
-    value?: string
-  }>
-  quantity?: number
-  product_id?: string
-  price_id?: string
-  description?: string
-  product_description?: string
-  product_name?: string
-  price_mappings?: Array<{
-    price_id?: string
-    frequency_unit?: "weekly" | "monthly" | "every_quarter" | "every_6_months" | "yearly" | "one_time"
-    name?: string
-    value?: number
-    metadata?: Record<string, string>
-  }>
   // ...
 }
 ```
@@ -6751,9 +7510,6 @@ type CompositePriceItem = {
       _tags?: { ... }
       feature?: { ... }
     }>
-    cross_sellable_products?: {
-      $relation?: { ... }
-    }
     product_images?: {
       $relation?: { ... }
     } | Array<{
@@ -6782,9 +7538,6 @@ type CompositePriceItem = {
       _title?: { ... }
       $relation?: { ... }
     }>
-    price_options?: {
-      $relation?: { ... }
-    }
     is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
@@ -6803,6 +7556,29 @@ type CompositePriceItem = {
     _org_id?: string
     _created_at?: string
     _updated_at?: string
+  }
+  catalog_reference?: {
+    product: {
+      id: { ... }
+      variant?: { ... }
+    }
+    price: {
+      id: { ... }
+      variant?: { ... }
+    }
+    price_components?: Array<{
+      id: { ... }
+      variant?: { ... }
+    }>
+    coupons?: Array<{
+      id: { ... }
+      variant?: { ... }
+    }>
+    as_of: string
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
   }
 }
 ```
@@ -6841,9 +7617,6 @@ type BasePriceItem = {
       _tags?: { ... }
       feature?: { ... }
     }>
-    cross_sellable_products?: {
-      $relation?: { ... }
-    }
     product_images?: {
       $relation?: { ... }
     } | Array<{
@@ -6872,9 +7645,6 @@ type BasePriceItem = {
       _title?: { ... }
       $relation?: { ... }
     }>
-    price_options?: {
-      $relation?: { ... }
-    }
     is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
@@ -6893,6 +7663,29 @@ type BasePriceItem = {
     _org_id?: string
     _created_at?: string
     _updated_at?: string
+  }
+  catalog_reference?: {
+    product: {
+      id: { ... }
+      variant?: { ... }
+    }
+    price: {
+      id: { ... }
+      variant?: { ... }
+    }
+    price_components?: Array<{
+      id: { ... }
+      variant?: { ... }
+    }>
+    coupons?: Array<{
+      id: { ... }
+      variant?: { ... }
+    }>
+    as_of: string
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
   }
 }
 ```
@@ -6991,9 +7784,6 @@ type PriceItem = {
       _tags?: { ... }
       feature?: { ... }
     }>
-    cross_sellable_products?: {
-      $relation?: { ... }
-    }
     product_images?: {
       $relation?: { ... }
     } | Array<{
@@ -7022,9 +7812,6 @@ type PriceItem = {
       _title?: { ... }
       $relation?: { ... }
     }>
-    price_options?: {
-      $relation?: { ... }
-    }
     is_conditional?: boolean
     _availability_files?: Array<{
       _id: { ... }
@@ -7043,6 +7830,29 @@ type PriceItem = {
     _org_id?: string
     _created_at?: string
     _updated_at?: string
+  }
+  catalog_reference?: {
+    product: {
+      id: { ... }
+      variant?: { ... }
+    }
+    price: {
+      id: { ... }
+      variant?: { ... }
+    }
+    price_components?: Array<{
+      id: { ... }
+      variant?: { ... }
+    }>
+    coupons?: Array<{
+      id: { ... }
+      variant?: { ... }
+    }>
+    as_of: string
+    _meta?: {
+      signature: { ... }
+      timestamp: { ... }
+    }
   }
 }
 ```
@@ -7238,10 +8048,8 @@ type PricingDetails = {
       name?: { ... }
       categories?: { ... }
       feature?: { ... }
-      cross_sellable_products?: { ... }
       product_images?: { ... }
       product_downloads?: { ... }
-      price_options?: { ... }
       is_conditional?: { ... }
       _availability_files?: { ... }
       _id?: { ... }
@@ -7249,6 +8057,14 @@ type PricingDetails = {
       _org_id?: { ... }
       _created_at?: { ... }
       _updated_at?: { ... }
+    }
+    catalog_reference?: {
+      product: { ... }
+      price: { ... }
+      price_components?: { ... }
+      coupons?: { ... }
+      as_of: { ... }
+      _meta?: { ... }
     }
   } | {
     metadata?: Array<{
@@ -7276,10 +8092,8 @@ type PricingDetails = {
       name?: { ... }
       categories?: { ... }
       feature?: { ... }
-      cross_sellable_products?: { ... }
       product_images?: { ... }
       product_downloads?: { ... }
-      price_options?: { ... }
       is_conditional?: { ... }
       _availability_files?: { ... }
       _id?: { ... }
@@ -7287,6 +8101,14 @@ type PricingDetails = {
       _org_id?: { ... }
       _created_at?: { ... }
       _updated_at?: { ... }
+    }
+    catalog_reference?: {
+      product: { ... }
+      price: { ... }
+      price_components?: { ... }
+      coupons?: { ... }
+      as_of: { ... }
+      _meta?: { ... }
     }
   }>
   amount_subtotal?: number
@@ -7299,18 +8121,6 @@ type PricingDetails = {
     amount_tax?: number
     breakdown?: {
       taxes?: { ... }
-      recurrences?: { ... }
-      cashbacks?: { ... }
-      recurrencesByTax?: { ... }
-    }
-  }
-  currency?: string
-  redeemed_promos?: Array<{
-    code: string
-    coupons: Array<{
-      _id: { ... }
-      _title: { ... }
-      _org: { ... }
   // ...
 }
 ```
@@ -7377,10 +8187,8 @@ type PricingDetailsResponse = {
       name?: { ... }
       categories?: { ... }
       feature?: { ... }
-      cross_sellable_products?: { ... }
       product_images?: { ... }
       product_downloads?: { ... }
-      price_options?: { ... }
       is_conditional?: { ... }
       _availability_files?: { ... }
       _id?: { ... }
@@ -7388,6 +8196,14 @@ type PricingDetailsResponse = {
       _org_id?: { ... }
       _created_at?: { ... }
       _updated_at?: { ... }
+    }
+    catalog_reference?: {
+      product: { ... }
+      price: { ... }
+      price_components?: { ... }
+      coupons?: { ... }
+      as_of: { ... }
+      _meta?: { ... }
     }
   } | {
     metadata?: Array<{
@@ -7415,10 +8231,8 @@ type PricingDetailsResponse = {
       name?: { ... }
       categories?: { ... }
       feature?: { ... }
-      cross_sellable_products?: { ... }
       product_images?: { ... }
       product_downloads?: { ... }
-      price_options?: { ... }
       is_conditional?: { ... }
       _availability_files?: { ... }
       _id?: { ... }
@@ -7426,6 +8240,14 @@ type PricingDetailsResponse = {
       _org_id?: { ... }
       _created_at?: { ... }
       _updated_at?: { ... }
+    }
+    catalog_reference?: {
+      product: { ... }
+      price: { ... }
+      price_components?: { ... }
+      coupons?: { ... }
+      as_of: { ... }
+      _meta?: { ... }
     }
   }>
   amount_subtotal?: number
@@ -7438,18 +8260,6 @@ type PricingDetailsResponse = {
     amount_tax?: number
     breakdown?: {
       taxes?: { ... }
-      recurrences?: { ... }
-      cashbacks?: { ... }
-      recurrencesByTax?: { ... }
-    }
-  }
-  currency?: string
-  redeemed_promos?: Array<{
-    code: string
-    coupons: Array<{
-      _id: { ... }
-      _title: { ... }
-      _org: { ... }
   // ...
 }
 ```
@@ -8187,6 +8997,7 @@ type ExternalCatalogItem = {
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     } | {
       metadata?: { ... }
       quantity?: { ... }
@@ -8198,6 +9009,7 @@ type ExternalCatalogItem = {
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     }>
     amount_subtotal?: number
     amount_total?: number
@@ -8275,6 +9087,7 @@ type ProductRecommendationResponse = {
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     } | {
       metadata?: { ... }
       quantity?: { ... }
@@ -8286,6 +9099,7 @@ type ProductRecommendationResponse = {
       price_mappings?: { ... }
       is_tax_inclusive?: { ... }
       _product?: { ... }
+      catalog_reference?: { ... }
     }
   }
 }

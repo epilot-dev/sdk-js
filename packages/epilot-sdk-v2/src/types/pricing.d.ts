@@ -508,7 +508,7 @@ export declare namespace Components {
             is_composite_price: true;
             /**
              * The flag for entities whose values vary by context. Resolve the values that apply with
-             * `POST /v1/conditional-pricing:resolve`.
+             * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
              *
              */
             is_conditional?: boolean;
@@ -595,7 +595,7 @@ export declare namespace Components {
             active?: boolean;
             /**
              * The flag for entities whose values vary by context. Resolve the values that apply with
-             * `POST /v1/conditional-pricing:resolve`.
+             * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
              *
              */
             is_conditional?: boolean;
@@ -915,12 +915,6 @@ export declare namespace Components {
                     feature?: string;
                 }[];
                 /**
-                 * Stores references to products that can be cross sold with the current product.
-                 */
-                cross_sellable_products?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * Stores references to a set of file images of the product
                  */
                 product_images?: /* Stores references to a set of file images of the product */ {
@@ -940,14 +934,8 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 } | File[];
                 /**
-                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
-                 */
-                price_options?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * The flag for entities whose values vary by context. Resolve the values that apply with
-                 * `POST /v1/conditional-pricing:resolve`.
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
                  *
                  */
                 is_conditional?: boolean;
@@ -977,6 +965,101 @@ export declare namespace Components {
                  * The product last update date
                  */
                 _updated_at?: string;
+                /**
+                 * Stores references to products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+                 */
+                price_options?: {
+                    $relation?: EntityRelation[];
+                };
+            };
+            /**
+             * The `catalog_reference` of the pair this item came from, unchanged. Required when the
+             * item's product or price is conditional. Component items carry none.
+             *
+             * example:
+             * {
+             *   "product": {
+             *     "id": "product-pv-2027",
+             *     "variant": "var-46045"
+             *   },
+             *   "price": {
+             *     "id": "price-composite-9f2",
+             *     "variant": "var-46046"
+             *   },
+             *   "price_components": [
+             *     {
+             *       "id": "price-base-fee-46045",
+             *       "variant": "var-46047"
+             *     },
+             *     {
+             *       "id": "price-kwh-46045",
+             *       "variant": "var-46048"
+             *     }
+             *   ],
+             *   "coupons": [
+             *     {
+             *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
+             *     }
+             *   ],
+             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "_meta": {
+             *     "timestamp": 1797000000000,
+             *     "signature": "c3ab8ff137"
+             *   }
+             * }
+             */
+            catalog_reference?: {
+                product: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                price: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                /**
+                 * Present for a composite price that serves at least one component: the components this
+                 * pair is the combination of, each with its variant where one produced it. A conditional
+                 * component with no variant in effect is left out of the composite and is not named here
+                 * (ADR 0048). A component line item carries no reference of its own.
+                 *
+                 */
+                price_components?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
+                 * can be conditional.
+                 *
+                 */
+                coupons?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
+                 * each conditional member's version at this instant.
+                 *
+                 * example:
+                 * 2026-12-20T10:15:00.000Z
+                 */
+                as_of: string;
+                _meta?: /* Signature meta data payload */ SignatureMeta;
             };
             /**
              * price item id
@@ -1261,12 +1344,6 @@ export declare namespace Components {
                     feature?: string;
                 }[];
                 /**
-                 * Stores references to products that can be cross sold with the current product.
-                 */
-                cross_sellable_products?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * Stores references to a set of file images of the product
                  */
                 product_images?: /* Stores references to a set of file images of the product */ {
@@ -1286,14 +1363,8 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 } | File[];
                 /**
-                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
-                 */
-                price_options?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * The flag for entities whose values vary by context. Resolve the values that apply with
-                 * `POST /v1/conditional-pricing:resolve`.
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
                  *
                  */
                 is_conditional?: boolean;
@@ -1323,6 +1394,101 @@ export declare namespace Components {
                  * The product last update date
                  */
                 _updated_at?: string;
+                /**
+                 * Stores references to products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+                 */
+                price_options?: {
+                    $relation?: EntityRelation[];
+                };
+            };
+            /**
+             * The `catalog_reference` of the pair this item came from, unchanged. Required when the
+             * item's product or price is conditional. Component items carry none.
+             *
+             * example:
+             * {
+             *   "product": {
+             *     "id": "product-pv-2027",
+             *     "variant": "var-46045"
+             *   },
+             *   "price": {
+             *     "id": "price-composite-9f2",
+             *     "variant": "var-46046"
+             *   },
+             *   "price_components": [
+             *     {
+             *       "id": "price-base-fee-46045",
+             *       "variant": "var-46047"
+             *     },
+             *     {
+             *       "id": "price-kwh-46045",
+             *       "variant": "var-46048"
+             *     }
+             *   ],
+             *   "coupons": [
+             *     {
+             *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
+             *     }
+             *   ],
+             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "_meta": {
+             *     "timestamp": 1797000000000,
+             *     "signature": "c3ab8ff137"
+             *   }
+             * }
+             */
+            catalog_reference?: {
+                product: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                price: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                /**
+                 * Present for a composite price that serves at least one component: the components this
+                 * pair is the combination of, each with its variant where one produced it. A conditional
+                 * component with no variant in effect is left out of the composite and is not named here
+                 * (ADR 0048). A component line item carries no reference of its own.
+                 *
+                 */
+                price_components?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
+                 * can be conditional.
+                 *
+                 */
+                coupons?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
+                 * each conditional member's version at this instant.
+                 *
+                 * example:
+                 * 2026-12-20T10:15:00.000Z
+                 */
+                as_of: string;
+                _meta?: /* Signature meta data payload */ SignatureMeta;
             };
         }
         /**
@@ -1487,12 +1653,6 @@ export declare namespace Components {
                     feature?: string;
                 }[];
                 /**
-                 * Stores references to products that can be cross sold with the current product.
-                 */
-                cross_sellable_products?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * Stores references to a set of file images of the product
                  */
                 product_images?: /* Stores references to a set of file images of the product */ {
@@ -1512,14 +1672,8 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 } | File[];
                 /**
-                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
-                 */
-                price_options?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * The flag for entities whose values vary by context. Resolve the values that apply with
-                 * `POST /v1/conditional-pricing:resolve`.
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
                  *
                  */
                 is_conditional?: boolean;
@@ -1549,6 +1703,101 @@ export declare namespace Components {
                  * The product last update date
                  */
                 _updated_at?: string;
+                /**
+                 * Stores references to products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+                 */
+                price_options?: {
+                    $relation?: EntityRelation[];
+                };
+            };
+            /**
+             * The `catalog_reference` of the pair this item came from, unchanged. Required when the
+             * item's product or price is conditional. Component items carry none.
+             *
+             * example:
+             * {
+             *   "product": {
+             *     "id": "product-pv-2027",
+             *     "variant": "var-46045"
+             *   },
+             *   "price": {
+             *     "id": "price-composite-9f2",
+             *     "variant": "var-46046"
+             *   },
+             *   "price_components": [
+             *     {
+             *       "id": "price-base-fee-46045",
+             *       "variant": "var-46047"
+             *     },
+             *     {
+             *       "id": "price-kwh-46045",
+             *       "variant": "var-46048"
+             *     }
+             *   ],
+             *   "coupons": [
+             *     {
+             *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
+             *     }
+             *   ],
+             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "_meta": {
+             *     "timestamp": 1797000000000,
+             *     "signature": "c3ab8ff137"
+             *   }
+             * }
+             */
+            catalog_reference?: {
+                product: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                price: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                /**
+                 * Present for a composite price that serves at least one component: the components this
+                 * pair is the combination of, each with its variant where one produced it. A conditional
+                 * component with no variant in effect is left out of the composite and is not named here
+                 * (ADR 0048). A component line item carries no reference of its own.
+                 *
+                 */
+                price_components?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
+                 * can be conditional.
+                 *
+                 */
+                coupons?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
+                 * each conditional member's version at this instant.
+                 *
+                 * example:
+                 * 2026-12-20T10:15:00.000Z
+                 */
+                as_of: string;
+                _meta?: /* Signature meta data payload */ SignatureMeta;
             };
             external_fees_mappings?: /**
              * example:
@@ -1582,6 +1831,98 @@ export declare namespace Components {
              * The coupons applicable to the price item
              */
             _coupons?: (/* The shared properties for the coupon entity and coupon item entity */ CouponItem)[];
+        }
+        /**
+         * The product's own attributes — everything but the two relations whose shape depends on
+         * whether the product was hydrated, which `Product` and `HydratedProduct` add.
+         *
+         */
+        export interface BaseProduct {
+            [name: string]: any;
+            /**
+             * The description for the product
+             */
+            description?: string;
+            /**
+             * The product code
+             */
+            code?: string;
+            /**
+             * The type of Product:
+             *
+             * | type | description |
+             * |----| ----|
+             * | `product` | Represents a physical good |
+             * | `service` | Represents a service or virtual product |
+             *
+             */
+            type?: "product" | "service";
+            /**
+             * The product main name
+             */
+            name?: string;
+            /**
+             * The product categories
+             */
+            categories?: string[];
+            feature?: {
+                /**
+                 * An arbitrary set of tags attached to a feature
+                 */
+                _tags?: string[];
+                feature?: string;
+            }[];
+            /**
+             * Stores references to a set of file images of the product
+             */
+            product_images?: /* Stores references to a set of file images of the product */ {
+                $relation?: EntityRelation[];
+            } | File[];
+            /**
+             * Stores references to a set of files downloadable from the product.
+             * e.g: tech specifications, quality control sheets, privacy policy agreements
+             *
+             */
+            product_downloads?: /**
+             * Stores references to a set of files downloadable from the product.
+             * e.g: tech specifications, quality control sheets, privacy policy agreements
+             *
+             */
+            {
+                $relation?: EntityRelation[];
+            } | File[];
+            /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
+             *
+             */
+            is_conditional?: boolean;
+            /**
+             * Stores references to the availability files that define where this product is available.
+             * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
+             *
+             */
+            _availability_files?: File[];
+            /**
+             * The product id
+             */
+            _id?: string;
+            /**
+             * The autogenerated product title
+             */
+            _title?: string;
+            /**
+             * The organization id the product belongs to
+             */
+            _org_id?: string;
+            /**
+             * The product creation date
+             */
+            _created_at?: string;
+            /**
+             * The product last update date
+             */
+            _updated_at?: string;
         }
         export interface BasicAuthCredentials {
             /**
@@ -6565,6 +6906,135 @@ export declare namespace Components {
          */
         export type CashbackPeriod = "0" | "12";
         /**
+         * One context per entity type, each the authenticated resolve's context and checked against
+         * that type's schema alone. A product resolves against `product`, a price and each of a
+         * composite's components against `price`, and a coupon against `coupon`. A type left out
+         * resolves against an empty context, which serves the `default` variant.
+         *
+         * example:
+         * {
+         *   "product": {
+         *     "postal_code": "46045",
+         *     "channel": "direct"
+         *   },
+         *   "price": {
+         *     "postal_code": "46045"
+         *   }
+         * }
+         */
+        export interface CatalogContext {
+            product?: /**
+             * The situation to resolve for: a flat map keyed by condition name. A condition left out
+             * matches only variants that leave it unpinned; an empty map therefore returns the `default`
+             * variant.
+             *
+             * Each value is an exact value, typed by its condition, or a single-operator predicate:
+             *
+             * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
+             *   or `date` condition
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+             * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
+             * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
+             *
+             * An `in` list carries at most 50,000 values. A `string` or `select` matches exactly and
+             * case-sensitively. A `location` of format
+             * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
+             * `postal_code` and `city`, named as an entity address names them, whose city is compared
+             * case- and whitespace-insensitively.
+             *
+             * `default` and names beginning with `_` are reserved and cannot be supplied.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "consumption": {
+             *     "lt": 5000
+             *   }
+             * }
+             */
+            ResolveContext;
+            price?: /**
+             * The situation to resolve for: a flat map keyed by condition name. A condition left out
+             * matches only variants that leave it unpinned; an empty map therefore returns the `default`
+             * variant.
+             *
+             * Each value is an exact value, typed by its condition, or a single-operator predicate:
+             *
+             * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
+             *   or `date` condition
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+             * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
+             * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
+             *
+             * An `in` list carries at most 50,000 values. A `string` or `select` matches exactly and
+             * case-sensitively. A `location` of format
+             * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
+             * `postal_code` and `city`, named as an entity address names them, whose city is compared
+             * case- and whitespace-insensitively.
+             *
+             * `default` and names beginning with `_` are reserved and cannot be supplied.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "consumption": {
+             *     "lt": 5000
+             *   }
+             * }
+             */
+            ResolveContext;
+            coupon?: /**
+             * The situation to resolve for: a flat map keyed by condition name. A condition left out
+             * matches only variants that leave it unpinned; an empty map therefore returns the `default`
+             * variant.
+             *
+             * Each value is an exact value, typed by its condition, or a single-operator predicate:
+             *
+             * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
+             *   or `date` condition
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+             * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
+             * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
+             *
+             * An `in` list carries at most 50,000 values. A `string` or `select` matches exactly and
+             * case-sensitively. A `location` of format
+             * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
+             * `postal_code` and `city`, named as an entity address names them, whose city is compared
+             * case- and whitespace-insensitively.
+             *
+             * `default` and names beginning with `_` are reserved and cannot be supplied.
+             *
+             * example:
+             * {
+             *   "postal_code": "46045",
+             *   "consumption": {
+             *     "lt": 5000
+             *   }
+             * }
+             */
+            ResolveContext;
+        }
+        /**
+         * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+         * pair, served as named; without it the entry is served from the resolved product's
+         * `price_options`, one pair per price.
+         *
+         */
+        export interface CatalogEntry {
+            /**
+             * The product to show.
+             * example:
+             * product-pv-2027
+             */
+            product_id: string;
+            /**
+             * The price to show it at. Absent, every price the resolved product offers.
+             * example:
+             * price-sp26d1yo
+             */
+            price_id?: string;
+        }
+        /**
          * List of entity fields to include or exclude from the results.
          *
          * example:
@@ -6574,6 +7044,1290 @@ export declare namespace Components {
          * ]
          */
         export type CatalogFieldsParam = string[];
+        /**
+         * A product and one of its prices, resolved for the request's `context` at its `as_of`, with
+         * the coupons that apply and the reference checkout prices from.
+         *
+         */
+        export interface CatalogPair {
+            /**
+             * The product, hydrated one level deep and sanitised. A conditional product is the resolved
+             * payload — the entity as its variant leaves it, carrying `_variant_id`,
+             * `_version_valid_from`, `_conditions` and `_inert_overrides`. A classic product carries
+             * none of them.
+             *
+             */
+            product: /**
+             * The product, hydrated one level deep and sanitised. A conditional product is the resolved
+             * payload — the entity as its variant leaves it, carrying `_variant_id`,
+             * `_version_valid_from`, `_conditions` and `_inert_overrides`. A classic product carries
+             * none of them.
+             *
+             */
+            {
+                [name: string]: any;
+                /**
+                 * The description for the product
+                 */
+                description?: string;
+                /**
+                 * The product code
+                 */
+                code?: string;
+                /**
+                 * The type of Product:
+                 *
+                 * | type | description |
+                 * |----| ----|
+                 * | `product` | Represents a physical good |
+                 * | `service` | Represents a service or virtual product |
+                 *
+                 */
+                type?: "product" | "service";
+                /**
+                 * The product main name
+                 */
+                name?: string;
+                /**
+                 * The product categories
+                 */
+                categories?: string[];
+                feature?: {
+                    /**
+                     * An arbitrary set of tags attached to a feature
+                     */
+                    _tags?: string[];
+                    feature?: string;
+                }[];
+                /**
+                 * Stores references to a set of file images of the product
+                 */
+                product_images?: /* Stores references to a set of file images of the product */ {
+                    $relation?: EntityRelation[];
+                } | File[];
+                /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                product_downloads?: /**
+                 * Stores references to a set of files downloadable from the product.
+                 * e.g: tech specifications, quality control sheets, privacy policy agreements
+                 *
+                 */
+                {
+                    $relation?: EntityRelation[];
+                } | File[];
+                /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
+                 * Stores references to the availability files that define where this product is available.
+                 * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
+                 *
+                 */
+                _availability_files?: File[];
+                /**
+                 * The logical entity's id, the same one a plain entity read returns.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                _id: string;
+                /**
+                 * The autogenerated product title
+                 */
+                _title?: string;
+                /**
+                 * The organization id the product belongs to
+                 */
+                _org_id?: string;
+                /**
+                 * The product creation date
+                 */
+                _created_at?: string;
+                /**
+                 * The product last update date
+                 */
+                _updated_at?: string;
+                /**
+                 * The products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: /**
+                 * The product entity, its relations as stored.
+                 * example:
+                 * {
+                 *   "type": "product",
+                 *   "_schema": "product",
+                 *   "_title": "Solar Panel with Battery Storage",
+                 *   "name": "Solar Panel with Battery Storage",
+                 *   "code": "SOLAR-BATT",
+                 *   "active": true,
+                 *   "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+                 *   "feature": [
+                 *     {
+                 *       "_tags": [],
+                 *       "feature": "Eco-Panels"
+                 *     },
+                 *     {
+                 *       "_tags": [],
+                 *       "feature": "Remote Management Platform"
+                 *     },
+                 *     {
+                 *       "_tags": [],
+                 *       "feature": "Battery Remote Control"
+                 *     },
+                 *     {
+                 *       "_tags": [],
+                 *       "feature": "Mobile App"
+                 *     }
+                 *   ],
+                 *   "cross_sellable_products": {
+                 *     "$relation": [
+                 *       {
+                 *         "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+                 *         "_schema": "product",
+                 *         "_tags": []
+                 *       },
+                 *       {
+                 *         "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+                 *         "_tags": []
+                 *       }
+                 *     ]
+                 *   },
+                 *   "product_images": {
+                 *     "$relation": [
+                 *       {
+                 *         "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+                 *       },
+                 *       {
+                 *         "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "product_downloads": {
+                 *     "$relation": [
+                 *       {
+                 *         "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+                 *   "_org": "728",
+                 *   "_created_at": "2022-06-03T15: 52: 27.512Z",
+                 *   "_updated_at": "2022-06-03T16: 05: 15.029Z",
+                 *   "price_options": {
+                 *     "$relation": [
+                 *       {
+                 *         "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+                 *         "_tags": []
+                 *       },
+                 *       {
+                 *         "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+                 *         "_tags": []
+                 *       }
+                 *     ]
+                 *   }
+                 * }
+                 */
+                Product[];
+                /**
+                 * The [prices](/api/pricing#tag/simple_price_schema) and [composite
+                 * prices](/api/pricing#tag/dynamic_price_schema) of the current product, each as stored.
+                 * A conditional one is its base entity: the pair's `price` is the resolved one.
+                 *
+                 */
+                price_options?: (/**
+                 * The price entity schema for simple pricing
+                 * example:
+                 * {
+                 *   "unit_amount": 100000,
+                 *   "unit_amount_currency": "EUR",
+                 *   "unit_amount_decimal": "1000",
+                 *   "sales_tax": "standard",
+                 *   "is_tax_inclusive": true,
+                 *   "price_display_in_journeys": "show_price",
+                 *   "type": "one_time",
+                 *   "billing_period": "weekly",
+                 *   "billing_duration_unit": "months",
+                 *   "notice_time_unit": "months",
+                 *   "termination_time_unit": "months",
+                 *   "renewal_duration_unit": "months",
+                 *   "_schema": "price",
+                 *   "_title": "Solar Panel Module",
+                 *   "description": "Solar Panel Module",
+                 *   "active": true,
+                 *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+                 *   "_org": "728",
+                 *   "_created_at": "2022-06-03T16:04:10.369Z",
+                 *   "_updated_at": "2022-06-03T16:04:10.369Z",
+                 *   "pricing_model": "per_unit",
+                 *   "is_composite_price": false
+                 * }
+                 */
+                Price | /**
+                 * The composite price entity
+                 * example:
+                 * {
+                 *   "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+                 *   "_schema": "price",
+                 *   "_title": "My Composite Price",
+                 *   "description": "My Composite Price",
+                 *   "_org": "739224",
+                 *   "_created_at": "2022-02-18T10:10:26.439Z",
+                 *   "_updated_at": "2022-02-18T11:53:04.191Z",
+                 *   "active": true,
+                 *   "is_composite_price": true,
+                 *   "price_components": {
+                 *     "$relation": [
+                 *       {
+                 *         "entity_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+                 *         "_schema": "price",
+                 *         "_product_id": "target-price-product-id",
+                 *         "quantity": 1,
+                 *         "item": {
+                 *           "_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+                 *           "unit_amount": 10000,
+                 *           "unit_amount_currency": "EUR",
+                 *           "unit_amount_decimal": "100.00",
+                 *           "sales_tax": "standard",
+                 *           "is_tax_inclusive": false,
+                 *           "price_display_in_journeys": "show_price",
+                 *           "type": "one_time",
+                 *           "_schema": "price",
+                 *           "_title": "Test 1",
+                 *           "description": "Test 1",
+                 *           "tax": {
+                 *             "$relation": [
+                 *               {
+                 *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+                 *               }
+                 *             ]
+                 *           },
+                 *           "_org": "739224",
+                 *           "_created_at": "2022-02-18T10:10:26.439Z",
+                 *           "_updated_at": "2022-02-18T11:53:04.191Z",
+                 *           "active": true,
+                 *           "billing_period": "weekly",
+                 *           "billing_duration_unit": "months",
+                 *           "notice_time_unit": "months",
+                 *           "termination_time_unit": "months",
+                 *           "renewal_duration_unit": "months",
+                 *           "is_composite_price": false
+                 *         }
+                 *       },
+                 *       {
+                 *         "entity_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+                 *         "_schema": "price",
+                 *         "_product_id": "target-price-product-id",
+                 *         "quantity": 2,
+                 *         "item": {
+                 *           "_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+                 *           "unit_amount": 10000,
+                 *           "unit_amount_currency": "EUR",
+                 *           "unit_amount_decimal": "100.00",
+                 *           "sales_tax": "standard",
+                 *           "is_tax_inclusive": false,
+                 *           "price_display_in_journeys": "show_price",
+                 *           "type": "one_time",
+                 *           "_schema": "price",
+                 *           "_title": "Test 1",
+                 *           "description": "Test 1",
+                 *           "tax": {
+                 *             "$relation": [
+                 *               {
+                 *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+                 *               }
+                 *             ]
+                 *           },
+                 *           "_org": "739224",
+                 *           "_created_at": "2022-02-18T10:10:26.439Z",
+                 *           "_updated_at": "2022-02-18T11:53:04.191Z",
+                 *           "active": true,
+                 *           "billing_period": "weekly",
+                 *           "billing_duration_unit": "months",
+                 *           "notice_time_unit": "months",
+                 *           "termination_time_unit": "months",
+                 *           "renewal_duration_unit": "months",
+                 *           "is_composite_price": false
+                 *         }
+                 *       }
+                 *     ]
+                 *   }
+                 * }
+                 */
+                CompositePrice)[];
+                /**
+                 * The variant these values came from — what an order or contract pins.
+                 * example:
+                 * var-46045
+                 */
+                _variant_id: string;
+                /**
+                 * The `valid_from` of the version applied for the requested `as_of`.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                _version_valid_from: string;
+                /**
+                 * The conditions this variant pins, plus the boolean `default` discriminator.
+                 * example:
+                 * {
+                 *   "postal_code": "46045",
+                 *   "default": false
+                 * }
+                 */
+                _conditions: {
+                    [name: string]: any;
+                    default: boolean;
+                };
+                /**
+                 * The variant's stored overrides this payload did not apply, and why. Always present, and
+                 * empty in the ordinary case. Computed per read against the schema as it stands, so
+                 * granting or withdrawing `overridable_attribute` changes it without any data being
+                 * rewritten.
+                 *
+                 */
+                _inert_overrides: /**
+                 * One override that did not apply, and why — reported by a write for the attributes in its
+                 * body, and by a resolved payload for the stored overrides composition passed over.
+                 *
+                 */
+                InertOverride[];
+            } | /**
+             * The product entity hydrated one level deep, as the v2 public catalog serves it: each
+             * relation holds the entities it referenced, sanitised, with their own relations as stored.
+             *
+             */
+            HydratedProduct;
+            /**
+             * The price, hydrated one level deep and sanitised, with the same discriminators when it is
+             * conditional. A composite price carries its components hydrated in place; a component that
+             * is itself conditional is resolved against the same context and carries the
+             * discriminators too.
+             *
+             */
+            price: /**
+             * The price, hydrated one level deep and sanitised, with the same discriminators when it is
+             * conditional. A composite price carries its components hydrated in place; a component that
+             * is itself conditional is resolved against the same context and carries the
+             * discriminators too.
+             *
+             */
+            {
+                [name: string]: any;
+                /**
+                 * The billing period duration
+                 */
+                billing_duration_amount?: number | null;
+                /**
+                 * The billing period duration unit
+                 */
+                billing_duration_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * The notice period duration
+                 */
+                notice_time_amount?: number | null;
+                /**
+                 * The notice period duration unit
+                 */
+                notice_time_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * The termination period duration
+                 */
+                termination_time_amount?: number | null;
+                /**
+                 * The termination period duration unit
+                 */
+                termination_time_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * The renewal period duration
+                 */
+                renewal_duration_amount?: number | null;
+                /**
+                 * The renewal period duration unit
+                 */
+                renewal_duration_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * Whether the price can be used for new purchases.
+                 */
+                active?: boolean;
+                /**
+                 * The flag for prices that contain price components.
+                 */
+                is_composite_price?: false;
+                /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
+                 * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
+                 * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+                 * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
+                 * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+                 * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+                 *  - `dynamic_tariff` indicates that the price is dynamically dependend on the (quarter)-hourly spot market price.
+                 * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
+                 *
+                 */
+                pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "dynamic_tariff" | "external_getag";
+                /**
+                 * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
+                 *
+                 */
+                tiers?: PriceTier[];
+                /**
+                 * A brief description of the price.
+                 */
+                description?: string;
+                /**
+                 * A detailed description of the price. This is shown on the order document and order table.
+                 */
+                long_description?: string;
+                /**
+                 * The default tax rate applicable to the product.
+                 * This field is deprecated, use the new `tax` attribute.
+                 *
+                 */
+                sales_tax?: /**
+                 * The default tax rate applicable to the product.
+                 * This field is deprecated, use the new `tax` attribute.
+                 *
+                 */
+                SalesTax;
+                /**
+                 * The default tax rate applied to the price
+                 */
+                tax?: /* The default tax rate applied to the price */ {
+                    $relation?: EntityRelation[];
+                } | /**
+                 * the tax configuration
+                 * example:
+                 * {
+                 *   "rate": 19,
+                 *   "_title": "Tax Standard",
+                 *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                 *   "type": "VAT",
+                 *   "description": "Tax description",
+                 *   "active": true,
+                 *   "region": "DE",
+                 *   "region_label": "Germany",
+                 *   "_org": "123",
+                 *   "_schema": "tax",
+                 *   "_tags": [
+                 *     "example",
+                 *     "mock"
+                 *   ],
+                 *   "_created_at": "2021-02-09T12:41:43.662Z",
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 * }
+                 */
+                Tax[];
+                /**
+                 * Specifies whether the price is considered `inclusive` of taxes or not.
+                 */
+                is_tax_inclusive?: boolean;
+                /**
+                 * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
+                 */
+                type?: "one_time" | "recurring";
+                /**
+                 * For recurring prices `billing_period` defines the default extent of the recurrence.
+                 */
+                billing_period?: /* For recurring prices `billing_period` defines the default extent of the recurrence. */ BillingPeriod;
+                /**
+                 * The unit amount in cents to be charged, represented as a whole integer if possible.
+                 */
+                unit_amount?: number;
+                /**
+                 * The unit amount in eur to be charged, represented as a decimal string with at most 12 decimal places.
+                 */
+                unit_amount_decimal?: string;
+                /**
+                 * Three-letter ISO currency code, in lowercase.
+                 */
+                unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
+                 * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+                 * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+                 *
+                 * example:
+                 * EUR
+                 */
+                Currency;
+                /**
+                 * Defines the way the price amount is display in epilot journeys.
+                 */
+                price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request" | "estimated_price";
+                /**
+                 * The flag for prices that can be influenced by external variables such as user input.
+                 */
+                variable_price?: boolean;
+                /**
+                 * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
+                 */
+                unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
+                get_ag?: PriceGetAg;
+                dynamic_tariff?: PriceDynamicTariff;
+                /**
+                 * The price creation date
+                 */
+                _created_at?: string;
+                /**
+                 * The logical entity's id, the same one a plain entity read returns.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                _id: string;
+                /**
+                 * The price autogenerated title
+                 */
+                _title?: string;
+                /**
+                 * The price last update date
+                 */
+                _updated_at?: string;
+                /**
+                 * The organization id the price belongs to
+                 */
+                _org_id?: string;
+                /**
+                 * An arbitrary set of tags attached to the price
+                 */
+                _tags?: string[];
+                /**
+                 * The variant these values came from — what an order or contract pins.
+                 * example:
+                 * var-46045
+                 */
+                _variant_id: string;
+                /**
+                 * The `valid_from` of the version applied for the requested `as_of`.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                _version_valid_from: string;
+                /**
+                 * The conditions this variant pins, plus the boolean `default` discriminator.
+                 * example:
+                 * {
+                 *   "postal_code": "46045",
+                 *   "default": false
+                 * }
+                 */
+                _conditions: {
+                    [name: string]: any;
+                    default: boolean;
+                };
+                /**
+                 * The variant's stored overrides this payload did not apply, and why. Always present, and
+                 * empty in the ordinary case. Computed per read against the schema as it stands, so
+                 * granting or withdrawing `overridable_attribute` changes it without any data being
+                 * rewritten.
+                 *
+                 */
+                _inert_overrides: /**
+                 * One override that did not apply, and why — reported by a write for the attributes in its
+                 * body, and by a resolved payload for the stored overrides composition passed over.
+                 *
+                 */
+                InertOverride[];
+            } | {
+                [name: string]: any;
+                /**
+                 * The billing period duration
+                 */
+                billing_duration_amount?: number | null;
+                /**
+                 * The billing period duration unit
+                 */
+                billing_duration_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * The notice period duration
+                 */
+                notice_time_amount?: number | null;
+                /**
+                 * The notice period duration unit
+                 */
+                notice_time_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * The termination period duration
+                 */
+                termination_time_amount?: number | null;
+                /**
+                 * The termination period duration unit
+                 */
+                termination_time_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * The renewal period duration
+                 */
+                renewal_duration_amount?: number | null;
+                /**
+                 * The renewal period duration unit
+                 */
+                renewal_duration_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * Whether the price can be used for new purchases.
+                 */
+                active?: boolean;
+                /**
+                 * A brief description of the price.
+                 */
+                description?: string;
+                /**
+                 * A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price.
+                 */
+                price_components?: /* A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price. */ /**
+                 * The price entity schema for simple pricing
+                 * example:
+                 * {
+                 *   "unit_amount": 100000,
+                 *   "unit_amount_currency": "EUR",
+                 *   "unit_amount_decimal": "1000",
+                 *   "sales_tax": "standard",
+                 *   "is_tax_inclusive": true,
+                 *   "price_display_in_journeys": "show_price",
+                 *   "type": "one_time",
+                 *   "billing_period": "weekly",
+                 *   "billing_duration_unit": "months",
+                 *   "notice_time_unit": "months",
+                 *   "termination_time_unit": "months",
+                 *   "renewal_duration_unit": "months",
+                 *   "_schema": "price",
+                 *   "_title": "Solar Panel Module",
+                 *   "description": "Solar Panel Module",
+                 *   "active": true,
+                 *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+                 *   "_org": "728",
+                 *   "_created_at": "2022-06-03T16:04:10.369Z",
+                 *   "_updated_at": "2022-06-03T16:04:10.369Z",
+                 *   "pricing_model": "per_unit",
+                 *   "is_composite_price": false
+                 * }
+                 */
+                Price[] | /**
+                 * The price entity schema for simple pricing
+                 * example:
+                 * {
+                 *   "unit_amount": 100000,
+                 *   "unit_amount_currency": "EUR",
+                 *   "unit_amount_decimal": "1000",
+                 *   "sales_tax": "standard",
+                 *   "is_tax_inclusive": true,
+                 *   "price_display_in_journeys": "show_price",
+                 *   "type": "one_time",
+                 *   "billing_period": "weekly",
+                 *   "billing_duration_unit": "months",
+                 *   "notice_time_unit": "months",
+                 *   "termination_time_unit": "months",
+                 *   "renewal_duration_unit": "months",
+                 *   "_schema": "price",
+                 *   "_title": "Solar Panel Module",
+                 *   "description": "Solar Panel Module",
+                 *   "active": true,
+                 *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+                 *   "_org": "728",
+                 *   "_created_at": "2022-06-03T16:04:10.369Z",
+                 *   "_updated_at": "2022-06-03T16:04:10.369Z",
+                 *   "pricing_model": "per_unit",
+                 *   "is_composite_price": false
+                 * }
+                 */
+                Price[];
+                /**
+                 * Three-letter ISO currency code, in lowercase.
+                 */
+                unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
+                 * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+                 * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+                 *
+                 * example:
+                 * EUR
+                 */
+                Currency;
+                /**
+                 * The flag for prices that contain price components.
+                 */
+                is_composite_price: true;
+                /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
+                 * The price creation date
+                 */
+                _created_at?: string;
+                /**
+                 * The logical entity's id, the same one a plain entity read returns.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                _id: string;
+                /**
+                 * The price autogenerated title
+                 */
+                _title?: string;
+                /**
+                 * The price last update date
+                 */
+                _updated_at?: string;
+                /**
+                 * The organization id the price belongs to
+                 */
+                _org_id?: string;
+                /**
+                 * An arbitrary set of tags attached to the composite price
+                 */
+                _tags?: string[];
+                /**
+                 * The variant these values came from — what an order or contract pins.
+                 * example:
+                 * var-46045
+                 */
+                _variant_id: string;
+                /**
+                 * The `valid_from` of the version applied for the requested `as_of`.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                _version_valid_from: string;
+                /**
+                 * The conditions this variant pins, plus the boolean `default` discriminator.
+                 * example:
+                 * {
+                 *   "postal_code": "46045",
+                 *   "default": false
+                 * }
+                 */
+                _conditions: {
+                    [name: string]: any;
+                    default: boolean;
+                };
+                /**
+                 * The variant's stored overrides this payload did not apply, and why. Always present, and
+                 * empty in the ordinary case. Computed per read against the schema as it stands, so
+                 * granting or withdrawing `overridable_attribute` changes it without any data being
+                 * rewritten.
+                 *
+                 */
+                _inert_overrides: /**
+                 * One override that did not apply, and why — reported by a write for the attributes in its
+                 * body, and by a resolved payload for the stored overrides composition passed over.
+                 *
+                 */
+                InertOverride[];
+            } | /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "unit_amount": 100000,
+             *   "unit_amount_currency": "EUR",
+             *   "unit_amount_decimal": "1000",
+             *   "sales_tax": "standard",
+             *   "is_tax_inclusive": true,
+             *   "price_display_in_journeys": "show_price",
+             *   "type": "one_time",
+             *   "billing_period": "weekly",
+             *   "billing_duration_unit": "months",
+             *   "notice_time_unit": "months",
+             *   "termination_time_unit": "months",
+             *   "renewal_duration_unit": "months",
+             *   "_schema": "price",
+             *   "_title": "Solar Panel Module",
+             *   "description": "Solar Panel Module",
+             *   "active": true,
+             *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:04:10.369Z",
+             *   "_updated_at": "2022-06-03T16:04:10.369Z",
+             *   "pricing_model": "per_unit",
+             *   "is_composite_price": false
+             * }
+             */
+            Price | {
+                [name: string]: any;
+                /**
+                 * The billing period duration
+                 */
+                billing_duration_amount?: number | null;
+                /**
+                 * The billing period duration unit
+                 */
+                billing_duration_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * The notice period duration
+                 */
+                notice_time_amount?: number | null;
+                /**
+                 * The notice period duration unit
+                 */
+                notice_time_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * The termination period duration
+                 */
+                termination_time_amount?: number | null;
+                /**
+                 * The termination period duration unit
+                 */
+                termination_time_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * The renewal period duration
+                 */
+                renewal_duration_amount?: number | null;
+                /**
+                 * The renewal period duration unit
+                 */
+                renewal_duration_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * Whether the price can be used for new purchases.
+                 */
+                active?: boolean;
+                /**
+                 * A brief description of the price.
+                 */
+                description?: string;
+                /**
+                 * A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price.
+                 */
+                price_components?: /* A set of [price](/api/pricing#tag/simple_price_schema) components that define the composite price. */ /**
+                 * The price entity schema for simple pricing
+                 * example:
+                 * {
+                 *   "unit_amount": 100000,
+                 *   "unit_amount_currency": "EUR",
+                 *   "unit_amount_decimal": "1000",
+                 *   "sales_tax": "standard",
+                 *   "is_tax_inclusive": true,
+                 *   "price_display_in_journeys": "show_price",
+                 *   "type": "one_time",
+                 *   "billing_period": "weekly",
+                 *   "billing_duration_unit": "months",
+                 *   "notice_time_unit": "months",
+                 *   "termination_time_unit": "months",
+                 *   "renewal_duration_unit": "months",
+                 *   "_schema": "price",
+                 *   "_title": "Solar Panel Module",
+                 *   "description": "Solar Panel Module",
+                 *   "active": true,
+                 *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+                 *   "_org": "728",
+                 *   "_created_at": "2022-06-03T16:04:10.369Z",
+                 *   "_updated_at": "2022-06-03T16:04:10.369Z",
+                 *   "pricing_model": "per_unit",
+                 *   "is_composite_price": false
+                 * }
+                 */
+                Price[] | /**
+                 * The price entity schema for simple pricing
+                 * example:
+                 * {
+                 *   "unit_amount": 100000,
+                 *   "unit_amount_currency": "EUR",
+                 *   "unit_amount_decimal": "1000",
+                 *   "sales_tax": "standard",
+                 *   "is_tax_inclusive": true,
+                 *   "price_display_in_journeys": "show_price",
+                 *   "type": "one_time",
+                 *   "billing_period": "weekly",
+                 *   "billing_duration_unit": "months",
+                 *   "notice_time_unit": "months",
+                 *   "termination_time_unit": "months",
+                 *   "renewal_duration_unit": "months",
+                 *   "_schema": "price",
+                 *   "_title": "Solar Panel Module",
+                 *   "description": "Solar Panel Module",
+                 *   "active": true,
+                 *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+                 *   "_org": "728",
+                 *   "_created_at": "2022-06-03T16:04:10.369Z",
+                 *   "_updated_at": "2022-06-03T16:04:10.369Z",
+                 *   "pricing_model": "per_unit",
+                 *   "is_composite_price": false
+                 * }
+                 */
+                Price[];
+                /**
+                 * Three-letter ISO currency code, in lowercase.
+                 */
+                unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
+                 * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+                 * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+                 *
+                 * example:
+                 * EUR
+                 */
+                Currency;
+                /**
+                 * The flag for prices that contain price components.
+                 */
+                is_composite_price: true;
+                /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
+                 * The price creation date
+                 */
+                _created_at?: string;
+                /**
+                 * The price id
+                 */
+                _id?: string;
+                /**
+                 * The price autogenerated title
+                 */
+                _title?: string;
+                /**
+                 * The price last update date
+                 */
+                _updated_at?: string;
+                /**
+                 * The organization id the price belongs to
+                 */
+                _org_id?: string;
+                /**
+                 * An arbitrary set of tags attached to the composite price
+                 */
+                _tags?: string[];
+            };
+            /**
+             * The active coupons whose `prices` name this price — for a composite, its components —
+             * with their promo codes and usage censored, as the v1 catalog serves them. Always present,
+             * and empty when none applies.
+             *
+             */
+            coupons: /**
+             * The base for the coupon entity without promo codes
+             * example:
+             * {
+             *   "_id": "123e4567-e89b-12d3-a456-426614174000",
+             *   "_schema": "coupon",
+             *   "_org": "org_12345",
+             *   "_created_at": "2024-01-15T10:00:00.000Z",
+             *   "_updated_at": "2024-01-20T12:00:00.000Z",
+             *   "_title": "Sample Coupon",
+             *   "name": "Sample Coupon",
+             *   "type": "fixed",
+             *   "fixed_value": 555,
+             *   "fixed_value_currency": "USD",
+             *   "fixed_value_decimal": "5.55",
+             *   "active": true,
+             *   "category": "cashback",
+             *   "prices": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "abc12345-def6-7890-gh12-ijklmnopqrst",
+             *         "_tags": [
+             *           "discount",
+             *           "special"
+             *         ],
+             *         "_schema": "price"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            CouponWithoutPromoCodes[];
+            catalog_reference: /**
+             * Names the variant each member of a catalog pair was resolved from, and the instant `as_of`
+             * they were resolved at. Checkout prices each conditional member from that variant, using the
+             * version in effect at `as_of`.
+             *
+             * The catalog signs every reference, classic pair or not: `_meta` signs the rest of the
+             * reference. Where the caller is public, a reference must verify. An authenticated caller may
+             * send one without `_meta`. Signatures do not expire.
+             *
+             * example:
+             * {
+             *   "product": {
+             *     "id": "product-pv-2027",
+             *     "variant": "var-46045"
+             *   },
+             *   "price": {
+             *     "id": "price-composite-9f2",
+             *     "variant": "var-46046"
+             *   },
+             *   "price_components": [
+             *     {
+             *       "id": "price-base-fee-46045",
+             *       "variant": "var-46047"
+             *     },
+             *     {
+             *       "id": "price-kwh-46045",
+             *       "variant": "var-46048"
+             *     }
+             *   ],
+             *   "coupons": [
+             *     {
+             *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
+             *     }
+             *   ],
+             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "_meta": {
+             *     "timestamp": 1797000000000,
+             *     "signature": "c3ab8ff137"
+             *   }
+             * }
+             */
+            CatalogReference;
+        }
+        /**
+         * Names the variant each member of a catalog pair was resolved from, and the instant `as_of`
+         * they were resolved at. Checkout prices each conditional member from that variant, using the
+         * version in effect at `as_of`.
+         *
+         * The catalog signs every reference, classic pair or not: `_meta` signs the rest of the
+         * reference. Where the caller is public, a reference must verify. An authenticated caller may
+         * send one without `_meta`. Signatures do not expire.
+         *
+         * example:
+         * {
+         *   "product": {
+         *     "id": "product-pv-2027",
+         *     "variant": "var-46045"
+         *   },
+         *   "price": {
+         *     "id": "price-composite-9f2",
+         *     "variant": "var-46046"
+         *   },
+         *   "price_components": [
+         *     {
+         *       "id": "price-base-fee-46045",
+         *       "variant": "var-46047"
+         *     },
+         *     {
+         *       "id": "price-kwh-46045",
+         *       "variant": "var-46048"
+         *     }
+         *   ],
+         *   "coupons": [
+         *     {
+         *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
+         *     }
+         *   ],
+         *   "as_of": "2026-12-20T10:15:00.000Z",
+         *   "_meta": {
+         *     "timestamp": 1797000000000,
+         *     "signature": "c3ab8ff137"
+         *   }
+         * }
+         */
+        export interface CatalogReference {
+            product: /**
+             * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+             * is absent for a classic entity.
+             *
+             */
+            CatalogReferenceMember;
+            price: /**
+             * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+             * is absent for a classic entity.
+             *
+             */
+            CatalogReferenceMember;
+            /**
+             * Present for a composite price that serves at least one component: the components this
+             * pair is the combination of, each with its variant where one produced it. A conditional
+             * component with no variant in effect is left out of the composite and is not named here
+             * (ADR 0048). A component line item carries no reference of its own.
+             *
+             */
+            price_components?: /**
+             * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+             * is absent for a classic entity.
+             *
+             */
+            CatalogReferenceMember[];
+            /**
+             * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
+             * can be conditional.
+             *
+             */
+            coupons?: /**
+             * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+             * is absent for a classic entity.
+             *
+             */
+            CatalogReferenceMember[];
+            /**
+             * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
+             * each conditional member's version at this instant.
+             *
+             * example:
+             * 2026-12-20T10:15:00.000Z
+             */
+            as_of: string;
+            _meta?: /* Signature meta data payload */ SignatureMeta;
+        }
+        /**
+         * An error from an order operation that prices line items. A catalog-reference refusal carries
+         * `code` and `details`, typed per code. Every other refusal carries neither.
+         *
+         */
+        export type CatalogReferenceError = /**
+         * An error from an order operation that prices line items. A catalog-reference refusal carries
+         * `code` and `details`, typed per code. Every other refusal carries neither.
+         *
+         */
+        {
+            code: "CATALOG_REFERENCE_MISSING";
+            details: /* The line item a checkout refusal is about, named as the item names itself. */ RefusedLineItem;
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CATALOG_REFERENCE_SIGNATURE_INVALID";
+            details: /* The line item a checkout refusal is about, named as the item names itself. */ RefusedLineItem;
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CATALOG_REFERENCE_UNRESOLVABLE";
+            details: {
+                schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
+                /**
+                 * The entity the reference addressed.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+                /**
+                 * The variant the reference addressed.
+                 * example:
+                 * var-46045
+                 */
+                variant_id: string;
+                /**
+                 * The instant the reference names.
+                 * example:
+                 * 2026-12-20T10:15:00.000Z
+                 */
+                as_of: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[];
+        } | {
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            error?: /**
+             * The `error` field of an error response: the message, or — where the request failed
+             * validation before any handler ran — the validation errors themselves.
+             *
+             */
+            ReportedError;
+        };
+        /**
+         * Why an order operation refused a catalog reference. Other refusals carry no `code`.
+         *
+         * - `CATALOG_REFERENCE_MISSING` (400): a line item whose product or price is conditional carries no `catalog_reference`, or one with no variant for that member
+         * - `CATALOG_REFERENCE_SIGNATURE_INVALID` (400): a `catalog_reference` on a public checkout is unsigned, or its signature does not verify
+         * - `CATALOG_REFERENCE_UNRESOLVABLE` (400): a member of a `catalog_reference` cannot be resolved at its `as_of` — its entity or variant no longer exists, the variant has no version in effect, or the entity's schema no longer lets the variant be read
+         *
+         */
+        export type CatalogReferenceErrorCode = "CATALOG_REFERENCE_MISSING" | "CATALOG_REFERENCE_SIGNATURE_INVALID" | "CATALOG_REFERENCE_UNRESOLVABLE";
+        /**
+         * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+         * is absent for a classic entity.
+         *
+         */
+        export interface CatalogReferenceMember {
+            /**
+             * The entity's id.
+             * example:
+             * price-sp26d1yo
+             */
+            id: string;
+            /**
+             * The variant checkout prices this member from.
+             * example:
+             * var-46045
+             */
+            variant?: string;
+        }
         /**
          * A catalog search payload
          * example:
@@ -6640,7 +8394,7 @@ export declare namespace Components {
              */
             hits?: number;
             results?: (/**
-             * The product entity
+             * The product entity, its relations as stored.
              * example:
              * {
              *   "type": "product",
@@ -6777,6 +8531,65 @@ export declare namespace Components {
              */
             Coupon)[];
         }
+        /**
+         * An entry the v2 catalog could not answer, and why. `details` is typed per `code`: narrow on
+         * `code` and the object under it declares exactly the fields that code sends.
+         *
+         */
+        export type CatalogWarning = /**
+         * An entry the v2 catalog could not answer, and why. `details` is typed per `code`: narrow on
+         * `code` and the object under it declares exactly the fields that code sends.
+         *
+         */
+        {
+            code: "CATALOG_ENTRY_NOT_FOUND";
+            message: string;
+            details: {
+                /**
+                 * The entry's product id, as sent.
+                 * example:
+                 * product-heatpump-2027
+                 */
+                product_id: string;
+                /**
+                 * The entry's price id, as sent. Absent when the entry named none.
+                 * example:
+                 * price-retired
+                 */
+                price_id?: string;
+                /**
+                 * Which of the entry's ids found nothing.
+                 */
+                missing: "product" | "price";
+            };
+        } | {
+            code: "CATALOG_ENTRY_TYPE_MISMATCH";
+            message: string;
+            details: {
+                /**
+                 * The entry's product id, as sent.
+                 * example:
+                 * product-heatpump-2027
+                 */
+                product_id: string;
+                /**
+                 * The entry's price id, as sent. Absent when the entry named none.
+                 * example:
+                 * product-tariff-2027
+                 */
+                price_id?: string;
+                /**
+                 * Which of the entry's ids names an entity of another type.
+                 */
+                mismatched: "product" | "price";
+                /**
+                 * The type the entity turned out to be.
+                 * example:
+                 * product
+                 */
+                actual_schema: string;
+            };
+        };
         /**
          * The cart checkout request payload
          */
@@ -8010,12 +9823,6 @@ export declare namespace Components {
                     feature?: string;
                 }[];
                 /**
-                 * Stores references to products that can be cross sold with the current product.
-                 */
-                cross_sellable_products?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * Stores references to a set of file images of the product
                  */
                 product_images?: /* Stores references to a set of file images of the product */ {
@@ -8035,14 +9842,8 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 } | File[];
                 /**
-                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
-                 */
-                price_options?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * The flag for entities whose values vary by context. Resolve the values that apply with
-                 * `POST /v1/conditional-pricing:resolve`.
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
                  *
                  */
                 is_conditional?: boolean;
@@ -8072,6 +9873,101 @@ export declare namespace Components {
                  * The product last update date
                  */
                 _updated_at?: string;
+                /**
+                 * Stores references to products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+                 */
+                price_options?: {
+                    $relation?: EntityRelation[];
+                };
+            };
+            /**
+             * The `catalog_reference` of the pair this item came from, unchanged. Required when the
+             * item's product or price is conditional. Component items carry none.
+             *
+             * example:
+             * {
+             *   "product": {
+             *     "id": "product-pv-2027",
+             *     "variant": "var-46045"
+             *   },
+             *   "price": {
+             *     "id": "price-composite-9f2",
+             *     "variant": "var-46046"
+             *   },
+             *   "price_components": [
+             *     {
+             *       "id": "price-base-fee-46045",
+             *       "variant": "var-46047"
+             *     },
+             *     {
+             *       "id": "price-kwh-46045",
+             *       "variant": "var-46048"
+             *     }
+             *   ],
+             *   "coupons": [
+             *     {
+             *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
+             *     }
+             *   ],
+             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "_meta": {
+             *     "timestamp": 1797000000000,
+             *     "signature": "c3ab8ff137"
+             *   }
+             * }
+             */
+            catalog_reference?: {
+                product: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                price: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                /**
+                 * Present for a composite price that serves at least one component: the components this
+                 * pair is the combination of, each with its variant where one produced it. A conditional
+                 * component with no variant in effect is left out of the composite and is not named here
+                 * (ADR 0048). A component line item carries no reference of its own.
+                 *
+                 */
+                price_components?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
+                 * can be conditional.
+                 *
+                 */
+                coupons?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
+                 * each conditional member's version at this instant.
+                 *
+                 * example:
+                 * 2026-12-20T10:15:00.000Z
+                 */
+                as_of: string;
+                _meta?: /* Signature meta data payload */ SignatureMeta;
             };
             /**
              * price item id
@@ -8243,7 +10139,7 @@ export declare namespace Components {
                 active?: boolean;
                 /**
                  * The flag for entities whose values vary by context. Resolve the values that apply with
-                 * `POST /v1/conditional-pricing:resolve`.
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
                  *
                  */
                 is_conditional?: boolean;
@@ -8627,12 +10523,6 @@ export declare namespace Components {
                     feature?: string;
                 }[];
                 /**
-                 * Stores references to products that can be cross sold with the current product.
-                 */
-                cross_sellable_products?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * Stores references to a set of file images of the product
                  */
                 product_images?: /* Stores references to a set of file images of the product */ {
@@ -8652,14 +10542,8 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 } | File[];
                 /**
-                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
-                 */
-                price_options?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * The flag for entities whose values vary by context. Resolve the values that apply with
-                 * `POST /v1/conditional-pricing:resolve`.
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
                  *
                  */
                 is_conditional?: boolean;
@@ -8689,6 +10573,101 @@ export declare namespace Components {
                  * The product last update date
                  */
                 _updated_at?: string;
+                /**
+                 * Stores references to products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+                 */
+                price_options?: {
+                    $relation?: EntityRelation[];
+                };
+            };
+            /**
+             * The `catalog_reference` of the pair this item came from, unchanged. Required when the
+             * item's product or price is conditional. Component items carry none.
+             *
+             * example:
+             * {
+             *   "product": {
+             *     "id": "product-pv-2027",
+             *     "variant": "var-46045"
+             *   },
+             *   "price": {
+             *     "id": "price-composite-9f2",
+             *     "variant": "var-46046"
+             *   },
+             *   "price_components": [
+             *     {
+             *       "id": "price-base-fee-46045",
+             *       "variant": "var-46047"
+             *     },
+             *     {
+             *       "id": "price-kwh-46045",
+             *       "variant": "var-46048"
+             *     }
+             *   ],
+             *   "coupons": [
+             *     {
+             *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
+             *     }
+             *   ],
+             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "_meta": {
+             *     "timestamp": 1797000000000,
+             *     "signature": "c3ab8ff137"
+             *   }
+             * }
+             */
+            catalog_reference?: {
+                product: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                price: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                /**
+                 * Present for a composite price that serves at least one component: the components this
+                 * pair is the combination of, each with its variant where one produced it. A conditional
+                 * component with no variant in effect is left out of the composite and is not named here
+                 * (ADR 0048). A component line item carries no reference of its own.
+                 *
+                 */
+                price_components?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
+                 * can be conditional.
+                 *
+                 */
+                coupons?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
+                 * each conditional member's version at this instant.
+                 *
+                 * example:
+                 * 2026-12-20T10:15:00.000Z
+                 */
+                as_of: string;
+                _meta?: /* Signature meta data payload */ SignatureMeta;
             };
             external_fees_mappings?: /**
              * example:
@@ -11044,7 +13023,7 @@ export declare namespace Components {
             active?: boolean;
             /**
              * The flag for entities whose values vary by context. Resolve the values that apply with
-             * `POST /v1/conditional-pricing:resolve`.
+             * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
              *
              */
             is_conditional?: boolean;
@@ -11161,7 +13140,7 @@ export declare namespace Components {
             active?: boolean;
             /**
              * The flag for entities whose values vary by context. Resolve the values that apply with
-             * `POST /v1/conditional-pricing:resolve`.
+             * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
              *
              */
             is_conditional?: boolean;
@@ -11256,7 +13235,7 @@ export declare namespace Components {
             active?: boolean;
             /**
              * The flag for entities whose values vary by context. Resolve the values that apply with
-             * `POST /v1/conditional-pricing:resolve`.
+             * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
              *
              */
             is_conditional?: boolean;
@@ -12283,7 +14262,7 @@ export declare namespace Components {
             is_composite_price: true;
             /**
              * The flag for entities whose values vary by context. Resolve the values that apply with
-             * `POST /v1/conditional-pricing:resolve`.
+             * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
              *
              */
             is_conditional?: boolean;
@@ -12311,6 +14290,305 @@ export declare namespace Components {
              * An arbitrary set of tags attached to the composite price
              */
             _tags?: string[];
+        }
+        /**
+         * The product entity hydrated one level deep, as the v2 public catalog serves it: each
+         * relation holds the entities it referenced, sanitised, with their own relations as stored.
+         *
+         */
+        export interface HydratedProduct {
+            [name: string]: any;
+            /**
+             * The description for the product
+             */
+            description?: string;
+            /**
+             * The product code
+             */
+            code?: string;
+            /**
+             * The type of Product:
+             *
+             * | type | description |
+             * |----| ----|
+             * | `product` | Represents a physical good |
+             * | `service` | Represents a service or virtual product |
+             *
+             */
+            type?: "product" | "service";
+            /**
+             * The product main name
+             */
+            name?: string;
+            /**
+             * The product categories
+             */
+            categories?: string[];
+            feature?: {
+                /**
+                 * An arbitrary set of tags attached to a feature
+                 */
+                _tags?: string[];
+                feature?: string;
+            }[];
+            /**
+             * Stores references to a set of file images of the product
+             */
+            product_images?: /* Stores references to a set of file images of the product */ {
+                $relation?: EntityRelation[];
+            } | File[];
+            /**
+             * Stores references to a set of files downloadable from the product.
+             * e.g: tech specifications, quality control sheets, privacy policy agreements
+             *
+             */
+            product_downloads?: /**
+             * Stores references to a set of files downloadable from the product.
+             * e.g: tech specifications, quality control sheets, privacy policy agreements
+             *
+             */
+            {
+                $relation?: EntityRelation[];
+            } | File[];
+            /**
+             * The flag for entities whose values vary by context. Resolve the values that apply with
+             * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
+             *
+             */
+            is_conditional?: boolean;
+            /**
+             * Stores references to the availability files that define where this product is available.
+             * These files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.
+             *
+             */
+            _availability_files?: File[];
+            /**
+             * The product id
+             */
+            _id?: string;
+            /**
+             * The autogenerated product title
+             */
+            _title?: string;
+            /**
+             * The organization id the product belongs to
+             */
+            _org_id?: string;
+            /**
+             * The product creation date
+             */
+            _created_at?: string;
+            /**
+             * The product last update date
+             */
+            _updated_at?: string;
+            /**
+             * The products that can be cross sold with the current product.
+             */
+            cross_sellable_products?: /**
+             * The product entity, its relations as stored.
+             * example:
+             * {
+             *   "type": "product",
+             *   "_schema": "product",
+             *   "_title": "Solar Panel with Battery Storage",
+             *   "name": "Solar Panel with Battery Storage",
+             *   "code": "SOLAR-BATT",
+             *   "active": true,
+             *   "description": "Solar Panel with battery solution, optimized for max efficiency. ",
+             *   "feature": [
+             *     {
+             *       "_tags": [],
+             *       "feature": "Eco-Panels"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Remote Management Platform"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Battery Remote Control"
+             *     },
+             *     {
+             *       "_tags": [],
+             *       "feature": "Mobile App"
+             *     }
+             *   ],
+             *   "cross_sellable_products": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "068d0713-a650-4668-9ed2-eca7be31e337",
+             *         "_schema": "product",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "c8402ee7-fba9-4f3d-bffd-6803ca655782",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   },
+             *   "product_images": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "37bdeaaa-65fe-403e-9894-65b01cd277f1"
+             *       },
+             *       {
+             *         "entity_id": "56dde657-795c-41bb-bf53-98fd586b7e6e"
+             *       }
+             *     ]
+             *   },
+             *   "product_downloads": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "64211361-8759-414b-81c0-afbf24f83aa9"
+             *       }
+             *     ]
+             *   },
+             *   "_id": "a7f4771a-6368-4d77-bb01-71f1e4902de5",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T15: 52: 27.512Z",
+             *   "_updated_at": "2022-06-03T16: 05: 15.029Z",
+             *   "price_options": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *         "_tags": []
+             *       },
+             *       {
+             *         "entity_id": "146aa2cc-f267-4d5e-bda4-cbe2669b7741",
+             *         "_tags": []
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            Product[];
+            /**
+             * The [prices](/api/pricing#tag/simple_price_schema) and [composite
+             * prices](/api/pricing#tag/dynamic_price_schema) of the current product, each as stored.
+             * A conditional one is its base entity: the pair's `price` is the resolved one.
+             *
+             */
+            price_options?: (/**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "unit_amount": 100000,
+             *   "unit_amount_currency": "EUR",
+             *   "unit_amount_decimal": "1000",
+             *   "sales_tax": "standard",
+             *   "is_tax_inclusive": true,
+             *   "price_display_in_journeys": "show_price",
+             *   "type": "one_time",
+             *   "billing_period": "weekly",
+             *   "billing_duration_unit": "months",
+             *   "notice_time_unit": "months",
+             *   "termination_time_unit": "months",
+             *   "renewal_duration_unit": "months",
+             *   "_schema": "price",
+             *   "_title": "Solar Panel Module",
+             *   "description": "Solar Panel Module",
+             *   "active": true,
+             *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:04:10.369Z",
+             *   "_updated_at": "2022-06-03T16:04:10.369Z",
+             *   "pricing_model": "per_unit",
+             *   "is_composite_price": false
+             * }
+             */
+            Price | /**
+             * The composite price entity
+             * example:
+             * {
+             *   "_id": "c2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *   "_schema": "price",
+             *   "_title": "My Composite Price",
+             *   "description": "My Composite Price",
+             *   "_org": "739224",
+             *   "_created_at": "2022-02-18T10:10:26.439Z",
+             *   "_updated_at": "2022-02-18T11:53:04.191Z",
+             *   "active": true,
+             *   "is_composite_price": true,
+             *   "price_components": {
+             *     "$relation": [
+             *       {
+             *         "entity_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *         "_schema": "price",
+             *         "_product_id": "target-price-product-id",
+             *         "quantity": 1,
+             *         "item": {
+             *           "_id": "comp1-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *           "unit_amount": 10000,
+             *           "unit_amount_currency": "EUR",
+             *           "unit_amount_decimal": "100.00",
+             *           "sales_tax": "standard",
+             *           "is_tax_inclusive": false,
+             *           "price_display_in_journeys": "show_price",
+             *           "type": "one_time",
+             *           "_schema": "price",
+             *           "_title": "Test 1",
+             *           "description": "Test 1",
+             *           "tax": {
+             *             "$relation": [
+             *               {
+             *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+             *               }
+             *             ]
+             *           },
+             *           "_org": "739224",
+             *           "_created_at": "2022-02-18T10:10:26.439Z",
+             *           "_updated_at": "2022-02-18T11:53:04.191Z",
+             *           "active": true,
+             *           "billing_period": "weekly",
+             *           "billing_duration_unit": "months",
+             *           "notice_time_unit": "months",
+             *           "termination_time_unit": "months",
+             *           "renewal_duration_unit": "months",
+             *           "is_composite_price": false
+             *         }
+             *       },
+             *       {
+             *         "entity_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *         "_schema": "price",
+             *         "_product_id": "target-price-product-id",
+             *         "quantity": 2,
+             *         "item": {
+             *           "_id": "comp2-2a95ca9-7a50-41a4-a73c-b5fb1a57d40f",
+             *           "unit_amount": 10000,
+             *           "unit_amount_currency": "EUR",
+             *           "unit_amount_decimal": "100.00",
+             *           "sales_tax": "standard",
+             *           "is_tax_inclusive": false,
+             *           "price_display_in_journeys": "show_price",
+             *           "type": "one_time",
+             *           "_schema": "price",
+             *           "_title": "Test 1",
+             *           "description": "Test 1",
+             *           "tax": {
+             *             "$relation": [
+             *               {
+             *                 "entity_id": "18bbbc2e-2c37-4f91-924a-07ae60d830e4"
+             *               }
+             *             ]
+             *           },
+             *           "_org": "739224",
+             *           "_created_at": "2022-02-18T10:10:26.439Z",
+             *           "_updated_at": "2022-02-18T11:53:04.191Z",
+             *           "active": true,
+             *           "billing_period": "weekly",
+             *           "billing_duration_unit": "months",
+             *           "notice_time_unit": "months",
+             *           "termination_time_unit": "months",
+             *           "renewal_duration_unit": "months",
+             *           "is_composite_price": false
+             *         }
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            CompositePrice)[];
         }
         /**
          * One override that did not apply, and why — reported by a write for the attributes in its
@@ -12698,7 +14976,7 @@ export declare namespace Components {
             is_composite_price: true;
             /**
              * The flag for entities whose values vary by context. Resolve the values that apply with
-             * `POST /v1/conditional-pricing:resolve`.
+             * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
              *
              */
             is_conditional?: boolean;
@@ -14119,7 +16397,7 @@ export declare namespace Components {
             is_composite_price?: false;
             /**
              * The flag for entities whose values vary by context. Resolve the values that apply with
-             * `POST /v1/conditional-pricing:resolve`.
+             * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
              *
              */
             is_conditional?: boolean;
@@ -14778,12 +17056,6 @@ export declare namespace Components {
                     feature?: string;
                 }[];
                 /**
-                 * Stores references to products that can be cross sold with the current product.
-                 */
-                cross_sellable_products?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * Stores references to a set of file images of the product
                  */
                 product_images?: /* Stores references to a set of file images of the product */ {
@@ -14803,14 +17075,8 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 } | File[];
                 /**
-                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
-                 */
-                price_options?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * The flag for entities whose values vary by context. Resolve the values that apply with
-                 * `POST /v1/conditional-pricing:resolve`.
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
                  *
                  */
                 is_conditional?: boolean;
@@ -14840,6 +17106,101 @@ export declare namespace Components {
                  * The product last update date
                  */
                 _updated_at?: string;
+                /**
+                 * Stores references to products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+                 */
+                price_options?: {
+                    $relation?: EntityRelation[];
+                };
+            };
+            /**
+             * The `catalog_reference` of the pair this item came from, unchanged. Required when the
+             * item's product or price is conditional. Component items carry none.
+             *
+             * example:
+             * {
+             *   "product": {
+             *     "id": "product-pv-2027",
+             *     "variant": "var-46045"
+             *   },
+             *   "price": {
+             *     "id": "price-composite-9f2",
+             *     "variant": "var-46046"
+             *   },
+             *   "price_components": [
+             *     {
+             *       "id": "price-base-fee-46045",
+             *       "variant": "var-46047"
+             *     },
+             *     {
+             *       "id": "price-kwh-46045",
+             *       "variant": "var-46048"
+             *     }
+             *   ],
+             *   "coupons": [
+             *     {
+             *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
+             *     }
+             *   ],
+             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "_meta": {
+             *     "timestamp": 1797000000000,
+             *     "signature": "c3ab8ff137"
+             *   }
+             * }
+             */
+            catalog_reference?: {
+                product: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                price: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                /**
+                 * Present for a composite price that serves at least one component: the components this
+                 * pair is the combination of, each with its variant where one produced it. A conditional
+                 * component with no variant in effect is left out of the composite and is not named here
+                 * (ADR 0048). A component line item carries no reference of its own.
+                 *
+                 */
+                price_components?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
+                 * can be conditional.
+                 *
+                 */
+                coupons?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
+                 * each conditional member's version at this instant.
+                 *
+                 * example:
+                 * 2026-12-20T10:15:00.000Z
+                 */
+                as_of: string;
+                _meta?: /* Signature meta data payload */ SignatureMeta;
             };
             /**
              * price item id
@@ -15182,12 +17543,6 @@ export declare namespace Components {
                     feature?: string;
                 }[];
                 /**
-                 * Stores references to products that can be cross sold with the current product.
-                 */
-                cross_sellable_products?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * Stores references to a set of file images of the product
                  */
                 product_images?: /* Stores references to a set of file images of the product */ {
@@ -15207,14 +17562,8 @@ export declare namespace Components {
                     $relation?: EntityRelation[];
                 } | File[];
                 /**
-                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
-                 */
-                price_options?: {
-                    $relation?: EntityRelation[];
-                };
-                /**
                  * The flag for entities whose values vary by context. Resolve the values that apply with
-                 * `POST /v1/conditional-pricing:resolve`.
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
                  *
                  */
                 is_conditional?: boolean;
@@ -15244,6 +17593,101 @@ export declare namespace Components {
                  * The product last update date
                  */
                 _updated_at?: string;
+                /**
+                 * Stores references to products that can be cross sold with the current product.
+                 */
+                cross_sellable_products?: {
+                    $relation?: EntityRelation[];
+                };
+                /**
+                 * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+                 */
+                price_options?: {
+                    $relation?: EntityRelation[];
+                };
+            };
+            /**
+             * The `catalog_reference` of the pair this item came from, unchanged. Required when the
+             * item's product or price is conditional. Component items carry none.
+             *
+             * example:
+             * {
+             *   "product": {
+             *     "id": "product-pv-2027",
+             *     "variant": "var-46045"
+             *   },
+             *   "price": {
+             *     "id": "price-composite-9f2",
+             *     "variant": "var-46046"
+             *   },
+             *   "price_components": [
+             *     {
+             *       "id": "price-base-fee-46045",
+             *       "variant": "var-46047"
+             *     },
+             *     {
+             *       "id": "price-kwh-46045",
+             *       "variant": "var-46048"
+             *     }
+             *   ],
+             *   "coupons": [
+             *     {
+             *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
+             *     }
+             *   ],
+             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "_meta": {
+             *     "timestamp": 1797000000000,
+             *     "signature": "c3ab8ff137"
+             *   }
+             * }
+             */
+            catalog_reference?: {
+                product: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                price: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember;
+                /**
+                 * Present for a composite price that serves at least one component: the components this
+                 * pair is the combination of, each with its variant where one produced it. A conditional
+                 * component with no variant in effect is left out of the composite and is not named here
+                 * (ADR 0048). A component line item carries no reference of its own.
+                 *
+                 */
+                price_components?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
+                 * can be conditional.
+                 *
+                 */
+                coupons?: /**
+                 * One member of a catalog reference: the entity, and the variant that produced it. `variant`
+                 * is absent for a classic entity.
+                 *
+                 */
+                CatalogReferenceMember[];
+                /**
+                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
+                 * each conditional member's version at this instant.
+                 *
+                 * example:
+                 * 2026-12-20T10:15:00.000Z
+                 */
+                as_of: string;
+                _meta?: /* Signature meta data payload */ SignatureMeta;
             };
             external_fees_mappings?: /**
              * example:
@@ -15392,7 +17836,7 @@ export declare namespace Components {
                 is_composite_price?: false;
                 /**
                  * The flag for entities whose values vary by context. Resolve the values that apply with
-                 * `POST /v1/conditional-pricing:resolve`.
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
                  *
                  */
                 is_conditional?: boolean;
@@ -16103,7 +18547,7 @@ export declare namespace Components {
          */
         export type PricingModel = "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "dynamic_tariff" | "external_getag";
         /**
-         * The product entity
+         * The product entity, its relations as stored.
          * example:
          * {
          *   "type": "product",
@@ -16215,12 +18659,6 @@ export declare namespace Components {
                 feature?: string;
             }[];
             /**
-             * Stores references to products that can be cross sold with the current product.
-             */
-            cross_sellable_products?: {
-                $relation?: EntityRelation[];
-            };
-            /**
              * Stores references to a set of file images of the product
              */
             product_images?: /* Stores references to a set of file images of the product */ {
@@ -16240,14 +18678,8 @@ export declare namespace Components {
                 $relation?: EntityRelation[];
             } | File[];
             /**
-             * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
-             */
-            price_options?: {
-                $relation?: EntityRelation[];
-            };
-            /**
              * The flag for entities whose values vary by context. Resolve the values that apply with
-             * `POST /v1/conditional-pricing:resolve`.
+             * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
              *
              */
             is_conditional?: boolean;
@@ -16277,6 +18709,18 @@ export declare namespace Components {
              * The product last update date
              */
             _updated_at?: string;
+            /**
+             * Stores references to products that can be cross sold with the current product.
+             */
+            cross_sellable_products?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.
+             */
+            price_options?: {
+                $relation?: EntityRelation[];
+            };
         }
         export type ProductCategory = "power" | "gas";
         /**
@@ -17000,6 +19444,23 @@ export declare namespace Components {
              */
             CouponWithoutPromoCodes[];
         }
+        /**
+         * The line item a checkout refusal is about, named as the item names itself.
+         */
+        export interface RefusedLineItem {
+            /**
+             * The item's price id.
+             * example:
+             * price-sp26d1yo
+             */
+            price_id: string;
+            /**
+             * The item's product id, when the item names one.
+             * example:
+             * product-pv-2027
+             */
+            product_id?: string;
+        }
         export interface ReplaceVersionRequest {
             /**
              * The complete set of overrides this version carries. An overridable attribute absent from
@@ -17149,6 +19610,772 @@ export declare namespace Components {
             PinnedResolveOptions;
         }
         /**
+         * The entries of one journey block, and the situation to resolve them for. Every member of
+         * every pair is resolved for its entity type's context at the same `as_of`.
+         *
+         */
+        export interface ResolveCatalogRequest {
+            /**
+             * One entry per configured tile, answered independently — a duplicate is answered twice.
+             * At most 100.
+             *
+             */
+            entries: [
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?,
+                /**
+                 * A product and, optionally, one of its prices. With `price_id` the entry is the author's
+                 * pair, served as named; without it the entry is served from the resolved product's
+                 * `price_options`, one pair per price.
+                 *
+                 */
+                CatalogEntry?
+            ];
+            context: /**
+             * One context per entity type, each the authenticated resolve's context and checked against
+             * that type's schema alone. A product resolves against `product`, a price and each of a
+             * composite's components against `price`, and a coupon against `coupon`. A type left out
+             * resolves against an empty context, which serves the `default` variant.
+             *
+             * example:
+             * {
+             *   "product": {
+             *     "postal_code": "46045",
+             *     "channel": "direct"
+             *   },
+             *   "price": {
+             *     "postal_code": "46045"
+             *   }
+             * }
+             */
+            CatalogContext;
+            /**
+             * The instant every member is resolved at. Defaults to now. It is written into every
+             * catalog reference, and checkout prices at it. Accepts an RFC 3339 date (read as midnight
+             * UTC) or date-time, to millisecond precision.
+             *
+             * example:
+             * 2026-12-20T10:15:00Z
+             */
+            as_of?: string;
+        }
+        export interface ResolveCatalogResult {
+            /**
+             * One pair per applicable combination, unordered. A member that matches several variants
+             * is several pairs; a composite whose components match several variants is one pair per
+             * combination. An entry may yield none.
+             *
+             */
+            pairs: /**
+             * A product and one of its prices, resolved for the request's `context` at its `as_of`, with
+             * the coupons that apply and the reference checkout prices from.
+             *
+             */
+            CatalogPair[];
+            /**
+             * The entries that could not be answered because an id found nothing. Always present, and
+             * empty in the ordinary case; an entry the catalog answers "not offered" is not in it.
+             *
+             */
+            warnings: /**
+             * An entry the v2 catalog could not answer, and why. `details` is typed per `code`: narrow on
+             * `code` and the object under it declares exactly the fields that code sends.
+             *
+             */
+            CatalogWarning[];
+        }
+        /**
          * A resolve names one conditional entity and selects its variants either by `context` or by
          * `variant_id`, never both. `context: {}` matches nothing and so returns the `default`
          * variant, which is how to ask for it without knowing its id.
@@ -17218,6 +20445,264 @@ export declare namespace Components {
              *
              */
             hydrate?: boolean;
+        }
+        /**
+         * The components of a composite price as the v2 catalog serves them: hydrated in place, and
+         * a component that is itself conditional resolved against the same context, carrying the
+         * discriminators a resolved payload carries. A conditional component with no variant in
+         * effect — nothing matches and there is no default — is left out, as a deleted component is
+         * (ADR 0048).
+         *
+         */
+        export interface ResolvedPriceComponents {
+            price_components?: ({
+                [name: string]: any;
+                /**
+                 * The billing period duration
+                 */
+                billing_duration_amount?: number | null;
+                /**
+                 * The billing period duration unit
+                 */
+                billing_duration_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * The notice period duration
+                 */
+                notice_time_amount?: number | null;
+                /**
+                 * The notice period duration unit
+                 */
+                notice_time_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * The termination period duration
+                 */
+                termination_time_amount?: number | null;
+                /**
+                 * The termination period duration unit
+                 */
+                termination_time_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * The renewal period duration
+                 */
+                renewal_duration_amount?: number | null;
+                /**
+                 * The renewal period duration unit
+                 */
+                renewal_duration_unit?: "days" | "weeks" | "months" | "years";
+                /**
+                 * Whether the price can be used for new purchases.
+                 */
+                active?: boolean;
+                /**
+                 * The flag for prices that contain price components.
+                 */
+                is_composite_price?: false;
+                /**
+                 * The flag for entities whose values vary by context. Resolve the values that apply with
+                 * `POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.
+                 *
+                 */
+                is_conditional?: boolean;
+                /**
+                 * Describes how to compute the price per period. Either `per_unit`, `tiered_graduated` or `tiered_volume`.
+                 * - `per_unit` indicates that the fixed amount (specified in unit_amount or unit_amount_decimal) will be charged per unit in quantity
+                 * - `tiered_graduated` indicates that the unit pricing will be computed using tiers attribute. The customer pays the price per unit in every range their purchase rises through.
+                 * - `tiered_volume` indicates that the unit pricing will be computed using tiers attribute. The customer pays the same unit price for all purchased units.
+                 * - `tiered_flatfee` While similar to tiered_volume, tiered flat fee charges for the same price (flat) for the entire range instead using the unit price to multiply the quantity.
+                 *  - `dynamic_tariff` indicates that the price is dynamically dependend on the (quarter)-hourly spot market price.
+                 * - `external_getag` indicates that the price is influenced by aquisition fees provided by GetAG.
+                 *
+                 */
+                pricing_model: "per_unit" | "tiered_graduated" | "tiered_volume" | "tiered_flatfee" | "dynamic_tariff" | "external_getag";
+                /**
+                 * Defines an array of tiers. Each tier has an upper bound, an unit amount and a flat fee.
+                 *
+                 */
+                tiers?: PriceTier[];
+                /**
+                 * A brief description of the price.
+                 */
+                description?: string;
+                /**
+                 * A detailed description of the price. This is shown on the order document and order table.
+                 */
+                long_description?: string;
+                /**
+                 * The default tax rate applicable to the product.
+                 * This field is deprecated, use the new `tax` attribute.
+                 *
+                 */
+                sales_tax?: /**
+                 * The default tax rate applicable to the product.
+                 * This field is deprecated, use the new `tax` attribute.
+                 *
+                 */
+                SalesTax;
+                /**
+                 * The default tax rate applied to the price
+                 */
+                tax?: /* The default tax rate applied to the price */ {
+                    $relation?: EntityRelation[];
+                } | /**
+                 * the tax configuration
+                 * example:
+                 * {
+                 *   "rate": 19,
+                 *   "_title": "Tax Standard",
+                 *   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                 *   "type": "VAT",
+                 *   "description": "Tax description",
+                 *   "active": true,
+                 *   "region": "DE",
+                 *   "region_label": "Germany",
+                 *   "_org": "123",
+                 *   "_schema": "tax",
+                 *   "_tags": [
+                 *     "example",
+                 *     "mock"
+                 *   ],
+                 *   "_created_at": "2021-02-09T12:41:43.662Z",
+                 *   "_updated_at": "2021-02-09T12:41:43.662Z"
+                 * }
+                 */
+                Tax[];
+                /**
+                 * Specifies whether the price is considered `inclusive` of taxes or not.
+                 */
+                is_tax_inclusive?: boolean;
+                /**
+                 * One of `one_time` or `recurring` depending on whether the price is for a one-time purchase or a recurring (subscription) purchase.
+                 */
+                type?: "one_time" | "recurring";
+                /**
+                 * For recurring prices `billing_period` defines the default extent of the recurrence.
+                 */
+                billing_period?: /* For recurring prices `billing_period` defines the default extent of the recurrence. */ BillingPeriod;
+                /**
+                 * The unit amount in cents to be charged, represented as a whole integer if possible.
+                 */
+                unit_amount?: number;
+                /**
+                 * The unit amount in eur to be charged, represented as a decimal string with at most 12 decimal places.
+                 */
+                unit_amount_decimal?: string;
+                /**
+                 * Three-letter ISO currency code, in lowercase.
+                 */
+                unit_amount_currency?: /* Three-letter ISO currency code, in lowercase. */ /**
+                 * Three-letter ISO currency code, in lowercase. Must be a supported currency.
+                 * ISO 4217 CURRENCY CODES as specified in the documentation: https://www.iso.org/iso-4217-currency-codes.html
+                 *
+                 * example:
+                 * EUR
+                 */
+                Currency;
+                /**
+                 * Defines the way the price amount is display in epilot journeys.
+                 */
+                price_display_in_journeys?: "show_price" | "show_as_starting_price" | "show_as_on_request" | "estimated_price";
+                /**
+                 * The flag for prices that can be influenced by external variables such as user input.
+                 */
+                variable_price?: boolean;
+                /**
+                 * The unit of measurement used for display purposes and possibly for calculations when the price is variable.
+                 */
+                unit?: /* The unit of measurement used for display purposes and possibly for calculations when the price is variable. */ ("kw" | "kwh" | "m" | "m2" | "l" | "cubic-meter" | "cubic-meter-h" | "ls" | "a" | "kva" | "w" | "wp" | "kwp") | string;
+                get_ag?: PriceGetAg;
+                dynamic_tariff?: PriceDynamicTariff;
+                /**
+                 * The price creation date
+                 */
+                _created_at?: string;
+                /**
+                 * The logical entity's id, the same one a plain entity read returns.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                _id: string;
+                /**
+                 * The price autogenerated title
+                 */
+                _title?: string;
+                /**
+                 * The price last update date
+                 */
+                _updated_at?: string;
+                /**
+                 * The organization id the price belongs to
+                 */
+                _org_id?: string;
+                /**
+                 * An arbitrary set of tags attached to the price
+                 */
+                _tags?: string[];
+                /**
+                 * The variant these values came from — what an order or contract pins.
+                 * example:
+                 * var-46045
+                 */
+                _variant_id: string;
+                /**
+                 * The `valid_from` of the version applied for the requested `as_of`.
+                 * example:
+                 * 2027-01-01T00:00:00.000Z
+                 */
+                _version_valid_from: string;
+                /**
+                 * The conditions this variant pins, plus the boolean `default` discriminator.
+                 * example:
+                 * {
+                 *   "postal_code": "46045",
+                 *   "default": false
+                 * }
+                 */
+                _conditions: {
+                    [name: string]: any;
+                    default: boolean;
+                };
+                /**
+                 * The variant's stored overrides this payload did not apply, and why. Always present, and
+                 * empty in the ordinary case. Computed per read against the schema as it stands, so
+                 * granting or withdrawing `overridable_attribute` changes it without any data being
+                 * rewritten.
+                 *
+                 */
+                _inert_overrides: /**
+                 * One override that did not apply, and why — reported by a write for the attributes in its
+                 * body, and by a resolved payload for the stored overrides composition passed over.
+                 *
+                 */
+                InertOverride[];
+            } | /**
+             * The price entity schema for simple pricing
+             * example:
+             * {
+             *   "unit_amount": 100000,
+             *   "unit_amount_currency": "EUR",
+             *   "unit_amount_decimal": "1000",
+             *   "sales_tax": "standard",
+             *   "is_tax_inclusive": true,
+             *   "price_display_in_journeys": "show_price",
+             *   "type": "one_time",
+             *   "billing_period": "weekly",
+             *   "billing_duration_unit": "months",
+             *   "notice_time_unit": "months",
+             *   "termination_time_unit": "months",
+             *   "renewal_duration_unit": "months",
+             *   "_schema": "price",
+             *   "_title": "Solar Panel Module",
+             *   "description": "Solar Panel Module",
+             *   "active": true,
+             *   "_id": "9c36c23b-1574-4193-beff-b1b5e1124bc7",
+             *   "_org": "728",
+             *   "_created_at": "2022-06-03T16:04:10.369Z",
+             *   "_updated_at": "2022-06-03T16:04:10.369Z",
+             *   "pricing_model": "per_unit",
+             *   "is_composite_price": false
+             * }
+             */
+            Price)[];
         }
         /**
          * The entity as this variant leaves it — every attribute of a plain entity read with the
@@ -18530,7 +22015,12 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* The result from the calculation of a set of price items. */ Components.Schemas.PricingDetailsResponse;
-            export type $400 = Components.Schemas.Error;
+            export type $400 = /**
+             * An error from an order operation that prices line items. A catalog-reference refusal carries
+             * `code` and `details`, typed per code. Every other refusal carries neither.
+             *
+             */
+            Components.Schemas.CatalogReferenceError;
         }
     }
     namespace $CheckoutCart {
@@ -18543,7 +22033,12 @@ export declare namespace Paths {
         export type RequestBody = /* The cart checkout request payload */ Components.Schemas.CheckoutCart;
         namespace Responses {
             export type $200 = /* The cart checkout result */ Components.Schemas.CheckoutCartResult;
-            export type $400 = Components.Schemas.Error;
+            export type $400 = /**
+             * An error from an order operation that prices line items. A catalog-reference refusal carries
+             * `code` and `details`, typed per code. Every other refusal carries neither.
+             *
+             */
+            Components.Schemas.CatalogReferenceError;
         }
     }
     namespace $ComputePrice {
@@ -19496,6 +22991,37 @@ export declare namespace Paths {
             Components.Schemas.ConditionalPricingError;
         }
     }
+    namespace $ResolveCatalog {
+        export type RequestBody = /**
+         * The entries of one journey block, and the situation to resolve them for. Every member of
+         * every pair is resolved for its entity type's context at the same `as_of`.
+         *
+         */
+        Components.Schemas.ResolveCatalogRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.ResolveCatalogResult;
+            export type $400 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $409 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
     namespace $ResolveConditionalEntity {
         export type RequestBody = /**
          * A resolve names one conditional entity and selects its variants either by `context` or by
@@ -20280,7 +23806,12 @@ export declare namespace Paths {
              * }
              */
             Components.Schemas.Order;
-            export type $400 = Components.Schemas.Error;
+            export type $400 = /**
+             * An error from an order operation that prices line items. A catalog-reference refusal carries
+             * `code` and `details`, typed per code. Every other refusal carries neither.
+             *
+             */
+            Components.Schemas.CatalogReferenceError;
         }
     }
     namespace PutOrder {
@@ -20854,7 +24385,12 @@ export declare namespace Paths {
              * }
              */
             Components.Schemas.Order;
-            export type $400 = Components.Schemas.Error;
+            export type $400 = /**
+             * An error from an order operation that prices line items. A catalog-reference refusal carries
+             * `code` and `details`, typed per code. Every other refusal carries neither.
+             *
+             */
+            Components.Schemas.CatalogReferenceError;
         }
     }
 }
@@ -20932,6 +24468,26 @@ export interface OperationMethods {
     data?: Paths.$PrivateSearchCatalog.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$PrivateSearchCatalog.Responses.$200>
+  /**
+   * $resolveCatalog - $resolveCatalog
+   * 
+   * Returns the products and prices a journey block shows as catalog pairs, each member resolved
+   * for its own entity type's context at `as_of`. A pair carries the product, one of its prices, the coupons that apply,
+   * and a signed `catalog_reference`. Line items carry that reference to checkout unchanged, and
+   * checkout prices from it.
+   * 
+   * Conditional entities resolve as on `POST /v1/conditional-pricing:resolve`. An organization
+   * that has not opted in gets base entities, not an error. A member matching several variants
+   * yields one pair per variant, and an entry without `price_id` yields one pair per price of
+   * the product. Members that match nothing or are inactive are left out. Ids that find no
+   * entity, or an entity of another type than the entry asked for, are reported in `warnings`.
+   * 
+   */
+  '$resolveCatalog'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$ResolveCatalog.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$ResolveCatalog.Responses.$200>
   /**
    * $validatePromoCodes - $validatePromoCodes
    * 
@@ -21434,6 +24990,28 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$PrivateSearchCatalog.Responses.$200>
   }
+  ['/v2/public/catalog']: {
+    /**
+     * $resolveCatalog - $resolveCatalog
+     * 
+     * Returns the products and prices a journey block shows as catalog pairs, each member resolved
+     * for its own entity type's context at `as_of`. A pair carries the product, one of its prices, the coupons that apply,
+     * and a signed `catalog_reference`. Line items carry that reference to checkout unchanged, and
+     * checkout prices from it.
+     * 
+     * Conditional entities resolve as on `POST /v1/conditional-pricing:resolve`. An organization
+     * that has not opted in gets base entities, not an error. A member matching several variants
+     * yields one pair per variant, and an entry without `price_id` yields one pair per price of
+     * the product. Members that match nothing or are inactive are left out. Ids that find no
+     * entity, or an entity of another type than the entry asked for, are reported in `warnings`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$ResolveCatalog.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$ResolveCatalog.Responses.$200>
+  }
   ['/v1/public/validate-promo-codes']: {
     /**
      * $validatePromoCodes - $validatePromoCodes
@@ -21923,6 +25501,7 @@ export type BaseMarketPriceRecord = Components.Schemas.BaseMarketPriceRecord;
 export type BasePriceItem = Components.Schemas.BasePriceItem;
 export type BasePriceItemCommon = Components.Schemas.BasePriceItemCommon;
 export type BasePriceItemDto = Components.Schemas.BasePriceItemDto;
+export type BaseProduct = Components.Schemas.BaseProduct;
 export type BasicAuthCredentials = Components.Schemas.BasicAuthCredentials;
 export type BasicAuthIntegration = Components.Schemas.BasicAuthIntegration;
 export type BatchDeleteByConditions = Components.Schemas.BatchDeleteByConditions;
@@ -21944,9 +25523,17 @@ export type CartDto = Components.Schemas.CartDto;
 export type CashbackAmount = Components.Schemas.CashbackAmount;
 export type CashbackAmounts = Components.Schemas.CashbackAmounts;
 export type CashbackPeriod = Components.Schemas.CashbackPeriod;
+export type CatalogContext = Components.Schemas.CatalogContext;
+export type CatalogEntry = Components.Schemas.CatalogEntry;
 export type CatalogFieldsParam = Components.Schemas.CatalogFieldsParam;
+export type CatalogPair = Components.Schemas.CatalogPair;
+export type CatalogReference = Components.Schemas.CatalogReference;
+export type CatalogReferenceError = Components.Schemas.CatalogReferenceError;
+export type CatalogReferenceErrorCode = Components.Schemas.CatalogReferenceErrorCode;
+export type CatalogReferenceMember = Components.Schemas.CatalogReferenceMember;
 export type CatalogSearch = Components.Schemas.CatalogSearch;
 export type CatalogSearchResult = Components.Schemas.CatalogSearchResult;
+export type CatalogWarning = Components.Schemas.CatalogWarning;
 export type CheckoutCart = Components.Schemas.CheckoutCart;
 export type CheckoutCartResult = Components.Schemas.CheckoutCartResult;
 export type CheckoutMode = Components.Schemas.CheckoutMode;
@@ -22005,6 +25592,7 @@ export type GasMarketAreaDetails = Components.Schemas.GasMarketAreaDetails;
 export type HistoricMarketPriceRecord = Components.Schemas.HistoricMarketPriceRecord;
 export type HistoricMarketPricesResult = Components.Schemas.HistoricMarketPricesResult;
 export type HydratedCompositePrice = Components.Schemas.HydratedCompositePrice;
+export type HydratedProduct = Components.Schemas.HydratedProduct;
 export type InertOverride = Components.Schemas.InertOverride;
 export type InertOverrideReason = Components.Schemas.InertOverrideReason;
 export type IntegrationAuthCredentials = Components.Schemas.IntegrationAuthCredentials;
@@ -22064,13 +25652,17 @@ export type RecurrenceAmount = Components.Schemas.RecurrenceAmount;
 export type RecurrenceAmountDto = Components.Schemas.RecurrenceAmountDto;
 export type RecurrenceAmountWithTax = Components.Schemas.RecurrenceAmountWithTax;
 export type RedeemedPromo = Components.Schemas.RedeemedPromo;
+export type RefusedLineItem = Components.Schemas.RefusedLineItem;
 export type ReplaceVersionRequest = Components.Schemas.ReplaceVersionRequest;
 export type ReportedError = Components.Schemas.ReportedError;
 export type ResolveByContextRequest = Components.Schemas.ResolveByContextRequest;
 export type ResolveByPinRequest = Components.Schemas.ResolveByPinRequest;
+export type ResolveCatalogRequest = Components.Schemas.ResolveCatalogRequest;
+export type ResolveCatalogResult = Components.Schemas.ResolveCatalogResult;
 export type ResolveConditionalEntityRequest = Components.Schemas.ResolveConditionalEntityRequest;
 export type ResolveContext = Components.Schemas.ResolveContext;
 export type ResolveOptions = Components.Schemas.ResolveOptions;
+export type ResolvedPriceComponents = Components.Schemas.ResolvedPriceComponents;
 export type ResolvedVariant = Components.Schemas.ResolvedVariant;
 export type ResolvedVariants = Components.Schemas.ResolvedVariants;
 export type SalesTax = Components.Schemas.SalesTax;
