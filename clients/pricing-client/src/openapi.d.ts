@@ -11202,10 +11202,7 @@ declare namespace Components {
         } | {
             gte: /* A number, or a date as an RFC 3339 date or date-time. */ OrderedConditionOperand;
         } | {
-            in: [
-                (string | number),
-                ...(string | number)[]
-            ];
+            in: (string | number)[];
         } | {
             /**
              * The instant a `daterange` condition's range must contain.
