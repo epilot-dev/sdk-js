@@ -137,6 +137,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'externalValues',
+    loader: () => expandDef(require('../definitions/external-values-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'file',
     loader: () => expandDef(require('../definitions/file-runtime.json')),
   });

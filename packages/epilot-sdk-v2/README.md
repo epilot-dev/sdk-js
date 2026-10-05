@@ -65,6 +65,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.entityMapping` | `@epilot/sdk/entity-mapping` | [docs](./docs/entity-mapping.md) |
 | `epilot.environments` | `@epilot/sdk/environments` | [docs](./docs/environments.md) |
 | `epilot.eventCatalog` | `@epilot/sdk/event-catalog` | [docs](./docs/event-catalog.md) |
+| `epilot.externalValues` | `@epilot/sdk/external-values` | [docs](./docs/external-values.md) |
 | `epilot.file` | `@epilot/sdk/file` | [docs](./docs/file.md) |
 | `epilot.iban` | `@epilot/sdk/iban` | [docs](./docs/iban.md) |
 | `epilot.identity` | `@epilot/sdk/identity` | [docs](./docs/identity.md) |

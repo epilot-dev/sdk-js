@@ -165,6 +165,12 @@
       "require": "./dist/apis/event-catalog.cjs"
     },
     "./event-catalog/openapi.json": "./definitions/event-catalog.json",
+    "./external-values": {
+      "types": "./dist/apis/external-values.d.ts",
+      "import": "./dist/apis/external-values.js",
+      "require": "./dist/apis/external-values.cjs"
+    },
+    "./external-values/openapi.json": "./definitions/external-values.json",
     "./file": {
       "types": "./dist/apis/file.d.ts",
       "import": "./dist/apis/file.js",
@@ -457,6 +463,9 @@
       ],
       "event-catalog": [
         "./dist/apis/event-catalog.d.ts"
+      ],
+      "external-values": [
+        "./dist/apis/external-values.d.ts"
       ],
       "file": [
         "./dist/apis/file.d.ts"

@@ -23,6 +23,7 @@ import type { Client as EntityClient } from './types/entity';
 import type { Client as EntityMappingClient } from './types/entity-mapping';
 import type { Client as EnvironmentsClient } from './types/environments';
 import type { Client as EventCatalogClient } from './types/event-catalog';
+import type { Client as ExternalValuesClient } from './types/external-values';
 import type { Client as FileClient } from './types/file';
 import type { Client as IbanClient } from './types/iban';
 import type { Client as IdentityClient } from './types/identity';
@@ -78,6 +79,7 @@ export type SDKClientMap = {
   entityMapping: EntityMappingClient;
   environments: EnvironmentsClient;
   eventCatalog: EventCatalogClient;
+  externalValues: ExternalValuesClient;
   file: FileClient;
   iban: IbanClient;
   identity: IdentityClient;

@@ -1,0 +1,450 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "External Values API",
+    "description": "Resolves **External Values** — typed values fetched from third-party systems through\nhooks declared in an installed App's `EXTERNAL_VALUES` component.\n\nConsumers (validation rules, journeys, portals) reference a value as\n`{ app_id, hook_id, result_id }`; this API executes the hook against the third-party\nendpoint with the installation's options and secrets, extracts the configured results,\ncoerces them to their declared type and returns them together with the hook's\nfail policy.\n\nCallers must be authenticated: epilot 360 user tokens (`/v1/external-values*`) or\nportal end-customer tokens (`/v1/portal/external-values*`). Public journey tokens are\nnot accepted.\n",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "external-values",
+      "description": "Discover and resolve External Values of installed apps"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/external-values": {
+      "get": {
+        "operationId": "listExternalValues",
+        "summary": "listExternalValues",
+        "description": "List hooks and their results of all enabled installed apps that declare an\n`EXTERNAL_VALUES` component. Intended for pickers (e.g. the validation-rules builder).\n",
+        "tags": [
+          "external-values"
+        ],
+        "responses": {
+          "200": {
+            "description": "Available external value hooks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalValueHookList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/external-values/{app_id}/hooks/{hook_id}:resolve": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/AppId"
+        },
+        {
+          "$ref": "#/components/parameters/HookId"
+        }
+      ],
+      "post": {
+        "operationId": "resolveExternalValue",
+        "summary": "resolveExternalValue",
+        "description": "Resolve an external value hook for an epilot 360 user (builder preview, entity-attribute\nrules). The organization is taken from the caller's token.\n\nReturns HTTP 200 whenever the hook configuration was found and executed — including\nupstream failures, which are reported in `errors` so clients can apply `policy`.\n",
+        "tags": [
+          "external-values"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveExternalValueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resolution result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveExternalValueResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Unknown app, component or hook"
+          },
+          "422": {
+            "description": "The app's EXTERNAL_VALUES configuration is invalid"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/portal/external-values/{app_id}/hooks/{hook_id}:resolve": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/AppId"
+        },
+        {
+          "$ref": "#/components/parameters/HookId"
+        }
+      ],
+      "post": {
+        "operationId": "resolvePortalExternalValue",
+        "summary": "resolvePortalExternalValue",
+        "description": "Resolve an external value hook for a portal end customer (private journeys, portal).\nThe organization is taken from the portal token claims.\n\nReturns HTTP 200 whenever the hook configuration was found and executed — including\nupstream failures, which are reported in `errors` so clients can apply `policy`.\n",
+        "tags": [
+          "external-values"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveExternalValueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resolution result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveExternalValueResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Unknown app, component or hook"
+          },
+          "422": {
+            "description": "The app's EXTERNAL_VALUES configuration is invalid"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Authorization header with epilot OAuth2 bearer token (epilot 360 users)"
+      },
+      "PortalAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Authorization header with a portal end-customer bearer token"
+      }
+    },
+    "parameters": {
+      "AppId": {
+        "name": "app_id",
+        "in": "path",
+        "required": true,
+        "description": "ID of the installed app declaring the EXTERNAL_VALUES component",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "HookId": {
+        "name": "hook_id",
+        "in": "path",
+        "required": true,
+        "description": "Stable hook identifier within the component configuration",
+        "schema": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]{1,100}$"
+        }
+      }
+    },
+    "schemas": {
+      "TranslatedString": {
+        "type": "object",
+        "required": [
+          "de"
+        ],
+        "properties": {
+          "de": {
+            "type": "string",
+            "description": "German translation"
+          },
+          "en": {
+            "type": "string",
+            "nullable": true,
+            "description": "English translation"
+          }
+        }
+      },
+      "ExternalValueType": {
+        "type": "string",
+        "enum": [
+          "number",
+          "text",
+          "date",
+          "boolean"
+        ]
+      },
+      "ResolveExternalValueRequest": {
+        "type": "object",
+        "required": [
+          "context"
+        ],
+        "properties": {
+          "context": {
+            "type": "object",
+            "description": "Everything the consumer supplies for interpolation, as one name → value map.\nExposed to the hook's Liquid templates as `Context` / `context`, e.g.\n`{{ context.input }}`, `{{ context.contract.installment_amount }}`.\n\nThe names are up to the consumer; this API does not interpret them. By\nconvention the journey runtime passes the validated value of a validation\nrule as `input` and every configured context binding under its own name.\n",
+            "additionalProperties": true
+          },
+          "consumer": {
+            "type": "object",
+            "description": "Who is resolving the value. Forwarded to the hook as `Consumer`.",
+            "additionalProperties": true,
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "validation_rule"
+              },
+              "rule_id": {
+                "type": "string"
+              },
+              "journey_id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "example": {
+          "context": {
+            "input": "123,45",
+            "contract": {
+              "_id": "8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a",
+              "installment_amount": 110
+            }
+          },
+          "consumer": {
+            "type": "validation_rule",
+            "rule_id": "6c0a9e1e-2f4b-4e6a-8f8e-2b2b2b2b2b2b"
+          }
+        }
+      },
+      "ExternalValueErrorCode": {
+        "type": "string",
+        "description": "- `timeout`: the third-party call exceeded `timeout_ms`\n- `upstream_error`: the third-party call failed or returned a non-2xx status\n- `auth_failed`: the `auth` pre-call failed\n- `extraction_failed`: template/path/jsonata threw or yielded null / empty\n- `coercion_failed`: the extracted value could not be coerced to the result type\n",
+        "enum": [
+          "timeout",
+          "upstream_error",
+          "auth_failed",
+          "extraction_failed",
+          "coercion_failed"
+        ]
+      },
+      "ExternalValueError": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "result_id": {
+            "type": "string",
+            "description": "Set for per-result errors; absent for hook-level failures"
+          },
+          "code": {
+            "$ref": "#/components/schemas/ExternalValueErrorCode"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ResolveExternalValueResponse": {
+        "type": "object",
+        "required": [
+          "values",
+          "errors",
+          "policy"
+        ],
+        "properties": {
+          "values": {
+            "type": "object",
+            "description": "Successfully extracted and coerced results, keyed by result id",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalValueError"
+            }
+          },
+          "policy": {
+            "type": "object",
+            "required": [
+              "on_unavailable"
+            ],
+            "properties": {
+              "on_unavailable": {
+                "type": "string",
+                "enum": [
+                  "skip",
+                  "block"
+                ],
+                "description": "What the consumer should do when the values are unavailable"
+              }
+            }
+          },
+          "cached": {
+            "type": "boolean",
+            "description": "True when `values` were served from the hook's result cache"
+          }
+        },
+        "example": {
+          "values": {
+            "predicted": 132
+          },
+          "errors": [
+            {
+              "result_id": "limit",
+              "code": "coercion_failed",
+              "message": "Cannot coerce \"n/a\" to number"
+            }
+          ],
+          "policy": {
+            "on_unavailable": "skip"
+          }
+        }
+      },
+      "ExternalValueResultSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ExternalValueType"
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          }
+        }
+      },
+      "ExternalValueHookSummary": {
+        "type": "object",
+        "required": [
+          "app_id",
+          "app_name",
+          "hook_id",
+          "name",
+          "results"
+        ],
+        "properties": {
+          "app_id": {
+            "type": "string"
+          },
+          "app_name": {
+            "type": "string"
+          },
+          "hook_id": {
+            "type": "string"
+          },
+          "name": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "description": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalValueResultSummary"
+            }
+          }
+        }
+      },
+      "ExternalValueHookList": {
+        "type": "object",
+        "required": [
+          "hooks"
+        ],
+        "properties": {
+          "hooks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalValueHookSummary"
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://external-values.sls.epilot.io"
+    }
+  ]
+}

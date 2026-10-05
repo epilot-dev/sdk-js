@@ -24,6 +24,7 @@
   "entityMapping": "entity-mapping",
   "environments": "environments",
   "eventCatalog": "event-catalog",
+  "externalValues": "external-values",
   "file": "file",
   "iban": "iban",
   "identity": "identity",
