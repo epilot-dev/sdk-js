@@ -595,11 +595,11 @@
             }
           },
           "400": {
-            "description": "Invalid payload",
+            "description": "`CATALOG_REFERENCE_MISSING`, `CATALOG_REFERENCE_UNRESOLVABLE`: see\n`CatalogReferenceErrorCode`. References are not verified on this authenticated route.\nOther refusals carry no `code`.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/CatalogReferenceError"
                 }
               }
             }
@@ -855,11 +855,11 @@
             }
           },
           "400": {
-            "description": "Invalid payload",
+            "description": "`CATALOG_REFERENCE_MISSING`, `CATALOG_REFERENCE_UNRESOLVABLE`: see\n`CatalogReferenceErrorCode`. References are not verified on this authenticated route.\nOther refusals carry no `code`.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/CatalogReferenceError"
                 }
               }
             }
@@ -984,11 +984,11 @@
             }
           },
           "400": {
-            "description": "Invalid payload",
+            "description": "`CATALOG_REFERENCE_MISSING`, `CATALOG_REFERENCE_UNRESOLVABLE`: see\n`CatalogReferenceErrorCode`. References are not verified on this authenticated route.\nOther refusals carry no `code`.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/CatalogReferenceError"
                 }
               }
             }
@@ -1053,11 +1053,11 @@
             }
           },
           "400": {
-            "description": "Invalid payload",
+            "description": "`CATALOG_REFERENCE_MISSING`, `CATALOG_REFERENCE_SIGNATURE_INVALID`,\n`CATALOG_REFERENCE_UNRESOLVABLE`: see `CatalogReferenceErrorCode`. Every reference must\nverify on this public route. Other refusals carry no `code`.\n",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/CatalogReferenceError"
                 }
               }
             }
@@ -1167,6 +1167,211 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/public/catalog": {
+      "post": {
+        "description": "Returns the products and prices a journey block shows as catalog pairs, each member resolved\nfor its own entity type's context at `as_of`. A pair carries the product, one of its prices, the coupons that apply,\nand a signed `catalog_reference`. Line items carry that reference to checkout unchanged, and\ncheckout prices from it.\n\nConditional entities resolve as on `POST /v1/conditional-pricing:resolve`. An organization\nthat has not opted in gets base entities, not an error. A member matching several variants\nyields one pair per variant, and an entry without `price_id` yields one pair per price of\nthe product. Members that match nothing or are inactive are left out. Ids that find no\nentity, or an entity of another type than the entry asked for, are reported in `warnings`.\n",
+        "operationId": "$resolveCatalog",
+        "summary": "$resolveCatalog",
+        "security": [
+          {
+            "EpilotPublicAuth": []
+          }
+        ],
+        "tags": [
+          "Catalog API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveCatalogRequest"
+              },
+              "examples": {
+                "A block of three tiles at a delivery address": {
+                  "summary": "Two priced entries and one that lets the product name its prices",
+                  "value": {
+                    "entries": [
+                      {
+                        "product_id": "product-pv-2027",
+                        "price_id": "price-sp26d1yo"
+                      },
+                      {
+                        "product_id": "product-heatpump-2027",
+                        "price_id": "price-retired"
+                      },
+                      {
+                        "product_id": "product-wallbox-2027"
+                      }
+                    ],
+                    "context": {
+                      "product": {
+                        "postal_code": "46045",
+                        "channel": "direct"
+                      },
+                      "price": {
+                        "postal_code": "46045"
+                      }
+                    },
+                    "as_of": "2026-12-20T10:15:00Z"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The pairs to show, unordered, and the entries whose ids found nothing or the wrong\ntype. `warnings` is always present and empty in the ordinary case.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveCatalogResult"
+                },
+                "examples": {
+                  "A resolved price beside a classic product, and an entry that found nothing": {
+                    "summary": "The product served as stored, the price resolved to its variant, the reference signed, and a retired price reported rather than refused",
+                    "value": {
+                      "pairs": [
+                        {
+                          "product": {
+                            "_id": "product-pv-2027",
+                            "_schema": "product",
+                            "_title": "Solar Panel with Battery Storage",
+                            "name": "Solar Panel with Battery Storage",
+                            "active": true,
+                            "is_conditional": false,
+                            "price_options": [
+                              {
+                                "_id": "price-sp26d1yo",
+                                "_schema": "price",
+                                "_title": "Solar Panel Module",
+                                "active": true,
+                                "is_conditional": true,
+                                "is_composite_price": false,
+                                "type": "one_time",
+                                "pricing_model": "per_unit",
+                                "$relation": {
+                                  "entity_id": "price-sp26d1yo",
+                                  "attribute": "price_options"
+                                }
+                              }
+                            ]
+                          },
+                          "price": {
+                            "_id": "price-sp26d1yo",
+                            "_schema": "price",
+                            "_title": "Solar Panel Module",
+                            "_variant_id": "var-46045",
+                            "_version_valid_from": "2027-01-01T00:00:00.000Z",
+                            "_conditions": {
+                              "postal_code": "46045",
+                              "default": false
+                            },
+                            "_inert_overrides": [],
+                            "active": true,
+                            "is_conditional": true,
+                            "is_composite_price": false,
+                            "type": "one_time",
+                            "pricing_model": "per_unit",
+                            "unit_amount": 2499,
+                            "unit_amount_decimal": "24.99",
+                            "unit_amount_currency": "EUR"
+                          },
+                          "coupons": [
+                            {
+                              "_id": "0f8c4852-23fa-4a64-a2f3-88702335f094",
+                              "_schema": "coupon",
+                              "_org": "739224",
+                              "_title": "Winter discount",
+                              "_created_at": "2026-10-01T09:00:00.000Z",
+                              "_updated_at": "2026-10-01T09:00:00.000Z",
+                              "name": "Winter discount",
+                              "type": "percentage",
+                              "category": "discount",
+                              "percentage_value": "10",
+                              "active": true,
+                              "prices": {
+                                "$relation": [
+                                  {
+                                    "entity_id": "price-sp26d1yo",
+                                    "_schema": "price"
+                                  }
+                                ]
+                              }
+                            }
+                          ],
+                          "catalog_reference": {
+                            "product": {
+                              "id": "product-pv-2027"
+                            },
+                            "price": {
+                              "id": "price-sp26d1yo",
+                              "variant": "var-46045"
+                            },
+                            "coupons": [
+                              {
+                                "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
+                              }
+                            ],
+                            "as_of": "2026-12-20T10:15:00.000Z",
+                            "_meta": {
+                              "timestamp": 1797000000000,
+                              "signature": "c3ab8ff137"
+                            }
+                          }
+                        }
+                      ],
+                      "warnings": [
+                        {
+                          "code": "CATALOG_ENTRY_NOT_FOUND",
+                          "message": "The entry names a price that does not exist",
+                          "details": {
+                            "product_id": "product-heatpump-2027",
+                            "price_id": "price-retired",
+                            "missing": "price"
+                          }
+                        },
+                        {
+                          "code": "CATALOG_ENTRY_TYPE_MISMATCH",
+                          "message": "The entry's price id names a product",
+                          "details": {
+                            "product_id": "product-heatpump-2027",
+                            "price_id": "product-tariff-2027",
+                            "mismatched": "price",
+                            "actual_schema": "product"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`CONDITION_UNDEFINED`, `OPERATOR_UNSUPPORTED`, `CONTEXT_FORMAT_INVALID`,\n`DEFAULT_MARKER_RESERVED`: an entity type's context is refused against that type's schema\nas the authenticated resolve refuses it.\n\n`TOO_MANY_MATCHES`: a member matches more variants than the authenticated resolve's cap\nof 100. The whole request is refused rather than serving a truncated block.\n\n`VALID_FROM_INVALID`: `as_of` is not an instant this operation can read.\n\nA body with no entries, more than 100, an entry without `product_id`, or a context keyed\nby anything but `product`, `price` or `coupon` fails validation and carries no `code`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`CONDITION_UNREADABLE`: a schema this request touches declares a condition in a way this\ndeploy cannot read. The whole request is refused rather than serving prices without\ntheir products.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
                 }
               }
             }
@@ -7300,6 +7505,26 @@
           }
         }
       },
+      "RefusedLineItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "The line item a checkout refusal is about, named as the item names itself.",
+        "required": [
+          "price_id"
+        ],
+        "properties": {
+          "price_id": {
+            "type": "string",
+            "description": "The item's price id.",
+            "example": "price-sp26d1yo"
+          },
+          "product_id": {
+            "type": "string",
+            "description": "The item's product id, when the item names one.",
+            "example": "product-pv-2027"
+          }
+        }
+      },
       "ReportedError": {
         "description": "The `error` field of an error response: the message, or — where the request failed\nvalidation before any handler ran — the validation errors themselves.\n",
         "oneOf": [
@@ -8635,9 +8860,278 @@
           }
         ]
       },
+      "CatalogReferenceErrorCode": {
+        "type": "string",
+        "description": "Why an order operation refused a catalog reference. Other refusals carry no `code`.\n\n- `CATALOG_REFERENCE_MISSING` (400): a line item whose product or price is conditional carries no `catalog_reference`, or one with no variant for that member\n- `CATALOG_REFERENCE_SIGNATURE_INVALID` (400): a `catalog_reference` on a public checkout is unsigned, or its signature does not verify\n- `CATALOG_REFERENCE_UNRESOLVABLE` (400): a member of a `catalog_reference` cannot be resolved at its `as_of` — its entity or variant no longer exists, the variant has no version in effect, or the entity's schema no longer lets the variant be read\n",
+        "enum": [
+          "CATALOG_REFERENCE_MISSING",
+          "CATALOG_REFERENCE_SIGNATURE_INVALID",
+          "CATALOG_REFERENCE_UNRESOLVABLE"
+        ]
+      },
+      "CatalogReferenceError": {
+        "description": "An error from an order operation that prices line items. A catalog-reference refusal carries\n`code` and `details`, typed per code. Every other refusal carries neither.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ReportedError"
+                  }
+                ],
+                "description": "What went wrong. The same string as `message`, except on a request-validation\nfailure, which puts the list of validation errors here instead.\n"
+              }
+            }
+          },
+          {
+            "oneOf": [
+              {
+                "type": "object",
+                "description": "A conditional line item carries no `catalog_reference`, or one with no variant for\nthat member. Send the pair's reference unchanged.\n",
+                "required": [
+                  "code",
+                  "details"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "CATALOG_REFERENCE_MISSING"
+                    ]
+                  },
+                  "details": {
+                    "$ref": "#/components/schemas/RefusedLineItem"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "description": "The `catalog_reference` of a line item on a public checkout carries no `_meta`, or a\nsignature that does not verify against the reference. The reference was altered or\ndid not come from the catalog; fetch the pair again and send it unchanged.\n",
+                "required": [
+                  "code",
+                  "details"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "CATALOG_REFERENCE_SIGNATURE_INVALID"
+                    ]
+                  },
+                  "details": {
+                    "$ref": "#/components/schemas/RefusedLineItem"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "description": "A member of the `catalog_reference` cannot be resolved at the reference's `as_of`:\nits entity or variant no longer exists, the variant has no version in effect at that\ninstant, or the entity's schema no longer lets the variant be read. Fetch the pair\nagain; the catalog answers with what is offered now.\n",
+                "required": [
+                  "code",
+                  "details"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "CATALOG_REFERENCE_UNRESOLVABLE"
+                    ]
+                  },
+                  "details": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "schema",
+                      "entity_id",
+                      "variant_id",
+                      "as_of"
+                    ],
+                    "properties": {
+                      "schema": {
+                        "$ref": "#/components/schemas/ConditionalEntitySlug"
+                      },
+                      "entity_id": {
+                        "type": "string",
+                        "description": "The entity the reference addressed.",
+                        "example": "price-sp26d1yo"
+                      },
+                      "variant_id": {
+                        "type": "string",
+                        "description": "The variant the reference addressed.",
+                        "example": "var-46045"
+                      },
+                      "as_of": {
+                        "type": "string",
+                        "description": "The instant the reference names.",
+                        "example": "2026-12-20T10:15:00.000Z"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "description": "A refusal without a `code`, such as a request validation failure or a price that\ndoes not exist.\n",
+                "additionalProperties": false,
+                "required": [
+                  "message"
+                ],
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "number"
+                  },
+                  "cause": {
+                    "type": "string"
+                  },
+                  "error": {
+                    "$ref": "#/components/schemas/ReportedError"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "BaseProduct": {
+        "type": "object",
+        "description": "The product's own attributes — everything but the two relations whose shape depends on\nwhether the product was hydrated, which `Product` and `HydratedProduct` add.\n",
+        "additionalProperties": true,
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "The description for the product"
+          },
+          "code": {
+            "type": "string",
+            "description": "The product code"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of Product:\n\n| type | description |\n|----| ----|\n| `product` | Represents a physical good |\n| `service` | Represents a service or virtual product |\n",
+            "enum": [
+              "product",
+              "service"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The product main name"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The product categories"
+          },
+          "feature": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_tags": {
+                  "type": "array",
+                  "description": "An arbitrary set of tags attached to a feature",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "feature": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "product_images": {
+            "description": "Stores references to a set of file images of the product",
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelation"
+                    }
+                  }
+                }
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/File"
+                }
+              }
+            ]
+          },
+          "product_downloads": {
+            "description": "Stores references to a set of files downloadable from the product.\ne.g: tech specifications, quality control sheets, privacy policy agreements\n",
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "$relation": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/EntityRelation"
+                    }
+                  }
+                }
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/File"
+                }
+              }
+            ]
+          },
+          "is_conditional": {
+            "description": "The flag for entities whose values vary by context. Resolve the values that apply with\n`POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.\n",
+            "type": "boolean"
+          },
+          "_availability_files": {
+            "type": "array",
+            "description": "Stores references to the availability files that define where this product is available.\nThese files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.\n",
+            "items": {
+              "$ref": "#/components/schemas/File"
+            }
+          },
+          "_id": {
+            "type": "string",
+            "description": "The product id"
+          },
+          "_title": {
+            "type": "string",
+            "description": "The autogenerated product title"
+          },
+          "_org_id": {
+            "type": "string",
+            "description": "The organization id the product belongs to"
+          },
+          "_created_at": {
+            "type": "string",
+            "description": "The product creation date",
+            "readOnly": true
+          },
+          "_updated_at": {
+            "type": "string",
+            "description": "The product last update date",
+            "readOnly": true
+          }
+        }
+      },
       "Product": {
         "type": "object",
-        "description": "The product entity",
+        "description": "The product entity, its relations as stored.",
         "readOnly": true,
         "additionalProperties": true,
         "example": {
@@ -8713,52 +9207,12 @@
             ]
           }
         },
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseProduct"
+          }
+        ],
         "properties": {
-          "description": {
-            "type": "string",
-            "description": "The description for the product"
-          },
-          "code": {
-            "type": "string",
-            "description": "The product code"
-          },
-          "type": {
-            "type": "string",
-            "description": "The type of Product:\n\n| type | description |\n|----| ----|\n| `product` | Represents a physical good |\n| `service` | Represents a service or virtual product |\n",
-            "enum": [
-              "product",
-              "service"
-            ]
-          },
-          "name": {
-            "type": "string",
-            "description": "The product main name"
-          },
-          "categories": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "The product categories"
-          },
-          "feature": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "_tags": {
-                  "type": "array",
-                  "description": "An arbitrary set of tags attached to a feature",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "feature": {
-                  "type": "string"
-                }
-              }
-            }
-          },
           "cross_sellable_products": {
             "type": "object",
             "description": "Stores references to products that can be cross sold with the current product.",
@@ -8771,50 +9225,6 @@
               }
             }
           },
-          "product_images": {
-            "description": "Stores references to a set of file images of the product",
-            "oneOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "$relation": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/EntityRelation"
-                    }
-                  }
-                }
-              },
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/File"
-                }
-              }
-            ]
-          },
-          "product_downloads": {
-            "description": "Stores references to a set of files downloadable from the product.\ne.g: tech specifications, quality control sheets, privacy policy agreements\n",
-            "oneOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "$relation": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/EntityRelation"
-                    }
-                  }
-                }
-              },
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/File"
-                }
-              }
-            ]
-          },
           "price_options": {
             "type": "object",
             "description": "A set of [prices](/api/pricing#tag/simple_price_schema) or [composite prices](/api/pricing#tag/dynamic_price_schema) for the current product.",
@@ -8826,39 +9236,40 @@
                 }
               }
             }
-          },
-          "is_conditional": {
-            "description": "The flag for entities whose values vary by context. Resolve the values that apply with\n`POST /v1/conditional-pricing:resolve`.\n",
-            "type": "boolean"
-          },
-          "_availability_files": {
+          }
+        }
+      },
+      "HydratedProduct": {
+        "type": "object",
+        "description": "The product entity hydrated one level deep, as the v2 public catalog serves it: each\nrelation holds the entities it referenced, sanitised, with their own relations as stored.\n",
+        "readOnly": true,
+        "additionalProperties": true,
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseProduct"
+          }
+        ],
+        "properties": {
+          "cross_sellable_products": {
             "type": "array",
-            "description": "Stores references to the availability files that define where this product is available.\nThese files are used when interacting with products via epilot Journeys, thought the AvailabilityCheck block.\n",
+            "description": "The products that can be cross sold with the current product.",
             "items": {
-              "$ref": "#/components/schemas/File"
+              "$ref": "#/components/schemas/Product"
             }
           },
-          "_id": {
-            "type": "string",
-            "description": "The product id"
-          },
-          "_title": {
-            "type": "string",
-            "description": "The autogenerated product title"
-          },
-          "_org_id": {
-            "type": "string",
-            "description": "The organization id the product belongs to"
-          },
-          "_created_at": {
-            "type": "string",
-            "description": "The product creation date",
-            "readOnly": true
-          },
-          "_updated_at": {
-            "type": "string",
-            "description": "The product last update date",
-            "readOnly": true
+          "price_options": {
+            "type": "array",
+            "description": "The [prices](/api/pricing#tag/simple_price_schema) and [composite\nprices](/api/pricing#tag/dynamic_price_schema) of the current product, each as stored.\nA conditional one is its base entity: the pair's `price` is the resolved one.\n",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Price"
+                },
+                {
+                  "$ref": "#/components/schemas/CompositePrice"
+                }
+              ]
+            }
           }
         }
       },
@@ -9990,7 +10401,7 @@
             ]
           },
           "is_conditional": {
-            "description": "The flag for entities whose values vary by context. Resolve the values that apply with\n`POST /v1/conditional-pricing:resolve`.\n",
+            "description": "The flag for entities whose values vary by context. Resolve the values that apply with\n`POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.\n",
             "type": "boolean"
           },
           "pricing_model": {
@@ -10314,7 +10725,7 @@
             ]
           },
           "is_conditional": {
-            "description": "The flag for entities whose values vary by context. Resolve the values that apply with\n`POST /v1/conditional-pricing:resolve`.\n",
+            "description": "The flag for entities whose values vary by context. Resolve the values that apply with\n`POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.\n",
             "type": "boolean"
           },
           "_created_at": {
@@ -10832,6 +11243,408 @@
               "unit_amount_decimal": "124.342343434"
             }
           ]
+        }
+      },
+      "ResolveCatalogRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "The entries of one journey block, and the situation to resolve them for. Every member of\nevery pair is resolved for its entity type's context at the same `as_of`.\n",
+        "required": [
+          "entries",
+          "context"
+        ],
+        "properties": {
+          "entries": {
+            "type": "array",
+            "description": "One entry per configured tile, answered independently — a duplicate is answered twice.\nAt most 100.\n",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/CatalogEntry"
+            }
+          },
+          "context": {
+            "$ref": "#/components/schemas/CatalogContext"
+          },
+          "as_of": {
+            "type": "string",
+            "description": "The instant every member is resolved at. Defaults to now. It is written into every\ncatalog reference, and checkout prices at it. Accepts an RFC 3339 date (read as midnight\nUTC) or date-time, to millisecond precision.\n",
+            "example": "2026-12-20T10:15:00Z"
+          }
+        }
+      },
+      "CatalogContext": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "One context per entity type, each the authenticated resolve's context and checked against\nthat type's schema alone. A product resolves against `product`, a price and each of a\ncomposite's components against `price`, and a coupon against `coupon`. A type left out\nresolves against an empty context, which serves the `default` variant.\n",
+        "properties": {
+          "product": {
+            "$ref": "#/components/schemas/ResolveContext"
+          },
+          "price": {
+            "$ref": "#/components/schemas/ResolveContext"
+          },
+          "coupon": {
+            "$ref": "#/components/schemas/ResolveContext"
+          }
+        },
+        "example": {
+          "product": {
+            "postal_code": "46045",
+            "channel": "direct"
+          },
+          "price": {
+            "postal_code": "46045"
+          }
+        }
+      },
+      "CatalogEntry": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A product and, optionally, one of its prices. With `price_id` the entry is the author's\npair, served as named; without it the entry is served from the resolved product's\n`price_options`, one pair per price.\n",
+        "required": [
+          "product_id"
+        ],
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "description": "The product to show.",
+            "example": "product-pv-2027"
+          },
+          "price_id": {
+            "type": "string",
+            "description": "The price to show it at. Absent, every price the resolved product offers.",
+            "example": "price-sp26d1yo"
+          }
+        }
+      },
+      "ResolveCatalogResult": {
+        "type": "object",
+        "required": [
+          "pairs",
+          "warnings"
+        ],
+        "properties": {
+          "pairs": {
+            "type": "array",
+            "description": "One pair per applicable combination, unordered. A member that matches several variants\nis several pairs; a composite whose components match several variants is one pair per\ncombination. An entry may yield none.\n",
+            "items": {
+              "$ref": "#/components/schemas/CatalogPair"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "description": "The entries that could not be answered because an id found nothing. Always present, and\nempty in the ordinary case; an entry the catalog answers \"not offered\" is not in it.\n",
+            "items": {
+              "$ref": "#/components/schemas/CatalogWarning"
+            }
+          }
+        }
+      },
+      "CatalogPair": {
+        "type": "object",
+        "description": "A product and one of its prices, resolved for the request's `context` at its `as_of`, with\nthe coupons that apply and the reference checkout prices from.\n",
+        "required": [
+          "product",
+          "price",
+          "coupons",
+          "catalog_reference"
+        ],
+        "properties": {
+          "product": {
+            "description": "The product, hydrated one level deep and sanitised. A conditional product is the resolved\npayload — the entity as its variant leaves it, carrying `_variant_id`,\n`_version_valid_from`, `_conditions` and `_inert_overrides`. A classic product carries\nnone of them.\n",
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/HydratedProduct"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ResolvedVariant"
+                  }
+                ]
+              },
+              {
+                "$ref": "#/components/schemas/HydratedProduct"
+              }
+            ]
+          },
+          "price": {
+            "description": "The price, hydrated one level deep and sanitised, with the same discriminators when it is\nconditional. A composite price carries its components hydrated in place; a component that\nis itself conditional is resolved against the same context and carries the\ndiscriminators too.\n",
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Price"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ResolvedVariant"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/HydratedCompositePrice"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ResolvedVariant"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ResolvedPriceComponents"
+                  }
+                ]
+              },
+              {
+                "$ref": "#/components/schemas/Price"
+              },
+              {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/HydratedCompositePrice"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ResolvedPriceComponents"
+                  }
+                ]
+              }
+            ]
+          },
+          "coupons": {
+            "type": "array",
+            "description": "The active coupons whose `prices` name this price — for a composite, its components —\nwith their promo codes and usage censored, as the v1 catalog serves them. Always present,\nand empty when none applies.\n",
+            "items": {
+              "$ref": "#/components/schemas/CouponWithoutPromoCodes"
+            }
+          },
+          "catalog_reference": {
+            "$ref": "#/components/schemas/CatalogReference"
+          }
+        }
+      },
+      "ResolvedPriceComponents": {
+        "type": "object",
+        "description": "The components of a composite price as the v2 catalog serves them: hydrated in place, and\na component that is itself conditional resolved against the same context, carrying the\ndiscriminators a resolved payload carries. A conditional component with no variant in\neffect — nothing matches and there is no default — is left out, as a deleted component is\n(ADR 0048).\n",
+        "properties": {
+          "price_components": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Price"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ResolvedVariant"
+                    }
+                  ]
+                },
+                {
+                  "$ref": "#/components/schemas/Price"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "CatalogWarning": {
+        "description": "An entry the v2 catalog could not answer, and why. `details` is typed per `code`: narrow on\n`code` and the object under it declares exactly the fields that code sends.\n",
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "An id in the entry finds no entity, or a deleted one. One warning per such id.\n",
+            "required": [
+              "code",
+              "message",
+              "details"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "CATALOG_ENTRY_NOT_FOUND"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "details": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "product_id",
+                  "missing"
+                ],
+                "properties": {
+                  "product_id": {
+                    "type": "string",
+                    "description": "The entry's product id, as sent.",
+                    "example": "product-heatpump-2027"
+                  },
+                  "price_id": {
+                    "type": "string",
+                    "description": "The entry's price id, as sent. Absent when the entry named none.",
+                    "example": "price-retired"
+                  },
+                  "missing": {
+                    "type": "string",
+                    "description": "Which of the entry's ids found nothing.",
+                    "enum": [
+                      "product",
+                      "price"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "An id in the entry names an entity of another type than the entry asked for: a price id\nwhere a product id was expected, or the reverse. One warning per such id.\n",
+            "required": [
+              "code",
+              "message",
+              "details"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "CATALOG_ENTRY_TYPE_MISMATCH"
+                ]
+              },
+              "message": {
+                "type": "string"
+              },
+              "details": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "product_id",
+                  "mismatched",
+                  "actual_schema"
+                ],
+                "properties": {
+                  "product_id": {
+                    "type": "string",
+                    "description": "The entry's product id, as sent.",
+                    "example": "product-heatpump-2027"
+                  },
+                  "price_id": {
+                    "type": "string",
+                    "description": "The entry's price id, as sent. Absent when the entry named none.",
+                    "example": "product-tariff-2027"
+                  },
+                  "mismatched": {
+                    "type": "string",
+                    "description": "Which of the entry's ids names an entity of another type.",
+                    "enum": [
+                      "product",
+                      "price"
+                    ]
+                  },
+                  "actual_schema": {
+                    "type": "string",
+                    "description": "The type the entity turned out to be.",
+                    "example": "product"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CatalogReference": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Names the variant each member of a catalog pair was resolved from, and the instant `as_of`\nthey were resolved at. Checkout prices each conditional member from that variant, using the\nversion in effect at `as_of`.\n\nThe catalog signs every reference, classic pair or not: `_meta` signs the rest of the\nreference. Where the caller is public, a reference must verify. An authenticated caller may\nsend one without `_meta`. Signatures do not expire.\n",
+        "required": [
+          "product",
+          "price",
+          "as_of"
+        ],
+        "properties": {
+          "product": {
+            "$ref": "#/components/schemas/CatalogReferenceMember"
+          },
+          "price": {
+            "$ref": "#/components/schemas/CatalogReferenceMember"
+          },
+          "price_components": {
+            "type": "array",
+            "description": "Present for a composite price that serves at least one component: the components this\npair is the combination of, each with its variant where one produced it. A conditional\ncomponent with no variant in effect is left out of the composite and is not named here\n(ADR 0048). A component line item carries no reference of its own.\n",
+            "items": {
+              "$ref": "#/components/schemas/CatalogReferenceMember"
+            }
+          },
+          "coupons": {
+            "type": "array",
+            "description": "Present when coupons apply to the price. A coupon's `variant` exists only once coupons\ncan be conditional.\n",
+            "items": {
+              "$ref": "#/components/schemas/CatalogReferenceMember"
+            }
+          },
+          "as_of": {
+            "type": "string",
+            "description": "The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects\neach conditional member's version at this instant.\n",
+            "example": "2026-12-20T10:15:00.000Z"
+          },
+          "_meta": {
+            "$ref": "#/components/schemas/SignatureMeta"
+          }
+        },
+        "example": {
+          "product": {
+            "id": "product-pv-2027",
+            "variant": "var-46045"
+          },
+          "price": {
+            "id": "price-composite-9f2",
+            "variant": "var-46046"
+          },
+          "price_components": [
+            {
+              "id": "price-base-fee-46045",
+              "variant": "var-46047"
+            },
+            {
+              "id": "price-kwh-46045",
+              "variant": "var-46048"
+            }
+          ],
+          "coupons": [
+            {
+              "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
+            }
+          ],
+          "as_of": "2026-12-20T10:15:00.000Z",
+          "_meta": {
+            "timestamp": 1797000000000,
+            "signature": "c3ab8ff137"
+          }
+        }
+      },
+      "CatalogReferenceMember": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "One member of a catalog reference: the entity, and the variant that produced it. `variant`\nis absent for a classic entity.\n",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The entity's id.",
+            "example": "price-sp26d1yo"
+          },
+          "variant": {
+            "type": "string",
+            "description": "The variant checkout prices this member from.",
+            "example": "var-46045"
+          }
         }
       },
       "SearchProvidersParams": {
@@ -11988,6 +12801,14 @@
                 "$ref": "#/components/schemas/Product"
               }
             ]
+          },
+          "catalog_reference": {
+            "description": "The `catalog_reference` of the pair this item came from, unchanged. Required when the\nitem's product or price is conditional. Component items carry none.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CatalogReference"
+              }
+            ]
           }
         }
       },
@@ -12042,7 +12863,6 @@
           "coupon_ids": {
             "type": "array",
             "description": "The ids of the coupons applicable to the price item",
-            "readOnly": true,
             "items": {
               "type": "string",
               "description": "The id of the coupon"
@@ -12194,7 +13014,6 @@
               "price_component_coupon_ids": {
                 "type": "object",
                 "description": "The map of coupon ids applicable to the price components",
-                "readOnly": true,
                 "additionalProperties": {
                   "type": "array",
                   "items": {
@@ -13862,7 +14681,7 @@
             "type": "boolean"
           },
           "is_conditional": {
-            "description": "The flag for entities whose values vary by context. Resolve the values that apply with\n`POST /v1/conditional-pricing:resolve`.\n",
+            "description": "The flag for entities whose values vary by context. Resolve the values that apply with\n`POST /v1/conditional-pricing:resolve`, or from a journey with `POST /v2/public/catalog`.\n",
             "type": "boolean"
           },
           "requires_promo_code": {

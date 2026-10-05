@@ -106,6 +106,18 @@
         "responses": {}
       }
     },
+    "/v2/public/catalog": {
+      "post": {
+        "operationId": "$resolveCatalog",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/public/validate-promo-codes": {
       "post": {
         "operationId": "$validatePromoCodes",
