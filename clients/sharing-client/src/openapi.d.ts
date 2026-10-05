@@ -9,9 +9,11 @@ import type {
 declare namespace Components {
     namespace Parameters {
         export type PartnerOrgIdPath = string;
+        export type RuleIdPath = string;
     }
     export interface PathParameters {
         PartnerOrgIdPath?: Parameters.PartnerOrgIdPath;
+        RuleIdPath?: Parameters.RuleIdPath;
     }
     namespace Schemas {
         export interface AcceptOfferPayload {
@@ -113,6 +115,106 @@ declare namespace Components {
             share: PartnerEntitiesInput[];
             unshare: PartnerEntitiesInput[];
         }
+        export interface SharingRule {
+            name: string;
+            enabled: boolean;
+            /**
+             * Schema of the shared parent entity that triggers the rule
+             * example:
+             * opportunity
+             */
+            trigger_schema: string;
+            /**
+             * Schemas of related entities the rule may share
+             */
+            include_schemas: [
+                string,
+                ...string[]
+            ];
+            evaluation_type: "deterministic" | "ai";
+            conditions?: /* Required iff evaluation_type is deterministic */ SharingRuleConditions;
+            ai_config?: /* Required iff evaluation_type is ai */ SharingRuleAiConfig;
+            rule_id: string; // uuid
+            vendor_org_id: string;
+            partner_org_id: string;
+            source: "AUTO_SHARING_RULE";
+            created_at: string; // date-time
+            updated_at: string; // date-time
+            created_by?: string;
+        }
+        /**
+         * Required iff evaluation_type is ai
+         */
+        export interface SharingRuleAiConfig {
+            confidence_threshold: number;
+            /**
+             * Vendor's natural-language instructions for the evaluator
+             */
+            guidance?: string;
+        }
+        /**
+         * Required iff evaluation_type is deterministic
+         */
+        export interface SharingRuleConditions {
+            logical_operator: "AND" | "OR";
+            statements: [
+                /* Subset of the Flows condition Statement */ Statement,
+                .../* Subset of the Flows condition Statement */ Statement[]
+            ];
+        }
+        export interface SharingRuleInput {
+            name: string;
+            enabled?: boolean;
+            /**
+             * Schema of the shared parent entity that triggers the rule
+             * example:
+             * opportunity
+             */
+            trigger_schema: string;
+            /**
+             * Schemas of related entities the rule may share
+             */
+            include_schemas: [
+                string,
+                ...string[]
+            ];
+            evaluation_type: "deterministic" | "ai";
+            conditions?: /* Required iff evaluation_type is deterministic */ SharingRuleConditions;
+            ai_config?: /* Required iff evaluation_type is ai */ SharingRuleAiConfig;
+        }
+        /**
+         * Every SharingRuleInput field is optional. The patch is merged into the stored rule, then validated.
+         */
+        export interface SharingRuleUpdate {
+            name?: string;
+            enabled?: boolean;
+            trigger_schema?: string;
+            include_schemas?: [
+                string,
+                ...string[]
+            ];
+            evaluation_type?: "deterministic" | "ai";
+            conditions?: /* Required iff evaluation_type is deterministic */ SharingRuleConditions;
+            ai_config?: /* Required iff evaluation_type is ai */ SharingRuleAiConfig;
+        }
+        /**
+         * Subset of the Flows condition Statement
+         */
+        export interface Statement {
+            id: string;
+            source: {
+                /**
+                 * Top-level entity attribute. Labels are `_tags`.
+                 */
+                attribute: string;
+                attribute_type: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "price";
+            };
+            operator: "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "is_empty" | "is_not_empty";
+            /**
+             * May be empty only for is_empty / is_not_empty
+             */
+            values: string[];
+        }
         export interface TemplateRoleGrant {
             action: string;
             resource: string;
@@ -151,6 +253,22 @@ declare namespace Paths {
             }
         }
     }
+    namespace CreateSharingRule {
+        namespace Parameters {
+            export type PartnerOrgId = string;
+        }
+        export interface PathParameters {
+            partner_org_id: Parameters.PartnerOrgId;
+        }
+        export type RequestBody = Components.Schemas.SharingRuleInput;
+        namespace Responses {
+            export type $201 = Components.Schemas.SharingRule;
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+        }
+    }
     namespace DeleteSharingConfiguration {
         namespace Parameters {
             export type PartnerOrgId = string;
@@ -160,6 +278,22 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.PartnerSharingConfig;
+            export interface $401 {
+            }
+        }
+    }
+    namespace DeleteSharingRule {
+        namespace Parameters {
+            export type PartnerOrgId = string;
+            export type RuleId = string;
+        }
+        export interface PathParameters {
+            partner_org_id: Parameters.PartnerOrgId;
+            rule_id: Parameters.RuleId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
             export interface $401 {
             }
         }
@@ -224,6 +358,44 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetSharingRule {
+        namespace Parameters {
+            export type PartnerOrgId = string;
+            export type RuleId = string;
+        }
+        export interface PathParameters {
+            partner_org_id: Parameters.PartnerOrgId;
+            rule_id: Parameters.RuleId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.SharingRule;
+            export interface $401 {
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace ListSharingRules {
+        namespace Parameters {
+            export type Enabled = boolean;
+            export type PartnerOrgId = string;
+        }
+        export interface PathParameters {
+            partner_org_id: Parameters.PartnerOrgId;
+        }
+        export interface QueryParameters {
+            enabled?: Parameters.Enabled;
+        }
+        namespace Responses {
+            export interface $200 {
+                rules: Components.Schemas.SharingRule[];
+            }
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+        }
+    }
     namespace OfferEntityToPartners {
         export type RequestBody = Components.Schemas.OfferEntityPayload;
         namespace Responses {
@@ -278,12 +450,32 @@ declare namespace Paths {
             }
         }
     }
+    namespace UpdateSharingRule {
+        namespace Parameters {
+            export type PartnerOrgId = string;
+            export type RuleId = string;
+        }
+        export interface PathParameters {
+            partner_org_id: Parameters.PartnerOrgId;
+            rule_id: Parameters.RuleId;
+        }
+        export type RequestBody = /* Every SharingRuleInput field is optional. The patch is merged into the stored rule, then validated. */ Components.Schemas.SharingRuleUpdate;
+        namespace Responses {
+            export type $200 = Components.Schemas.SharingRule;
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $404 {
+            }
+        }
+    }
 }
 
 
 export interface OperationMethods {
   /**
-   * getSharingConfiguration - Get sharing configuration for a partner
+   * getSharingConfiguration - getSharingConfiguration
    * 
    * Returns the sharing configuration for a specific partner organization, including shared entities, offered entities, and assigned users.
    */
@@ -293,7 +485,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSharingConfiguration.Responses.$200>
   /**
-   * updateSharingConfiguration - Update sharing configuration for a partner
+   * updateSharingConfiguration - updateSharingConfiguration
    * 
    * Updates the sharing configuration for a partner, such as the user limit. Also patches the internal role if the user limit changes.
    */
@@ -303,7 +495,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateSharingConfiguration.Responses.$200>
   /**
-   * deleteSharingConfiguration - Delete sharing configuration for a partner
+   * deleteSharingConfiguration - deleteSharingConfiguration
    * 
    * Deletes the sharing configuration for a partner, removing all shared and offered entity access.
    */
@@ -313,7 +505,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSharingConfiguration.Responses.$200>
   /**
-   * assignRoleToConfiguration - Assign a template role to a partner sharing configuration
+   * assignRoleToConfiguration - assignRoleToConfiguration
    * 
    * Assigns a template role to a partner sharing configuration. The role grants are copied into the configuration for entity access control.
    */
@@ -323,7 +515,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AssignRoleToConfiguration.Responses.$200>
   /**
-   * getSharingConfigurations - Get sharing configurations for multiple partners
+   * getSharingConfigurations - getSharingConfigurations
    * 
    * Returns sharing configurations for multiple partner organizations in a single batch request.
    */
@@ -333,7 +525,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSharingConfigurations.Responses.$200>
   /**
-   * searchPartnerSharingConfigurations - Search partner sharing configurations by entities
+   * searchPartnerSharingConfigurations - searchPartnerSharingConfigurations
    * 
    * Searches for partner sharing configurations that have access to the given entities. Returns configurations with their shared and offered entity lists.
    */
@@ -343,7 +535,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchPartnerSharingConfigurations.Responses.$200>
   /**
-   * getConfigurationsByTemplateRole - Get sharing configurations that use a specific template role
+   * getConfigurationsByTemplateRole - getConfigurationsByTemplateRole
    * 
    * Returns all partner sharing configurations that reference the given template role ID. Useful for checking role usage before deletion.
    */
@@ -353,7 +545,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConfigurationsByTemplateRole.Responses.$200>
   /**
-   * shareEntityWithPartners - Share or unshare entities with partners
+   * shareEntityWithPartners - shareEntityWithPartners
    * 
    * Shares or unshares top-level entities with one or more partner organizations. Publishes sharing events for downstream processing.
    */
@@ -363,7 +555,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ShareEntityWithPartners.Responses.$200>
   /**
-   * shareChildEntityWithPartners - Share or unshare child entities with partners
+   * shareChildEntityWithPartners - shareChildEntityWithPartners
    * 
    * Shares or unshares child entities (entities that belong to an already-shared parent) with partner organizations.
    */
@@ -373,7 +565,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ShareChildEntityWithPartners.Responses.$200>
   /**
-   * offerEntityToPartners - Offer or unoffer entities to partners (First Come First Served)
+   * offerEntityToPartners - offerEntityToPartners
    * 
    * Offers or unoffers entities to partner organizations using a First Come First Served model. Only one partner can accept each offered entity.
    */
@@ -383,7 +575,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.OfferEntityToPartners.Responses.$200>
   /**
-   * getOfferStatus - Get the status of an entity offer (public, no auth required)
+   * getOfferStatus - getOfferStatus
    * 
    * Returns the current status of an entity offer (pending, accepted, expired). This is a public endpoint used from partner-facing pages without authentication.
    */
@@ -393,7 +585,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOfferStatus.Responses.$200>
   /**
-   * acceptOffer - Accept an entity offer (public, no auth required)
+   * acceptOffer - acceptOffer
    * 
    * Accepts an entity offer on behalf of a partner organization. This is a public endpoint used from partner-facing pages without authentication. Only one partner can accept each offer.
    */
@@ -402,12 +594,62 @@ export interface OperationMethods {
     data?: Paths.AcceptOffer.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AcceptOffer.Responses.$200>
+  /**
+   * listSharingRules - listSharingRules
+   * 
+   * Lists the auto-sharing rules the caller's organization configured for a partner.
+   */
+  'listSharingRules'(
+    parameters?: Parameters<Paths.ListSharingRules.QueryParameters & Paths.ListSharingRules.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSharingRules.Responses.$200>
+  /**
+   * createSharingRule - createSharingRule
+   * 
+   * Creates an auto-sharing rule for a partner.
+   */
+  'createSharingRule'(
+    parameters?: Parameters<Paths.CreateSharingRule.PathParameters> | null,
+    data?: Paths.CreateSharingRule.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateSharingRule.Responses.$201>
+  /**
+   * getSharingRule - getSharingRule
+   * 
+   * Returns a single auto-sharing rule.
+   */
+  'getSharingRule'(
+    parameters?: Parameters<Paths.GetSharingRule.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSharingRule.Responses.$200>
+  /**
+   * updateSharingRule - updateSharingRule
+   * 
+   * Partially updates an auto-sharing rule. The patch is merged into the stored rule, which is then validated as a whole. Use `{ "enabled": false }` to disable a rule.
+   */
+  'updateSharingRule'(
+    parameters?: Parameters<Paths.UpdateSharingRule.PathParameters> | null,
+    data?: Paths.UpdateSharingRule.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateSharingRule.Responses.$200>
+  /**
+   * deleteSharingRule - deleteSharingRule
+   * 
+   * Deletes an auto-sharing rule.
+   */
+  'deleteSharingRule'(
+    parameters?: Parameters<Paths.DeleteSharingRule.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteSharingRule.Responses.$204>
 }
 
 export interface PathsDictionary {
   ['/v1/sharing/configurations/{partner_org_id}']: {
     /**
-     * getSharingConfiguration - Get sharing configuration for a partner
+     * getSharingConfiguration - getSharingConfiguration
      * 
      * Returns the sharing configuration for a specific partner organization, including shared entities, offered entities, and assigned users.
      */
@@ -417,7 +659,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSharingConfiguration.Responses.$200>
     /**
-     * updateSharingConfiguration - Update sharing configuration for a partner
+     * updateSharingConfiguration - updateSharingConfiguration
      * 
      * Updates the sharing configuration for a partner, such as the user limit. Also patches the internal role if the user limit changes.
      */
@@ -427,7 +669,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateSharingConfiguration.Responses.$200>
     /**
-     * deleteSharingConfiguration - Delete sharing configuration for a partner
+     * deleteSharingConfiguration - deleteSharingConfiguration
      * 
      * Deletes the sharing configuration for a partner, removing all shared and offered entity access.
      */
@@ -439,7 +681,7 @@ export interface PathsDictionary {
   }
   ['/v1/sharing/configurations/{partner_org_id}/role']: {
     /**
-     * assignRoleToConfiguration - Assign a template role to a partner sharing configuration
+     * assignRoleToConfiguration - assignRoleToConfiguration
      * 
      * Assigns a template role to a partner sharing configuration. The role grants are copied into the configuration for entity access control.
      */
@@ -451,7 +693,7 @@ export interface PathsDictionary {
   }
   ['/v1/sharing/configurations']: {
     /**
-     * getSharingConfigurations - Get sharing configurations for multiple partners
+     * getSharingConfigurations - getSharingConfigurations
      * 
      * Returns sharing configurations for multiple partner organizations in a single batch request.
      */
@@ -463,7 +705,7 @@ export interface PathsDictionary {
   }
   ['/v1/sharing/configurations:search']: {
     /**
-     * searchPartnerSharingConfigurations - Search partner sharing configurations by entities
+     * searchPartnerSharingConfigurations - searchPartnerSharingConfigurations
      * 
      * Searches for partner sharing configurations that have access to the given entities. Returns configurations with their shared and offered entity lists.
      */
@@ -475,7 +717,7 @@ export interface PathsDictionary {
   }
   ['/v1/sharing/configurations/by-role/{template_role_id}']: {
     /**
-     * getConfigurationsByTemplateRole - Get sharing configurations that use a specific template role
+     * getConfigurationsByTemplateRole - getConfigurationsByTemplateRole
      * 
      * Returns all partner sharing configurations that reference the given template role ID. Useful for checking role usage before deletion.
      */
@@ -487,7 +729,7 @@ export interface PathsDictionary {
   }
   ['/v1/sharing/entities:share']: {
     /**
-     * shareEntityWithPartners - Share or unshare entities with partners
+     * shareEntityWithPartners - shareEntityWithPartners
      * 
      * Shares or unshares top-level entities with one or more partner organizations. Publishes sharing events for downstream processing.
      */
@@ -499,7 +741,7 @@ export interface PathsDictionary {
   }
   ['/v1/sharing/entities:share-child']: {
     /**
-     * shareChildEntityWithPartners - Share or unshare child entities with partners
+     * shareChildEntityWithPartners - shareChildEntityWithPartners
      * 
      * Shares or unshares child entities (entities that belong to an already-shared parent) with partner organizations.
      */
@@ -511,7 +753,7 @@ export interface PathsDictionary {
   }
   ['/v1/sharing/entities:offer']: {
     /**
-     * offerEntityToPartners - Offer or unoffer entities to partners (First Come First Served)
+     * offerEntityToPartners - offerEntityToPartners
      * 
      * Offers or unoffers entities to partner organizations using a First Come First Served model. Only one partner can accept each offered entity.
      */
@@ -523,7 +765,7 @@ export interface PathsDictionary {
   }
   ['/v1/sharing/offers/status']: {
     /**
-     * getOfferStatus - Get the status of an entity offer (public, no auth required)
+     * getOfferStatus - getOfferStatus
      * 
      * Returns the current status of an entity offer (pending, accepted, expired). This is a public endpoint used from partner-facing pages without authentication.
      */
@@ -535,7 +777,7 @@ export interface PathsDictionary {
   }
   ['/v1/sharing/offers:accept']: {
     /**
-     * acceptOffer - Accept an entity offer (public, no auth required)
+     * acceptOffer - acceptOffer
      * 
      * Accepts an entity offer on behalf of a partner organization. This is a public endpoint used from partner-facing pages without authentication. Only one partner can accept each offer.
      */
@@ -544,6 +786,60 @@ export interface PathsDictionary {
       data?: Paths.AcceptOffer.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AcceptOffer.Responses.$200>
+  }
+  ['/v1/sharing/rules/{partner_org_id}']: {
+    /**
+     * listSharingRules - listSharingRules
+     * 
+     * Lists the auto-sharing rules the caller's organization configured for a partner.
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListSharingRules.QueryParameters & Paths.ListSharingRules.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSharingRules.Responses.$200>
+    /**
+     * createSharingRule - createSharingRule
+     * 
+     * Creates an auto-sharing rule for a partner.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateSharingRule.PathParameters> | null,
+      data?: Paths.CreateSharingRule.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateSharingRule.Responses.$201>
+  }
+  ['/v1/sharing/rules/{partner_org_id}/{rule_id}']: {
+    /**
+     * getSharingRule - getSharingRule
+     * 
+     * Returns a single auto-sharing rule.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSharingRule.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSharingRule.Responses.$200>
+    /**
+     * updateSharingRule - updateSharingRule
+     * 
+     * Partially updates an auto-sharing rule. The patch is merged into the stored rule, which is then validated as a whole. Use `{ "enabled": false }` to disable a rule.
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateSharingRule.PathParameters> | null,
+      data?: Paths.UpdateSharingRule.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateSharingRule.Responses.$200>
+    /**
+     * deleteSharingRule - deleteSharingRule
+     * 
+     * Deletes an auto-sharing rule.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteSharingRule.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteSharingRule.Responses.$204>
   }
 }
 
@@ -568,5 +864,11 @@ export type PartnerStatus = Components.Schemas.PartnerStatus;
 export type SearchSharingConfigurationsPayload = Components.Schemas.SearchSharingConfigurationsPayload;
 export type ShareChildEntityPayload = Components.Schemas.ShareChildEntityPayload;
 export type SharingEntityPayload = Components.Schemas.SharingEntityPayload;
+export type SharingRule = Components.Schemas.SharingRule;
+export type SharingRuleAiConfig = Components.Schemas.SharingRuleAiConfig;
+export type SharingRuleConditions = Components.Schemas.SharingRuleConditions;
+export type SharingRuleInput = Components.Schemas.SharingRuleInput;
+export type SharingRuleUpdate = Components.Schemas.SharingRuleUpdate;
+export type Statement = Components.Schemas.Statement;
 export type TemplateRoleGrant = Components.Schemas.TemplateRoleGrant;
 export type UpdateSharingConfigurationPayload = Components.Schemas.UpdateSharingConfigurationPayload;
