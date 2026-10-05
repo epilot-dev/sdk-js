@@ -104,6 +104,12 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`CreateVariantRequest`](#createvariantrequest)
 - [`VariantConditions`](#variantconditions)
 - [`PinnedConditions`](#pinnedconditions)
+- [`PinnedConditionValue`](#pinnedconditionvalue)
+- [`ConditionDateRange`](#conditiondaterange)
+- [`PostalCodeCity`](#postalcodecity)
+- [`ContextConditionValue`](#contextconditionvalue)
+- [`ConditionPredicate`](#conditionpredicate)
+- [`OrderedConditionOperand`](#orderedconditionoperand)
 - [`VariantValues`](#variantvalues)
 - [`CreatedVariant`](#createdvariant)
 - [`WriteWarning`](#writewarning)
@@ -3001,7 +3007,24 @@ variant, which is how to ask for it without knowing its id.
 type ResolveConditionalEntityRequest = {
   schema: "product" | "price" | "coupon"
   entity_id: string
-  context: Record<string, unknown>
+  context: Record<string, string | number | boolean | {
+    postal_code: string
+    city: string
+  } | {
+    lt: number | string
+  } | {
+    lte: number | string
+  } | {
+    gt: number | string
+  } | {
+    gte: number | string
+  } | {
+    in: string | number[]
+  } | {
+    between: string
+  } | {
+    exists: boolean
+  }>
   as_of?: string
   options?: {
     resolve_one?: boolean
@@ -3028,7 +3051,24 @@ composed with the version in effect at `as_of`.
 type ResolveByContextRequest = {
   schema: "product" | "price" | "coupon"
   entity_id: string
-  context: Record<string, unknown>
+  context: Record<string, string | number | boolean | {
+    postal_code: string
+    city: string
+  } | {
+    lt: number | string
+  } | {
+    lte: number | string
+  } | {
+    gt: number | string
+  } | {
+    gte: number | string
+  } | {
+    in: string | number[]
+  } | {
+    between: string
+  } | {
+    exists: boolean
+  }>
   as_of?: string
   options?: {
     resolve_one?: boolean
@@ -3064,7 +3104,24 @@ Each value is an exact value, typed by its condition, or a single-operator predi
 - `{ "lt": v }`, `{ "lte"
 
 ```ts
-type ResolveContext = Record<string, unknown>
+type ResolveContext = Record<string, string | number | boolean | {
+  postal_code: string
+  city: string
+} | {
+  lt: number | string
+} | {
+  lte: number | string
+} | {
+  gt: number | string
+} | {
+  gte: number | string
+} | {
+  in: string | number[]
+} | {
+  between: string
+} | {
+  exists: boolean
+}>
 ```
 
 ### `ResolveOptions`
@@ -3134,7 +3191,13 @@ type ResolvedVariant = {
 
 ```ts
 type CreateVariantRequest = {
-  conditions?: Record<string, unknown>
+  conditions?: Record<string, string | number | boolean | {
+    from?: string
+    until?: string
+  } | {
+    postal_code: string
+    city: string
+  }>
   default?: boolean
   valid_from?: string
   values: Record<string, unknown>
@@ -3163,7 +3226,113 @@ Exact values only; predicates belong to reads. Values are stored canonicalized f
 type: a `dat
 
 ```ts
-type PinnedConditions = Record<string, unknown>
+type PinnedConditions = Record<string, string | number | boolean | {
+  from?: string
+  until?: string
+} | {
+  postal_code: string
+  city: string
+}>
+```
+
+### `PinnedConditionValue`
+
+One condition's exact value. Which of these shapes a condition takes is set by its type in the
+entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+
+
+```ts
+type PinnedConditionValue = string | number | boolean | {
+  from?: string
+  until?: string
+} | {
+  postal_code: string
+  city: string
+}
+```
+
+### `ConditionDateRange`
+
+The value of a `daterange` condition. A bound that is absent, `null` or an empty string is an
+open end; stored, an open end is an empty string.
+
+
+```ts
+type ConditionDateRange = {
+  from?: string
+  until?: string
+}
+```
+
+### `PostalCodeCity`
+
+The value of a `location` condition of format `postal_code_city`, its parts named as an entity
+address names them.
+
+
+```ts
+type PostalCodeCity = {
+  postal_code: string
+  city: string
+}
+```
+
+### `ContextConditionValue`
+
+One condition's value in a resolve context or listing filter: an exact value, or a predicate.
+Which of these a condition takes is set by its type in the entity's schema, and a value of
+another shape is refused with `CONTEXT_FORMAT_INVALID`, or `OPERATOR_UNSUPPORTED` for a
+predicate its type does not
+
+```ts
+type ContextConditionValue = string | number | boolean | {
+  postal_code: string
+  city: string
+} | {
+  lt: number | string
+} | {
+  lte: number | string
+} | {
+  gt: number | string
+} | {
+  gte: number | string
+} | {
+  in: string | number[]
+} | {
+  between: string
+} | {
+  exists: boolean
+}
+```
+
+### `ConditionPredicate`
+
+A single-operator predicate.
+
+```ts
+type ConditionPredicate = {
+  lt: number | string
+} | {
+  lte: number | string
+} | {
+  gt: number | string
+} | {
+  gte: number | string
+} | {
+  in: string | number[]
+} | {
+  between: string
+} | {
+  exists: boolean
+}
+```
+
+### `OrderedConditionOperand`
+
+A number, or a date as an RFC 3339 date or date-time.
+
+```ts
+type OrderedConditionOperand = number | string
 ```
 
 ### `VariantValues`
@@ -3453,7 +3622,13 @@ type DeletedVariantVersion = {
 type AppendVersionRequest = {
   valid_from?: string
   values: Record<string, unknown>
-  conditions?: Record<string, unknown>
+  conditions?: Record<string, string | number | boolean | {
+    from?: string
+    until?: string
+  } | {
+    postal_code: string
+    city: string
+  }>
 }
 ```
 
@@ -3464,7 +3639,13 @@ type ReplaceVersionRequest = {
   values: Record<string, unknown>
   _revision: number
   valid_from?: string
-  conditions?: Record<string, unknown>
+  conditions?: Record<string, string | number | boolean | {
+    from?: string
+    until?: string
+  } | {
+    postal_code: string
+    city: string
+  }>
 }
 ```
 
@@ -3475,7 +3656,13 @@ type PatchVersionRequest = {
   values: Record<string, unknown>
   _revision: number
   valid_from?: string
-  conditions?: Record<string, unknown>
+  conditions?: Record<string, string | number | boolean | {
+    from?: string
+    until?: string
+  } | {
+    postal_code: string
+    city: string
+  }>
 }
 ```
 
@@ -3488,7 +3675,24 @@ first ten variants in `variant_id` order, but the body itself is required. `cond
 
 ```ts
 type ListVariantsRequest = {
-  conditions?: Record<string, unknown>
+  conditions?: Record<string, string | number | boolean | {
+    postal_code: string
+    city: string
+  } | {
+    lt: number | string
+  } | {
+    lte: number | string
+  } | {
+    gt: number | string
+  } | {
+    gte: number | string
+  } | {
+    in: string | number[]
+  } | {
+    between: string
+  } | {
+    exists: boolean
+  }>
   search?: string
   sort?: string
   from?: number
@@ -3505,7 +3709,24 @@ The variants list's request plus `as_of`, the instant each row's version is sele
 
 ```ts
 type VariantTreeRequest = {
-  conditions?: Record<string, unknown>
+  conditions?: Record<string, string | number | boolean | {
+    postal_code: string
+    city: string
+  } | {
+    lt: number | string
+  } | {
+    lte: number | string
+  } | {
+    gt: number | string
+  } | {
+    gte: number | string
+  } | {
+    in: string | number[]
+  } | {
+    between: string
+  } | {
+    exists: boolean
+  }>
   search?: string
   sort?: string
   from?: number
@@ -3524,7 +3745,24 @@ filtered on. An `in` list carries at most 50,000 values.
 A variant matches only where it pins the condition — unlike `:re
 
 ```ts
-type VariantConditionFilter = Record<string, unknown>
+type VariantConditionFilter = Record<string, string | number | boolean | {
+  postal_code: string
+  city: string
+} | {
+  lt: number | string
+} | {
+  lte: number | string
+} | {
+  gt: number | string
+} | {
+  gte: number | string
+} | {
+  in: string | number[]
+} | {
+  between: string
+} | {
+  exists: boolean
+}>
 ```
 
 ### `VariantList`
@@ -3677,7 +3915,13 @@ type BatchUpsertVariantsRequest = {
   correlation_id?: string
   items: Array<{
     entity_id: string
-    conditions?: Record<string, unknown>
+    conditions?: Record<string, string | number | boolean | {
+      from?: { ... }
+      until?: { ... }
+    } | {
+      postal_code: { ... }
+      city: { ... }
+    }>
     default?: boolean
     valid_from?: string
     values: Record<string, unknown>
@@ -3694,7 +3938,13 @@ existing condition tuple appends a version to the variant holding it rather than
 ```ts
 type BatchUpsertItem = {
   entity_id: string
-  conditions?: Record<string, unknown>
+  conditions?: Record<string, string | number | boolean | {
+    from?: string
+    until?: string
+  } | {
+    postal_code: string
+    city: string
+  }>
   default?: boolean
   valid_from?: string
   values: Record<string, unknown>
@@ -3714,7 +3964,13 @@ type BatchDeleteVariantsRequest = {
     valid_from?: string
   } | {
     entity_id: string
-    conditions?: Record<string, unknown>
+    conditions?: Record<string, string | number | boolean | {
+      from?: { ... }
+      until?: { ... }
+    } | {
+      postal_code: { ... }
+      city: { ... }
+    }>
     default?: boolean
     valid_from?: string
   }>
@@ -3735,7 +3991,13 @@ type BatchDeleteItem = {
   valid_from?: string
 } | {
   entity_id: string
-  conditions?: Record<string, unknown>
+  conditions?: Record<string, string | number | boolean | {
+    from?: string
+    until?: string
+  } | {
+    postal_code: string
+    city: string
+  }>
   default?: boolean
   valid_from?: string
 }
@@ -3764,7 +4026,13 @@ per-item `VARIANT_UNPINNED`, and one marking `default` besi
 ```ts
 type BatchDeleteByConditions = {
   entity_id: string
-  conditions?: Record<string, unknown>
+  conditions?: Record<string, string | number | boolean | {
+    from?: string
+    until?: string
+  } | {
+    postal_code: string
+    city: string
+  }>
   default?: boolean
   valid_from?: string
 }
@@ -4982,9 +5250,60 @@ type ResolveCatalogRequest = {
     price_id?: string
   }>
   context: {
-    product?: Record<string, unknown>
-    price?: Record<string, unknown>
-    coupon?: Record<string, unknown>
+    product?: Record<string, string | number | boolean | {
+      postal_code: { ... }
+      city: { ... }
+    } | {
+      lt: { ... }
+    } | {
+      lte: { ... }
+    } | {
+      gt: { ... }
+    } | {
+      gte: { ... }
+    } | {
+      in: { ... }
+    } | {
+      between: { ... }
+    } | {
+      exists: { ... }
+    }>
+    price?: Record<string, string | number | boolean | {
+      postal_code: { ... }
+      city: { ... }
+    } | {
+      lt: { ... }
+    } | {
+      lte: { ... }
+    } | {
+      gt: { ... }
+    } | {
+      gte: { ... }
+    } | {
+      in: { ... }
+    } | {
+      between: { ... }
+    } | {
+      exists: { ... }
+    }>
+    coupon?: Record<string, string | number | boolean | {
+      postal_code: { ... }
+      city: { ... }
+    } | {
+      lt: { ... }
+    } | {
+      lte: { ... }
+    } | {
+      gt: { ... }
+    } | {
+      gte: { ... }
+    } | {
+      in: { ... }
+    } | {
+      between: { ... }
+    } | {
+      exists: { ... }
+    }>
   }
   as_of?: string
 }
@@ -4993,15 +5312,66 @@ type ResolveCatalogRequest = {
 ### `CatalogContext`
 
 One context per entity type, each the authenticated resolve's context and checked against
-that type's schema alone. A product resolves against `product`, a price and each of a
-composite's components against `price`, and a coupon against `coupon`. A type left out
-resolves against an empty context, wh
+that type's schema alone. A product resolves against `product`, and a price and each of a
+composite's components against `price`. A type left out resolves against an empty context,
+which serves the `default` va
 
 ```ts
 type CatalogContext = {
-  product?: Record<string, unknown>
-  price?: Record<string, unknown>
-  coupon?: Record<string, unknown>
+  product?: Record<string, string | number | boolean | {
+    postal_code: string
+    city: string
+  } | {
+    lt: number | string
+  } | {
+    lte: number | string
+  } | {
+    gt: number | string
+  } | {
+    gte: number | string
+  } | {
+    in: string | number[]
+  } | {
+    between: string
+  } | {
+    exists: boolean
+  }>
+  price?: Record<string, string | number | boolean | {
+    postal_code: string
+    city: string
+  } | {
+    lt: number | string
+  } | {
+    lte: number | string
+  } | {
+    gt: number | string
+  } | {
+    gte: number | string
+  } | {
+    in: string | number[]
+  } | {
+    between: string
+  } | {
+    exists: boolean
+  }>
+  coupon?: Record<string, string | number | boolean | {
+    postal_code: string
+    city: string
+  } | {
+    lt: number | string
+  } | {
+    lte: number | string
+  } | {
+    gt: number | string
+  } | {
+    gte: number | string
+  } | {
+    in: string | number[]
+  } | {
+    between: string
+  } | {
+    exists: boolean
+  }>
 }
 ```
 

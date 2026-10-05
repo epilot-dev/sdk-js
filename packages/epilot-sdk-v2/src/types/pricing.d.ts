@@ -204,7 +204,12 @@ export declare namespace Components {
              * }
              */
             conditions?: {
-                [name: string]: any;
+                [name: string]: /**
+                 * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 *
+                 */
+                PinnedConditionValue;
             };
         }
         /**
@@ -1030,8 +1035,8 @@ export declare namespace Components {
                 /**
                  * Present for a composite price that serves at least one component: the components this
                  * pair is the combination of, each with its variant where one produced it. A conditional
-                 * component with no variant in effect is left out of the composite and is not named here
-                 * (ADR 0048). A component line item carries no reference of its own.
+                 * component with no variant in effect is left out of the composite and is not named here.
+                 * A component line item carries no reference of its own.
                  *
                  */
                 price_components?: /**
@@ -1041,8 +1046,8 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
-                 * can be conditional.
+                 * Present when coupons apply to the price. Coupons are served as stored, so a coupon member
+                 * carries no `variant`.
                  *
                  */
                 coupons?: /**
@@ -1459,8 +1464,8 @@ export declare namespace Components {
                 /**
                  * Present for a composite price that serves at least one component: the components this
                  * pair is the combination of, each with its variant where one produced it. A conditional
-                 * component with no variant in effect is left out of the composite and is not named here
-                 * (ADR 0048). A component line item carries no reference of its own.
+                 * component with no variant in effect is left out of the composite and is not named here.
+                 * A component line item carries no reference of its own.
                  *
                  */
                 price_components?: /**
@@ -1470,8 +1475,8 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
-                 * can be conditional.
+                 * Present when coupons apply to the price. Coupons are served as stored, so a coupon member
+                 * carries no `variant`.
                  *
                  */
                 coupons?: /**
@@ -1768,8 +1773,8 @@ export declare namespace Components {
                 /**
                  * Present for a composite price that serves at least one component: the components this
                  * pair is the combination of, each with its variant where one produced it. A conditional
-                 * component with no variant in effect is left out of the composite and is not named here
-                 * (ADR 0048). A component line item carries no reference of its own.
+                 * component with no variant in effect is left out of the composite and is not named here.
+                 * A component line item carries no reference of its own.
                  *
                  */
                 price_components?: /**
@@ -1779,8 +1784,8 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
-                 * can be conditional.
+                 * Present when coupons apply to the price. Coupons are served as stored, so a coupon member
+                 * carries no `variant`.
                  *
                  */
                 coupons?: /**
@@ -6907,9 +6912,9 @@ export declare namespace Components {
         export type CashbackPeriod = "0" | "12";
         /**
          * One context per entity type, each the authenticated resolve's context and checked against
-         * that type's schema alone. A product resolves against `product`, a price and each of a
-         * composite's components against `price`, and a coupon against `coupon`. A type left out
-         * resolves against an empty context, which serves the `default` variant.
+         * that type's schema alone. A product resolves against `product`, and a price and each of a
+         * composite's components against `price`. A type left out resolves against an empty context,
+         * which serves the `default` variant.
          *
          * example:
          * {
@@ -7380,7 +7385,12 @@ export declare namespace Components {
                  * }
                  */
                 _conditions: {
-                    [name: string]: any;
+                    [name: string]: /**
+                     * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     *
+                     */
+                    PinnedConditionValue;
                     default: boolean;
                 };
                 /**
@@ -7619,7 +7629,12 @@ export declare namespace Components {
                  * }
                  */
                 _conditions: {
-                    [name: string]: any;
+                    [name: string]: /**
+                     * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     *
+                     */
+                    PinnedConditionValue;
                     default: boolean;
                 };
                 /**
@@ -7805,7 +7820,12 @@ export declare namespace Components {
                  * }
                  */
                 _conditions: {
-                    [name: string]: any;
+                    [name: string]: /**
+                     * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     *
+                     */
+                    PinnedConditionValue;
                     default: boolean;
                 };
                 /**
@@ -8135,8 +8155,8 @@ export declare namespace Components {
             /**
              * Present for a composite price that serves at least one component: the components this
              * pair is the combination of, each with its variant where one produced it. A conditional
-             * component with no variant in effect is left out of the composite and is not named here
-             * (ADR 0048). A component line item carries no reference of its own.
+             * component with no variant in effect is left out of the composite and is not named here.
+             * A component line item carries no reference of its own.
              *
              */
             price_components?: /**
@@ -8146,8 +8166,8 @@ export declare namespace Components {
              */
             CatalogReferenceMember[];
             /**
-             * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
-             * can be conditional.
+             * Present when coupons apply to the price. Coupons are served as stored, so a coupon member
+             * carries no `variant`.
              *
              */
             coupons?: /**
@@ -9938,8 +9958,8 @@ export declare namespace Components {
                 /**
                  * Present for a composite price that serves at least one component: the components this
                  * pair is the combination of, each with its variant where one produced it. A conditional
-                 * component with no variant in effect is left out of the composite and is not named here
-                 * (ADR 0048). A component line item carries no reference of its own.
+                 * component with no variant in effect is left out of the composite and is not named here.
+                 * A component line item carries no reference of its own.
                  *
                  */
                 price_components?: /**
@@ -9949,8 +9969,8 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
-                 * can be conditional.
+                 * Present when coupons apply to the price. Coupons are served as stored, so a coupon member
+                 * carries no `variant`.
                  *
                  */
                 coupons?: /**
@@ -10638,8 +10658,8 @@ export declare namespace Components {
                 /**
                  * Present for a composite price that serves at least one component: the components this
                  * pair is the combination of, each with its variant where one produced it. A conditional
-                 * component with no variant in effect is left out of the composite and is not named here
-                 * (ADR 0048). A component line item carries no reference of its own.
+                 * component with no variant in effect is left out of the composite and is not named here.
+                 * A component line item carries no reference of its own.
                  *
                  */
                 price_components?: /**
@@ -10649,8 +10669,8 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
-                 * can be conditional.
+                 * Present when coupons apply to the price. Coupons are served as stored, so a coupon member
+                 * carries no `variant`.
                  *
                  */
                 coupons?: /**
@@ -11088,6 +11108,23 @@ export declare namespace Components {
             [name: string]: /* The computed price */ ComputedBasePrice;
         }
         /**
+         * The value of a `daterange` condition. A bound that is absent, `null` or an empty string is an
+         * open end; stored, an open end is an empty string.
+         *
+         */
+        export interface ConditionDateRange {
+            /**
+             * example:
+             * 2026-01-01
+             */
+            from?: string | null;
+            /**
+             * example:
+             * 2027-01-01
+             */
+            until?: string | null;
+        }
+        /**
          * One condition dimension, in the shape a schema's `conditions` array holds it — copy it in verbatim.
          */
         export interface ConditionDefinition {
@@ -11154,6 +11191,30 @@ export declare namespace Components {
              */
             format?: "postal_code" | "postal_code_city";
         }
+        /**
+         * A single-operator predicate.
+         */
+        export type ConditionPredicate = /* A single-operator predicate. */ {
+            lt: /* A number, or a date as an RFC 3339 date or date-time. */ OrderedConditionOperand;
+        } | {
+            lte: /* A number, or a date as an RFC 3339 date or date-time. */ OrderedConditionOperand;
+        } | {
+            gt: /* A number, or a date as an RFC 3339 date or date-time. */ OrderedConditionOperand;
+        } | {
+            gte: /* A number, or a date as an RFC 3339 date or date-time. */ OrderedConditionOperand;
+        } | {
+            in: [
+                (string | number),
+                ...(string | number)[]
+            ];
+        } | {
+            /**
+             * The instant a `daterange` condition's range must contain.
+             */
+            between: string;
+        } | {
+            exists: boolean;
+        };
         /**
          * A named bundle of condition definitions, built in for one entity type.
          */
@@ -12938,6 +12999,26 @@ export declare namespace Components {
         }
         export type ConsumptionTypeGetAg = "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
         /**
+         * One condition's value in a resolve context or listing filter: an exact value, or a predicate.
+         * Which of these a condition takes is set by its type in the entity's schema, and a value of
+         * another shape is refused with `CONTEXT_FORMAT_INVALID`, or `OPERATOR_UNSUPPORTED` for a
+         * predicate its type does not support.
+         *
+         */
+        export type ContextConditionValue = /**
+         * One condition's value in a resolve context or listing filter: an exact value, or a predicate.
+         * Which of these a condition takes is set by its type in the entity's schema, and a value of
+         * another shape is refused with `CONTEXT_FORMAT_INVALID`, or `OPERATOR_UNSUPPORTED` for a
+         * predicate its type does not support.
+         *
+         */
+        string | number | boolean | /**
+         * The value of a `location` condition of format `postal_code_city`, its parts named as an entity
+         * address names them.
+         *
+         */
+        PostalCodeCity | /* A single-operator predicate. */ ConditionPredicate;
+        /**
          * The coupon entity
          * example:
          * {
@@ -13358,7 +13439,12 @@ export declare namespace Components {
              * }
              */
             conditions: {
-                [name: string]: any;
+                [name: string]: /**
+                 * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 *
+                 */
+                PinnedConditionValue;
                 default: boolean;
             };
             /**
@@ -16154,6 +16240,10 @@ export declare namespace Components {
          *
          */
         export type OrderStatus = "draft" | "quote" | "placed" | "cancelled" | "completed";
+        /**
+         * A number, or a date as an RFC 3339 date or date-time.
+         */
+        export type OrderedConditionOperand = /* A number, or a date as an RFC 3339 date or date-time. */ number | string;
         export interface PatchVersionRequest {
             /**
              * Only the overrides to change; everything not mentioned is left as stored. `null` sets a
@@ -16188,7 +16278,12 @@ export declare namespace Components {
              * }
              */
             conditions?: {
-                [name: string]: any;
+                [name: string]: /**
+                 * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 *
+                 */
+                PinnedConditionValue;
             };
         }
         /**
@@ -16208,6 +16303,27 @@ export declare namespace Components {
             };
         }
         /**
+         * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+         * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+         *
+         */
+        export type PinnedConditionValue = /**
+         * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+         * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+         *
+         */
+        string | number | boolean | /**
+         * The value of a `daterange` condition. A bound that is absent, `null` or an empty string is an
+         * open end; stored, an open end is an empty string.
+         *
+         */
+        ConditionDateRange | /**
+         * The value of a `location` condition of format `postal_code_city`, its parts named as an entity
+         * address names them.
+         *
+         */
+        PostalCodeCity;
+        /**
          * The situation this variant applies to: a flat map keyed by condition name. A condition left
          * out is a wildcard, which is what makes adding a condition to a schema non-breaking for
          * existing variants.
@@ -16226,7 +16342,12 @@ export declare namespace Components {
          * }
          */
         export interface PinnedConditions {
-            [name: string]: any;
+            [name: string]: /**
+             * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+             * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+             *
+             */
+            PinnedConditionValue;
         }
         /**
          * The options a pinned resolve accepts — `hydrate` and nothing else. `resolve_one` has nothing
@@ -16307,6 +16428,23 @@ export declare namespace Components {
                  */
                 journey_target_block?: string;
             }[];
+        }
+        /**
+         * The value of a `location` condition of format `postal_code_city`, its parts named as an entity
+         * address names them.
+         *
+         */
+        export interface PostalCodeCity {
+            /**
+             * example:
+             * 50667
+             */
+            postal_code: string;
+            /**
+             * example:
+             * Köln
+             */
+            city: string;
         }
         /**
          * Market area details for power
@@ -17171,8 +17309,8 @@ export declare namespace Components {
                 /**
                  * Present for a composite price that serves at least one component: the components this
                  * pair is the combination of, each with its variant where one produced it. A conditional
-                 * component with no variant in effect is left out of the composite and is not named here
-                 * (ADR 0048). A component line item carries no reference of its own.
+                 * component with no variant in effect is left out of the composite and is not named here.
+                 * A component line item carries no reference of its own.
                  *
                  */
                 price_components?: /**
@@ -17182,8 +17320,8 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
-                 * can be conditional.
+                 * Present when coupons apply to the price. Coupons are served as stored, so a coupon member
+                 * carries no `variant`.
                  *
                  */
                 coupons?: /**
@@ -17658,8 +17796,8 @@ export declare namespace Components {
                 /**
                  * Present for a composite price that serves at least one component: the components this
                  * pair is the combination of, each with its variant where one produced it. A conditional
-                 * component with no variant in effect is left out of the composite and is not named here
-                 * (ADR 0048). A component line item carries no reference of its own.
+                 * component with no variant in effect is left out of the composite and is not named here.
+                 * A component line item carries no reference of its own.
                  *
                  */
                 price_components?: /**
@@ -17669,8 +17807,8 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * Present when coupons apply to the price. A coupon's `variant` exists only once coupons
-                 * can be conditional.
+                 * Present when coupons apply to the price. Coupons are served as stored, so a coupon member
+                 * carries no `variant`.
                  *
                  */
                 coupons?: /**
@@ -19497,7 +19635,12 @@ export declare namespace Components {
              * }
              */
             conditions?: {
-                [name: string]: any;
+                [name: string]: /**
+                 * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 *
+                 */
+                PinnedConditionValue;
             };
         }
         /**
@@ -20324,9 +20467,9 @@ export declare namespace Components {
             ];
             context: /**
              * One context per entity type, each the authenticated resolve's context and checked against
-             * that type's schema alone. A product resolves against `product`, a price and each of a
-             * composite's components against `price`, and a coupon against `coupon`. A type left out
-             * resolves against an empty context, which serves the `default` variant.
+             * that type's schema alone. A product resolves against `product`, and a price and each of a
+             * composite's components against `price`. A type left out resolves against an empty context,
+             * which serves the `default` variant.
              *
              * example:
              * {
@@ -20423,7 +20566,14 @@ export declare namespace Components {
          * }
          */
         export interface ResolveContext {
-            [name: string]: any;
+            [name: string]: /**
+             * One condition's value in a resolve context or listing filter: an exact value, or a predicate.
+             * Which of these a condition takes is set by its type in the entity's schema, and a value of
+             * another shape is refused with `CONTEXT_FORMAT_INVALID`, or `OPERATOR_UNSUPPORTED` for a
+             * predicate its type does not support.
+             *
+             */
+            ContextConditionValue;
         }
         /**
          * The options a context resolve accepts. A pin takes `PinnedResolveOptions` instead.
@@ -20450,8 +20600,7 @@ export declare namespace Components {
          * The components of a composite price as the v2 catalog serves them: hydrated in place, and
          * a component that is itself conditional resolved against the same context, carrying the
          * discriminators a resolved payload carries. A conditional component with no variant in
-         * effect — nothing matches and there is no default — is left out, as a deleted component is
-         * (ADR 0048).
+         * effect — nothing matches and there is no default — is left out, as a deleted component is.
          *
          */
         export interface ResolvedPriceComponents {
@@ -20658,7 +20807,12 @@ export declare namespace Components {
                  * }
                  */
                 _conditions: {
-                    [name: string]: any;
+                    [name: string]: /**
+                     * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     *
+                     */
+                    PinnedConditionValue;
                     default: boolean;
                 };
                 /**
@@ -20738,7 +20892,12 @@ export declare namespace Components {
              * }
              */
             _conditions: {
-                [name: string]: any;
+                [name: string]: /**
+                 * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 *
+                 */
+                PinnedConditionValue;
                 default: boolean;
             };
             /**
@@ -21173,7 +21332,14 @@ export declare namespace Components {
          * }
          */
         export interface VariantConditionFilter {
-            [name: string]: any;
+            [name: string]: /**
+             * One condition's value in a resolve context or listing filter: an exact value, or a predicate.
+             * Which of these a condition takes is set by its type in the entity's schema, and a value of
+             * another shape is refused with `CONTEXT_FORMAT_INVALID`, or `OPERATOR_UNSUPPORTED` for a
+             * predicate its type does not support.
+             *
+             */
+            ContextConditionValue;
         }
         /**
          * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
@@ -21186,7 +21352,12 @@ export declare namespace Components {
          * }
          */
         export interface VariantConditions {
-            [name: string]: any;
+            [name: string]: /**
+             * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+             * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+             *
+             */
+            PinnedConditionValue;
             default: boolean;
         }
         export interface VariantList {
@@ -21232,7 +21403,12 @@ export declare namespace Components {
              * }
              */
             conditions: {
-                [name: string]: any;
+                [name: string]: /**
+                 * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 *
+                 */
+                PinnedConditionValue;
                 default: boolean;
             };
         }
@@ -21360,7 +21536,12 @@ export declare namespace Components {
              * }
              */
             conditions: {
-                [name: string]: any;
+                [name: string]: /**
+                 * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 *
+                 */
+                PinnedConditionValue;
                 default: boolean;
             };
             status: /**
@@ -21399,7 +21580,12 @@ export declare namespace Components {
                  * }
                  */
                 conditions: {
-                    [name: string]: any;
+                    [name: string]: /**
+                     * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     *
+                     */
+                    PinnedConditionValue;
                     default: boolean;
                 };
                 /**
@@ -21503,7 +21689,12 @@ export declare namespace Components {
              * }
              */
             conditions: {
-                [name: string]: any;
+                [name: string]: /**
+                 * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 *
+                 */
+                PinnedConditionValue;
                 default: boolean;
             };
             /**
@@ -21599,7 +21790,12 @@ export declare namespace Components {
              * }
              */
             conditions: {
-                [name: string]: any;
+                [name: string]: /**
+                 * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 *
+                 */
+                PinnedConditionValue;
                 default: boolean;
             };
             /**
@@ -21747,7 +21943,12 @@ export declare namespace Components {
              * }
              */
             conditions: {
-                [name: string]: any;
+                [name: string]: /**
+                 * One condition's exact value. Which of these shapes a condition takes is set by its type in the
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 *
+                 */
+                PinnedConditionValue;
                 default: boolean;
             };
             /**
@@ -25549,7 +25750,9 @@ export type ComputePriceResult = Components.Schemas.ComputePriceResult;
 export type ComputedBasePrice = Components.Schemas.ComputedBasePrice;
 export type ComputedPriceBreakdown = Components.Schemas.ComputedPriceBreakdown;
 export type ComputedPriceComponents = Components.Schemas.ComputedPriceComponents;
+export type ConditionDateRange = Components.Schemas.ConditionDateRange;
 export type ConditionDefinition = Components.Schemas.ConditionDefinition;
+export type ConditionPredicate = Components.Schemas.ConditionPredicate;
 export type ConditionSet = Components.Schemas.ConditionSet;
 export type ConditionSetCatalog = Components.Schemas.ConditionSetCatalog;
 export type ConditionType = Components.Schemas.ConditionType;
@@ -25558,6 +25761,7 @@ export type ConditionalPricingError = Components.Schemas.ConditionalPricingError
 export type ConditionalPricingErrorCode = Components.Schemas.ConditionalPricingErrorCode;
 export type ConditionalPricingOptIn = Components.Schemas.ConditionalPricingOptIn;
 export type ConsumptionTypeGetAg = Components.Schemas.ConsumptionTypeGetAg;
+export type ContextConditionValue = Components.Schemas.ContextConditionValue;
 export type Coupon = Components.Schemas.Coupon;
 export type CouponItem = Components.Schemas.CouponItem;
 export type CouponWithoutPromoCodes = Components.Schemas.CouponWithoutPromoCodes;
@@ -25615,11 +25819,14 @@ export type OrderPayload = Components.Schemas.OrderPayload;
 export type OrderRelation = Components.Schemas.OrderRelation;
 export type OrderSource = Components.Schemas.OrderSource;
 export type OrderStatus = Components.Schemas.OrderStatus;
+export type OrderedConditionOperand = Components.Schemas.OrderedConditionOperand;
 export type PatchVersionRequest = Components.Schemas.PatchVersionRequest;
 export type PaymentMethod = Components.Schemas.PaymentMethod;
+export type PinnedConditionValue = Components.Schemas.PinnedConditionValue;
 export type PinnedConditions = Components.Schemas.PinnedConditions;
 export type PinnedResolveOptions = Components.Schemas.PinnedResolveOptions;
 export type PortalContext = Components.Schemas.PortalContext;
+export type PostalCodeCity = Components.Schemas.PostalCodeCity;
 export type PowerMarketAreaDetails = Components.Schemas.PowerMarketAreaDetails;
 export type PowerMeterType = Components.Schemas.PowerMeterType;
 export type Price = Components.Schemas.Price;
