@@ -924,7 +924,10 @@
                       "5m",
                       "1w",
                       "2w",
-                      "1m"
+                      "1m",
+                      "3m",
+                      "6m",
+                      "1y"
                     ],
                     "description": "Optional timeframe for initial mailbox sync. When provided, triggers an automatic\nmailbox sync after connecting the mailbox, syncing emails from the specified period.\n"
                   }
@@ -1079,7 +1082,7 @@
                         "$ref": "#/components/schemas/MailboxSyncTimeframePeriods"
                       }
                     ],
-                    "description": "Sync period:\n- 5m: last 5 minutes (quick sync)\n- 1w: 1 week\n- 2w: 2 weeks\n- 1m: 1 month\n"
+                    "description": "Sync period:\n- 5m: last 5 minutes (quick sync)\n- 1w: 1 week\n- 2w: 2 weeks\n- 1m: 1 month\n- 3m: 3 months\n- 6m: 6 months\n- 1y: 1 year\n"
                   }
                 }
               }
@@ -2700,7 +2703,10 @@
           "5m",
           "1w",
           "2w",
-          "1m"
+          "1m",
+          "3m",
+          "6m",
+          "1y"
         ]
       },
       "InboxBucketResponse": {
