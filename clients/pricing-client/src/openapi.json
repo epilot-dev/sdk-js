@@ -6335,12 +6335,10 @@
         "properties": {
           "postal_code": {
             "type": "string",
-            "minLength": 1,
             "example": "50667"
           },
           "city": {
             "type": "string",
-            "minLength": 1,
             "example": "Köln"
           }
         }
