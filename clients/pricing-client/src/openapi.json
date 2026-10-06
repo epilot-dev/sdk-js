@@ -3946,7 +3946,7 @@
             }
           },
           "400": {
-            "description": "`VARIANT_UNPINNED`, `CONDITION_UNDEFINED`, `CONDITION_VALUE_INVALID`,\n`PIN_FORMAT_INVALID`, `DEFAULT_MARKER_RESERVED`, `DEFAULT_VARIANT_PINS_CONDITIONS`,\n`VALID_FROM_INVALID`, `VALUE_UNSTORABLE`, `IDENTIFIER_INVALID`, `ENTITY_TYPE_MISMATCH`.\n",
+            "description": "`VARIANT_UNPINNED`, `CONDITION_UNDEFINED`, `CONDITION_VALUE_INVALID`,\n`PIN_FORMAT_INVALID`, `DEFAULT_MARKER_RESERVED`, `DEFAULT_VARIANT_PINS_CONDITIONS`,\n`VALID_FROM_INVALID`, `VALUE_UNSTORABLE`, `OVERRIDE_VALUE_INVALID`, `IDENTIFIER_INVALID`,\n`ENTITY_TYPE_MISMATCH`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -4487,7 +4487,7 @@
             }
           },
           "400": {
-            "description": "`VALID_FROM_IMMUTABLE`, `VALID_FROM_INVALID`, `VALUE_UNSTORABLE`, `IDENTIFIER_INVALID`,\n`ENTITY_TYPE_MISMATCH`.\n",
+            "description": "`VALID_FROM_IMMUTABLE`, `VALID_FROM_INVALID`, `VALUE_UNSTORABLE`, `OVERRIDE_VALUE_INVALID`,\n`IDENTIFIER_INVALID`, `ENTITY_TYPE_MISMATCH`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -4589,7 +4589,7 @@
             }
           },
           "400": {
-            "description": "`VALID_FROM_IMMUTABLE`, `VALID_FROM_INVALID`, `VALUE_UNSTORABLE`, `IDENTIFIER_INVALID`,\n`ENTITY_TYPE_MISMATCH`.\n",
+            "description": "`VALID_FROM_IMMUTABLE`, `VALID_FROM_INVALID`, `VALUE_UNSTORABLE`, `OVERRIDE_VALUE_INVALID`,\n`IDENTIFIER_INVALID`, `ENTITY_TYPE_MISMATCH`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -4963,7 +4963,7 @@
             }
           },
           "400": {
-            "description": "`VALID_FROM_INVALID`, `VALUE_UNSTORABLE`, `IDENTIFIER_INVALID`, `ENTITY_TYPE_MISMATCH`.",
+            "description": "`VALID_FROM_INVALID`, `VALUE_UNSTORABLE`, `OVERRIDE_VALUE_INVALID`, `IDENTIFIER_INVALID`,\n`ENTITY_TYPE_MISMATCH`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -5179,7 +5179,7 @@
             }
           },
           "400": {
-            "description": "`VALID_FROM_IMMUTABLE`, `VALID_FROM_INVALID`, `VALUE_UNSTORABLE`, `IDENTIFIER_INVALID`,\n`ENTITY_TYPE_MISMATCH`.\n",
+            "description": "`VALID_FROM_IMMUTABLE`, `VALID_FROM_INVALID`, `VALUE_UNSTORABLE`, `OVERRIDE_VALUE_INVALID`,\n`IDENTIFIER_INVALID`, `ENTITY_TYPE_MISMATCH`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -5291,7 +5291,7 @@
             }
           },
           "400": {
-            "description": "`VALID_FROM_IMMUTABLE`, `VALID_FROM_INVALID`, `VALUE_UNSTORABLE`, `IDENTIFIER_INVALID`,\n`ENTITY_TYPE_MISMATCH`.\n",
+            "description": "`VALID_FROM_IMMUTABLE`, `VALID_FROM_INVALID`, `VALUE_UNSTORABLE`, `OVERRIDE_VALUE_INVALID`,\n`IDENTIFIER_INVALID`, `ENTITY_TYPE_MISMATCH`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -6017,7 +6017,7 @@
       },
       "ConditionalPricingErrorCode": {
         "type": "string",
-        "description": "Machine-readable failure mode of a conditional-pricing operation, so a client can branch on\nthe kind of failure instead of parsing the message. A `400` is about the request; a `409` is\nabout what is already stored. Refusals raised by request validation carry no `code` at all.\n\n- `SCHEMA_NOT_FOUND` (404): no conditional entity type by that slug\n- `ENTITY_NOT_FOUND` (404): the schema holds no entity with that id\n- `ENTITY_TYPE_MISMATCH` (400): that id belongs to an entity of another type than the slug named\n- `ENTITY_NOT_CONDITIONAL` (409): the entity is of the right type but was not created as a conditional one\n- `VARIANT_NOT_FOUND` (404): the entity has no such variant\n- `VERSION_NOT_FOUND` (404): the variant has no version at that `valid_from`\n- `NO_MATCHES` (404): nothing applied to the context and the entity has no `default` variant\n- `NO_ACTIVE_VERSION` (404): the variant has no version in effect at the instant asked about\n- `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested\n- `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant\n- `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant\n- `CONDITION_UNDEFINED` (400): the request names a condition the entity's schema does not define\n- `VARIANT_PIN_UNDECLARED` (409): a variant a resolve would compose pins a condition the entity's schema no longer declares\n- `OPERATOR_UNSUPPORTED` (400): the requested predicate, or a sort, is not applicable to the condition's type\n- `CONTEXT_FORMAT_INVALID` (400): a resolve context or listing filter value is malformed for its condition type\n- `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value absent from the condition's declared `options`\n- `CONDITION_UNCONFIGURED` (409): a variant write pins a `select` condition whose `options` are absent or empty\n- `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap\n- `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`\n- `OFFSET_WINDOW_EXCEEDED` (400): a listing's `from` plus `size` reaches past the offset window the search index allows\n- `CURSOR_INVALID` (400): a paging cursor cannot be read, or does not belong to the read it was sent with\n- `VARIANT_LIMIT_REACHED` (409): the entity already holds every variant it may hold\n- `PIN_FORMAT_INVALID` (400): a variant pins a value malformed for its condition's type\n- `VARIANT_UNPINNED` (400): a variant write pins no condition and is not marked `default`, or a batch delete item addresses no variant\n- `LAST_VERSION_UNDELETABLE` (409): the delete would leave the variant with no version at all\n- `CONDITION_UNREADABLE` (409): the entity's schema declares a condition in a way this deploy cannot read\n- `SORT_INVALID` (400): a listing's `sort` is not `conditions.<name>:asc` or `conditions.<name>:desc`\n- `DEFAULT_MARKER_RESERVED` (400): a variant write's pins, or a resolve context, address the fallback marker — `default` or `_default`\n- `DEFAULT_VARIANT_PINS_CONDITIONS` (400): a variant marked `default` also pins real conditions\n- `VALID_FROM_IMMUTABLE` (400): a version write asks for a different `valid_from` than the version its own address names\n- `VARIANT_CONDITIONS_IMMUTABLE` (409): a version write carries a condition tuple other than the one its variant was created with\n- `IDENTIFIER_INVALID` (400): an id in the request cannot be used as a storage key — empty, carrying an unsupported character, or longer than 128 characters\n- `VALID_FROM_INVALID` (400): a `valid_from` is not one of the timestamp forms a version timeline can be sorted by\n- `VALUE_UNSTORABLE` (400): a write carries a value the store cannot hold, such as a non-finite number or one outside the table's numeric range\n- `CONDITIONAL_PRICING_NOT_ENABLED` (403): the organization has not opted in to Conditional Pricing\n- `CONDITIONAL_PRICING_NOT_READY` (409): the organization opted in minutes ago and a variant cannot be created until its setup finishes\n",
+        "description": "Machine-readable failure mode of a conditional-pricing operation, so a client can branch on\nthe kind of failure instead of parsing the message. A `400` is about the request; a `409` is\nabout what is already stored. Refusals raised by request validation carry no `code` at all.\n\n- `SCHEMA_NOT_FOUND` (404): no conditional entity type by that slug\n- `ENTITY_NOT_FOUND` (404): the schema holds no entity with that id\n- `ENTITY_TYPE_MISMATCH` (400): that id belongs to an entity of another type than the slug named\n- `ENTITY_NOT_CONDITIONAL` (409): the entity is of the right type but was not created as a conditional one\n- `VARIANT_NOT_FOUND` (404): the entity has no such variant\n- `VERSION_NOT_FOUND` (404): the variant has no version at that `valid_from`\n- `NO_MATCHES` (404): nothing applied to the context and the entity has no `default` variant\n- `NO_ACTIVE_VERSION` (404): the variant has no version in effect at the instant asked about\n- `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested\n- `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant\n- `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant\n- `CONDITION_UNDEFINED` (400): the request names a condition the entity's schema does not define\n- `VARIANT_PIN_UNDECLARED` (409): a variant a resolve would compose pins a condition the entity's schema no longer declares\n- `OPERATOR_UNSUPPORTED` (400): the requested predicate, or a sort, is not applicable to the condition's type\n- `CONTEXT_FORMAT_INVALID` (400): a resolve context or listing filter value is malformed for its condition type\n- `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value absent from the condition's declared `options`\n- `CONDITION_UNCONFIGURED` (409): a variant write pins a `select` condition whose `options` are absent or empty\n- `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap\n- `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`\n- `OFFSET_WINDOW_EXCEEDED` (400): a listing's `from` plus `size` reaches past the offset window the search index allows\n- `CURSOR_INVALID` (400): a paging cursor cannot be read, or does not belong to the read it was sent with\n- `VARIANT_LIMIT_REACHED` (409): the entity already holds every variant it may hold\n- `PIN_FORMAT_INVALID` (400): a variant pins a value malformed for its condition's type\n- `VARIANT_UNPINNED` (400): a variant write pins no condition and is not marked `default`, or a batch delete item addresses no variant\n- `LAST_VERSION_UNDELETABLE` (409): the delete would leave the variant with no version at all\n- `CONDITION_UNREADABLE` (409): the entity's schema declares a condition in a way this deploy cannot read\n- `SORT_INVALID` (400): a listing's `sort` is not `conditions.<name>:asc` or `conditions.<name>:desc`\n- `DEFAULT_MARKER_RESERVED` (400): a variant write's pins, or a resolve context, address the fallback marker — `default` or `_default`\n- `DEFAULT_VARIANT_PINS_CONDITIONS` (400): a variant marked `default` also pins real conditions\n- `VALID_FROM_IMMUTABLE` (400): a version write asks for a different `valid_from` than the version its own address names\n- `VARIANT_CONDITIONS_IMMUTABLE` (409): a version write carries a condition tuple other than the one its variant was created with\n- `IDENTIFIER_INVALID` (400): an id in the request cannot be used as a storage key — empty, carrying an unsupported character, or longer than 128 characters\n- `VALID_FROM_INVALID` (400): a `valid_from` is not one of the timestamp forms a version timeline can be sorted by\n- `VALUE_UNSTORABLE` (400): a write carries a value the store cannot hold, such as a non-finite number or one outside the table's numeric range\n- `OVERRIDE_VALUE_INVALID` (400): a write overrides a `currency` or `number` field, or an amount/decimal pair, with a value of the wrong type\n- `CONDITIONAL_PRICING_NOT_ENABLED` (403): the organization has not opted in to Conditional Pricing\n- `CONDITIONAL_PRICING_NOT_READY` (409): the organization opted in minutes ago and a variant cannot be created until its setup finishes\n",
         "enum": [
           "SCHEMA_NOT_FOUND",
           "ENTITY_NOT_FOUND",
@@ -6053,6 +6053,7 @@
           "IDENTIFIER_INVALID",
           "VALID_FROM_INVALID",
           "VALUE_UNSTORABLE",
+          "OVERRIDE_VALUE_INVALID",
           "CONDITIONAL_PRICING_NOT_ENABLED",
           "CONDITIONAL_PRICING_NOT_READY"
         ]
@@ -8982,6 +8983,42 @@
                         "type": "string",
                         "description": "What about the value cannot be stored, in prose.",
                         "example": "the non-finite number Infinity"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "description": "An override whose value is not of the type its field holds. A field declared by a\n`currency` attribute `x` takes `x` as a number, `x_decimal` as a non-empty string and\n`x_currency` as one of the attribute's currency codes, in any case. A field declared\nby a `number` attribute takes a string, or a number where the attribute sets\n`data_type: number`. A field a capability manages that neither attribute type\ndeclares, such as `tiers`, is checked at any depth by the amount/decimal convention:\na key `K_decimal` is a non-empty string, and a `K` beside it is a number. No other\nvalue is checked, and a decimal string is not parsed.\n",
+                "required": [
+                  "code",
+                  "details"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "OVERRIDE_VALUE_INVALID"
+                    ]
+                  },
+                  "details": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "path",
+                      "expected"
+                    ],
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "description": "Where the value sits, as a dotted path of the request's own keys, with array\nentries by index.\n",
+                        "example": "values.tiers.0.unit_amount_decimal"
+                      },
+                      "expected": {
+                        "type": "string",
+                        "description": "What the value has to be, in prose.",
+                        "example": "a non-empty string"
                       }
                     }
                   }
