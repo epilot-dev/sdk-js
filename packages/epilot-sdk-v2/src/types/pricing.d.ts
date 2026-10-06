@@ -3612,6 +3612,49 @@ export declare namespace Components {
                     [name: string]: any;
                 }[];
             } | {
+                code: "OVERRIDE_VALUE_INVALID";
+                details: {
+                    /**
+                     * Where the value sits, as a dotted path of the request's own keys, with array
+                     * entries by index.
+                     *
+                     * example:
+                     * values.tiers.0.unit_amount_decimal
+                     */
+                    path: string;
+                    /**
+                     * What the value has to be, in prose.
+                     * example:
+                     * a non-empty string
+                     */
+                    expected: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
                 code: "CONDITIONAL_PRICING_NOT_ENABLED";
                 details: {
                     [key: string]: never;
@@ -6089,6 +6132,51 @@ export declare namespace Components {
                      * the non-finite number Infinity
                      */
                     reason: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "OVERRIDE_VALUE_INVALID";
+                details: {
+                    /**
+                     * Where the value sits, as a dotted path of the request's own keys, with array
+                     * entries by index.
+                     *
+                     * example:
+                     * values.tiers.0.unit_amount_decimal
+                     */
+                    path: string;
+                    /**
+                     * What the value has to be, in prose.
+                     * example:
+                     * a non-empty string
+                     */
+                    expected: string;
                 };
                 /**
                  * Error message
@@ -12854,6 +12942,53 @@ export declare namespace Components {
                 [name: string]: any;
             }[];
         } | {
+            code: "OVERRIDE_VALUE_INVALID";
+            details: {
+                /**
+                 * Where the value sits, as a dotted path of the request's own keys, with array
+                 * entries by index.
+                 *
+                 * example:
+                 * values.tiers.0.unit_amount_decimal
+                 */
+                path: string;
+                /**
+                 * What the value has to be, in prose.
+                 * example:
+                 * a non-empty string
+                 */
+                expected: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
             code: "CONDITIONAL_PRICING_NOT_ENABLED";
             details: {
                 [key: string]: never;
@@ -12980,11 +13115,12 @@ export declare namespace Components {
          * - `IDENTIFIER_INVALID` (400): an id in the request cannot be used as a storage key — empty, carrying an unsupported character, or longer than 128 characters
          * - `VALID_FROM_INVALID` (400): a `valid_from` is not one of the timestamp forms a version timeline can be sorted by
          * - `VALUE_UNSTORABLE` (400): a write carries a value the store cannot hold, such as a non-finite number or one outside the table's numeric range
+         * - `OVERRIDE_VALUE_INVALID` (400): a write overrides a `currency` or `number` field, or an amount/decimal pair, with a value of the wrong type
          * - `CONDITIONAL_PRICING_NOT_ENABLED` (403): the organization has not opted in to Conditional Pricing
          * - `CONDITIONAL_PRICING_NOT_READY` (409): the organization opted in minutes ago and a variant cannot be created until its setup finishes
          *
          */
-        export type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE" | "CONDITIONAL_PRICING_NOT_ENABLED" | "CONDITIONAL_PRICING_NOT_READY";
+        export type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE" | "OVERRIDE_VALUE_INVALID" | "CONDITIONAL_PRICING_NOT_ENABLED" | "CONDITIONAL_PRICING_NOT_READY";
         export interface ConditionalPricingOptIn {
             /**
              * - `PROVISIONING`: the organization's search collection is still being set up, and
