@@ -2278,6 +2278,15 @@ declare namespace Components {
              */
             allowed_operations?: string[];
             /**
+             * Whether the identified contact already has a portal user on this portal, so the caller
+             * can skip offering account creation. Present only on a match; omitted when it could not
+             * be determined.
+             *
+             * example:
+             * false
+             */
+            has_portal_user?: boolean;
+            /**
              * Present only when no token was issued. NOT_FOUND means the given identifiers did not
              * match any contact (definitive - the client should not retry). TIMEOUT means the contact
              * was not found within the processing window but may still be ingesting; the client may
@@ -5200,7 +5209,7 @@ declare namespace Components {
              */
             scanned: number;
             usages: {
-                kind: "portal-config" | "portal-block" | "portal-widget";
+                kind: "portal-config" | "portal-block";
                 resource: {
                     type: "portal";
                     id: string;
@@ -5235,6 +5244,26 @@ declare namespace Components {
              * https://example.com
              */
             redirect_to?: string;
+            /**
+             * Portal name, served as the document title before the app boots
+             * example:
+             * Kundenportal
+             */
+            title?: string;
+            /**
+             * Whether the served document should carry a `noindex, nofollow` robots meta tag
+             */
+            prevent_indexing?: boolean;
+            /**
+             * Organization of the portal, used to preload its design from the served document
+             * example:
+             * 123
+             */
+            organization_id?: string;
+            /**
+             * Design of the portal, used to preload it from the served document
+             */
+            design_id?: string;
         }
         /**
          * The meter entity
@@ -7791,15 +7820,19 @@ declare namespace Components {
          */
         export interface PortalFeatureSettings {
             /**
-             * Start page feature flag
+             * Retired, not read. A portal shows a start page by having a `dashboard` page.
              */
             start_page?: boolean;
             /**
-             * Billing feature flag
+             * Retired, not read. Billing follows the organization's `commodity_billing` setting.
              */
             billing?: boolean;
             /**
-             * Change due date feature flag
+             * Retired, not read. Billing pages and blocks follow the organization's `commodity_billing` setting.
+             */
+            commodity_billing?: boolean;
+            /**
+             * Retired, not read.
              */
             change_due_date?: boolean;
             /**
@@ -7814,6 +7847,14 @@ declare namespace Components {
              * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
              */
             mcp_grant_version?: number;
+            /**
+             * Enable the portal copilot chat for this portal
+             */
+            portal_copilot?: boolean;
+            /**
+             * ID of the Agent Builder portal agent this portal's copilot chat runs, set by Agent Builder. When unset, or when the agent no longer exists in the portal's organization, the chat runs the default portal copilot.
+             */
+            portal_copilot_agent_id?: string;
         }
         /**
          * ID of the portal
@@ -10066,10 +10107,52 @@ declare namespace Components {
              */
             status: string;
         }
+        export interface SwapPortalReferenceGroup {
+            /**
+             * Items whose references now point at the target portal.
+             */
+            updated: SwapPortalReferenceItem[];
+            /**
+             * Items that reference the source portal but could not be updated.
+             */
+            failed: SwapPortalReferenceItem[];
+            /**
+             * Set when the items could not be listed, so none of them were checked.
+             */
+            list_error?: string;
+        }
+        export interface SwapPortalReferenceItem {
+            /**
+             * Journey id or automation flow id.
+             */
+            id: string;
+            name?: string;
+            /**
+             * Where the reference sat in the item.
+             * example:
+             * [
+             *   "steps[0].uischema.elements[2].options.portalId"
+             * ]
+             */
+            paths?: string[];
+            /**
+             * Why the update failed. Only set on failed items.
+             */
+            error?: string;
+        }
+        /**
+         * Outcome of the `portal_references` swap option. Only present when that option was requested. The swap itself has already succeeded when this is returned, so failures here do not undo it.
+         */
+        export interface SwapPortalReferencesResult {
+            journeys: SwapPortalReferenceGroup;
+            automation_flows: SwapPortalReferenceGroup;
+        }
         /**
          * Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum.
+         * - `email_templates`: swap the email templates of the two portals.
+         * - `portal_references`: after the swap, re-point configuration in other services from the source portal to the target portal: the portal on journey login (AuthControl) blocks and in file upload portal access, and the portal of automation flow portal triggers. One-directional: references to the target portal are left unchanged, because the target keeps its domain and users. System flows are not changed. Uses the caller's permissions; the outcome is returned in `portal_references`.
          */
-        export type SwappableConfig = "email_templates";
+        export type SwappableConfig = "email_templates" | "portal_references";
         export type TariffType = "ht" | "nt";
         export interface TeaserWidget {
             id: string;
@@ -11867,6 +11950,48 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CompleteTemporaryPassword {
+        export interface RequestBody {
+            /**
+             * Organization ID
+             * example:
+             * 123
+             */
+            org_id: string;
+            /**
+             * ID of the portal the user belongs to
+             * example:
+             * 7hj28akg-97fb-4f5c-b2a1-3e4fbc1d8c7a
+             */
+            portal_id: string;
+            /**
+             * Email address of the portal user
+             * example:
+             * user@example.com
+             */
+            email: string;
+            /**
+             * Temporary password from the email
+             */
+            temporary_password: string;
+            /**
+             * New password, must match the portal's password policy
+             */
+            new_password: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * Password set successfully.
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $429 = Components.Responses.TooManyRequests;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -19037,7 +19162,12 @@ declare namespace Paths {
             /**
              * Optional, opt-in configuration items to additionally swap on top of the always-swapped pages and functional config. Defaults to an empty list (nothing extra swapped). Domain and access/security settings can never be swapped.
              */
-            items_to_swap?: /* Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum. */ Components.Schemas.SwappableConfig[];
+            items_to_swap?: /**
+             * Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum.
+             * - `email_templates`: swap the email templates of the two portals.
+             * - `portal_references`: after the swap, re-point configuration in other services from the source portal to the target portal: the portal on journey login (AuthControl) blocks and in file upload portal access, and the portal of automation flow portal triggers. One-directional: references to the target portal are left unchanged, because the target keeps its domain and users. System flows are not changed. Uses the caller's permissions; the outcome is returned in `portal_references`.
+             */
+            Components.Schemas.SwappableConfig[];
         }
         namespace Responses {
             export interface $200 {
@@ -19046,6 +19176,7 @@ declare namespace Paths {
                  * Domain and users swapped successfully.
                  */
                 message?: string;
+                portal_references?: /* Outcome of the `portal_references` swap option. Only present when that option was requested. The swap itself has already succeeded when this is returned, so failures here do not undo it. */ Components.Schemas.SwapPortalReferencesResult;
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
@@ -21469,6 +21600,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUserEntryPoint.Responses.$200>
   /**
+   * completeTemporaryPassword - completeTemporaryPassword
+   * 
+   * Replaces a portal user's temporary password with the password they chose.
+   */
+  'completeTemporaryPassword'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CompleteTemporaryPassword.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CompleteTemporaryPassword.Responses.$200>
+  /**
    * updateCampaignPortalBlockStatus - updateCampaignPortalBlockStatus
    * 
    * Updates the status of a campaign portal block for multiple recipients.
@@ -23645,6 +23786,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUserEntryPoint.Responses.$200>
   }
+  ['/v3/portal/public/user/temporary-password/complete']: {
+    /**
+     * completeTemporaryPassword - completeTemporaryPassword
+     * 
+     * Replaces a portal user's temporary password with the password they chose.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CompleteTemporaryPassword.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CompleteTemporaryPassword.Responses.$200>
+  }
   ['/v2/portal/campaign/{campaign_id}/entity:status']: {
     /**
      * updateCampaignPortalBlockStatus - updateCampaignPortalBlockStatus
@@ -24221,6 +24374,9 @@ export type Source = Components.Schemas.Source;
 export type SupportReportType = Components.Schemas.SupportReportType;
 export type SupportRequestAttachment = Components.Schemas.SupportRequestAttachment;
 export type SupportRequestResult = Components.Schemas.SupportRequestResult;
+export type SwapPortalReferenceGroup = Components.Schemas.SwapPortalReferenceGroup;
+export type SwapPortalReferenceItem = Components.Schemas.SwapPortalReferenceItem;
+export type SwapPortalReferencesResult = Components.Schemas.SwapPortalReferencesResult;
 export type SwappableConfig = Components.Schemas.SwappableConfig;
 export type TariffType = Components.Schemas.TariffType;
 export type TeaserWidget = Components.Schemas.TeaserWidget;

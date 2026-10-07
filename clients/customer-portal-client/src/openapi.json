@@ -10025,6 +10025,86 @@
         }
       }
     },
+    "/v3/portal/public/user/temporary-password/complete": {
+      "post": {
+        "operationId": "completeTemporaryPassword",
+        "summary": "completeTemporaryPassword",
+        "description": "Replaces a portal user's temporary password with the password they chose.",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "org_id",
+                  "portal_id",
+                  "email",
+                  "temporary_password",
+                  "new_password"
+                ],
+                "properties": {
+                  "org_id": {
+                    "type": "string",
+                    "description": "Organization ID",
+                    "example": "123"
+                  },
+                  "portal_id": {
+                    "type": "string",
+                    "description": "ID of the portal the user belongs to",
+                    "example": "7hj28akg-97fb-4f5c-b2a1-3e4fbc1d8c7a"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the portal user",
+                    "example": "user@example.com"
+                  },
+                  "temporary_password": {
+                    "type": "string",
+                    "description": "Temporary password from the email"
+                  },
+                  "new_password": {
+                    "type": "string",
+                    "description": "New password, must match the portal's password policy"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The new password was set.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Password set successfully."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/campaign/{campaign_id}/entity:status": {
       "put": {
         "operationId": "updateCampaignPortalBlockStatus",
@@ -11213,6 +11293,9 @@
                     "message": {
                       "type": "string",
                       "example": "Domain and users swapped successfully."
+                    },
+                    "portal_references": {
+                      "$ref": "#/components/schemas/SwapPortalReferencesResult"
                     }
                   }
                 }
@@ -14216,6 +14299,11 @@
             },
             "example": []
           },
+          "has_portal_user": {
+            "type": "boolean",
+            "description": "Whether the identified contact already has a portal user on this portal, so the caller\ncan skip offering account creation. Present only on a match; omitted when it could not\nbe determined.\n",
+            "example": false
+          },
           "reason": {
             "type": "string",
             "enum": [
@@ -15968,8 +16056,7 @@
                   "type": "string",
                   "enum": [
                     "portal-config",
-                    "portal-block",
-                    "portal-widget"
+                    "portal-block"
                   ]
                 },
                 "resource": {
@@ -20900,15 +20987,23 @@
         "properties": {
           "start_page": {
             "type": "boolean",
-            "description": "Start page feature flag"
+            "deprecated": true,
+            "description": "Retired, not read. A portal shows a start page by having a `dashboard` page."
           },
           "billing": {
             "type": "boolean",
-            "description": "Billing feature flag"
+            "deprecated": true,
+            "description": "Retired, not read. Billing follows the organization's `commodity_billing` setting."
+          },
+          "commodity_billing": {
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Retired, not read. Billing pages and blocks follow the organization's `commodity_billing` setting."
           },
           "change_due_date": {
             "type": "boolean",
-            "description": "Change due date feature flag"
+            "deprecated": true,
+            "description": "Retired, not read."
           },
           "new_design": {
             "type": "boolean",
@@ -20924,6 +21019,15 @@
             "default": 0,
             "readOnly": true,
             "description": "Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled"
+          },
+          "portal_copilot": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable the portal copilot chat for this portal"
+          },
+          "portal_copilot_agent_id": {
+            "type": "string",
+            "description": "ID of the Agent Builder portal agent this portal's copilot chat runs, set by Agent Builder. When unset, or when the agent no longer exists in the portal's organization, the chat runs the default portal copilot."
           }
         }
       },
@@ -21098,6 +21202,24 @@
             "type": "string",
             "description": "The URL to redirect to",
             "example": "https://example.com"
+          },
+          "title": {
+            "type": "string",
+            "description": "Portal name, served as the document title before the app boots",
+            "example": "Kundenportal"
+          },
+          "prevent_indexing": {
+            "type": "boolean",
+            "description": "Whether the served document should carry a `noindex, nofollow` robots meta tag"
+          },
+          "organization_id": {
+            "type": "string",
+            "description": "Organization of the portal, used to preload its design from the served document",
+            "example": "123"
+          },
+          "design_id": {
+            "type": "string",
+            "description": "Design of the portal, used to preload it from the served document"
           }
         }
       },
@@ -21376,9 +21498,82 @@
       },
       "SwappableConfig": {
         "type": "string",
-        "description": "Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum.",
+        "description": "Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum.\n- `email_templates`: swap the email templates of the two portals.\n- `portal_references`: after the swap, re-point configuration in other services from the source portal to the target portal: the portal on journey login (AuthControl) blocks and in file upload portal access, and the portal of automation flow portal triggers. One-directional: references to the target portal are left unchanged, because the target keeps its domain and users. System flows are not changed. Uses the caller's permissions; the outcome is returned in `portal_references`.",
         "enum": [
-          "email_templates"
+          "email_templates",
+          "portal_references"
+        ]
+      },
+      "SwapPortalReferencesResult": {
+        "type": "object",
+        "description": "Outcome of the `portal_references` swap option. Only present when that option was requested. The swap itself has already succeeded when this is returned, so failures here do not undo it.",
+        "properties": {
+          "journeys": {
+            "$ref": "#/components/schemas/SwapPortalReferenceGroup"
+          },
+          "automation_flows": {
+            "$ref": "#/components/schemas/SwapPortalReferenceGroup"
+          }
+        },
+        "required": [
+          "journeys",
+          "automation_flows"
+        ]
+      },
+      "SwapPortalReferenceGroup": {
+        "type": "object",
+        "properties": {
+          "updated": {
+            "type": "array",
+            "description": "Items whose references now point at the target portal.",
+            "items": {
+              "$ref": "#/components/schemas/SwapPortalReferenceItem"
+            }
+          },
+          "failed": {
+            "type": "array",
+            "description": "Items that reference the source portal but could not be updated.",
+            "items": {
+              "$ref": "#/components/schemas/SwapPortalReferenceItem"
+            }
+          },
+          "list_error": {
+            "type": "string",
+            "description": "Set when the items could not be listed, so none of them were checked."
+          }
+        },
+        "required": [
+          "updated",
+          "failed"
+        ]
+      },
+      "SwapPortalReferenceItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Journey id or automation flow id."
+          },
+          "name": {
+            "type": "string"
+          },
+          "paths": {
+            "type": "array",
+            "description": "Where the reference sat in the item.",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "steps[0].uischema.elements[2].options.portalId"
+            ]
+          },
+          "error": {
+            "type": "string",
+            "description": "Why the update failed. Only set on failed items."
+          }
+        },
+        "required": [
+          "id"
         ]
       },
       "PortalUserRegistrationStatus": {
