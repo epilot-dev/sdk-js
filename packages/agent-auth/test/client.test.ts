@@ -88,6 +88,13 @@ describe('AgentAuthClient', () => {
     expect(server.calls).toHaveLength(2);
   });
 
+  it('strips any number of trailing slashes from the issuer', async () => {
+    const server = fakeServer(discoveryRoute);
+    const client = new AgentAuthClient({ baseUrl: `${ISSUER}///`, fetch: server.fetch });
+    await client.discover();
+    expect(server.calls[0].url).toBe(`${ISSUER}/.well-known/agent-configuration`);
+  });
+
   it('resolves relative and absolute endpoints against the issuer', async () => {
     const server = fakeServer(discoveryRoute);
     const client = new AgentAuthClient({ baseUrl: ISSUER, fetch: server.fetch });

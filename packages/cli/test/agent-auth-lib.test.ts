@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -76,7 +76,7 @@ describe('host key storage', () => {
     expect(loadHostKey()).toBeNull();
     const key = ensureHostKey();
     const path = join(tmp.configDir, 'agent-auth', 'host.json');
-    expect(existsSync(path)).toBe(true);
+    // statSync throws when the file is missing
     expect(statSync(path).mode & 0o777).toBe(0o600);
     const stored = JSON.parse(readFileSync(path, 'utf-8'));
     expect(stored).toMatchObject({ thumbprint: key.thumbprint, privateKey: key.privateKey });

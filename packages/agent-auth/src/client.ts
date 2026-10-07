@@ -34,7 +34,12 @@ export interface WaitForApprovalOptions {
   pendingGrantIds?: string[];
 }
 
-const trimSlash = (value: string) => value.replace(/\/+$/, '');
+// A loop instead of /\/+$/, which backtracks quadratically on long runs of '/'.
+const trimSlash = (value: string) => {
+  let end = value.length;
+  while (end > 0 && value[end - 1] === '/') end--;
+  return value.slice(0, end);
+};
 
 const safeJson = (text: string): unknown => {
   try {
