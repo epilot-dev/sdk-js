@@ -23,6 +23,7 @@
     {
       "name": "Drafts"
     },
+    null,
     {
       "name": "message_schema",
       "x-displayName": "Message",
@@ -55,8 +56,21 @@
     "/v1/message/messages": {
       "post": {
         "operationId": "sendMessage",
+        "x-epilot-permissions": [
+          {
+            "action": "message:send"
+          },
+          {
+            "action": "entity:create",
+            "resource": "message"
+          },
+          {
+            "action": "entity:create",
+            "resource": "thread"
+          }
+        ],
         "summary": "sendMessage",
-        "description": "Send an email message",
+        "description": "Send an email message\n\nRequires `message:send` and `entity:create` on `message`; `entity:create` on `thread` only when the\nrequest starts a new thread (a `thread` and no `parent_id`). With `do_not_create_entities=true` only\n`message:send` is required. Checked with the caller's token before the send is queued (403).\n",
         "tags": [
           "Messages"
         ],
@@ -98,6 +112,16 @@
       },
       "put": {
         "operationId": "updateMessage",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          },
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          }
+        ],
         "summary": "updateMessage",
         "description": "Update message metadata",
         "tags": [
@@ -158,6 +182,12 @@
     "/v1/message/messages/{id}": {
       "get": {
         "operationId": "getMessage",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message"
+          }
+        ],
         "summary": "getMessage",
         "description": "Get an email message by id",
         "tags": [
@@ -212,6 +242,16 @@
       },
       "delete": {
         "operationId": "deleteMessage",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message"
+          },
+          {
+            "action": "entity:delete",
+            "resource": "message"
+          }
+        ],
         "summary": "deleteMessage",
         "description": "Immediately and permanently delete a message. This operation cannot be undone.",
         "tags": [
@@ -241,6 +281,12 @@
     "/v1/message/messages/{id}/eml": {
       "get": {
         "operationId": "getMessageEml",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message"
+          }
+        ],
         "summary": "getMessageEml",
         "description": "Download a message as an EML file.\nReturns a 302 redirect to a pre-signed S3 URL where the EML file can be downloaded.\n",
         "tags": [
@@ -282,6 +328,13 @@
     "/v1/message/messages:search": {
       "post": {
         "operationId": "searchMessages",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message",
+            "filter": true
+          }
+        ],
         "summary": "searchMessages",
         "description": "Search Messages",
         "tags": [
@@ -341,6 +394,20 @@
     "/v1/message/messages/{id}/trash": {
       "post": {
         "operationId": "trashMessage",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          }
+        ],
         "summary": "trashMessage",
         "description": "Move a message to the trash",
         "tags": [
@@ -370,6 +437,20 @@
     "/v1/message/messages/{id}/untrash": {
       "post": {
         "operationId": "untrashMessage",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          }
+        ],
         "summary": "untrashMessage",
         "description": "Restore a trashed message",
         "tags": [
@@ -399,6 +480,16 @@
     "/v1/message/messages/{id}/read": {
       "post": {
         "operationId": "markReadMessage",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "markReadMessage",
         "description": "Mark message as read",
         "tags": [
@@ -428,6 +519,16 @@
     "/v2/message/messages/{id}/read": {
       "post": {
         "operationId": "markReadMessageV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "markReadMessageV2",
         "description": "Mark message as read within a scope",
         "tags": [
@@ -467,6 +568,16 @@
     "/v1/message/messages/{id}/unread": {
       "post": {
         "operationId": "markUnreadMessage",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "markUnreadMessage",
         "description": "Mark message as unread",
         "tags": [
@@ -496,6 +607,13 @@
     "/v1/message/messages/unread/{actor}": {
       "get": {
         "operationId": "getUnread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message",
+            "filter": true
+          }
+        ],
         "summary": "getUnread",
         "description": "Get all unread messages by actor",
         "tags": [
@@ -584,6 +702,13 @@
     "/v1/message/unread:counts": {
       "post": {
         "operationId": "getUnreadCounts",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message",
+            "filter": true
+          }
+        ],
         "summary": "getUnreadCounts",
         "description": "Unread counts for several named scopes in one request.\n\nA scope is a name plus the same parameters the thread list already takes (`q`, `inbox_id`),\nso a scope's count and the list beneath it are the same predicate and agree by construction.\nThe server adds only the read-state condition; it does not re-author the caller's view.\n\nThe `organization` scope is the exception and takes no `q`: it reuses the four canonical\ncentral-inbox queries, so its numbers match `getUnread` exactly.\n\nWhich buckets come back varies by scope type and actor. Every scope other than `organization`\nreturns `unread` alone. An `organization` scope returns all four (`unread`, `drafts`,\n`unassigned`, `spam`) for `actor: organization`, and `unread` and `drafts` only for\n`actor: user`. `getUnread` returns all four for both actors; this endpoint omits the two that\nno per-user surface renders, since each costs an aggregation.\n\nGated on the `message-unread-counts` flag, evaluated once per request against the calling\norg. With the flag off the response is `{ \"enabled\": false, \"counts\": {} }` and no\nElasticsearch query is issued.\n",
         "tags": [
@@ -622,6 +747,16 @@
     "/v2/message/messages/{id}/unread": {
       "post": {
         "operationId": "markUnreadMessageV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "markUnreadMessageV2",
         "description": "Mark message as unread within a scope",
         "tags": [
@@ -661,6 +796,18 @@
     "/v1/message/threads:search": {
       "post": {
         "operationId": "searchThreads",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message",
+            "filter": true
+          },
+          {
+            "action": "entity:view",
+            "resource": "thread",
+            "filter": true
+          }
+        ],
         "summary": "searchThreads",
         "description": "Search for threads of email messages.\n\nMessages with no replies yet are treated as threads with single message.\n\nLucene syntax supported.\n",
         "tags": [
@@ -720,6 +867,18 @@
     "/v2/message/threads:search": {
       "post": {
         "operationId": "searchThreadsV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message",
+            "filter": true
+          },
+          {
+            "action": "entity:view",
+            "resource": "thread",
+            "filter": true
+          }
+        ],
         "summary": "searchThreadsV2",
         "description": "Search for threads of email messages.\n\nMessages with no replies yet are treated as threads with single message.\n\nLucene syntax supported.\n",
         "tags": [
@@ -779,6 +938,18 @@
     "/v1/message/threads:searchIds": {
       "post": {
         "operationId": "searchIds",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message",
+            "filter": true
+          },
+          {
+            "action": "entity:view",
+            "resource": "thread",
+            "filter": true
+          }
+        ],
         "summary": "Search threads and return all id's",
         "description": "Return all thread id's that match a criteria\n\nLucene syntax supported.\n",
         "tags": [
@@ -831,8 +1002,15 @@
     "/v2/message/threads:workload": {
       "post": {
         "operationId": "getAssigneeWorkload",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message",
+            "filter": true
+          }
+        ],
         "summary": "getAssigneeWorkload",
-        "description": "Return the open-thread workload for a set of user ids.\n\nFor each requested user id, returns the number of *open* threads assigned\ndirectly to that user \u2014 matching what the user sees in their central-inbox\nopen view: in inbox, not trashed, not done, and excluding notification-only\nand spam threads.\n\nOnly threads assigned directly to a user are counted; threads assigned to a\ngroup the user belongs to are not. Intended for assignment load-balancing\n(e.g. even-distribution automations) that need a consistent, inbox-aligned\nworkload per user.\n",
+        "description": "Return the open-thread workload for a set of user ids.\n\nFor each requested user id, returns the number of *open* threads assigned\ndirectly to that user — matching what the user sees in their central-inbox\nopen view: in inbox, not trashed, not done, and excluding notification-only\nand spam threads.\n\nOnly threads assigned directly to a user are counted; threads assigned to a\ngroup the user belongs to are not. Intended for assignment load-balancing\n(e.g. even-distribution automations) that need a consistent, inbox-aligned\nworkload per user.\n",
         "tags": [
           "Threads"
         ],
@@ -866,6 +1044,16 @@
     "/v1/message/threads": {
       "put": {
         "operationId": "updateThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "updateThread",
         "description": "Modify thread metadata",
         "tags": [
@@ -898,6 +1086,20 @@
     "/v1/message/threads/{id}": {
       "delete": {
         "operationId": "deleteThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:delete",
+            "resource": "message"
+          },
+          {
+            "action": "entity:delete",
+            "resource": "thread"
+          }
+        ],
         "summary": "deleteThread",
         "description": "Immediately and permanently delete a thread. This operation cannot be undone.",
         "tags": [
@@ -927,6 +1129,20 @@
     "/v1/message/threads/{id}:move": {
       "post": {
         "operationId": "moveThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "moveThread",
         "description": "Move thread to a different Inbox",
         "tags": [
@@ -978,6 +1194,20 @@
     "/v1/message/threads/{id}:markAsDone": {
       "post": {
         "operationId": "markThreadAsDone",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "markThreadAsDone",
         "description": "Mark thread as done",
         "tags": [
@@ -1007,6 +1237,20 @@
     "/v1/message/threads/{id}:markAsOpen": {
       "post": {
         "operationId": "markThreadAsOpen",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "markThreadAsOpen",
         "description": "Mark thread as open",
         "tags": [
@@ -1036,6 +1280,12 @@
     "/v1/message/threads/{id}/timeline": {
       "get": {
         "operationId": "getThreadTimeline",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          }
+        ],
         "summary": "getThreadTimeline",
         "description": "Get thread timeline",
         "tags": [
@@ -1072,6 +1322,20 @@
     "/v1/message/threads/{id}/trash": {
       "post": {
         "operationId": "trashThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "trashThread",
         "description": "Move a thread to trash",
         "tags": [
@@ -1101,6 +1365,20 @@
     "/v1/message/threads/{id}/untrash": {
       "post": {
         "operationId": "untrashThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "untrashThread",
         "description": "Restore a trashed thread",
         "tags": [
@@ -1130,6 +1408,20 @@
     "/v1/message/threads/{id}/spam": {
       "post": {
         "operationId": "spamThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "spamThread",
         "description": "Mark a thread as spam",
         "tags": [
@@ -1162,6 +1454,20 @@
     "/v1/message/threads/{id}/unspam": {
       "post": {
         "operationId": "unspamThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "unspamThread",
         "description": "Remove spam marking from a thread",
         "tags": [
@@ -1194,6 +1500,24 @@
     "/v1/message/messages/{id}/spam": {
       "post": {
         "operationId": "spamMessage",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          },
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          }
+        ],
         "summary": "spamMessage",
         "description": "Mark a single message as spam. Also marks the parent thread as spam if all messages in the thread are spam.",
         "tags": [
@@ -1226,6 +1550,24 @@
     "/v1/message/messages/{id}/unspam": {
       "post": {
         "operationId": "unspamMessage",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          },
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          }
+        ],
         "summary": "unspamMessage",
         "description": "Remove spam marking from a single message. Also removes spam from the parent thread if no other messages are spam.",
         "tags": [
@@ -1258,6 +1600,20 @@
     "/v1/message/threads/bulk:move": {
       "post": {
         "operationId": "bulkMoveThreads",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "bulkMoveThreads",
         "description": "Move many threads to a different inbox",
         "tags": [
@@ -1286,6 +1642,20 @@
     "/v1/message/threads/bulk:assign": {
       "post": {
         "operationId": "bulkAssignThreads",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "bulkAssignThreads",
         "description": "Assign many threads",
         "tags": [
@@ -1314,6 +1684,16 @@
     "/v1/message/threads/bulk:read": {
       "post": {
         "operationId": "threadBulkActionsRead",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          }
+        ],
         "summary": "threadBulkActionsRead",
         "description": "Perform a bulk action of marking an array of thread ids as read",
         "tags": [
@@ -1342,6 +1722,16 @@
     "/v1/message/threads/bulk:unread": {
       "post": {
         "operationId": "threadBulkActionsUnread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          }
+        ],
         "summary": "threadBulkActionsUnread",
         "description": "Perform a bulk action of marking an array of thread ids as unread",
         "tags": [
@@ -1370,6 +1760,20 @@
     "/v1/message/threads/bulk:favorite": {
       "post": {
         "operationId": "threadBulkActionsFavorite",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "threadBulkActionsFavorite",
         "description": "Perform a bulk action of marking an array of thread ids favorite",
         "tags": [
@@ -1398,6 +1802,20 @@
     "/v1/message/threads/bulk:unfavorite": {
       "post": {
         "operationId": "threadBulkActionsUnfavorite",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "threadBulkActionsUnfavorite",
         "description": "Perform a bulk action of marking an array of thread ids unfavorited",
         "tags": [
@@ -1426,6 +1844,20 @@
     "/v1/message/threads/bulk:trash": {
       "post": {
         "operationId": "threadBulkActionsTrash",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "threadBulkActionsTrash",
         "description": "Perform a bulk action of trashing an array of threads",
         "tags": [
@@ -1454,6 +1886,20 @@
     "/v1/message/threads/bulk:untrash": {
       "post": {
         "operationId": "threadBulkActionsUntrash",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "threadBulkActionsUntrash",
         "description": "Perform a bulk action of untrashing an array of threads",
         "tags": [
@@ -1482,6 +1928,20 @@
     "/v1/message/threads/bulk:delete": {
       "post": {
         "operationId": "threadBulkActionsDelete",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:delete",
+            "resource": "message"
+          },
+          {
+            "action": "entity:delete",
+            "resource": "thread"
+          }
+        ],
         "summary": "threadBulkActionsDelete",
         "description": "Performs a bulk permanent delete for all threads",
         "tags": [
@@ -1510,6 +1970,20 @@
     "/v1/message/threads/bulk:done": {
       "post": {
         "operationId": "threadBulkActionsDone",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "threadBulkActionsDone",
         "description": "Perform a bulk action of marking an array of threads as done",
         "tags": [
@@ -1538,6 +2012,20 @@
     "/v1/message/threads/bulk:open": {
       "post": {
         "operationId": "threadBulkActionsOpen",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "threadBulkActionsOpen",
         "description": "Perform a bulk action of marking an array of threads as open",
         "tags": [
@@ -1566,6 +2054,16 @@
     "/v1/message/threads/{id}/read": {
       "post": {
         "operationId": "markReadThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          }
+        ],
         "summary": "markReadThread",
         "description": "Mark thread as read",
         "tags": [
@@ -1595,6 +2093,16 @@
     "/v2/message/threads/{id}/read": {
       "post": {
         "operationId": "markReadThreadV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          }
+        ],
         "summary": "markReadThreadV2",
         "description": "Mark thread as read within a scope",
         "tags": [
@@ -1634,6 +2142,16 @@
     "/v1/message/threads/{id}/unread": {
       "post": {
         "operationId": "markUnreadThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          }
+        ],
         "summary": "markUnreadThread",
         "description": "Mark thread as unread",
         "tags": [
@@ -1663,6 +2181,16 @@
     "/v2/message/threads/{id}/unread": {
       "post": {
         "operationId": "markUnreadThreadV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          }
+        ],
         "summary": "markUnreadThreadV2",
         "description": "Mark thread as unread within a scope",
         "tags": [
@@ -1702,6 +2230,20 @@
     "/v1/message/threads/{id}/assign": {
       "post": {
         "operationId": "assignThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "assignThread",
         "description": "Assign thread to entities",
         "tags": [
@@ -1764,9 +2306,107 @@
         }
       }
     },
+    "/v1/message/threads/{id}/link-suggestions/dismiss": {
+      "post": {
+        "operationId": "dismissThreadLinkSuggestions",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
+        "summary": "dismissThreadLinkSuggestions",
+        "description": "Dismiss pending entity-link suggestions on a thread. A suggestion is recorded on a message when an identifier in it matched entities of different customers, so nothing was linked automatically. A dismissed suggestion is not suggested again for the thread. To accept a suggestion, link one of its candidates with assignThread.",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "suggestion_ids": {
+                    "description": "Suggestions to dismiss. Omit to dismiss every pending suggestion on the thread.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "dismissed"
+                  ],
+                  "properties": {
+                    "dismissed": {
+                      "description": "IDs of the suggestions that were dismissed",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Thread not found"
+          }
+        }
+      }
+    },
     "/v1/message/threads/{id}/unassign": {
       "post": {
         "operationId": "unassignThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "unassignThread",
         "description": "Unassign thread from entities",
         "tags": [
@@ -1832,6 +2472,20 @@
     "/v1/message/threads/{id}/assign:users": {
       "post": {
         "operationId": "assignUsers",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "assignUsers",
         "description": "Assign users to thread for receiving notifications.\nThe operation replaces all existing assigned users in thread.\n",
         "tags": [
@@ -1882,6 +2536,20 @@
     "/v2/message/threads/{id}/assign:users": {
       "post": {
         "operationId": "assignUsersV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "assignUsersV2",
         "description": "Assign users to thread.\n",
         "tags": [
@@ -1943,6 +2611,20 @@
     "/v1/message/threads/{id}:pin": {
       "post": {
         "operationId": "pinThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "Pin a single thread",
         "description": "Pin a single thread",
         "tags": [
@@ -1979,6 +2661,20 @@
       },
       "delete": {
         "operationId": "unpinThread",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "Unpin a single thread",
         "description": "Unpin a single thread",
         "tags": [
@@ -2017,8 +2713,14 @@
     "/v1/message/drafts": {
       "post": {
         "operationId": "createDraft",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:create",
+            "resource": "message"
+          }
+        ],
         "summary": "createDraft",
-        "description": "Create a new draft",
+        "description": "Create a new draft\n\nRequires `entity:create` on `message`, checked with the caller's token before anything is created (403).\n",
         "tags": [
           "Drafts"
         ],
@@ -2058,8 +2760,21 @@
     "/v1/message/drafts:send": {
       "post": {
         "operationId": "sendDraft",
+        "x-epilot-permissions": [
+          {
+            "action": "message:send"
+          },
+          {
+            "action": "entity:create",
+            "resource": "message"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
         "summary": "sendDraft",
-        "description": "Send the existing draft to the recipients",
+        "description": "Send the existing draft to the recipients.\n\nRequires `message:send`, `entity:create` on `message` and `entity:edit` on the draft, checked with the\ncaller's token (403). The id must be a DRAFT of the given thread (409).\n",
         "tags": [
           "Drafts"
         ],
@@ -2082,7 +2797,10 @@
             }
           },
           "403": {
-            "description": "Forbidden"
+            "description": "Forbidden – the caller is not the draft's author and cannot view the draft"
+          },
+          "409": {
+            "description": "The message is not a draft of the given thread (e.g. already sent)"
           }
         }
       }
@@ -2090,6 +2808,12 @@
     "/v2/message/messages/{id}": {
       "get": {
         "operationId": "getMessageV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "message"
+          }
+        ],
         "summary": "getMessageV2",
         "description": "- Fetches message by ID\n- If the message html is omitted on the entity, then it keeps the content on the message as a signed url\n  {\n    ...\n    _id: \"4d74976d-fb64-47fd-85e2-65eea140f5eb\",\n    _schema: \"message\",\n    _org: \"org-123\",\n    html_omitted: true,\n    html_download_url: \"https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html\"\n  }\n",
         "tags": [
@@ -2465,6 +3189,13 @@
           }
         ],
         "properties": {
+          "link_suggestions": {
+            "type": "array",
+            "description": "Entity-link suggestions recorded when the message arrived: identifiers that matched entities of different customers, so none was linked automatically.",
+            "items": {
+              "$ref": "#/components/schemas/LinkSuggestion"
+            }
+          },
           "html_omitted": {
             "type": "boolean",
             "description": "If true then html is not provided and must be downloaded using the html_download_url",
@@ -2594,7 +3325,7 @@
           },
           "mark_thread_as_read": {
             "type": "boolean",
-            "description": "Whether to mark the thread as read by the sender's org/user after sending a reply.\nOnly applies when `parent_id` is set. When false, the thread's `org_read_message` and\n`user_read_message` arrays are left unchanged, so the thread remains unread for anyone\nwho had it unread before. Defaults to true for backward compatibility.\n",
+            "description": "When true (default), replying marks the whole thread read for the sender: every message on the\nthread is marked read, so the thread is read without leaving any message unread under it. When\nfalse, no message is marked and the thread's read-state reflects its messages — a message still\nunread keeps the thread unread (e.g. an automated reply-in-thread stays unread for a human to\npick up). Only applies to replies (`parent_id` set); a new thread always reflects its single\nmessage. Defaults to true.\n",
             "default": true
           },
           "thread": {
@@ -2825,7 +3556,7 @@
               "shared_inbox",
               "saved_view"
             ],
-            "description": "Decides which buckets come back, and whether `q` is required. `organization` returns all\nfour buckets from the canonical central-inbox queries and takes no `q`. `shared_inbox`\nand `saved_view` return `unread` alone. A `saved_view` scope names its view with `view_id`;\na `shared_inbox` scope needs only its `inbox_id`, since the query follows from the type.\n\nA `shared_inbox` scope additionally requires `actor: organization` and is refused with a\n400 otherwise. A shared inbox is an organization-level construct \u2014 selecting one always\nswitches the mailbox to the organization \u2014 so it has no per-user read state and the\ncombination would compute a number no surface renders. `saved_view` accepts either actor,\nbecause a view's own configuration names its mailbox.\n"
+            "description": "Decides which buckets come back, and whether `q` is required. `organization` returns all\nfour buckets from the canonical central-inbox queries and takes no `q`. `shared_inbox`\nand `saved_view` return `unread` alone. A `saved_view` scope names its view with `view_id`;\na `shared_inbox` scope needs only its `inbox_id`, since the query follows from the type.\n\nA `shared_inbox` scope additionally requires `actor: organization` and is refused with a\n400 otherwise. A shared inbox is an organization-level construct — selecting one always\nswitches the mailbox to the organization — so it has no per-user read state and the\ncombination would compute a number no surface renders. `saved_view` accepts either actor,\nbecause a view's own configuration names its mailbox.\n"
           },
           "q": {
             "type": "string",
@@ -2867,14 +3598,14 @@
               "organization",
               "user"
             ],
-            "description": "Which read state to count against \u2014 the org's or the calling user's. Same meaning as\n`getUnread`'s path parameter, and unrelated to a scope's `type`.\n"
+            "description": "Which read state to count against — the org's or the calling user's. Same meaning as\n`getUnread`'s path parameter, and unrelated to a scope's `type`.\n"
           },
           "email_filter": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "description": "Restrict every scope to messages involving these addresses."
+            "description": "The addresses selected in the address filter, applied to the `organization` scope only.\n\nNot a request-level restriction, despite arriving at request level. A `shared_inbox`\nscope's own list applies no address filter at all, because scoping to an inbox is what\nswitches it off, and a `saved_view` ignores the address lens entirely. Applying this to\neither would make the badge answer a narrower question than the list beneath it.\n"
           },
           "user_groups": {
             "type": "array",
@@ -3175,6 +3906,184 @@
           "user"
         ]
       },
+      "ThreadReplyContext": {
+        "type": "object",
+        "required": [
+          "thread_id",
+          "messages",
+          "related_entities"
+        ],
+        "properties": {
+          "thread_id": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "reply_to_message_id": {
+            "type": "string",
+            "description": "ID of the latest received message, i.e. the one a reply would answer. Absent if none."
+          },
+          "messages": {
+            "type": "array",
+            "description": "Conversation oldest first, cleaned for prompting",
+            "items": {
+              "$ref": "#/components/schemas/ReplyContextMessage"
+            }
+          },
+          "related_entities": {
+            "type": "array",
+            "description": "Entities linked to the conversation (recipients, message relations), not hydrated",
+            "items": {
+              "$ref": "#/components/schemas/ReplyContextEntityRef"
+            }
+          }
+        }
+      },
+      "ReplyContextMessage": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "role",
+          "text"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "RECEIVED",
+              "SENT"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "description": "Who wrote the message from the organization's point of view",
+            "enum": [
+              "customer",
+              "agent",
+              "partner"
+            ]
+          },
+          "subject": {
+            "type": "string"
+          },
+          "from": {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "text": {
+            "type": "string",
+            "description": "Plain text body with quotes, forwarded content, reply headers and links removed"
+          }
+        }
+      },
+      "ReplyContextEntityRef": {
+        "type": "object",
+        "required": [
+          "_id",
+          "_schema"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "_schema": {
+            "type": "string"
+          }
+        }
+      },
+      "SimilarSentMessagesRequest": {
+        "type": "object",
+        "required": [
+          "queries"
+        ],
+        "properties": {
+          "queries": {
+            "type": "array",
+            "description": "Texts to search with. Results are merged across queries, best score per message wins.",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of messages to return",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 3
+          },
+          "min_score": {
+            "type": "number",
+            "description": "Minimum similarity (0-1, cosine certainty) a message must reach to be returned",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.6
+          }
+        }
+      },
+      "SimilarSentMessagesResponse": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SimilarSentMessage"
+            }
+          }
+        }
+      },
+      "SimilarSentMessage": {
+        "type": "object",
+        "required": [
+          "message_id",
+          "text",
+          "score"
+        ],
+        "properties": {
+          "message_id": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string",
+            "description": "Anonymized plain text of the sent message"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "description": "Similarity in 0-1, higher is more similar"
+          }
+        }
+      },
       "ThreadTimeline": {
         "type": "object",
         "required": [
@@ -3310,7 +4219,7 @@
           },
           "label_name": {
             "type": "string",
-            "description": "Resolved taxonomy classification display name (e.g. `Ver\u00e4rgert`), when the label is a classification. Absent for free-form tags."
+            "description": "Resolved taxonomy classification display name (e.g. `Verärgert`), when the label is a classification. Absent for free-form tags."
           }
         }
       },
@@ -3333,7 +4242,7 @@
           },
           "label_name": {
             "type": "string",
-            "description": "Resolved taxonomy classification display name (e.g. `Ver\u00e4rgert`), when the label is a classification. Absent for free-form tags."
+            "description": "Resolved taxonomy classification display name (e.g. `Verärgert`), when the label is a classification. Absent for free-form tags."
           }
         }
       },
@@ -3361,6 +4270,10 @@
               "manual",
               "auto"
             ]
+          },
+          "from_suggestion": {
+            "type": "boolean",
+            "description": "The link accepted a pending entity-link suggestion"
           }
         }
       },
@@ -3463,6 +4376,149 @@
           }
         }
       },
+      "LinkSuggestionCandidate": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "schema"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema slug, e.g. \"contract\""
+          },
+          "attribute": {
+            "type": "string",
+            "description": "The identifier attribute that matched, e.g. \"contract_number\""
+          },
+          "attribute_value": {
+            "type": "string",
+            "description": "The stored value that matched"
+          },
+          "title": {
+            "type": "string",
+            "description": "Entity title when the suggestion was recorded"
+          }
+        }
+      },
+      "LinkSuggestion": {
+        "type": "object",
+        "required": [
+          "id",
+          "identifier",
+          "status",
+          "candidates"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable id of the suggestion (identifier + candidate set), shared across a thread's messages"
+          },
+          "identifier": {
+            "type": "string",
+            "description": "The identifier found in the message, as written there"
+          },
+          "found_in": {
+            "type": "string",
+            "description": "Where the identifier was found, e.g. \"subject\" or \"text\""
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "dismissed"
+            ]
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinkSuggestionCandidate"
+            }
+          },
+          "accepted_entity_ids": {
+            "type": "array",
+            "description": "Candidates that were linked when the suggestion was accepted",
+            "items": {
+              "type": "string"
+            }
+          },
+          "resolved_by": {
+            "$ref": "#/components/schemas/TimelineActor"
+          },
+          "resolved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TimelineLinkSuggestion": {
+        "type": "object",
+        "required": [
+          "identifier"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineLinkedEntity"
+            }
+          }
+        }
+      },
+      "MessageEntityLinkSuggestedEvent": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MESSAGE_ENTITY_LINK_SUGGESTED"
+            ]
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineLinkSuggestion"
+            }
+          }
+        }
+      },
+      "MessageEntityLinkSuggestionDismissedEvent": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MESSAGE_ENTITY_LINK_SUGGESTION_DISMISSED"
+            ]
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineLinkSuggestion"
+            }
+          }
+        }
+      },
       "TimelineLinkedEntity": {
         "type": "object",
         "required": [
@@ -3520,6 +4576,12 @@
             "$ref": "#/components/schemas/MessageEntityUnlinkedEvent"
           },
           {
+            "$ref": "#/components/schemas/MessageEntityLinkSuggestedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/MessageEntityLinkSuggestionDismissedEvent"
+          },
+          {
             "$ref": "#/components/schemas/MessageAutoReplySentEvent"
           },
           {
@@ -3550,7 +4612,7 @@
           "timestamp": {
             "type": "string",
             "description": "Timestamp of the event",
-            "example": "2024-01-01T00:00:00.000Z"
+            "example": "2024-01-01T00:00:00Z"
           },
           "message_id": {
             "type": "string",
