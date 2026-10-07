@@ -124,6 +124,15 @@ function printRootHelp() {
   w(`  ${CYAN}completion${R}              Generate shell completion scripts\n`);
   w(`  ${CYAN}upgrade${R}                 Upgrade to the latest version\n`);
   w(`\n`);
+  w(`${BOLD}AGENT MODE${R} ${DIM}(optional)${R}\n`);
+  w(
+    `  ${CYAN}auth login --agent${R}      Register this CLI as an Agent Auth agent ${DIM}(org switching, silent token refresh, scoped access profiles)${R}\n`,
+  );
+  w(`  ${CYAN}org list${R}                List your organizations and this CLI's access\n`);
+  w(`  ${CYAN}org use${R} <id>            Switch the active organization\n`);
+  w(`  ${CYAN}org request${R} <id>        Request access ${DIM}(--access <profile> --reason "…")${R}\n`);
+  w(`  ${CYAN}org current${R}             Show the active organization\n`);
+  w(`\n`);
   w(`${BOLD}APIs${R}\n`);
 
   // Print APIs in columns
@@ -143,6 +152,8 @@ function printRootHelp() {
   w(`  ${YELLOW}$${R} echo '{"q":"*"}' | epilot entity searchEntities\n`);
   w(`  ${YELLOW}$${R} epilot entity searchEntities --use-dev ${DIM}# target dev environment${R}\n`);
   w(`  ${YELLOW}$${R} epilot config set stage dev ${DIM}# persist dev as default${R}\n`);
+  w(`  ${YELLOW}$${R} epilot auth login --agent --org 739224 ${DIM}# agent mode (optional)${R}\n`);
+  w(`  ${YELLOW}$${R} epilot org request 739224 --access config:write --reason "Fix the PV journey mapping"\n`);
   w(`\n`);
   w(`Run ${CYAN}epilot <api>${R} to list available operations.\n`);
   w(`Run ${CYAN}epilot <api> <operationId> --help${R} for operation details.\n`);

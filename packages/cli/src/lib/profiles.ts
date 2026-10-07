@@ -15,6 +15,8 @@ export type Profile = {
   user_id?: string;
   /** Token expiry */
   expires_at?: string;
+  /** Access profile the token was issued with (Agent Auth logins only, e.g. "read", "config:write") */
+  access_profile?: string;
   /** Custom headers */
   headers?: Record<string, string>;
 };
@@ -28,7 +30,8 @@ export type ProfileConfig = {
   stage?: string;
 };
 
-const getConfigDir = (): string => {
+/** CLI config directory: `$XDG_CONFIG_HOME/epilot` or `~/.config/epilot`. */
+export const getConfigDir = (): string => {
   const xdgConfig = process.env.XDG_CONFIG_HOME;
   const base = xdgConfig || join(homedir(), '.config');
   return join(base, 'epilot');
