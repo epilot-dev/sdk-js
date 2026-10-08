@@ -8,9 +8,27 @@ import type { ApiEntry, SDKState } from './types';
 
 export const createRegistry = () => new Map<string, ApiEntry>();
 
+/**
+ * Loads the definition once and returns the same object on every later call.
+ *
+ * Every client of an API must share one definition object: expanding it is costly,
+ * and openapi-client-axios caches the dereferenced definition per definition object,
+ * so a new object per client means a new expand + deep clone + dereference each time
+ * (and, with dereference-json-schema < 0.2.3, a cache entry that is never freed).
+ */
+export const memoizeLoader = (loader: () => Document): (() => Document) => {
+  let definition: Document | null = null;
+
+  return () => {
+    definition ??= loader();
+
+    return definition;
+  };
+};
+
 export const registerApi = (params: { registry: Map<string, ApiEntry>; name: string; loader: () => Document }) => {
   const { registry, name, loader } = params;
-  registry.set(name, { loader, instance: null });
+  registry.set(name, { loader: memoizeLoader(loader), instance: null });
 };
 
 export const resolveClient = (params: {
