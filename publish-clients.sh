@@ -37,6 +37,7 @@ CLIENTS=(
   "organization-client"
   "partner-directory-client"
   "permissions-client"
+  "phone-integration-client"
   "pricing-client"
   "pricing-tier-client"
   "sandbox-client"

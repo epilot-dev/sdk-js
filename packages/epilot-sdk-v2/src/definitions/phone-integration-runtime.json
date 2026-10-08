@@ -1,0 +1,1 @@
+{"s":"https://phone-integration-api.sls.epilot.io","o":[["batchSearchCustomers","get","/v1/customer:batchSearch",[["id","q",false,"form",true],["customer_number","q",false,"form",true],["external_id","q",false,"form",true],["phone_number","q",false,"form",true],["email","q",false,"form",true],["x-trace-id","h"]]]],"v":"3.0.3"}

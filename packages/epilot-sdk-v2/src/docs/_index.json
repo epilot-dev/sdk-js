@@ -38,6 +38,7 @@
   "organization": "organization",
   "partnerDirectory": "partner-directory",
   "permissions": "permissions",
+  "phoneIntegration": "phone-integration",
   "pricing": "pricing",
   "pricingTier": "pricing-tier",
   "purpose": "purpose",

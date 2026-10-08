@@ -1,0 +1,315 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Phone Integration API",
+    "description": "Connects epilot to phone systems. Resolves the epilot customers (Contacts)\nbehind phone numbers and other contact identifiers, many at once, so the\nepilot 360 phone can show callers and call history by name.\n",
+    "version": "0.1.0"
+  },
+  "tags": [
+    {
+      "name": "phone-integration",
+      "description": "Phone Integration"
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://phone-integration-api.sls.epilot.io"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/customer:batchSearch": {
+      "get": {
+        "operationId": "batchSearchCustomers",
+        "summary": "batchSearchCustomers",
+        "description": "Resolves up to 50 identifiers to epilot customers (Contacts) in one\nrequest — for example every number in an agent's call history.\n\nEach identifier is an exact key of a Contact: its entity `id`, its\n`customer_number`, its `external_id`, one of its `email` addresses or\none of its `phone` numbers. Repeat a parameter to pass several values,\nand combine parameters freely. Phone numbers are normalized on the\nserver, so E.164, national and formatted forms of one number match the\nsame contact; the other identifiers match exactly, ignoring case and\nsurrounding whitespace.\n\nEvery distinct identifier gets its own result, so one unknown or\nambiguous identifier never fails the others. Results are ordered by\nparameter (`id`, `customer_number`, `external_id`, `phone_number`,\n`email`), then as sent; match them by `identifier`.\n\nThe search runs with the caller's token: the organization and the\npermissions applied are the caller's own, as for entity search.\n",
+        "tags": [
+          "phone-integration"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "description": "Contact entity id",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "dba8e5f9-8b3f-4608-b887-cd0798fce624"
+            ]
+          },
+          {
+            "name": "customer_number",
+            "in": "query",
+            "required": false,
+            "description": "Contact customer number",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "4711"
+            ]
+          },
+          {
+            "name": "external_id",
+            "in": "query",
+            "required": false,
+            "description": "Contact external id, as set by an integration",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "crm-000123"
+            ]
+          },
+          {
+            "name": "phone_number",
+            "in": "query",
+            "required": false,
+            "description": "Phone number in E.164 (+4917…), national (017…) or a formatted form",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "+4917012345678",
+              "030 1234567"
+            ]
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "description": "Email address",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "max.mustermann@example.com"
+            ]
+          },
+          {
+            "name": "x-trace-id",
+            "in": "header",
+            "required": false,
+            "description": "Correlation id; echoed on the response",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One result per distinct identifier",
+            "headers": {
+              "x-trace-id": {
+                "description": "Correlation id (echoed if supplied, otherwise generated)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerBatchSearchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No identifier, more than 50, or a blank one",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, or downstream-rejected epilot bearer token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not permitted to search Contacts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "CustomerBatchSearchResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "description": "One result per distinct identifier",
+            "items": {
+              "$ref": "#/components/schemas/CustomerSearchResult"
+            }
+          }
+        }
+      },
+      "CustomerSearchResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "identifier",
+          "status"
+        ],
+        "properties": {
+          "identifier": {
+            "$ref": "#/components/schemas/CustomerIdentifier"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "found",
+              "not_found",
+              "ambiguous",
+              "invalid",
+              "error"
+            ],
+            "description": "- `found` — exactly one contact has the identifier; see `customer`\n- `not_found` — no contact the caller may see has it\n- `ambiguous` — several contacts share it; none is chosen\n- `invalid` — not a usable identifier (a phone number that does\n  not parse), so nothing was searched\n- `error` — the search for this identifier failed; try again\n"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/CustomerSummary"
+          }
+        }
+      },
+      "CustomerIdentifier": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "value"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "id",
+              "customer_number",
+              "external_id",
+              "phone_number",
+              "email"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "description": "The identifier as sent",
+            "example": "+4917012345678"
+          }
+        }
+      },
+      "CustomerSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Present when `status` is `found`",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "epilot entity id of the customer (Contact)",
+            "example": "dba8e5f9-8b3f-4608-b887-cd0798fce624"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "The contact's title, else its first and last name; null when it has neither",
+            "example": "Max Mustermann"
+          },
+          "customer_number": {
+            "type": "string",
+            "description": "Omitted when the contact has none",
+            "example": "4711"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "error"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code."
+          },
+          "error": {
+            "type": "string",
+            "description": "Human-readable error message."
+          },
+          "code": {
+            "type": "string",
+            "description": "Stable machine-readable error code, when the operation defines one."
+          }
+        }
+      }
+    }
+  }
+}

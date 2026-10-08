@@ -1,0 +1,63 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://phone-integration-api.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/customer:batchSearch": {
+      "get": {
+        "operationId": "batchSearchCustomers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "customer_number",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "external_id",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "phone_number",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "x-trace-id",
+            "in": "header",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}
