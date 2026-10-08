@@ -1,6 +1,6 @@
 import type { Document } from 'openapi-client-axios';
 
-import { registerApi } from './registry';
+import { memoizeLoader, registerApi } from './registry';
 import type { ApiEntry, OverridesConfig } from './types';
 
 const OVERRIDES_PATH = '.epilot/sdk-overrides.json';
@@ -67,7 +67,7 @@ export const loadOverrides = (registry: Map<string, ApiEntry>, cwd?: string) => 
 
       const existing = registry.get(name);
       if (existing) {
-        existing.loader = loader;
+        existing.loader = memoizeLoader(loader);
         existing.instance = null;
       } else {
         registerApi({ registry, name, loader });
