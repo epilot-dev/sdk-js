@@ -63,6 +63,8 @@ const { data } = await validationRulesClient.getValidationRules(...)
 - [`ContextValue`](#contextvalue)
 - [`ValueAdjustment`](#valueadjustment)
 - [`RelativeDateValue`](#relativedatevalue)
+- [`BillingCycleAnchor`](#billingcycleanchor)
+- [`AnchorScalar`](#anchorscalar)
 - [`RangeValue`](#rangevalue)
 - [`NoValue`](#novalue)
 - [`DocumentRuleType`](#documentruletype)
@@ -1777,7 +1779,13 @@ type Condition = {
     source: "relative_date"
     offset: number
     unit: "days" | "months" | "years"
-    anchor?: "today"
+    anchor?: "today" | {
+      type: { ... }
+      day: { ... }
+      interval: { ... }
+      cycle_start?: { ... }
+      occurrence?: { ... }
+    }
   } | {
     source: "environment"
     key: string
@@ -1852,12 +1860,6 @@ type Condition = {
   error_message: string
   applies_when?: {
     path: string
-    operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "isEmpty" | "isNotEmpty"
-    value?: number | string | boolean | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    }
   // ...
 }
 ```
@@ -1902,7 +1904,64 @@ type ConditionValue = {
   source: "relative_date"
   offset: number
   unit: "days" | "months" | "years"
-  anchor?: "today"
+  anchor?: "today" | {
+    type: "billing_cycle"
+    day: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    interval: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    cycle_start?: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    occurrence?: "current" | "next" | "previous"
+  }
 } | {
   source: "environment"
   key: string
@@ -1921,63 +1980,6 @@ type ConditionValue = {
     rounding?: "up" | "down"
   }
 } | {
-  source: "external"
-  app_id: string
-  hook_id: string
-  result_id: string
-  adjust?: {
-    type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    }
-    direction: "increase" | "decrease"
-    rounding?: "up" | "down"
-  }
-} | {
-  source: "range"
-  min: {
-    source: "static"
-    data: number | string | boolean
-  } | {
-    source: "context"
-    path: string
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
-  } | {
-    source: "relative_date"
-    offset: number
-    unit: "days" | "months" | "years"
-    anchor?: "today"
-  } | {
-    source: "environment"
-    key: string
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
-  } | {
-    source: "external"
-    app_id: string
-    hook_id: string
-    result_id: string
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
   // ...
 }
 ```
@@ -2011,7 +2013,64 @@ type ScalarValue = {
   source: "relative_date"
   offset: number
   unit: "days" | "months" | "years"
-  anchor?: "today"
+  anchor?: "today" | {
+    type: "billing_cycle"
+    day: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    interval: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    cycle_start?: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    occurrence?: "current" | "next" | "previous"
+  }
 } | {
   source: "environment"
   key: string
@@ -2030,24 +2089,7 @@ type ScalarValue = {
     rounding?: "up" | "down"
   }
 } | {
-  source: "external"
-  app_id: string
-  hook_id: string
-  result_id: string
-  adjust?: {
-    type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    }
-    direction: "increase" | "decrease"
-    rounding?: "up" | "down"
-  }
+  // ...
 }
 ```
 
@@ -2185,14 +2227,250 @@ type ValueAdjustment = {
 
 ### `RelativeDateValue`
 
-A date relative to the evaluation moment, e.g. "today minus 30 days". Only valid for date rules.
+A date relative to an anchor, e.g. "today minus 30 days" or "4 days before the next billing
+date". The anchor is `today` by default, or a billing cycle date derived from other
+attributes (see `BillingCycleAnchor`). Only valid for date rules.
+
 
 ```ts
 type RelativeDateValue = {
   source: "relative_date"
   offset: number
   unit: "days" | "months" | "years"
-  anchor?: "today"
+  anchor?: "today" | {
+    type: "billing_cycle"
+    day: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    interval: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    cycle_start?: {
+      source: { ... }
+      data: { ... }
+    } | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    occurrence?: "current" | "next" | "previous"
+  }
+}
+```
+
+### `BillingCycleAnchor`
+
+A date derived from a billing cycle: the day of the month billing is due, how often it
+recurs, and optionally the date the cycle started (its phase). Day and interval are ordinary
+scalars, so they can come from a contract (`contract.billing_due_day`,
+`contract.billing_period`), a fixed value, an env
+
+```ts
+type BillingCycleAnchor = {
+  type: "billing_cycle"
+  day: {
+    source: "static"
+    data: number | string | boolean
+  } | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  }
+  interval: {
+    source: "static"
+    data: number | string | boolean
+  } | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  }
+  cycle_start?: {
+    source: "static"
+    data: number | string | boolean
+  } | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  // ...
+}
+```
+
+### `AnchorScalar`
+
+A part of a derived date - a fixed value or one resolved at evaluation time. Carries no adjustment; shift the result with the relative date's offset instead.
+
+```ts
+type AnchorScalar = {
+  source: "static"
+  data: number | string | boolean
+} | {
+  source: "context"
+  path: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
+} | {
+  source: "environment"
+  key: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
+} | {
+  source: "external"
+  app_id: string
+  hook_id: string
+  result_id: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
 }
 ```
 
@@ -2219,7 +2497,13 @@ type RangeValue = {
     source: "relative_date"
     offset: number
     unit: "days" | "months" | "years"
-    anchor?: "today"
+    anchor?: "today" | {
+      type: { ... }
+      day: { ... }
+      interval: { ... }
+      cycle_start?: { ... }
+      occurrence?: { ... }
+    }
   } | {
     source: "environment"
     key: string
@@ -2257,7 +2541,13 @@ type RangeValue = {
     source: "relative_date"
     offset: number
     unit: "days" | "months" | "years"
-    anchor?: "today"
+    anchor?: "today" | {
+      type: { ... }
+      day: { ... }
+      interval: { ... }
+      cycle_start?: { ... }
+      occurrence?: { ... }
+    }
   } | {
     source: "environment"
     key: string
@@ -2451,7 +2741,13 @@ type DocumentConditionValue = {
     source: "relative_date"
     offset: number
     unit: "days" | "months" | "years"
-    anchor?: "today"
+    anchor?: "today" | {
+      type: { ... }
+      day: { ... }
+      interval: { ... }
+      cycle_start?: { ... }
+      occurrence?: { ... }
+    }
   } | {
     source: "environment"
     key: string
@@ -2489,7 +2785,13 @@ type DocumentConditionValue = {
     source: "relative_date"
     offset: number
     unit: "days" | "months" | "years"
-    anchor?: "today"
+    anchor?: "today" | {
+      type: { ... }
+      day: { ... }
+      interval: { ... }
+      cycle_start?: { ... }
+      occurrence?: { ... }
+    }
   } | {
     source: "environment"
     key: string
@@ -2518,7 +2820,7 @@ type DocumentConditionValue = {
   types: "image" | "pdf" | "document" | "spreadsheet"[]
 } | {
   source: "criteria"
-  text: string
+  // ...
 }
 ```
 

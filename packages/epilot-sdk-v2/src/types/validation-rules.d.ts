@@ -10,6 +10,42 @@ import type {
 export declare namespace Components {
     namespace Schemas {
         /**
+         * A part of a derived date - a fixed value or one resolved at evaluation time. Carries no adjustment; shift the result with the relative date's offset instead.
+         */
+        export type AnchorScalar = /* A part of a derived date - a fixed value or one resolved at evaluation time. Carries no adjustment; shift the result with the relative date's offset instead. */ /* A fixed comparison value. */ StaticValue | /**
+         * A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`
+         * or `previous_reading.value`. The first path segment must match the `name` of a declared
+         * context requirement.
+         *
+         */
+        ContextValue | /**
+         * A comparison value resolved at evaluation time from an organisation environment variable
+         * (environments-api). The rule stores the key, never the value, so one change to the variable
+         * reaches every rule that references it and a blueprint install never overwrites the
+         * organisation's own value.
+         *
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
+         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * `String` and `SecretString` variables are rejected at write time. Write-time validation also
+         * checks that the variable exists in the organisation; a variable that exists without a value
+         * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
+         *
+         */
+        EnvironmentValue | /**
+         * A comparison value produced at evaluation time by an External Values hook of an installed
+         * app (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is
+         * resolved server-side by the external-values-api, which executes the hook's HTTP call with
+         * the app's credentials and returns the typed result identified by `result_id`.
+         *
+         * Write-time validation checks that the app is installed in the organisation, that the hook
+         * and result exist, and that the result's type is compatible with the compared kind
+         * (`number` results for numeric comparisons, `text` for text, `date` for date). External values
+         * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
+         * in public journeys the dependent conditions are skipped.
+         *
+         */
+        ExternalValue;
+        /**
          * Optional precondition on a condition: the condition only takes part in the
          * validation when this comparison over context holds. Examples: apply the
          * dual-tariff reference only when `contract.htnt` is not empty, or run a
@@ -53,6 +89,39 @@ export declare namespace Components {
              *
              */
             EnvironmentValue;
+        }
+        /**
+         * A date derived from a billing cycle: the day of the month billing is due, how often it
+         * recurs, and optionally the date the cycle started (its phase). Day and interval are ordinary
+         * scalars, so they can come from a contract (`contract.billing_due_day`,
+         * `contract.billing_period`), a fixed value, an environment variable or an external value.
+         *
+         * Resolution at evaluation time:
+         * - `day` clamps to the last day of the month (31 in February resolves to the 28th/29th).
+         * - Without `cycle_start`, non-monthly cycles are calendar aligned (quarters start in
+         *   January, April, July and October; half-years in January and July; yearly in January).
+         *   `weekly` needs a `cycle_start` and resolves as unavailable without one.
+         * - `occurrence` picks the cycle date: `current` is the one in the period that contains the
+         *   evaluation day, `next` the first on or after it, `previous` the last before it.
+         * - Any part that cannot be resolved (missing attribute, day outside 1-31, unknown interval)
+         *   makes the whole value unavailable and the condition fails.
+         *
+         */
+        export interface BillingCycleAnchor {
+            type: "billing_cycle";
+            /**
+             * Day of the month billing is due (1-31). Numeric strings are accepted at evaluation time. Weekly cycles recur from `cycle_start` and ignore it.
+             */
+            day: /* A part of a derived date - a fixed value or one resolved at evaluation time. Carries no adjustment; shift the result with the relative date's offset instead. */ AnchorScalar;
+            /**
+             * How often billing recurs, one of `weekly`, `monthly`, `every_quarter`, `every_6_months`, `yearly`.
+             */
+            interval: /* A part of a derived date - a fixed value or one resolved at evaluation time. Carries no adjustment; shift the result with the relative date's offset instead. */ AnchorScalar;
+            /**
+             * The date the billing cycle started, e.g. `contract.start_date`. Sets the phase of non-monthly cycles.
+             */
+            cycle_start?: /* A part of a derived date - a fixed value or one resolved at evaluation time. Carries no adjustment; shift the result with the relative date's offset instead. */ AnchorScalar;
+            occurrence?: "current" | "next" | "previous";
         }
         /**
          * Declarative validation rule (schema version v2). Supports predefined comparison operators
@@ -131,7 +200,13 @@ export declare namespace Components {
          * context requirement.
          *
          */
-        ContextValue | /* A date relative to the evaluation moment, e.g. "today minus 30 days". Only valid for date rules. */ RelativeDateValue | /**
+        ContextValue | /**
+         * A date relative to an anchor, e.g. "today minus 30 days" or "4 days before the next billing
+         * date". The anchor is `today` by default, or a billing cycle date derived from other
+         * attributes (see `BillingCycleAnchor`). Only valid for date rules.
+         *
+         */
+        RelativeDateValue | /**
          * A comparison value resolved at evaluation time from an organisation environment variable
          * (environments-api). The rule stores the key, never the value, so one change to the variable
          * reaches every rule that references it and a blueprint install never overwrites the
@@ -810,7 +885,10 @@ export declare namespace Components {
             conditions: /* Condition definition for a regex-based validation rule (2 levels deep) */ RegexCondition;
         }
         /**
-         * A date relative to the evaluation moment, e.g. "today minus 30 days". Only valid for date rules.
+         * A date relative to an anchor, e.g. "today minus 30 days" or "4 days before the next billing
+         * date". The anchor is `today` by default, or a billing cycle date derived from other
+         * attributes (see `BillingCycleAnchor`). Only valid for date rules.
+         *
          */
         export interface RelativeDateValue {
             source: "relative_date";
@@ -819,7 +897,27 @@ export declare namespace Components {
              */
             offset: number;
             unit: "days" | "months" | "years";
-            anchor?: "today";
+            /**
+             * The date the offset is applied to. Defaults to the evaluation day.
+             */
+            anchor?: /* The date the offset is applied to. Defaults to the evaluation day. */ ("today") | /**
+             * A date derived from a billing cycle: the day of the month billing is due, how often it
+             * recurs, and optionally the date the cycle started (its phase). Day and interval are ordinary
+             * scalars, so they can come from a contract (`contract.billing_due_day`,
+             * `contract.billing_period`), a fixed value, an environment variable or an external value.
+             *
+             * Resolution at evaluation time:
+             * - `day` clamps to the last day of the month (31 in February resolves to the 28th/29th).
+             * - Without `cycle_start`, non-monthly cycles are calendar aligned (quarters start in
+             *   January, April, July and October; half-years in January and July; yearly in January).
+             *   `weekly` needs a `cycle_start` and resolves as unavailable without one.
+             * - `occurrence` picks the cycle date: `current` is the one in the period that contains the
+             *   evaluation day, `next` the first on or after it, `previous` the last before it.
+             * - Any part that cannot be resolved (missing attribute, day outside 1-31, unknown interval)
+             *   makes the whole value unavailable and the condition fails.
+             *
+             */
+            BillingCycleAnchor;
         }
         /**
          * A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value.
@@ -830,7 +928,13 @@ export declare namespace Components {
          * context requirement.
          *
          */
-        ContextValue | /* A date relative to the evaluation moment, e.g. "today minus 30 days". Only valid for date rules. */ RelativeDateValue | /**
+        ContextValue | /**
+         * A date relative to an anchor, e.g. "today minus 30 days" or "4 days before the next billing
+         * date". The anchor is `today` by default, or a billing cycle date derived from other
+         * attributes (see `BillingCycleAnchor`). Only valid for date rules.
+         *
+         */
+        RelativeDateValue | /**
          * A comparison value resolved at evaluation time from an organisation environment variable
          * (environments-api). The rule stores the key, never the value, so one change to the variable
          * reaches every rule that references it and a blueprint install never overwrites the
@@ -1628,7 +1732,9 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AnchorScalar = Components.Schemas.AnchorScalar;
 export type AppliesWhen = Components.Schemas.AppliesWhen;
+export type BillingCycleAnchor = Components.Schemas.BillingCycleAnchor;
 export type ComparisonRuleType = Components.Schemas.ComparisonRuleType;
 export type Condition = Components.Schemas.Condition;
 export type ConditionValue = Components.Schemas.ConditionValue;
