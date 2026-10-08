@@ -255,10 +255,13 @@ declare namespace Components {
              * Where the identifier was found, e.g. "subject" or "text"
              */
             found_in?: string;
+            /**
+             * pending while any candidate is pending; once all are resolved, accepted if any candidate was linked, otherwise dismissed
+             */
             status: "pending" | "accepted" | "dismissed";
             candidates: LinkSuggestionCandidate[];
             /**
-             * Candidates that were linked when the suggestion was accepted
+             * Candidates that were linked from this suggestion
              */
             accepted_entity_ids?: string[];
             resolved_by?: TimelineActor;
@@ -283,6 +286,12 @@ declare namespace Components {
              * Entity title when the suggestion was recorded
              */
             title?: string;
+            /**
+             * Resolution of this candidate. Absent on suggestions recorded before candidates were resolved individually.
+             */
+            status?: "pending" | "linked" | "dismissed";
+            resolved_by?: TimelineActor;
+            resolved_at?: string; // date-time
         }
         export interface Message {
             /**
@@ -1779,14 +1788,18 @@ declare namespace Paths {
         }
         export interface RequestBody {
             /**
-             * Suggestions to dismiss. Omit to dismiss every pending suggestion on the thread.
+             * Suggestions to dismiss candidates of. Omit for every pending suggestion on the thread.
              */
             suggestion_ids?: string[];
+            /**
+             * Candidates to dismiss. Omit to dismiss every pending candidate of the selected suggestions.
+             */
+            entity_ids?: string[];
         }
         namespace Responses {
             export interface $200 {
                 /**
-                 * IDs of the suggestions that were dismissed
+                 * IDs of the suggestions that had at least one candidate dismissed
                  */
                 dismissed: string[];
             }
@@ -4137,7 +4150,7 @@ export interface OperationMethods {
   /**
    * dismissThreadLinkSuggestions - dismissThreadLinkSuggestions
    * 
-   * Dismiss pending entity-link suggestions on a thread. A suggestion is recorded on a message when an identifier in it matched entities of different customers, so nothing was linked automatically. A dismissed suggestion is not suggested again for the thread. To accept a suggestion, link one of its candidates with assignThread.
+   * Dismiss pending candidates of entity-link suggestions on a thread. A suggestion is recorded on a message when an identifier in it matched entities of different customers, so nothing was linked automatically. Each candidate is resolved on its own: linking one (assignThread) leaves the others suggested until they are linked or dismissed. A suggestion whose candidates are all resolved is not suggested again for the thread.
    */
   'dismissThreadLinkSuggestions'(
     parameters?: Parameters<Paths.DismissThreadLinkSuggestions.PathParameters> | null,
@@ -4848,7 +4861,7 @@ export interface PathsDictionary {
     /**
      * dismissThreadLinkSuggestions - dismissThreadLinkSuggestions
      * 
-     * Dismiss pending entity-link suggestions on a thread. A suggestion is recorded on a message when an identifier in it matched entities of different customers, so nothing was linked automatically. A dismissed suggestion is not suggested again for the thread. To accept a suggestion, link one of its candidates with assignThread.
+     * Dismiss pending candidates of entity-link suggestions on a thread. A suggestion is recorded on a message when an identifier in it matched entities of different customers, so nothing was linked automatically. Each candidate is resolved on its own: linking one (assignThread) leaves the others suggested until they are linked or dismissed. A suggestion whose candidates are all resolved is not suggested again for the thread.
      */
     'post'(
       parameters?: Parameters<Paths.DismissThreadLinkSuggestions.PathParameters> | null,

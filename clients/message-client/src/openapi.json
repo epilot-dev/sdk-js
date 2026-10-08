@@ -2324,7 +2324,7 @@
           }
         ],
         "summary": "dismissThreadLinkSuggestions",
-        "description": "Dismiss pending entity-link suggestions on a thread. A suggestion is recorded on a message when an identifier in it matched entities of different customers, so nothing was linked automatically. A dismissed suggestion is not suggested again for the thread. To accept a suggestion, link one of its candidates with assignThread.",
+        "description": "Dismiss pending candidates of entity-link suggestions on a thread. A suggestion is recorded on a message when an identifier in it matched entities of different customers, so nothing was linked automatically. Each candidate is resolved on its own: linking one (assignThread) leaves the others suggested until they are linked or dismissed. A suggestion whose candidates are all resolved is not suggested again for the thread.",
         "tags": [
           "Threads"
         ],
@@ -2347,7 +2347,14 @@
                 "type": "object",
                 "properties": {
                   "suggestion_ids": {
-                    "description": "Suggestions to dismiss. Omit to dismiss every pending suggestion on the thread.",
+                    "description": "Suggestions to dismiss candidates of. Omit for every pending suggestion on the thread.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "entity_ids": {
+                    "description": "Candidates to dismiss. Omit to dismiss every pending candidate of the selected suggestions.",
                     "type": "array",
                     "items": {
                       "type": "string"
@@ -2370,7 +2377,7 @@
                   ],
                   "properties": {
                     "dismissed": {
-                      "description": "IDs of the suggestions that were dismissed",
+                      "description": "IDs of the suggestions that had at least one candidate dismissed",
                       "type": "array",
                       "items": {
                         "type": "string"
@@ -4401,6 +4408,22 @@
           "title": {
             "type": "string",
             "description": "Entity title when the suggestion was recorded"
+          },
+          "status": {
+            "type": "string",
+            "description": "Resolution of this candidate. Absent on suggestions recorded before candidates were resolved individually.",
+            "enum": [
+              "pending",
+              "linked",
+              "dismissed"
+            ]
+          },
+          "resolved_by": {
+            "$ref": "#/components/schemas/TimelineActor"
+          },
+          "resolved_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -4427,6 +4450,7 @@
           },
           "status": {
             "type": "string",
+            "description": "pending while any candidate is pending; once all are resolved, accepted if any candidate was linked, otherwise dismissed",
             "enum": [
               "pending",
               "accepted",
@@ -4441,7 +4465,7 @@
           },
           "accepted_entity_ids": {
             "type": "array",
-            "description": "Candidates that were linked when the suggestion was accepted",
+            "description": "Candidates that were linked from this suggestion",
             "items": {
               "type": "string"
             }
