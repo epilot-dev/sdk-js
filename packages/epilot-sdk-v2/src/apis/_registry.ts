@@ -207,6 +207,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'phoneIntegration',
+    loader: () => expandDef(require('../definitions/phone-integration-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'pricing',
     loader: () => expandDef(require('../definitions/pricing-runtime.json')),
   });

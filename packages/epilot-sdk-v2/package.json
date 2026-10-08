@@ -249,6 +249,12 @@
       "require": "./dist/apis/permissions.cjs"
     },
     "./permissions/openapi.json": "./definitions/permissions.json",
+    "./phone-integration": {
+      "types": "./dist/apis/phone-integration.d.ts",
+      "import": "./dist/apis/phone-integration.js",
+      "require": "./dist/apis/phone-integration.cjs"
+    },
+    "./phone-integration/openapi.json": "./definitions/phone-integration.json",
     "./pricing": {
       "types": "./dist/apis/pricing.d.ts",
       "import": "./dist/apis/pricing.js",
@@ -505,6 +511,9 @@
       ],
       "permissions": [
         "./dist/apis/permissions.d.ts"
+      ],
+      "phone-integration": [
+        "./dist/apis/phone-integration.d.ts"
       ],
       "pricing": [
         "./dist/apis/pricing.d.ts"
