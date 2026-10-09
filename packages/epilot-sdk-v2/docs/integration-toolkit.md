@@ -3722,8 +3722,15 @@ const { data } = await client.createErpImport(
               "entity": "string"
             }
           ],
+          "attributes": [
+            {
+              "name": "string"
+            }
+          ],
+          "lines": [0],
           "subject": "string",
-          "row": 0
+          "row": 0,
+          "expected": "number"
         }
       ]
     },
@@ -3812,8 +3819,15 @@ const { data } = await client.listErpImports({
                 "entity": "string"
               }
             ],
+            "attributes": [
+              {
+                "name": "string"
+              }
+            ],
+            "lines": [0],
             "subject": "string",
-            "row": 0
+            "row": 0,
+            "expected": "number"
           }
         ]
       },
@@ -3895,8 +3909,15 @@ const { data } = await client.getErpImport({
             "entity": "string"
           }
         ],
+        "attributes": [
+          {
+            "name": "string"
+          }
+        ],
+        "lines": [0],
         "subject": "string",
-        "row": 0
+        "row": 0,
+        "expected": "number"
       }
     ]
   },
@@ -4159,19 +4180,24 @@ A problem found during validation, scoped to the file as a whole rather than to
 individual rows.
 
 `code` is the translation key and the other fields are its parameters — there is
-deliberately no message to display. Each code appears at most once, with
-everything it has to say aggregated into that on
+deliberately no message to display. Each code appears at most once (once per
+`expected` for `VALUE_FORMAT_INVALID`), with
 
 ```ts
 type ErpImportIssue = {
-  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED"
+  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED"
   severity: "warning" | "blocking"
   columns?: Array<{
     name: string
     entity?: string
   }>
+  attributes?: Array<{
+    name: string
+  }>
+  lines?: number[]
   subject?: string
   row?: number
+  expected?: "number" | "text" | "decimal" | "date"
 }
 ```
 
@@ -4195,14 +4221,19 @@ type ErpImportValidation = {
     version_attribute?: string
   }>
   issues?: Array<{
-    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED"
+    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED"
     severity: "warning" | "blocking"
     columns?: Array<{
       name: { ... }
       entity?: { ... }
     }>
+    attributes?: Array<{
+      name: { ... }
+    }>
+    lines?: number[]
     subject?: string
     row?: number
+    expected?: "number" | "text" | "decimal" | "date"
   }>
 }
 ```
@@ -4348,8 +4379,11 @@ type ErpImportJob = {
       code: { ... }
       severity: { ... }
       columns?: { ... }
+      attributes?: { ... }
+      lines?: { ... }
       subject?: { ... }
       row?: { ... }
+      expected?: { ... }
     }>
   }
   progress?: {
