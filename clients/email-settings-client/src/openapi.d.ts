@@ -438,7 +438,7 @@ declare namespace Components {
             };
         }
         export type MailboxSyncStatuses = "RUNNING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "CANCELLED";
-        export type MailboxSyncTimeframePeriods = "5m" | "1w" | "2w" | "1m";
+        export type MailboxSyncTimeframePeriods = "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y";
         /**
          * Per-user calendar connection metadata, or null when the caller has
          * not connected their personal calendar yet.
@@ -1098,7 +1098,7 @@ declare namespace Paths {
              * mailbox sync after connecting the mailbox, syncing emails from the specified period.
              *
              */
-            mailboxSyncTimeframe?: "5m" | "1w" | "2w" | "1m";
+            mailboxSyncTimeframe?: "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y";
         }
         namespace Responses {
             export interface $201 {
@@ -1630,9 +1630,12 @@ declare namespace Paths {
              * - 1w: 1 week
              * - 2w: 2 weeks
              * - 1m: 1 month
+             * - 3m: 3 months
+             * - 6m: 6 months
+             * - 1y: 1 year
              *
              */
-            timeframe: "5m" | "1w" | "2w" | "1m";
+            timeframe: "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y";
         }
         namespace Responses {
             export interface $202 {
