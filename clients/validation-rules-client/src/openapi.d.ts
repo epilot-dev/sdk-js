@@ -44,8 +44,9 @@ declare namespace Components {
              * reaches every rule that references it and a blueprint install never overwrites the
              * organisation's own value.
              *
-             * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-             * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+             * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+             * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+             * string), `Boolean` for `applies_when` values.
              * `String` and `SecretString` variables are rejected at write time. Write-time validation also
              * checks that the variable exists in the organisation; a variable that exists without a value
              * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
@@ -136,8 +137,9 @@ declare namespace Components {
          * reaches every rule that references it and a blueprint install never overwrites the
          * organisation's own value.
          *
-         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+         * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+         * string), `Boolean` for `applies_when` values.
          * `String` and `SecretString` variables are rejected at write time. Write-time validation also
          * checks that the variable exists in the organisation; a variable that exists without a value
          * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
@@ -357,8 +359,9 @@ declare namespace Components {
          * reaches every rule that references it and a blueprint install never overwrites the
          * organisation's own value.
          *
-         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+         * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+         * string), `Boolean` for `applies_when` values.
          * `String` and `SecretString` variables are rejected at write time. Write-time validation also
          * checks that the variable exists in the organisation; a variable that exists without a value
          * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
@@ -815,8 +818,35 @@ declare namespace Components {
             source: "relative_date";
             /**
              * Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.
+             * Either a fixed whole number, or a `Number` organisation environment variable resolved at evaluation
+             * time. Environment offsets must not carry an adjustment. If the
+             * variable is missing, has no value, or its value is not a whole number within ±36500, the comparison
+             * is unresolved.
+             *
              */
-            offset: number;
+            offset: /**
+             * Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.
+             * Either a fixed whole number, or a `Number` organisation environment variable resolved at evaluation
+             * time. Environment offsets must not carry an adjustment. If the
+             * variable is missing, has no value, or its value is not a whole number within ±36500, the comparison
+             * is unresolved.
+             *
+             */
+            number | /**
+             * A comparison value resolved at evaluation time from an organisation environment variable
+             * (environments-api). The rule stores the key, never the value, so one change to the variable
+             * reaches every rule that references it and a blueprint install never overwrites the
+             * organisation's own value.
+             *
+             * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+             * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+             * string), `Boolean` for `applies_when` values.
+             * `String` and `SecretString` variables are rejected at write time. Write-time validation also
+             * checks that the variable exists in the organisation; a variable that exists without a value
+             * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
+             *
+             */
+            EnvironmentValue;
             unit: "days" | "months" | "years";
             anchor?: "today";
         }
@@ -835,8 +865,9 @@ declare namespace Components {
          * reaches every rule that references it and a blueprint install never overwrites the
          * organisation's own value.
          *
-         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+         * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+         * string), `Boolean` for `applies_when` values.
          * `String` and `SecretString` variables are rejected at write time. Write-time validation also
          * checks that the variable exists in the organisation; a variable that exists without a value
          * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
@@ -1127,8 +1158,9 @@ declare namespace Components {
              * reaches every rule that references it and a blueprint install never overwrites the
              * organisation's own value.
              *
-             * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-             * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+             * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+             * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+             * string), `Boolean` for `applies_when` values.
              * `String` and `SecretString` variables are rejected at write time. Write-time validation also
              * checks that the variable exists in the organisation; a variable that exists without a value
              * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
