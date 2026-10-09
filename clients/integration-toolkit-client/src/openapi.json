@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.38.1",
+    "version": "1.43.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -2974,7 +2974,12 @@
     "/v1/integrations/{integrationId}/monitoring/inbound-events": {
       "post": {
         "operationId": "queryInboundMonitoringEvents",
-        "x-epilot-permissions": [],
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integrationId}"
+          }
+        ],
         "summary": "queryInboundMonitoringEvents",
         "description": "Query inbound monitoring events for a specific integration.\nReturns detailed information about inbound sync events from ERP systems,\nincluding success rates, error breakdowns, and processing metrics.\n",
         "tags": [
@@ -3013,6 +3018,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3025,7 +3033,12 @@
     "/v1/integrations/{integrationId}/monitoring/stats": {
       "post": {
         "operationId": "getMonitoringStats",
-        "x-epilot-permissions": [],
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integrationId}"
+          }
+        ],
         "summary": "getMonitoringStats",
         "description": "Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.\nReturns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,\nincluding success/error counts and optional breakdowns.\n",
         "tags": [
@@ -3064,6 +3077,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3076,7 +3092,12 @@
     "/v1/integrations/{integrationId}/monitoring/timeseries": {
       "post": {
         "operationId": "getMonitoringTimeSeries",
-        "x-epilot-permissions": [],
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integrationId}"
+          }
+        ],
         "summary": "getMonitoringTimeSeries",
         "description": "Get time-series aggregated event counts for monitoring charts.\nReturns pre-bucketed counts at configurable intervals for both inbound and outbound events.\nMaximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.\n",
         "tags": [
@@ -3115,6 +3136,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3127,7 +3151,12 @@
     "/v1/integrations/{integrationId}/outbound-status": {
       "get": {
         "operationId": "getOutboundStatus",
-        "x-epilot-permissions": [],
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integrationId}"
+          }
+        ],
         "summary": "getOutboundStatus",
         "description": "Get the status of all outbound use cases for a specific integration.\nReturns conflict information when events or webhooks are disabled but the use case is enabled.\n",
         "tags": [
@@ -3158,6 +3187,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -3656,7 +3688,12 @@
     "/v1/integrations/{integrationId}/monitoring/access-logs": {
       "post": {
         "operationId": "queryAccessLogs",
-        "x-epilot-permissions": [],
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integrationId}"
+          }
+        ],
         "summary": "queryAccessLogs",
         "description": "Query API access logs for a specific integration's organization.\nReturns access token usage analytics filtered by user_id (access token).\nSupports infinite scroll pagination with cursor-based navigation.\n",
         "tags": [
@@ -3695,6 +3732,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3707,7 +3747,12 @@
     "/v1/integrations/{integrationId}/monitoring/outbound-events": {
       "post": {
         "operationId": "queryOutboundMonitoringEvents",
-        "x-epilot-permissions": [],
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integrationId}"
+          }
+        ],
         "summary": "queryOutboundMonitoringEvents",
         "description": "Query outbound monitoring events for a specific integration.\nReturns detailed information about outbound event deliveries,\nfiltered by event_name (event_catalog_event) linked to the integration's outbound use cases.\n",
         "tags": [
@@ -3746,6 +3791,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3758,9 +3806,14 @@
     "/v2/integrations/{integrationId}/monitoring/events": {
       "post": {
         "operationId": "queryMonitoringEventsV2",
-        "x-epilot-permissions": [],
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integrationId}"
+          }
+        ],
         "summary": "queryMonitoringEventsV2",
-        "description": "Query monitoring events from the unified erp_monitoring_v2 table.\nReturns all event types (inbound, outbound, file_proxy, etc.) in a single list.\nReplaces the separate v1 inbound-events and outbound-events endpoints.\n",
+        "description": "Query monitoring events from the unified erp_monitoring_v2 table.\nReturns all event types (inbound, outbound, file_proxy, etc.) in a single list.\nReplaces the separate v1 inbound-events and outbound-events endpoints.\nRequires the `integration:view` grant for the integration: event\ndetails can carry customer data (a mapped poll message's delivered\npayload, for example).\n",
         "tags": [
           "monitoring",
           "integrations"
@@ -3797,6 +3850,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3809,7 +3865,12 @@
     "/v2/integrations/{integrationId}/monitoring/stats": {
       "post": {
         "operationId": "getMonitoringStatsV2",
-        "x-epilot-permissions": [],
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integrationId}"
+          }
+        ],
         "summary": "getMonitoringStatsV2",
         "description": "Get aggregated statistics from the unified erp_monitoring_v2 table.\nReturns combined metrics for all event types with optional breakdowns.\n",
         "tags": [
@@ -3848,6 +3909,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3860,7 +3924,12 @@
     "/v2/integrations/{integrationId}/monitoring/time-series": {
       "post": {
         "operationId": "getMonitoringTimeSeriesV2",
-        "x-epilot-permissions": [],
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integrationId}"
+          }
+        ],
         "summary": "getMonitoringTimeSeriesV2",
         "description": "Get time-series aggregated event counts from the unified erp_monitoring_v2 table.\nReturns bucketed counts for chart rendering.\n",
         "tags": [
@@ -3899,6 +3968,9 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3911,7 +3983,12 @@
     "/v2/integrations/{integrationId}/monitoring/events/{eventId}/associated": {
       "get": {
         "operationId": "getAssociatedMonitoringEvents",
-        "x-epilot-permissions": [],
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integrationId}"
+          }
+        ],
         "summary": "getAssociatedMonitoringEvents",
         "description": "Returns all monitoring events sharing the same event_id, ordered chronologically.\nAlso includes the original inbound event payload from erp_incoming_events if available.\nUsed to display a full event trace/timeline.\n",
         "tags": [
@@ -3948,6 +4025,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -4025,7 +4105,8 @@
         "operationId": "getMonitoringTraceByCorrelation",
         "x-epilot-permissions": [
           {
-            "action": "integration:view"
+            "action": "integration:view",
+            "resource": "integration:{integrationId}"
           }
         ],
         "summary": "getMonitoringTraceByCorrelation",
@@ -5188,7 +5269,7 @@
       },
       "ErpImportIssue": {
         "type": "object",
-        "description": "A problem found during validation, scoped to the file as a whole rather than to\nindividual rows.\n\n`code` is the translation key and the other fields are its parameters — there is\ndeliberately no message to display. Each code appears at most once, with\neverything it has to say aggregated into that one entry.\n\nThe conditional codes describe a file that cannot be written as variants:\n\n- `TIER_ROWS_NOT_GROUPED` — rows of one variant are spread through the file;\n  `columns` names what to group by.\n- `TIER_BANDS_CONFLICT` — two rows of one variant claim the same band.\n- `CONDITION_VALUE_MISSING` — a condition column is blank in every row.\n- `VARIANT_VALUE_CONFLICT` — rows of one variant disagree on a value outside\n  `from_rows`; the first row's value is what would be written.\n- `ATTRIBUTE_NOT_OVERRIDABLE` — the schema does not let a variant override this\n  attribute, so the mapped value would be discarded.\n- `ATTRIBUTE_NOT_IN_SCHEMA` — the schema does not have the attribute at all.\n\nThe rest reject the mapping against the entity schemas, before the file is read, and\nname the thing at fault in `subject`: `IS_CONDITIONAL_NOT_CONSTANT`,\n`SCHEMA_NOT_CONDITIONABLE`, `SCHEMA_NOT_FOUND`, `SCHEMA_DECLARES_NO_CONDITIONS`,\n`GROUPING_KEY_NOT_A_COLUMN`, `GROUPING_KEY_IS_SORT_COLUMN`,\n`CONDITIONAL_TARGET_MODE_UNSUPPORTED` (a conditional target with any `mode` other\nthan `upsert` — a row of such a target addresses one variant-version, while every\nother mode acts on whole entities; removing variants through an import is not\nsupported yet, and to remove a whole entity, map it as a non-conditional target).",
+        "description": "A problem found during validation, scoped to the file as a whole rather than to\nindividual rows.\n\n`code` is the translation key and the other fields are its parameters — there is\ndeliberately no message to display. Each code appears at most once (once per\n`expected` for `VALUE_FORMAT_INVALID`), with everything it has to say aggregated\ninto that one entry.\n\n`VALUE_FORMAT_INVALID` — the mapping produces values in a format the entity schema\ndoes not store; `expected` says which format, and `columns` names every column\n(or, for a value built by an expression, the attribute) that holds one.\n\n`MAPPING_EXPRESSION_FAILED` (a warning) — a mapping expression failed for some rows,\nincluding `$number()` on a value it cannot convert such as `12,50` or on a blank cell,\nso importing anyway leaves those values out; `attributes` names the attribute it fills.\n\n`FROM_ROWS_EXPRESSION_FAILED` — an expression in a `conditional.from_rows` item failed\nfor some rows. Blocking, unlike a field: the import would skip every entry of that\ntarget built in the same chunk, not one value; `attributes` names the list attribute.\n\n`lines` points at up to five file lines an issue was seen on, as examples.\n\nThe conditional codes describe a file that cannot be written as variants:\n\n- `TIER_ROWS_NOT_GROUPED` — rows of one variant are spread through the file;\n  `columns` names what to group by.\n- `TIER_BANDS_CONFLICT` — two rows of one variant claim the same band.\n- `CONDITION_VALUE_MISSING` — a condition column is blank in every row.\n- `VARIANT_VALUE_CONFLICT` — rows of one variant disagree on a value outside\n  `from_rows`; the first row's value is what would be written.\n- `ATTRIBUTE_NOT_OVERRIDABLE` — the schema does not let a variant override this\n  attribute, so the mapped value would be discarded.\n- `ATTRIBUTE_NOT_IN_SCHEMA` — the schema does not have the attribute at all.\n\nThe rest reject the mapping against the entity schemas, before the file is read, and\nname the thing at fault in `subject`: `IS_CONDITIONAL_NOT_CONSTANT`,\n`SCHEMA_NOT_CONDITIONABLE`, `SCHEMA_NOT_FOUND`, `SCHEMA_DECLARES_NO_CONDITIONS`,\n`GROUPING_KEY_NOT_A_COLUMN`, `GROUPING_KEY_IS_SORT_COLUMN`,\n`CONDITIONAL_TARGET_MODE_UNSUPPORTED` (a conditional target with any `mode` other\nthan `upsert` — a row of such a target addresses one variant-version, while every\nother mode acts on whole entities; removing variants through an import is not\nsupported yet, and to remove a whole entity, map it as a non-conditional target).",
         "required": [
           "code",
           "severity"
@@ -5217,7 +5298,10 @@
               "SCHEMA_DECLARES_NO_CONDITIONS",
               "GROUPING_KEY_NOT_A_COLUMN",
               "GROUPING_KEY_IS_SORT_COLUMN",
-              "CONDITIONAL_TARGET_MODE_UNSUPPORTED"
+              "CONDITIONAL_TARGET_MODE_UNSUPPORTED",
+              "VALUE_FORMAT_INVALID",
+              "MAPPING_EXPRESSION_FAILED",
+              "FROM_ROWS_EXPRESSION_FAILED"
             ]
           },
           "severity": {
@@ -5247,13 +5331,46 @@
               }
             }
           },
+          "attributes": {
+            "type": "array",
+            "description": "The mapping fields this issue is about, where the value is not a file column as it is: an expression builds it, or the expression fails. VALUE_FORMAT_INVALID (beside `columns`, which holds the values taken from a column as they are), MAPPING_EXPRESSION_FAILED and FROM_ROWS_EXPRESSION_FAILED.",
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The attribute the mapping writes, like `unit_amount_decimal`."
+                }
+              }
+            }
+          },
+          "lines": {
+            "type": "array",
+            "description": "Up to five lines of the file this issue was seen on, as examples rather than the full list. The header is line 1. BLANK_ROWS_SKIPPED, VALUE_FORMAT_INVALID, MAPPING_EXPRESSION_FAILED, FROM_ROWS_EXPRESSION_FAILED, TIER_ROWS_NOT_GROUPED (where a variant's rows start again), TIER_BANDS_CONFLICT and VARIANT_VALUE_CONFLICT (the row at odds with the first).",
+            "items": {
+              "type": "integer"
+            }
+          },
           "subject": {
             "type": "string",
             "description": "What the issue is about — an attribute, an entity type slug, or an \"attribute reads column\" pair — to substitute into the client's copy for the code. Independent of `columns`; a code can carry both."
           },
           "row": {
             "type": "integer",
-            "description": "The offending data row, 1-based as the user counts rows. MALFORMED_ROW only."
+            "description": "The offending row's line in the file, the header being line 1 — the number a spreadsheet or text editor shows, and the same numbering as `lines`. MALFORMED_ROW only."
+          },
+          "expected": {
+            "type": "string",
+            "description": "The format the values should have had. VALUE_FORMAT_INVALID only.\n- `number` — a JSON number; the mapping produces text (wrap the column in `$number()`). - `text` — text; the mapping produces a number. - `decimal` — a plain number with a dot as text, like `12.50`. - `date` — a date like `2026-01-01`, optionally with a time and offset like\n  `2026-01-01T08:00:00Z`.",
+            "enum": [
+              "number",
+              "text",
+              "decimal",
+              "date"
+            ]
           }
         }
       },

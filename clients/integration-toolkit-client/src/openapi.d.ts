@@ -2993,8 +2993,23 @@ declare namespace Components {
          * individual rows.
          *
          * `code` is the translation key and the other fields are its parameters — there is
-         * deliberately no message to display. Each code appears at most once, with
-         * everything it has to say aggregated into that one entry.
+         * deliberately no message to display. Each code appears at most once (once per
+         * `expected` for `VALUE_FORMAT_INVALID`), with everything it has to say aggregated
+         * into that one entry.
+         *
+         * `VALUE_FORMAT_INVALID` — the mapping produces values in a format the entity schema
+         * does not store; `expected` says which format, and `columns` names every column
+         * (or, for a value built by an expression, the attribute) that holds one.
+         *
+         * `MAPPING_EXPRESSION_FAILED` (a warning) — a mapping expression failed for some rows,
+         * including `$number()` on a value it cannot convert such as `12,50` or on a blank cell,
+         * so importing anyway leaves those values out; `attributes` names the attribute it fills.
+         *
+         * `FROM_ROWS_EXPRESSION_FAILED` — an expression in a `conditional.from_rows` item failed
+         * for some rows. Blocking, unlike a field: the import would skip every entry of that
+         * target built in the same chunk, not one value; `attributes` names the list attribute.
+         *
+         * `lines` points at up to five file lines an issue was seen on, as examples.
          *
          * The conditional codes describe a file that cannot be written as variants:
          *
@@ -3022,7 +3037,7 @@ declare namespace Components {
              * Enum of possible issue codes.
              *
              */
-            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED";
+            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED";
             severity: "warning" | "blocking";
             /**
              * The columns this issue is about, at most one entry per column per entity.
@@ -3039,13 +3054,32 @@ declare namespace Components {
                 entity?: string;
             }[];
             /**
+             * The mapping fields this issue is about, where the value is not a file column as it is: an expression builds it, or the expression fails. VALUE_FORMAT_INVALID (beside `columns`, which holds the values taken from a column as they are), MAPPING_EXPRESSION_FAILED and FROM_ROWS_EXPRESSION_FAILED.
+             */
+            attributes?: {
+                /**
+                 * The attribute the mapping writes, like `unit_amount_decimal`.
+                 */
+                name: string;
+            }[];
+            /**
+             * Up to five lines of the file this issue was seen on, as examples rather than the full list. The header is line 1. BLANK_ROWS_SKIPPED, VALUE_FORMAT_INVALID, MAPPING_EXPRESSION_FAILED, FROM_ROWS_EXPRESSION_FAILED, TIER_ROWS_NOT_GROUPED (where a variant's rows start again), TIER_BANDS_CONFLICT and VARIANT_VALUE_CONFLICT (the row at odds with the first).
+             */
+            lines?: number[];
+            /**
              * What the issue is about — an attribute, an entity type slug, or an "attribute reads column" pair — to substitute into the client's copy for the code. Independent of `columns`; a code can carry both.
              */
             subject?: string;
             /**
-             * The offending data row, 1-based as the user counts rows. MALFORMED_ROW only.
+             * The offending row's line in the file, the header being line 1 — the number a spreadsheet or text editor shows, and the same numbering as `lines`. MALFORMED_ROW only.
              */
             row?: number;
+            /**
+             * The format the values should have had. VALUE_FORMAT_INVALID only.
+             * - `number` — a JSON number; the mapping produces text (wrap the column in `$number()`). - `text` — text; the mapping produces a number. - `decimal` — a plain number with a dot as text, like `12.50`. - `date` — a date like `2026-01-01`, optionally with a time and offset like
+             *   `2026-01-01T08:00:00Z`.
+             */
+            expected?: "number" | "text" | "decimal" | "date";
         }
         export interface ErpImportJob {
             /**
@@ -3161,8 +3195,23 @@ declare namespace Components {
              * individual rows.
              *
              * `code` is the translation key and the other fields are its parameters — there is
-             * deliberately no message to display. Each code appears at most once, with
-             * everything it has to say aggregated into that one entry.
+             * deliberately no message to display. Each code appears at most once (once per
+             * `expected` for `VALUE_FORMAT_INVALID`), with everything it has to say aggregated
+             * into that one entry.
+             *
+             * `VALUE_FORMAT_INVALID` — the mapping produces values in a format the entity schema
+             * does not store; `expected` says which format, and `columns` names every column
+             * (or, for a value built by an expression, the attribute) that holds one.
+             *
+             * `MAPPING_EXPRESSION_FAILED` (a warning) — a mapping expression failed for some rows,
+             * including `$number()` on a value it cannot convert such as `12,50` or on a blank cell,
+             * so importing anyway leaves those values out; `attributes` names the attribute it fills.
+             *
+             * `FROM_ROWS_EXPRESSION_FAILED` — an expression in a `conditional.from_rows` item failed
+             * for some rows. Blocking, unlike a field: the import would skip every entry of that
+             * target built in the same chunk, not one value; `attributes` names the list attribute.
+             *
+             * `lines` points at up to five file lines an issue was seen on, as examples.
              *
              * The conditional codes describe a file that cannot be written as variants:
              *
@@ -8943,6 +8992,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.GetAssociatedMonitoringEventsResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -9052,6 +9102,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.GetMonitoringStatsResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -9068,6 +9119,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.GetMonitoringStatsV2Response;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -9084,6 +9136,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.GetMonitoringTimeSeriesResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -9100,6 +9153,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.GetMonitoringTimeSeriesV2Response;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -9151,6 +9205,7 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.OutboundStatusResponse;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -9504,6 +9559,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.QueryAccessLogsResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -9536,6 +9592,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.QueryInboundMonitoringEventsResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -9552,6 +9609,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.QueryMonitoringEventsV2Response;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -9568,6 +9626,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.QueryOutboundMonitoringEventsResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -10605,6 +10664,9 @@ export interface OperationMethods {
    * Query monitoring events from the unified erp_monitoring_v2 table.
    * Returns all event types (inbound, outbound, file_proxy, etc.) in a single list.
    * Replaces the separate v1 inbound-events and outbound-events endpoints.
+   * Requires the `integration:view` grant for the integration: event
+   * details can carry customer data (a mapped poll message's delivered
+   * payload, for example).
    * 
    */
   'queryMonitoringEventsV2'(
@@ -11661,6 +11723,9 @@ export interface PathsDictionary {
      * Query monitoring events from the unified erp_monitoring_v2 table.
      * Returns all event types (inbound, outbound, file_proxy, etc.) in a single list.
      * Replaces the separate v1 inbound-events and outbound-events endpoints.
+     * Requires the `integration:view` grant for the integration: event
+     * details can carry customer data (a mapped poll message's delivered
+     * payload, for example).
      * 
      */
     'post'(
