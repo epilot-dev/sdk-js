@@ -242,6 +242,57 @@ declare namespace Components {
              */
             save_to_entity?: boolean;
         }
+        export interface LinkSuggestion {
+            /**
+             * Stable id of the suggestion (identifier + candidate set), shared across a thread's messages
+             */
+            id: string;
+            /**
+             * The identifier found in the message, as written there
+             */
+            identifier: string;
+            /**
+             * Where the identifier was found, e.g. "subject" or "text"
+             */
+            found_in?: string;
+            /**
+             * pending while any candidate is pending; once all are resolved, accepted if any candidate was linked, otherwise dismissed
+             */
+            status: "pending" | "accepted" | "dismissed";
+            candidates: LinkSuggestionCandidate[];
+            /**
+             * Candidates that were linked from this suggestion
+             */
+            accepted_entity_ids?: string[];
+            resolved_by?: TimelineActor;
+            resolved_at?: string; // date-time
+            created_at?: string; // date-time
+        }
+        export interface LinkSuggestionCandidate {
+            entity_id: string;
+            /**
+             * Entity schema slug, e.g. "contract"
+             */
+            schema: string;
+            /**
+             * The identifier attribute that matched, e.g. "contract_number"
+             */
+            attribute?: string;
+            /**
+             * The stored value that matched
+             */
+            attribute_value?: string;
+            /**
+             * Entity title when the suggestion was recorded
+             */
+            title?: string;
+            /**
+             * Resolution of this candidate. Absent on suggestions recorded before candidates were resolved individually.
+             */
+            status?: "pending" | "linked" | "dismissed";
+            resolved_by?: TimelineActor;
+            resolved_at?: string; // date-time
+        }
         export interface Message {
             /**
              * Message ID which is from email provider. If you provide `message-id`, API overrides by its own value.
@@ -353,10 +404,22 @@ declare namespace Components {
              */
             parent_message_id?: string;
         }
+        export interface MessageEntityLinkSuggestedEvent {
+            type: "MESSAGE_ENTITY_LINK_SUGGESTED";
+            suggestions?: TimelineLinkSuggestion[];
+        }
+        export interface MessageEntityLinkSuggestionDismissedEvent {
+            type: "MESSAGE_ENTITY_LINK_SUGGESTION_DISMISSED";
+            suggestions?: TimelineLinkSuggestion[];
+        }
         export interface MessageEntityLinkedEvent {
             type: "MESSAGE_ENTITY_LINKED";
             entities?: TimelineLinkedEntity[];
             link_kind?: "manual" | "auto";
+            /**
+             * The link accepted a pending entity-link suggestion
+             */
+            from_suggestion?: boolean;
         }
         export interface MessageEntityUnlinkedEvent {
             type: "MESSAGE_ENTITY_UNLINKED";
@@ -392,10 +455,12 @@ declare namespace Components {
              */
             complete_thread?: boolean;
             /**
-             * Whether to mark the thread as read by the sender's org/user after sending a reply.
-             * Only applies when `parent_id` is set. When false, the thread's `org_read_message` and
-             * `user_read_message` arrays are left unchanged, so the thread remains unread for anyone
-             * who had it unread before. Defaults to true for backward compatibility.
+             * When true (default), replying marks the whole thread read for the sender: every message on the
+             * thread is marked read, so the thread is read without leaving any message unread under it. When
+             * false, no message is marked and the thread's read-state reflects its messages — a message still
+             * unread keeps the thread unread (e.g. an automated reply-in-thread stays unread for a human to
+             * pick up). Only applies to replies (`parent_id` set); a new thread always reflects its single
+             * message. Defaults to true.
              *
              */
             mark_thread_as_read?: boolean;
@@ -623,6 +688,10 @@ declare namespace Components {
              */
             template_id?: string;
             /**
+             * Entity-link suggestions recorded when the message arrived: identifiers that matched entities of different customers, so none was linked automatically.
+             */
+            link_suggestions?: LinkSuggestion[];
+            /**
              * If true then html is not provided and must be downloaded using the html_download_url
              */
             html_omitted?: boolean;
@@ -656,6 +725,28 @@ declare namespace Components {
          * Who is marking an item as read or unread.
          */
         export type ReadingScope = "organization" | "user";
+        export interface ReplyContextEntityRef {
+            _id: string;
+            _schema: string;
+        }
+        export interface ReplyContextMessage {
+            id: string;
+            created_at?: string; // date-time
+            type: "RECEIVED" | "SENT";
+            /**
+             * Who wrote the message from the organization's point of view
+             */
+            role: "customer" | "agent" | "partner";
+            subject?: string;
+            from?: {
+                address?: string;
+                name?: string;
+            };
+            /**
+             * Plain text body with quotes, forwarded content, reply headers and links removed
+             */
+            text: string;
+        }
         export interface SearchIDParams {
             /**
              * The view to compile, with the same meaning as on `threads:search`. Present here because
@@ -921,6 +1012,43 @@ declare namespace Components {
             sort?: string;
             highlight?: any;
         }
+        export interface SimilarSentMessage {
+            message_id: string;
+            thread_id?: string;
+            subject?: string;
+            /**
+             * Anonymized plain text of the sent message
+             */
+            text: string;
+            created_at?: string;
+            /**
+             * Similarity in 0-1, higher is more similar
+             */
+            score: number;
+        }
+        export interface SimilarSentMessagesRequest {
+            /**
+             * Texts to search with. Results are merged across queries, best score per message wins.
+             */
+            queries: [
+                string,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+            /**
+             * Maximum number of messages to return
+             */
+            limit?: number;
+            /**
+             * Minimum similarity (0-1, cosine certainty) a message must reach to be returned
+             */
+            min_score?: number;
+        }
+        export interface SimilarSentMessagesResponse {
+            results: SimilarSentMessage[];
+        }
         /**
          * Thread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.
          */
@@ -1004,6 +1132,22 @@ declare namespace Components {
              * 456
              */
             organization_id: string;
+        }
+        export interface ThreadReplyContext {
+            thread_id: string;
+            topic?: string;
+            /**
+             * ID of the latest received message, i.e. the one a reply would answer. Absent if none.
+             */
+            reply_to_message_id?: string;
+            /**
+             * Conversation oldest first, cleaned for prompting
+             */
+            messages: ReplyContextMessage[];
+            /**
+             * Entities linked to the conversation (recipients, message relations), not hydrated
+             */
+            related_entities: ReplyContextEntityRef[];
         }
         export interface ThreadRestoredEvent {
             type: "THREAD_RESTORED";
@@ -1132,7 +1276,7 @@ declare namespace Components {
             /**
              * Timestamp of the event
              * example:
-             * 2024-01-01T00:00:00.000Z
+             * 2024-01-01T00:00:00Z
              */
             timestamp: string;
             /**
@@ -1150,7 +1294,12 @@ declare namespace Components {
                 name?: string;
             };
         }
-        export type TimelineEventData = ThreadDoneEvent | ThreadOpenEvent | WorkflowStartedEvent | ThreadUserAssignedEvent | MessageLabelAddedEvent | MessageLabelRemovedEvent | MessageEntityLinkedEvent | MessageEntityUnlinkedEvent | MessageAutoReplySentEvent | ThreadMovedToInboxEvent | ThreadTrashedEvent | ThreadRestoredEvent;
+        export type TimelineEventData = ThreadDoneEvent | ThreadOpenEvent | WorkflowStartedEvent | ThreadUserAssignedEvent | MessageLabelAddedEvent | MessageLabelRemovedEvent | MessageEntityLinkedEvent | MessageEntityUnlinkedEvent | MessageEntityLinkSuggestedEvent | MessageEntityLinkSuggestionDismissedEvent | MessageAutoReplySentEvent | ThreadMovedToInboxEvent | ThreadTrashedEvent | ThreadRestoredEvent;
+        export interface TimelineLinkSuggestion {
+            id?: string;
+            identifier: string;
+            candidates?: TimelineLinkedEntity[];
+        }
         export interface TimelineLinkedEntity {
             entity_id: string;
             /**
@@ -1255,7 +1404,13 @@ declare namespace Components {
              */
             actor: "organization" | "user";
             /**
-             * Restrict every scope to messages involving these addresses.
+             * The addresses selected in the address filter, applied to the `organization` scope only.
+             *
+             * Not a request-level restriction, despite arriving at request level. A `shared_inbox`
+             * scope's own list applies no address filter at all, because scoping to an inbox is what
+             * switches it off, and a `saved_view` ignores the address lens entirely. Applying this to
+             * either would make the badge answer a narrower question than the list beneath it.
+             *
              */
             email_filter?: string[];
             /**
@@ -1624,6 +1779,36 @@ declare namespace Paths {
             }
         }
     }
+    namespace DismissThreadLinkSuggestions {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface RequestBody {
+            /**
+             * Suggestions to dismiss candidates of. Omit for every pending suggestion on the thread.
+             */
+            suggestion_ids?: string[];
+            /**
+             * Candidates to dismiss. Omit to dismiss every pending candidate of the selected suggestions.
+             */
+            entity_ids?: string[];
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * IDs of the suggestions that had at least one candidate dismissed
+                 */
+                dismissed: string[];
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace GetAssigneeWorkload {
         export type RequestBody = Components.Schemas.AssigneeWorkloadParams;
         namespace Responses {
@@ -1979,6 +2164,10 @@ declare namespace Paths {
                  * 3f34ce73-089c-4d45-a5ee-c161234e41c3
                  */
                 template_id?: string;
+                /**
+                 * Entity-link suggestions recorded when the message arrived: identifiers that matched entities of different customers, so none was linked automatically.
+                 */
+                link_suggestions?: Components.Schemas.LinkSuggestion[];
                 /**
                  * If true then html is not provided and must be downloaded using the html_download_url
                  */
@@ -2776,6 +2965,8 @@ declare namespace Paths {
             }
             export interface $403 {
             }
+            export interface $409 {
+            }
         }
     }
     namespace SendMessage {
@@ -3461,6 +3652,11 @@ export interface OperationMethods {
    * sendMessage - sendMessage
    * 
    * Send an email message
+   * 
+   * Requires `message:send` and `entity:create` on `message`; `entity:create` on `thread` only when the
+   * request starts a new thread (a `thread` and no `parent_id`). With `do_not_create_entities=true` only
+   * `message:send` is required. Checked with the caller's token before the send is queued (403).
+   * 
    */
   'sendMessage'(
     parameters?: Parameters<Paths.SendMessage.QueryParameters> | null,
@@ -3952,6 +4148,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AssignThread.Responses.$204>
   /**
+   * dismissThreadLinkSuggestions - dismissThreadLinkSuggestions
+   * 
+   * Dismiss pending candidates of entity-link suggestions on a thread. A suggestion is recorded on a message when an identifier in it matched entities of different customers, so nothing was linked automatically. Each candidate is resolved on its own: linking one (assignThread) leaves the others suggested until they are linked or dismissed. A suggestion whose candidates are all resolved is not suggested again for the thread.
+   */
+  'dismissThreadLinkSuggestions'(
+    parameters?: Parameters<Paths.DismissThreadLinkSuggestions.PathParameters> | null,
+    data?: Paths.DismissThreadLinkSuggestions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DismissThreadLinkSuggestions.Responses.$200>
+  /**
    * unassignThread - unassignThread
    * 
    * Unassign thread from entities
@@ -4008,6 +4214,9 @@ export interface OperationMethods {
    * createDraft - createDraft
    * 
    * Create a new draft
+   * 
+   * Requires `entity:create` on `message`, checked with the caller's token before anything is created (403).
+   * 
    */
   'createDraft'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -4017,7 +4226,11 @@ export interface OperationMethods {
   /**
    * sendDraft - sendDraft
    * 
-   * Send the existing draft to the recipients
+   * Send the existing draft to the recipients.
+   * 
+   * Requires `message:send`, `entity:create` on `message` and `entity:edit` on the draft, checked with the
+   * caller's token (403). The id must be a DRAFT of the given thread (409).
+   * 
    */
   'sendDraft'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -4052,6 +4265,11 @@ export interface PathsDictionary {
      * sendMessage - sendMessage
      * 
      * Send an email message
+     * 
+     * Requires `message:send` and `entity:create` on `message`; `entity:create` on `thread` only when the
+     * request starts a new thread (a `thread` and no `parent_id`). With `do_not_create_entities=true` only
+     * `message:send` is required. Checked with the caller's token before the send is queued (403).
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.SendMessage.QueryParameters> | null,
@@ -4639,6 +4857,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AssignThread.Responses.$204>
   }
+  ['/v1/message/threads/{id}/link-suggestions/dismiss']: {
+    /**
+     * dismissThreadLinkSuggestions - dismissThreadLinkSuggestions
+     * 
+     * Dismiss pending candidates of entity-link suggestions on a thread. A suggestion is recorded on a message when an identifier in it matched entities of different customers, so nothing was linked automatically. Each candidate is resolved on its own: linking one (assignThread) leaves the others suggested until they are linked or dismissed. A suggestion whose candidates are all resolved is not suggested again for the thread.
+     */
+    'post'(
+      parameters?: Parameters<Paths.DismissThreadLinkSuggestions.PathParameters> | null,
+      data?: Paths.DismissThreadLinkSuggestions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DismissThreadLinkSuggestions.Responses.$200>
+  }
   ['/v1/message/threads/{id}/unassign']: {
     /**
      * unassignThread - unassignThread
@@ -4705,6 +4935,9 @@ export interface PathsDictionary {
      * createDraft - createDraft
      * 
      * Create a new draft
+     * 
+     * Requires `entity:create` on `message`, checked with the caller's token before anything is created (403).
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -4716,7 +4949,11 @@ export interface PathsDictionary {
     /**
      * sendDraft - sendDraft
      * 
-     * Send the existing draft to the recipients
+     * Send the existing draft to the recipients.
+     * 
+     * Requires `message:send`, `entity:create` on `message` and `entity:edit` on the draft, checked with the
+     * caller's token (403). The id must be a DRAFT of the given thread (409).
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -4762,8 +4999,12 @@ export type BulkActionsPayloadWithScopes = Components.Schemas.BulkActionsPayload
 export type ErrorResponse = Components.Schemas.ErrorResponse;
 export type FieldsParam = Components.Schemas.FieldsParam;
 export type File = Components.Schemas.File;
+export type LinkSuggestion = Components.Schemas.LinkSuggestion;
+export type LinkSuggestionCandidate = Components.Schemas.LinkSuggestionCandidate;
 export type Message = Components.Schemas.Message;
 export type MessageAutoReplySentEvent = Components.Schemas.MessageAutoReplySentEvent;
+export type MessageEntityLinkSuggestedEvent = Components.Schemas.MessageEntityLinkSuggestedEvent;
+export type MessageEntityLinkSuggestionDismissedEvent = Components.Schemas.MessageEntityLinkSuggestionDismissedEvent;
 export type MessageEntityLinkedEvent = Components.Schemas.MessageEntityLinkedEvent;
 export type MessageEntityUnlinkedEvent = Components.Schemas.MessageEntityUnlinkedEvent;
 export type MessageLabelAddedEvent = Components.Schemas.MessageLabelAddedEvent;
@@ -4773,13 +5014,19 @@ export type MessageV2 = Components.Schemas.MessageV2;
 export type MoveThreadPayload = Components.Schemas.MoveThreadPayload;
 export type ReadMessagePayload = Components.Schemas.ReadMessagePayload;
 export type ReadingScope = Components.Schemas.ReadingScope;
+export type ReplyContextEntityRef = Components.Schemas.ReplyContextEntityRef;
+export type ReplyContextMessage = Components.Schemas.ReplyContextMessage;
 export type SearchIDParams = Components.Schemas.SearchIDParams;
 export type SearchParams = Components.Schemas.SearchParams;
 export type SearchParamsV2 = Components.Schemas.SearchParamsV2;
+export type SimilarSentMessage = Components.Schemas.SimilarSentMessage;
+export type SimilarSentMessagesRequest = Components.Schemas.SimilarSentMessagesRequest;
+export type SimilarSentMessagesResponse = Components.Schemas.SimilarSentMessagesResponse;
 export type Thread = Components.Schemas.Thread;
 export type ThreadDoneEvent = Components.Schemas.ThreadDoneEvent;
 export type ThreadMovedToInboxEvent = Components.Schemas.ThreadMovedToInboxEvent;
 export type ThreadOpenEvent = Components.Schemas.ThreadOpenEvent;
+export type ThreadReplyContext = Components.Schemas.ThreadReplyContext;
 export type ThreadRestoredEvent = Components.Schemas.ThreadRestoredEvent;
 export type ThreadTimeline = Components.Schemas.ThreadTimeline;
 export type ThreadTrashedEvent = Components.Schemas.ThreadTrashedEvent;
@@ -4788,6 +5035,7 @@ export type ThreadView = Components.Schemas.ThreadView;
 export type TimelineActor = Components.Schemas.TimelineActor;
 export type TimelineEvent = Components.Schemas.TimelineEvent;
 export type TimelineEventData = Components.Schemas.TimelineEventData;
+export type TimelineLinkSuggestion = Components.Schemas.TimelineLinkSuggestion;
 export type TimelineLinkedEntity = Components.Schemas.TimelineLinkedEntity;
 export type UnreadCountBuckets = Components.Schemas.UnreadCountBuckets;
 export type UnreadCountScope = Components.Schemas.UnreadCountScope;
