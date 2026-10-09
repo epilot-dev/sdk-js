@@ -2145,7 +2145,7 @@
       },
       "EnvironmentValue": {
         "type": "object",
-        "description": "A comparison value resolved at evaluation time from an organisation environment variable\n(environments-api). The rule stores the key, never the value, so one change to the variable\nreaches every rule that references it and a blueprint install never overwrites the\norganisation's own value.\n\nOnly browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for\ntext comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.\n`String` and `SecretString` variables are rejected at write time. Write-time validation also\nchecks that the variable exists in the organisation; a variable that exists without a value\n(for example seeded by a blueprint install) is accepted and resolves as unavailable until set.\n",
+        "description": "A comparison value resolved at evaluation time from an organisation environment variable\n(environments-api). The rule stores the key, never the value, so one change to the variable\nreaches every rule that references it and a blueprint install never overwrites the\norganisation's own value.\n\nOnly browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment\namounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601\nstring), `Boolean` for `applies_when` values.\n`String` and `SecretString` variables are rejected at write time. Write-time validation also\nchecks that the variable exists in the organisation; a variable that exists without a value\n(for example seeded by a blueprint install) is accepted and resolves as unavailable until set.\n",
         "required": [
           "source",
           "key"
@@ -2334,10 +2334,17 @@
             ]
           },
           "offset": {
-            "type": "integer",
-            "minimum": -36500,
-            "maximum": 36500,
-            "description": "Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself."
+            "description": "Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.\nEither a fixed whole number, or a `Number` organisation environment variable resolved at evaluation\ntime. Environment offsets must not carry an adjustment. If the\nvariable is missing, has no value, or its value is not a whole number within ±36500, the comparison\nis unresolved.\n",
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": -36500,
+                "maximum": 36500
+              },
+              {
+                "$ref": "#/components/schemas/EnvironmentValue"
+              }
+            ]
           },
           "unit": {
             "type": "string",
