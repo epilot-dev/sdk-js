@@ -1,6 +1,5 @@
 # Validation Rules API
 
-- **Base URL:** `https://validation-rules.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/validation-rules](https://docs.epilot.io/api/validation-rules)
 
 ## Usage
@@ -57,6 +56,7 @@ const { data } = await validationRulesClient.getValidationRules(...)
 - [`Operator`](#operator)
 - [`ConditionValue`](#conditionvalue)
 - [`ScalarValue`](#scalarvalue)
+- [`ValueReference`](#valuereference)
 - [`EnvironmentValue`](#environmentvalue)
 - [`ExternalValue`](#externalvalue)
 - [`StaticValue`](#staticvalue)
@@ -1775,7 +1775,21 @@ type Condition = {
     }
   } | {
     source: "relative_date"
-    offset: number
+    offset: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
     unit: "days" | "months" | "years"
     anchor?: "today"
   } | {
@@ -1844,20 +1858,6 @@ type Condition = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
-      adjust?: { ... }
-    }
-  } | {
-    source: "none"
-  }
-  error_message: string
-  applies_when?: {
-    path: string
-    operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "isEmpty" | "isNotEmpty"
-    value?: number | string | boolean | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    }
   // ...
 }
 ```
@@ -1894,57 +1894,19 @@ type ConditionValue = {
       source: { ... }
       key: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
     }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
   }
 } | {
   source: "relative_date"
-  offset: number
-  unit: "days" | "months" | "years"
-  anchor?: "today"
-} | {
-  source: "environment"
-  key: string
-  adjust?: {
-    type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    }
-    direction: "increase" | "decrease"
-    rounding?: "up" | "down"
-  }
-} | {
-  source: "external"
-  app_id: string
-  hook_id: string
-  result_id: string
-  adjust?: {
-    type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    }
-    direction: "increase" | "decrease"
-    rounding?: "up" | "down"
-  }
-} | {
-  source: "range"
-  min: {
-    source: "static"
-    data: number | string | boolean
-  } | {
+  offset: number | {
     source: "context"
     path: string
     adjust?: {
@@ -1953,11 +1915,6 @@ type ConditionValue = {
       direction: { ... }
       rounding?: { ... }
     }
-  } | {
-    source: "relative_date"
-    offset: number
-    unit: "days" | "months" | "years"
-    anchor?: "today"
   } | {
     source: "environment"
     key: string
@@ -1978,6 +1935,49 @@ type ConditionValue = {
       direction: { ... }
       rounding?: { ... }
     }
+  }
+  unit: "days" | "months" | "years"
+  anchor?: "today"
+} | {
+  source: "environment"
+  key: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
+} | {
+  source: "external"
+  app_id: string
+  hook_id: string
+  result_id: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
   // ...
 }
 ```
@@ -2003,13 +2003,48 @@ type ScalarValue = {
       source: { ... }
       key: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
     }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
   }
 } | {
   source: "relative_date"
-  offset: number
+  offset: number | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  }
   unit: "days" | "months" | "years"
   anchor?: "today"
 } | {
@@ -2024,6 +2059,12 @@ type ScalarValue = {
     } | {
       source: { ... }
       key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
       adjust?: { ... }
     }
     direction: "increase" | "decrease"
@@ -2043,6 +2084,87 @@ type ScalarValue = {
     } | {
       source: { ... }
       key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+  // ...
+}
+```
+
+### `ValueReference`
+
+A value resolved at evaluation time instead of written into the rule, identified by
+`source`. Each field that accepts a reference lists the sources it allows; a rule using
+any other source is rejected when it is saved.
+
+
+```ts
+type ValueReference = {
+  source: "context"
+  path: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
+} | {
+  source: "environment"
+  key: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
+} | {
+  source: "external"
+  app_id: string
+  hook_id: string
+  result_id: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
       adjust?: { ... }
     }
     direction: "increase" | "decrease"
@@ -2074,6 +2196,12 @@ type EnvironmentValue = {
       source: { ... }
       key: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
     }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
@@ -2103,6 +2231,12 @@ type ExternalValue = {
     } | {
       source: { ... }
       key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
       adjust?: { ... }
     }
     direction: "increase" | "decrease"
@@ -2143,6 +2277,12 @@ type ContextValue = {
       source: { ... }
       key: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
     }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
@@ -2177,6 +2317,17 @@ type ValueAdjustment = {
       direction: { ... }
       rounding?: { ... }
     }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
   }
   direction: "increase" | "decrease"
   rounding?: "up" | "down"
@@ -2190,7 +2341,36 @@ A date relative to the evaluation moment, e.g. "today minus 30 days". Only valid
 ```ts
 type RelativeDateValue = {
   source: "relative_date"
-  offset: number
+  offset: number | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  }
   unit: "days" | "months" | "years"
   anchor?: "today"
 }
@@ -2217,7 +2397,21 @@ type RangeValue = {
     }
   } | {
     source: "relative_date"
-    offset: number
+    offset: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
     unit: "days" | "months" | "years"
     anchor?: "today"
   } | {
@@ -2255,7 +2449,21 @@ type RangeValue = {
     }
   } | {
     source: "relative_date"
-    offset: number
+    offset: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
     unit: "days" | "months" | "years"
     anchor?: "today"
   } | {
@@ -2273,12 +2481,7 @@ type RangeValue = {
     hook_id: string
     result_id: string
     adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
-  }
+  // ...
 }
 ```
 
@@ -2449,7 +2652,21 @@ type DocumentConditionValue = {
     }
   } | {
     source: "relative_date"
-    offset: number
+    offset: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
     unit: "days" | "months" | "years"
     anchor?: "today"
   } | {
@@ -2487,7 +2704,21 @@ type DocumentConditionValue = {
     }
   } | {
     source: "relative_date"
-    offset: number
+    offset: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    }
     unit: "days" | "months" | "years"
     anchor?: "today"
   } | {
@@ -2502,23 +2733,7 @@ type DocumentConditionValue = {
   } | {
     source: "external"
     app_id: string
-    hook_id: string
-    result_id: string
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
-  }
-} | {
-  source: "none"
-} | {
-  source: "file_types"
-  types: "image" | "pdf" | "document" | "spreadsheet"[]
-} | {
-  source: "criteria"
-  text: string
+  // ...
 }
 ```
 
@@ -2560,8 +2775,28 @@ type AppliesWhen = {
   path: string
   operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "isEmpty" | "isNotEmpty"
   value?: number | string | boolean | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
     source: "environment"
     key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
     adjust?: {
       type: { ... }
       value: { ... }

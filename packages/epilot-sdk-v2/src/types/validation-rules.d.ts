@@ -28,31 +28,28 @@ export declare namespace Components {
              */
             operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "isEmpty" | "isNotEmpty";
             /**
-             * Comparison value for binary operators: a static number, string or boolean, or an
-             * organisation environment variable (`Number`, `Text` or `Boolean`) so a precondition
-             * can act as a per-organisation switch or threshold.
+             * Comparison value for binary operators: a static number, string or boolean, or a
+             * reference resolved at evaluation time. Accepted reference source: `environment` (a
+             * `Number`, `Text` or `Boolean` organisation environment variable), so a precondition
+             * can act as a per-organisation switch or threshold. Any other source is rejected at
+             * write time, and the reference must not carry an `adjust`.
              *
              */
             value?: /**
-             * Comparison value for binary operators: a static number, string or boolean, or an
-             * organisation environment variable (`Number`, `Text` or `Boolean`) so a precondition
-             * can act as a per-organisation switch or threshold.
+             * Comparison value for binary operators: a static number, string or boolean, or a
+             * reference resolved at evaluation time. Accepted reference source: `environment` (a
+             * `Number`, `Text` or `Boolean` organisation environment variable), so a precondition
+             * can act as a per-organisation switch or threshold. Any other source is rejected at
+             * write time, and the reference must not carry an `adjust`.
              *
              */
             number | string | boolean | /**
-             * A comparison value resolved at evaluation time from an organisation environment variable
-             * (environments-api). The rule stores the key, never the value, so one change to the variable
-             * reaches every rule that references it and a blueprint install never overwrites the
-             * organisation's own value.
-             *
-             * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-             * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
-             * `String` and `SecretString` variables are rejected at write time. Write-time validation also
-             * checks that the variable exists in the organisation; a variable that exists without a value
-             * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
+             * A value resolved at evaluation time instead of written into the rule, identified by
+             * `source`. Each field that accepts a reference lists the sources it allows; a rule using
+             * any other source is rejected when it is saved.
              *
              */
-            EnvironmentValue;
+            ValueReference;
         }
         /**
          * Declarative validation rule (schema version v2). Supports predefined comparison operators
@@ -137,8 +134,9 @@ export declare namespace Components {
          * reaches every rule that references it and a blueprint install never overwrites the
          * organisation's own value.
          *
-         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+         * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+         * string), `Boolean` for `applies_when` values.
          * `String` and `SecretString` variables are rejected at write time. Write-time validation also
          * checks that the variable exists in the organisation; a variable that exists without a value
          * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
@@ -358,8 +356,9 @@ export declare namespace Components {
          * reaches every rule that references it and a blueprint install never overwrites the
          * organisation's own value.
          *
-         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+         * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+         * string), `Boolean` for `applies_when` values.
          * `String` and `SecretString` variables are rejected at write time. Write-time validation also
          * checks that the variable exists in the organisation; a variable that exists without a value
          * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
@@ -816,8 +815,27 @@ export declare namespace Components {
             source: "relative_date";
             /**
              * Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.
+             * Either a fixed whole number, or a reference resolved at evaluation time. Accepted reference source:
+             * `environment` (a `Number` organisation environment variable). Any other source is rejected at write
+             * time, and the reference must not carry an `adjust`. If the referenced value is missing or is not a
+             * whole number within ±36500, the comparison is unresolved.
+             *
              */
-            offset: number;
+            offset: /**
+             * Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.
+             * Either a fixed whole number, or a reference resolved at evaluation time. Accepted reference source:
+             * `environment` (a `Number` organisation environment variable). Any other source is rejected at write
+             * time, and the reference must not carry an `adjust`. If the referenced value is missing or is not a
+             * whole number within ±36500, the comparison is unresolved.
+             *
+             */
+            number | /**
+             * A value resolved at evaluation time instead of written into the rule, identified by
+             * `source`. Each field that accepts a reference lists the sources it allows; a rule using
+             * any other source is rejected when it is saved.
+             *
+             */
+            ValueReference;
             unit: "days" | "months" | "years";
             anchor?: "today";
         }
@@ -836,8 +854,9 @@ export declare namespace Components {
          * reaches every rule that references it and a blueprint install never overwrites the
          * organisation's own value.
          *
-         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+         * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+         * string), `Boolean` for `applies_when` values.
          * `String` and `SecretString` variables are rejected at write time. Write-time validation also
          * checks that the variable exists in the organisation; a variable that exists without a value
          * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
@@ -1105,37 +1124,28 @@ export declare namespace Components {
         export interface ValueAdjustment {
             type: "percent" | "absolute";
             /**
-             * The adjustment amount - a fixed number, or a context path resolving to a number
-             * (e.g. a per-contract percentage limit). Contextual adjustment values must not
-             * carry a nested adjustment.
+             * The adjustment amount - a fixed non-negative number, or a reference resolving to a
+             * number at evaluation time. Accepted reference sources: `context` (e.g. a per-contract
+             * percentage limit) and `environment` (a `Number` organisation environment variable).
+             * Any other source is rejected at write time, and the reference must not carry its own
+             * `adjust`.
              *
              */
             value: /**
-             * The adjustment amount - a fixed number, or a context path resolving to a number
-             * (e.g. a per-contract percentage limit). Contextual adjustment values must not
-             * carry a nested adjustment.
+             * The adjustment amount - a fixed non-negative number, or a reference resolving to a
+             * number at evaluation time. Accepted reference sources: `context` (e.g. a per-contract
+             * percentage limit) and `environment` (a `Number` organisation environment variable).
+             * Any other source is rejected at write time, and the reference must not carry its own
+             * `adjust`.
              *
              */
             number | /**
-             * A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`
-             * or `previous_reading.value`. The first path segment must match the `name` of a declared
-             * context requirement.
+             * A value resolved at evaluation time instead of written into the rule, identified by
+             * `source`. Each field that accepts a reference lists the sources it allows; a rule using
+             * any other source is rejected when it is saved.
              *
              */
-            ContextValue | /**
-             * A comparison value resolved at evaluation time from an organisation environment variable
-             * (environments-api). The rule stores the key, never the value, so one change to the variable
-             * reaches every rule that references it and a blueprint install never overwrites the
-             * organisation's own value.
-             *
-             * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-             * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
-             * `String` and `SecretString` variables are rejected at write time. Write-time validation also
-             * checks that the variable exists in the organisation; a variable that exists without a value
-             * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
-             *
-             */
-            EnvironmentValue;
+            ValueReference;
             direction: "increase" | "decrease";
             /**
              * Rounds the adjusted result to a whole number - `up` (ceiling) or `down` (floor).
@@ -1144,6 +1154,52 @@ export declare namespace Components {
              */
             rounding?: "up" | "down";
         }
+        /**
+         * A value resolved at evaluation time instead of written into the rule, identified by
+         * `source`. Each field that accepts a reference lists the sources it allows; a rule using
+         * any other source is rejected when it is saved.
+         *
+         */
+        export type ValueReference = /**
+         * A value resolved at evaluation time instead of written into the rule, identified by
+         * `source`. Each field that accepts a reference lists the sources it allows; a rule using
+         * any other source is rejected when it is saved.
+         *
+         */
+        /**
+         * A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`
+         * or `previous_reading.value`. The first path segment must match the `name` of a declared
+         * context requirement.
+         *
+         */
+        ContextValue | /**
+         * A comparison value resolved at evaluation time from an organisation environment variable
+         * (environments-api). The rule stores the key, never the value, so one change to the variable
+         * reaches every rule that references it and a blueprint install never overwrites the
+         * organisation's own value.
+         *
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+         * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+         * string), `Boolean` for `applies_when` values.
+         * `String` and `SecretString` variables are rejected at write time. Write-time validation also
+         * checks that the variable exists in the organisation; a variable that exists without a value
+         * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
+         *
+         */
+        EnvironmentValue | /**
+         * A comparison value produced at evaluation time by an External Values hook of an installed
+         * app (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is
+         * resolved server-side by the external-values-api, which executes the hook's HTTP call with
+         * the app's credentials and returns the typed result identified by `result_id`.
+         *
+         * Write-time validation checks that the app is installed in the organisation, that the hook
+         * and result exist, and that the result's type is compatible with the compared kind
+         * (`number` results for numeric comparisons, `text` for text, `date` for date). External values
+         * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
+         * in public journeys the dependent conditions are skipped.
+         *
+         */
+        ExternalValue;
     }
 }
 export declare namespace Paths {
@@ -1668,3 +1724,4 @@ export type UsedBy = Components.Schemas.UsedBy;
 export type ValidationRule = Components.Schemas.ValidationRule;
 export type ValidationRuleBase = Components.Schemas.ValidationRuleBase;
 export type ValueAdjustment = Components.Schemas.ValueAdjustment;
+export type ValueReference = Components.Schemas.ValueReference;
