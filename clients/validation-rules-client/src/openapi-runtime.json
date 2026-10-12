@@ -97,9 +97,5 @@
     }
   },
   "components": {},
-  "servers": [
-    {
-      "url": "https://validation-rules.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }

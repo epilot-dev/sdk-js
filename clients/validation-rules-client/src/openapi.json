@@ -2143,9 +2143,23 @@
           }
         ]
       },
+      "ValueReference": {
+        "description": "A value resolved at evaluation time instead of written into the rule, identified by\n`source`. Each field that accepts a reference lists the sources it allows; a rule using\nany other source is rejected when it is saved.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ContextValue"
+          },
+          {
+            "$ref": "#/components/schemas/EnvironmentValue"
+          },
+          {
+            "$ref": "#/components/schemas/ExternalValue"
+          }
+        ]
+      },
       "EnvironmentValue": {
         "type": "object",
-        "description": "A comparison value resolved at evaluation time from an organisation environment variable\n(environments-api). The rule stores the key, never the value, so one change to the variable\nreaches every rule that references it and a blueprint install never overwrites the\norganisation's own value.\n\nOnly browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for\ntext comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.\n`String` and `SecretString` variables are rejected at write time. Write-time validation also\nchecks that the variable exists in the organisation; a variable that exists without a value\n(for example seeded by a blueprint install) is accepted and resolves as unavailable until set.\n",
+        "description": "A comparison value resolved at evaluation time from an organisation environment variable\n(environments-api). The rule stores the key, never the value, so one change to the variable\nreaches every rule that references it and a blueprint install never overwrites the\norganisation's own value.\n\nOnly browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment\namounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601\nstring), `Boolean` for `applies_when` values.\n`String` and `SecretString` variables are rejected at write time. Write-time validation also\nchecks that the variable exists in the organisation; a variable that exists without a value\n(for example seeded by a blueprint install) is accepted and resolves as unavailable until set.\n",
         "required": [
           "source",
           "key"
@@ -2286,17 +2300,14 @@
             ]
           },
           "value": {
-            "description": "The adjustment amount - a fixed number, or a context path resolving to a number\n(e.g. a per-contract percentage limit). Contextual adjustment values must not\ncarry a nested adjustment.\n",
+            "description": "The adjustment amount - a fixed non-negative number, or a reference resolving to a\nnumber at evaluation time. Accepted reference sources: `context` (e.g. a per-contract\npercentage limit) and `environment` (a `Number` organisation environment variable).\nAny other source is rejected at write time, and the reference must not carry its own\n`adjust`.\n",
             "oneOf": [
               {
                 "type": "number",
                 "minimum": 0
               },
               {
-                "$ref": "#/components/schemas/ContextValue"
-              },
-              {
-                "$ref": "#/components/schemas/EnvironmentValue"
+                "$ref": "#/components/schemas/ValueReference"
               }
             ]
           },
@@ -2313,7 +2324,7 @@
               "up",
               "down"
             ],
-            "description": "Rounds the adjusted result to a whole number - `up` (ceiling) or `down` (floor).\nOmitted means no rounding. Used for bounds like \"round up(current \u00d7 0.9) to whole euros\".\n"
+            "description": "Rounds the adjusted result to a whole number - `up` (ceiling) or `down` (floor).\nOmitted means no rounding. Used for bounds like \"round up(current × 0.9) to whole euros\".\n"
           }
         }
       },
@@ -2334,10 +2345,17 @@
             ]
           },
           "offset": {
-            "type": "integer",
-            "minimum": -36500,
-            "maximum": 36500,
-            "description": "Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself."
+            "description": "Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.\nEither a fixed whole number, or a reference resolved at evaluation time. Accepted reference source:\n`environment` (a `Number` organisation environment variable). Any other source is rejected at write\ntime, and the reference must not carry an `adjust`. If the referenced value is missing or is not a\nwhole number within ±36500, the comparison is unresolved.\n",
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": -36500,
+                "maximum": 36500
+              },
+              {
+                "$ref": "#/components/schemas/ValueReference"
+              }
+            ]
           },
           "unit": {
             "type": "string",
@@ -2598,7 +2616,7 @@
             "description": "Comparison applied to the resolved context value. `isEmpty` / `isNotEmpty`\ntake no `value`; all other operators require one.\n"
           },
           "value": {
-            "description": "Comparison value for binary operators: a static number, string or boolean, or an\norganisation environment variable (`Number`, `Text` or `Boolean`) so a precondition\ncan act as a per-organisation switch or threshold.\n",
+            "description": "Comparison value for binary operators: a static number, string or boolean, or a\nreference resolved at evaluation time. Accepted reference source: `environment` (a\n`Number`, `Text` or `Boolean` organisation environment variable), so a precondition\ncan act as a per-organisation switch or threshold. Any other source is rejected at\nwrite time, and the reference must not carry an `adjust`.\n",
             "oneOf": [
               {
                 "type": "number"
@@ -2610,7 +2628,7 @@
                 "type": "boolean"
               },
               {
-                "$ref": "#/components/schemas/EnvironmentValue"
+                "$ref": "#/components/schemas/ValueReference"
               }
             ]
           }
@@ -2634,9 +2652,5 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "https://validation-rules.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }
