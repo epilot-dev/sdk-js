@@ -2702,6 +2702,28 @@
           }
         ],
         "responses": {}
+      },
+      "patch": {
+        "operationId": "updatePortalRevision",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "revision_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v3/portal/config/{portal_id}/publish": {

@@ -1308,6 +1308,13 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
              * Configuration for contract selector in the portal
              */
             contract_selector_config?: {
@@ -1847,6 +1854,13 @@ declare namespace Components {
              * ]
              */
             contract_identifiers?: ContractIdentifier[];
+            /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
             /**
              * Configuration for contract selector in the portal
              */
@@ -5264,6 +5278,12 @@ declare namespace Components {
              * Design of the portal, used to preload it from the served document
              */
             design_id?: string;
+            /**
+             * The portal design as returned by design-builder parse (theme=NEW), for the served document; absent when the design could not be read
+             */
+            design?: {
+                [name: string]: any;
+            } | null;
         }
         /**
          * The meter entity
@@ -6739,6 +6759,13 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
              * Configuration for contract selector in the portal
              */
             contract_selector_config?: {
@@ -7489,6 +7516,13 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
              * Configuration for contract selector in the portal
              */
             contract_selector_config?: {
@@ -7943,13 +7977,18 @@ declare namespace Components {
              */
             created_by?: string;
             /**
-             * Set at publish time only, and only when the publish request carried one. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
+             * Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
              *
              * example:
              * FAQ page launch
              */
             name?: string;
             description?: string;
+            source?: /**
+             * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+             *
+             */
+            RevisionSource;
             page_count: number;
             /**
              * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
@@ -8018,13 +8057,18 @@ declare namespace Components {
              */
             created_by?: string;
             /**
-             * Set at publish time only, and only when the publish request carried one. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
+             * Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
              *
              * example:
              * FAQ page launch
              */
             name?: string;
             description?: string;
+            source?: /**
+             * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+             *
+             */
+            RevisionSource;
             page_count: number;
             /**
              * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
@@ -8447,6 +8491,13 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
              * Configuration for contract selector in the portal
              */
             contract_selector_config?: {
@@ -8658,6 +8709,11 @@ declare namespace Components {
                 [name: string]: Block;
             };
             based_on_revision_id?: string;
+            revision_source?: /**
+             * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+             *
+             */
+            RevisionSource;
             pages: /**
              * A page inside a revision snapshot. `additionalProperties` is true on purpose — a page carries fields this schema does not name and they must survive into the snapshot and back onto the live page when it is published.
              *
@@ -8676,13 +8732,18 @@ declare namespace Components {
              */
             created_by?: string;
             /**
-             * Set at publish time only, and only when the publish request carried one. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
+             * Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
              *
              * example:
              * FAQ page launch
              */
             name?: string;
             description?: string;
+            source?: /**
+             * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+             *
+             */
+            RevisionSource;
             page_count: number;
             /**
              * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
@@ -8899,6 +8960,28 @@ declare namespace Components {
             _schema: "portal_user";
         }
         export type PortalUserRegistrationStatus = "Registration Pending" | "Confirmation Email Sent" | "Registered" | "Email Update In Progress";
+        /**
+         * A portal whose design_id is the design asked about.
+         */
+        export interface PortalUsingDesign {
+            portal_id: /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            PortalId;
+            /**
+             * example:
+             * Kundenportal
+             */
+            name?: string;
+            origin?: /* Origin of the portal */ Origin;
+            /**
+             * example:
+             * 9ba94f20-b872-11ed-b30a-b3e3bf2dc8ab
+             */
+            design_id?: string;
+        }
         export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget | MeterReadingWidget | MeterChartWidget | CampaignWidget | ProductRecommendationsWidget;
         /**
          * A portal-facing projection of a workflow execution (V1 or V2), with the execution
@@ -9869,6 +9952,14 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
+        /**
+         * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+         *
+         */
+        export interface RevisionSource {
+            type: "blueprint_sync";
+            blueprint_title?: string;
+        }
         export interface Rule {
             entity?: string | null;
             attribute?: string | null;
@@ -10293,6 +10384,15 @@ declare namespace Components {
              */
             ProviderConfig[];
         }
+        export interface UpdatePortalRevisionRequest {
+            /**
+             * New label for the revision. Trimmed by the server; an empty name after trimming removes the revision's name.
+             *
+             * example:
+             * FAQ page launch
+             */
+            name: string;
+        }
         export interface UpsertPortalConfig {
             /**
              * Journey actions allowed on an entity by a portal user
@@ -10671,6 +10771,13 @@ declare namespace Components {
              * ]
              */
             contract_identifiers?: ContractIdentifier[];
+            /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
             /**
              * Configuration for contract selector in the portal
              */
@@ -11272,6 +11379,13 @@ declare namespace Components {
              * ]
              */
             contract_identifiers?: ContractIdentifier[];
+            /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
             /**
              * Configuration for contract selector in the portal
              */
@@ -15329,6 +15443,13 @@ declare namespace Paths {
                  */
                 contract_identifiers?: Components.Schemas.ContractIdentifier[];
                 /**
+                 * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+                 *   - `contracts`: the user's Contact is added as a customer of the Contract.
+                 *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+                 *
+                 */
+                self_assignment_mode?: "contracts" | "customer_to_portal_user";
+                /**
                  * Configuration for contract selector in the portal
                  */
                 contract_selector_config?: {
@@ -15959,6 +16080,13 @@ declare namespace Paths {
                  * ]
                  */
                 contract_identifiers?: Components.Schemas.ContractIdentifier[];
+                /**
+                 * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+                 *   - `contracts`: the user's Contact is added as a customer of the Contract.
+                 *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+                 *
+                 */
+                self_assignment_mode?: "contracts" | "customer_to_portal_user";
                 /**
                  * Configuration for contract selector in the portal
                  */
@@ -17144,6 +17272,13 @@ declare namespace Paths {
                  * ]
                  */
                 contract_identifiers?: Components.Schemas.ContractIdentifier[];
+                /**
+                 * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+                 *   - `contracts`: the user's Contact is added as a customer of the Contract.
+                 *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+                 *
+                 */
+                self_assignment_mode?: "contracts" | "customer_to_portal_user";
                 /**
                  * Configuration for contract selector in the portal
                  */
@@ -19160,7 +19295,7 @@ declare namespace Paths {
              */
             Components.Schemas.PortalId;
             /**
-             * Optional, opt-in configuration items to additionally swap on top of the always-swapped pages and functional config. Defaults to an empty list (nothing extra swapped). Domain and access/security settings can never be swapped.
+             * Optional, opt-in configuration items to additionally swap on top of the always-swapped pages and functional config. Defaults to an empty list (nothing extra swapped). Domain and access/security settings can never be swapped. With `mode` the listed items are included in the draft revisions.
              */
             items_to_swap?: /**
              * Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum.
@@ -19168,6 +19303,10 @@ declare namespace Paths {
              * - `portal_references`: after the swap, re-point configuration in other services from the source portal to the target portal: the portal on journey login (AuthControl) blocks and in file upload portal access, and the portal of automation flow portal triggers. One-directional: references to the target portal are left unchanged, because the target keeps its domain and users. System flows are not changed. Uses the caller's permissions; the outcome is returned in `portal_references`.
              */
             Components.Schemas.SwappableConfig[];
+            /**
+             * Requires portal versioning (flag on, V3 target portal), otherwise 400. `copy` saves an unpublished revision on the target holding the source's setup; neither portal changes live and the source is untouched. Omit for the original live swap. Cannot be combined with the `portal_references` item, which only applies to a live swap.
+             */
+            mode?: "copy";
         }
         namespace Responses {
             export interface $200 {
@@ -19177,6 +19316,18 @@ declare namespace Paths {
                  */
                 message?: string;
                 portal_references?: /* Outcome of the `portal_references` swap option. Only present when that option was requested. The swap itself has already succeeded when this is returned, so failures here do not undo it. */ Components.Schemas.SwapPortalReferencesResult;
+                /**
+                 * Only with `mode`. The draft revision created on the target.
+                 */
+                revisions?: {
+                    portal_id?: /**
+                     * ID of the portal
+                     * example:
+                     * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+                     */
+                    Components.Schemas.PortalId;
+                    revision_id?: string;
+                }[];
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
@@ -19473,6 +19624,41 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.BlockRequest;
         namespace Responses {
             export type $200 = Components.Schemas.Block;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdatePortalRevision {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type PortalId = string; // uuid
+            /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            export type RevisionId = string;
+        }
+        export interface PathParameters {
+            portal_id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.PortalId /* uuid */;
+            revision_id: /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            Parameters.RevisionId;
+        }
+        export type RequestBody = Components.Schemas.UpdatePortalRevisionRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalRevisionSummary;
+            export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -21776,6 +21962,19 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPortalRevision.Responses.$200>
   /**
+   * updatePortalRevision - updatePortalRevision
+   * 
+   * Renames a revision without publishing it. Any revision can be renamed, published or not. Only the revision's `name` changes: its content, `published_at`, `published_by` and which revision is live stay as they are.
+   * 
+   * The server trims `name`. An empty name after trimming removes the revision's name, and clients fall back to a label derived from `published_at` / `created_at`. A later publish without a `name` keeps the renamed name.
+   * 
+   */
+  'updatePortalRevision'(
+    parameters?: Parameters<Paths.UpdatePortalRevision.PathParameters> | null,
+    data?: Paths.UpdatePortalRevision.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdatePortalRevision.Responses.$200>
+  /**
    * publishPortalRevision - publishPortalRevision
    * 
    * Makes one revision the portal's live configuration, atomically: either everything below takes effect or nothing does. Publish is a full-snapshot replace: it writes config, every page and email templates to match the revision exactly, and deletes every live page the revision does not contain.
@@ -21821,7 +22020,7 @@ export interface OperationMethods {
   /**
    * swapPortalConfig - swapPortalConfig
    * 
-   * Swaps the portal configuration of two portals.
+   * Swaps the portal configuration of two portals. Without `mode` both portals exchange pages and experience config live, as before. With `mode: copy` (portal versioning only) nothing live changes: the source's setup is saved as an unpublished revision on the target to review and publish. Domain and access/security settings never move.
    */
   'swapPortalConfig'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -23987,6 +24186,19 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPortalRevision.Responses.$200>
+    /**
+     * updatePortalRevision - updatePortalRevision
+     * 
+     * Renames a revision without publishing it. Any revision can be renamed, published or not. Only the revision's `name` changes: its content, `published_at`, `published_by` and which revision is live stay as they are.
+     * 
+     * The server trims `name`. An empty name after trimming removes the revision's name, and clients fall back to a label derived from `published_at` / `created_at`. A later publish without a `name` keeps the renamed name.
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdatePortalRevision.PathParameters> | null,
+      data?: Paths.UpdatePortalRevision.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdatePortalRevision.Responses.$200>
   }
   ['/v3/portal/config/{portal_id}/publish']: {
     /**
@@ -24041,7 +24253,7 @@ export interface PathsDictionary {
     /**
      * swapPortalConfig - swapPortalConfig
      * 
-     * Swaps the portal configuration of two portals.
+     * Swaps the portal configuration of two portals. Without `mode` both portals exchange pages and experience config live, as before. With `mode: copy` (portal versioning only) nothing live changes: the source's setup is saved as an unpublished revision on the target to review and publish. Domain and access/security settings never move.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -24329,6 +24541,7 @@ export type PortalSurfaceEntityAccess = Components.Schemas.PortalSurfaceEntityAc
 export type PortalTaskConfig = Components.Schemas.PortalTaskConfig;
 export type PortalUser = Components.Schemas.PortalUser;
 export type PortalUserRegistrationStatus = Components.Schemas.PortalUserRegistrationStatus;
+export type PortalUsingDesign = Components.Schemas.PortalUsingDesign;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type PortalWorkflow = Components.Schemas.PortalWorkflow;
 export type PortalWorkflowStage = Components.Schemas.PortalWorkflowStage;
@@ -24360,6 +24573,7 @@ export type RegistrationIdentifier = Components.Schemas.RegistrationIdentifier;
 export type ReimbursementEvent = Components.Schemas.ReimbursementEvent;
 export type RevisionPage = Components.Schemas.RevisionPage;
 export type RevisionPageRequest = Components.Schemas.RevisionPageRequest;
+export type RevisionSource = Components.Schemas.RevisionSource;
 export type Rule = Components.Schemas.Rule;
 export type SAMLProviderConfig = Components.Schemas.SAMLProviderConfig;
 export type SSOCallbackRequest = Components.Schemas.SSOCallbackRequest;
@@ -24383,6 +24597,7 @@ export type TeaserWidget = Components.Schemas.TeaserWidget;
 export type TemplatesRef = Components.Schemas.TemplatesRef;
 export type TriggerPortalFlow = Components.Schemas.TriggerPortalFlow;
 export type UpdateOnlyPortalConfigAttributes = Components.Schemas.UpdateOnlyPortalConfigAttributes;
+export type UpdatePortalRevisionRequest = Components.Schemas.UpdatePortalRevisionRequest;
 export type UpsertPortalConfig = Components.Schemas.UpsertPortalConfig;
 export type UpsertPortalConfigV3 = Components.Schemas.UpsertPortalConfigV3;
 export type UpsertPortalWidget = Components.Schemas.UpsertPortalWidget;

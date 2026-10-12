@@ -11077,6 +11077,80 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         }
+      },
+      "patch": {
+        "operationId": "updatePortalRevision",
+        "summary": "updatePortalRevision",
+        "description": "Renames a revision without publishing it. Any revision can be renamed, published or not. Only the revision's `name` changes: its content, `published_at`, `published_by` and which revision is live stay as they are.\n\nThe server trims `name`. An empty name after trimming removes the revision's name, and clients fall back to a label derived from `published_at` / `created_at`. A later publish without a `name` keeps the renamed name.\n",
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+            },
+            "description": "Portal ID (readonly UUID generated on portal creation)"
+          },
+          {
+            "in": "path",
+            "name": "revision_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2026-08-25T14:03:11.482Z-a7f3c1d9"
+            },
+            "description": "Revision ID. Contains `:` characters, so percent-encode it."
+          }
+        ],
+        "requestBody": {
+          "description": "The new revision name",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePortalRevisionRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revision renamed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalRevisionSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v3/portal/config/{portal_id}/publish": {
@@ -11243,7 +11317,7 @@
       "post": {
         "operationId": "swapPortalConfig",
         "summary": "swapPortalConfig",
-        "description": "Swaps the portal configuration of two portals.",
+        "description": "Swaps the portal configuration of two portals. Without `mode` both portals exchange pages and experience config live, as before. With `mode: copy` (portal versioning only) nothing live changes: the source's setup is saved as an unpublished revision on the target to review and publish. Domain and access/security settings never move.",
         "tags": [
           "ECP Admin"
         ],
@@ -11275,7 +11349,14 @@
                     "items": {
                       "$ref": "#/components/schemas/SwappableConfig"
                     },
-                    "description": "Optional, opt-in configuration items to additionally swap on top of the always-swapped pages and functional config. Defaults to an empty list (nothing extra swapped). Domain and access/security settings can never be swapped."
+                    "description": "Optional, opt-in configuration items to additionally swap on top of the always-swapped pages and functional config. Defaults to an empty list (nothing extra swapped). Domain and access/security settings can never be swapped. With `mode` the listed items are included in the draft revisions."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "copy"
+                    ],
+                    "description": "Requires portal versioning (flag on, V3 target portal), otherwise 400. `copy` saves an unpublished revision on the target holding the source's setup; neither portal changes live and the source is untouched. Omit for the original live swap. Cannot be combined with the `portal_references` item, which only applies to a live swap."
                   }
                 }
               }
@@ -11296,6 +11377,21 @@
                     },
                     "portal_references": {
                       "$ref": "#/components/schemas/SwapPortalReferencesResult"
+                    },
+                    "revisions": {
+                      "type": "array",
+                      "description": "Only with `mode`. The draft revision created on the target.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "portal_id": {
+                            "$ref": "#/components/schemas/PortalId"
+                          },
+                          "revision_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -13494,6 +13590,15 @@
                 "schema": "contract"
               }
             ]
+          },
+          "self_assignment_mode": {
+            "type": "string",
+            "enum": [
+              "contracts",
+              "customer_to_portal_user"
+            ],
+            "default": "contracts",
+            "description": "What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:\n  - `contracts`: the user's Contact is added as a customer of the Contract.\n  - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.\n"
           },
           "contract_selector_config": {
             "type": "object",
@@ -20585,6 +20690,15 @@
               }
             ]
           },
+          "self_assignment_mode": {
+            "type": "string",
+            "enum": [
+              "contracts",
+              "customer_to_portal_user"
+            ],
+            "default": "contracts",
+            "description": "What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:\n  - `contracts`: the user's Contact is added as a customer of the Contract.\n  - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.\n"
+          },
           "contract_selector_config": {
             "type": "object",
             "description": "Configuration for contract selector in the portal",
@@ -21031,6 +21145,29 @@
           }
         }
       },
+      "PortalUsingDesign": {
+        "type": "object",
+        "description": "A portal whose design_id is the design asked about.",
+        "required": [
+          "portal_id"
+        ],
+        "properties": {
+          "portal_id": {
+            "$ref": "#/components/schemas/PortalId"
+          },
+          "name": {
+            "type": "string",
+            "example": "Kundenportal"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
+          },
+          "design_id": {
+            "type": "string",
+            "example": "9ba94f20-b872-11ed-b30a-b3e3bf2dc8ab"
+          }
+        }
+      },
       "PortalConfigSummaryV3": {
         "type": "object",
         "description": "Lightweight view of a portal config for lists and pickers. Carries the identifying,\ndisplay and registration fields only. Pages, email templates, grants, feature flags,\nidentity providers and certificate details are left out; read them per portal with\n`getPortalConfigV3`.\n",
@@ -21220,6 +21357,12 @@
           "design_id": {
             "type": "string",
             "description": "Design of the portal, used to preload it from the served document"
+          },
+          "design": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true,
+            "description": "The portal design as returned by design-builder parse (theme=NEW), for the served document; absent when the design could not be read"
           }
         }
       },
@@ -21282,6 +21425,9 @@
               "based_on_revision_id": {
                 "type": "string"
               },
+              "revision_source": {
+                "$ref": "#/components/schemas/RevisionSource"
+              },
               "pages": {
                 "type": "array",
                 "items": {
@@ -21315,6 +21461,40 @@
           }
         }
       },
+      "UpdatePortalRevisionRequest": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "New label for the revision. Trimmed by the server; an empty name after trimming removes the revision's name.\n",
+            "example": "FAQ page launch"
+          }
+        }
+      },
+      "RevisionSource": {
+        "type": "object",
+        "description": "Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.\n",
+        "additionalProperties": false,
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "blueprint_sync"
+            ]
+          },
+          "blueprint_title": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      },
       "PortalRevisionSummary": {
         "type": "object",
         "required": [
@@ -21338,11 +21518,14 @@
           },
           "name": {
             "type": "string",
-            "description": "Set at publish time only, and only when the publish request carried one. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.\n",
+            "description": "Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.\n",
             "example": "FAQ page launch"
           },
           "description": {
             "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/RevisionSource"
           },
           "page_count": {
             "type": "number"
