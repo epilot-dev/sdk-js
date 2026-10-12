@@ -88,6 +88,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`getAssociatedMonitoringEvents`](#getassociatedmonitoringevents)
 - [`ingestExternalMonitoringEvents`](#ingestexternalmonitoringevents)
 - [`getMonitoringTraceByCorrelation`](#getmonitoringtracebycorrelation)
+- [`getMonitoringRunCompletionV2`](#getmonitoringruncompletionv2)
 
 **proxy**
 - [`secureProxy`](#secureproxy)
@@ -318,6 +319,10 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`MonitoringCode`](#monitoringcode)
 - [`MonitoringEventV2`](#monitoringeventv2)
 - [`GetMonitoringStatsV2Request`](#getmonitoringstatsv2request)
+- [`GetMonitoringRunCompletionV2Request`](#getmonitoringruncompletionv2request)
+- [`MonitoringRunCompletionV2Response`](#monitoringruncompletionv2response)
+- [`MonitoringRunCompletionV2`](#monitoringruncompletionv2)
+- [`MonitoringRunEntriesV2`](#monitoringrunentriesv2)
 - [`MonitoringStatsV2`](#monitoringstatsv2)
 - [`GetMonitoringTimeSeriesV2Request`](#getmonitoringtimeseriesv2request)
 - [`TimeSeriesBreakdownItemV2`](#timeseriesbreakdownitemv2)
@@ -3466,6 +3471,57 @@ const { data } = await client.getMonitoringTraceByCorrelation({
 
 ---
 
+### `getMonitoringRunCompletionV2`
+
+Per-event completion of one or more runs (every monitoring event sharing a
+`correlation_id`), each reduced to "how many events have reached a final
+outcome, and how many are still going". Unlike `getM
+
+`POST /v2/integrations/{integrationId}/monitoring/runs/completion`
+
+```ts
+const { data } = await client.getMonitoringRunCompletionV2(
+  {
+    integrationId: 'example',
+  },
+  {
+    correlation_ids: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "runs": [
+    {
+      "correlation_id": "string",
+      "seen": 0,
+      "in_flight": 0,
+      "retrying": 0,
+      "success": 0,
+      "warning": 0,
+      "error": 0,
+      "info": 0,
+      "entries": {
+        "total": 0,
+        "error": 0,
+        "warning": 0,
+        "success": 0,
+        "info": 0
+      },
+      "last_activity_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `listSecureProxies`
 
 Lists all secure_proxy use cases across all integrations for the authenticated organization.
@@ -3736,7 +3792,8 @@ const { data } = await client.createErpImport(
     },
     "progress": {
       "processed_rows": 0,
-      "total_rows": 0
+      "total_rows": 0,
+      "events_published": 0
     },
     "error": {
       "code": "VALIDATION_BLOCKED",
@@ -3833,7 +3890,8 @@ const { data } = await client.listErpImports({
       },
       "progress": {
         "processed_rows": 0,
-        "total_rows": 0
+        "total_rows": 0,
+        "events_published": 0
       },
       "error": {
         "code": "VALIDATION_BLOCKED",
@@ -3923,7 +3981,8 @@ const { data } = await client.getErpImport({
   },
   "progress": {
     "processed_rows": 0,
-    "total_rows": 0
+    "total_rows": 0,
+    "events_published": 0
   },
   "error": {
     "code": "VALIDATION_BLOCKED",
@@ -4263,6 +4322,7 @@ How far the currently running phase has got. Written at every batch boundary, so
 type ErpImportProgress = {
   processed_rows: number
   total_rows?: number
+  events_published?: number
 }
 ```
 
@@ -4327,6 +4387,7 @@ type CreateErpImportResponse = {
     progress?: {
       processed_rows: { ... }
       total_rows?: { ... }
+      events_published?: { ... }
     }
     error?: {
       code: { ... }
@@ -4389,6 +4450,7 @@ type ErpImportJob = {
   progress?: {
     processed_rows: number
     total_rows?: number
+    events_published?: number
   }
   error?: {
     code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "INTERNAL_ERROR"
@@ -4430,6 +4492,7 @@ type ErpImportList = {
     progress?: {
       processed_rows: { ... }
       total_rows?: { ... }
+      events_published?: { ... }
     }
     error?: {
       code: { ... }
@@ -9658,6 +9721,78 @@ type GetMonitoringStatsV2Request = {
   use_case_types?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"[]
   group_by?: "use_case_id" | "use_case_type" | "level" | "code" | "correlation_id" | "date"
   source?: "monitoring" | "incoming"
+}
+```
+
+### `GetMonitoringRunCompletionV2Request`
+
+```ts
+type GetMonitoringRunCompletionV2Request = {
+  correlation_ids: string[]
+}
+```
+
+### `MonitoringRunCompletionV2Response`
+
+```ts
+type MonitoringRunCompletionV2Response = {
+  runs: Array<{
+    correlation_id: string
+    seen: number
+    in_flight: number
+    retrying: number
+    success: number
+    warning: number
+    error: number
+    info: number
+    entries: {
+      total: { ... }
+      error: { ... }
+      warning: { ... }
+      success: { ... }
+      info: { ... }
+    }
+    last_activity_at: string // date-time
+  }>
+}
+```
+
+### `MonitoringRunCompletionV2`
+
+Per-event completion of one run. Every count is in EVENTS (distinct `event_id`), never rows: `seen = in_flight + success + warning + error + info`.
+
+```ts
+type MonitoringRunCompletionV2 = {
+  correlation_id: string
+  seen: number
+  in_flight: number
+  retrying: number
+  success: number
+  warning: number
+  error: number
+  info: number
+  entries: {
+    total: number
+    error: number
+    warning: number
+    success: number
+    info: number
+  }
+  last_activity_at: string // date-time
+}
+```
+
+### `MonitoringRunEntriesV2`
+
+The run's monitoring rows counted by level, retry markers included — the same rows its trace lists. Unlike the event counts above, one event can contribute many rows (one per entity written, plus every caveat and retry).
+
+```ts
+type MonitoringRunEntriesV2 = {
+  total: number
+  error: number
+  warning: number
+  success: number
+  info: number
 }
 ```
 
