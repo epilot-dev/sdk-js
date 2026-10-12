@@ -3148,6 +3148,10 @@ declare namespace Components {
              * Rows in the file. Known only once a phase has read to EOF; the execute phase has it from the start, because validate recorded it first.
              */
             total_rows?: number;
+            /**
+             * Events handed to the platform so far — the denominator for "has everything this run dispatched finished processing?", answered per event by `getMonitoringRunCompletionV2` under the job's `correlation_id`. Equals `processed_rows` on the flat path; smaller on the grouped path, where rows sharing a variant-version collapse into one event. Execute phase only, and absent on jobs written before this field existed.
+             */
+            events_published?: number;
         }
         export interface ErpImportUseCaseSuggestion {
             integration_id: string;
@@ -4082,6 +4086,12 @@ declare namespace Components {
                 [name: string]: string;
             };
             warnings?: string[];
+        }
+        export interface GetMonitoringRunCompletionV2Request {
+            /**
+             * The runs to report on — an import's `import_id` is its `correlation_id`. At least one; a history page's worth (tens, not thousands) is the intended batch.
+             */
+            correlation_ids: string[];
         }
         export interface GetMonitoringStatsRequest {
             /**
@@ -5901,6 +5911,61 @@ declare namespace Components {
              * When the monitoring event was created
              */
             created_at: string; // date-time
+        }
+        /**
+         * Per-event completion of one run. Every count is in EVENTS (distinct `event_id`), never rows: `seen = in_flight + success + warning + error + info`.
+         */
+        export interface MonitoringRunCompletionV2 {
+            correlation_id: string;
+            /**
+             * Distinct events that have reported at least one row under this run.
+             */
+            seen: number;
+            /**
+             * Events that have reported something but no final outcome yet: only mapping or relation caveats so far (the success row comes last, from the final stage), or a failed attempt the queue will retry. An event stuck here with an old `last_activity_at` was most likely lost on its final attempt (processor crash) — a stall, not a slow run.
+             */
+            in_flight: number;
+            /**
+             * The subset of `in_flight` whose latest row is a retry marker — the queue will deliver them again after a temporary failure.
+             */
+            retrying: number;
+            /**
+             * Settled events whose terminal rows were all successes.
+             */
+            success: number;
+            /**
+             * Settled events processed with a caveat (unique-id matched several entities, attribute type mismatch, …) and no terminal error. Retry markers are not caveats and are never counted here.
+             */
+            warning: number;
+            /**
+             * Settled events with at least one terminal error row (retries exhausted, or non-retryable).
+             */
+            error: number;
+            /**
+             * Settled events whose rows were all informational — deduplicated or skipped, nothing to apply.
+             */
+            info: number;
+            entries: /* The run's monitoring rows counted by level, retry markers included — the same rows its trace lists. Unlike the event counts above, one event can contribute many rows (one per entity written, plus every caveat and retry). */ MonitoringRunEntriesV2;
+            /**
+             * Newest row of any level under this run; null when nothing has reported yet.
+             */
+            last_activity_at: string | null; // date-time
+        }
+        export interface MonitoringRunCompletionV2Response {
+            /**
+             * One entry per requested `correlation_id`, in request order.
+             */
+            runs: /* Per-event completion of one run. Every count is in EVENTS (distinct `event_id`), never rows: `seen = in_flight + success + warning + error + info`. */ MonitoringRunCompletionV2[];
+        }
+        /**
+         * The run's monitoring rows counted by level, retry markers included — the same rows its trace lists. Unlike the event counts above, one event can contribute many rows (one per entity written, plus every caveat and retry).
+         */
+        export interface MonitoringRunEntriesV2 {
+            total: number;
+            error: number;
+            warning: number;
+            success: number;
+            info: number;
         }
         export interface MonitoringStats {
             /**
@@ -9090,6 +9155,22 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetMonitoringRunCompletionV2 {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.GetMonitoringRunCompletionV2Request;
+        namespace Responses {
+            export type $200 = Components.Schemas.MonitoringRunCompletionV2Response;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetMonitoringStats {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -10755,6 +10836,37 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMonitoringTraceByCorrelation.Responses.$200>
   /**
+   * getMonitoringRunCompletionV2 - getMonitoringRunCompletionV2
+   * 
+   * Per-event completion of one or more runs (every monitoring event sharing a
+   * `correlation_id`), each reduced to "how many events have reached a final
+   * outcome, and how many are still going". Unlike `getMonitoringStatsV2`, which
+   * counts rows, this groups `erp_monitoring_v2` by `event_id` first: an event
+   * retried twice and then processed counts once, as a success.
+   * 
+   * Per event: it is **settled** once it has a `success` row, a terminal `error`
+   * row (a non-retryable failure, retries exhausted, or the dead-letter closure),
+   * or nothing but informational rows (deduplicated, skipped). A `warning` never
+   * settles an event on its own: mapping and relation caveats are written BEFORE
+   * the final stage's success row, and a retry marker (`warning` with
+   * `will_retry: true`) means the queue will deliver it again. Everything else is
+   * **in flight**. A settled event's outcome is its worst terminal row — `error`
+   * beats `warning` beats `success`.
+   * 
+   * Batched so a history page costs one request: pass every run on the page. A run
+   * that has reported nothing yet comes back with `seen: 0`, never omitted.
+   * 
+   * The denominator is NOT here: the producer owns it. For an ERP file import it is
+   * `ErpImportProgress.events_published`; `seen` is how many of those have reported
+   * anything yet. Freshness is near-real-time (ClickHouse ingestion lag).
+   * 
+   */
+  'getMonitoringRunCompletionV2'(
+    parameters?: Parameters<Paths.GetMonitoringRunCompletionV2.PathParameters> | null,
+    data?: Paths.GetMonitoringRunCompletionV2.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMonitoringRunCompletionV2.Responses.$200>
+  /**
    * listSecureProxies - listSecureProxies
    * 
    * Lists all secure_proxy use cases across all integrations for the authenticated organization.
@@ -11824,6 +11936,39 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMonitoringTraceByCorrelation.Responses.$200>
   }
+  ['/v2/integrations/{integrationId}/monitoring/runs/completion']: {
+    /**
+     * getMonitoringRunCompletionV2 - getMonitoringRunCompletionV2
+     * 
+     * Per-event completion of one or more runs (every monitoring event sharing a
+     * `correlation_id`), each reduced to "how many events have reached a final
+     * outcome, and how many are still going". Unlike `getMonitoringStatsV2`, which
+     * counts rows, this groups `erp_monitoring_v2` by `event_id` first: an event
+     * retried twice and then processed counts once, as a success.
+     * 
+     * Per event: it is **settled** once it has a `success` row, a terminal `error`
+     * row (a non-retryable failure, retries exhausted, or the dead-letter closure),
+     * or nothing but informational rows (deduplicated, skipped). A `warning` never
+     * settles an event on its own: mapping and relation caveats are written BEFORE
+     * the final stage's success row, and a retry marker (`warning` with
+     * `will_retry: true`) means the queue will deliver it again. Everything else is
+     * **in flight**. A settled event's outcome is its worst terminal row — `error`
+     * beats `warning` beats `success`.
+     * 
+     * Batched so a history page costs one request: pass every run on the page. A run
+     * that has reported nothing yet comes back with `seen: 0`, never omitted.
+     * 
+     * The denominator is NOT here: the producer owns it. For an ERP file import it is
+     * `ErpImportProgress.events_published`; `seen` is how many of those have reported
+     * anything yet. Freshness is near-real-time (ClickHouse ingestion lag).
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.GetMonitoringRunCompletionV2.PathParameters> | null,
+      data?: Paths.GetMonitoringRunCompletionV2.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMonitoringRunCompletionV2.Responses.$200>
+  }
   ['/v1/integrations/secure-proxies']: {
     /**
      * listSecureProxies - listSecureProxies
@@ -12119,6 +12264,7 @@ export type FileProxyUseCaseHistoryEntry = Components.Schemas.FileProxyUseCaseHi
 export type GenerateTypesPreviewResponse = Components.Schemas.GenerateTypesPreviewResponse;
 export type GenerateTypesRequest = Components.Schemas.GenerateTypesRequest;
 export type GenerateTypesResponse = Components.Schemas.GenerateTypesResponse;
+export type GetMonitoringRunCompletionV2Request = Components.Schemas.GetMonitoringRunCompletionV2Request;
 export type GetMonitoringStatsRequest = Components.Schemas.GetMonitoringStatsRequest;
 export type GetMonitoringStatsV2Request = Components.Schemas.GetMonitoringStatsV2Request;
 export type GetMonitoringTimeSeriesRequest = Components.Schemas.GetMonitoringTimeSeriesRequest;
@@ -12164,6 +12310,9 @@ export type MeterReadingUpdate = Components.Schemas.MeterReadingUpdate;
 export type MeterUniqueIdsConfig = Components.Schemas.MeterUniqueIdsConfig;
 export type MonitoringCode = Components.Schemas.MonitoringCode;
 export type MonitoringEventV2 = Components.Schemas.MonitoringEventV2;
+export type MonitoringRunCompletionV2 = Components.Schemas.MonitoringRunCompletionV2;
+export type MonitoringRunCompletionV2Response = Components.Schemas.MonitoringRunCompletionV2Response;
+export type MonitoringRunEntriesV2 = Components.Schemas.MonitoringRunEntriesV2;
 export type MonitoringStats = Components.Schemas.MonitoringStats;
 export type MonitoringStatsV2 = Components.Schemas.MonitoringStatsV2;
 export type MonitoringTraceResponse = Components.Schemas.MonitoringTraceResponse;

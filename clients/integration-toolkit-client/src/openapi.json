@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.43.0",
+    "version": "1.45.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -4162,6 +4162,68 @@
         }
       }
     },
+    "/v2/integrations/{integrationId}/monitoring/runs/completion": {
+      "post": {
+        "operationId": "getMonitoringRunCompletionV2",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view"
+          }
+        ],
+        "summary": "getMonitoringRunCompletionV2",
+        "description": "Per-event completion of one or more runs (every monitoring event sharing a\n`correlation_id`), each reduced to \"how many events have reached a final\noutcome, and how many are still going\". Unlike `getMonitoringStatsV2`, which\ncounts rows, this groups `erp_monitoring_v2` by `event_id` first: an event\nretried twice and then processed counts once, as a success.\n\nPer event: it is **settled** once it has a `success` row, a terminal `error`\nrow (a non-retryable failure, retries exhausted, or the dead-letter closure),\nor nothing but informational rows (deduplicated, skipped). A `warning` never\nsettles an event on its own: mapping and relation caveats are written BEFORE\nthe final stage's success row, and a retry marker (`warning` with\n`will_retry: true`) means the queue will deliver it again. Everything else is\n**in flight**. A settled event's outcome is its worst terminal row — `error`\nbeats `warning` beats `success`.\n\nBatched so a history page costs one request: pass every run on the page. A run\nthat has reported nothing yet comes back with `seen: 0`, never omitted.\n\nThe denominator is NOT here: the producer owns it. For an ERP file import it is\n`ErpImportProgress.events_published`; `seen` is how many of those have reported\nanything yet. Freshness is near-real-time (ClickHouse ingestion lag).\n",
+        "tags": [
+          "monitoring",
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMonitoringRunCompletionV2Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Per-event completion, one entry per requested run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringRunCompletionV2Response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/integrations/secure-proxies": {
       "get": {
         "operationId": "listSecureProxies",
@@ -5479,6 +5541,10 @@
           "total_rows": {
             "type": "integer",
             "description": "Rows in the file. Known only once a phase has read to EOF; the execute phase has it from the start, because validate recorded it first."
+          },
+          "events_published": {
+            "type": "integer",
+            "description": "Events handed to the platform so far — the denominator for \"has everything this run dispatched finished processing?\", answered per event by `getMonitoringRunCompletionV2` under the job's `correlation_id`. Equals `processed_rows` on the flat path; smaller on the grouped path, where rows sharing a variant-version collapse into one event. Execute phase only, and absent on jobs written before this field existed."
           }
         }
       },
@@ -13032,6 +13098,122 @@
             ],
             "default": "monitoring",
             "description": "Data source for the stats. \"monitoring\" (default) aggregates processed events from erp_monitoring_v2 — this counts every event produced throughout the processing tree (fan-out children, post-actions, relation resolutions, etc.). \"incoming\" counts only the initial inbound events actually received (distinct event_id from erp_incoming_events); only group_by=use_case_id is supported and status/level breakdown is not available for this source (success/error/warning/skipped counts are returned as 0).\n"
+          }
+        }
+      },
+      "GetMonitoringRunCompletionV2Request": {
+        "type": "object",
+        "required": [
+          "correlation_ids"
+        ],
+        "properties": {
+          "correlation_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The runs to report on — an import's `import_id` is its `correlation_id`. At least one; a history page's worth (tens, not thousands) is the intended batch."
+          }
+        }
+      },
+      "MonitoringRunCompletionV2Response": {
+        "type": "object",
+        "required": [
+          "runs"
+        ],
+        "properties": {
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringRunCompletionV2"
+            },
+            "description": "One entry per requested `correlation_id`, in request order."
+          }
+        }
+      },
+      "MonitoringRunCompletionV2": {
+        "type": "object",
+        "description": "Per-event completion of one run. Every count is in EVENTS (distinct `event_id`), never rows: `seen = in_flight + success + warning + error + info`.",
+        "required": [
+          "correlation_id",
+          "seen",
+          "in_flight",
+          "retrying",
+          "success",
+          "warning",
+          "error",
+          "info",
+          "entries",
+          "last_activity_at"
+        ],
+        "properties": {
+          "correlation_id": {
+            "type": "string"
+          },
+          "seen": {
+            "type": "integer",
+            "description": "Distinct events that have reported at least one row under this run."
+          },
+          "in_flight": {
+            "type": "integer",
+            "description": "Events that have reported something but no final outcome yet: only mapping or relation caveats so far (the success row comes last, from the final stage), or a failed attempt the queue will retry. An event stuck here with an old `last_activity_at` was most likely lost on its final attempt (processor crash) — a stall, not a slow run."
+          },
+          "retrying": {
+            "type": "integer",
+            "description": "The subset of `in_flight` whose latest row is a retry marker — the queue will deliver them again after a temporary failure."
+          },
+          "success": {
+            "type": "integer",
+            "description": "Settled events whose terminal rows were all successes."
+          },
+          "warning": {
+            "type": "integer",
+            "description": "Settled events processed with a caveat (unique-id matched several entities, attribute type mismatch, …) and no terminal error. Retry markers are not caveats and are never counted here."
+          },
+          "error": {
+            "type": "integer",
+            "description": "Settled events with at least one terminal error row (retries exhausted, or non-retryable)."
+          },
+          "info": {
+            "type": "integer",
+            "description": "Settled events whose rows were all informational — deduplicated or skipped, nothing to apply."
+          },
+          "entries": {
+            "$ref": "#/components/schemas/MonitoringRunEntriesV2"
+          },
+          "last_activity_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Newest row of any level under this run; null when nothing has reported yet."
+          }
+        }
+      },
+      "MonitoringRunEntriesV2": {
+        "type": "object",
+        "description": "The run's monitoring rows counted by level, retry markers included — the same rows its trace lists. Unlike the event counts above, one event can contribute many rows (one per entity written, plus every caveat and retry).",
+        "required": [
+          "total",
+          "error",
+          "warning",
+          "success",
+          "info"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "integer"
+          },
+          "warning": {
+            "type": "integer"
+          },
+          "success": {
+            "type": "integer"
+          },
+          "info": {
+            "type": "integer"
           }
         }
       },
