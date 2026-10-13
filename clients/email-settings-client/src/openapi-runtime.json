@@ -280,6 +280,19 @@
         "responses": {}
       }
     },
+    "/v2/outlook/mailbox/{email}/sync/cancel": {
+      "post": {
+        "operationId": "cancelMailboxSync",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/outlook/mailbox/mappings": {
       "get": {
         "operationId": "getConnectedOutlookEmails",
@@ -650,6 +663,11 @@
           "application/json": {}
         }
       },
+      "PricingTierRequired": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "OutlookErrorResponse": {
         "content": {
           "application/json": {}
@@ -669,9 +687,5 @@
       }
     }
   },
-  "servers": [
-    {
-      "url": "https://email-settings.sls.epilot.io"
-    }
-  ]
+  "servers": []
 }
