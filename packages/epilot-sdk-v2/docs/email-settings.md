@@ -1801,7 +1801,7 @@ type ConnectOutlookRequest = {
 type MailboxSyncStatus = {
   execution_id: string
   status: "RUNNING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "CANCELLED"
-  timeframe: "5m" | "1w" | "2w" | "1m"
+  timeframe: "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y"
   started_at: string // date-time
   completed_at?: string // date-time
   inbox?: {
@@ -1834,7 +1834,7 @@ type MailboxSyncFolderStatuses = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" 
 ### `MailboxSyncTimeframePeriods`
 
 ```ts
-type MailboxSyncTimeframePeriods = "5m" | "1w" | "2w" | "1m"
+type MailboxSyncTimeframePeriods = "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y"
 ```
 
 ### `InboxBucketResponse`
