@@ -20,15 +20,72 @@ declare namespace Components {
             reason: "invalid_token";
         }
         export type Conflict = Schemas.ErrorResp;
+        export interface ContactAmbiguousMatch {
+            /**
+             * The HTTP status code, repeated in the body.
+             * example:
+             * 409
+             */
+            status: number;
+            /**
+             * Human-readable error message. For support, not for display to end customers.
+             */
+            error: string;
+            reason: "AMBIGUOUS_MATCH";
+            /**
+             * Correlation id of the ERP sync that was waited on.
+             */
+            correlation_id?: string; // ^[A-Za-z0-9_-]+$
+        }
         export interface ContractAssignmentConflict {
             /**
              * Error message
              */
             message?: string;
             /**
-             * Reason why the contract is not assignable. If the reason is "MULTIPLE", the contract is not assignable because multiple contracts were found and the business logic does not allow it.
+             * Reason why the contract is not assignable.
+             * - `DRAFT`: the contract is still a draft.
+             * - `MULTIPLE`: multiple contracts were found and the business logic does not allow it.
+             * - `SELF_ASSIGNMENT_DISABLED`: the contract already has a contact assigned and
+             *   self-assignment is disabled.
+             * - `AMBIGUOUS_MATCH`: the portal waited on the Integration Toolkit and the ERP
+             *   delivered entities it cannot tell apart (several matching the selector, or
+             *   contracts naming different customers). Nothing was assigned, and retrying
+             *   will not help.
+             *
              */
-            reason: "DRAFT" | "MULTIPLE";
+            reason: "DRAFT" | "MULTIPLE" | "SELF_ASSIGNMENT_DISABLED" | "AMBIGUOUS_MATCH";
+            /**
+             * The HTTP status code, repeated in the body.
+             * example:
+             * 409
+             */
+            status?: number;
+            /**
+             * Human-readable error message. For support, not for display to end customers.
+             */
+            error?: string;
+            /**
+             * Correlation id of the ERP sync that was waited on. Present only with `AMBIGUOUS_MATCH`.
+             */
+            correlation_id?: string; // ^[A-Za-z0-9_-]+$
+        }
+        export interface ContractAssignmentNotFound {
+            /**
+             * The HTTP status code, repeated in the body.
+             * example:
+             * 404
+             */
+            status: number;
+            /**
+             * Human-readable error message. For support, not for display to end customers.
+             */
+            error: string;
+            reason?: "TIMEOUT" | "INCOMPLETE";
+            /**
+             * Correlation id of the ERP sync that was waited on. Present with `TIMEOUT` and `INCOMPLETE`.
+             */
+            correlation_id?: string; // ^[A-Za-z0-9_-]+$
         }
         export type Forbidden = Schemas.ErrorResp;
         export type ForbiddenByRule = Schemas.ErrorResp | Schemas.FailedRuleErrorResp;
@@ -2173,6 +2230,19 @@ declare namespace Components {
              *
              */
             trigger_identifiers_check?: boolean;
+            /**
+             * Correlation id of an already triggered ERP sync, as returned by a previous call that
+             * answered `reason: TIMEOUT`. Sent together with `trigger_identifiers_check: false` on a
+             * retry so the portal keeps waiting on the same correlation instead of starting over.
+             * Only used by portals configured with
+             * `extension_hooks.registrationIdentifiersCheck.wait_for_toolkit`; ignored otherwise.
+             * At most 255 letters, digits, hyphens and underscores: the toolkit's bound for a
+             * correlation id and the charset it enforces on its identifiers.
+             *
+             * example:
+             * 0199c0d5-6f1c-7a3b-9e21-9a9ce1d1b2c3
+             */
+            correlation_id?: string; // ^[A-Za-z0-9_-]+$
         }
         /**
          * ContactExistsRequest plus the surface the token is requested for. `registration_identifiers` carries the values of the surface's effective identifiers (keyed by schema, then attribute name): the surface's own `identifiers` when it configures any, otherwise the portal's `registration_identifiers`.
@@ -2211,6 +2281,19 @@ declare namespace Components {
              *
              */
             trigger_identifiers_check?: boolean;
+            /**
+             * Correlation id of an already triggered ERP sync, as returned by a previous call that
+             * answered `reason: TIMEOUT`. Sent together with `trigger_identifiers_check: false` on a
+             * retry so the portal keeps waiting on the same correlation instead of starting over.
+             * Only used by portals configured with
+             * `extension_hooks.registrationIdentifiersCheck.wait_for_toolkit`; ignored otherwise.
+             * At most 255 letters, digits, hyphens and underscores: the toolkit's bound for a
+             * correlation id and the charset it enforces on its identifiers.
+             *
+             * example:
+             * 0199c0d5-6f1c-7a3b-9e21-9a9ce1d1b2c3
+             */
+            correlation_id?: string; // ^[A-Za-z0-9_-]+$
             /**
              * Id of the portal surface (see `surfaces` on the portal config) this token is
              * for. The surface must exist and use `authentication: registration_identifiers`;
@@ -2278,6 +2361,15 @@ declare namespace Components {
              */
             allowed_operations?: string[];
             /**
+             * Whether the identified contact already has a portal user on this portal, so the caller
+             * can skip offering account creation. Present only on a match; omitted when it could not
+             * be determined.
+             *
+             * example:
+             * false
+             */
+            has_portal_user?: boolean;
+            /**
              * Present only when no token was issued. NOT_FOUND means the given identifiers did not
              * match any contact (definitive - the client should not retry). TIMEOUT means the contact
              * was not found within the processing window but may still be ingesting; the client may
@@ -2285,6 +2377,13 @@ declare namespace Components {
              *
              */
             reason?: "TIMEOUT" | "NOT_FOUND";
+            /**
+             * Correlation id of the triggered ERP sync. Present only with `reason: TIMEOUT`, for
+             * portals waiting on the Integration Toolkit (`wait_for_toolkit`). Send it back with
+             * `trigger_identifiers_check: false` to keep waiting on the same correlation.
+             *
+             */
+            correlation_id?: string; // ^[A-Za-z0-9_-]+$
         }
         export interface ContentWidget {
             id: string;
@@ -4141,12 +4240,35 @@ declare namespace Components {
                  * Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result?: string;
+                /**
+                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
+                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Only read when the portal is
+                 * configured to wait on the Integration Toolkit
+                 * (`extension_hooks.<hook>.wait_for_toolkit`).
+                 *
+                 * There is no default: unless a hook declares this, the portal waits on the id it
+                 * minted and handed the hook as `{{CorrelationId}}`, whatever the response carries. A
+                 * partner that pushes under that id leaves this unset; only a partner that pushes
+                 * under an id of its own declares where the response carries it. A declared id that
+                 * is absent from the response falls back to the minted one; one that is not a valid
+                 * correlation id (at most 255 letters, digits, `-` and `_`) is not waited on, and
+                 * the portal polls entity search instead.
+                 *
+                 */
+                result_correlation_id?: string;
             };
             resolved?: {
                 /**
                  * Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
                  */
                 result?: string;
+                /**
+                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
+                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Supersedes
+                 * `call.result_correlation_id`. No default; see `call.result_correlation_id`.
+                 *
+                 */
+                result_correlation_id?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
                  * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
@@ -4596,12 +4718,35 @@ declare namespace Components {
                  * Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result?: string;
+                /**
+                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
+                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Only read when the portal is
+                 * configured to wait on the Integration Toolkit
+                 * (`extension_hooks.<hook>.wait_for_toolkit`).
+                 *
+                 * There is no default: unless a hook declares this, the portal waits on the id it
+                 * minted and handed the hook as `{{CorrelationId}}`, whatever the response carries. A
+                 * partner that pushes under that id leaves this unset; only a partner that pushes
+                 * under an id of its own declares where the response carries it. A declared id that
+                 * is absent from the response falls back to the minted one; one that is not a valid
+                 * correlation id (at most 255 letters, digits, `-` and `_`) is not waited on, and
+                 * the portal polls entity search instead.
+                 *
+                 */
+                result_correlation_id?: string;
             };
             resolved?: {
                 /**
                  * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
                  */
                 result?: string;
+                /**
+                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
+                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Supersedes
+                 * `call.result_correlation_id`. No default; see `call.result_correlation_id`.
+                 *
+                 */
+                result_correlation_id?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
                  * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
@@ -4632,6 +4777,137 @@ declare namespace Components {
              * The ID of the selected hook.
              */
             hook_id: string;
+            /**
+             * Opt in to waiting on the Integration Toolkit instead of polling entity search for the
+             * data the ERP pushes after the hook returns. When true, the portal hands the hook a
+             * correlation id (`{{CorrelationId}}`) and then asks the toolkit whether the entities it
+             * needs have landed under that correlation. Off by default: a portal that does not set it
+             * keeps polling entity search exactly as before.
+             *
+             * Only effective for hooks whose partner pushes through the Integration Toolkit and
+             * echoes the correlation id. A hook that answers with an epilot contact id is fetched
+             * directly, as today, whatever this flag says.
+             *
+             */
+            wait_for_toolkit?: boolean;
+            /**
+             * The entities the portal waits for, keyed by entity slug. Configured explicitly per
+             * hook: nothing is derived from the hook type or from the portal's identifier
+             * configuration, and a hook that configures no requirement for the entity the portal
+             * links does not wait at all - it keeps polling entity search exactly as before.
+             *
+             * A selector may only name an attribute that is literally a member of that entity
+             * target's configured `unique_ids` in the inbound use case, because the toolkit reports
+             * exactly those and nothing else. A selector on any other attribute can never match. A
+             * toolkit that validates selectors rejects such a wait (400) with the slug, the key and
+             * the keys it accepts; the portal logs that at error level with the hook it came from
+             * and polls entity search for the request, so the customer is unaffected and never told.
+             *
+             * The slug the portal resolves its link target from is fixed by the hook, and a
+             * requirement for it must be configured for the wait to happen at all:
+             * `registrationIdentifiersCheck` resolves the contact, every `contractIdentification`
+             * assignment mode resolves the contract (in the contact modes the linked contact is the
+             * delivered contract's `customer`). Every other configured slug is evidence that the push
+             * carried what it promised, and is never linked.
+             *
+             * Ignored unless `wait_for_toolkit` is true.
+             *
+             * Worked examples, verified against the live integration configuration. Each block is the
+             * `wait_for_entities` of one hook selection, and each names the slug that hook links.
+             *
+             * Ratingen / Wilken add-contract hook (`contractIdentification`, `contact_to_portal_user`).
+             * No value the user types is a unique id anywhere in the org - every one is a Wilken
+             * surrogate `external_id` - so the contact cannot be selected by attribute at all. Wait on
+             * the contract and link its `customer`; the identity-keyed contact is evidence that the
+             * business partner landed, and is never linked.
+             *
+             * ```yaml
+             * contract: {}
+             * contact:
+             *   key: external_id            # the PROFILE contact's unique id is external_id
+             *   from_caller_contact: external_id
+             * ```
+             *
+             * WEMAG registration hook (`registrationIdentifiersCheck`). The contact's unique ids are
+             * `customer_pin` and `reenumber`; `meter.external_id` and `meter.meter_number` are both
+             * the `ZNR` the user types.
+             *
+             * ```yaml
+             * contact:
+             *   key: reenumber
+             *   from_identifier: contact.complete_customer_number
+             *   split_on: "-"               # "0002-<customer_pin>-<reenumber>"
+             *   part: 2
+             * meter:
+             *   key: external_id
+             *   from_identifier: meter.meter_number
+             * ```
+             *
+             * WEMAG add-contract hook (`contractIdentification`, `contact_to_portal_user`). The
+             * contract's unique ids are `billing_account_number` (the `reenumber`, the same third
+             * part of `complete_customer_number`) and `customer_number` (the PIN). Wait on the
+             * contract of the typed Rechnungseinheit and link its `customer`.
+             *
+             * ```yaml
+             * contract:
+             *   key: billing_account_number
+             *   from_identifier: contact.complete_customer_number
+             *   split_on: "-"               # "0002-<customer_pin>-<reenumber>"
+             *   part: 2
+             * meter:
+             *   key: external_id
+             *   from_identifier: meter.meter_number
+             * ```
+             *
+             * Never `complete_customer_number` or `customer_number` on a WEMAG contact - neither is a
+             * unique id there - and never `customer_pin` alone on a contact or `customer_number` alone
+             * on a contract, both of which are the PIN and ambiguous, because one person has one
+             * contact and one contract per Rechnungseinheit. Never a key-less `contract` either: WEMAG's
+             * `EKM Anlagedaten` writes contracts of its own, keyed on `contract_number`.
+             *
+             * example:
+             * {
+             *   "contract": {},
+             *   "contact": {
+             *     "key": "external_id",
+             *     "from_caller_contact": "external_id"
+             *   }
+             * }
+             */
+            wait_for_entities?: {
+                [name: string]: /**
+                 * One requirement of a hook's correlation wait, for the entity slug it is configured under.
+                 *
+                 * Without `key` the requirement is satisfied by any entity of that slug. That is safe for
+                 * evidence, and for a linked slug only where the inbound use case writes exactly one entity
+                 * of it per push - Wilken's `BusinessPartnerChanged` always writes two contacts, and WEMAG's
+                 * `DocumentChange` / `D3Metadata` write contacts under the same unique-id keys a registration
+                 * push uses - so a second match answers 409 rather than linking a guess.
+                 *
+                 * With `key`, the value comes from exactly one declared source, `from_identifier` or
+                 * `from_caller_contact`. A rule whose source has no value produces no wait at all, so the
+                 * hook keeps polling rather than waiting on a requirement that cannot be met.
+                 *
+                 */
+                WaitForEntityRule;
+            };
+            /**
+             * Inbound use case slugs the portal additionally waits for. A requirement is met once at
+             * least one event of that use case slug has finished processing, whether or not it
+             * produced an entity, so it covers pushes whose entity set varies and pushes whose
+             * outcome is a file or a relation rather than an entity.
+             *
+             * Entity requirements stay primary - the portal links by entity id, so it always waits
+             * for the entity it links. Use case slugs are an additional bar: when both are
+             * configured, both must be met. Empty by default. Ignored unless `wait_for_toolkit` is
+             * true.
+             *
+             * example:
+             * [
+             *   "wilken_contract_changed"
+             * ]
+             */
+            wait_for_use_cases?: string[];
         } | null;
         /**
          * Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.
@@ -5200,7 +5476,7 @@ declare namespace Components {
              */
             scanned: number;
             usages: {
-                kind: "portal-config" | "portal-block" | "portal-widget";
+                kind: "portal-config" | "portal-block";
                 resource: {
                     type: "portal";
                     id: string;
@@ -5235,6 +5511,26 @@ declare namespace Components {
              * https://example.com
              */
             redirect_to?: string;
+            /**
+             * Portal name, served as the document title before the app boots
+             * example:
+             * Kundenportal
+             */
+            title?: string;
+            /**
+             * Whether the served document should carry a `noindex, nofollow` robots meta tag
+             */
+            prevent_indexing?: boolean;
+            /**
+             * Organization of the portal, used to preload its design from the served document
+             * example:
+             * 123
+             */
+            organization_id?: string;
+            /**
+             * Design of the portal, used to preload it from the served document
+             */
+            design_id?: string;
         }
         /**
          * The meter entity
@@ -7791,15 +8087,19 @@ declare namespace Components {
          */
         export interface PortalFeatureSettings {
             /**
-             * Start page feature flag
+             * Retired, not read. A portal shows a start page by having a `dashboard` page.
              */
             start_page?: boolean;
             /**
-             * Billing feature flag
+             * Retired, not read. Billing follows the organization's `commodity_billing` setting.
              */
             billing?: boolean;
             /**
-             * Change due date feature flag
+             * Retired, not read. Billing pages and blocks follow the organization's `commodity_billing` setting.
+             */
+            commodity_billing?: boolean;
+            /**
+             * Retired, not read.
              */
             change_due_date?: boolean;
             /**
@@ -7814,6 +8114,14 @@ declare namespace Components {
              * Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled
              */
             mcp_grant_version?: number;
+            /**
+             * Enable the portal copilot chat for this portal
+             */
+            portal_copilot?: boolean;
+            /**
+             * ID of the Agent Builder portal agent this portal's copilot chat runs, set by Agent Builder. When unset, or when the agent no longer exists in the portal's organization, the chat runs the default portal copilot.
+             */
+            portal_copilot_agent_id?: string;
         }
         /**
          * ID of the portal
@@ -7902,13 +8210,18 @@ declare namespace Components {
              */
             created_by?: string;
             /**
-             * Set at publish time only, and only when the publish request carried one. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
+             * Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
              *
              * example:
              * FAQ page launch
              */
             name?: string;
             description?: string;
+            source?: /**
+             * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+             *
+             */
+            RevisionSource;
             page_count: number;
             /**
              * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
@@ -7977,13 +8290,18 @@ declare namespace Components {
              */
             created_by?: string;
             /**
-             * Set at publish time only, and only when the publish request carried one. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
+             * Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
              *
              * example:
              * FAQ page launch
              */
             name?: string;
             description?: string;
+            source?: /**
+             * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+             *
+             */
+            RevisionSource;
             page_count: number;
             /**
              * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
@@ -8617,6 +8935,11 @@ declare namespace Components {
                 [name: string]: Block;
             };
             based_on_revision_id?: string;
+            revision_source?: /**
+             * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+             *
+             */
+            RevisionSource;
             pages: /**
              * A page inside a revision snapshot. `additionalProperties` is true on purpose — a page carries fields this schema does not name and they must survive into the snapshot and back onto the live page when it is published.
              *
@@ -8635,13 +8958,18 @@ declare namespace Components {
              */
             created_by?: string;
             /**
-             * Set at publish time only, and only when the publish request carried one. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
+             * Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.
              *
              * example:
              * FAQ page launch
              */
             name?: string;
             description?: string;
+            source?: /**
+             * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+             *
+             */
+            RevisionSource;
             page_count: number;
             /**
              * The last time this revision was published. NOT the same question as `is_published`: a revision that was live yesterday still carries a `published_at`.
@@ -9828,6 +10156,14 @@ declare namespace Components {
                 [name: string]: any;
             };
         }
+        /**
+         * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+         *
+         */
+        export interface RevisionSource {
+            type: "blueprint_sync";
+            blueprint_title?: string;
+        }
         export interface Rule {
             entity?: string | null;
             attribute?: string | null;
@@ -10066,10 +10402,52 @@ declare namespace Components {
              */
             status: string;
         }
+        export interface SwapPortalReferenceGroup {
+            /**
+             * Items whose references now point at the target portal.
+             */
+            updated: SwapPortalReferenceItem[];
+            /**
+             * Items that reference the source portal but could not be updated.
+             */
+            failed: SwapPortalReferenceItem[];
+            /**
+             * Set when the items could not be listed, so none of them were checked.
+             */
+            list_error?: string;
+        }
+        export interface SwapPortalReferenceItem {
+            /**
+             * Journey id or automation flow id.
+             */
+            id: string;
+            name?: string;
+            /**
+             * Where the reference sat in the item.
+             * example:
+             * [
+             *   "steps[0].uischema.elements[2].options.portalId"
+             * ]
+             */
+            paths?: string[];
+            /**
+             * Why the update failed. Only set on failed items.
+             */
+            error?: string;
+        }
+        /**
+         * Outcome of the `portal_references` swap option. Only present when that option was requested. The swap itself has already succeeded when this is returned, so failures here do not undo it.
+         */
+        export interface SwapPortalReferencesResult {
+            journeys: SwapPortalReferenceGroup;
+            automation_flows: SwapPortalReferenceGroup;
+        }
         /**
          * Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum.
+         * - `email_templates`: swap the email templates of the two portals.
+         * - `portal_references`: after the swap, re-point configuration in other services from the source portal to the target portal: the portal on journey login (AuthControl) blocks and in file upload portal access, and the portal of automation flow portal triggers. One-directional: references to the target portal are left unchanged, because the target keeps its domain and users. System flows are not changed. Uses the caller's permissions; the outcome is returned in `portal_references`.
          */
-        export type SwappableConfig = "email_templates";
+        export type SwappableConfig = "email_templates" | "portal_references";
         export type TariffType = "ht" | "nt";
         export interface TeaserWidget {
             id: string;
@@ -10209,6 +10587,15 @@ declare namespace Components {
              *
              */
             ProviderConfig[];
+        }
+        export interface UpdatePortalRevisionRequest {
+            /**
+             * New label for the revision. Trimmed by the server; an empty name after trimming removes the revision's name.
+             *
+             * example:
+             * FAQ page launch
+             */
+            name: string;
         }
         export interface UpsertPortalConfig {
             /**
@@ -11512,6 +11899,64 @@ declare namespace Components {
              */
             precision?: number;
         }
+        /**
+         * One requirement of a hook's correlation wait, for the entity slug it is configured under.
+         *
+         * Without `key` the requirement is satisfied by any entity of that slug. That is safe for
+         * evidence, and for a linked slug only where the inbound use case writes exactly one entity
+         * of it per push - Wilken's `BusinessPartnerChanged` always writes two contacts, and WEMAG's
+         * `DocumentChange` / `D3Metadata` write contacts under the same unique-id keys a registration
+         * push uses - so a second match answers 409 rather than linking a guess.
+         *
+         * With `key`, the value comes from exactly one declared source, `from_identifier` or
+         * `from_caller_contact`. A rule whose source has no value produces no wait at all, so the
+         * hook keeps polling rather than waiting on a requirement that cannot be met.
+         *
+         */
+        export interface WaitForEntityRule {
+            /**
+             * Unique-id attribute the selector matches on. Must be a member of that entity target's
+             * configured `unique_ids` in the inbound use case; the toolkit reports nothing else.
+             *
+             * example:
+             * reenumber
+             */
+            key?: string;
+            /**
+             * Identifier the user submitted to take the value from, as `<schema>.<name>` - the same
+             * schema and name the portal's `registration_identifiers` / `contract_identifiers` use.
+             * Mutually exclusive with `from_caller_contact`.
+             *
+             * example:
+             * contact.complete_customer_number
+             */
+            from_identifier?: string;
+            /**
+             * Attribute of the calling portal user's own contact to take the value from. Only
+             * available to hooks called by a signed-in user. Mutually exclusive with
+             * `from_identifier`.
+             *
+             * example:
+             * external_id
+             */
+            from_caller_contact?: string;
+            /**
+             * Separator the source value is split on before `part` is taken, for identifiers that
+             * carry a unique id inside a larger value the user types. WEMAG's
+             * `complete_customer_number` is `"0002-<customer_pin>-<reenumber>"`, so splitting on `-`
+             * and taking part 2 yields the contact's `reenumber` unique id.
+             *
+             * example:
+             * -
+             */
+            split_on?: string;
+            /**
+             * Zero-based index of the part to use after splitting on `split_on`.
+             * example:
+             * 2
+             */
+            part?: number;
+        }
         export interface WidgetAction {
             _id: string;
             type: "link" | "journey";
@@ -11633,6 +12078,12 @@ declare namespace Components {
 }
 declare namespace Paths {
     namespace AddContractByIdentifiers {
+        namespace Parameters {
+            export type CorrelationId = string; // ^[A-Za-z0-9_-]+$
+        }
+        export interface QueryParameters {
+            correlation_id?: Parameters.CorrelationId /* ^[A-Za-z0-9_-]+$ */;
+        }
         /**
          * Identifier-value pairs per schema to identify the contract
          * example:
@@ -11658,6 +12109,7 @@ declare namespace Paths {
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.ContractAssignmentNotFound;
             export type $409 = Components.Responses.ContractAssignmentConflict;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -11841,9 +12293,25 @@ declare namespace Paths {
                  *
                  */
                 reason?: "TIMEOUT" | "NOT_FOUND";
+                /**
+                 * Correlation id of the triggered ERP sync. Present only for portals waiting on
+                 * the Integration Toolkit (`wait_for_toolkit`). Send it back with
+                 * `trigger_identifiers_check: false` to keep waiting on the same correlation.
+                 *
+                 */
+                correlation_id?: string; // ^[A-Za-z0-9_-]+$
+                /**
+                 * Human-readable reason the identifiers did not resolve, when the portal knows
+                 * one. Set when the ERP finished sending for this correlation without the
+                 * entities the portal needs (e.g. "account data arrived, no contract"), so
+                 * support can tell a silent timeout from an incomplete delivery.
+                 *
+                 */
+                message?: string;
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.ContactAmbiguousMatch;
             export type $429 = Components.Responses.TooManyRequests;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -11867,6 +12335,48 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CompleteTemporaryPassword {
+        export interface RequestBody {
+            /**
+             * Organization ID
+             * example:
+             * 123
+             */
+            org_id: string;
+            /**
+             * ID of the portal the user belongs to
+             * example:
+             * 7hj28akg-97fb-4f5c-b2a1-3e4fbc1d8c7a
+             */
+            portal_id: string;
+            /**
+             * Email address of the portal user
+             * example:
+             * user@example.com
+             */
+            email: string;
+            /**
+             * Temporary password from the email
+             */
+            temporary_password: string;
+            /**
+             * New password, must match the portal's password policy
+             */
+            new_password: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * example:
+                 * Password set successfully.
+                 */
+                message?: string;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $429 = Components.Responses.TooManyRequests;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -19035,9 +19545,18 @@ declare namespace Paths {
              */
             Components.Schemas.PortalId;
             /**
-             * Optional, opt-in configuration items to additionally swap on top of the always-swapped pages and functional config. Defaults to an empty list (nothing extra swapped). Domain and access/security settings can never be swapped.
+             * Optional, opt-in configuration items to additionally swap on top of the always-swapped pages and functional config. Defaults to an empty list (nothing extra swapped). Domain and access/security settings can never be swapped. With `mode` the listed items are included in the draft revisions.
              */
-            items_to_swap?: /* Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum. */ Components.Schemas.SwappableConfig[];
+            items_to_swap?: /**
+             * Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum.
+             * - `email_templates`: swap the email templates of the two portals.
+             * - `portal_references`: after the swap, re-point configuration in other services from the source portal to the target portal: the portal on journey login (AuthControl) blocks and in file upload portal access, and the portal of automation flow portal triggers. One-directional: references to the target portal are left unchanged, because the target keeps its domain and users. System flows are not changed. Uses the caller's permissions; the outcome is returned in `portal_references`.
+             */
+            Components.Schemas.SwappableConfig[];
+            /**
+             * Requires portal versioning (flag on, V3 target portal), otherwise 400. `copy` saves an unpublished revision on the target holding the source's setup; neither portal changes live and the source is untouched. Omit for the original live swap. Cannot be combined with the `portal_references` item, which only applies to a live swap.
+             */
+            mode?: "copy";
         }
         namespace Responses {
             export interface $200 {
@@ -19046,6 +19565,19 @@ declare namespace Paths {
                  * Domain and users swapped successfully.
                  */
                 message?: string;
+                portal_references?: /* Outcome of the `portal_references` swap option. Only present when that option was requested. The swap itself has already succeeded when this is returned, so failures here do not undo it. */ Components.Schemas.SwapPortalReferencesResult;
+                /**
+                 * Only with `mode`. The draft revision created on the target.
+                 */
+                revisions?: {
+                    portal_id?: /**
+                     * ID of the portal
+                     * example:
+                     * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+                     */
+                    Components.Schemas.PortalId;
+                    revision_id?: string;
+                }[];
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
@@ -19342,6 +19874,41 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.BlockRequest;
         namespace Responses {
             export type $200 = Components.Schemas.Block;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdatePortalRevision {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type PortalId = string; // uuid
+            /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            export type RevisionId = string;
+        }
+        export interface PathParameters {
+            portal_id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.PortalId /* uuid */;
+            revision_id: /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            Parameters.RevisionId;
+        }
+        export type RequestBody = Components.Schemas.UpdatePortalRevisionRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalRevisionSummary;
+            export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -20816,9 +21383,16 @@ export interface OperationMethods {
    * addContractByIdentifiers - addContractByIdentifiers
    * 
    * Self-assign contract(s) by pre-configured identifiers.
+   * 
+   * When the portal is configured to wait on the Integration Toolkit
+   * (`extension_hooks.contractIdentification.wait_for_toolkit`) and the ERP has not finished
+   * sending within the request budget, the call fails with 404 and `reason: TIMEOUT`, carrying
+   * the `correlation_id` of the triggered sync. Repeating the call with that `correlation_id`
+   * keeps waiting on the same correlation without calling the third party again.
+   * 
    */
   'addContractByIdentifiers'(
-    parameters?: Parameters<UnknownParamsObject> | null,
+    parameters?: Parameters<Paths.AddContractByIdentifiers.QueryParameters> | null,
     data?: Paths.AddContractByIdentifiers.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddContractByIdentifiers.Responses.$200>
@@ -21469,6 +22043,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUserEntryPoint.Responses.$200>
   /**
+   * completeTemporaryPassword - completeTemporaryPassword
+   * 
+   * Replaces a portal user's temporary password with the password they chose.
+   */
+  'completeTemporaryPassword'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CompleteTemporaryPassword.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CompleteTemporaryPassword.Responses.$200>
+  /**
    * updateCampaignPortalBlockStatus - updateCampaignPortalBlockStatus
    * 
    * Updates the status of a campaign portal block for multiple recipients.
@@ -21635,6 +22219,19 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPortalRevision.Responses.$200>
   /**
+   * updatePortalRevision - updatePortalRevision
+   * 
+   * Renames a revision without publishing it. Any revision can be renamed, published or not. Only the revision's `name` changes: its content, `published_at`, `published_by` and which revision is live stay as they are.
+   * 
+   * The server trims `name`. An empty name after trimming removes the revision's name, and clients fall back to a label derived from `published_at` / `created_at`. A later publish without a `name` keeps the renamed name.
+   * 
+   */
+  'updatePortalRevision'(
+    parameters?: Parameters<Paths.UpdatePortalRevision.PathParameters> | null,
+    data?: Paths.UpdatePortalRevision.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdatePortalRevision.Responses.$200>
+  /**
    * publishPortalRevision - publishPortalRevision
    * 
    * Makes one revision the portal's live configuration, atomically: either everything below takes effect or nothing does. Publish is a full-snapshot replace: it writes config, every page and email templates to match the revision exactly, and deletes every live page the revision does not contain.
@@ -21680,7 +22277,7 @@ export interface OperationMethods {
   /**
    * swapPortalConfig - swapPortalConfig
    * 
-   * Swaps the portal configuration of two portals.
+   * Swaps the portal configuration of two portals. Without `mode` both portals exchange pages and experience config live, as before. With `mode: copy` (portal versioning only) nothing live changes: the source's setup is saved as an unpublished revision on the target to review and publish. Domain and access/security settings never move.
    */
   'swapPortalConfig'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -22894,9 +23491,16 @@ export interface PathsDictionary {
      * addContractByIdentifiers - addContractByIdentifiers
      * 
      * Self-assign contract(s) by pre-configured identifiers.
+     * 
+     * When the portal is configured to wait on the Integration Toolkit
+     * (`extension_hooks.contractIdentification.wait_for_toolkit`) and the ERP has not finished
+     * sending within the request budget, the call fails with 404 and `reason: TIMEOUT`, carrying
+     * the `correlation_id` of the triggered sync. Repeating the call with that `correlation_id`
+     * keeps waiting on the same correlation without calling the third party again.
+     * 
      */
     'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
+      parameters?: Parameters<Paths.AddContractByIdentifiers.QueryParameters> | null,
       data?: Paths.AddContractByIdentifiers.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddContractByIdentifiers.Responses.$200>
@@ -23645,6 +24249,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUserEntryPoint.Responses.$200>
   }
+  ['/v3/portal/public/user/temporary-password/complete']: {
+    /**
+     * completeTemporaryPassword - completeTemporaryPassword
+     * 
+     * Replaces a portal user's temporary password with the password they chose.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CompleteTemporaryPassword.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CompleteTemporaryPassword.Responses.$200>
+  }
   ['/v2/portal/campaign/{campaign_id}/entity:status']: {
     /**
      * updateCampaignPortalBlockStatus - updateCampaignPortalBlockStatus
@@ -23834,6 +24450,19 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPortalRevision.Responses.$200>
+    /**
+     * updatePortalRevision - updatePortalRevision
+     * 
+     * Renames a revision without publishing it. Any revision can be renamed, published or not. Only the revision's `name` changes: its content, `published_at`, `published_by` and which revision is live stay as they are.
+     * 
+     * The server trims `name`. An empty name after trimming removes the revision's name, and clients fall back to a label derived from `published_at` / `created_at`. A later publish without a `name` keeps the renamed name.
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdatePortalRevision.PathParameters> | null,
+      data?: Paths.UpdatePortalRevision.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdatePortalRevision.Responses.$200>
   }
   ['/v3/portal/config/{portal_id}/publish']: {
     /**
@@ -23888,7 +24517,7 @@ export interface PathsDictionary {
     /**
      * swapPortalConfig - swapPortalConfig
      * 
-     * Swaps the portal configuration of two portals.
+     * Swaps the portal configuration of two portals. Without `mode` both portals exchange pages and experience config live, as before. With `mode: copy` (portal versioning only) nothing live changes: the source's setup is saved as an unpublished revision on the target to review and publish. Domain and access/security settings never move.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -24207,6 +24836,7 @@ export type RegistrationIdentifier = Components.Schemas.RegistrationIdentifier;
 export type ReimbursementEvent = Components.Schemas.ReimbursementEvent;
 export type RevisionPage = Components.Schemas.RevisionPage;
 export type RevisionPageRequest = Components.Schemas.RevisionPageRequest;
+export type RevisionSource = Components.Schemas.RevisionSource;
 export type Rule = Components.Schemas.Rule;
 export type SAMLProviderConfig = Components.Schemas.SAMLProviderConfig;
 export type SSOCallbackRequest = Components.Schemas.SSOCallbackRequest;
@@ -24221,12 +24851,16 @@ export type Source = Components.Schemas.Source;
 export type SupportReportType = Components.Schemas.SupportReportType;
 export type SupportRequestAttachment = Components.Schemas.SupportRequestAttachment;
 export type SupportRequestResult = Components.Schemas.SupportRequestResult;
+export type SwapPortalReferenceGroup = Components.Schemas.SwapPortalReferenceGroup;
+export type SwapPortalReferenceItem = Components.Schemas.SwapPortalReferenceItem;
+export type SwapPortalReferencesResult = Components.Schemas.SwapPortalReferencesResult;
 export type SwappableConfig = Components.Schemas.SwappableConfig;
 export type TariffType = Components.Schemas.TariffType;
 export type TeaserWidget = Components.Schemas.TeaserWidget;
 export type TemplatesRef = Components.Schemas.TemplatesRef;
 export type TriggerPortalFlow = Components.Schemas.TriggerPortalFlow;
 export type UpdateOnlyPortalConfigAttributes = Components.Schemas.UpdateOnlyPortalConfigAttributes;
+export type UpdatePortalRevisionRequest = Components.Schemas.UpdatePortalRevisionRequest;
 export type UpsertPortalConfig = Components.Schemas.UpsertPortalConfig;
 export type UpsertPortalConfigV3 = Components.Schemas.UpsertPortalConfigV3;
 export type UpsertPortalWidget = Components.Schemas.UpsertPortalWidget;
@@ -24234,6 +24868,7 @@ export type UserRequest = Components.Schemas.UserRequest;
 export type VisualizationDataRange = Components.Schemas.VisualizationDataRange;
 export type VisualizationMetadata = Components.Schemas.VisualizationMetadata;
 export type VisualizationTypeOption = Components.Schemas.VisualizationTypeOption;
+export type WaitForEntityRule = Components.Schemas.WaitForEntityRule;
 export type WidgetAction = Components.Schemas.WidgetAction;
 export type WidgetBase = Components.Schemas.WidgetBase;
 export type WorfklowIdentifier = Components.Schemas.WorfklowIdentifier;

@@ -4011,6 +4011,17 @@
                         "NOT_FOUND"
                       ],
                       "description": "Present only when exists is false. NOT_FOUND means the given identifiers did\nnot match any contact (definitive - the client should not retry). TIMEOUT\nmeans the contact was not found within the processing window but may still be\ningesting; the client may retry (ideally with trigger_identifiers_check=false).\n"
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 255,
+                      "pattern": "^[A-Za-z0-9_-]+$",
+                      "description": "Correlation id of the triggered ERP sync. Present only for portals waiting on\nthe Integration Toolkit (`wait_for_toolkit`). Send it back with\n`trigger_identifiers_check: false` to keep waiting on the same correlation.\n"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Human-readable reason the identifiers did not resolve, when the portal knows\none. Set when the ERP finished sending for this correlation without the\nentities the portal needs (e.g. \"account data arrived, no contract\"), so\nsupport can tell a silent timeout from an incomplete delivery.\n"
                     }
                   }
                 }
@@ -4022,6 +4033,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/ContactAmbiguousMatch"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -4074,7 +4088,7 @@
         },
         "responses": {
           "200": {
-            "description": "The identification result. On a match, `contact_id` and `token` are present. When no\ncontact matched, only `reason` is present - the response is deliberately shaped the same\nway for every negative outcome so it cannot be used to enumerate contacts.\n",
+            "description": "The identification result. On a match, `contact_id` and `token` are present. When no\ncontact matched, only `reason` is present - the response is deliberately shaped the same\nway for every negative outcome so it cannot be used to enumerate contacts. The one\naddition is `correlation_id` on a TIMEOUT from a portal waiting on the Integration\nToolkit, which a retry needs; what the ERP did or did not send is never part of it.\nThat includes an ERP delivery of several matching contacts: unlike\n`checkContactExistsV3`, which answers it with 409 `AMBIGUOUS_MATCH`, this endpoint\nanswers it as `NOT_FOUND`, because the 409 would confirm that the ERP knows the\nidentifiers.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -6262,13 +6276,27 @@
       "post": {
         "operationId": "addContractByIdentifiers",
         "summary": "addContractByIdentifiers",
-        "description": "Self-assign contract(s) by pre-configured identifiers.",
+        "description": "Self-assign contract(s) by pre-configured identifiers.\n\nWhen the portal is configured to wait on the Integration Toolkit\n(`extension_hooks.contractIdentification.wait_for_toolkit`) and the ERP has not finished\nsending within the request budget, the call fails with 404 and `reason: TIMEOUT`, carrying\nthe `correlation_id` of the triggered sync. Repeating the call with that `correlation_id`\nkeeps waiting on the same correlation without calling the third party again.\n",
         "tags": [
           "ECP"
         ],
         "security": [
           {
             "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "correlation_id",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Correlation id of an already triggered ERP sync, as returned by a previous call that\nfailed with `reason: TIMEOUT`. Keeps waiting on the same correlation instead of calling\nthe contract identification hook again. Ignored unless the portal is configured with\n`extension_hooks.contractIdentification.wait_for_toolkit`. At most 255 letters, digits,\nhyphens and underscores: the toolkit's bound for a correlation id and the charset it\nenforces on its identifiers.\n"
           }
         ],
         "requestBody": {
@@ -6331,6 +6359,9 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/ContractAssignmentNotFound"
           },
           "409": {
             "$ref": "#/components/responses/ContractAssignmentConflict"
@@ -10025,6 +10056,86 @@
         }
       }
     },
+    "/v3/portal/public/user/temporary-password/complete": {
+      "post": {
+        "operationId": "completeTemporaryPassword",
+        "summary": "completeTemporaryPassword",
+        "description": "Replaces a portal user's temporary password with the password they chose.",
+        "tags": [
+          "Public"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "org_id",
+                  "portal_id",
+                  "email",
+                  "temporary_password",
+                  "new_password"
+                ],
+                "properties": {
+                  "org_id": {
+                    "type": "string",
+                    "description": "Organization ID",
+                    "example": "123"
+                  },
+                  "portal_id": {
+                    "type": "string",
+                    "description": "ID of the portal the user belongs to",
+                    "example": "7hj28akg-97fb-4f5c-b2a1-3e4fbc1d8c7a"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the portal user",
+                    "example": "user@example.com"
+                  },
+                  "temporary_password": {
+                    "type": "string",
+                    "description": "Temporary password from the email"
+                  },
+                  "new_password": {
+                    "type": "string",
+                    "description": "New password, must match the portal's password policy"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The new password was set.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Password set successfully."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v2/portal/campaign/{campaign_id}/entity:status": {
       "put": {
         "operationId": "updateCampaignPortalBlockStatus",
@@ -10997,6 +11108,80 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         }
+      },
+      "patch": {
+        "operationId": "updatePortalRevision",
+        "summary": "updatePortalRevision",
+        "description": "Renames a revision without publishing it. Any revision can be renamed, published or not. Only the revision's `name` changes: its content, `published_at`, `published_by` and which revision is live stay as they are.\n\nThe server trims `name`. An empty name after trimming removes the revision's name, and clients fall back to a label derived from `published_at` / `created_at`. A later publish without a `name` keeps the renamed name.\n",
+        "tags": [
+          "ECP Admin"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+            },
+            "description": "Portal ID (readonly UUID generated on portal creation)"
+          },
+          {
+            "in": "path",
+            "name": "revision_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2026-08-25T14:03:11.482Z-a7f3c1d9"
+            },
+            "description": "Revision ID. Contains `:` characters, so percent-encode it."
+          }
+        ],
+        "requestBody": {
+          "description": "The new revision name",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePortalRevisionRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revision renamed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalRevisionSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
       }
     },
     "/v3/portal/config/{portal_id}/publish": {
@@ -11163,7 +11348,7 @@
       "post": {
         "operationId": "swapPortalConfig",
         "summary": "swapPortalConfig",
-        "description": "Swaps the portal configuration of two portals.",
+        "description": "Swaps the portal configuration of two portals. Without `mode` both portals exchange pages and experience config live, as before. With `mode: copy` (portal versioning only) nothing live changes: the source's setup is saved as an unpublished revision on the target to review and publish. Domain and access/security settings never move.",
         "tags": [
           "ECP Admin"
         ],
@@ -11195,7 +11380,14 @@
                     "items": {
                       "$ref": "#/components/schemas/SwappableConfig"
                     },
-                    "description": "Optional, opt-in configuration items to additionally swap on top of the always-swapped pages and functional config. Defaults to an empty list (nothing extra swapped). Domain and access/security settings can never be swapped."
+                    "description": "Optional, opt-in configuration items to additionally swap on top of the always-swapped pages and functional config. Defaults to an empty list (nothing extra swapped). Domain and access/security settings can never be swapped. With `mode` the listed items are included in the draft revisions."
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "copy"
+                    ],
+                    "description": "Requires portal versioning (flag on, V3 target portal), otherwise 400. `copy` saves an unpublished revision on the target holding the source's setup; neither portal changes live and the source is untouched. Omit for the original live swap. Cannot be combined with the `portal_references` item, which only applies to a live swap."
                   }
                 }
               }
@@ -11213,6 +11405,24 @@
                     "message": {
                       "type": "string",
                       "example": "Domain and users swapped successfully."
+                    },
+                    "portal_references": {
+                      "$ref": "#/components/schemas/SwapPortalReferencesResult"
+                    },
+                    "revisions": {
+                      "type": "array",
+                      "description": "Only with `mode`. The draft revision created on the target.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "portal_id": {
+                            "$ref": "#/components/schemas/PortalId"
+                          },
+                          "revision_id": {
+                            "type": "string"
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -12019,19 +12229,115 @@
                 },
                 {
                   "properties": {
+                    "status": {
+                      "type": "integer",
+                      "description": "The HTTP status code, repeated in the body.",
+                      "example": 409
+                    },
+                    "error": {
+                      "type": "string",
+                      "description": "Human-readable error message. For support, not for display to end customers."
+                    },
                     "reason": {
                       "type": "string",
-                      "description": "Reason why the contract is not assignable. If the reason is \"MULTIPLE\", the contract is not assignable because multiple contracts were found and the business logic does not allow it.",
+                      "description": "Reason why the contract is not assignable.\n- `DRAFT`: the contract is still a draft.\n- `MULTIPLE`: multiple contracts were found and the business logic does not allow it.\n- `SELF_ASSIGNMENT_DISABLED`: the contract already has a contact assigned and\n  self-assignment is disabled.\n- `AMBIGUOUS_MATCH`: the portal waited on the Integration Toolkit and the ERP\n  delivered entities it cannot tell apart (several matching the selector, or\n  contracts naming different customers). Nothing was assigned, and retrying\n  will not help.\n",
                       "enum": [
                         "DRAFT",
-                        "MULTIPLE"
+                        "MULTIPLE",
+                        "SELF_ASSIGNMENT_DISABLED",
+                        "AMBIGUOUS_MATCH"
                       ]
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 255,
+                      "pattern": "^[A-Za-z0-9_-]+$",
+                      "description": "Correlation id of the ERP sync that was waited on. Present only with `AMBIGUOUS_MATCH`."
                     }
                   },
                   "required": [
                     "reason"
                   ]
                 }
+              ]
+            }
+          }
+        }
+      },
+      "ContractAssignmentNotFound": {
+        "description": "No contract could be assigned. Without a `reason`, the identifiers matched nothing. With\n`reason`, the portal waited on the Integration Toolkit\n(`extension_hooks.contractIdentification.wait_for_toolkit`):\n- `TIMEOUT`: the ERP has not finished sending yet. Repeat the request with the\n  `correlation_id` query parameter set to the `correlation_id` of this body to keep waiting\n  on the same ERP sync without calling the third party again.\n- `INCOMPLETE`: the ERP finished sending without the data needed. Definitive; `error` names\n  what was missing, for support, not for display to end customers.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "integer",
+                  "description": "The HTTP status code, repeated in the body.",
+                  "example": 404
+                },
+                "error": {
+                  "type": "string",
+                  "description": "Human-readable error message. For support, not for display to end customers."
+                },
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "TIMEOUT",
+                    "INCOMPLETE"
+                  ]
+                },
+                "correlation_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 255,
+                  "pattern": "^[A-Za-z0-9_-]+$",
+                  "description": "Correlation id of the ERP sync that was waited on. Present with `TIMEOUT` and `INCOMPLETE`."
+                }
+              },
+              "required": [
+                "status",
+                "error"
+              ]
+            }
+          }
+        }
+      },
+      "ContactAmbiguousMatch": {
+        "description": "The portal waited on the Integration Toolkit\n(`extension_hooks.registrationIdentifiersCheck.wait_for_toolkit`) and the ERP delivered\nseveral contacts matching the identifiers. Nothing was linked; retrying will not help.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "integer",
+                  "description": "The HTTP status code, repeated in the body.",
+                  "example": 409
+                },
+                "error": {
+                  "type": "string",
+                  "description": "Human-readable error message. For support, not for display to end customers."
+                },
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "AMBIGUOUS_MATCH"
+                  ]
+                },
+                "correlation_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 255,
+                  "pattern": "^[A-Za-z0-9_-]+$",
+                  "description": "Correlation id of the ERP sync that was waited on."
+                }
+              },
+              "required": [
+                "status",
+                "error",
+                "reason"
               ]
             }
           }
@@ -14150,6 +14456,14 @@
             "type": "boolean",
             "default": true,
             "description": "Whether to (re)trigger the registration identifiers check hook, which issues a request\nto the connected ERP to (re)sync the contact, in addition to waiting for the entity to\narrive. Defaults to true to preserve existing behaviour. Set to false on retry attempts\nto only poll for an already-triggered sync to land, without issuing another upstream\nrequest to the ERP.\n"
+          },
+          "correlation_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "description": "Correlation id of an already triggered ERP sync, as returned by a previous call that\nanswered `reason: TIMEOUT`. Sent together with `trigger_identifiers_check: false` on a\nretry so the portal keeps waiting on the same correlation instead of starting over.\nOnly used by portals configured with\n`extension_hooks.registrationIdentifiersCheck.wait_for_toolkit`; ignored otherwise.\nAt most 255 letters, digits, hyphens and underscores: the toolkit's bound for a\ncorrelation id and the charset it enforces on its identifiers.\n",
+            "example": "0199c0d5-6f1c-7a3b-9e21-9a9ce1d1b2c3"
           }
         }
       },
@@ -14216,6 +14530,11 @@
             },
             "example": []
           },
+          "has_portal_user": {
+            "type": "boolean",
+            "description": "Whether the identified contact already has a portal user on this portal, so the caller\ncan skip offering account creation. Present only on a match; omitted when it could not\nbe determined.\n",
+            "example": false
+          },
           "reason": {
             "type": "string",
             "enum": [
@@ -14223,6 +14542,13 @@
               "NOT_FOUND"
             ],
             "description": "Present only when no token was issued. NOT_FOUND means the given identifiers did not\nmatch any contact (definitive - the client should not retry). TIMEOUT means the contact\nwas not found within the processing window but may still be ingesting; the client may\nretry (ideally with trigger_identifiers_check=false).\n"
+          },
+          "correlation_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "description": "Correlation id of the triggered ERP sync. Present only with `reason: TIMEOUT`, for\nportals waiting on the Integration Toolkit (`wait_for_toolkit`). Send it back with\n`trigger_identifiers_check: false` to keep waiting on the same correlation.\n"
           }
         }
       },
@@ -15968,8 +16294,7 @@
                   "type": "string",
                   "enum": [
                     "portal-config",
-                    "portal-block",
-                    "portal-widget"
+                    "portal-block"
                   ]
                 },
                 "resource": {
@@ -17302,6 +17627,36 @@
           "hook_id": {
             "type": "string",
             "description": "The ID of the selected hook."
+          },
+          "wait_for_toolkit": {
+            "type": "boolean",
+            "default": false,
+            "description": "Opt in to waiting on the Integration Toolkit instead of polling entity search for the\ndata the ERP pushes after the hook returns. When true, the portal hands the hook a\ncorrelation id (`{{CorrelationId}}`) and then asks the toolkit whether the entities it\nneeds have landed under that correlation. Off by default: a portal that does not set it\nkeeps polling entity search exactly as before.\n\nOnly effective for hooks whose partner pushes through the Integration Toolkit and\nechoes the correlation id. A hook that answers with an epilot contact id is fetched\ndirectly, as today, whatever this flag says.\n"
+          },
+          "wait_for_entities": {
+            "type": "object",
+            "description": "The entities the portal waits for, keyed by entity slug. Configured explicitly per\nhook: nothing is derived from the hook type or from the portal's identifier\nconfiguration, and a hook that configures no requirement for the entity the portal\nlinks does not wait at all - it keeps polling entity search exactly as before.\n\nA selector may only name an attribute that is literally a member of that entity\ntarget's configured `unique_ids` in the inbound use case, because the toolkit reports\nexactly those and nothing else. A selector on any other attribute can never match. A\ntoolkit that validates selectors rejects such a wait (400) with the slug, the key and\nthe keys it accepts; the portal logs that at error level with the hook it came from\nand polls entity search for the request, so the customer is unaffected and never told.\n\nThe slug the portal resolves its link target from is fixed by the hook, and a\nrequirement for it must be configured for the wait to happen at all:\n`registrationIdentifiersCheck` resolves the contact, every `contractIdentification`\nassignment mode resolves the contract (in the contact modes the linked contact is the\ndelivered contract's `customer`). Every other configured slug is evidence that the push\ncarried what it promised, and is never linked.\n\nIgnored unless `wait_for_toolkit` is true.\n\nWorked examples, verified against the live integration configuration. Each block is the\n`wait_for_entities` of one hook selection, and each names the slug that hook links.\n\nRatingen / Wilken add-contract hook (`contractIdentification`, `contact_to_portal_user`).\nNo value the user types is a unique id anywhere in the org - every one is a Wilken\nsurrogate `external_id` - so the contact cannot be selected by attribute at all. Wait on\nthe contract and link its `customer`; the identity-keyed contact is evidence that the\nbusiness partner landed, and is never linked.\n\n```yaml\ncontract: {}\ncontact:\n  key: external_id            # the PROFILE contact's unique id is external_id\n  from_caller_contact: external_id\n```\n\nWEMAG registration hook (`registrationIdentifiersCheck`). The contact's unique ids are\n`customer_pin` and `reenumber`; `meter.external_id` and `meter.meter_number` are both\nthe `ZNR` the user types.\n\n```yaml\ncontact:\n  key: reenumber\n  from_identifier: contact.complete_customer_number\n  split_on: \"-\"               # \"0002-<customer_pin>-<reenumber>\"\n  part: 2\nmeter:\n  key: external_id\n  from_identifier: meter.meter_number\n```\n\nWEMAG add-contract hook (`contractIdentification`, `contact_to_portal_user`). The\ncontract's unique ids are `billing_account_number` (the `reenumber`, the same third\npart of `complete_customer_number`) and `customer_number` (the PIN). Wait on the\ncontract of the typed Rechnungseinheit and link its `customer`.\n\n```yaml\ncontract:\n  key: billing_account_number\n  from_identifier: contact.complete_customer_number\n  split_on: \"-\"               # \"0002-<customer_pin>-<reenumber>\"\n  part: 2\nmeter:\n  key: external_id\n  from_identifier: meter.meter_number\n```\n\nNever `complete_customer_number` or `customer_number` on a WEMAG contact - neither is a\nunique id there - and never `customer_pin` alone on a contact or `customer_number` alone\non a contract, both of which are the PIN and ambiguous, because one person has one\ncontact and one contract per Rechnungseinheit. Never a key-less `contract` either: WEMAG's\n`EKM Anlagedaten` writes contracts of its own, keyed on `contract_number`.\n",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/WaitForEntityRule"
+            },
+            "example": {
+              "contract": {},
+              "contact": {
+                "key": "external_id",
+                "from_caller_contact": "external_id"
+              }
+            }
+          },
+          "wait_for_use_cases": {
+            "type": "array",
+            "description": "Inbound use case slugs the portal additionally waits for. A requirement is met once at\nleast one event of that use case slug has finished processing, whether or not it\nproduced an entity, so it covers pushes whose entity set varies and pushes whose\noutcome is a file or a relation rather than an entity.\n\nEntity requirements stay primary - the portal links by entity id, so it always waits\nfor the entity it links. Use case slugs are an additional bar: when both are\nconfigured, both must be met. Empty by default. Ignored unless `wait_for_toolkit` is\ntrue.\n",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "example": [
+              "wilken_contract_changed"
+            ]
           }
         },
         "required": [
@@ -17309,6 +17664,39 @@
           "extension_id",
           "hook_id"
         ]
+      },
+      "WaitForEntityRule": {
+        "type": "object",
+        "description": "One requirement of a hook's correlation wait, for the entity slug it is configured under.\n\nWithout `key` the requirement is satisfied by any entity of that slug. That is safe for\nevidence, and for a linked slug only where the inbound use case writes exactly one entity\nof it per push - Wilken's `BusinessPartnerChanged` always writes two contacts, and WEMAG's\n`DocumentChange` / `D3Metadata` write contacts under the same unique-id keys a registration\npush uses - so a second match answers 409 rather than linking a guess.\n\nWith `key`, the value comes from exactly one declared source, `from_identifier` or\n`from_caller_contact`. A rule whose source has no value produces no wait at all, so the\nhook keeps polling rather than waiting on a requirement that cannot be met.\n",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Unique-id attribute the selector matches on. Must be a member of that entity target's\nconfigured `unique_ids` in the inbound use case; the toolkit reports nothing else.\n",
+            "example": "reenumber"
+          },
+          "from_identifier": {
+            "type": "string",
+            "description": "Identifier the user submitted to take the value from, as `<schema>.<name>` - the same\nschema and name the portal's `registration_identifiers` / `contract_identifiers` use.\nMutually exclusive with `from_caller_contact`.\n",
+            "example": "contact.complete_customer_number"
+          },
+          "from_caller_contact": {
+            "type": "string",
+            "description": "Attribute of the calling portal user's own contact to take the value from. Only\navailable to hooks called by a signed-in user. Mutually exclusive with\n`from_identifier`.\n",
+            "example": "external_id"
+          },
+          "split_on": {
+            "type": "string",
+            "description": "Separator the source value is split on before `part` is taken, for identifiers that\ncarry a unique id inside a larger value the user types. WEMAG's\n`complete_customer_number` is `\"0002-<customer_pin>-<reenumber>\"`, so splitting on `-`\nand taking part 2 yields the contact's `reenumber` unique id.\n",
+            "example": "-"
+          },
+          "part": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Zero-based index of the part to use after splitting on `split_on`.",
+            "example": 2
+          }
+        }
       },
       "PublicExtensionCapabilities": {
         "type": "object",
@@ -18048,6 +18436,10 @@
                 "type": "string",
                 "deprecated": true,
                 "description": "Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
+              },
+              "result_correlation_id": {
+                "type": "string",
+                "description": "Correlation id to wait for inbound ERP events under, resolved from the third-party\nresponse, e.g. `{{CallResponse.data.acknowledgeId}}`. Only read when the portal is\nconfigured to wait on the Integration Toolkit\n(`extension_hooks.<hook>.wait_for_toolkit`).\n\nThere is no default: unless a hook declares this, the portal waits on the id it\nminted and handed the hook as `{{CorrelationId}}`, whatever the response carries. A\npartner that pushes under that id leaves this unset; only a partner that pushes\nunder an id of its own declares where the response carries it. A declared id that\nis absent from the response falls back to the minted one; one that is not a valid\ncorrelation id (at most 255 letters, digits, `-` and `_`) is not waited on, and\nthe portal polls entity search instead.\n"
               }
             },
             "required": [
@@ -18061,6 +18453,10 @@
               "result": {
                 "type": "string",
                 "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`."
+              },
+              "result_correlation_id": {
+                "type": "string",
+                "description": "Correlation id to wait for inbound ERP events under, resolved from the third-party\nresponse, e.g. `{{CallResponse.data.acknowledgeId}}`. Supersedes\n`call.result_correlation_id`. No default; see `call.result_correlation_id`.\n"
               },
               "error_message_path": {
                 "type": "string",
@@ -18133,6 +18529,10 @@
                 "type": "string",
                 "deprecated": true,
                 "description": "Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
+              },
+              "result_correlation_id": {
+                "type": "string",
+                "description": "Correlation id to wait for inbound ERP events under, resolved from the third-party\nresponse, e.g. `{{CallResponse.data.acknowledgeId}}`. Only read when the portal is\nconfigured to wait on the Integration Toolkit\n(`extension_hooks.<hook>.wait_for_toolkit`).\n\nThere is no default: unless a hook declares this, the portal waits on the id it\nminted and handed the hook as `{{CorrelationId}}`, whatever the response carries. A\npartner that pushes under that id leaves this unset; only a partner that pushes\nunder an id of its own declares where the response carries it. A declared id that\nis absent from the response falls back to the minted one; one that is not a valid\ncorrelation id (at most 255 letters, digits, `-` and `_`) is not waited on, and\nthe portal polls entity search instead.\n"
               }
             },
             "required": [
@@ -18146,6 +18546,10 @@
               "result": {
                 "type": "string",
                 "description": "Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`."
+              },
+              "result_correlation_id": {
+                "type": "string",
+                "description": "Correlation id to wait for inbound ERP events under, resolved from the third-party\nresponse, e.g. `{{CallResponse.data.acknowledgeId}}`. Supersedes\n`call.result_correlation_id`. No default; see `call.result_correlation_id`.\n"
               },
               "error_message_path": {
                 "type": "string",
@@ -20900,15 +21304,23 @@
         "properties": {
           "start_page": {
             "type": "boolean",
-            "description": "Start page feature flag"
+            "deprecated": true,
+            "description": "Retired, not read. A portal shows a start page by having a `dashboard` page."
           },
           "billing": {
             "type": "boolean",
-            "description": "Billing feature flag"
+            "deprecated": true,
+            "description": "Retired, not read. Billing follows the organization's `commodity_billing` setting."
+          },
+          "commodity_billing": {
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Retired, not read. Billing pages and blocks follow the organization's `commodity_billing` setting."
           },
           "change_due_date": {
             "type": "boolean",
-            "description": "Change due date feature flag"
+            "deprecated": true,
+            "description": "Retired, not read."
           },
           "new_design": {
             "type": "boolean",
@@ -20924,6 +21336,15 @@
             "default": 0,
             "readOnly": true,
             "description": "Server-managed generation used to invalidate MCP grants after the connector is disabled or re-enabled"
+          },
+          "portal_copilot": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable the portal copilot chat for this portal"
+          },
+          "portal_copilot_agent_id": {
+            "type": "string",
+            "description": "ID of the Agent Builder portal agent this portal's copilot chat runs, set by Agent Builder. When unset, or when the agent no longer exists in the portal's organization, the chat runs the default portal copilot."
           }
         }
       },
@@ -21098,6 +21519,24 @@
             "type": "string",
             "description": "The URL to redirect to",
             "example": "https://example.com"
+          },
+          "title": {
+            "type": "string",
+            "description": "Portal name, served as the document title before the app boots",
+            "example": "Kundenportal"
+          },
+          "prevent_indexing": {
+            "type": "boolean",
+            "description": "Whether the served document should carry a `noindex, nofollow` robots meta tag"
+          },
+          "organization_id": {
+            "type": "string",
+            "description": "Organization of the portal, used to preload its design from the served document",
+            "example": "123"
+          },
+          "design_id": {
+            "type": "string",
+            "description": "Design of the portal, used to preload it from the served document"
           }
         }
       },
@@ -21160,6 +21599,9 @@
               "based_on_revision_id": {
                 "type": "string"
               },
+              "revision_source": {
+                "$ref": "#/components/schemas/RevisionSource"
+              },
               "pages": {
                 "type": "array",
                 "items": {
@@ -21193,6 +21635,40 @@
           }
         }
       },
+      "UpdatePortalRevisionRequest": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "New label for the revision. Trimmed by the server; an empty name after trimming removes the revision's name.\n",
+            "example": "FAQ page launch"
+          }
+        }
+      },
+      "RevisionSource": {
+        "type": "object",
+        "description": "Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.\n",
+        "additionalProperties": false,
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "blueprint_sync"
+            ]
+          },
+          "blueprint_title": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      },
       "PortalRevisionSummary": {
         "type": "object",
         "required": [
@@ -21216,11 +21692,14 @@
           },
           "name": {
             "type": "string",
-            "description": "Set at publish time only, and only when the publish request carried one. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.\n",
+            "description": "Set at publish time when the publish request carries one, or by renaming the revision with `updatePortalRevision`. A revision can have been published and still have no name; `published_at` is the signal that a revision was live at some point, not this field.\n",
             "example": "FAQ page launch"
           },
           "description": {
             "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/RevisionSource"
           },
           "page_count": {
             "type": "number"
@@ -21376,9 +21855,82 @@
       },
       "SwappableConfig": {
         "type": "string",
-        "description": "Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum.",
+        "description": "Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, auth_settings) can never be swapped and are therefore not part of this enum.\n- `email_templates`: swap the email templates of the two portals.\n- `portal_references`: after the swap, re-point configuration in other services from the source portal to the target portal: the portal on journey login (AuthControl) blocks and in file upload portal access, and the portal of automation flow portal triggers. One-directional: references to the target portal are left unchanged, because the target keeps its domain and users. System flows are not changed. Uses the caller's permissions; the outcome is returned in `portal_references`.",
         "enum": [
-          "email_templates"
+          "email_templates",
+          "portal_references"
+        ]
+      },
+      "SwapPortalReferencesResult": {
+        "type": "object",
+        "description": "Outcome of the `portal_references` swap option. Only present when that option was requested. The swap itself has already succeeded when this is returned, so failures here do not undo it.",
+        "properties": {
+          "journeys": {
+            "$ref": "#/components/schemas/SwapPortalReferenceGroup"
+          },
+          "automation_flows": {
+            "$ref": "#/components/schemas/SwapPortalReferenceGroup"
+          }
+        },
+        "required": [
+          "journeys",
+          "automation_flows"
+        ]
+      },
+      "SwapPortalReferenceGroup": {
+        "type": "object",
+        "properties": {
+          "updated": {
+            "type": "array",
+            "description": "Items whose references now point at the target portal.",
+            "items": {
+              "$ref": "#/components/schemas/SwapPortalReferenceItem"
+            }
+          },
+          "failed": {
+            "type": "array",
+            "description": "Items that reference the source portal but could not be updated.",
+            "items": {
+              "$ref": "#/components/schemas/SwapPortalReferenceItem"
+            }
+          },
+          "list_error": {
+            "type": "string",
+            "description": "Set when the items could not be listed, so none of them were checked."
+          }
+        },
+        "required": [
+          "updated",
+          "failed"
+        ]
+      },
+      "SwapPortalReferenceItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Journey id or automation flow id."
+          },
+          "name": {
+            "type": "string"
+          },
+          "paths": {
+            "type": "array",
+            "description": "Where the reference sat in the item.",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "steps[0].uischema.elements[2].options.portalId"
+            ]
+          },
+          "error": {
+            "type": "string",
+            "description": "Why the update failed. Only set on failed items."
+          }
+        },
+        "required": [
+          "id"
         ]
       },
       "PortalUserRegistrationStatus": {

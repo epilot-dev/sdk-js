@@ -1488,6 +1488,13 @@
     "/v2/portal/contract/by-identifiers": {
       "post": {
         "operationId": "addContractByIdentifiers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "correlation_id",
+            "required": false
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2460,6 +2467,18 @@
         "responses": {}
       }
     },
+    "/v3/portal/public/user/temporary-password/complete": {
+      "post": {
+        "operationId": "completeTemporaryPassword",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/campaign/{campaign_id}/entity:status": {
       "put": {
         "operationId": "updateCampaignPortalBlockStatus",
@@ -2690,6 +2709,28 @@
           }
         ],
         "responses": {}
+      },
+      "patch": {
+        "operationId": "updatePortalRevision",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "revision_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v3/portal/config/{portal_id}/publish": {
@@ -2906,6 +2947,16 @@
         }
       },
       "ContractAssignmentConflict": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ContractAssignmentNotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ContactAmbiguousMatch": {
         "content": {
           "application/json": {}
         }
