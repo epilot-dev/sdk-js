@@ -1649,6 +1649,19 @@ declare namespace Components {
              */
             login_methods: ("email_code" | "portal_login")[];
             /**
+             * Starter questions of the assigned Agent Builder website agent, by locale. Absent when the agent has none; clients then show their own defaults.
+             */
+            starters?: {
+                /**
+                 * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                 */
+                de?: string[];
+                /**
+                 * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                 */
+                en?: string[];
+            };
+            /**
              * Prototype Guided Actions offered by this Website Chat.
              */
             actions?: {
@@ -1691,6 +1704,9 @@ declare namespace Components {
                     highContrast?: boolean;
                 };
             };
+            /**
+             * Languages the chat offers, default first: the assigned Agent Builder website agent's languages, or both for a legacy agent. Hide the language choice when there is one.
+             */
             locales: ("en" | "de")[];
         }
         /**
@@ -2160,6 +2176,10 @@ declare namespace Components {
                 }?
             ];
         } | null;
+        /**
+         * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+         */
+        export type StarterQuestions = string[];
         export interface UpdateWebsiteChatRequest {
             name?: string;
             agent_id?: string | null; // uuid
@@ -3272,6 +3292,93 @@ declare namespace Components {
                 cardColor?: string;
                 highContrast?: boolean;
             };
+        }
+        export interface WebsiteChatPreviewGrant {
+            /**
+             * Single-use grant for POST /v1/sessions.
+             */
+            grant: string;
+            /**
+             * Seconds until the grant expires.
+             */
+            expires_in: number;
+            frame_origin: string; // uri
+            website_chat: {
+                key: string;
+                organisationName: string;
+                assistantName: string;
+                defaultLocale: "en" | "de";
+                /**
+                 * Login methods currently available to the customer.
+                 */
+                login_methods: ("email_code" | "portal_login")[];
+                /**
+                 * Starter questions of the assigned Agent Builder website agent, by locale. Absent when the agent has none; clients then show their own defaults.
+                 */
+                starters?: {
+                    /**
+                     * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                     */
+                    de?: string[];
+                    /**
+                     * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                     */
+                    en?: string[];
+                };
+                /**
+                 * Prototype Guided Actions offered by this Website Chat.
+                 */
+                actions?: {
+                    meter_reading?: boolean;
+                    meter_reading_journey_id?: string; // uuid
+                };
+                design?: {
+                    id: string; // uuid
+                    last_modified_at?: string;
+                    style?: {
+                        palette?: {
+                            primary?: string;
+                            background?: string;
+                        };
+                        typography?: {
+                            font?: {
+                                font_family?: string;
+                            };
+                        };
+                        shape?: {
+                            border_radius?: number;
+                        };
+                    };
+                    spark_theme?: {
+                        accentColor?: string;
+                        backgroundColor?: string;
+                        fontBody?: string;
+                        fontHeading?: string;
+                        radius?: string;
+                        scaling?: string;
+                        spacing?: string;
+                        appearance?: string;
+                        neutralColor?: string;
+                        styleVariant?: string;
+                        labelPosition?: string;
+                        inputStyle?: string;
+                        inputColor?: string;
+                        cardVariant?: string;
+                        cardColor?: string;
+                        highContrast?: boolean;
+                    };
+                };
+                /**
+                 * Languages the chat offers, default first: the assigned Agent Builder website agent's languages, or both for a legacy agent. Hide the language choice when there is one.
+                 */
+                locales: ("en" | "de")[];
+            };
+        }
+        export interface WebsiteChatPreviewGrantRequest {
+            /**
+             * Unsaved design to preview. Omit to keep the saved design; null previews the default design.
+             */
+            design_id?: string | null; // uuid
         }
         export interface WebsiteChatSettings {
             /**
@@ -4867,6 +4974,19 @@ declare namespace Paths {
                      */
                     login_methods: ("email_code" | "portal_login")[];
                     /**
+                     * Starter questions of the assigned Agent Builder website agent, by locale. Absent when the agent has none; clients then show their own defaults.
+                     */
+                    starters?: {
+                        /**
+                         * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                         */
+                        de?: string[];
+                        /**
+                         * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                         */
+                        en?: string[];
+                    };
+                    /**
                      * Prototype Guided Actions offered by this Website Chat.
                      */
                     actions?: {
@@ -4909,8 +5029,15 @@ declare namespace Paths {
                             highContrast?: boolean;
                         };
                     };
+                    /**
+                     * Languages the chat offers, default first: the assigned Agent Builder website agent's languages, or both for a legacy agent. Hide the language choice when there is one.
+                     */
                     locales: ("en" | "de")[];
                 };
+                /**
+                 * Agent Builder preview session; the frame only runs it inside the 360 portal.
+                 */
+                preview?: boolean;
             }
             export interface Default {
                 code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
@@ -6014,6 +6141,125 @@ declare namespace Paths {
             }
         }
     }
+    namespace CreateWebsiteChatPreviewGrant {
+        export interface RequestBody {
+            /**
+             * Unsaved design to preview. Omit to keep the saved design; null previews the default design.
+             */
+            design_id?: string | null; // uuid
+        }
+        namespace Responses {
+            export interface $201 {
+                /**
+                 * Single-use grant for POST /v1/sessions.
+                 */
+                grant: string;
+                /**
+                 * Seconds until the grant expires.
+                 */
+                expires_in: number;
+                frame_origin: string; // uri
+                website_chat: {
+                    key: string;
+                    organisationName: string;
+                    assistantName: string;
+                    defaultLocale: "en" | "de";
+                    /**
+                     * Login methods currently available to the customer.
+                     */
+                    login_methods: ("email_code" | "portal_login")[];
+                    /**
+                     * Starter questions of the assigned Agent Builder website agent, by locale. Absent when the agent has none; clients then show their own defaults.
+                     */
+                    starters?: {
+                        /**
+                         * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                         */
+                        de?: string[];
+                        /**
+                         * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                         */
+                        en?: string[];
+                    };
+                    /**
+                     * Prototype Guided Actions offered by this Website Chat.
+                     */
+                    actions?: {
+                        meter_reading?: boolean;
+                        meter_reading_journey_id?: string; // uuid
+                    };
+                    design?: {
+                        id: string; // uuid
+                        last_modified_at?: string;
+                        style?: {
+                            palette?: {
+                                primary?: string;
+                                background?: string;
+                            };
+                            typography?: {
+                                font?: {
+                                    font_family?: string;
+                                };
+                            };
+                            shape?: {
+                                border_radius?: number;
+                            };
+                        };
+                        spark_theme?: {
+                            accentColor?: string;
+                            backgroundColor?: string;
+                            fontBody?: string;
+                            fontHeading?: string;
+                            radius?: string;
+                            scaling?: string;
+                            spacing?: string;
+                            appearance?: string;
+                            neutralColor?: string;
+                            styleVariant?: string;
+                            labelPosition?: string;
+                            inputStyle?: string;
+                            inputColor?: string;
+                            cardVariant?: string;
+                            cardColor?: string;
+                            highContrast?: boolean;
+                        };
+                    };
+                    /**
+                     * Languages the chat offers, default first: the assigned Agent Builder website agent's languages, or both for a legacy agent. Hide the language choice when there is one.
+                     */
+                    locales: ("en" | "de")[];
+                };
+            }
+            export interface $400 {
+                error?: string;
+                message?: string;
+                details?: {
+                    [key: string]: any;
+                };
+            }
+            export interface $403 {
+                error?: string;
+                message?: string;
+                details?: {
+                    [key: string]: any;
+                };
+            }
+            export interface $404 {
+                error?: string;
+                message?: string;
+                details?: {
+                    [key: string]: any;
+                };
+            }
+            export interface $429 {
+                error?: string;
+                message?: string;
+                details?: {
+                    [key: string]: any;
+                };
+            }
+        }
+    }
     namespace DeleteWebsiteChat {
         namespace Parameters {
             export type Version = number;
@@ -6530,6 +6776,24 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetChatPortalJourneyToken {
+        namespace Responses {
+            export interface $200 {
+                id_token: string;
+                /**
+                 * Unix seconds
+                 */
+                expires_at: number;
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
     namespace GetChatPortalLogin {
         namespace Responses {
             export interface $200 {
@@ -6623,6 +6887,19 @@ declare namespace Paths {
                  */
                 login_methods: ("email_code" | "portal_login")[];
                 /**
+                 * Starter questions of the assigned Agent Builder website agent, by locale. Absent when the agent has none; clients then show their own defaults.
+                 */
+                starters?: {
+                    /**
+                     * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                     */
+                    de?: string[];
+                    /**
+                     * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                     */
+                    en?: string[];
+                };
+                /**
                  * Prototype Guided Actions offered by this Website Chat.
                  */
                 actions?: {
@@ -6665,6 +6942,9 @@ declare namespace Paths {
                         highContrast?: boolean;
                     };
                 };
+                /**
+                 * Languages the chat offers, default first: the assigned Agent Builder website agent's languages, or both for a legacy agent. Hide the language choice when there is one.
+                 */
                 locales: ("en" | "de")[];
             }
             export interface Default {
@@ -7794,6 +8074,23 @@ declare namespace Paths {
                 details?: {
                     [key: string]: any;
                 };
+            }
+        }
+    }
+    namespace ReportChatActionEvent {
+        export interface RequestBody {
+            action: string; // ^[a-z][a-z_]{0,59}$
+            event: "journey_submitted" | "journey_closed";
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -9989,6 +10286,14 @@ declare namespace Paths {
             website_chat_id: Parameters.WebsiteChatId /* uuid */;
         }
     }
+    namespace V1WebsiteChats$WebsiteChatIdPreviewGrant {
+        namespace Parameters {
+            export type WebsiteChatId = string; // uuid
+        }
+        export interface PathParameters {
+            website_chat_id: Parameters.WebsiteChatId /* uuid */;
+        }
+    }
     namespace VerifyChatEmailCode {
         export interface RequestBody {
             challenge_id: string; // uuid
@@ -10117,6 +10422,14 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteWebsiteChat.Responses.$204>
   /**
+   * createWebsiteChatPreviewGrant - Issues a single-use grant for an Agent Builder preview of this Website Chat. Only callable from the 360 portal; the preview runs without allowed websites (also before any are added), is exempt from Website Chat analytics and ends after 15 minutes. The grant is exchanged at POST /v1/sessions within 60 seconds.
+   */
+  'createWebsiteChatPreviewGrant'(
+    parameters?: Parameters<Paths.V1WebsiteChats$WebsiteChatIdPreviewGrant.PathParameters> | null,
+    data?: Paths.CreateWebsiteChatPreviewGrant.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateWebsiteChatPreviewGrant.Responses.$201>
+  /**
    * getPublicWebsiteChat - Resolve visitor-facing configuration for an independent Website Chat and its current agent assignment. The Website Chat ID is not an organisation ID or a destination such as website or portal.
    */
   'getPublicWebsiteChat'(
@@ -10194,6 +10507,14 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetChatPortalLogin.Responses.$200 | Paths.GetChatPortalLogin.Responses.Default>
   /**
+   * getChatPortalJourneyToken - Prototype. The portal ID token of this session's portal login, for an embedded Journey running in the Journey app's parent-auth mode, so the customer does not log in twice. Only for a valid portal login; the frame keeps it in memory and posts it only to the Journey origin.
+   */
+  'getChatPortalJourneyToken'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetChatPortalJourneyToken.Responses.$200 | Paths.GetChatPortalJourneyToken.Responses.Default>
+  /**
    * startChatPortalLogin - Send a one-time code for the customer portal account with this email, using the portal
    * configured on this session's Website Chat. The response is pending whether or not an
    * account exists. Repeating the same request_id and email does not send another email.
@@ -10248,6 +10569,14 @@ export interface OperationMethods {
     data?: Paths.StartChatAction.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.StartChatAction.Responses.$200 | Paths.StartChatAction.Responses.Default>
+  /**
+   * reportChatActionEvent - Report what an embedded journey did, so the assistant can refer to it. Accepted only for a journey action this Website Chat offers. Browser input: the assistant is told it is not confirmed.
+   */
+  'reportChatActionEvent'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ReportChatActionEvent.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReportChatActionEvent.Responses.$204 | Paths.ReportChatActionEvent.Responses.Default>
   /**
    * submitChatAction - Prototype. Submit values for review. Targets must be one of the server-offered options; values are validated before confirmation.
    */
@@ -10318,6 +10647,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteWebsiteChat.Responses.$204>
+  }
+  ['/v1/website-chats/{website_chat_id}/preview-grant']: {
+    /**
+     * createWebsiteChatPreviewGrant - Issues a single-use grant for an Agent Builder preview of this Website Chat. Only callable from the 360 portal; the preview runs without allowed websites (also before any are added), is exempt from Website Chat analytics and ends after 15 minutes. The grant is exchanged at POST /v1/sessions within 60 seconds.
+     */
+    'post'(
+      parameters?: Parameters<Paths.V1WebsiteChats$WebsiteChatIdPreviewGrant.PathParameters> | null,
+      data?: Paths.CreateWebsiteChatPreviewGrant.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateWebsiteChatPreviewGrant.Responses.$201>
   }
   ['/v1/website-chats/{website_chat_id}/configuration']: {
     /**
@@ -10414,6 +10753,16 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetChatPortalLogin.Responses.$200 | Paths.GetChatPortalLogin.Responses.Default>
   }
+  ['/v1/login/portal/journey-token']: {
+    /**
+     * getChatPortalJourneyToken - Prototype. The portal ID token of this session's portal login, for an embedded Journey running in the Journey app's parent-auth mode, so the customer does not log in twice. Only for a valid portal login; the frame keeps it in memory and posts it only to the Journey origin.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetChatPortalJourneyToken.Responses.$200 | Paths.GetChatPortalJourneyToken.Responses.Default>
+  }
   ['/v1/login/portal/start']: {
     /**
      * startChatPortalLogin - Send a one-time code for the customer portal account with this email, using the portal
@@ -10479,6 +10828,16 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.StartChatAction.Responses.$200 | Paths.StartChatAction.Responses.Default>
   }
+  ['/v1/actions/events']: {
+    /**
+     * reportChatActionEvent - Report what an embedded journey did, so the assistant can refer to it. Accepted only for a journey action this Website Chat offers. Browser input: the assistant is told it is not confirmed.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ReportChatActionEvent.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReportChatActionEvent.Responses.$204 | Paths.ReportChatActionEvent.Responses.Default>
+  }
   ['/v1/actions/{action_id}/submit']: {
     /**
      * submitChatAction - Prototype. Submit values for review. Targets must be one of the server-offered options; values are validated before confirmation.
@@ -10529,8 +10888,11 @@ export type PublicWebsiteChat = Components.Schemas.PublicWebsiteChat;
 export type SelfServiceAction = Components.Schemas.SelfServiceAction;
 export type SelfServiceDirective = Components.Schemas.SelfServiceDirective;
 export type SelfServiceSettings = Components.Schemas.SelfServiceSettings;
+export type StarterQuestions = Components.Schemas.StarterQuestions;
 export type UpdateWebsiteChatRequest = Components.Schemas.UpdateWebsiteChatRequest;
 export type VerificationState = Components.Schemas.VerificationState;
 export type WebsiteChat = Components.Schemas.WebsiteChat;
 export type WebsiteChatDesign = Components.Schemas.WebsiteChatDesign;
+export type WebsiteChatPreviewGrant = Components.Schemas.WebsiteChatPreviewGrant;
+export type WebsiteChatPreviewGrantRequest = Components.Schemas.WebsiteChatPreviewGrantRequest;
 export type WebsiteChatSettings = Components.Schemas.WebsiteChatSettings;
