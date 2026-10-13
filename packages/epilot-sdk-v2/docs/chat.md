@@ -30,6 +30,7 @@ const { data } = await chatClient.listWebsiteChats(...)
 - [`getWebsiteChat`](#getwebsitechat)
 - [`updateWebsiteChat`](#updatewebsitechat)
 - [`deleteWebsiteChat`](#deletewebsitechat)
+- [`createWebsiteChatPreviewGrant`](#createwebsitechatpreviewgrant)
 
 **Other**
 - [`getPublicWebsiteChat`](#getpublicwebsitechat)
@@ -41,12 +42,14 @@ const { data } = await chatClient.listWebsiteChats(...)
 - [`verifyChatEmailCode`](#verifychatemailcode)
 - [`cancelChatVerification`](#cancelchatverification)
 - [`getChatPortalLogin`](#getchatportallogin)
+- [`getChatPortalJourneyToken`](#getchatportaljourneytoken)
 - [`startChatPortalLogin`](#startchatportallogin)
 - [`verifyChatPortalLogin`](#verifychatportallogin)
 - [`cancelChatPortalLogin`](#cancelchatportallogin)
 - [`signOutChatCustomer`](#signoutchatcustomer)
 - [`getChatAction`](#getchataction)
 - [`startChatAction`](#startchataction)
+- [`reportChatActionEvent`](#reportchatactionevent)
 - [`submitChatAction`](#submitchataction)
 - [`confirmChatAction`](#confirmchataction)
 - [`cancelChatAction`](#cancelchataction)
@@ -57,6 +60,8 @@ const { data } = await chatClient.listWebsiteChats(...)
 - [`WebsiteChatSettings`](#websitechatsettings)
 - [`SelfServiceSettings`](#selfservicesettings)
 - [`SelfServiceAction`](#selfserviceaction)
+- [`WebsiteChatPreviewGrantRequest`](#websitechatpreviewgrantrequest)
+- [`WebsiteChatPreviewGrant`](#websitechatpreviewgrant)
 - [`Error`](#error)
 - [`CreateWebsiteChatRequest`](#createwebsitechatrequest)
 - [`UpdateWebsiteChatRequest`](#updatewebsitechatrequest)
@@ -67,6 +72,7 @@ const { data } = await chatClient.listWebsiteChats(...)
 - [`LoginMethod`](#loginmethod)
 - [`AccessTier`](#accesstier)
 - [`CustomerAccess`](#customeraccess)
+- [`StarterQuestions`](#starterquestions)
 - [`PublicWebsiteChat`](#publicwebsitechat)
 - [`WebsiteChatDesign`](#websitechatdesign)
 - [`PublicEvent`](#publicevent)
@@ -404,6 +410,88 @@ const { data } = await client.deleteWebsiteChat({
 
 ---
 
+### `createWebsiteChatPreviewGrant`
+
+`POST /v1/website-chats/{website_chat_id}/preview-grant`
+
+```ts
+const { data } = await client.createWebsiteChatPreviewGrant(
+  {
+    website_chat_id: 'example',
+  },
+  {
+    design_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "grant": "string",
+  "expires_in": 0,
+  "frame_origin": "https://example.com/path",
+  "website_chat": {
+    "key": "string",
+    "organisationName": "string",
+    "assistantName": "string",
+    "defaultLocale": "en",
+    "login_methods": ["email_code"],
+    "starters": {
+      "de": ["string"],
+      "en": ["string"]
+    },
+    "actions": {
+      "meter_reading": true,
+      "meter_reading_journey_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    },
+    "design": {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "last_modified_at": "string",
+      "style": {
+        "palette": {
+          "primary": "string",
+          "background": "string"
+        },
+        "typography": {
+          "font": {
+            "font_family": "string"
+          }
+        },
+        "shape": {
+          "border_radius": 0
+        }
+      },
+      "spark_theme": {
+        "accentColor": "string",
+        "backgroundColor": "string",
+        "fontBody": "string",
+        "fontHeading": "string",
+        "radius": "string",
+        "scaling": "string",
+        "spacing": "string",
+        "appearance": "string",
+        "neutralColor": "string",
+        "styleVariant": "string",
+        "labelPosition": "string",
+        "inputStyle": "string",
+        "inputColor": "string",
+        "cardVariant": "string",
+        "cardColor": "string",
+        "highContrast": true
+      }
+    },
+    "locales": ["en"]
+  }
+}
+```
+
+</details>
+
+---
+
 ### `getPublicWebsiteChat`
 
 `GET /v1/website-chats/{website_chat_id}/configuration`
@@ -424,6 +512,10 @@ const { data } = await client.getPublicWebsiteChat({
   "assistantName": "string",
   "defaultLocale": "en",
   "login_methods": ["email_code"],
+  "starters": {
+    "de": ["string"],
+    "en": ["string"]
+  },
   "actions": {
     "meter_reading": true,
     "meter_reading_journey_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
@@ -527,6 +619,10 @@ const { data } = await client.createAnonymousChatSession(
     "assistantName": "string",
     "defaultLocale": "en",
     "login_methods": ["email_code"],
+    "starters": {
+      "de": ["string"],
+      "en": ["string"]
+    },
     "actions": {
       "meter_reading": true,
       "meter_reading_journey_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
@@ -568,7 +664,8 @@ const { data } = await client.createAnonymousChatSession(
       }
     },
     "locales": ["en"]
-  }
+  },
+  "preview": true
 }
 ```
 
@@ -760,6 +857,28 @@ const { data } = await client.getChatPortalLogin()
     "tier": "anonymous",
     "method": "email_code"
   }
+}
+```
+
+</details>
+
+---
+
+### `getChatPortalJourneyToken`
+
+`GET /v1/login/portal/journey-token`
+
+```ts
+const { data } = await client.getChatPortalJourneyToken()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id_token": "string",
+  "expires_at": 0
 }
 ```
 
@@ -1001,6 +1120,22 @@ const { data } = await client.startChatAction(
 ```
 
 </details>
+
+---
+
+### `reportChatActionEvent`
+
+`POST /v1/actions/events`
+
+```ts
+const { data } = await client.reportChatActionEvent(
+  null,
+  {
+    action: 'string',
+    event: 'journey_submitted'
+  },
+)
+```
 
 ---
 
@@ -1305,6 +1440,46 @@ type SelfServiceAction = {
 }
 ```
 
+### `WebsiteChatPreviewGrantRequest`
+
+```ts
+type WebsiteChatPreviewGrantRequest = {
+  design_id?: string // uuid
+}
+```
+
+### `WebsiteChatPreviewGrant`
+
+```ts
+type WebsiteChatPreviewGrant = {
+  grant: string
+  expires_in: number
+  frame_origin: string // uri
+  website_chat: {
+    key: string
+    organisationName: string
+    assistantName: string
+    defaultLocale: "en" | "de"
+    login_methods: "email_code" | "portal_login"[]
+    starters?: {
+      de?: { ... }
+      en?: { ... }
+    }
+    actions?: {
+      meter_reading?: { ... }
+      meter_reading_journey_id?: { ... }
+    }
+    design?: {
+      id: { ... }
+      last_modified_at?: { ... }
+      style?: { ... }
+      spark_theme?: { ... }
+    }
+    locales: "en" | "de"[]
+  }
+}
+```
+
 ### `Error`
 
 ```ts
@@ -1467,6 +1642,14 @@ type CustomerAccess = {
 }
 ```
 
+### `StarterQuestions`
+
+At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+
+```ts
+type StarterQuestions = string[]
+```
+
 ### `PublicWebsiteChat`
 
 ```ts
@@ -1476,6 +1659,10 @@ type PublicWebsiteChat = {
   assistantName: string
   defaultLocale: "en" | "de"
   login_methods: "email_code" | "portal_login"[]
+  starters?: {
+    de?: string[]
+    en?: string[]
+  }
   actions?: {
     meter_reading?: boolean
     meter_reading_journey_id?: string // uuid

@@ -1,6 +1,6 @@
 {
   "name": "@epilot/sdk",
-  "version": "2.20.64",
+  "version": "2.20.65",
   "description": "JavaScript/TypeScript SDK for epilot APIs",
   "type": "module",
   "main": "./dist/index.cjs",
