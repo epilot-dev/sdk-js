@@ -55,6 +55,7 @@ const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 - [`startMailboxSync`](#startmailboxsync)
 - [`getMailboxSyncStatus`](#getmailboxsyncstatus)
 - [`retryMailboxSync`](#retrymailboxsync)
+- [`cancelMailboxSync`](#cancelmailboxsync)
 - [`getConnectedOutlookEmails`](#getconnectedoutlookemails)
 - [`outlookOAuthCallback`](#outlookoauthcallback)
 
@@ -123,6 +124,7 @@ const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 - [`EmailAddressSetting`](#emailaddresssetting)
 - [`WhitelistEmailAddressSetting`](#whitelistemailaddresssetting)
 - [`RestrictDuplicatesWithinSetting`](#restrictduplicateswithinsetting)
+- [`AllowedRecipientDomainsSetting`](#allowedrecipientdomainssetting)
 - [`SettingType`](#settingtype)
 - [`Setting`](#setting)
 - [`Domain`](#domain)
@@ -761,7 +763,7 @@ const { data } = await client.disconnectOutlook(
 ### `connectMsTeams`
 
 Connects Microsoft Teams channel (click-to-call deep links, meetings) for the organization.
-Requires an active Microsoft 365 / Outlook connection.
+Independent of the Microsoft 365 / Outlook connection.
 
 `POST /v2/channels/msteams/connect`
 
@@ -990,6 +992,32 @@ const { data } = await client.retryMailboxSync(
   },
 )
 ```
+
+---
+
+### `cancelMailboxSync`
+
+Stop Mailbox Sync
+
+`POST /v2/outlook/mailbox/{email}/sync/cancel`
+
+```ts
+const { data } = await client.cancelMailboxSync({
+  email: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "execution_id": "string",
+  "status": "RUNNING"
+}
+```
+
+</details>
 
 ---
 
@@ -1513,26 +1541,6 @@ const { data } = await client.deleteSetting(
 )
 ```
 
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "id": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7",
-  "name": "Default Signature",
-  "org_id": "org-123",
-  "type": "signature",
-  "value": "Best regards, The Team",
-  "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
-  "created_at": "2024-01-15T10:30:00Z",
-  "updated_at": "2024-01-20T14:45:00Z",
-  "created_by": "user-123",
-  "updated_by": "user-456"
-}
-```
-
-</details>
-
 ---
 
 ### `updateSetting`
@@ -1833,6 +1841,11 @@ type MailboxSyncFolderStatuses = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" 
 
 ### `MailboxSyncTimeframePeriods`
 
+Mailbox sync period. The long timeframes `3m`, `6m` and `1y` are only available to organizations
+with the `outlook-mailbox-sync-long-timeframes` feature enabled; connecting a mailbox, starting a sync,
+or retrying one of these syncs returns 403 otherwise.
+
+
 ```ts
 type MailboxSyncTimeframePeriods = "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y"
 ```
@@ -2003,7 +2016,7 @@ type SettingsResponse = Array<{
   id?: string
   name?: string
   org_id?: string
-  type: "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within"
+  type: "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within" | "allowed_recipient_domains"
   value?: string
   html?: string
   created_at?: string
@@ -2014,7 +2027,7 @@ type SettingsResponse = Array<{
   id?: string
   name?: string
   org_id?: string
-  type: "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within"
+  type: "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within" | "allowed_recipient_domains"
   value?: string
   html?: string
   created_at?: string
@@ -2255,10 +2268,21 @@ type WhitelistEmailAddressSetting = "whitelist_email_address"
 type RestrictDuplicatesWithinSetting = "restrict_duplicates_within"
 ```
 
+### `AllowedRecipientDomainsSetting`
+
+- Extra recipient domain allowed for outbound email from a sandbox organization.
+- Sandbox orgs (organization_use) with the sandbox recipient allowlist enabled may only
+  send unattended emails (workflow/automation/bulk/system) to epilot domains, the
+  verified sending domains of the org and its par
+
+```ts
+type AllowedRecipientDomainsSetting = "allowed_recipient_domains"
+```
+
 ### `SettingType`
 
 ```ts
-type SettingType = "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within"
+type SettingType = "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within" | "allowed_recipient_domains"
 ```
 
 ### `Setting`
@@ -2275,7 +2299,7 @@ type Setting = {
   id?: string
   name?: string
   org_id?: string
-  type: "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within"
+  type: "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within" | "allowed_recipient_domains"
   value?: string
   html?: string
   created_at?: string
