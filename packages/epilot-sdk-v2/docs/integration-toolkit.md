@@ -28,6 +28,9 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`acknowledgeTracking`](#acknowledgetracking)
 - [`triggerErp`](#triggererp)
 - [`processErpUpdatesEventsV3`](#processerpupdateseventsv3)
+- [`queryErpUpdateEvents`](#queryerpupdateevents)
+- [`getErpUpdateEvent`](#geterpupdateevent)
+- [`listErpUpdateCorrelations`](#listerpupdatecorrelations)
 - [`simulateMappingV2`](#simulatemappingv2)
 - [`simulateDirect`](#simulatedirect)
 - [`simulateMapping`](#simulatemapping)
@@ -138,6 +141,14 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`ErpUpdatesEventsV2Request`](#erpupdateseventsv2request)
 - [`ErpEventV3`](#erpeventv3)
 - [`ErpUpdatesEventsV3Request`](#erpupdateseventsv3request)
+- [`ErpUpdateProcessedEntity`](#erpupdateprocessedentity)
+- [`ErpUpdateProcessingError`](#erpupdateprocessingerror)
+- [`ErpUpdateEventStatus`](#erpupdateeventstatus)
+- [`CorrelationUseCaseCounts`](#correlationusecasecounts)
+- [`CorrelationStatus`](#correlationstatus)
+- [`CorrelationWaitResult`](#correlationwaitresult)
+- [`CorrelationWaitBadRequest`](#correlationwaitbadrequest)
+- [`CorrelationStatusList`](#correlationstatuslist)
 - [`TriggerErpActionRequest`](#triggererpactionrequest)
 - [`TriggerWebhookResp`](#triggerwebhookresp)
 - [`IntegrationEditableFields`](#integrationeditablefields)
@@ -418,6 +429,8 @@ const { data } = await client.processErpUpdatesEventsV3(
     integration_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     correlation_id: 'string',
     group_id: 'customer-42',
+    interactive: true,
+    correlation_complete: true,
     events: [
       {},
       {}
@@ -431,13 +444,204 @@ const { data } = await client.processErpUpdatesEventsV3(
 
 ```json
 {
+  "correlation_id": "string",
   "results": [
     {
       "event_id": "string",
       "status": "success",
+      "interactive": true,
+      "lane": "interactive",
       "message": "string"
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `queryErpUpdateEvents`
+
+Waits for the events of one correlation — the long poll behind interactive
+registration — and returns the correlation's summary.
+
+`GET /v3/erp/updates/events`
+
+```ts
+const { data } = await client.queryErpUpdateEvents({
+  correlation_id: 'example',
+  wait: 1,
+  wait_for_entities: ['...'],
+  wait_for_use_cases: ['...'],
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "correlation_id": "string",
+  "integration_id": "string",
+  "closed": true,
+  "closed_at": "1970-01-01T00:00:00.000Z",
+  "events_received": 0,
+  "events_done": 0,
+  "late_events": 0,
+  "first_ingested_at": "1970-01-01T00:00:00.000Z",
+  "last_done_at": "1970-01-01T00:00:00.000Z",
+  "use_cases": [
+    {
+      "use_case_slug": "string",
+      "received": 0,
+      "done": 0,
+      "error": 0
+    }
+  ],
+  "entities": [
+    {
+      "slug": "contact",
+      "_id": "string",
+      "operation": "created",
+      "unique_ids": {
+        "reenumber": "4711"
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": "string",
+      "message": "string",
+      "event_id": "string",
+      "occurred_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "completion": "requirements_met"
+}
+```
+
+</details>
+
+---
+
+### `getErpUpdateEvent`
+
+Returns one interactive event's processing record, without waiting.
+
+`GET /v3/erp/updates/events/{event_id}`
+
+```ts
+const { data } = await client.getErpUpdateEvent({
+  event_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "event_id": "string",
+  "correlation_id": "string",
+  "integration_id": "string",
+  "status": "accepted",
+  "lane": "interactive",
+  "use_case_id": "string",
+  "use_case_slug": "string",
+  "event_name": "string",
+  "ingested_at": "1970-01-01T00:00:00.000Z",
+  "mapped_at": "1970-01-01T00:00:00.000Z",
+  "done_at": "1970-01-01T00:00:00.000Z",
+  "writes_total": 0,
+  "writes_done": 0,
+  "entities": [
+    {
+      "slug": "contact",
+      "_id": "string",
+      "operation": "created",
+      "unique_ids": {
+        "reenumber": "4711"
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": "string",
+      "message": "string",
+      "event_id": "string",
+      "occurred_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `listErpUpdateCorrelations`
+
+Lists the organization's interactive correlations, newest first by the time
+their first event was ingested, with the same summary the correlation wait
+returns.
+
+`GET /v3/erp/updates/correlations`
+
+```ts
+const { data } = await client.listErpUpdateCorrelations({
+  integration_id: 'example',
+  limit: 1,
+  cursor: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "correlation_id": "string",
+      "integration_id": "string",
+      "closed": true,
+      "closed_at": "1970-01-01T00:00:00.000Z",
+      "events_received": 0,
+      "events_done": 0,
+      "late_events": 0,
+      "first_ingested_at": "1970-01-01T00:00:00.000Z",
+      "last_done_at": "1970-01-01T00:00:00.000Z",
+      "use_cases": [
+        {
+          "use_case_slug": "string",
+          "received": 0,
+          "done": 0,
+          "error": 0
+        }
+      ],
+      "entities": [
+        {
+          "slug": "contact",
+          "_id": "string",
+          "operation": "created",
+          "unique_ids": {
+            "reenumber": "4711"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "code": "string",
+          "message": "string",
+          "event_id": "string",
+          "occurred_at": "1970-01-01T00:00:00.000Z"
+        }
+      ]
+    }
+  ],
+  "next_cursor": "string",
+  "horizon_days": 7
 }
 ```
 
@@ -457,6 +661,7 @@ const { data } = await client.simulateMappingV2(
   {
     event_configuration: {
       direct: true,
+      interactive: 'on_request',
       entities: [
         { /* ... */ }
       ],
@@ -556,6 +761,7 @@ const { data } = await client.simulateDirect(
   {
     event_configuration: {
       direct: true,
+      interactive: 'on_request',
       entities: [
         { /* ... */ }
       ],
@@ -1283,6 +1489,7 @@ const { data } = await client.createUseCase(
     type: 'inbound',
     configuration: {
       direct: true,
+      interactive: 'on_request',
       entities: [
         { /* ... */ }
       ],
@@ -1311,6 +1518,7 @@ const { data } = await client.createUseCase(
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
     "direct": true,
+    "interactive": "on_request",
     "entities": [
       {}
     ],
@@ -1355,6 +1563,7 @@ const { data } = await client.getUseCase({
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
     "direct": true,
+    "interactive": "on_request",
     "entities": [
       {}
     ],
@@ -1389,6 +1598,7 @@ const { data } = await client.updateUseCase(
     type: 'inbound',
     configuration: {
       direct: true,
+      interactive: 'on_request',
       entities: [
         { /* ... */ }
       ],
@@ -1417,6 +1627,7 @@ const { data } = await client.updateUseCase(
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
     "direct": true,
+    "interactive": "on_request",
     "entities": [
       {}
     ],
@@ -4713,7 +4924,202 @@ type ErpUpdatesEventsV3Request = {
   integration_id: string // uuid
   correlation_id?: string
   group_id?: string
+  interactive?: boolean
+  correlation_complete?: boolean
   events: unknown | unknown[]
+}
+```
+
+### `ErpUpdateProcessedEntity`
+
+An entity an interactive event wrote.
+
+```ts
+type ErpUpdateProcessedEntity = {
+  slug: string
+  _id: string
+  operation: "created" | "updated" | "deleted" | "unchanged"
+  unique_ids: Record<string, string>
+}
+```
+
+### `ErpUpdateProcessingError`
+
+A failure nothing will retry.
+
+```ts
+type ErpUpdateProcessingError = {
+  code: string
+  message: string
+  event_id?: string
+  occurred_at: string // date-time
+}
+```
+
+### `ErpUpdateEventStatus`
+
+One interactive event's processing record.
+
+```ts
+type ErpUpdateEventStatus = {
+  event_id: string
+  correlation_id?: string
+  integration_id?: string
+  status: "accepted" | "processing" | "done" | "partial" | "error"
+  lane: "interactive" | "priority" | "default" | "deferred"
+  use_case_id?: string
+  use_case_slug?: string
+  event_name?: string
+  ingested_at: string // date-time
+  mapped_at?: string // date-time
+  done_at?: string // date-time
+  writes_total: number
+  writes_done: number
+  entities: Array<{
+    slug: string
+    _id: string
+    operation: "created" | "updated" | "deleted" | "unchanged"
+    unique_ids: Record<string, string>
+  }>
+  errors: Array<{
+    code: string
+    message: string
+    event_id?: string
+    occurred_at: string // date-time
+  }>
+}
+```
+
+### `CorrelationUseCaseCounts`
+
+How many of a correlation's events belong to one use case, and how they ended.
+
+```ts
+type CorrelationUseCaseCounts = {
+  use_case_slug: string
+  received: number
+  done: number
+  error: number
+}
+```
+
+### `CorrelationStatus`
+
+One correlation's summary.
+
+```ts
+type CorrelationStatus = {
+  correlation_id: string
+  integration_id?: string
+  closed: boolean
+  closed_at?: string // date-time
+  events_received: number
+  events_done: number
+  late_events: number
+  first_ingested_at?: string // date-time
+  last_done_at?: string // date-time
+  use_cases: Array<{
+    use_case_slug: string
+    received: number
+    done: number
+    error: number
+  }>
+  entities: Array<{
+    slug: string
+    _id: string
+    operation: "created" | "updated" | "deleted" | "unchanged"
+    unique_ids: Record<string, string>
+  }>
+  errors: Array<{
+    code: string
+    message: string
+    event_id?: string
+    occurred_at: string // date-time
+  }>
+}
+```
+
+### `CorrelationWaitResult`
+
+```ts
+type CorrelationWaitResult = {
+  correlation_id: string
+  integration_id?: string
+  closed: boolean
+  closed_at?: string // date-time
+  events_received: number
+  events_done: number
+  late_events: number
+  first_ingested_at?: string // date-time
+  last_done_at?: string // date-time
+  use_cases: Array<{
+    use_case_slug: string
+    received: number
+    done: number
+    error: number
+  }>
+  entities: Array<{
+    slug: string
+    _id: string
+    operation: "created" | "updated" | "deleted" | "unchanged"
+    unique_ids: Record<string, string>
+  }>
+  errors: Array<{
+    code: string
+    message: string
+    event_id?: string
+    occurred_at: string // date-time
+  }>
+  completion: "requirements_met" | "complete" | "timeout" | "error"
+}
+```
+
+### `CorrelationWaitBadRequest`
+
+```ts
+type CorrelationWaitBadRequest = {
+  message: string
+  slug?: string
+  rejected_key?: string
+  allowed_keys?: string[]
+}
+```
+
+### `CorrelationStatusList`
+
+```ts
+type CorrelationStatusList = {
+  results: Array<{
+    correlation_id: string
+    integration_id?: string
+    closed: boolean
+    closed_at?: string // date-time
+    events_received: number
+    events_done: number
+    late_events: number
+    first_ingested_at?: string // date-time
+    last_done_at?: string // date-time
+    use_cases: Array<{
+      use_case_slug: { ... }
+      received: { ... }
+      done: { ... }
+      error: { ... }
+    }>
+    entities: Array<{
+      slug: { ... }
+      _id: { ... }
+      operation: { ... }
+      unique_ids: { ... }
+    }>
+    errors: Array<{
+      code: { ... }
+      message: { ... }
+      event_id?: { ... }
+      occurred_at: { ... }
+    }>
+  }>
+  next_cursor: string
+  horizon_days: number
 }
 ```
 
@@ -5340,6 +5746,7 @@ type IntegrationWithUseCases = {
     updated_at: string // date-time
     configuration?: {
       direct?: { ... }
+      interactive?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }
@@ -5502,6 +5909,7 @@ type UpsertIntegrationWithUseCasesRequest = {
     type: "inbound"
     configuration?: {
       direct?: { ... }
+      interactive?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }
@@ -5527,7 +5935,6 @@ type UpsertIntegrationWithUseCasesRequest = {
     type: "file_proxy"
     configuration?: {
       direction?: { ... }
-      upload?: { ... }
   // ...
 }
 ```
@@ -5539,6 +5946,7 @@ Configuration for inbound use cases (ERP to epilot)
 ```ts
 type InboundIntegrationEventConfiguration = {
   direct?: boolean
+  interactive?: "disabled" | "on_request" | "always"
   entities?: Array<{
     entity_schema: string
     unique_ids: string[]
@@ -6132,6 +6540,7 @@ type EmbeddedUseCaseRequest = {
   type: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6222,7 +6631,6 @@ type EmbeddedUseCaseRequest = {
       body?: { ... }
       response_type: { ... }
     }>
-    response?: {
   // ...
 }
 ```
@@ -6251,6 +6659,7 @@ type EmbeddedInboundUseCaseRequest = {
   type: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6439,6 +6848,7 @@ type InboundUseCase = {
   updated_at: string // date-time
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6631,6 +7041,7 @@ type UseCase = {
   updated_at: string // date-time
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6717,7 +7128,6 @@ type UseCase = {
     params?: Array<{
       name: { ... }
       required: { ... }
-      description?: { ... }
   // ...
 }
 ```
@@ -6732,6 +7142,7 @@ type CreateUseCaseRequest = {
   type: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6824,7 +7235,6 @@ type CreateUseCaseRequest = {
       filename?: { ... }
       content_type?: { ... }
     }
-    prevent_indirect_serving?: boolean
   // ...
 }
 ```
@@ -6849,6 +7259,7 @@ type CreateInboundUseCaseRequest = {
   type: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -7007,6 +7418,7 @@ type UpdateUseCaseRequest = {
   type?: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -7098,7 +7510,6 @@ type UpdateUseCaseRequest = {
     response?: {
       body: { ... }
       encoding: { ... }
-      filename?: { ... }
   // ...
 }
 ```
@@ -7125,6 +7536,7 @@ type UpdateInboundUseCaseRequest = {
   type?: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -7298,6 +7710,7 @@ type UseCaseHistoryEntry = {
   type: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -7382,7 +7795,6 @@ type UseCaseHistoryEntry = {
       username?: { ... }
       password?: { ... }
       body_params?: { ... }
-      headers?: { ... }
   // ...
 }
 ```
@@ -7423,6 +7835,7 @@ type InboundUseCaseHistoryEntry = {
   type: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -8207,6 +8620,7 @@ making it easier to test configurations before saving them.
 type MappingSimulationV2Request = {
   event_configuration: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -8534,6 +8948,7 @@ against, and the payload to validate and translate.
 type DirectSimulationRequest = {
   event_configuration: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -8749,6 +9164,7 @@ type IntegrationConfigurationV2 = {
   mapping: {
     events: Record<string, {
       direct?: { ... }
+      interactive?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }>
@@ -9687,7 +10103,7 @@ This schema exists so consumers can import the union as a type. It is
 deliberately 
 
 ```ts
-type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED"
+type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED"
 ```
 
 ### `MonitoringEventV2`

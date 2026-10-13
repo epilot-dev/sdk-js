@@ -75,6 +75,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`createPortalRevision`](#createportalrevision)
 - [`listPortalRevisions`](#listportalrevisions)
 - [`getPortalRevision`](#getportalrevision)
+- [`updatePortalRevision`](#updateportalrevision)
 - [`publishPortalRevision`](#publishportalrevision)
 - [`listAllPortalConfigs`](#listallportalconfigs)
 - [`listPortalConfigSummaries`](#listportalconfigsummaries)
@@ -109,6 +110,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ssoCallback`](#ssocallback)
 - [`getPublicPages`](#getpublicpages)
 - [`getUserEntryPoint`](#getuserentrypoint)
+- [`completeTemporaryPassword`](#completetemporarypassword)
 - [`deRegisterMLoginUser`](#deregistermloginuser)
 - [`notifyMLoginInterestChange`](#notifymlogininterestchange)
 
@@ -305,6 +307,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`TriggerPortalFlow`](#triggerportalflow)
 - [`ExtensionConfig`](#extensionconfig)
 - [`ExtensionHookSelection`](#extensionhookselection)
+- [`WaitForEntityRule`](#waitforentityrule)
 - [`PublicExtensionCapabilities`](#publicextensioncapabilities)
 - [`PublicSelfManagementExplanation`](#publicselfmanagementexplanation)
 - [`PublicChangeEmailDetails`](#publicchangeemaildetails)
@@ -377,6 +380,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`RevisionPageRequest`](#revisionpagerequest)
 - [`PortalRevisionRequest`](#portalrevisionrequest)
 - [`PublishRevisionRequest`](#publishrevisionrequest)
+- [`UpdatePortalRevisionRequest`](#updateportalrevisionrequest)
+- [`RevisionSource`](#revisionsource)
 - [`PortalRevisionSummary`](#portalrevisionsummary)
 - [`PortalRevisionList`](#portalrevisionlist)
 - [`PortalRevisionCreated`](#portalrevisioncreated)
@@ -384,6 +389,9 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`PortalRevision`](#portalrevision)
 - [`PublishResult`](#publishresult)
 - [`SwappableConfig`](#swappableconfig)
+- [`SwapPortalReferencesResult`](#swapportalreferencesresult)
+- [`SwapPortalReferenceGroup`](#swapportalreferencegroup)
+- [`SwapPortalReferenceItem`](#swapportalreferenceitem)
 - [`PortalUserRegistrationStatus`](#portaluserregistrationstatus)
 - [`BusinessPartnerItem`](#businesspartneritem)
 - [`SupportReportType`](#supportreporttype)
@@ -494,10 +502,13 @@ const { data } = await client.upsertPortal(
     feature_settings: {
       start_page: true,
       billing: true,
+      commodity_billing: true,
       change_due_date: true,
       new_design: true,
       mcp_enabled: true,
-      mcp_grant_version: 0
+      mcp_grant_version: 0,
+      portal_copilot: false,
+      portal_copilot_agent_id: 'string'
     },
     accessToken: 'string',
     advanced_mfa: {
@@ -745,10 +756,13 @@ const { data } = await client.upsertPortal(
   "feature_settings": {
     "start_page": true,
     "billing": true,
+    "commodity_billing": true,
     "change_due_date": true,
     "new_design": true,
     "mcp_enabled": true,
-    "mcp_grant_version": 0
+    "mcp_grant_version": 0,
+    "portal_copilot": false,
+    "portal_copilot_agent_id": "string"
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -1133,10 +1147,13 @@ const { data } = await client.getPortalConfigByDomain({
   "feature_settings": {
     "start_page": true,
     "billing": true,
+    "commodity_billing": true,
     "change_due_date": true,
     "new_design": true,
     "mcp_enabled": true,
-    "mcp_grant_version": 0
+    "mcp_grant_version": 0,
+    "portal_copilot": false,
+    "portal_copilot_agent_id": "string"
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -1424,10 +1441,13 @@ const { data } = await client.getPortalConfig({
   "feature_settings": {
     "start_page": true,
     "billing": true,
+    "commodity_billing": true,
     "change_due_date": true,
     "new_design": true,
     "mcp_enabled": true,
-    "mcp_grant_version": 0
+    "mcp_grant_version": 0,
+    "portal_copilot": false,
+    "portal_copilot_agent_id": "string"
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -1819,10 +1839,12 @@ const { data } = await client.getPortalExtensions({
           "params": {},
           "headers": {},
           "body": {},
-          "result": "string"
+          "result": "string",
+          "result_correlation_id": "string"
         },
         "resolved": {
           "result": "string",
+          "result_correlation_id": "string",
           "error_message_path": "error.message"
         },
         "use_static_ips": false,
@@ -2050,10 +2072,12 @@ const { data } = await client.getPortalExtensionsV3({
           "params": {},
           "headers": {},
           "body": {},
-          "result": "string"
+          "result": "string",
+          "result_correlation_id": "string"
         },
         "resolved": {
           "result": "string",
+          "result_correlation_id": "string",
           "error_message_path": "error.message"
         },
         "use_static_ips": false,
@@ -2608,10 +2632,13 @@ const { data } = await client.getPublicPortalConfig({
   "feature_settings": {
     "start_page": true,
     "billing": true,
+    "commodity_billing": true,
     "change_due_date": true,
     "new_design": true,
     "mcp_enabled": true,
-    "mcp_grant_version": 0
+    "mcp_grant_version": 0,
+    "portal_copilot": false,
+    "portal_copilot_agent_id": "string"
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -2899,10 +2926,13 @@ const { data } = await client.getOrgPortalConfig({
   "feature_settings": {
     "start_page": true,
     "billing": true,
+    "commodity_billing": true,
     "change_due_date": true,
     "new_design": true,
     "mcp_enabled": true,
-    "mcp_grant_version": 0
+    "mcp_grant_version": 0,
+    "portal_copilot": false,
+    "portal_copilot_agent_id": "string"
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -3199,10 +3229,13 @@ const { data } = await client.getPublicPortalConfigV3({
   "feature_settings": {
     "start_page": true,
     "billing": true,
+    "commodity_billing": true,
     "change_due_date": true,
     "new_design": true,
     "mcp_enabled": true,
-    "mcp_grant_version": 0
+    "mcp_grant_version": 0,
+    "portal_copilot": false,
+    "portal_copilot_agent_id": "string"
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -3490,10 +3523,13 @@ const { data } = await client.getOrgPortalConfigV3({
   "feature_settings": {
     "start_page": true,
     "billing": true,
+    "commodity_billing": true,
     "change_due_date": true,
     "new_design": true,
     "mcp_enabled": true,
-    "mcp_grant_version": 0
+    "mcp_grant_version": 0,
+    "portal_copilot": false,
+    "portal_copilot_agent_id": "string"
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -4831,7 +4867,8 @@ const { data } = await client.checkContactExists(
         contract_number: '123456'
       }
     },
-    trigger_identifiers_check: true
+    trigger_identifiers_check: true,
+    correlation_id: '0199c0d5-6f1c-7a3b-9e21-9a9ce1d1b2c3'
   },
 )
 ```
@@ -4876,7 +4913,8 @@ const { data } = await client.checkContactExistsV3(
         contract_number: '123456'
       }
     },
-    trigger_identifiers_check: true
+    trigger_identifiers_check: true,
+    correlation_id: '0199c0d5-6f1c-7a3b-9e21-9a9ce1d1b2c3'
   },
 )
 ```
@@ -4889,7 +4927,9 @@ const { data } = await client.checkContactExistsV3(
   "exists": true,
   "contactId": "5da0a718-c822-403d-9f5d-20d4584e0528",
   "accountId": "5da0a718-c822-403d-9f5d-20d4584e0528",
-  "reason": "TIMEOUT"
+  "reason": "TIMEOUT",
+  "correlation_id": "string",
+  "message": "string"
 }
 ```
 
@@ -4921,6 +4961,7 @@ const { data } = await client.identifyContact(
       }
     },
     trigger_identifiers_check: true,
+    correlation_id: '0199c0d5-6f1c-7a3b-9e21-9a9ce1d1b2c3',
     surface_id: 'website-journeys'
   },
 )
@@ -4938,7 +4979,9 @@ const { data } = await client.identifyContact(
   "surface_id": "website-journeys",
   "expires_at": "2026-08-11T10:35:00.000Z",
   "allowed_operations": [],
-  "reason": "TIMEOUT"
+  "has_portal_user": false,
+  "reason": "TIMEOUT",
+  "correlation_id": "string"
 }
 ```
 
@@ -5638,7 +5681,9 @@ Self-assign contract(s) by pre-configured identifiers.
 
 ```ts
 const { data } = await client.addContractByIdentifiers(
-  null,
+  {
+    correlation_id: 'example',
+  },
   {
     contract: {
       contract_number: '123456'
@@ -8287,6 +8332,38 @@ const { data } = await client.getUserEntryPoint({
 
 ---
 
+### `completeTemporaryPassword`
+
+Replaces a portal user's temporary password with the password they chose.
+
+`POST /v3/portal/public/user/temporary-password/complete`
+
+```ts
+const { data } = await client.completeTemporaryPassword(
+  null,
+  {
+    org_id: '123',
+    portal_id: '7hj28akg-97fb-4f5c-b2a1-3e4fbc1d8c7a',
+    email: 'user@example.com',
+    temporary_password: 'string',
+    new_password: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "message": "Password set successfully."
+}
+```
+
+</details>
+
+---
+
 ### `updateCampaignPortalBlockStatus`
 
 Updates the status of a campaign portal block for multiple recipients.
@@ -8596,10 +8673,13 @@ const { data } = await client.createPortalConfig(
     feature_settings: {
       start_page: true,
       billing: true,
+      commodity_billing: true,
       change_due_date: true,
       new_design: true,
       mcp_enabled: true,
-      mcp_grant_version: 0
+      mcp_grant_version: 0,
+      portal_copilot: false,
+      portal_copilot_agent_id: 'string'
     },
     accessToken: 'string',
     advanced_mfa: {
@@ -8889,10 +8969,13 @@ const { data } = await client.createPortalConfig(
   "feature_settings": {
     "start_page": true,
     "billing": true,
+    "commodity_billing": true,
     "change_due_date": true,
     "new_design": true,
     "mcp_enabled": true,
-    "mcp_grant_version": 0
+    "mcp_grant_version": 0,
+    "portal_copilot": false,
+    "portal_copilot_agent_id": "string"
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -9217,10 +9300,13 @@ const { data } = await client.getPortalConfigV3({
   "feature_settings": {
     "start_page": true,
     "billing": true,
+    "commodity_billing": true,
     "change_due_date": true,
     "new_design": true,
     "mcp_enabled": true,
-    "mcp_grant_version": 0
+    "mcp_grant_version": 0,
+    "portal_copilot": false,
+    "portal_copilot_agent_id": "string"
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -9541,10 +9627,13 @@ const { data } = await client.putPortalConfig(
     feature_settings: {
       start_page: true,
       billing: true,
+      commodity_billing: true,
       change_due_date: true,
       new_design: true,
       mcp_enabled: true,
-      mcp_grant_version: 0
+      mcp_grant_version: 0,
+      portal_copilot: false,
+      portal_copilot_agent_id: 'string'
     },
     accessToken: 'string',
     advanced_mfa: {
@@ -9855,10 +9944,13 @@ const { data } = await client.putPortalConfig(
   "feature_settings": {
     "start_page": true,
     "billing": true,
+    "commodity_billing": true,
     "change_due_date": true,
     "new_design": true,
     "mcp_enabled": true,
-    "mcp_grant_version": 0
+    "mcp_grant_version": 0,
+    "portal_copilot": false,
+    "portal_copilot_agent_id": "string"
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -10194,10 +10286,13 @@ const { data } = await client.createPortalRevision(
     feature_settings: {
       start_page: true,
       billing: true,
+      commodity_billing: true,
       change_due_date: true,
       new_design: true,
       mcp_enabled: true,
-      mcp_grant_version: 0
+      mcp_grant_version: 0,
+      portal_copilot: false,
+      portal_copilot_agent_id: 'string'
     },
     accessToken: 'string',
     advanced_mfa: {
@@ -10370,6 +10465,10 @@ const { data } = await client.createPortalRevision(
     origin: 'string',
     global_blocks: {},
     based_on_revision_id: 'string',
+    revision_source: {
+      type: 'blueprint_sync',
+      blueprint_title: 'string'
+    },
     pages: [
       {
         id: 'c495fef9-eeca-4019-a989-8390dcd9825b',
@@ -10392,6 +10491,10 @@ const { data } = await client.createPortalRevision(
   "created_by": "string",
   "name": "FAQ page launch",
   "description": "string",
+  "source": {
+    "type": "blueprint_sync",
+    "blueprint_title": "string"
+  },
   "page_count": 0,
   "published_at": "1970-01-01T00:00:00.000Z",
   "published_by": "string",
@@ -10500,6 +10603,10 @@ const { data } = await client.listPortalRevisions({
       "created_by": "string",
       "name": "FAQ page launch",
       "description": "string",
+      "source": {
+        "type": "blueprint_sync",
+        "blueprint_title": "string"
+      },
       "page_count": 0,
       "published_at": "1970-01-01T00:00:00.000Z",
       "published_by": "string",
@@ -10537,6 +10644,10 @@ const { data } = await client.getPortalRevision({
   "created_by": "string",
   "name": "FAQ page launch",
   "description": "string",
+  "source": {
+    "type": "blueprint_sync",
+    "blueprint_title": "string"
+  },
   "page_count": 0,
   "published_at": "1970-01-01T00:00:00.000Z",
   "published_by": "string",
@@ -10597,6 +10708,49 @@ const { data } = await client.getPortalRevision({
     "verifyCodeToSetPassword": "5da0a718-c822-403d-9f5d-20d4584e0528"
   },
   "email_template_settings": {}
+}
+```
+
+</details>
+
+---
+
+### `updatePortalRevision`
+
+Renames a revision without publishing it. Any revision can be renamed, published or not. Only the revision's `name` changes: its content, `published_at`, `published_by` and which revision is live stay
+
+`PATCH /v3/portal/config/{portal_id}/revisions/{revision_id}`
+
+```ts
+const { data } = await client.updatePortalRevision(
+  {
+    portal_id: 'example',
+    revision_id: 'example',
+  },
+  {
+    name: 'FAQ page launch'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "revision_id": "2026-08-25T14:03:11.482Z-a7f3c1d9",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "name": "FAQ page launch",
+  "description": "string",
+  "source": {
+    "type": "blueprint_sync",
+    "blueprint_title": "string"
+  },
+  "page_count": 0,
+  "published_at": "1970-01-01T00:00:00.000Z",
+  "published_by": "string",
+  "is_published": true
 }
 ```
 
@@ -10774,10 +10928,13 @@ const { data } = await client.listPortalConfigSummaries()
       "feature_settings": {
         "start_page": true,
         "billing": true,
+        "commodity_billing": true,
         "change_due_date": true,
         "new_design": true,
         "mcp_enabled": true,
-        "mcp_grant_version": 0
+        "mcp_grant_version": 0,
+        "portal_copilot": false,
+        "portal_copilot_agent_id": "string"
       },
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
       "self_registration_account_setting": "ALLOW_WITH_CREATION",
@@ -10834,7 +10991,7 @@ const { data } = await client.listPortalConfigSummaries()
 
 ### `swapPortalConfig`
 
-Swaps the portal configuration of two portals.
+Swaps the portal configuration of two portals. Without `mode` both portals exchange pages and experience config live, as before. With `mode: copy` (portal versioning only) nothing live changes: the so
 
 `POST /v3/portal/config/swap`
 
@@ -10844,7 +11001,8 @@ const { data } = await client.swapPortalConfig(
   {
     source_portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
     target_portal_id: '453ad7bf-86d5-46c8-8252-bcc868df5e3c',
-    items_to_swap: ['email_templates']
+    items_to_swap: ['email_templates'],
+    mode: 'copy'
   },
 )
 ```
@@ -10854,7 +11012,53 @@ const { data } = await client.swapPortalConfig(
 
 ```json
 {
-  "message": "Domain and users swapped successfully."
+  "message": "Domain and users swapped successfully.",
+  "portal_references": {
+    "journeys": {
+      "updated": [
+        {
+          "id": "string",
+          "name": "string",
+          "paths": ["steps[0].uischema.elements[2].options.portalId"],
+          "error": "string"
+        }
+      ],
+      "failed": [
+        {
+          "id": "string",
+          "name": "string",
+          "paths": ["steps[0].uischema.elements[2].options.portalId"],
+          "error": "string"
+        }
+      ],
+      "list_error": "string"
+    },
+    "automation_flows": {
+      "updated": [
+        {
+          "id": "string",
+          "name": "string",
+          "paths": ["steps[0].uischema.elements[2].options.portalId"],
+          "error": "string"
+        }
+      ],
+      "failed": [
+        {
+          "id": "string",
+          "name": "string",
+          "paths": ["steps[0].uischema.elements[2].options.portalId"],
+          "error": "string"
+        }
+      ],
+      "list_error": "string"
+    }
+  },
+  "revisions": [
+    {
+      "portal_id": "453ad7bf-86d5-46c8-8252-bcc868df5e3c",
+      "revision_id": "string"
+    }
+  ]
 }
 ```
 
@@ -10972,10 +11176,13 @@ const { data } = await client.clonePortalConfig(
   "feature_settings": {
     "start_page": true,
     "billing": true,
+    "commodity_billing": true,
     "change_due_date": true,
     "new_design": true,
     "mcp_enabled": true,
-    "mcp_grant_version": 0
+    "mcp_grant_version": 0,
+    "portal_copilot": false,
+    "portal_copilot_agent_id": "string"
   },
   "accessToken": "string",
   "advanced_mfa": {
@@ -11951,6 +12158,15 @@ type UpdateOnlyPortalConfigAttributes = {
     app_id: string
     extension_id: string
     hook_id: string
+    wait_for_toolkit?: boolean
+    wait_for_entities?: Record<string, {
+      key?: { ... }
+      from_identifier?: { ... }
+      from_caller_contact?: { ... }
+      split_on?: { ... }
+      part?: { ... }
+    }>
+    wait_for_use_cases?: string[]
   }>
   default_user_to_notify?: {
     onPendingUser?: Array<{
@@ -12059,10 +12275,13 @@ type CommonConfigAttributes = {
   feature_settings?: {
     start_page?: boolean
     billing?: boolean
+    commodity_billing?: boolean
     change_due_date?: boolean
     new_design?: boolean
     mcp_enabled?: boolean
     mcp_grant_version?: number
+    portal_copilot?: boolean
+    portal_copilot_agent_id?: string
   }
   accessToken?: string
   advanced_mfa?: {
@@ -12098,9 +12317,6 @@ type CommonConfigAttributes = {
       require_uppercase?: { ... }
       require_numbers?: { ... }
       require_symbols?: { ... }
-      password_history_size?: { ... }
-    }
-  }
   // ...
 }
 ```
@@ -12137,6 +12353,15 @@ type UpsertPortalConfig = {
     app_id: string
     extension_id: string
     hook_id: string
+    wait_for_toolkit?: boolean
+    wait_for_entities?: Record<string, {
+      key?: { ... }
+      from_identifier?: { ... }
+      from_caller_contact?: { ... }
+      split_on?: { ... }
+      part?: { ... }
+    }>
+    wait_for_use_cases?: string[]
   }>
   default_user_to_notify?: {
     onPendingUser?: Array<{
@@ -12210,15 +12435,6 @@ type UpsertPortalConfig = {
       store_url?: { ... }
       last_build?: { ... }
     }
-    ota?: {
-      enabled?: { ... }
-      channel?: { ... }
-      auto_update?: { ... }
-      update_strategy?: { ... }
-      min_native_version?: { ... }
-    }
-  }
-  enabled?: boolean
   // ...
 }
 ```
@@ -12284,10 +12500,13 @@ type PortalConfig = {
   feature_settings?: {
     start_page?: boolean
     billing?: boolean
+    commodity_billing?: boolean
     change_due_date?: boolean
     new_design?: boolean
     mcp_enabled?: boolean
     mcp_grant_version?: number
+    portal_copilot?: boolean
+    portal_copilot_agent_id?: string
   }
   accessToken?: string
   advanced_mfa?: {
@@ -12323,9 +12542,6 @@ type PortalConfig = {
       require_uppercase?: { ... }
       require_numbers?: { ... }
       require_symbols?: { ... }
-      password_history_size?: { ... }
-    }
-  }
   // ...
 }
 ```
@@ -12795,6 +13011,7 @@ type ContactExistsRequest = {
   org_id: string
   registration_identifiers: Record<string, Record<string, string>>
   trigger_identifiers_check?: boolean
+  correlation_id?: string
 }
 ```
 
@@ -12808,6 +13025,7 @@ type ContactIdentifyRequest = {
   org_id: string
   registration_identifiers: Record<string, Record<string, string>>
   trigger_identifiers_check?: boolean
+  correlation_id?: string
   surface_id: string
 }
 ```
@@ -12823,7 +13041,9 @@ type ContactIdentifyResponse = {
   surface_id?: string
   expires_at?: string // date-time
   allowed_operations?: string[]
+  has_portal_user?: boolean
   reason?: "TIMEOUT" | "NOT_FOUND"
+  correlation_id?: string
 }
 ```
 
@@ -13618,7 +13838,7 @@ type JourneyContextUsagesResponse = {
   status: "ok" | "partial"
   scanned: number
   usages: Array<{
-    kind: "portal-config" | "portal-block" | "portal-widget"
+    kind: "portal-config" | "portal-block"
     resource: {
       type: { ... }
       id: { ... }
@@ -14225,6 +14445,33 @@ type ExtensionHookSelection = {
   app_id: string
   extension_id: string
   hook_id: string
+  wait_for_toolkit?: boolean
+  wait_for_entities?: Record<string, {
+    key?: string
+    from_identifier?: string
+    from_caller_contact?: string
+    split_on?: string
+    part?: number
+  }>
+  wait_for_use_cases?: string[]
+}
+```
+
+### `WaitForEntityRule`
+
+One requirement of a hook's correlation wait, for the entity slug it is configured under.
+
+Without `key` the requirement is satisfied by any entity of that slug. That is safe for
+evidence, and for a linked slug only where the inbound use case writes exactly one entity
+of it per push - Wilken's `Busi
+
+```ts
+type WaitForEntityRule = {
+  key?: string
+  from_identifier?: string
+  from_caller_contact?: string
+  split_on?: string
+  part?: number
 }
 ```
 
@@ -14631,9 +14878,11 @@ type ExtensionHookRegistrationIdentifiersCheck = {
     headers: Record<string, string>
     body?: object
     result?: string
+    result_correlation_id?: string
   }
   resolved?: {
     result?: string
+    result_correlation_id?: string
     error_message_path?: string
   }
   use_static_ips?: boolean
@@ -14674,9 +14923,11 @@ type ExtensionHookContractIdentification = {
     headers: Record<string, string>
     body?: object
     result?: string
+    result_correlation_id?: string
   }
   resolved?: {
     result?: string
+    result_correlation_id?: string
     error_message_path?: string
   }
   assignment_mode?: "contracts" | "contact_to_contracts" | "contact_to_portal_user"
@@ -15733,10 +15984,13 @@ type CommonConfigAttributesV3 = {
   feature_settings?: {
     start_page?: boolean
     billing?: boolean
+    commodity_billing?: boolean
     change_due_date?: boolean
     new_design?: boolean
     mcp_enabled?: boolean
     mcp_grant_version?: number
+    portal_copilot?: boolean
+    portal_copilot_agent_id?: string
   }
   accessToken?: string
   advanced_mfa?: {
@@ -15772,9 +16026,6 @@ type CommonConfigAttributesV3 = {
       require_uppercase?: { ... }
       require_numbers?: { ... }
       require_symbols?: { ... }
-      password_history_size?: { ... }
-    }
-  }
   // ...
 }
 ```
@@ -15826,6 +16077,15 @@ type UpsertPortalConfigV3 = {
     app_id: string
     extension_id: string
     hook_id: string
+    wait_for_toolkit?: boolean
+    wait_for_entities?: Record<string, {
+      key?: { ... }
+      from_identifier?: { ... }
+      from_caller_contact?: { ... }
+      split_on?: { ... }
+      part?: { ... }
+    }>
+    wait_for_use_cases?: string[]
   }>
   default_user_to_notify?: {
     onPendingUser?: Array<{
@@ -15899,15 +16159,6 @@ type UpsertPortalConfigV3 = {
       store_url?: { ... }
       last_build?: { ... }
     }
-    ota?: {
-      enabled?: { ... }
-      channel?: { ... }
-      auto_update?: { ... }
-      update_strategy?: { ... }
-      min_native_version?: { ... }
-    }
-  }
-  enabled?: boolean
   // ...
 }
 ```
@@ -15933,6 +16184,15 @@ type PortalConfigV3 = {
     app_id: string
     extension_id: string
     hook_id: string
+    wait_for_toolkit?: boolean
+    wait_for_entities?: Record<string, {
+      key?: { ... }
+      from_identifier?: { ... }
+      from_caller_contact?: { ... }
+      split_on?: { ... }
+      part?: { ... }
+    }>
+    wait_for_use_cases?: string[]
   }>
   default_user_to_notify?: {
     onPendingUser?: Array<{
@@ -16006,15 +16266,6 @@ type PortalConfigV3 = {
   domain?: string
   is_epilot_domain?: boolean
   epilot_domain?: string
-  domain_settings?: {
-    is_custom_domain_enabled?: boolean
-    is_epilot_domain_enabled?: boolean
-    is_redirection_enabled?: boolean
-  }
-  design_id?: string // uuid
-  allowed_portal_entities?: string[]
-  self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
-  self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
   // ...
 }
 ```
@@ -16027,10 +16278,13 @@ Feature settings for the portal
 type PortalFeatureSettings = {
   start_page?: boolean
   billing?: boolean
+  commodity_billing?: boolean
   change_due_date?: boolean
   new_design?: boolean
   mcp_enabled?: boolean
   mcp_grant_version?: number
+  portal_copilot?: boolean
+  portal_copilot_agent_id?: string
 }
 ```
 
@@ -16072,10 +16326,13 @@ type PortalConfigSummaryV3 = {
   feature_settings?: {
     start_page?: boolean
     billing?: boolean
+    commodity_billing?: boolean
     change_due_date?: boolean
     new_design?: boolean
     mcp_enabled?: boolean
     mcp_grant_version?: number
+    portal_copilot?: boolean
+    portal_copilot_agent_id?: string
   }
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
   self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
@@ -16117,6 +16374,10 @@ type JuiceSettings = {
   is_canary?: boolean
   is_legacy_design?: boolean
   redirect_to?: string
+  title?: string
+  prevent_indexing?: boolean
+  organization_id?: string
+  design_id?: string
 }
 ```
 
@@ -16155,6 +16416,15 @@ type PortalRevisionRequest = {
     app_id: string
     extension_id: string
     hook_id: string
+    wait_for_toolkit?: boolean
+    wait_for_entities?: Record<string, {
+      key?: { ... }
+      from_identifier?: { ... }
+      from_caller_contact?: { ... }
+      split_on?: { ... }
+      part?: { ... }
+    }>
+    wait_for_use_cases?: string[]
   }>
   default_user_to_notify?: {
     onPendingUser?: Array<{
@@ -16228,15 +16498,6 @@ type PortalRevisionRequest = {
       store_url?: { ... }
       last_build?: { ... }
     }
-    ota?: {
-      enabled?: { ... }
-      channel?: { ... }
-      auto_update?: { ... }
-      update_strategy?: { ... }
-      min_native_version?: { ... }
-    }
-  }
-  enabled?: boolean
   // ...
 }
 ```
@@ -16251,6 +16512,26 @@ type PublishRevisionRequest = {
 }
 ```
 
+### `UpdatePortalRevisionRequest`
+
+```ts
+type UpdatePortalRevisionRequest = {
+  name: string
+}
+```
+
+### `RevisionSource`
+
+Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
+
+
+```ts
+type RevisionSource = {
+  type: "blueprint_sync"
+  blueprint_title?: string
+}
+```
+
 ### `PortalRevisionSummary`
 
 ```ts
@@ -16260,6 +16541,10 @@ type PortalRevisionSummary = {
   created_by?: string
   name?: string
   description?: string
+  source?: {
+    type: "blueprint_sync"
+    blueprint_title?: string
+  }
   page_count: number
   published_at?: string // date-time
   published_by?: string
@@ -16277,6 +16562,10 @@ type PortalRevisionList = {
     created_by?: string
     name?: string
     description?: string
+    source?: {
+      type: { ... }
+      blueprint_title?: { ... }
+    }
     page_count: number
     published_at?: string // date-time
     published_by?: string
@@ -16295,6 +16584,10 @@ type PortalRevisionCreated = {
   created_by?: string
   name?: string
   description?: string
+  source?: {
+    type: "blueprint_sync"
+    blueprint_title?: string
+  }
   page_count: number
   published_at?: string // date-time
   published_by?: string
@@ -16354,6 +16647,10 @@ type PortalRevision = {
   created_by?: string
   name?: string
   description?: string
+  source?: {
+    type: "blueprint_sync"
+    blueprint_title?: string
+  }
   page_count: number
   published_at?: string // date-time
   published_by?: string
@@ -16432,7 +16729,77 @@ type PublishResult = {
 Optional configuration item that a portal swap can additionally include. The swap always transfers the pages and the functional experience config that keep the portal working. These items are opt-in on top of that and are OFF by default. Domain and access/security settings (domain, cognito_details, 
 
 ```ts
-type SwappableConfig = "email_templates"
+type SwappableConfig = "email_templates" | "portal_references"
+```
+
+### `SwapPortalReferencesResult`
+
+Outcome of the `portal_references` swap option. Only present when that option was requested. The swap itself has already succeeded when this is returned, so failures here do not undo it.
+
+```ts
+type SwapPortalReferencesResult = {
+  journeys: {
+    updated: Array<{
+      id: { ... }
+      name?: { ... }
+      paths?: { ... }
+      error?: { ... }
+    }>
+    failed: Array<{
+      id: { ... }
+      name?: { ... }
+      paths?: { ... }
+      error?: { ... }
+    }>
+    list_error?: string
+  }
+  automation_flows: {
+    updated: Array<{
+      id: { ... }
+      name?: { ... }
+      paths?: { ... }
+      error?: { ... }
+    }>
+    failed: Array<{
+      id: { ... }
+      name?: { ... }
+      paths?: { ... }
+      error?: { ... }
+    }>
+    list_error?: string
+  }
+}
+```
+
+### `SwapPortalReferenceGroup`
+
+```ts
+type SwapPortalReferenceGroup = {
+  updated: Array<{
+    id: string
+    name?: string
+    paths?: string[]
+    error?: string
+  }>
+  failed: Array<{
+    id: string
+    name?: string
+    paths?: string[]
+    error?: string
+  }>
+  list_error?: string
+}
+```
+
+### `SwapPortalReferenceItem`
+
+```ts
+type SwapPortalReferenceItem = {
+  id: string
+  name?: string
+  paths?: string[]
+  error?: string
+}
 ```
 
 ### `PortalUserRegistrationStatus`
