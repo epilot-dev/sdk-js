@@ -66,6 +66,25 @@
         ]
       }
     },
+    "/v1/website-chats/{website_chat_id}/preview-grant": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "website_chat_id",
+          "required": true
+        }
+      ],
+      "post": {
+        "operationId": "createWebsiteChatPreviewGrant",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/website-chats/{website_chat_id}/configuration": {
       "get": {
         "operationId": "getPublicWebsiteChat",
@@ -157,6 +176,12 @@
         "responses": {}
       }
     },
+    "/v1/login/portal/journey-token": {
+      "get": {
+        "operationId": "getChatPortalJourneyToken",
+        "responses": {}
+      }
+    },
     "/v1/login/portal/start": {
       "post": {
         "operationId": "startChatPortalLogin",
@@ -200,6 +225,18 @@
       },
       "post": {
         "operationId": "startChatAction",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/actions/events": {
+      "post": {
+        "operationId": "reportChatActionEvent",
         "requestBody": {
           "required": true,
           "content": {
