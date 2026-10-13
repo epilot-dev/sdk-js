@@ -1,5 +1,6 @@
 # Messaging Settings API
 
+- **Base URL:** `https://email-settings.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/email-settings](https://docs.epilot.io/api/email-settings)
 
 ## Usage
