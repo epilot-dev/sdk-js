@@ -24,14 +24,13 @@ export const RELATION_ATTRIBUTE_TYPES: ReadonlySet<string> = new Set(RELATION_AT
 
 /**
  * Entity attribute types a conditional pricing variant may override (`overridable_attribute`).
- * An allowlist, so a new scalar type is never overridable by default; a new relation type is, since
- * relations are overridable by kind. No pricing schema to `satisfies` against — `models.test.ts`
+ * An allowlist, so new attribute types are never overridable by default. Of the relation types,
+ * only `relation` is overridable. No pricing schema to `satisfies` against — `models.test.ts`
  * checks these against the entity spec.
  *
- * Scalars are overridden value for value. The relation types are overridden as a whole: the
+ * Scalars are overridden value for value. A `relation` attribute is overridden as a whole: the
  * variant's `$relation` list replaces the base entity's, which is how a variant swaps a product's
- * prices or a composite price's components. They are spread from `RELATION_ATTRIBUTE_TYPE_LIST`
- * above rather than restated, so the two sets cannot drift.
+ * prices or a composite price's components.
  */
 export const OVERRIDABLE_ATTRIBUTE_TYPE_LIST = [
   'string',
@@ -46,7 +45,7 @@ export const OVERRIDABLE_ATTRIBUTE_TYPE_LIST = [
   'checkbox',
   'country',
   'tags',
-  ...RELATION_ATTRIBUTE_TYPE_LIST,
+  'relation',
 ] as const;
 
 /** `string`, not a literal union, so callers can test an unnarrowed `attribute.type`. */

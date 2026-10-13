@@ -107,9 +107,10 @@ describe('runtime models are exposed by the SDK', () => {
     expect(OVERRIDABLE_ATTRIBUTE_TYPES.has('ordered_list')).toBe(false);
   });
 
-  it('every relation type is overridable — a variant swaps the whole $relation list', () => {
-    for (const type of RELATION_ATTRIBUTE_TYPE_LIST) {
-      expect(OVERRIDABLE_ATTRIBUTE_TYPES.has(type), `"${type}" should be overridable`).toBe(true);
+  it('only regular relations are overridable — a variant swaps the whole $relation list', () => {
+    expect(OVERRIDABLE_ATTRIBUTE_TYPES.has('relation')).toBe(true);
+    for (const type of ['relation_user', 'relation_address', 'relation_payment_method']) {
+      expect(OVERRIDABLE_ATTRIBUTE_TYPES.has(type), `"${type}" should not be overridable`).toBe(false);
     }
   });
 
