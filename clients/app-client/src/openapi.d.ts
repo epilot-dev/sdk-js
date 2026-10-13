@@ -922,10 +922,6 @@ declare namespace Components {
                 versioned_by?: string;
             };
         }
-        /**
-         * A requirement a hook reads from `Context`, discriminated by `type`. More types will be added later; consumers must ignore types they do not know.
-         */
-        export type ContextRequirement = /* A requirement a hook reads from `Context`, discriminated by `type`. More types will be added later; consumers must ignore types they do not know. */ /* The consumer supplies the bound entities of `schema` under `Context.<schema>`. */ EntityContextRequirement;
         export interface CustomCapabilityComponent {
             component_type: "CUSTOM_CAPABILITY";
             configuration: {
@@ -992,18 +988,6 @@ declare namespace Components {
              * Optional tooltip or description for the navigation item.
              */
             nav_description?: string;
-        }
-        /**
-         * The consumer supplies the bound entities of `schema` under `Context.<schema>`.
-         */
-        export interface EntityContextRequirement {
-            type: "entity";
-            /**
-             * Entity schema slug, e.g. `contract`.
-             * example:
-             * contract
-             */
-            schema: string; // ^[a-z0-9_-]{1,100}$
         }
         export interface EnumArg {
             type?: "enum";
@@ -1300,17 +1284,17 @@ declare namespace Components {
              * Hooks exposed by this component. Hook ids must be unique within the component.
              */
             hooks: /**
-             * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.contract }}`).
+             * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.input }}`).
              *
-             * `Context` is the name → value map the consumer supplies, one entry per context requirement it bound. Declare what a hook reads from `Context` in `contexts` so consumers can require it.
+             * `Context` is the single name → value map the consumer supplies. The names in it are up to the consumer — by convention the journey runtime passes the validated value of a validation rule as `context.input` and every configured context binding under its own configured name.
              *
              */
             ExternalValuesHook[];
         }
         /**
-         * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.contract }}`).
+         * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.input }}`).
          *
-         * `Context` is the name → value map the consumer supplies, one entry per context requirement it bound. Declare what a hook reads from `Context` in `contexts` so consumers can require it.
+         * `Context` is the single name → value map the consumer supplies. The names in it are up to the consumer — by convention the journey runtime passes the validated value of a validation rule as `context.input` and every configured context binding under its own configured name.
          *
          */
         export interface ExternalValuesHook {
@@ -1397,10 +1381,6 @@ declare namespace Components {
              * Behaviour when the external system is unavailable (timeout, network or upstream error). `skip`: consumers ignore conditions depending on this hook. `block`: consumers treat the dependent action as not allowed.
              */
             on_unavailable?: "skip" | "block";
-            /**
-             * The requirements the hook reads from `Context` (at most 10). An `entity` requirement means the consumer supplies the bound entities of that schema under `Context.<schema>` (e.g. `{{ Context.contract[0].external_id }}` needs `{ type: entity, schema: contract }`). More requirement types will be added later; consumers must ignore types they do not know.
-             */
-            contexts?: /* A requirement a hook reads from `Context`, discriminated by `type`. More types will be added later; consumers must ignore types they do not know. */ ContextRequirement[];
             /**
              * Response caching. Off when omitted.
              */
@@ -2403,12 +2383,35 @@ declare namespace Components {
                  * Deprecated. Use `resolved.result` instead. Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result?: string;
+                /**
+                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
+                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Only read when the portal is
+                 * configured to wait on the Integration Toolkit
+                 * (`extension_hooks.<hook>.wait_for_toolkit`).
+                 *
+                 * There is no default: unless a hook declares this, the portal waits on the id it
+                 * minted and handed the hook as `{{CorrelationId}}`, whatever the response carries. A
+                 * partner that pushes under that id leaves this unset; only a partner that pushes
+                 * under an id of its own declares where the response carries it. A declared id that
+                 * is absent from the response falls back to the minted one; one that is not a valid
+                 * correlation id (at most 255 letters, digits, `-` and `_`) is not waited on, and
+                 * the portal polls entity search instead.
+                 *
+                 */
+                result_correlation_id?: string;
             };
             resolved?: {
                 /**
                  * Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
                  */
                 result?: string;
+                /**
+                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
+                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Supersedes
+                 * `call.result_correlation_id`. No default; see `call.result_correlation_id`.
+                 *
+                 */
+                result_correlation_id?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
                  * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
@@ -2899,12 +2902,35 @@ declare namespace Components {
                  * Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result: string;
+                /**
+                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
+                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Only read when the portal is
+                 * configured to wait on the Integration Toolkit
+                 * (`extension_hooks.<hook>.wait_for_toolkit`).
+                 *
+                 * There is no default: unless a hook declares this, the portal waits on the id it
+                 * minted and handed the hook as `{{CorrelationId}}`, whatever the response carries. A
+                 * partner that pushes under that id leaves this unset; only a partner that pushes
+                 * under an id of its own declares where the response carries it. A declared id that
+                 * is absent from the response falls back to the minted one; one that is not a valid
+                 * correlation id (at most 255 letters, digits, `-` and `_`) is not waited on, and
+                 * the portal polls entity search instead.
+                 *
+                 */
+                result_correlation_id?: string;
             };
             resolved?: {
                 /**
                  * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
                  */
                 result?: string;
+                /**
+                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
+                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Supersedes
+                 * `call.result_correlation_id`. No default; see `call.result_correlation_id`.
+                 *
+                 */
+                result_correlation_id?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
                  * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
@@ -4685,13 +4711,11 @@ export type ComponentType = Components.Schemas.ComponentType;
 export type Configuration = Components.Schemas.Configuration;
 export type ConfigurationMetadata = Components.Schemas.ConfigurationMetadata;
 export type ConfigurationVersion = Components.Schemas.ConfigurationVersion;
-export type ContextRequirement = Components.Schemas.ContextRequirement;
 export type CustomCapabilityComponent = Components.Schemas.CustomCapabilityComponent;
 export type CustomFlowActionComponent = Components.Schemas.CustomFlowActionComponent;
 export type CustomFlowConfig = Components.Schemas.CustomFlowConfig;
 export type CustomPageComponent = Components.Schemas.CustomPageComponent;
 export type CustomPageConfig = Components.Schemas.CustomPageConfig;
-export type EntityContextRequirement = Components.Schemas.EntityContextRequirement;
 export type EnumArg = Components.Schemas.EnumArg;
 export type ErpInformToolkitComponent = Components.Schemas.ErpInformToolkitComponent;
 export type EventsQuery = Components.Schemas.EventsQuery;
