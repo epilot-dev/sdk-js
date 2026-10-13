@@ -67,6 +67,7 @@
         "summary": "getPublicFacingComponent",
         "description": "Retrieve public facing components for an installed app",
         "operationId": "getPublicFacingComponent",
+        "x-epilot-permissions": [],
         "tags": [
           "App Installation"
         ],
@@ -97,6 +98,11 @@
         "summary": "listConfigurations",
         "description": "List all app configuration metadata owned by an organization. To get full app configuration details, use the /v1/app-configurations/{appId} endpoint.",
         "operationId": "listConfigurations",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:read"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -159,6 +165,11 @@
         "summary": "createConfiguration",
         "description": "Create a new private app configuration. To make it public a verification process needs to be triggered",
         "operationId": "createConfiguration",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -192,6 +203,11 @@
         "summary": "listPublicConfigurations",
         "description": "List all publicly available app configurations that can be installed. This endpoint returns apps that have at least one public version.",
         "operationId": "listPublicConfigurations",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:read"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -267,6 +283,11 @@
         "summary": "getPublicConfiguration",
         "description": "Retrieve the public configuration of an app to install in your tenant",
         "operationId": "getPublicConfiguration",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:read"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -313,6 +334,11 @@
         "summary": "getConfiguration",
         "description": "Retrieve a specific app configuration",
         "operationId": "getConfiguration",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:read"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -346,6 +372,11 @@
         "summary": "patchMetadata",
         "description": "Patch non-versioned configuration metadata of a given app configuration.",
         "operationId": "patchMetadata",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -365,6 +396,11 @@
         "summary": "Delete app configuration",
         "description": "Delete an app configuration and all its versions and components.",
         "operationId": "deleteConfiguration",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -383,6 +419,11 @@
         "summary": "queryEvents",
         "description": "Query analytics events for a specific app with flexible filtering",
         "operationId": "queryEvents",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:read"
+          }
+        ],
         "tags": [
           "App Analytics"
         ],
@@ -432,6 +473,11 @@
         "summary": "createBundleUploadUrl",
         "description": "Generate a presigned URL for uploading app bundle to /<app-id>/bundle.js path",
         "operationId": "createBundleUploadUrl",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -495,6 +541,11 @@
       "post": {
         "summary": "createZipUploadUrl",
         "operationId": "createZipUploadUrl",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "description": "Generate a presigned URL to upload a zip file with artifacts that will be unpacked in a new directory under the /<app-id>/ path\n",
         "tags": [
           "App Configuration"
@@ -595,6 +646,11 @@
         "summary": "createLogoUploadUrl",
         "description": "Generate a presigned URL for uploading app logo to /<app-id>/logo.png path",
         "operationId": "createLogoUploadUrl",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -638,6 +694,11 @@
         "summary": "deleteLogo",
         "description": "Delete the app logo from /<app-id>/logo.png path",
         "operationId": "deleteLogo",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -656,6 +717,11 @@
         "summary": "listVersions",
         "description": "Retrieve a list of versions for an app configuration",
         "operationId": "listVersions",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:read"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -732,6 +798,11 @@
         "summary": "getVersion",
         "description": "Retrieve a specific version of an app configuration",
         "operationId": "getVersion",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:read"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -775,6 +846,11 @@
         "summary": "deleteVersion",
         "description": "Delete a specific version of an app configuration",
         "operationId": "deleteVersion",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -817,6 +893,11 @@
         "summary": "patchVersion",
         "description": "Patch an existing app version",
         "operationId": "patchVersion",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -861,6 +942,11 @@
         "summary": "getReview",
         "description": "Retrieve the review status of a specific app version",
         "operationId": "getReview",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:read"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -909,6 +995,11 @@
         "summary": "createReview",
         "description": "Submit an app version for review to make it public",
         "operationId": "createReview",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -965,6 +1056,11 @@
         "summary": "createComponent",
         "description": "Patch an existing app version to create/add a component",
         "operationId": "createComponent",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -1021,6 +1117,11 @@
         "summary": "patchComponent",
         "description": "Patch an existing app version to update its components",
         "operationId": "patchComponent",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -1072,6 +1173,11 @@
         "summary": "deleteComponent",
         "description": "Delete a specific component from an app version",
         "operationId": "deleteComponent",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -1119,6 +1225,11 @@
         "summary": "cloneVersion",
         "description": "Clone an existing app version to create a new version",
         "operationId": "cloneVersion",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Configuration"
         ],
@@ -1194,6 +1305,11 @@
         "summary": "listInstallations",
         "description": "Retrieve a list of installed apps for the organization.",
         "operationId": "listInstallations",
+        "x-epilot-permissions": [
+          {
+            "action": "app:view"
+          }
+        ],
         "tags": [
           "App Installation"
         ],
@@ -1275,6 +1391,11 @@
         "summary": "getInstallation",
         "description": "Retrieve details of an installed app by its ID.",
         "operationId": "getInstallation",
+        "x-epilot-permissions": [
+          {
+            "action": "app:view"
+          }
+        ],
         "tags": [
           "App Installation"
         ],
@@ -1308,6 +1429,11 @@
         "summary": "install",
         "description": "Upsert app installation by its ID.",
         "operationId": "install",
+        "x-epilot-permissions": [
+          {
+            "action": "app:install"
+          }
+        ],
         "tags": [
           "App Installation"
         ],
@@ -1344,6 +1470,11 @@
         "summary": "patchInstallation",
         "description": "Patch an installed app by its ID.",
         "operationId": "patchInstallation",
+        "x-epilot-permissions": [
+          {
+            "action": "app:install"
+          }
+        ],
         "tags": [
           "App Installation"
         ],
@@ -1364,8 +1495,11 @@
           "204": {
             "description": "App installation patched successfully."
           },
+          "400": {
+            "description": "The requested `version` is not available to the requesting organization (`code: VERSION_NOT_VISIBLE`; `details.latest_visible_version` names the newest version it can install). Pass `version: latest` to take that version instead."
+          },
           "404": {
-            "description": "App not found."
+            "description": "App installation not found."
           }
         }
       },
@@ -1373,6 +1507,11 @@
         "summary": "uninstall",
         "description": "Uninstall an app by its ID.",
         "operationId": "uninstall",
+        "x-epilot-permissions": [
+          {
+            "action": "app:uninstall"
+          }
+        ],
         "tags": [
           "App Installation"
         ],
@@ -1401,6 +1540,11 @@
         "summary": "promoteVersion",
         "description": "Update an installed app to a new version",
         "operationId": "promoteVersion",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "tags": [
           "App Installation"
         ],
@@ -1447,6 +1591,7 @@
         "summary": "resolveOptions",
         "description": "Resolve the effective app-level options of an installation, including decrypted sensitive values (secrets). This endpoint accepts epilot internal-auth tokens exclusively (internal service calls, e.g. automation-workers or the customer portal API) — no user token, API key, or app token can call it, regardless of roles. Every call is audit-logged with the caller identity.",
         "operationId": "resolveOptions",
+        "x-epilot-permissions": [],
         "tags": [
           "App Installation"
         ],
@@ -1510,6 +1655,11 @@
       "post": {
         "summary": "ingestEvent",
         "operationId": "ingestEvent",
+        "x-epilot-permissions": [
+          {
+            "action": "app:config:write"
+          }
+        ],
         "description": "Internal endpoint for services to submit app events for analytic purposes",
         "tags": [
           "App Analytics"
@@ -1586,6 +1736,7 @@
       "get": {
         "summary": "publicProxyGet",
         "operationId": "publicProxyGet",
+        "x-epilot-permissions": [],
         "description": "Forward a GET request to a registered proxy target from a public-facing component (e.g. journey blocks)",
         "tags": [
           "App Proxy"
@@ -1613,6 +1764,7 @@
       "post": {
         "summary": "publicProxyPost",
         "operationId": "publicProxyPost",
+        "x-epilot-permissions": [],
         "description": "Forward a POST request to a registered proxy target from a public-facing component (e.g. journey blocks)",
         "tags": [
           "App Proxy"
@@ -1649,6 +1801,7 @@
       "put": {
         "summary": "publicProxyPut",
         "operationId": "publicProxyPut",
+        "x-epilot-permissions": [],
         "description": "Forward a PUT request to a registered proxy target from a public-facing component",
         "tags": [
           "App Proxy"
@@ -1685,6 +1838,7 @@
       "patch": {
         "summary": "publicProxyPatch",
         "operationId": "publicProxyPatch",
+        "x-epilot-permissions": [],
         "description": "Forward a PATCH request to a registered proxy target from a public-facing component",
         "tags": [
           "App Proxy"
@@ -1721,6 +1875,7 @@
       "delete": {
         "summary": "publicProxyDelete",
         "operationId": "publicProxyDelete",
+        "x-epilot-permissions": [],
         "description": "Forward a DELETE request to a registered proxy target from a public-facing component",
         "tags": [
           "App Proxy"
@@ -5154,7 +5309,7 @@
       },
       "ExternalValuesHook": {
         "type": "object",
-        "description": "One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Input`, `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse`.\n",
+        "description": "One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.contract }}`).\n\n`Context` is the name → value map the consumer supplies, one entry per context requirement it bound. Declare what a hook reads from `Context` in `contexts` so consumers can require it.\n",
         "required": [
           "id",
           "name",
@@ -5233,7 +5388,7 @@
               },
               "body": {
                 "type": "object",
-                "description": "JSON body to send. Values support variable interpolation. When omitted, `{ Input, Context, Consumer }` is sent as-is.",
+                "description": "JSON body to send. Values support variable interpolation. When omitted, `{ Context, Consumer }` is sent as-is.",
                 "additionalProperties": true
               }
             }
@@ -5262,6 +5417,13 @@
             "default": "skip",
             "description": "Behaviour when the external system is unavailable (timeout, network or upstream error). `skip`: consumers ignore conditions depending on this hook. `block`: consumers treat the dependent action as not allowed."
           },
+          "contexts": {
+            "type": "array",
+            "description": "The requirements the hook reads from `Context` (at most 10). An `entity` requirement means the consumer supplies the bound entities of that schema under `Context.<schema>` (e.g. `{{ Context.contract[0].external_id }}` needs `{ type: entity, schema: contract }`). More requirement types will be added later; consumers must ignore types they do not know.",
+            "items": {
+              "$ref": "#/components/schemas/ContextRequirement"
+            }
+          },
           "cache": {
             "type": "object",
             "description": "Response caching. Off when omitted.",
@@ -5277,12 +5439,48 @@
               },
               "key": {
                 "type": "string",
-                "description": "Liquid template for the cache key. Defaults to a hash of org, app, hook, `Input` and `Context`."
+                "description": "Liquid template for the cache key. Defaults to a hash of org, app, hook and `Context`."
               }
             }
           },
           "secure_proxy": {
             "$ref": "#/components/schemas/PortalExtensionSecureProxy"
+          }
+        }
+      },
+      "ContextRequirement": {
+        "description": "A requirement a hook reads from `Context`, discriminated by `type`. More types will be added later; consumers must ignore types they do not know.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/EntityContextRequirement"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "entity": "#/components/schemas/EntityContextRequirement"
+          }
+        }
+      },
+      "EntityContextRequirement": {
+        "type": "object",
+        "description": "The consumer supplies the bound entities of `schema` under `Context.<schema>`.",
+        "required": [
+          "type",
+          "schema"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "entity"
+            ]
+          },
+          "schema": {
+            "type": "string",
+            "pattern": "^[a-z0-9_-]{1,100}$",
+            "description": "Entity schema slug, e.g. `contract`.",
+            "example": "contract"
           }
         }
       },
@@ -5325,7 +5523,7 @@
           },
           "jsonata": {
             "type": "string",
-            "description": "JSONata expression over `{ Response, Input, Context, Options, Env }`.",
+            "description": "JSONata expression over `{ Response, Context, Options, Env }`.",
             "example": "$sum(Response.items.amount)"
           }
         }

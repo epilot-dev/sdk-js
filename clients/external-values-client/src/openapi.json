@@ -241,7 +241,7 @@
         "properties": {
           "context": {
             "type": "object",
-            "description": "Everything the consumer supplies for interpolation, as one name → value map.\nExposed to the hook's Liquid templates as `Context` / `context`, e.g.\n`{{ context.input }}`, `{{ context.contract.installment_amount }}`.\n\nThe names are up to the consumer; this API does not interpret them. By\nconvention the journey runtime passes the validated value of a validation\nrule as `input` and every configured context binding under its own name.\n",
+            "description": "Everything the consumer supplies for interpolation, as one name → value map.\nExposed to the hook's Liquid templates as `Context` / `context`, e.g.\n`{{ context.contract[0].external_id }}`.\n\nOne entry per context requirement the consumer bound (see\n`ExternalValueHookSummary.contexts`): for an `entity` requirement, the bound\nentities of that schema under its schema slug. This API gives no name special\ntreatment.\n",
             "additionalProperties": true
           },
           "consumer": {
@@ -264,11 +264,13 @@
         },
         "example": {
           "context": {
-            "input": "123,45",
-            "contract": {
-              "_id": "8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a",
-              "installment_amount": 110
-            }
+            "contract": [
+              {
+                "_id": "8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a",
+                "external_id": "C-1001",
+                "installment_amount": 110
+              }
+            ]
           },
           "consumer": {
             "type": "validation_rule",
@@ -423,6 +425,48 @@
             "items": {
               "$ref": "#/components/schemas/ExternalValueResultSummary"
             }
+          },
+          "contexts": {
+            "type": "array",
+            "description": "What the hook needs the consumer to supply in `context`, as declared in the hook\nconfig. Omitted when the hook declares none. A rule builder must require these\ncontexts on any rule that uses the hook, so the caller passes them in `context`.\nMore requirement types will follow; consumers ignore types they do not know.\n",
+            "items": {
+              "$ref": "#/components/schemas/ContextRequirement"
+            }
+          }
+        }
+      },
+      "ContextRequirement": {
+        "description": "Something a hook needs the consumer to supply in `context`, discriminated by `type`.\nToday only `entity`; more types will follow. Consumers ignore types they do not know.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/EntityContextRequirement"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "entity": "#/components/schemas/EntityContextRequirement"
+          }
+        }
+      },
+      "EntityContextRequirement": {
+        "type": "object",
+        "description": "The consumer supplies the bound entities of `schema` under `Context.<schema>`, e.g. a hook\ninterpolating `{{ Context.contract[0].external_id }}` declares\n`{ type: entity, schema: contract }`.\n",
+        "required": [
+          "type",
+          "schema"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "entity"
+            ]
+          },
+          "schema": {
+            "type": "string",
+            "description": "Entity schema slug, e.g. `contract`.",
+            "example": "contract"
           }
         }
       },
