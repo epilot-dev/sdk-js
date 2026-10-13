@@ -136,6 +136,8 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`ApiProxyConfig`](#apiproxyconfig)
 - [`ExternalValuesConfig`](#externalvaluesconfig)
 - [`ExternalValuesHook`](#externalvalueshook)
+- [`ContextRequirement`](#contextrequirement)
+- [`EntityContextRequirement`](#entitycontextrequirement)
 - [`ExternalValuesResult`](#externalvaluesresult)
 - [`Grants`](#grants)
 - [`BlueprintRef`](#blueprintref)
@@ -2268,6 +2270,7 @@ type ExternalValuesComponent = {
       result: { ... }
       timeout_ms?: { ... }
       on_unavailable?: { ... }
+      contexts?: { ... }
       cache?: { ... }
       secure_proxy?: { ... }
     }>
@@ -3793,6 +3796,10 @@ type ExternalValuesConfig = {
     }>
     timeout_ms?: number
     on_unavailable?: "skip" | "block"
+    contexts?: Array<{
+      type: { ... }
+      schema: { ... }
+    }>
     cache?: {
       ttl_seconds: { ... }
       key?: { ... }
@@ -3807,8 +3814,9 @@ type ExternalValuesConfig = {
 
 ### `ExternalValuesHook`
 
-One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Input`, `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse`.
+One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.contract }}`).
 
+`Context` is the name → v
 
 ```ts
 type ExternalValuesHook = {
@@ -3855,6 +3863,10 @@ type ExternalValuesHook = {
   }>
   timeout_ms?: number
   on_unavailable?: "skip" | "block"
+  contexts?: Array<{
+    type: "entity"
+    schema: string
+  }>
   cache?: {
     ttl_seconds: number
     key?: string
@@ -3863,6 +3875,28 @@ type ExternalValuesHook = {
     integration_id: string // uuid
     use_case_slug: string
   }
+}
+```
+
+### `ContextRequirement`
+
+A requirement a hook reads from `Context`, discriminated by `type`. More types will be added later; consumers must ignore types they do not know.
+
+```ts
+type ContextRequirement = {
+  type: "entity"
+  schema: string
+}
+```
+
+### `EntityContextRequirement`
+
+The consumer supplies the bound entities of `schema` under `Context.`<schema>``.
+
+```ts
+type EntityContextRequirement = {
+  type: "entity"
+  schema: string
 }
 ```
 

@@ -38,6 +38,8 @@ const { data } = await externalValuesClient.listExternalValues(...)
 - [`ResolveExternalValueResponse`](#resolveexternalvalueresponse)
 - [`ExternalValueResultSummary`](#externalvalueresultsummary)
 - [`ExternalValueHookSummary`](#externalvaluehooksummary)
+- [`ContextRequirement`](#contextrequirement)
+- [`EntityContextRequirement`](#entitycontextrequirement)
 - [`ExternalValueHookList`](#externalvaluehooklist)
 
 ### `listExternalValues`
@@ -78,6 +80,12 @@ const { data } = await client.listExternalValues()
             "en": "string"
           }
         }
+      ],
+      "contexts": [
+        {
+          "type": "entity",
+          "schema": "contract"
+        }
       ]
     }
   ]
@@ -103,11 +111,13 @@ const { data } = await client.resolveExternalValue(
   },
   {
     context: {
-      input: '123,45',
-      contract: {
-        _id: '8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a',
-        installment_amount: 110
-      }
+      contract: [
+        {
+          _id: '8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a',
+          external_id: 'C-1001',
+          installment_amount: 110
+        }
+      ]
     },
     consumer: {
       type: 'validation_rule',
@@ -157,11 +167,13 @@ const { data } = await client.resolvePortalExternalValue(
   },
   {
     context: {
-      input: '123,45',
-      contract: {
-        _id: '8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a',
-        installment_amount: 110
-      }
+      contract: [
+        {
+          _id: '8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a',
+          external_id: 'C-1001',
+          installment_amount: 110
+        }
+      ]
     },
     consumer: {
       type: 'validation_rule',
@@ -301,6 +313,37 @@ type ExternalValueHookSummary = {
       en?: { ... }
     }
   }>
+  contexts?: Array<{
+    type: "entity"
+    schema: string
+  }>
+}
+```
+
+### `ContextRequirement`
+
+Something a hook needs the consumer to supply in `context`, discriminated by `type`.
+Today only `entity`; more types will follow. Consumers ignore types they do not know.
+
+
+```ts
+type ContextRequirement = {
+  type: "entity"
+  schema: string
+}
+```
+
+### `EntityContextRequirement`
+
+The consumer supplies the bound entities of `schema` under `Context.`<schema>``, e.g. a hook
+interpolating `{{ Context.contract[0].external_id }}` declares
+`{ type: entity, schema: contract }`.
+
+
+```ts
+type EntityContextRequirement = {
+  type: "entity"
+  schema: string
 }
 ```
 
@@ -324,6 +367,10 @@ type ExternalValueHookList = {
       id: { ... }
       type: { ... }
       name: { ... }
+    }>
+    contexts?: Array<{
+      type: { ... }
+      schema: { ... }
     }>
   }>
 }

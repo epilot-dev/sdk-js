@@ -923,6 +923,10 @@ export declare namespace Components {
                 versioned_by?: string;
             };
         }
+        /**
+         * A requirement a hook reads from `Context`, discriminated by `type`. More types will be added later; consumers must ignore types they do not know.
+         */
+        export type ContextRequirement = /* A requirement a hook reads from `Context`, discriminated by `type`. More types will be added later; consumers must ignore types they do not know. */ /* The consumer supplies the bound entities of `schema` under `Context.<schema>`. */ EntityContextRequirement;
         export interface CustomCapabilityComponent {
             component_type: "CUSTOM_CAPABILITY";
             configuration: {
@@ -989,6 +993,18 @@ export declare namespace Components {
              * Optional tooltip or description for the navigation item.
              */
             nav_description?: string;
+        }
+        /**
+         * The consumer supplies the bound entities of `schema` under `Context.<schema>`.
+         */
+        export interface EntityContextRequirement {
+            type: "entity";
+            /**
+             * Entity schema slug, e.g. `contract`.
+             * example:
+             * contract
+             */
+            schema: string; // ^[a-z0-9_-]{1,100}$
         }
         export interface EnumArg {
             type?: "enum";
@@ -1285,13 +1301,17 @@ export declare namespace Components {
              * Hooks exposed by this component. Hook ids must be unique within the component.
              */
             hooks: /**
-             * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Input`, `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse`.
+             * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.contract }}`).
+             *
+             * `Context` is the name → value map the consumer supplies, one entry per context requirement it bound. Declare what a hook reads from `Context` in `contexts` so consumers can require it.
              *
              */
             ExternalValuesHook[];
         }
         /**
-         * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Input`, `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse`.
+         * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.contract }}`).
+         *
+         * `Context` is the name → value map the consumer supplies, one entry per context requirement it bound. Declare what a hook reads from `Context` in `contexts` so consumers can require it.
          *
          */
         export interface ExternalValuesHook {
@@ -1349,7 +1369,7 @@ export declare namespace Components {
                     [name: string]: string;
                 };
                 /**
-                 * JSON body to send. Values support variable interpolation. When omitted, `{ Input, Context, Consumer }` is sent as-is.
+                 * JSON body to send. Values support variable interpolation. When omitted, `{ Context, Consumer }` is sent as-is.
                  */
                 body?: {
                     [name: string]: any;
@@ -1379,6 +1399,10 @@ export declare namespace Components {
              */
             on_unavailable?: "skip" | "block";
             /**
+             * The requirements the hook reads from `Context` (at most 10). An `entity` requirement means the consumer supplies the bound entities of that schema under `Context.<schema>` (e.g. `{{ Context.contract[0].external_id }}` needs `{ type: entity, schema: contract }`). More requirement types will be added later; consumers must ignore types they do not know.
+             */
+            contexts?: /* A requirement a hook reads from `Context`, discriminated by `type`. More types will be added later; consumers must ignore types they do not know. */ ContextRequirement[];
+            /**
              * Response caching. Off when omitted.
              */
             cache?: {
@@ -1387,7 +1411,7 @@ export declare namespace Components {
                  */
                 ttl_seconds: number;
                 /**
-                 * Liquid template for the cache key. Defaults to a hash of org, app, hook, `Input` and `Context`.
+                 * Liquid template for the cache key. Defaults to a hash of org, app, hook and `Context`.
                  */
                 key?: string;
             };
@@ -1420,7 +1444,7 @@ export declare namespace Components {
              */
             path?: string;
             /**
-             * JSONata expression over `{ Response, Input, Context, Options, Env }`.
+             * JSONata expression over `{ Response, Context, Options, Env }`.
              * example:
              * $sum(Response.items.amount)
              */
@@ -3643,6 +3667,8 @@ export declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
+            export interface $400 {
+            }
             export interface $404 {
             }
         }
@@ -4660,11 +4686,13 @@ export type ComponentType = Components.Schemas.ComponentType;
 export type Configuration = Components.Schemas.Configuration;
 export type ConfigurationMetadata = Components.Schemas.ConfigurationMetadata;
 export type ConfigurationVersion = Components.Schemas.ConfigurationVersion;
+export type ContextRequirement = Components.Schemas.ContextRequirement;
 export type CustomCapabilityComponent = Components.Schemas.CustomCapabilityComponent;
 export type CustomFlowActionComponent = Components.Schemas.CustomFlowActionComponent;
 export type CustomFlowConfig = Components.Schemas.CustomFlowConfig;
 export type CustomPageComponent = Components.Schemas.CustomPageComponent;
 export type CustomPageConfig = Components.Schemas.CustomPageConfig;
+export type EntityContextRequirement = Components.Schemas.EntityContextRequirement;
 export type EnumArg = Components.Schemas.EnumArg;
 export type ErpInformToolkitComponent = Components.Schemas.ErpInformToolkitComponent;
 export type EventsQuery = Components.Schemas.EventsQuery;
