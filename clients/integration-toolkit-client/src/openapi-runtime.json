@@ -66,6 +66,72 @@
           }
         },
         "responses": {}
+      },
+      "get": {
+        "operationId": "queryErpUpdateEvents",
+        "parameters": [
+          {
+            "name": "correlation_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "wait",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "wait_for_entities",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "wait_for_use_cases",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/erp/updates/events/{event_id}": {
+      "get": {
+        "operationId": "getErpUpdateEvent",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/erp/updates/correlations": {
+      "get": {
+        "operationId": "listErpUpdateCorrelations",
+        "parameters": [
+          {
+            "name": "integration_id",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
       }
     },
     "/v2/erp/updates/mapping_simulation": {
@@ -1232,6 +1298,14 @@
         }
       },
       "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "CorrelationWaitRejected": {
+        "headers": {
+          "Retry-After": {}
+        },
         "content": {
           "application/json": {}
         }

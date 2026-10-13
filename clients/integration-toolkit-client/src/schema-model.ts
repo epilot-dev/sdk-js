@@ -65,6 +65,56 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     description:
       'Conditional price variants were written for one imported entity: emitted once per chunk, with a per-outcome count and the variant ids in details',
   },
+  CORRELATION_CLOSE_IGNORED: {
+    level: 'warning',
+    description:
+      'The partner declared a correlation complete, but the close was not applied: either the same request has to be retried, or none of its events was processed as interactive (the use case does not allow it, or the request did not ask for it). Retry with `correlation_complete`, or send the events with `interactive: true`',
+  },
+  CORRELATION_CLOSED_EMPTY: {
+    level: 'info',
+    description:
+      'The partner declared a correlation complete without sending any event for it. That is the partner reporting "I found nothing", and anyone waiting is told so at once instead of waiting it out',
+  },
+  CORRELATION_CLOSED_INCOMPLETE: {
+    level: 'warning',
+    description:
+      'The partner declared a correlation complete and everything it sent was processed, but what the caller was waiting for was not in it — see `missing_entities` and `missing_use_cases`. Reported once per correlation',
+  },
+  CORRELATION_COMPLETED: {
+    level: 'info',
+    description:
+      'Every event the partner sent under this correlation has finished processing and the partner declared the correlation complete',
+  },
+  CORRELATION_EVENT_LIMIT_EXCEEDED: {
+    level: 'warning',
+    description:
+      'This correlation already holds as many events as one correlation may, so further events sent under it were processed normally and cannot be waited on. A correlation is meant to cover one registration or one change; this usually means the partner sends the same correlation id with every push. Each request that should be waited on needs its own id',
+  },
+  CORRELATION_ID_MISSING: {
+    level: 'error',
+    description:
+      'A request asked for something that only makes sense for a correlation, but did not say which correlation',
+  },
+  CORRELATION_LATE_EVENT: {
+    level: 'warning',
+    description:
+      'An event arrived under a correlation the partner had already declared complete. It was processed, but anyone waiting on that correlation had already been answered — the partner is sending `correlation_complete` too early',
+  },
+  CORRELATION_REQUIREMENT_FAILED: {
+    level: 'error',
+    description:
+      'Something a caller was waiting for can no longer arrive: every event that would have satisfied the requirement ended in an error',
+  },
+  CORRELATION_WAIT_REJECTED: {
+    level: 'warning',
+    description:
+      'A caller tried to wait on a correlation while too many waits were already open, so it was asked to retry. Its data is unaffected — only the answer it was waiting for is slower',
+  },
+  CORRELATION_WAIT_TIMEOUT: {
+    level: 'warning',
+    description:
+      'A caller waited on a correlation until its time ran out without getting what it asked for — see `missing_entities` and `missing_use_cases` for what had not arrived. Reported once per correlation',
+  },
   DEPRECATED_ENDPOINT: { level: 'error', description: 'This endpoint version is deprecated' },
   DIRECT_ENTITY_NOT_ALLOWED: {
     level: 'error',
@@ -145,6 +195,21 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     description:
       "The inbound event referenced an integration_id that does not exist in the calling token's organization. Check the integration id and that the token belongs to the same org.",
   },
+  INTERACTIVE_CROSS_LANE_WRITE: {
+    level: 'warning',
+    description:
+      'The same entity was updated from two different processing lanes within seconds of each other, one of them the interactive lane. Both updates were applied; this reports that they overlapped, so the order they landed in was decided by timing',
+  },
+  INTERACTIVE_NOT_ALLOWED: {
+    level: 'info',
+    description:
+      'Interactive processing was requested for a use case that is not configured for it, so the events were processed normally. Set `interactive` to `on_request` or `always` on the use case if the caller is meant to be able to wait for these events',
+  },
+  INTERACTIVE_RATE_LIMITED: {
+    level: 'warning',
+    description:
+      'The organization asked for interactive processing more often than its agreed rate, so these events were processed on its normal lane instead. Nothing was lost and the correlation can still be waited on — it will simply take as long as a bulk event does',
+  },
   INVALID_METER_READING_ATTRIBUTES: { level: 'error', description: 'Meter reading has invalid attributes' },
   LOOKUP_UNMAPPED: {
     level: 'warning',
@@ -190,7 +255,8 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   },
   MSG_ENQUEUED: {
     level: 'info',
-    description: 'Outbound message enqueued to the poll queue, awaiting consumption by the ERP',
+    description:
+      'Outbound message enqueued to the poll queue, awaiting consumption by the ERP. When the use case maps the payload, the detail carries the mapped payload as delivered and its mapping_version (or payload_omitted when it exceeds 48 KiB)',
   },
   MSG_EXPIRED_UNPOLLED: {
     level: 'error',

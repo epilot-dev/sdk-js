@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.45.0",
+    "version": "1.46.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -359,6 +359,239 @@
           },
           "429": {
             "$ref": "#/components/responses/ERPUpdatesRetryableResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "get": {
+        "operationId": "queryErpUpdateEvents",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integration_id}"
+          }
+        ],
+        "summary": "queryErpUpdateEvents",
+        "description": "Waits for the events of one correlation — the long poll behind interactive\nregistration — and returns the correlation's summary.\n\nPass the `correlation_id` returned by `POST /v3/erp/updates/events` and say\nwhat you are waiting for:\n\n- `wait_for_entities` — entity slugs, optionally with a selector:\n  `contact`, `contract[billing_account_number=4711]`.\n- `wait_for_use_cases` — inbound use case slugs: `contract`, `meter_reading`.\n  A meter reading is not an entity, so this is how a wait names one.\n\nThe call returns as soon as `completion` is decided, or after `wait`\nseconds. `completion` is one of:\n\n- `requirements_met` — every listed requirement is satisfied. This wins even\n  if an unrelated event of the correlation failed; `errors` still lists it.\n- `complete` — the partner closed the correlation (`correlation_complete`)\n  and every event it sent has finished. Nothing further can arrive, so the\n  wait ends even if a requirement is unmet. A correlation closed with zero\n  events is `complete` at once: the partner sent nothing and never will.\n- `error` — a requirement can no longer be met because an event it depends\n  on failed: every event of a required use case ended in error, or an\n  entity requirement is still missing when the correlation is complete and\n  one of its events failed. Without requirements, `error` means the\n  correlation completed with failures.\n- `timeout` — the budget ran out first. The body still shows what has\n  landed so far; call again to keep waiting.\n\n**Every requirement is met by the first matching event.** A use case\nrequirement is satisfied by the first event of that use case to finish, and\nan entity requirement without a selector by the first entity of that slug;\nneither says anything about the rest. So, unless the partner sends\n`correlation_complete`, `requirements_met` does not mean the partner has\nfinished: more data for the same customer may still be arriving.\n`correlation_complete` is the only signal that nothing further is coming —\nstrongly recommended for every partner, never required. When you know the\nidentifier you are waiting for, an entity requirement with a selector is the\nprecise tool: `contract[billing_account_number=4711]` is satisfied by that\ncontract and by nothing else.\n\nA requirement is only as good as the use case configuration it refers to:\nmodel one inbound use case per partner event type, and give every use case a\nslug. A use case without a slug cannot be named here.\n\nAn unknown correlation, or one with no interactive events, reads as\n`events_received: 0, closed: false` — \"not yet\" and \"never\" look the same,\nwhich is why `correlation_complete` exists.\n\nWaiting holds a connection, so concurrent waits are capped per organization\nand overall. Over the cap the call is refused with 429 and `Retry-After`;\nfall back to calls with `wait=0` (they never need a slot) or retry later.\nCalls that do not have to wait — `wait=0`, or a correlation that is already\ndecided — are never refused.\n\nRequires `integration:view` on the correlation's integration. The organization\nis always the token's own, so no other organization's correlation is ever\nvisible.\n",
+        "tags": [
+          "erp"
+        ],
+        "parameters": [
+          {
+            "name": "correlation_id",
+            "in": "query",
+            "required": true,
+            "description": "The correlation to wait on, as returned by `POST /v3/erp/updates/events`:\n1-255 characters of letters, digits, hyphens and underscores.\n",
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,255}$"
+            }
+          },
+          {
+            "name": "wait",
+            "in": "query",
+            "required": false,
+            "description": "Seconds to wait for `completion` to be decided, `0` to `25`. `0` answers\nimmediately. A value outside the range is a 400 naming the maximum, never\na silent clamp: 25 seconds keeps the call inside the 30 second HTTP limit.\n",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 25,
+              "default": 0
+            }
+          },
+          {
+            "name": "wait_for_entities",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "description": "Entities to wait for: `slug` or `slug[key=value]`, at most 20.\n\n- Repeat the parameter for several requirements, one per occurrence\n  (`wait_for_entities=contact&wait_for_entities=contract`); a repeated\n  occurrence is never split, so its value may contain a comma. Given only\n  once, the parameter may instead hold a comma-separated list.\n- Inside the brackets the split is on the **first** `=`, and the value runs\n  to the **final** `]`, so a value may contain `=` and `]`.\n- The value is percent-decoded once more after that split, on top of the\n  normal URL decoding. That is how a comma travels in the comma-separated\n  form (`%2C` inside the value, so `%252C` on the wire), and why a literal\n  `%` in a value must be sent as `%25` inside the value.\n\nA selector matches only an attribute that is one of the use case's\nconfigured `unique_ids` for that entity — they are all the toolkit records\nper entity. The value is compared the way entity lookup compares unique ids:\nignoring letter case and surrounding whitespace on both sides, so\n`contact[customer_number=ab-1001]` matches a stored ` AB-1001 `. Whitespace\ninside the value stays significant. A selector whose key is not a unique id of that slug in ANY of\nthe organization's inbound use cases can never match, and is refused with a\n400 whose body names the `slug`, the `rejected_key` and the `allowed_keys`.\nA slug that no inbound use case writes is refused the same way. Treat that\n400 as a configuration error, not a reason to retry. Without a selector, any\nentity of the slug satisfies the requirement, which is only safe when the\nbundle cannot contain more than one of that type. A deleted entity never\nsatisfies a requirement.\n",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "contact[reenumber=4711]",
+              "contract"
+            ]
+          },
+          {
+            "name": "wait_for_use_cases",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "description": "Inbound use case slugs to wait for, at most 20, repeated or comma-separated.\nNo selectors. Each is met when at least one event of that use case in the\ncorrelation has finished (`done`), not merely been received.\n",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "business_partner",
+              "contract"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The correlation's summary and the wait's verdict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorrelationWaitResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid: a missing `correlation_id`, `wait` out of range, a\nmalformed requirement, or a `wait_for_entities` requirement that can never\nmatch. For the last, `slug`, `rejected_key` (absent when no inbound use case\nwrites the slug) and `allowed_keys` say what would have worked.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorrelationWaitBadRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/CorrelationWaitRejected"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/erp/updates/events/{event_id}": {
+      "get": {
+        "operationId": "getErpUpdateEvent",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integration_id}"
+          }
+        ],
+        "summary": "getErpUpdateEvent",
+        "description": "Returns one interactive event's processing record, without waiting.\n\nRecords exist for events processed as interactive (the ingest result said\n`interactive: true`) and are kept for 24 hours. Any other event id is a 404.\n\nRequires `integration:view` on the event's integration.\n",
+        "tags": [
+          "erp"
+        ],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "description": "The `event_id` from the ingest result.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The event's processing record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErpUpdateEventStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v3/erp/updates/correlations": {
+      "get": {
+        "operationId": "listErpUpdateCorrelations",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view",
+            "resource": "integration:{integration_id}"
+          }
+        ],
+        "summary": "listErpUpdateCorrelations",
+        "description": "Lists the organization's interactive correlations, newest first by the time\ntheir first event was ingested, with the same summary the correlation wait\nreturns.\n\nIt exists because looking a correlation up by id only finds the ones somebody\nalready has an id for. A correlation that is merely stuck emits no monitoring\ncode, so nothing points at it — and that is the case most worth seeing.\n\n**The listing covers the last 7 days** — the lifetime of a correlation record\n— and says so in `horizon_days`. Correlations older than that are not\nreturned, even when a wider range is being displayed.\n\nPass `next_cursor` back as `cursor` for the next page. A page can be shorter\nthan `limit` and still have more behind it, so stop on `next_cursor: null`.\n\nRequires `integration:view` on `integration_id` when it is given, and on every\nintegration of the organization when it is not.\n",
+        "tags": [
+          "erp"
+        ],
+        "parameters": [
+          {
+            "name": "integration_id",
+            "in": "query",
+            "required": false,
+            "description": "Only correlations of this integration.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Page size. Values above 100 are clamped to 100.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque cursor from a prior page's `next_cursor`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Correlations, newest first",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorrelationStatusList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -6284,6 +6517,11 @@
             "maxLength": 255,
             "description": "Optional per-event trace id. Overrides the request-level `correlation_id` for THIS event, so a batch carrying several distinct business operations keeps its traces segregated in monitoring instead of merged under one request-level id. When absent, the event inherits the request-level `correlation_id`.\n",
             "example": "customer-42-sync-2026-08-26"
+          },
+          "interactive": {
+            "type": "boolean",
+            "description": "Optional per-event interactive opt-in. Overrides the request-level `interactive` for THIS event, so one batch can carry both the registration somebody is waiting on and the routine updates that came along with it. When absent, the event inherits the request-level `interactive`.\n",
+            "example": true
           }
         }
       },
@@ -6309,12 +6547,351 @@
             "maxLength": 128,
             "example": "customer-42"
           },
+          "interactive": {
+            "type": "boolean",
+            "description": "Request interactive processing for this request's events.\n\nInteractive events are carried on a dedicated, low-latency lane and\nrecorded, so a caller can wait for their result with\n`GET /v3/erp/updates/events?correlation_id=...`. Use it for the pushes a\nperson is waiting on — a registration, a self-service lookup — not for\nbatch loads.\n\nThe use case has to allow it: its `interactive` setting must be\n`on_request` (this flag then selects the lane) or `always` (every event of\nthat use case is interactive and this flag is unnecessary). On a use case\nthat does not allow it the events are processed normally and the result\nsays `interactive: false`.\n\nAn organization that asks for interactive processing faster than its agreed\nrate has the excess carried on its normal lane instead. Nothing is rejected\nand nothing is lost: those results still say `interactive: true`, with\n`lane` naming the queue that actually carried them, and the correlation can\nstill be waited on - it will simply take as long as a bulk event does.\n\nIndividual events may set their own `interactive`, which overrides this\nrequest-level value for that event only.\n",
+            "example": true
+          },
+          "correlation_complete": {
+            "type": "boolean",
+            "description": "Declares that no further events will follow for this request's\n`correlation_id`. A caller waiting on that correlation is answered as soon\nas the events already sent have finished, instead of waiting out its full\nbudget.\n\nRequires a request-level `correlation_id` - it closes that correlation and\nis never inferred from per-event `correlation_id` values; sending it\nwithout one is a 400.\n\nIt is valid on a request with an empty `events` array, which is how a\nbridge closes a correlation whose terminal marker arrived on its own. If\nnothing was ever pushed under that correlation id, it is created closed and\nempty, so a waiter is told straight away that nothing is coming rather than\nwaiting for data that will never arrive.\n\nClosing a correlation twice is a no-op. Events that arrive afterwards are\nstill processed, and raise a `CORRELATION_LATE_EVENT` monitoring warning.\n",
+            "example": true
+          },
           "events": {
             "type": "array",
-            "description": "List of ERP events to process",
+            "description": "List of ERP events to process. At least one is required, unless\n`correlation_complete` is `true` - a request that only closes a correlation\nmay send an empty array.\n\nNote: `wait` is NOT accepted on this endpoint and returns 400. Ingest never\nblocks; poll `GET /v3/erp/updates/events` to wait for a correlation.\n",
             "items": {
               "$ref": "#/components/schemas/ErpEventV3"
             }
+          }
+        }
+      },
+      "ErpUpdateProcessedEntity": {
+        "type": "object",
+        "description": "An entity an interactive event wrote.",
+        "required": [
+          "slug",
+          "_id",
+          "operation",
+          "unique_ids"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "description": "Entity schema slug, e.g. `contact`.",
+            "example": "contact"
+          },
+          "_id": {
+            "type": "string",
+            "description": "The entity id."
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "created",
+              "updated",
+              "deleted",
+              "unchanged"
+            ],
+            "description": "What the write did. `unchanged` means the entity already matched the\nevent; it still counts as written.\n"
+          },
+          "unique_ids": {
+            "type": "object",
+            "description": "The unique ids the entity was looked up by — exactly the use case's\nconfigured `unique_ids` for that entity and nothing else. These and `_id`\nare what a caller can tell several entities of one slug apart by, and the\nonly attributes a `wait_for_entities` selector can match.\n",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "reenumber": "4711"
+            }
+          }
+        }
+      },
+      "ErpUpdateProcessingError": {
+        "type": "object",
+        "description": "A failure nothing will retry.",
+        "required": [
+          "code",
+          "message",
+          "occurred_at"
+        ],
+        "properties": {
+          "code": {
+            "description": "The v2 monitoring code of the failure.",
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "event_id": {
+            "type": "string",
+            "description": "Which event of the correlation failed. Present on the correlation's\nerrors only; on an event's own errors it would repeat the event's id.\n"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ErpUpdateEventStatus": {
+        "type": "object",
+        "description": "One interactive event's processing record.",
+        "required": [
+          "event_id",
+          "status",
+          "lane",
+          "ingested_at",
+          "writes_total",
+          "writes_done",
+          "entities",
+          "errors"
+        ],
+        "properties": {
+          "event_id": {
+            "type": "string"
+          },
+          "correlation_id": {
+            "type": "string"
+          },
+          "integration_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "processing",
+              "done",
+              "partial",
+              "error"
+            ],
+            "description": "`accepted` until the mapping ran, `processing` while its writes run, then\none of the terminal states: `done`, `partial` (some writes failed) or\n`error`.\n"
+          },
+          "lane": {
+            "type": "string",
+            "enum": [
+              "interactive",
+              "priority",
+              "default",
+              "deferred"
+            ],
+            "description": "Which processing lane carried the event."
+          },
+          "use_case_id": {
+            "type": "string"
+          },
+          "use_case_slug": {
+            "type": "string"
+          },
+          "event_name": {
+            "type": "string",
+            "description": "The partner's own name for the event, as pushed."
+          },
+          "ingested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "mapped_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the event's mapping finished."
+          },
+          "done_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the event reached a terminal status."
+          },
+          "writes_total": {
+            "type": "integer",
+            "description": "The entity writes the event fanned out into so far."
+          },
+          "writes_done": {
+            "type": "integer",
+            "description": "The entity writes that have finished."
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErpUpdateProcessedEntity"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ErpUpdateProcessingError"
+            }
+          }
+        }
+      },
+      "CorrelationUseCaseCounts": {
+        "type": "object",
+        "description": "How many of a correlation's events belong to one use case, and how they ended.",
+        "required": [
+          "use_case_slug",
+          "received",
+          "done",
+          "error"
+        ],
+        "properties": {
+          "use_case_slug": {
+            "type": "string",
+            "description": "The use case's slug, or its id for a use case that has no slug — such a\nuse case is counted but cannot be named in `wait_for_use_cases`.\n"
+          },
+          "received": {
+            "type": "integer"
+          },
+          "done": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "integer",
+            "description": "Events of this use case that ended `error` or `partial`."
+          }
+        }
+      },
+      "CorrelationStatus": {
+        "type": "object",
+        "description": "One correlation's summary.",
+        "required": [
+          "correlation_id",
+          "closed",
+          "events_received",
+          "events_done",
+          "late_events",
+          "use_cases",
+          "entities",
+          "errors"
+        ],
+        "properties": {
+          "correlation_id": {
+            "type": "string"
+          },
+          "integration_id": {
+            "type": "string"
+          },
+          "closed": {
+            "type": "boolean",
+            "description": "The partner sent `correlation_complete`."
+          },
+          "closed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "events_received": {
+            "type": "integer"
+          },
+          "events_done": {
+            "type": "integer",
+            "description": "Events that reached a terminal status, failed ones included."
+          },
+          "late_events": {
+            "type": "integer",
+            "description": "Events that arrived after the correlation was closed."
+          },
+          "first_ingested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_done_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "use_cases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CorrelationUseCaseCounts"
+            }
+          },
+          "entities": {
+            "type": "array",
+            "description": "Every entity the correlation's events wrote.",
+            "items": {
+              "$ref": "#/components/schemas/ErpUpdateProcessedEntity"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "description": "Every failure in the correlation, whatever `completion` says.",
+            "items": {
+              "$ref": "#/components/schemas/ErpUpdateProcessingError"
+            }
+          }
+        }
+      },
+      "CorrelationWaitResult": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CorrelationStatus"
+          },
+          {
+            "type": "object",
+            "required": [
+              "completion"
+            ],
+            "properties": {
+              "completion": {
+                "type": "string",
+                "enum": [
+                  "requirements_met",
+                  "complete",
+                  "timeout",
+                  "error"
+                ],
+                "description": "Why the wait ended. See the operation description."
+              }
+            }
+          }
+        ]
+      },
+      "CorrelationWaitBadRequest": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string",
+            "description": "The entity slug of a requirement that can never match."
+          },
+          "rejected_key": {
+            "type": "string",
+            "description": "The selector key that is not a unique id of `slug`."
+          },
+          "allowed_keys": {
+            "type": "array",
+            "description": "Every unique id of `slug` across the organization's inbound use cases —\nthe keys a selector on `slug` may name. Empty when no use case writes it.\n",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CorrelationStatusList": {
+        "type": "object",
+        "required": [
+          "results",
+          "next_cursor",
+          "horizon_days"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CorrelationStatus"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Cursor for the next page, or null when there are no more rows."
+          },
+          "horizon_days": {
+            "type": "integer",
+            "description": "How many days back the listing reaches — the lifetime of a correlation\nrecord. Nothing older is ever returned.\n",
+            "example": 7
           }
         }
       },
@@ -7104,6 +7681,16 @@
           "direct": {
             "type": "boolean",
             "description": "Enables direct mode for this use case. When `true`, every event routed to this use\ncase must carry a `DirectPayload` - pre-mapped entity and meter reading operations -\ninstead of raw ERP data, and the mapping engine is skipped entirely. Everything else\nin the inbound pipeline (deduplication, ordering, create-vs-update resolution,\nrelation resolution, monitoring) behaves exactly as in mapped mode.\n\nIn direct mode, `entities` doubles as an optional allowlist: when non-empty, each\noperation's `entity_slug` must match an entry's `entity_schema`, and when that entry\ndeclares `unique_ids`, the operation's unique-id keys must be exactly that set (or\njust `_id`). Entries need only `entity_schema` and `unique_ids` - `fields` is not\nrequired and is ignored. `meter_readings` is ignored in direct mode.\n\nFlag changes take up to 5 minutes to propagate (configuration cache).\n"
+          },
+          "interactive": {
+            "type": "string",
+            "enum": [
+              "disabled",
+              "on_request",
+              "always"
+            ],
+            "description": "Whether events of this use case may be processed on the interactive lane -\na dedicated low-latency lane whose events are recorded, so a caller can wait\nfor their result with `GET /v3/erp/updates/events?correlation_id=...`.\n\n- `on_request`: the ingest request's own `interactive: true` selects the\n  lane. The normal setting for a mapping that serves both the nightly batch\n  and a registration push.\n- `always`: every event of this use case is interactive, and the caller does\n  not have to ask. For use cases that exist only to serve a person waiting.\n- `disabled`: requests asking for interactive processing are processed\n  normally and told so in the result.\n\nTHE FIELD IS OPTIONAL AND ABSENT MEANS `disabled`. It is resolved when the\nconfiguration is read and is never written into a stored configuration: a\n`disabled` materialised on save would give a configuration a key its source\ndoes not have, which configuration-synchronisation tooling reports as drift\non every comparison. Send it only when you mean `on_request` or `always`,\nand remove it rather than setting it to `disabled`.\n\nThe per-organization interactive rate limit still applies to `always`.\n",
+            "example": "on_request"
           },
           "entities": {
             "type": "array",
@@ -12863,6 +13450,16 @@
           "CONDITIONAL_VARIANTS_WRITTEN",
           "CONDITIONAL_VARIANT_WRITE_FAILED",
           "CONDITIONAL_VARIANT_WRITE_WARNING",
+          "CORRELATION_CLOSED_EMPTY",
+          "CORRELATION_CLOSED_INCOMPLETE",
+          "CORRELATION_CLOSE_IGNORED",
+          "CORRELATION_COMPLETED",
+          "CORRELATION_EVENT_LIMIT_EXCEEDED",
+          "CORRELATION_ID_MISSING",
+          "CORRELATION_LATE_EVENT",
+          "CORRELATION_REQUIREMENT_FAILED",
+          "CORRELATION_WAIT_REJECTED",
+          "CORRELATION_WAIT_TIMEOUT",
           "DEPRECATED_ENDPOINT",
           "DIRECT_ENTITY_NOT_ALLOWED",
           "DIRECT_PAYLOAD_INVALID",
@@ -12890,6 +13487,9 @@
           "FILE_PROXY_UPLOAD_RETRYING",
           "FILE_TOO_LARGE",
           "INTEGRATION_NOT_FOUND",
+          "INTERACTIVE_CROSS_LANE_WRITE",
+          "INTERACTIVE_NOT_ALLOWED",
+          "INTERACTIVE_RATE_LIMITED",
           "INVALID_METER_READING_ATTRIBUTES",
           "LOOKUP_UNMAPPED",
           "MALFORMED_PAYLOAD",
@@ -13601,6 +14201,24 @@
           }
         }
       },
+      "CorrelationWaitRejected": {
+        "description": "Too many correlation waits are open — for this organization or overall — so\nthis one was not admitted. Nothing about the correlation changed. Retry after\n`Retry-After`, or call with `wait=0`, which never needs a slot.\n",
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds to wait before retrying",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
       "QueryInboundMonitoringEventsResponse": {
         "description": "Inbound monitoring events queried successfully",
         "content": {
@@ -13841,6 +14459,10 @@
             "schema": {
               "type": "object",
               "properties": {
+                "correlation_id": {
+                  "type": "string",
+                  "description": "The request's correlation id, echoed, or the one generated for it when the caller omitted it. This is the id to pass to `GET /v3/erp/updates/events?correlation_id=...` to wait for these events. Omitted when the request carried no correlation id and none was generated (v1 and v2).\n"
+                },
                 "results": {
                   "type": "array",
                   "items": {
@@ -13863,6 +14485,20 @@
                           "ignored"
                         ],
                         "description": "Processing status for the event (skipped indicates duplicate deduplication_id, ignored indicates unconfigured event)"
+                      },
+                      "interactive": {
+                        "type": "boolean",
+                        "description": "Whether the event was PROCESSED as interactive - its processing record exists and the correlation wait works on it. Present only when interactive processing was requested or the use case is configured `always`. `true` with a `lane` other than `interactive` means the organization was over its rate and the event was carried on its normal lane; the wait still works, it is just slower. `false` means the use case does not allow interactive processing, and `message` says so.\n"
+                      },
+                      "lane": {
+                        "type": "string",
+                        "enum": [
+                          "interactive",
+                          "priority",
+                          "default",
+                          "deferred"
+                        ],
+                        "description": "Which processing lane carried the event. Present only alongside `interactive`.\n"
                       },
                       "message": {
                         "type": "string"
@@ -13890,6 +14526,10 @@
             "schema": {
               "type": "object",
               "properties": {
+                "correlation_id": {
+                  "type": "string",
+                  "description": "The request's correlation id, echoed, or the one generated for it when the caller omitted it. This is the id to pass to `GET /v3/erp/updates/events?correlation_id=...` to wait for these events. Omitted when the request carried no correlation id and none was generated (v1 and v2).\n"
+                },
                 "results": {
                   "type": "array",
                   "items": {
@@ -13912,6 +14552,20 @@
                           "ignored"
                         ],
                         "description": "Processing status for the event (skipped indicates duplicate deduplication_id, ignored indicates unconfigured event)"
+                      },
+                      "interactive": {
+                        "type": "boolean",
+                        "description": "Whether the event was PROCESSED as interactive - its processing record exists and the correlation wait works on it. Present only when interactive processing was requested or the use case is configured `always`. `true` with a `lane` other than `interactive` means the organization was over its rate and the event was carried on its normal lane; the wait still works, it is just slower. `false` means the use case does not allow interactive processing, and `message` says so.\n"
+                      },
+                      "lane": {
+                        "type": "string",
+                        "enum": [
+                          "interactive",
+                          "priority",
+                          "default",
+                          "deferred"
+                        ],
+                        "description": "Which processing lane carried the event. Present only alongside `interactive`.\n"
                       },
                       "message": {
                         "type": "string"
