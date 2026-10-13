@@ -1,5 +1,11 @@
 # @epilot/app-client
 
+## 0.18.0
+
+### Minor Changes
+
+- EXTERNAL_VALUES hooks: optional typed `contexts` requirements (`{ type: "entity", schema }`); `x-epilot-permissions` metadata on operations
+
 ## 0.9.2
 
 ### Patch Changes

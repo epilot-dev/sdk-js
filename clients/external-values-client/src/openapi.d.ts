@@ -16,6 +16,38 @@ declare namespace Components {
         HookId?: Parameters.HookId /* ^[a-zA-Z0-9_-]{1,100}$ */;
     }
     namespace Schemas {
+        /**
+         * Something a hook needs the consumer to supply in `context`, discriminated by `type`.
+         * Today only `entity`; more types will follow. Consumers ignore types they do not know.
+         *
+         */
+        export type ContextRequirement = /**
+         * Something a hook needs the consumer to supply in `context`, discriminated by `type`.
+         * Today only `entity`; more types will follow. Consumers ignore types they do not know.
+         *
+         */
+        /**
+         * The consumer supplies the bound entities of `schema` under `Context.<schema>`, e.g. a hook
+         * interpolating `{{ Context.contract[0].external_id }}` declares
+         * `{ type: entity, schema: contract }`.
+         *
+         */
+        EntityContextRequirement;
+        /**
+         * The consumer supplies the bound entities of `schema` under `Context.<schema>`, e.g. a hook
+         * interpolating `{{ Context.contract[0].external_id }}` declares
+         * `{ type: entity, schema: contract }`.
+         *
+         */
+        export interface EntityContextRequirement {
+            type: "entity";
+            /**
+             * Entity schema slug, e.g. `contract`.
+             * example:
+             * contract
+             */
+            schema: string;
+        }
         export interface ExternalValueError {
             /**
              * Set for per-result errors; absent for hook-level failures
@@ -51,6 +83,19 @@ declare namespace Components {
             name: TranslatedString;
             description?: TranslatedString;
             results: ExternalValueResultSummary[];
+            /**
+             * What the hook needs the consumer to supply in `context`, as declared in the hook
+             * config. Omitted when the hook declares none. A rule builder must require these
+             * contexts on any rule that uses the hook, so the caller passes them in `context`.
+             * More requirement types will follow; consumers ignore types they do not know.
+             *
+             */
+            contexts?: /**
+             * Something a hook needs the consumer to supply in `context`, discriminated by `type`.
+             * Today only `entity`; more types will follow. Consumers ignore types they do not know.
+             *
+             */
+            ContextRequirement[];
         }
         export interface ExternalValueResultSummary {
             id: string;
@@ -62,11 +107,13 @@ declare namespace Components {
          * example:
          * {
          *   "context": {
-         *     "input": "123,45",
-         *     "contract": {
-         *       "_id": "8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a",
-         *       "installment_amount": 110
-         *     }
+         *     "contract": [
+         *       {
+         *         "_id": "8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a",
+         *         "external_id": "C-1001",
+         *         "installment_amount": 110
+         *       }
+         *     ]
          *   },
          *   "consumer": {
          *     "type": "validation_rule",
@@ -78,11 +125,12 @@ declare namespace Components {
             /**
              * Everything the consumer supplies for interpolation, as one name → value map.
              * Exposed to the hook's Liquid templates as `Context` / `context`, e.g.
-             * `{{ context.input }}`, `{{ context.contract.installment_amount }}`.
+             * `{{ context.contract[0].external_id }}`.
              *
-             * The names are up to the consumer; this API does not interpret them. By
-             * convention the journey runtime passes the validated value of a validation
-             * rule as `input` and every configured context binding under its own name.
+             * One entry per context requirement the consumer bound (see
+             * `ExternalValueHookSummary.contexts`): for an `entity` requirement, the bound
+             * entities of that schema under its schema slug. This API gives no name special
+             * treatment.
              *
              */
             context: {
@@ -168,11 +216,13 @@ declare namespace Paths {
          * example:
          * {
          *   "context": {
-         *     "input": "123,45",
-         *     "contract": {
-         *       "_id": "8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a",
-         *       "installment_amount": 110
-         *     }
+         *     "contract": [
+         *       {
+         *         "_id": "8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a",
+         *         "external_id": "C-1001",
+         *         "installment_amount": 110
+         *       }
+         *     ]
          *   },
          *   "consumer": {
          *     "type": "validation_rule",
@@ -220,11 +270,13 @@ declare namespace Paths {
          * example:
          * {
          *   "context": {
-         *     "input": "123,45",
-         *     "contract": {
-         *       "_id": "8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a",
-         *       "installment_amount": 110
-         *     }
+         *     "contract": [
+         *       {
+         *         "_id": "8a7e3f5e-9c0c-4c74-8d4a-1a1a1a1a1a1a",
+         *         "external_id": "C-1001",
+         *         "installment_amount": 110
+         *       }
+         *     ]
          *   },
          *   "consumer": {
          *     "type": "validation_rule",
@@ -381,6 +433,8 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type ContextRequirement = Components.Schemas.ContextRequirement;
+export type EntityContextRequirement = Components.Schemas.EntityContextRequirement;
 export type ExternalValueError = Components.Schemas.ExternalValueError;
 export type ExternalValueErrorCode = Components.Schemas.ExternalValueErrorCode;
 export type ExternalValueHookList = Components.Schemas.ExternalValueHookList;
