@@ -70,6 +70,7 @@ const { data } = await chatClient.listWebsiteChats(...)
 - [`VerificationState`](#verificationstate)
 - [`PortalLoginState`](#portalloginstate)
 - [`LoginMethod`](#loginmethod)
+- [`AccessMethod`](#accessmethod)
 - [`AccessTier`](#accesstier)
 - [`CustomerAccess`](#customeraccess)
 - [`StarterQuestions`](#starterquestions)
@@ -96,11 +97,9 @@ const { data } = await client.listWebsiteChats({
 {
   "website_chats": [
     {
-      "name": "string",
       "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "settings": {
         "allowed_origins": ["string"],
-        "organisation_name": "string",
         "default_locale": "en",
         "design_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
         "authentication": {
@@ -154,11 +153,9 @@ const { data } = await client.listWebsiteChats({
 const { data } = await client.createWebsiteChat(
   null,
   {
-    name: 'string',
     agent_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     settings: {
       allowed_origins: ['string'],
-      organisation_name: 'string',
       default_locale: 'en',
       design_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
       authentication: {
@@ -192,11 +189,9 @@ const { data } = await client.createWebsiteChat(
 
 ```json
 {
-  "name": "string",
   "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "settings": {
     "allowed_origins": ["string"],
-    "organisation_name": "string",
     "default_locale": "en",
     "design_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "authentication": {
@@ -254,11 +249,9 @@ const { data } = await client.getWebsiteChat({
 
 ```json
 {
-  "name": "string",
   "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "settings": {
     "allowed_origins": ["string"],
-    "organisation_name": "string",
     "default_locale": "en",
     "design_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "authentication": {
@@ -311,11 +304,9 @@ const { data } = await client.updateWebsiteChat(
     website_chat_id: 'example',
   },
   {
-    name: 'string',
     agent_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     settings: {
       allowed_origins: ['string'],
-      organisation_name: 'string',
       default_locale: 'en',
       design_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
       authentication: {
@@ -350,11 +341,9 @@ const { data } = await client.updateWebsiteChat(
 
 ```json
 {
-  "name": "string",
   "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "settings": {
     "allowed_origins": ["string"],
-    "organisation_name": "string",
     "default_locale": "en",
     "design_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "authentication": {
@@ -420,7 +409,8 @@ const { data } = await client.createWebsiteChatPreviewGrant(
     website_chat_id: 'example',
   },
   {
-    design_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+    design_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    demo_customer: false
   },
 )
 ```
@@ -435,8 +425,14 @@ const { data } = await client.createWebsiteChatPreviewGrant(
   "frame_origin": "https://example.com/path",
   "website_chat": {
     "key": "string",
-    "organisationName": "string",
-    "assistantName": "string",
+    "assistant_name": {
+      "de": "string",
+      "en": "string"
+    },
+    "greeting": {
+      "de": "string",
+      "en": "string"
+    },
     "defaultLocale": "en",
     "login_methods": ["email_code"],
     "starters": {
@@ -508,8 +504,14 @@ const { data } = await client.getPublicWebsiteChat({
 ```json
 {
   "key": "string",
-  "organisationName": "string",
-  "assistantName": "string",
+  "assistant_name": {
+    "de": "string",
+    "en": "string"
+  },
+  "greeting": {
+    "de": "string",
+    "en": "string"
+  },
   "defaultLocale": "en",
   "login_methods": ["email_code"],
   "starters": {
@@ -615,8 +617,14 @@ const { data } = await client.createAnonymousChatSession(
   "expires_at": 0,
   "website_chat": {
     "key": "string",
-    "organisationName": "string",
-    "assistantName": "string",
+    "assistant_name": {
+      "de": "string",
+      "en": "string"
+    },
+    "greeting": {
+      "de": "string",
+      "en": "string"
+    },
     "defaultLocale": "en",
     "login_methods": ["email_code"],
     "starters": {
@@ -665,7 +673,11 @@ const { data } = await client.createAnonymousChatSession(
     },
     "locales": ["en"]
   },
-  "preview": true
+  "preview": true,
+  "access": {
+    "tier": "anonymous",
+    "method": "email_code"
+  }
 }
 ```
 
@@ -1317,11 +1329,9 @@ const { data } = await client.cancelChatAction(
 ```ts
 type ListWebsiteChatsResponse = {
   website_chats: Array<{
-    name: string
     agent_id: string // uuid
     settings: {
       allowed_origins: { ... }
-      organisation_name: { ... }
       default_locale: { ... }
       design_id?: { ... }
       authentication?: { ... }
@@ -1347,11 +1357,9 @@ type ListWebsiteChatsResponse = {
 
 ```ts
 type WebsiteChat = {
-  name: string
   agent_id: string // uuid
   settings: {
     allowed_origins: string[]
-    organisation_name: string
     default_locale: "en" | "de"
     design_id?: string // uuid
     authentication?: {
@@ -1381,7 +1389,6 @@ type WebsiteChat = {
 ```ts
 type WebsiteChatSettings = {
   allowed_origins: string[]
-  organisation_name: string
   default_locale: "en" | "de"
   design_id?: string // uuid
   authentication?: {
@@ -1445,6 +1452,7 @@ type SelfServiceAction = {
 ```ts
 type WebsiteChatPreviewGrantRequest = {
   design_id?: string // uuid
+  demo_customer?: boolean
 }
 ```
 
@@ -1457,8 +1465,14 @@ type WebsiteChatPreviewGrant = {
   frame_origin: string // uri
   website_chat: {
     key: string
-    organisationName: string
-    assistantName: string
+    assistant_name?: {
+      de?: { ... }
+      en?: { ... }
+    }
+    greeting?: {
+      de?: { ... }
+      en?: { ... }
+    }
     defaultLocale: "en" | "de"
     login_methods: "email_code" | "portal_login"[]
     starters?: {
@@ -1494,11 +1508,9 @@ type Error = {
 
 ```ts
 type CreateWebsiteChatRequest = {
-  name: string
   agent_id: string // uuid
   settings: {
     allowed_origins: string[]
-    organisation_name: string
     default_locale: "en" | "de"
     design_id?: string // uuid
     authentication?: {
@@ -1516,11 +1528,9 @@ type CreateWebsiteChatRequest = {
 
 ```ts
 type UpdateWebsiteChatRequest = {
-  name?: string
   agent_id?: string // uuid
   settings?: {
     allowed_origins: string[]
-    organisation_name: string
     default_locale: "en" | "de"
     design_id?: string // uuid
     authentication?: {
@@ -1591,7 +1601,7 @@ type VerificationState = {
   contact_resolution?: "matched" | "ambiguous" | "not_found"
   access: {
     tier: "anonymous" | "identified" | "verified"
-    method?: "email_code" | "portal_login"
+    method?: "email_code" | "portal_login" | "demo"
   }
 }
 ```
@@ -1610,7 +1620,7 @@ type PortalLoginState = {
   contact_resolution?: "matched" | "not_found"
   access: {
     tier: "anonymous" | "identified" | "verified"
-    method?: "email_code" | "portal_login"
+    method?: "email_code" | "portal_login" | "demo"
   }
 }
 ```
@@ -1623,10 +1633,21 @@ How a customer can log in or verify themselves in the chat.
 type LoginMethod = "email_code" | "portal_login"
 ```
 
+### `AccessMethod`
+
+How the current customer identity was established. demo is the fictional, verified
+customer of an Agent Builder preview; it is never a login method.
+
+
+```ts
+type AccessMethod = "email_code" | "portal_login" | "demo"
+```
+
 ### `AccessTier`
 
 anonymous: no customer identity. identified: the Contact is known but ownership
-is not proven. verified: ownership is proven (an email code or a portal login).
+is not proven. verified: ownership is proven (an email code or a portal login), or the
+demo customer of an Agent Builder preview.
 
 
 ```ts
@@ -1638,7 +1659,7 @@ type AccessTier = "anonymous" | "identified" | "verified"
 ```ts
 type CustomerAccess = {
   tier: "anonymous" | "identified" | "verified"
-  method?: "email_code" | "portal_login"
+  method?: "email_code" | "portal_login" | "demo"
 }
 ```
 
@@ -1655,8 +1676,14 @@ type StarterQuestions = string[]
 ```ts
 type PublicWebsiteChat = {
   key: string
-  organisationName: string
-  assistantName: string
+  assistant_name?: {
+    de?: string
+    en?: string
+  }
+  greeting?: {
+    de?: string
+    en?: string
+  }
   defaultLocale: "en" | "de"
   login_methods: "email_code" | "portal_login"[]
   starters?: {
