@@ -24,8 +24,15 @@ declare namespace Components {
     }
     namespace Schemas {
         /**
+         * How the current customer identity was established. demo is the fictional, verified
+         * customer of an Agent Builder preview; it is never a login method.
+         *
+         */
+        export type AccessMethod = "email_code" | "portal_login" | "demo";
+        /**
          * anonymous: no customer identity. identified: the Contact is known but ownership
-         * is not proven. verified: ownership is proven (an email code or a portal login).
+         * is not proven. verified: ownership is proven (an email code or a portal login), or the
+         * demo customer of an Agent Builder preview.
          *
          */
         export type AccessTier = "anonymous" | "identified" | "verified";
@@ -505,7 +512,6 @@ declare namespace Components {
             reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
         }
         export interface CreateWebsiteChatRequest {
-            name: string;
             agent_id: string | null; // uuid
             settings: {
                 /**
@@ -563,7 +569,6 @@ declare namespace Components {
                     string?,
                     string?
                 ];
-                organisation_name: string;
                 default_locale: "en" | "de";
                 /**
                  * Design Builder configuration for the Website Chat only.
@@ -1021,14 +1026,17 @@ declare namespace Components {
         export interface CustomerAccess {
             /**
              * anonymous: no customer identity. identified: the Contact is known but ownership
-             * is not proven. verified: ownership is proven (an email code or a portal login).
+             * is not proven. verified: ownership is proven (an email code or a portal login), or the
+             * demo customer of an Agent Builder preview.
              *
              */
             tier: "anonymous" | "identified" | "verified";
             /**
-             * How a customer can log in or verify themselves in the chat.
+             * How the current customer identity was established. demo is the fictional, verified
+             * customer of an Agent Builder preview; it is never a login method.
+             *
              */
-            method?: "email_code" | "portal_login";
+            method?: "email_code" | "portal_login" | "demo";
         }
         export interface Error {
             error?: string;
@@ -1039,7 +1047,6 @@ declare namespace Components {
         }
         export interface ListWebsiteChatsResponse {
             website_chats: {
-                name: string;
                 agent_id: string | null; // uuid
                 settings: {
                     /**
@@ -1097,7 +1104,6 @@ declare namespace Components {
                         string?,
                         string?
                     ];
-                    organisation_name: string;
                     default_locale: "en" | "de";
                     /**
                      * Design Builder configuration for the Website Chat only.
@@ -1590,14 +1596,17 @@ declare namespace Components {
             access: {
                 /**
                  * anonymous: no customer identity. identified: the Contact is known but ownership
-                 * is not proven. verified: ownership is proven (an email code or a portal login).
+                 * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                 * demo customer of an Agent Builder preview.
                  *
                  */
                 tier: "anonymous" | "identified" | "verified";
                 /**
-                 * How a customer can log in or verify themselves in the chat.
+                 * How the current customer identity was established. demo is the fictional, verified
+                 * customer of an Agent Builder preview; it is never a login method.
+                 *
                  */
-                method?: "email_code" | "portal_login";
+                method?: "email_code" | "portal_login" | "demo";
             };
         }
         export interface PublicChatError {
@@ -1641,8 +1650,20 @@ declare namespace Components {
         };
         export interface PublicWebsiteChat {
             key: string;
-            organisationName: string;
-            assistantName: string;
+            /**
+             * Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+             */
+            assistant_name?: {
+                de?: string;
+                en?: string;
+            };
+            /**
+             * Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+             */
+            greeting?: {
+                de?: string;
+                en?: string;
+            };
             defaultLocale: "en" | "de";
             /**
              * Login methods currently available to the customer.
@@ -2181,7 +2202,6 @@ declare namespace Components {
          */
         export type StarterQuestions = string[];
         export interface UpdateWebsiteChatRequest {
-            name?: string;
             agent_id?: string | null; // uuid
             settings?: {
                 /**
@@ -2239,7 +2259,6 @@ declare namespace Components {
                     string?,
                     string?
                 ];
-                organisation_name: string;
                 default_locale: "en" | "de";
                 /**
                  * Design Builder configuration for the Website Chat only.
@@ -2716,18 +2735,20 @@ declare namespace Components {
             access: {
                 /**
                  * anonymous: no customer identity. identified: the Contact is known but ownership
-                 * is not proven. verified: ownership is proven (an email code or a portal login).
+                 * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                 * demo customer of an Agent Builder preview.
                  *
                  */
                 tier: "anonymous" | "identified" | "verified";
                 /**
-                 * How a customer can log in or verify themselves in the chat.
+                 * How the current customer identity was established. demo is the fictional, verified
+                 * customer of an Agent Builder preview; it is never a login method.
+                 *
                  */
-                method?: "email_code" | "portal_login";
+                method?: "email_code" | "portal_login" | "demo";
             };
         }
         export interface WebsiteChat {
-            name: string;
             agent_id: string | null; // uuid
             settings: {
                 /**
@@ -2785,7 +2806,6 @@ declare namespace Components {
                     string?,
                     string?
                 ];
-                organisation_name: string;
                 default_locale: "en" | "de";
                 /**
                  * Design Builder configuration for the Website Chat only.
@@ -3305,8 +3325,20 @@ declare namespace Components {
             frame_origin: string; // uri
             website_chat: {
                 key: string;
-                organisationName: string;
-                assistantName: string;
+                /**
+                 * Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                 */
+                assistant_name?: {
+                    de?: string;
+                    en?: string;
+                };
+                /**
+                 * Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                 */
+                greeting?: {
+                    de?: string;
+                    en?: string;
+                };
                 defaultLocale: "en" | "de";
                 /**
                  * Login methods currently available to the customer.
@@ -3379,6 +3411,10 @@ declare namespace Components {
              * Unsaved design to preview. Omit to keep the saved design; null previews the default design.
              */
             design_id?: string | null; // uuid
+            /**
+             * Start the preview as a fictional, verified demo customer (no login, no sign-out). In-chat actions are simulated with demo data and write nothing; the Website Chat frame shows journeys as a simulated hand-off and never loads them.
+             */
+            demo_customer?: boolean;
         }
         export interface WebsiteChatSettings {
             /**
@@ -3436,7 +3472,6 @@ declare namespace Components {
                 string?,
                 string?
             ];
-            organisation_name: string;
             default_locale: "en" | "de";
             /**
              * Design Builder configuration for the Website Chat only.
@@ -4402,14 +4437,17 @@ declare namespace Paths {
                 access: {
                     /**
                      * anonymous: no customer identity. identified: the Contact is known but ownership
-                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
                      *
                      */
                     tier: "anonymous" | "identified" | "verified";
                     /**
-                     * How a customer can log in or verify themselves in the chat.
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
                      */
-                    method?: "email_code" | "portal_login";
+                    method?: "email_code" | "portal_login" | "demo";
                 };
             }
             export interface Default {
@@ -4441,14 +4479,17 @@ declare namespace Paths {
                 access: {
                     /**
                      * anonymous: no customer identity. identified: the Contact is known but ownership
-                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
                      *
                      */
                     tier: "anonymous" | "identified" | "verified";
                     /**
-                     * How a customer can log in or verify themselves in the chat.
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
                      */
-                    method?: "email_code" | "portal_login";
+                    method?: "email_code" | "portal_login" | "demo";
                 };
             }
             export interface Default {
@@ -4966,8 +5007,20 @@ declare namespace Paths {
                 expires_at: number;
                 website_chat: {
                     key: string;
-                    organisationName: string;
-                    assistantName: string;
+                    /**
+                     * Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                     */
+                    assistant_name?: {
+                        de?: string;
+                        en?: string;
+                    };
+                    /**
+                     * Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                     */
+                    greeting?: {
+                        de?: string;
+                        en?: string;
+                    };
                     defaultLocale: "en" | "de";
                     /**
                      * Login methods currently available to the customer.
@@ -5038,6 +5091,21 @@ declare namespace Paths {
                  * Agent Builder preview session; the frame only runs it inside the 360 portal.
                  */
                 preview?: boolean;
+                access?: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
+                     */
+                    method?: "email_code" | "portal_login" | "demo";
+                };
             }
             export interface Default {
                 code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
@@ -5073,7 +5141,6 @@ declare namespace Paths {
     }
     namespace CreateWebsiteChat {
         export interface RequestBody {
-            name: string;
             agent_id: string | null; // uuid
             settings: {
                 /**
@@ -5131,7 +5198,6 @@ declare namespace Paths {
                     string?,
                     string?
                 ];
-                organisation_name: string;
                 default_locale: "en" | "de";
                 /**
                  * Design Builder configuration for the Website Chat only.
@@ -5588,7 +5654,6 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $201 {
-                name: string;
                 agent_id: string | null; // uuid
                 settings: {
                     /**
@@ -5646,7 +5711,6 @@ declare namespace Paths {
                         string?,
                         string?
                     ];
-                    organisation_name: string;
                     default_locale: "en" | "de";
                     /**
                      * Design Builder configuration for the Website Chat only.
@@ -6147,6 +6211,10 @@ declare namespace Paths {
              * Unsaved design to preview. Omit to keep the saved design; null previews the default design.
              */
             design_id?: string | null; // uuid
+            /**
+             * Start the preview as a fictional, verified demo customer (no login, no sign-out). In-chat actions are simulated with demo data and write nothing; the Website Chat frame shows journeys as a simulated hand-off and never loads them.
+             */
+            demo_customer?: boolean;
         }
         namespace Responses {
             export interface $201 {
@@ -6161,8 +6229,20 @@ declare namespace Paths {
                 frame_origin: string; // uri
                 website_chat: {
                     key: string;
-                    organisationName: string;
-                    assistantName: string;
+                    /**
+                     * Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                     */
+                    assistant_name?: {
+                        de?: string;
+                        en?: string;
+                    };
+                    /**
+                     * Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                     */
+                    greeting?: {
+                        de?: string;
+                        en?: string;
+                    };
                     defaultLocale: "en" | "de";
                     /**
                      * Login methods currently available to the customer.
@@ -6811,14 +6891,17 @@ declare namespace Paths {
                 access: {
                     /**
                      * anonymous: no customer identity. identified: the Contact is known but ownership
-                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
                      *
                      */
                     tier: "anonymous" | "identified" | "verified";
                     /**
-                     * How a customer can log in or verify themselves in the chat.
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
                      */
-                    method?: "email_code" | "portal_login";
+                    method?: "email_code" | "portal_login" | "demo";
                 };
             }
             export interface Default {
@@ -6850,14 +6933,17 @@ declare namespace Paths {
                 access: {
                     /**
                      * anonymous: no customer identity. identified: the Contact is known but ownership
-                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
                      *
                      */
                     tier: "anonymous" | "identified" | "verified";
                     /**
-                     * How a customer can log in or verify themselves in the chat.
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
                      */
-                    method?: "email_code" | "portal_login";
+                    method?: "email_code" | "portal_login" | "demo";
                 };
             }
             export interface Default {
@@ -6879,8 +6965,20 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 key: string;
-                organisationName: string;
-                assistantName: string;
+                /**
+                 * Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                 */
+                assistant_name?: {
+                    de?: string;
+                    en?: string;
+                };
+                /**
+                 * Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                 */
+                greeting?: {
+                    de?: string;
+                    en?: string;
+                };
                 defaultLocale: "en" | "de";
                 /**
                  * Login methods currently available to the customer.
@@ -6959,7 +7057,6 @@ declare namespace Paths {
     namespace GetWebsiteChat {
         namespace Responses {
             export interface $200 {
-                name: string;
                 agent_id: string | null; // uuid
                 settings: {
                     /**
@@ -7017,7 +7114,6 @@ declare namespace Paths {
                         string?,
                         string?
                     ];
-                    organisation_name: string;
                     default_locale: "en" | "de";
                     /**
                      * Design Builder configuration for the Website Chat only.
@@ -7522,7 +7618,6 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 website_chats: {
-                    name: string;
                     agent_id: string | null; // uuid
                     settings: {
                         /**
@@ -7580,7 +7675,6 @@ declare namespace Paths {
                             string?,
                             string?
                         ];
-                        organisation_name: string;
                         default_locale: "en" | "de";
                         /**
                          * Design Builder configuration for the Website Chat only.
@@ -8119,14 +8213,17 @@ declare namespace Paths {
                 access: {
                     /**
                      * anonymous: no customer identity. identified: the Contact is known but ownership
-                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
                      *
                      */
                     tier: "anonymous" | "identified" | "verified";
                     /**
-                     * How a customer can log in or verify themselves in the chat.
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
                      */
-                    method?: "email_code" | "portal_login";
+                    method?: "email_code" | "portal_login" | "demo";
                 };
             }
             export interface Default {
@@ -8650,14 +8747,17 @@ declare namespace Paths {
                 access: {
                     /**
                      * anonymous: no customer identity. identified: the Contact is known but ownership
-                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
                      *
                      */
                     tier: "anonymous" | "identified" | "verified";
                     /**
-                     * How a customer can log in or verify themselves in the chat.
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
                      */
-                    method?: "email_code" | "portal_login";
+                    method?: "email_code" | "portal_login" | "demo";
                 };
             }
             export interface Default {
@@ -8690,14 +8790,17 @@ declare namespace Paths {
                 access: {
                     /**
                      * anonymous: no customer identity. identified: the Contact is known but ownership
-                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
                      *
                      */
                     tier: "anonymous" | "identified" | "verified";
                     /**
-                     * How a customer can log in or verify themselves in the chat.
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
                      */
-                    method?: "email_code" | "portal_login";
+                    method?: "email_code" | "portal_login" | "demo";
                 };
             }
             export interface Default {
@@ -9206,7 +9309,6 @@ declare namespace Paths {
     }
     namespace UpdateWebsiteChat {
         export interface RequestBody {
-            name?: string;
             agent_id?: string | null; // uuid
             settings?: {
                 /**
@@ -9264,7 +9366,6 @@ declare namespace Paths {
                     string?,
                     string?
                 ];
-                organisation_name: string;
                 default_locale: "en" | "de";
                 /**
                  * Design Builder configuration for the Website Chat only.
@@ -9725,7 +9826,6 @@ declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                name: string;
                 agent_id: string | null; // uuid
                 settings: {
                     /**
@@ -9783,7 +9883,6 @@ declare namespace Paths {
                         string?,
                         string?
                     ];
-                    organisation_name: string;
                     default_locale: "en" | "de";
                     /**
                      * Design Builder configuration for the Website Chat only.
@@ -10318,14 +10417,17 @@ declare namespace Paths {
                 access: {
                     /**
                      * anonymous: no customer identity. identified: the Contact is known but ownership
-                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
                      *
                      */
                     tier: "anonymous" | "identified" | "verified";
                     /**
-                     * How a customer can log in or verify themselves in the chat.
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
                      */
-                    method?: "email_code" | "portal_login";
+                    method?: "email_code" | "portal_login" | "demo";
                 };
             }
             export interface Default {
@@ -10358,14 +10460,17 @@ declare namespace Paths {
                 access: {
                     /**
                      * anonymous: no customer identity. identified: the Contact is known but ownership
-                     * is not proven. verified: ownership is proven (an email code or a portal login).
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
                      *
                      */
                     tier: "anonymous" | "identified" | "verified";
                     /**
-                     * How a customer can log in or verify themselves in the chat.
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
                      */
-                    method?: "email_code" | "portal_login";
+                    method?: "email_code" | "portal_login" | "demo";
                 };
             }
             export interface Default {
@@ -10546,7 +10651,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CancelChatPortalLogin.Responses.$200 | Paths.CancelChatPortalLogin.Responses.Default>
   /**
-   * signOutChatCustomer - Clear the customer identity of any login method and pending challenges. Clearing an identity starts a new anonymous conversation.
+   * signOutChatCustomer - Clear the customer identity of any login method and pending challenges. Clearing an identity starts a new anonymous conversation. The demo customer of an Agent Builder preview stays signed in for the whole session (403 LOGIN_DISABLED); it cannot start an email verification or portal login either.
    */
   'signOutChatCustomer'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -10802,7 +10907,7 @@ export interface PathsDictionary {
   }
   ['/v1/login/sign-out']: {
     /**
-     * signOutChatCustomer - Clear the customer identity of any login method and pending challenges. Clearing an identity starts a new anonymous conversation.
+     * signOutChatCustomer - Clear the customer identity of any login method and pending challenges. Clearing an identity starts a new anonymous conversation. The demo customer of an Agent Builder preview stays signed in for the whole session (403 LOGIN_DISABLED); it cannot start an email verification or portal login either.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -10873,6 +10978,7 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AccessMethod = Components.Schemas.AccessMethod;
 export type AccessTier = Components.Schemas.AccessTier;
 export type ActionRevision = Components.Schemas.ActionRevision;
 export type ActionState = Components.Schemas.ActionState;
