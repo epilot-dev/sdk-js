@@ -428,9 +428,19 @@
           {
             "name": "next",
             "in": "query",
-            "description": "Cursor for pagination",
+            "description": "Cursor for sequential pagination. Ignored when `from` is provided.",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Zero-based offset of the first item to return. Enables direct (random-access) pagination to any page. When provided, it takes precedence over `next`.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
             }
           },
           {
