@@ -2160,7 +2160,7 @@ declare namespace Components {
              * Why this item failed, present only with `outcome: error`:
              * `LAST_VERSION_UNDELETABLE`, `VARIANT_UNPINNED`, the codes a condition tuple that cannot
              * be canonicalized raises, `IDENTIFIER_INVALID`, `VALID_FROM_INVALID`, `WRITE_CONFLICT`,
-             * and the per-item `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and
+             * and the per-item `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH`, `ENTITY_SOFT_DELETED` and
              * `ENTITY_NOT_CONDITIONAL`. A missing variant or version is `skipped` instead.
              *
              */
@@ -2168,7 +2168,7 @@ declare namespace Components {
              * Why this item failed, present only with `outcome: error`:
              * `LAST_VERSION_UNDELETABLE`, `VARIANT_UNPINNED`, the codes a condition tuple that cannot
              * be canonicalized raises, `IDENTIFIER_INVALID`, `VALID_FROM_INVALID`, `WRITE_CONFLICT`,
-             * and the per-item `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and
+             * and the per-item `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH`, `ENTITY_SOFT_DELETED` and
              * `ENTITY_NOT_CONDITIONAL`. A missing variant or version is `skipped` instead.
              *
              */
@@ -2271,6 +2271,47 @@ declare namespace Components {
                      * product
                      */
                     actual_schema: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_SOFT_DELETED";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
                 };
                 /**
                  * Error message
@@ -4641,16 +4682,16 @@ declare namespace Components {
             WriteWarning[];
             /**
              * Why this item failed, present only with `outcome: error`: the codes a variant create
-             * raises, plus `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and `ENTITY_NOT_CONDITIONAL`,
-             * which are per item because each item names its own entity. Never `TUPLE_CONFLICT` or
-             * `VERSION_CONFLICT`.
+             * raises, plus `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH`, `ENTITY_SOFT_DELETED` and
+             * `ENTITY_NOT_CONDITIONAL`, which are per item because each item names its own entity.
+             * Never `TUPLE_CONFLICT` or `VERSION_CONFLICT`.
              *
              */
             error?: /**
              * Why this item failed, present only with `outcome: error`: the codes a variant create
-             * raises, plus `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and `ENTITY_NOT_CONDITIONAL`,
-             * which are per item because each item names its own entity. Never `TUPLE_CONFLICT` or
-             * `VERSION_CONFLICT`.
+             * raises, plus `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH`, `ENTITY_SOFT_DELETED` and
+             * `ENTITY_NOT_CONDITIONAL`, which are per item because each item names its own entity.
+             * Never `TUPLE_CONFLICT` or `VERSION_CONFLICT`.
              *
              */
             {
@@ -4756,6 +4797,49 @@ declare namespace Components {
                      * product
                      */
                     actual_schema: string;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "ENTITY_SOFT_DELETED";
+                details: {
+                    /**
+                     * The entity type the request addressed.
+                     * example:
+                     * price
+                     */
+                    schema: string;
+                    /**
+                     * The conditional entity the request addressed.
+                     * example:
+                     * price-sp26d1yo
+                     */
+                    entity_id: string;
                 };
                 /**
                  * Error message
@@ -7018,7 +7102,7 @@ declare namespace Components {
             product?: /**
              * The situation to resolve for: a flat map keyed by condition name. A condition left out
              * matches only variants that leave it unpinned; an empty map therefore returns the `default`
-             * variant.
+             * variant. A key naming no condition the schema declares is ignored, as if it were left out.
              *
              * Each value is an exact value, typed by its condition, or a single-operator predicate:
              *
@@ -7048,7 +7132,7 @@ declare namespace Components {
             price?: /**
              * The situation to resolve for: a flat map keyed by condition name. A condition left out
              * matches only variants that leave it unpinned; an empty map therefore returns the `default`
-             * variant.
+             * variant. A key naming no condition the schema declares is ignored, as if it were left out.
              *
              * Each value is an exact value, typed by its condition, or a single-operator predicate:
              *
@@ -7078,7 +7162,7 @@ declare namespace Components {
             coupon?: /**
              * The situation to resolve for: a flat map keyed by condition name. A condition left out
              * matches only variants that leave it unpinned; an empty map therefore returns the `default`
-             * variant.
+             * variant. A key naming no condition the schema declares is ignored, as if it were left out.
              *
              * Each value is an exact value, typed by its condition, or a single-operator predicate:
              *
@@ -8639,13 +8723,15 @@ declare namespace Components {
             Coupon)[];
         }
         /**
-         * An entry the v2 catalog could not answer, and why. `details` is typed per `code`: narrow on
-         * `code` and the object under it declares exactly the fields that code sends.
+         * An entry the v2 catalog could not answer, or context conditions it ignored, and why. `details`
+         * is typed per `code`: narrow on `code` and the object under it declares exactly the fields that
+         * code sends.
          *
          */
         export type CatalogWarning = /**
-         * An entry the v2 catalog could not answer, and why. `details` is typed per `code`: narrow on
-         * `code` and the object under it declares exactly the fields that code sends.
+         * An entry the v2 catalog could not answer, or context conditions it ignored, and why. `details`
+         * is typed per `code`: narrow on `code` and the object under it declares exactly the fields that
+         * code sends.
          *
          */
         {
@@ -8670,31 +8756,17 @@ declare namespace Components {
                 missing: "product" | "price";
             };
         } | {
-            code: "CATALOG_ENTRY_TYPE_MISMATCH";
+            code: "CONTEXT_CONDITIONS_IGNORED";
             message: string;
             details: {
+                entity_type: "product" | "price" | "coupon";
                 /**
-                 * The entry's product id, as sent.
                  * example:
-                 * product-heatpump-2027
+                 * [
+                 *   "customer_segment"
+                 * ]
                  */
-                product_id: string;
-                /**
-                 * The entry's price id, as sent. Absent when the entry named none.
-                 * example:
-                 * product-tariff-2027
-                 */
-                price_id?: string;
-                /**
-                 * Which of the entry's ids names an entity of another type.
-                 */
-                mismatched: "product" | "price";
-                /**
-                 * The type the entity turned out to be.
-                 * example:
-                 * product
-                 */
-                actual_schema: string;
+                conditions: string[];
             };
         };
         /**
@@ -11504,6 +11576,51 @@ declare namespace Components {
                 [name: string]: any;
             }[];
         } | {
+            code: "ENTITY_SOFT_DELETED";
+            details: {
+                /**
+                 * The entity type the request addressed.
+                 * example:
+                 * price
+                 */
+                schema: string;
+                /**
+                 * The conditional entity the request addressed.
+                 * example:
+                 * price-sp26d1yo
+                 */
+                entity_id: string;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
             code: "ENTITY_NOT_CONDITIONAL";
             details: {
                 /**
@@ -13083,6 +13200,7 @@ declare namespace Components {
          * - `SCHEMA_NOT_FOUND` (404): no conditional entity type by that slug
          * - `ENTITY_NOT_FOUND` (404): the schema holds no entity with that id
          * - `ENTITY_TYPE_MISMATCH` (400): that id belongs to an entity of another type than the slug named
+         * - `ENTITY_SOFT_DELETED` (409): the entity is soft-deleted and can still be restored, which brings its variants back unchanged
          * - `ENTITY_NOT_CONDITIONAL` (409): the entity is of the right type but was not created as a conditional one
          * - `VARIANT_NOT_FOUND` (404): the entity has no such variant
          * - `VERSION_NOT_FOUND` (404): the variant has no version at that `valid_from`
@@ -13091,7 +13209,7 @@ declare namespace Components {
          * - `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested
          * - `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant
          * - `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant
-         * - `CONDITION_UNDEFINED` (400): the request names a condition the entity's schema does not define
+         * - `CONDITION_UNDEFINED` (400): a listing filter or a variant's pins name a condition the entity's schema does not define (a resolve context ignores such a name instead)
          * - `VARIANT_PIN_UNDECLARED` (409): a variant a resolve would compose pins a condition the entity's schema no longer declares
          * - `OPERATOR_UNSUPPORTED` (400): the requested predicate, or a sort, is not applicable to the condition's type
          * - `CONTEXT_FORMAT_INVALID` (400): a resolve context or listing filter value is malformed for its condition type
@@ -13119,7 +13237,7 @@ declare namespace Components {
          * - `CONDITIONAL_PRICING_NOT_READY` (409): the organization opted in minutes ago and a variant cannot be created until its setup finishes
          *
          */
-        export type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE" | "OVERRIDE_VALUE_INVALID" | "CONDITIONAL_PRICING_NOT_ENABLED" | "CONDITIONAL_PRICING_NOT_READY";
+        export type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_SOFT_DELETED" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE" | "OVERRIDE_VALUE_INVALID" | "CONDITIONAL_PRICING_NOT_ENABLED" | "CONDITIONAL_PRICING_NOT_READY";
         export interface ConditionalPricingOptIn {
             /**
              * - `PROVISIONING`: the organization's search collection is still being set up, and
@@ -19804,7 +19922,7 @@ declare namespace Components {
             context: /**
              * The situation to resolve for: a flat map keyed by condition name. A condition left out
              * matches only variants that leave it unpinned; an empty map therefore returns the `default`
-             * variant.
+             * variant. A key naming no condition the schema declares is ignored, as if it were left out.
              *
              * Each value is an exact value, typed by its condition, or a single-operator predicate:
              *
@@ -20639,13 +20757,15 @@ declare namespace Components {
              */
             CatalogPair[];
             /**
-             * The entries that could not be answered because an id found nothing. Always present, and
-             * empty in the ordinary case; an entry the catalog answers "not offered" is not in it.
+             * The entries that could not be answered because an id found nothing, and the context
+             * conditions that were ignored. Always present, and empty in the ordinary case; an entry the
+             * catalog answers "not offered" is not in it.
              *
              */
             warnings: /**
-             * An entry the v2 catalog could not answer, and why. `details` is typed per `code`: narrow on
-             * `code` and the object under it declares exactly the fields that code sends.
+             * An entry the v2 catalog could not answer, or context conditions it ignored, and why. `details`
+             * is typed per `code`: narrow on `code` and the object under it declares exactly the fields that
+             * code sends.
              *
              */
             CatalogWarning[];
@@ -20671,7 +20791,7 @@ declare namespace Components {
         /**
          * The situation to resolve for: a flat map keyed by condition name. A condition left out
          * matches only variants that leave it unpinned; an empty map therefore returns the `default`
-         * variant.
+         * variant. A key naming no condition the schema declares is ignored, as if it were left out.
          *
          * Each value is an exact value, typed by its condition, or a single-operator predicate:
          *
@@ -22343,7 +22463,7 @@ declare namespace Paths {
     }
     namespace $CalculatePricingDetails {
         export interface RequestBody {
-            line_items?: /* A valid set of product prices, quantities, (discounts) and taxes from a client. */ Components.Schemas.PriceItemsDto;
+            line_items: /* A valid set of product prices, quantities, (discounts) and taxes from a client. */ Components.Schemas.PriceItemsDto;
             redeemed_promos?: Components.Schemas.RedeemedPromo[];
         }
         namespace Responses {
@@ -24812,8 +24932,9 @@ export interface OperationMethods {
    * Conditional entities resolve as on `POST /v1/conditional-pricing:resolve`. An organization
    * that has not opted in gets base entities, not an error. A member matching several variants
    * yields one pair per variant, and an entry without `price_id` yields one pair per price of
-   * the product. Members that match nothing or are inactive are left out. Ids that find no
-   * entity, or an entity of another type than the entry asked for, are reported in `warnings`.
+   * the product. Members that match nothing or are inactive are left out. Ids the catalog does
+   * not find are reported in `warnings`, as are context keys a schema does not declare, which
+   * are ignored.
    * 
    */
   '$resolveCatalog'(
@@ -25335,8 +25456,9 @@ export interface PathsDictionary {
      * Conditional entities resolve as on `POST /v1/conditional-pricing:resolve`. An organization
      * that has not opted in gets base entities, not an error. A member matching several variants
      * yields one pair per variant, and an entry without `price_id` yields one pair per price of
-     * the product. Members that match nothing or are inactive are left out. Ids that find no
-     * entity, or an entity of another type than the entry asked for, are reported in `warnings`.
+     * the product. Members that match nothing or are inactive are left out. Ids the catalog does
+     * not find are reported in `warnings`, as are context keys a schema does not declare, which
+     * are ignored.
      * 
      */
     'post'(

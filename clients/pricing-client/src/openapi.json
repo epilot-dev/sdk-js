@@ -147,10 +147,14 @@
           "Order API"
         ],
         "requestBody": {
-          "required": false,
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
+                "required": [
+                  "line_items"
+                ],
                 "properties": {
                   "line_items": {
                     "$ref": "#/components/schemas/PriceItemsDto"
@@ -1176,7 +1180,7 @@
     },
     "/v2/public/catalog": {
       "post": {
-        "description": "Returns the products and prices a journey block shows as catalog pairs, each member resolved\nfor its own entity type's context at `as_of`. A pair carries the product, one of its prices, the coupons that apply,\nand a signed `catalog_reference`. Line items carry that reference to checkout unchanged, and\ncheckout prices from it.\n\nConditional entities resolve as on `POST /v1/conditional-pricing:resolve`. An organization\nthat has not opted in gets base entities, not an error. A member matching several variants\nyields one pair per variant, and an entry without `price_id` yields one pair per price of\nthe product. Members that match nothing or are inactive are left out. Ids that find no\nentity, or an entity of another type than the entry asked for, are reported in `warnings`.\n",
+        "description": "Returns the products and prices a journey block shows as catalog pairs, each member resolved\nfor its own entity type's context at `as_of`. A pair carries the product, one of its prices, the coupons that apply,\nand a signed `catalog_reference`. Line items carry that reference to checkout unchanged, and\ncheckout prices from it.\n\nConditional entities resolve as on `POST /v1/conditional-pricing:resolve`. An organization\nthat has not opted in gets base entities, not an error. A member matching several variants\nyields one pair per variant, and an entry without `price_id` yields one pair per price of\nthe product. Members that match nothing or are inactive are left out. Ids the catalog does\nnot find are reported in `warnings`, as are context keys a schema does not declare, which\nare ignored.\n",
         "operationId": "$resolveCatalog",
         "summary": "$resolveCatalog",
         "security": [
@@ -1229,7 +1233,7 @@
         },
         "responses": {
           "200": {
-            "description": "The pairs to show, unordered, and the entries whose ids found nothing or the wrong\ntype. `warnings` is always present and empty in the ordinary case.\n",
+            "description": "The pairs to show, unordered, the entries whose ids found nothing or the wrong type,\nand the context keys that were ignored. `warnings` is always present and empty in the\nordinary case.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -1237,7 +1241,7 @@
                 },
                 "examples": {
                   "A resolved price beside a classic product, and an entry that found nothing": {
-                    "summary": "The product served as stored, the price resolved to its variant, the reference signed, and a retired price reported rather than refused",
+                    "summary": "The product served as stored, the price resolved to its variant, the reference signed, a retired price reported rather than refused, and a stale context key reported as ignored",
                     "value": {
                       "pairs": [
                         {
@@ -1332,7 +1336,7 @@
                       "warnings": [
                         {
                           "code": "CATALOG_ENTRY_NOT_FOUND",
-                          "message": "The entry names a price that does not exist",
+                          "message": "The entry's price id finds no price",
                           "details": {
                             "product_id": "product-heatpump-2027",
                             "price_id": "price-retired",
@@ -1340,13 +1344,13 @@
                           }
                         },
                         {
-                          "code": "CATALOG_ENTRY_TYPE_MISMATCH",
-                          "message": "The entry's price id names a product",
+                          "code": "CONTEXT_CONDITIONS_IGNORED",
+                          "message": "The price context names conditions the price schema does not declare: customer_segment",
                           "details": {
-                            "product_id": "product-heatpump-2027",
-                            "price_id": "product-tariff-2027",
-                            "mismatched": "price",
-                            "actual_schema": "product"
+                            "entity_type": "price",
+                            "conditions": [
+                              "customer_segment"
+                            ]
                           }
                         }
                       ]
@@ -1357,7 +1361,7 @@
             }
           },
           "400": {
-            "description": "`CONDITION_UNDEFINED`, `OPERATOR_UNSUPPORTED`, `CONTEXT_FORMAT_INVALID`,\n`DEFAULT_MARKER_RESERVED`: an entity type's context is refused against that type's schema\nas the authenticated resolve refuses it.\n\n`TOO_MANY_MATCHES`: a member matches more variants than the authenticated resolve's cap\nof 100. The whole request is refused rather than serving a truncated block.\n\n`VALID_FROM_INVALID`: `as_of` is not an instant this operation can read.\n\nA body with no entries, more than 100, an entry without `product_id`, or a context keyed\nby anything but `product`, `price` or `coupon` fails validation and carries no `code`.\n",
+            "description": "`OPERATOR_UNSUPPORTED`, `CONTEXT_FORMAT_INVALID`, `DEFAULT_MARKER_RESERVED`: an entity\ntype's context is refused against that type's schema as the authenticated resolve refuses\nit. A context key naming no condition that schema declares is ignored, not refused.\n\n`TOO_MANY_MATCHES`: a member matches more variants than the authenticated resolve's cap\nof 100. The whole request is refused rather than serving a truncated block.\n\n`VALID_FROM_INVALID`: `as_of` is not an instant this operation can read.\n\nA body with no entries, more than 100, an entry without `product_id`, or a context keyed\nby anything but `product`, `price` or `coupon` fails validation and carries no `code`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -3813,7 +3817,7 @@
             }
           },
           "400": {
-            "description": "`CONDITION_UNDEFINED`, `OPERATOR_UNSUPPORTED`, `CONTEXT_FORMAT_INVALID`,\n`DEFAULT_MARKER_RESERVED`, `TOO_MANY_MATCHES`, `VALID_FROM_INVALID`,\n`ENTITY_TYPE_MISMATCH`. A body carrying both `context` and `variant_id`, or neither,\nfails validation and carries no `code`.\n",
+            "description": "`OPERATOR_UNSUPPORTED`, `CONTEXT_FORMAT_INVALID`, `DEFAULT_MARKER_RESERVED`,\n`TOO_MANY_MATCHES`, `VALID_FROM_INVALID`, `ENTITY_TYPE_MISMATCH`. A context key naming no\ncondition the schema declares is ignored, not refused. A body carrying both `context` and\n`variant_id`, or neither, fails validation and carries no `code`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -3843,7 +3847,7 @@
             }
           },
           "409": {
-            "description": "`AMBIGUOUS_RESOLUTION`, `CONDITION_UNREADABLE`, `VARIANT_PIN_UNDECLARED`,\n`ENTITY_NOT_CONDITIONAL`.\n",
+            "description": "`AMBIGUOUS_RESOLUTION`, `CONDITION_UNREADABLE`, `VARIANT_PIN_UNDECLARED`,\n`ENTITY_SOFT_DELETED`, `ENTITY_NOT_CONDITIONAL`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -3976,7 +3980,7 @@
             }
           },
           "409": {
-            "description": "`TUPLE_CONFLICT` (also how a second `default` variant is refused), `WRITE_CONFLICT`,\n`CONDITION_UNREADABLE`, `CONDITION_UNCONFIGURED`, `VARIANT_LIMIT_REACHED`,\n`ENTITY_NOT_CONDITIONAL`, `CONDITIONAL_PRICING_NOT_READY`.\n",
+            "description": "`TUPLE_CONFLICT` (also how a second `default` variant is refused), `WRITE_CONFLICT`,\n`CONDITION_UNREADABLE`, `CONDITION_UNCONFIGURED`, `VARIANT_LIMIT_REACHED`,\n`ENTITY_SOFT_DELETED`, `ENTITY_NOT_CONDITIONAL`, `CONDITIONAL_PRICING_NOT_READY`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -4140,7 +4144,7 @@
             }
           },
           "409": {
-            "description": "`CONDITION_UNREADABLE`, raised only where the filter or `sort` names that condition, and\n`ENTITY_NOT_CONDITIONAL`.\n",
+            "description": "`ENTITY_SOFT_DELETED`, `ENTITY_NOT_CONDITIONAL`, and `CONDITION_UNREADABLE`, raised only\nwhere the filter or `sort` names that condition.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -4321,7 +4325,7 @@
             }
           },
           "409": {
-            "description": "`CONDITION_UNREADABLE`, raised only where the filter or `sort` names that condition, and\n`ENTITY_NOT_CONDITIONAL`.\n",
+            "description": "`ENTITY_SOFT_DELETED`, `ENTITY_NOT_CONDITIONAL`, and `CONDITION_UNREADABLE`, raised only\nwhere the filter or `sort` names that condition.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -4415,7 +4419,7 @@
             }
           },
           "409": {
-            "description": "`ENTITY_NOT_CONDITIONAL`.",
+            "description": "`ENTITY_SOFT_DELETED`, `ENTITY_NOT_CONDITIONAL`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4517,7 +4521,7 @@
             }
           },
           "409": {
-            "description": "`WRITE_CONFLICT`, `VARIANT_CONDITIONS_IMMUTABLE`, `ENTITY_NOT_CONDITIONAL`.",
+            "description": "`WRITE_CONFLICT`, `VARIANT_CONDITIONS_IMMUTABLE`, `ENTITY_SOFT_DELETED`,\n`ENTITY_NOT_CONDITIONAL`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -4619,7 +4623,7 @@
             }
           },
           "409": {
-            "description": "`WRITE_CONFLICT`, `VARIANT_CONDITIONS_IMMUTABLE`, `ENTITY_NOT_CONDITIONAL`.",
+            "description": "`WRITE_CONFLICT`, `VARIANT_CONDITIONS_IMMUTABLE`, `ENTITY_SOFT_DELETED`,\n`ENTITY_NOT_CONDITIONAL`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -4711,7 +4715,7 @@
             }
           },
           "409": {
-            "description": "`WRITE_CONFLICT`, `ENTITY_NOT_CONDITIONAL`.",
+            "description": "`WRITE_CONFLICT`, `ENTITY_SOFT_DELETED`, `ENTITY_NOT_CONDITIONAL`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4891,7 +4895,7 @@
             }
           },
           "409": {
-            "description": "`ENTITY_NOT_CONDITIONAL`.",
+            "description": "`ENTITY_SOFT_DELETED`, `ENTITY_NOT_CONDITIONAL`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4993,7 +4997,7 @@
             }
           },
           "409": {
-            "description": "`VERSION_CONFLICT`, `VARIANT_CONDITIONS_IMMUTABLE`, `ENTITY_NOT_CONDITIONAL`.",
+            "description": "`VERSION_CONFLICT`, `VARIANT_CONDITIONS_IMMUTABLE`, `ENTITY_SOFT_DELETED`,\n`ENTITY_NOT_CONDITIONAL`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -5097,7 +5101,7 @@
             }
           },
           "409": {
-            "description": "`ENTITY_NOT_CONDITIONAL`.",
+            "description": "`ENTITY_SOFT_DELETED`, `ENTITY_NOT_CONDITIONAL`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5209,7 +5213,7 @@
             }
           },
           "409": {
-            "description": "`WRITE_CONFLICT`, `VARIANT_CONDITIONS_IMMUTABLE`, `ENTITY_NOT_CONDITIONAL`.",
+            "description": "`WRITE_CONFLICT`, `VARIANT_CONDITIONS_IMMUTABLE`, `ENTITY_SOFT_DELETED`,\n`ENTITY_NOT_CONDITIONAL`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -5321,7 +5325,7 @@
             }
           },
           "409": {
-            "description": "`WRITE_CONFLICT`, `VARIANT_CONDITIONS_IMMUTABLE`, `ENTITY_NOT_CONDITIONAL`.",
+            "description": "`WRITE_CONFLICT`, `VARIANT_CONDITIONS_IMMUTABLE`, `ENTITY_SOFT_DELETED`,\n`ENTITY_NOT_CONDITIONAL`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -5434,7 +5438,7 @@
             }
           },
           "409": {
-            "description": "`LAST_VERSION_UNDELETABLE`, `WRITE_CONFLICT`, `ENTITY_NOT_CONDITIONAL`.",
+            "description": "`LAST_VERSION_UNDELETABLE`, `WRITE_CONFLICT`, `ENTITY_SOFT_DELETED`,\n`ENTITY_NOT_CONDITIONAL`.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -6017,11 +6021,12 @@
       },
       "ConditionalPricingErrorCode": {
         "type": "string",
-        "description": "Machine-readable failure mode of a conditional-pricing operation, so a client can branch on\nthe kind of failure instead of parsing the message. A `400` is about the request; a `409` is\nabout what is already stored. Refusals raised by request validation carry no `code` at all.\n\n- `SCHEMA_NOT_FOUND` (404): no conditional entity type by that slug\n- `ENTITY_NOT_FOUND` (404): the schema holds no entity with that id\n- `ENTITY_TYPE_MISMATCH` (400): that id belongs to an entity of another type than the slug named\n- `ENTITY_NOT_CONDITIONAL` (409): the entity is of the right type but was not created as a conditional one\n- `VARIANT_NOT_FOUND` (404): the entity has no such variant\n- `VERSION_NOT_FOUND` (404): the variant has no version at that `valid_from`\n- `NO_MATCHES` (404): nothing applied to the context and the entity has no `default` variant\n- `NO_ACTIVE_VERSION` (404): the variant has no version in effect at the instant asked about\n- `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested\n- `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant\n- `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant\n- `CONDITION_UNDEFINED` (400): the request names a condition the entity's schema does not define\n- `VARIANT_PIN_UNDECLARED` (409): a variant a resolve would compose pins a condition the entity's schema no longer declares\n- `OPERATOR_UNSUPPORTED` (400): the requested predicate, or a sort, is not applicable to the condition's type\n- `CONTEXT_FORMAT_INVALID` (400): a resolve context or listing filter value is malformed for its condition type\n- `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value absent from the condition's declared `options`\n- `CONDITION_UNCONFIGURED` (409): a variant write pins a `select` condition whose `options` are absent or empty\n- `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap\n- `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`\n- `OFFSET_WINDOW_EXCEEDED` (400): a listing's `from` plus `size` reaches past the offset window the search index allows\n- `CURSOR_INVALID` (400): a paging cursor cannot be read, or does not belong to the read it was sent with\n- `VARIANT_LIMIT_REACHED` (409): the entity already holds every variant it may hold\n- `PIN_FORMAT_INVALID` (400): a variant pins a value malformed for its condition's type\n- `VARIANT_UNPINNED` (400): a variant write pins no condition and is not marked `default`, or a batch delete item addresses no variant\n- `LAST_VERSION_UNDELETABLE` (409): the delete would leave the variant with no version at all\n- `CONDITION_UNREADABLE` (409): the entity's schema declares a condition in a way this deploy cannot read\n- `SORT_INVALID` (400): a listing's `sort` is not `conditions.<name>:asc` or `conditions.<name>:desc`\n- `DEFAULT_MARKER_RESERVED` (400): a variant write's pins, or a resolve context, address the fallback marker — `default` or `_default`\n- `DEFAULT_VARIANT_PINS_CONDITIONS` (400): a variant marked `default` also pins real conditions\n- `VALID_FROM_IMMUTABLE` (400): a version write asks for a different `valid_from` than the version its own address names\n- `VARIANT_CONDITIONS_IMMUTABLE` (409): a version write carries a condition tuple other than the one its variant was created with\n- `IDENTIFIER_INVALID` (400): an id in the request cannot be used as a storage key — empty, carrying an unsupported character, or longer than 128 characters\n- `VALID_FROM_INVALID` (400): a `valid_from` is not one of the timestamp forms a version timeline can be sorted by\n- `VALUE_UNSTORABLE` (400): a write carries a value the store cannot hold, such as a non-finite number or one outside the table's numeric range\n- `OVERRIDE_VALUE_INVALID` (400): a write overrides a `currency` or `number` field, or an amount/decimal pair, with a value of the wrong type\n- `CONDITIONAL_PRICING_NOT_ENABLED` (403): the organization has not opted in to Conditional Pricing\n- `CONDITIONAL_PRICING_NOT_READY` (409): the organization opted in minutes ago and a variant cannot be created until its setup finishes\n",
+        "description": "Machine-readable failure mode of a conditional-pricing operation, so a client can branch on\nthe kind of failure instead of parsing the message. A `400` is about the request; a `409` is\nabout what is already stored. Refusals raised by request validation carry no `code` at all.\n\n- `SCHEMA_NOT_FOUND` (404): no conditional entity type by that slug\n- `ENTITY_NOT_FOUND` (404): the schema holds no entity with that id\n- `ENTITY_TYPE_MISMATCH` (400): that id belongs to an entity of another type than the slug named\n- `ENTITY_SOFT_DELETED` (409): the entity is soft-deleted and can still be restored, which brings its variants back unchanged\n- `ENTITY_NOT_CONDITIONAL` (409): the entity is of the right type but was not created as a conditional one\n- `VARIANT_NOT_FOUND` (404): the entity has no such variant\n- `VERSION_NOT_FOUND` (404): the variant has no version at that `valid_from`\n- `NO_MATCHES` (404): nothing applied to the context and the entity has no `default` variant\n- `NO_ACTIVE_VERSION` (404): the variant has no version in effect at the instant asked about\n- `AMBIGUOUS_RESOLUTION` (409): several variants match the given context while a single result was requested\n- `TUPLE_CONFLICT` (409): the condition tuple is already claimed by another variant\n- `VERSION_CONFLICT` (409): a version already exists at the given `valid_from` on that variant\n- `CONDITION_UNDEFINED` (400): a listing filter or a variant's pins name a condition the entity's schema does not define (a resolve context ignores such a name instead)\n- `VARIANT_PIN_UNDECLARED` (409): a variant a resolve would compose pins a condition the entity's schema no longer declares\n- `OPERATOR_UNSUPPORTED` (400): the requested predicate, or a sort, is not applicable to the condition's type\n- `CONTEXT_FORMAT_INVALID` (400): a resolve context or listing filter value is malformed for its condition type\n- `CONDITION_VALUE_INVALID` (400): a variant write pins a `select` value absent from the condition's declared `options`\n- `CONDITION_UNCONFIGURED` (409): a variant write pins a `select` condition whose `options` are absent or empty\n- `TOO_MANY_MATCHES` (400): a multi-match resolve exceeded its result cap\n- `WRITE_CONFLICT` (409): transient write contention, retryable unlike `TUPLE_CONFLICT`\n- `OFFSET_WINDOW_EXCEEDED` (400): a listing's `from` plus `size` reaches past the offset window the search index allows\n- `CURSOR_INVALID` (400): a paging cursor cannot be read, or does not belong to the read it was sent with\n- `VARIANT_LIMIT_REACHED` (409): the entity already holds every variant it may hold\n- `PIN_FORMAT_INVALID` (400): a variant pins a value malformed for its condition's type\n- `VARIANT_UNPINNED` (400): a variant write pins no condition and is not marked `default`, or a batch delete item addresses no variant\n- `LAST_VERSION_UNDELETABLE` (409): the delete would leave the variant with no version at all\n- `CONDITION_UNREADABLE` (409): the entity's schema declares a condition in a way this deploy cannot read\n- `SORT_INVALID` (400): a listing's `sort` is not `conditions.<name>:asc` or `conditions.<name>:desc`\n- `DEFAULT_MARKER_RESERVED` (400): a variant write's pins, or a resolve context, address the fallback marker — `default` or `_default`\n- `DEFAULT_VARIANT_PINS_CONDITIONS` (400): a variant marked `default` also pins real conditions\n- `VALID_FROM_IMMUTABLE` (400): a version write asks for a different `valid_from` than the version its own address names\n- `VARIANT_CONDITIONS_IMMUTABLE` (409): a version write carries a condition tuple other than the one its variant was created with\n- `IDENTIFIER_INVALID` (400): an id in the request cannot be used as a storage key — empty, carrying an unsupported character, or longer than 128 characters\n- `VALID_FROM_INVALID` (400): a `valid_from` is not one of the timestamp forms a version timeline can be sorted by\n- `VALUE_UNSTORABLE` (400): a write carries a value the store cannot hold, such as a non-finite number or one outside the table's numeric range\n- `OVERRIDE_VALUE_INVALID` (400): a write overrides a `currency` or `number` field, or an amount/decimal pair, with a value of the wrong type\n- `CONDITIONAL_PRICING_NOT_ENABLED` (403): the organization has not opted in to Conditional Pricing\n- `CONDITIONAL_PRICING_NOT_READY` (409): the organization opted in minutes ago and a variant cannot be created until its setup finishes\n",
         "enum": [
           "SCHEMA_NOT_FOUND",
           "ENTITY_NOT_FOUND",
           "ENTITY_TYPE_MISMATCH",
+          "ENTITY_SOFT_DELETED",
           "ENTITY_NOT_CONDITIONAL",
           "VARIANT_NOT_FOUND",
           "VERSION_NOT_FOUND",
@@ -6138,7 +6143,7 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/ContextConditionValue"
         },
-        "description": "The situation to resolve for: a flat map keyed by condition name. A condition left out\nmatches only variants that leave it unpinned; an empty map therefore returns the `default`\nvariant.\n\nEach value is an exact value, typed by its condition, or a single-operator predicate:\n\n- `{ \"lt\": v }`, `{ \"lte\": v }`, `{ \"gt\": v }`, `{ \"gte\": v }` — order, against a `number`\n  or `date` condition\n- `{ \"in\": [...] }` — membership, against a `string`, `select` or `number` condition\n- `{ \"between\": \"2026-03-01\" }` — `daterange` containment, which a plain date also means\n- `{ \"exists\": true }` — pinned to any value; `{ \"exists\": false }` — left unpinned\n\nAn `in` list carries at most 50,000 values. A `string` or `select` matches exactly and\ncase-sensitively. A `location` of format\n`postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying\n`postal_code` and `city`, named as an entity address names them, whose city is compared\ncase- and whitespace-insensitively.\n\n`default` and names beginning with `_` are reserved and cannot be supplied.\n",
+        "description": "The situation to resolve for: a flat map keyed by condition name. A condition left out\nmatches only variants that leave it unpinned; an empty map therefore returns the `default`\nvariant. A key naming no condition the schema declares is ignored, as if it were left out.\n\nEach value is an exact value, typed by its condition, or a single-operator predicate:\n\n- `{ \"lt\": v }`, `{ \"lte\": v }`, `{ \"gt\": v }`, `{ \"gte\": v }` — order, against a `number`\n  or `date` condition\n- `{ \"in\": [...] }` — membership, against a `string`, `select` or `number` condition\n- `{ \"between\": \"2026-03-01\" }` — `daterange` containment, which a plain date also means\n- `{ \"exists\": true }` — pinned to any value; `{ \"exists\": false }` — left unpinned\n\nAn `in` list carries at most 50,000 values. A `string` or `select` matches exactly and\ncase-sensitively. A `location` of format\n`postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying\n`postal_code` and `city`, named as an entity address names them, whose city is compared\ncase- and whitespace-insensitively.\n\n`default` and names beginning with `_` are reserved and cannot be supplied.\n",
         "example": {
           "postal_code": "46045",
           "consumption": {
@@ -7633,7 +7638,7 @@
                 "$ref": "#/components/schemas/ConditionalPricingError"
               }
             ],
-            "description": "Why this item failed, present only with `outcome: error`: the codes a variant create\nraises, plus `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and `ENTITY_NOT_CONDITIONAL`,\nwhich are per item because each item names its own entity. Never `TUPLE_CONFLICT` or\n`VERSION_CONFLICT`.\n"
+            "description": "Why this item failed, present only with `outcome: error`: the codes a variant create\nraises, plus `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH`, `ENTITY_SOFT_DELETED` and\n`ENTITY_NOT_CONDITIONAL`, which are per item because each item names its own entity.\nNever `TUPLE_CONFLICT` or `VERSION_CONFLICT`.\n"
           }
         }
       },
@@ -7678,7 +7683,7 @@
                 "$ref": "#/components/schemas/ConditionalPricingError"
               }
             ],
-            "description": "Why this item failed, present only with `outcome: error`:\n`LAST_VERSION_UNDELETABLE`, `VARIANT_UNPINNED`, the codes a condition tuple that cannot\nbe canonicalized raises, `IDENTIFIER_INVALID`, `VALID_FROM_INVALID`, `WRITE_CONFLICT`,\nand the per-item `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH` and\n`ENTITY_NOT_CONDITIONAL`. A missing variant or version is `skipped` instead.\n"
+            "description": "Why this item failed, present only with `outcome: error`:\n`LAST_VERSION_UNDELETABLE`, `VARIANT_UNPINNED`, the codes a condition tuple that cannot\nbe canonicalized raises, `IDENTIFIER_INVALID`, `VALID_FROM_INVALID`, `WRITE_CONFLICT`,\nand the per-item `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH`, `ENTITY_SOFT_DELETED` and\n`ENTITY_NOT_CONDITIONAL`. A missing variant or version is `skipped` instead.\n"
           }
         }
       },
@@ -7863,6 +7868,42 @@
                         "type": "string",
                         "description": "The entity type that id belongs to. Where it is a conditional entity type,\nit is the slug to send instead.\n",
                         "example": "product"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "description": "The entity is soft-deleted. A soft-deleted entity can be restored until it is\nhard-deleted, and restoring it brings its variants back unchanged; once it is\nhard-deleted, the same request answers `ENTITY_NOT_FOUND`. Only the entity the request addresses\nis refused: an entity it references is still returned when a resolve hydrates it.\n",
+                "required": [
+                  "code",
+                  "details"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "ENTITY_SOFT_DELETED"
+                    ]
+                  },
+                  "details": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "schema",
+                      "entity_id"
+                    ],
+                    "properties": {
+                      "schema": {
+                        "type": "string",
+                        "description": "The entity type the request addressed.",
+                        "example": "price"
+                      },
+                      "entity_id": {
+                        "type": "string",
+                        "description": "The conditional entity the request addressed.",
+                        "example": "price-sp26d1yo"
                       }
                     }
                   }
@@ -11566,7 +11607,7 @@
           },
           "warnings": {
             "type": "array",
-            "description": "The entries that could not be answered because an id found nothing. Always present, and\nempty in the ordinary case; an entry the catalog answers \"not offered\" is not in it.\n",
+            "description": "The entries that could not be answered because an id found nothing, and the context\nconditions that were ignored. Always present, and empty in the ordinary case; an entry the\ncatalog answers \"not offered\" is not in it.\n",
             "items": {
               "$ref": "#/components/schemas/CatalogWarning"
             }
@@ -11681,12 +11722,12 @@
         }
       },
       "CatalogWarning": {
-        "description": "An entry the v2 catalog could not answer, and why. `details` is typed per `code`: narrow on\n`code` and the object under it declares exactly the fields that code sends.\n",
+        "description": "An entry the v2 catalog could not answer, or context conditions it ignored, and why. `details`\nis typed per `code`: narrow on `code` and the object under it declares exactly the fields that\ncode sends.\n",
         "oneOf": [
           {
             "type": "object",
             "additionalProperties": false,
-            "description": "An id in the entry finds no entity, or a deleted one. One warning per such id.\n",
+            "description": "An id in the entry the catalog does not find: no entity has it, the entity is deleted or\nnot yet searchable, or it is an entity of another type than the entry asked for. One\nwarning per such id.\n",
             "required": [
               "code",
               "message",
@@ -11735,7 +11776,7 @@
           {
             "type": "object",
             "additionalProperties": false,
-            "description": "An id in the entry names an entity of another type than the entry asked for: a price id\nwhere a product id was expected, or the reverse. One warning per such id.\n",
+            "description": "An entity type's context names conditions that type's schema does not declare. They were\nignored, and that type resolved as if they had been left out. One warning per such type.\n",
             "required": [
               "code",
               "message",
@@ -11745,7 +11786,7 @@
               "code": {
                 "type": "string",
                 "enum": [
-                  "CATALOG_ENTRY_TYPE_MISMATCH"
+                  "CONTEXT_CONDITIONS_IGNORED"
                 ]
               },
               "message": {
@@ -11755,33 +11796,26 @@
                 "type": "object",
                 "additionalProperties": false,
                 "required": [
-                  "product_id",
-                  "mismatched",
-                  "actual_schema"
+                  "entity_type",
+                  "conditions"
                 ],
                 "properties": {
-                  "product_id": {
+                  "entity_type": {
                     "type": "string",
-                    "description": "The entry's product id, as sent.",
-                    "example": "product-heatpump-2027"
-                  },
-                  "price_id": {
-                    "type": "string",
-                    "description": "The entry's price id, as sent. Absent when the entry named none.",
-                    "example": "product-tariff-2027"
-                  },
-                  "mismatched": {
-                    "type": "string",
-                    "description": "Which of the entry's ids names an entity of another type.",
                     "enum": [
                       "product",
-                      "price"
+                      "price",
+                      "coupon"
                     ]
                   },
-                  "actual_schema": {
-                    "type": "string",
-                    "description": "The type the entity turned out to be.",
-                    "example": "product"
+                  "conditions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "customer_segment"
+                    ]
                   }
                 }
               }
