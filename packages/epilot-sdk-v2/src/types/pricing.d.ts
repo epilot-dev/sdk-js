@@ -15063,6 +15063,9 @@ export declare namespace Components {
              * condition matches any value. `{ "exists": false }` selects the variants that leave it
              * unpinned.
              *
+             * A `location` of format `postal_code_city` also takes its postal code alone,
+             * `{ "postal_code": "10115" }`, matching that postal code in any city.
+             *
              * `default` is accepted as an exact boolean and takes no predicate: `true` selects the
              * entity's fallback variant, `false` every variant that is not it. Names beginning with `_`
              * are reserved.
@@ -16696,6 +16699,19 @@ export declare namespace Components {
              * Köln
              */
             city: string;
+        }
+        /**
+         * A listing filter on a `location` of format `postal_code_city` by its postal code alone: it
+         * matches the variants pinned to that postal code, whatever their city. Only a listing filter
+         * takes it; a resolve context must name the city too.
+         *
+         */
+        export interface PostalCodeFilter {
+            /**
+             * example:
+             * 10115
+             */
+            postal_code: string;
         }
         /**
          * Market area details for power
@@ -21572,6 +21588,9 @@ export declare namespace Components {
          * condition matches any value. `{ "exists": false }` selects the variants that leave it
          * unpinned.
          *
+         * A `location` of format `postal_code_city` also takes its postal code alone,
+         * `{ "postal_code": "10115" }`, matching that postal code in any city.
+         *
          * `default` is accepted as an exact boolean and takes no predicate: `true` selects the
          * entity's fallback variant, `false` every variant that is not it. Names beginning with `_`
          * are reserved.
@@ -21592,7 +21611,13 @@ export declare namespace Components {
              * predicate its type does not support.
              *
              */
-            ContextConditionValue;
+            ContextConditionValue | /**
+             * A listing filter on a `location` of format `postal_code_city` by its postal code alone: it
+             * matches the variants pinned to that postal code, whatever their city. Only a listing filter
+             * takes it; a resolve context must name the city too.
+             *
+             */
+            PostalCodeFilter;
         }
         /**
          * A variant's pinned conditions as a reader sees them: the pins the schema declares, plus a
@@ -21701,6 +21726,9 @@ export declare namespace Components {
              * A variant matches only where it pins the condition — unlike `:resolve`, where an unpinned
              * condition matches any value. `{ "exists": false }` selects the variants that leave it
              * unpinned.
+             *
+             * A `location` of format `postal_code_city` also takes its postal code alone,
+             * `{ "postal_code": "10115" }`, matching that postal code in any city.
              *
              * `default` is accepted as an exact boolean and takes no predicate: `true` selects the
              * entity's fallback variant, `false` every variant that is not it. Names beginning with `_`
@@ -25097,6 +25125,11 @@ export interface OperationMethods {
    * $productRecommendations - $productRecommendations
    * 
    * Get a list of product recommendations based on the search parameters.
+   * 
+   * When searching by `catalog_item` or `contract_id`, returns the recommendations whose source is the
+   * current product and price, followed by the ones without a source, which apply to any product. Their
+   * offers never include the current product and price. At most 10, newest first within each group.
+   * 
    */
   '$productRecommendations'(
     parameters?: Parameters<Paths.$ProductRecommendations.HeaderParameters> | null,
@@ -25653,6 +25686,11 @@ export interface PathsDictionary {
      * $productRecommendations - $productRecommendations
      * 
      * Get a list of product recommendations based on the search parameters.
+     * 
+     * When searching by `catalog_item` or `contract_id`, returns the recommendations whose source is the
+     * current product and price, followed by the ones without a source, which apply to any product. Their
+     * offers never include the current product and price. At most 10, newest first within each group.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.$ProductRecommendations.HeaderParameters> | null,
@@ -26082,6 +26120,7 @@ export type PinnedConditions = Components.Schemas.PinnedConditions;
 export type PinnedResolveOptions = Components.Schemas.PinnedResolveOptions;
 export type PortalContext = Components.Schemas.PortalContext;
 export type PostalCodeCity = Components.Schemas.PostalCodeCity;
+export type PostalCodeFilter = Components.Schemas.PostalCodeFilter;
 export type PowerMarketAreaDetails = Components.Schemas.PowerMarketAreaDetails;
 export type PowerMeterType = Components.Schemas.PowerMeterType;
 export type Price = Components.Schemas.Price;
