@@ -204,6 +204,23 @@
         "responses": {}
       }
     },
+    "/v1/identity/operator/clients/{client_id}/organizations/{org_id}/users/{user_id}:subject": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        },
+        {
+          "$ref": "#/components/parameters/OrgIdPath"
+        },
+        {
+          "$ref": "#/components/parameters/UserIdPath"
+        }
+      ],
+      "get": {
+        "operationId": "getUserSubject",
+        "responses": {}
+      }
+    },
     "/v1/identity/session": {
       "get": {
         "operationId": "createIdentitySession",
@@ -262,6 +279,11 @@
       },
       "OrgIdPath": {
         "name": "org_id",
+        "in": "path",
+        "required": true
+      },
+      "UserIdPath": {
+        "name": "user_id",
         "in": "path",
         "required": true
       },
