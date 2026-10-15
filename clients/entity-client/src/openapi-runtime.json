@@ -98,6 +98,14 @@
             "in": "query",
             "name": "draft",
             "deprecated": true
+          },
+          {
+            "in": "query",
+            "name": "base_version"
+          },
+          {
+            "in": "query",
+            "name": "base_updated_at"
           }
         ],
         "requestBody": {
@@ -109,6 +117,17 @@
       },
       "delete": {
         "operationId": "deleteSchema",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/schemas/{slug}/head": {
+      "get": {
+        "operationId": "getSchemaHead",
         "parameters": [
           {
             "$ref": "#/components/parameters/EntitySlugPathParam"
@@ -573,6 +592,18 @@
         "responses": {}
       }
     },
+    "/v1/entity:wipeJobs": {
+      "get": {
+        "operationId": "listWipeJobs",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/entity/activity": {
       "post": {
         "operationId": "createActivity",
@@ -744,6 +775,20 @@
           {
             "in": "query",
             "name": "exclude_activity_groups"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity/{slug}/{id}/summary": {
+      "get": {
+        "operationId": "getEntitySummary",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
           }
         ],
         "responses": {}
@@ -1041,9 +1086,58 @@
         "responses": {}
       }
     },
+    "/v1/entity:import:latest": {
+      "get": {
+        "operationId": "getLatestEntityImport",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "schema",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity:importHistory": {
+      "get": {
+        "operationId": "getEntityImportHistory",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "schema",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/entity:abortImport": {
       "post": {
         "operationId": "abortEntityImport",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "schema",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity:discardImport": {
+      "post": {
+        "operationId": "discardEntityImport",
         "parameters": [
           {
             "in": "query",
