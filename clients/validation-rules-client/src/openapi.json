@@ -2116,6 +2116,9 @@
             "$ref": "#/components/schemas/ExternalValue"
           },
           {
+            "$ref": "#/components/schemas/ParameterValue"
+          },
+          {
             "$ref": "#/components/schemas/RangeValue"
           },
           {
@@ -2124,7 +2127,7 @@
         ]
       },
       "ScalarValue": {
-        "description": "A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value.",
+        "description": "A single comparison value - static, resolved from context, a relative date, an organisation environment variable, an external value, or a parameter the consuming surface supplies.",
         "oneOf": [
           {
             "$ref": "#/components/schemas/StaticValue"
@@ -2140,6 +2143,9 @@
           },
           {
             "$ref": "#/components/schemas/ExternalValue"
+          },
+          {
+            "$ref": "#/components/schemas/ParameterValue"
           }
         ]
       },
@@ -2154,6 +2160,9 @@
           },
           {
             "$ref": "#/components/schemas/ExternalValue"
+          },
+          {
+            "$ref": "#/components/schemas/ParameterValue"
           }
         ]
       },
@@ -2218,6 +2227,31 @@
             "maxLength": 100,
             "pattern": "^[a-zA-Z0-9_-]+$",
             "description": "ID of the result entry within the hook whose value is compared."
+          },
+          "adjust": {
+            "$ref": "#/components/schemas/ValueAdjustment"
+          }
+        }
+      },
+      "ParameterValue": {
+        "type": "object",
+        "description": "A comparison value supplied by the surface that evaluates the rule, identified by a name\nthe rule chooses (e.g. `start_date`). The rule stores the name only. The consuming surface\nbinds the name to a source of its own - a journey binds it to the value of another block -\nand resolves it at evaluation time, so the rule never references the surface's objects\nand stays reusable across journeys and forms.\n\nThe kind a parameter is compared as follows from the field it sits in: `number`, `text`\nor `date` for comparison values, range bounds, adjustment amounts and relative date\noffsets, or a number, string or boolean as an `applies_when` value. One name is compared\nas one kind throughout a rule; a rule using a name as two kinds is rejected at write time.\nA parameter the surface leaves unbound or empty leaves the comparison unresolved.\n",
+        "required": [
+          "source",
+          "name"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "parameter"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "description": "Parameter name, e.g. `start_date`."
           },
           "adjust": {
             "$ref": "#/components/schemas/ValueAdjustment"
@@ -2300,7 +2334,7 @@
             ]
           },
           "value": {
-            "description": "The adjustment amount - a fixed non-negative number, or a reference resolving to a\nnumber at evaluation time. Accepted reference sources: `context` (e.g. a per-contract\npercentage limit) and `environment` (a `Number` organisation environment variable).\nAny other source is rejected at write time, and the reference must not carry its own\n`adjust`.\n",
+            "description": "The adjustment amount - a fixed non-negative number, or a reference resolving to a\nnumber at evaluation time. Accepted reference sources: `context` (e.g. a per-contract\npercentage limit), `environment` (a `Number` organisation environment variable) and\n`parameter` (a number the consuming surface supplies). Any other source is rejected at\nwrite time, and the reference must not carry its own `adjust`.\n",
             "oneOf": [
               {
                 "type": "number",
@@ -2345,7 +2379,7 @@
             ]
           },
           "offset": {
-            "description": "Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.\nEither a fixed whole number, or a reference resolved at evaluation time. Accepted reference source:\n`environment` (a `Number` organisation environment variable). Any other source is rejected at write\ntime, and the reference must not carry an `adjust`. If the referenced value is missing or is not a\nwhole number within ±36500, the comparison is unresolved.\n",
+            "description": "Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.\nEither a fixed whole number, or a reference resolved at evaluation time. Accepted reference sources:\n`environment` (a `Number` organisation environment variable) and `parameter` (a number the consuming\nsurface supplies). Any other source is rejected at write time, and the reference must not carry an\n`adjust`. If the referenced value is missing or is not a whole number within ±36500, the comparison\nis unresolved.\n",
             "oneOf": [
               {
                 "type": "integer",
@@ -2366,11 +2400,19 @@
             ]
           },
           "anchor": {
-            "type": "string",
-            "enum": [
-              "today"
-            ],
-            "default": "today"
+            "description": "The date the offset is applied to. `today` (the default) is the evaluation moment. A\nreference resolves to a date at evaluation time - for example a `parameter` bound to\nanother field's date, so \"at least one day after the start date\" is `offset: 1`,\n`unit: days` on that anchor. Accepted reference sources: `context`, `environment` (a\n`Text` variable holding an ISO 8601 date), `external` (a `date` result) and `parameter`.\nThe reference must not carry an `adjust`; if it does not resolve to a date, the\ncomparison is unresolved.\n",
+            "default": "today",
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "today"
+                ]
+              },
+              {
+                "$ref": "#/components/schemas/ValueReference"
+              }
+            ]
           }
         }
       },
@@ -2616,7 +2658,7 @@
             "description": "Comparison applied to the resolved context value. `isEmpty` / `isNotEmpty`\ntake no `value`; all other operators require one.\n"
           },
           "value": {
-            "description": "Comparison value for binary operators: a static number, string or boolean, or a\nreference resolved at evaluation time. Accepted reference source: `environment` (a\n`Number`, `Text` or `Boolean` organisation environment variable), so a precondition\ncan act as a per-organisation switch or threshold. Any other source is rejected at\nwrite time, and the reference must not carry an `adjust`.\n",
+            "description": "Comparison value for binary operators: a static number, string or boolean, or a\nreference resolved at evaluation time. Accepted reference sources: `environment` (a\n`Number`, `Text` or `Boolean` organisation environment variable), so a precondition\ncan act as a per-organisation switch or threshold, and `parameter` (a value the\nconsuming surface supplies, e.g. another field's answer). Any other source is rejected\nat write time, and the reference must not carry an `adjust`.\n",
             "oneOf": [
               {
                 "type": "number"
@@ -2652,5 +2694,9 @@
       }
     }
   },
-  "servers": []
+  "servers": [
+    {
+      "url": "https://validation-rules.sls.epilot.io"
+    }
+  ]
 }
