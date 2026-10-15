@@ -37,6 +37,11 @@
     "/v1/identity/operator/clients": {
       "get": {
         "operationId": "listClients",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "listClients",
         "description": "List registered partner clients. The client secret is never returned.",
         "tags": [
@@ -77,6 +82,11 @@
       },
       "post": {
         "operationId": "createOidcClient",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "createOidcClient",
         "description": "Create a partner client in `draft` status. The client secret is returned exactly once in this\nresponse and can never be read again; use `rotateClientSecret` to obtain a new one.\n",
         "tags": [
@@ -123,6 +133,11 @@
       ],
       "get": {
         "operationId": "getOidcClient",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "getOidcClient",
         "description": "Read a partner client. The client secret is never returned.",
         "tags": [
@@ -152,6 +167,11 @@
       },
       "put": {
         "operationId": "updateClient",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "updateClient",
         "description": "Replace the mutable configuration of a client. `config_version` must equal the current\nversion (compare-and-swap); a mismatch is rejected with `409`.\n",
         "tags": [
@@ -197,6 +217,11 @@
       },
       "delete": {
         "operationId": "retireClient",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "retireClient",
         "description": "Retire a client. The record is kept as a tombstone, the `client_id` is never reused, every\norganization enablement is revoked and all provider-side artefacts are revoked.\n",
         "tags": [
@@ -233,6 +258,11 @@
       ],
       "post": {
         "operationId": "activateClient",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "activateClient",
         "description": "Activate a `draft` or `suspended` client. Validates that every redirect URI is an absolute\nHTTPS URL without fragment, that `scopes_allowed` contains `openid`, and that the\nauthentication method is `client_secret_basic`.\n",
         "tags": [
@@ -275,6 +305,11 @@
       ],
       "post": {
         "operationId": "suspendClient",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "suspendClient",
         "description": "Immediately block the client for every organization. Provider-side artefacts (codes, tokens,\ngrants) are revoked; the audit trail is kept. Reversible with `activateClient`.\n",
         "tags": [
@@ -324,6 +359,11 @@
       ],
       "post": {
         "operationId": "rotateClientSecret",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "rotateClientSecret",
         "description": "Issue a new client secret. The new secret is returned exactly once. The previous secret\nkeeps working until `previous_secret_expires_at` unless `compromise_mode` is set, in which\ncase it stops working immediately.\n",
         "tags": [
@@ -373,6 +413,11 @@
       ],
       "get": {
         "operationId": "listClientOrganizations",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "listClientOrganizations",
         "description": "List the organizations enabled on a client, including suspended and revoked ones.",
         "tags": [
@@ -407,6 +452,11 @@
       },
       "post": {
         "operationId": "enableClientOrganization",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "enableClientOrganization",
         "description": "Enable an epilot organization on a client, recording the customer's authorization policy\n(version 1). `allowed_scopes` must contain `openid` and be a subset of the client's\n`scopes_allowed`.\n",
         "tags": [
@@ -462,6 +512,11 @@
       ],
       "get": {
         "operationId": "getClientOrganization",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "getClientOrganization",
         "description": "Read one organization enablement.",
         "tags": [
@@ -491,6 +546,11 @@
       },
       "put": {
         "operationId": "updateClientOrganization",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "updateClientOrganization",
         "description": "Record a new version of the customer's authorization policy. `expected_policy_version` must\nequal the current version (compare-and-swap); a mismatch is rejected with `409`.\n",
         "tags": [
@@ -536,6 +596,11 @@
       },
       "delete": {
         "operationId": "revokeClientOrganization",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "revokeClientOrganization",
         "description": "Revoke an organization's enablement. The record is kept as an audited tombstone; future\nauthorizations for this organization fail with `access_denied` and provider-side artefacts\nbound to it are revoked.\n",
         "tags": [
@@ -585,6 +650,11 @@
       ],
       "post": {
         "operationId": "suspendClientOrganization",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "suspendClientOrganization",
         "description": "Temporarily block one organization on this client. Reversible with `activateClientOrganization`.",
         "tags": [
@@ -637,6 +707,11 @@
       ],
       "post": {
         "operationId": "activateClientOrganization",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
         "summary": "activateClientOrganization",
         "description": "Resume a suspended organization on this client. Revoked enablements cannot be re-activated; enabling the organization again (`POST …/organizations`) replaces the revoked entry and continues its policy version.",
         "tags": [
@@ -668,11 +743,90 @@
         }
       }
     },
+    "/v1/identity/operator/clients/{client_id}/organizations/{org_id}/users/{user_id}:subject": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        },
+        {
+          "$ref": "#/components/parameters/OrgIdPath"
+        },
+        {
+          "$ref": "#/components/parameters/UserIdPath"
+        }
+      ],
+      "get": {
+        "operationId": "getUserSubject",
+        "x-epilot-permissions": [
+          {
+            "access": "internal"
+          }
+        ],
+        "summary": "getUserSubject",
+        "description": "The pairwise `sub` this client receives for one epilot user, so the partner can bind the person on its\nside **before** the first sign-in (for example a Babelforce agent provisioned through SCIM with\n`externalId = sub`).\n\nDerived exactly as the token endpoint derives it, never stored:\n`sub = key_version + \".\" + base64url(HMAC-SHA256(key[key_version], sector + \"\\n\" + user_id))`, where the\nsector is the client's `sector_identifier_uri` host or, without one, the host of its first redirect URI.\nThe same inputs always give the same value; it changes only when the client's sector or the active key\nversion changes.\n\nRequires an **active** client (a draft client's sector may still change and would invalidate every binding),\nan organization enablement that is not revoked, and the user being an active member of that organization\n(checked live against user-api). Every read is written to the audit trail: the value is a partner-facing\nidentifier.\n",
+        "tags": [
+          "Operator Organizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "The subject this client sees for the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSubject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "user_id is not the canonical epilot user id (the spelling 360 tokens carry)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Client, enablement or active organization membership not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Client not active, or the organization's enablement is revoked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/identity/session": {
       "get": {
         "operationId": "createIdentitySession",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
         "summary": "createIdentitySession",
-        "description": "Called by the epilot portal through the portal-host proxy after every persisted 360 session.\nValidates the 360 bearer token itself and mirrors it into the `identity_session` cookie\n(`HttpOnly; Secure; Path=/v1/identity`) whose lifetime equals the remaining token lifetime.\nThe cookie is what proves the live 360 session during `completeInteraction`.\n",
+        "description": "Called by the epilot portal through the portal-host proxy after every persisted 360 session.\nValidates the 360 bearer token itself and mirrors it into the `identity_session` cookie\n(`HttpOnly; Secure; Path=/v1/identity`) whose lifetime is the remaining token lifetime, capped at 15 minutes\n(the portal mirrors the credential again on every token refresh and just before a partner sign-in).\nThe cookie is what proves the live 360 session during `completeInteraction`.\n",
         "tags": [
           "Session"
         ],
@@ -686,7 +840,7 @@
             "description": "Session mirrored into the cookie",
             "headers": {
               "Set-Cookie": {
-                "description": "`identity_session=<360 ID token>; HttpOnly; Secure; SameSite=None; Path=/v1/identity; Max-Age=<remaining lifetime>`",
+                "description": "`identity_session=<360 ID token>; HttpOnly; Secure; SameSite=None; Path=/v1/identity; Max-Age=<remaining lifetime, at most 900>`",
                 "schema": {
                   "type": "string"
                 }
@@ -845,6 +999,14 @@
           "$ref": "#/components/schemas/OrgId"
         }
       },
+      "UserIdPath": {
+        "name": "user_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/UserId"
+        }
+      },
       "PartnerKeyQuery": {
         "name": "partner_key",
         "in": "query",
@@ -981,6 +1143,14 @@
         "type": "string",
         "description": "epilot organization id, an opaque case-sensitive string",
         "example": "739224",
+        "minLength": 1,
+        "maxLength": 64,
+        "pattern": "^[A-Za-z0-9_-]+$"
+      },
+      "UserId": {
+        "type": "string",
+        "description": "epilot user id (`custom:ivy_user_id` in a 360 token). A user belongs to exactly one organization.",
+        "example": "100321",
         "minLength": 1,
         "maxLength": 64,
         "pattern": "^[A-Za-z0-9_-]+$"
@@ -1246,10 +1416,11 @@
           },
           "created_by": {
             "type": "string",
-            "description": "Admin-portal identity of the operator who created the client"
+            "description": "Email of the admin-portal operator who created the client (their Cognito identity when the pool holds no email)"
           },
           "updated_by": {
-            "type": "string"
+            "type": "string",
+            "description": "Email of the admin-portal operator who last changed the client"
           }
         }
       },
@@ -1387,7 +1558,8 @@
                 }
               },
               "recorded_by": {
-                "type": "string"
+                "type": "string",
+                "description": "Email of the admin-portal operator who recorded this policy version"
               },
               "recorded_at": {
                 "type": "string",
@@ -1396,23 +1568,6 @@
             }
           }
         ]
-      },
-      "PartnerAccount": {
-        "type": "object",
-        "description": "Optional audit reference to the partner tenant this organization maps to. The partner enforces the mapping.",
-        "required": [
-          "id"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "maxLength": 256
-          },
-          "label": {
-            "type": "string",
-            "maxLength": 256
-          }
-        }
       },
       "OrgEnablementStatus": {
         "type": "string",
@@ -1434,9 +1589,6 @@
           },
           "authorization_policy": {
             "$ref": "#/components/schemas/AuthorizationPolicyInput"
-          },
-          "partner_account": {
-            "$ref": "#/components/schemas/PartnerAccount"
           }
         }
       },
@@ -1454,9 +1606,6 @@
           },
           "authorization_policy": {
             "$ref": "#/components/schemas/AuthorizationPolicyInput"
-          },
-          "partner_account": {
-            "$ref": "#/components/schemas/PartnerAccount"
           }
         }
       },
@@ -1486,9 +1635,6 @@
           "authorization_policy": {
             "$ref": "#/components/schemas/AuthorizationPolicy"
           },
-          "partner_account": {
-            "$ref": "#/components/schemas/PartnerAccount"
-          },
           "created_at": {
             "type": "string",
             "format": "date-time"
@@ -1498,10 +1644,12 @@
             "format": "date-time"
           },
           "created_by": {
-            "type": "string"
+            "type": "string",
+            "description": "Email of the admin-portal operator who enabled the organization"
           },
           "updated_by": {
-            "type": "string"
+            "type": "string",
+            "description": "Email of the admin-portal operator who last changed the enablement"
           }
         }
       },
@@ -1537,7 +1685,44 @@
           "expires_at": {
             "type": "string",
             "format": "date-time",
-            "description": "When the mirrored credential, and therefore the cookie, expires"
+            "description": "When the cookie expires (the mirrored credential's expiry, capped at 15 minutes)"
+          }
+        }
+      },
+      "UserSubject": {
+        "type": "object",
+        "required": [
+          "client_id",
+          "org_id",
+          "user_id",
+          "sub",
+          "key_version",
+          "sector"
+        ],
+        "properties": {
+          "client_id": {
+            "$ref": "#/components/schemas/PartnerClientId"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/OrgId"
+          },
+          "user_id": {
+            "$ref": "#/components/schemas/UserId"
+          },
+          "sub": {
+            "type": "string",
+            "description": "The pairwise subject this client receives for the user, `<key_version>.<base64url digest>`",
+            "example": "v1.dGhpcy1pcy1hLWR1bW15LXN1YmplY3QtdmFsdWUtMDAx"
+          },
+          "key_version": {
+            "type": "string",
+            "description": "Active pairwise key version the value was derived with",
+            "example": "v1"
+          },
+          "sector": {
+            "type": "string",
+            "description": "Pairwise sector the value was derived for (sector_identifier_uri host, else the first redirect host)",
+            "example": "portal.epilot.cloud"
           }
         }
       }
