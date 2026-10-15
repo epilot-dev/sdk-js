@@ -29,18 +29,20 @@ export declare namespace Components {
             operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "isEmpty" | "isNotEmpty";
             /**
              * Comparison value for binary operators: a static number, string or boolean, or a
-             * reference resolved at evaluation time. Accepted reference source: `environment` (a
+             * reference resolved at evaluation time. Accepted reference sources: `environment` (a
              * `Number`, `Text` or `Boolean` organisation environment variable), so a precondition
-             * can act as a per-organisation switch or threshold. Any other source is rejected at
-             * write time, and the reference must not carry an `adjust`.
+             * can act as a per-organisation switch or threshold, and `parameter` (a value the
+             * consuming surface supplies, e.g. another field's answer). Any other source is rejected
+             * at write time, and the reference must not carry an `adjust`.
              *
              */
             value?: /**
              * Comparison value for binary operators: a static number, string or boolean, or a
-             * reference resolved at evaluation time. Accepted reference source: `environment` (a
+             * reference resolved at evaluation time. Accepted reference sources: `environment` (a
              * `Number`, `Text` or `Boolean` organisation environment variable), so a precondition
-             * can act as a per-organisation switch or threshold. Any other source is rejected at
-             * write time, and the reference must not carry an `adjust`.
+             * can act as a per-organisation switch or threshold, and `parameter` (a value the
+             * consuming surface supplies, e.g. another field's answer). Any other source is rejected
+             * at write time, and the reference must not carry an `adjust`.
              *
              */
             number | string | boolean | /**
@@ -155,7 +157,21 @@ export declare namespace Components {
          * in public journeys the dependent conditions are skipped.
          *
          */
-        ExternalValue | /* A lower and upper bound for range operators (between, dateBetween, lengthBetween). Bounds are inclusive. */ RangeValue | /* No comparison value - used by unary operators such as notInFuture / notInPast. */ NoValue;
+        ExternalValue | /**
+         * A comparison value supplied by the surface that evaluates the rule, identified by a name
+         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consuming surface
+         * binds the name to a source of its own - a journey binds it to the value of another block -
+         * and resolves it at evaluation time, so the rule never references the surface's objects
+         * and stays reusable across journeys and forms.
+         *
+         * The kind a parameter is compared as follows from the field it sits in: `number`, `text`
+         * or `date` for comparison values, range bounds, adjustment amounts and relative date
+         * offsets, or a number, string or boolean as an `applies_when` value. One name is compared
+         * as one kind throughout a rule; a rule using a name as two kinds is rejected at write time.
+         * A parameter the surface leaves unbound or empty leaves the comparison unresolved.
+         *
+         */
+        ParameterValue | /* A lower and upper bound for range operators (between, dateBetween, lengthBetween). Bounds are inclusive. */ RangeValue | /* No comparison value - used by unary operators such as notInFuture / notInPast. */ NoValue;
         /**
          * An entity context source the rule needs at evaluation time, referenced by `context`
          * value paths via the schema slug as their first segment (e.g. `contract.installment_amount`).
@@ -585,6 +601,33 @@ export declare namespace Components {
          */
         export type Operator = "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "between" | "dateBefore" | "dateOnOrBefore" | "dateAfter" | "dateOnOrAfter" | "dateBetween" | "notInFuture" | "notInPast" | "contains" | "doesNotContain" | "startsWith" | "endsWith" | "regexMatch" | "lengthBetween" | "maxDigits" | "maxDecimals";
         /**
+         * A comparison value supplied by the surface that evaluates the rule, identified by a name
+         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consuming surface
+         * binds the name to a source of its own - a journey binds it to the value of another block -
+         * and resolves it at evaluation time, so the rule never references the surface's objects
+         * and stays reusable across journeys and forms.
+         *
+         * The kind a parameter is compared as follows from the field it sits in: `number`, `text`
+         * or `date` for comparison values, range bounds, adjustment amounts and relative date
+         * offsets, or a number, string or boolean as an `applies_when` value. One name is compared
+         * as one kind throughout a rule; a rule using a name as two kinds is rejected at write time.
+         * A parameter the surface leaves unbound or empty leaves the comparison unresolved.
+         *
+         */
+        export interface ParameterValue {
+            source: "parameter";
+            /**
+             * Parameter name, e.g. `start_date`.
+             */
+            name: string; // ^[a-z][a-z0-9_]{0,63}$
+            adjust?: /**
+             * Adjusts a context-resolved numeric value before comparison, e.g. "context value plus 10 percent".
+             * Used to express tolerance bands such as "at most 10% above the current instalment amount".
+             *
+             */
+            ValueAdjustment;
+        }
+        /**
          * Condition definition for a pattern-based validation rule (2 levels deep)
          */
         export type PatternCondition = /* Condition definition for a pattern-based validation rule (2 levels deep) */ {
@@ -746,8 +789,8 @@ export declare namespace Components {
          */
         export interface RangeValue {
             source: "range";
-            min: /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value. */ ScalarValue;
-            max: /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value. */ ScalarValue;
+            min: /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, an external value, or a parameter the consuming surface supplies. */ ScalarValue;
+            max: /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, an external value, or a parameter the consuming surface supplies. */ ScalarValue;
         }
         /**
          * Condition definition for a regex-based validation rule (2 levels deep)
@@ -815,18 +858,20 @@ export declare namespace Components {
             source: "relative_date";
             /**
              * Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.
-             * Either a fixed whole number, or a reference resolved at evaluation time. Accepted reference source:
-             * `environment` (a `Number` organisation environment variable). Any other source is rejected at write
-             * time, and the reference must not carry an `adjust`. If the referenced value is missing or is not a
-             * whole number within ±36500, the comparison is unresolved.
+             * Either a fixed whole number, or a reference resolved at evaluation time. Accepted reference sources:
+             * `environment` (a `Number` organisation environment variable) and `parameter` (a number the consuming
+             * surface supplies). Any other source is rejected at write time, and the reference must not carry an
+             * `adjust`. If the referenced value is missing or is not a whole number within ±36500, the comparison
+             * is unresolved.
              *
              */
             offset: /**
              * Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.
-             * Either a fixed whole number, or a reference resolved at evaluation time. Accepted reference source:
-             * `environment` (a `Number` organisation environment variable). Any other source is rejected at write
-             * time, and the reference must not carry an `adjust`. If the referenced value is missing or is not a
-             * whole number within ±36500, the comparison is unresolved.
+             * Either a fixed whole number, or a reference resolved at evaluation time. Accepted reference sources:
+             * `environment` (a `Number` organisation environment variable) and `parameter` (a number the consuming
+             * surface supplies). Any other source is rejected at write time, and the reference must not carry an
+             * `adjust`. If the referenced value is missing or is not a whole number within ±36500, the comparison
+             * is unresolved.
              *
              */
             number | /**
@@ -837,12 +882,38 @@ export declare namespace Components {
              */
             ValueReference;
             unit: "days" | "months" | "years";
-            anchor?: "today";
+            /**
+             * The date the offset is applied to. `today` (the default) is the evaluation moment. A
+             * reference resolves to a date at evaluation time - for example a `parameter` bound to
+             * another field's date, so "at least one day after the start date" is `offset: 1`,
+             * `unit: days` on that anchor. Accepted reference sources: `context`, `environment` (a
+             * `Text` variable holding an ISO 8601 date), `external` (a `date` result) and `parameter`.
+             * The reference must not carry an `adjust`; if it does not resolve to a date, the
+             * comparison is unresolved.
+             *
+             */
+            anchor?: /**
+             * The date the offset is applied to. `today` (the default) is the evaluation moment. A
+             * reference resolves to a date at evaluation time - for example a `parameter` bound to
+             * another field's date, so "at least one day after the start date" is `offset: 1`,
+             * `unit: days` on that anchor. Accepted reference sources: `context`, `environment` (a
+             * `Text` variable holding an ISO 8601 date), `external` (a `date` result) and `parameter`.
+             * The reference must not carry an `adjust`; if it does not resolve to a date, the
+             * comparison is unresolved.
+             *
+             */
+            ("today") | /**
+             * A value resolved at evaluation time instead of written into the rule, identified by
+             * `source`. Each field that accepts a reference lists the sources it allows; a rule using
+             * any other source is rejected when it is saved.
+             *
+             */
+            ValueReference;
         }
         /**
-         * A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value.
+         * A single comparison value - static, resolved from context, a relative date, an organisation environment variable, an external value, or a parameter the consuming surface supplies.
          */
-        export type ScalarValue = /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value. */ /* A fixed comparison value. */ StaticValue | /**
+        export type ScalarValue = /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, an external value, or a parameter the consuming surface supplies. */ /* A fixed comparison value. */ StaticValue | /**
          * A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`
          * or `previous_reading.value`. The first path segment must match the `name` of a declared
          * context requirement.
@@ -875,7 +946,21 @@ export declare namespace Components {
          * in public journeys the dependent conditions are skipped.
          *
          */
-        ExternalValue;
+        ExternalValue | /**
+         * A comparison value supplied by the surface that evaluates the rule, identified by a name
+         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consuming surface
+         * binds the name to a source of its own - a journey binds it to the value of another block -
+         * and resolves it at evaluation time, so the rule never references the surface's objects
+         * and stays reusable across journeys and forms.
+         *
+         * The kind a parameter is compared as follows from the field it sits in: `number`, `text`
+         * or `date` for comparison values, range bounds, adjustment amounts and relative date
+         * offsets, or a number, string or boolean as an `applies_when` value. One name is compared
+         * as one kind throughout a rule; a rule using a name as two kinds is rejected at write time.
+         * A parameter the surface leaves unbound or empty leaves the comparison unresolved.
+         *
+         */
+        ParameterValue;
         /**
          * A fixed comparison value.
          */
@@ -1126,17 +1211,17 @@ export declare namespace Components {
             /**
              * The adjustment amount - a fixed non-negative number, or a reference resolving to a
              * number at evaluation time. Accepted reference sources: `context` (e.g. a per-contract
-             * percentage limit) and `environment` (a `Number` organisation environment variable).
-             * Any other source is rejected at write time, and the reference must not carry its own
-             * `adjust`.
+             * percentage limit), `environment` (a `Number` organisation environment variable) and
+             * `parameter` (a number the consuming surface supplies). Any other source is rejected at
+             * write time, and the reference must not carry its own `adjust`.
              *
              */
             value: /**
              * The adjustment amount - a fixed non-negative number, or a reference resolving to a
              * number at evaluation time. Accepted reference sources: `context` (e.g. a per-contract
-             * percentage limit) and `environment` (a `Number` organisation environment variable).
-             * Any other source is rejected at write time, and the reference must not carry its own
-             * `adjust`.
+             * percentage limit), `environment` (a `Number` organisation environment variable) and
+             * `parameter` (a number the consuming surface supplies). Any other source is rejected at
+             * write time, and the reference must not carry its own `adjust`.
              *
              */
             number | /**
@@ -1199,7 +1284,21 @@ export declare namespace Components {
          * in public journeys the dependent conditions are skipped.
          *
          */
-        ExternalValue;
+        ExternalValue | /**
+         * A comparison value supplied by the surface that evaluates the rule, identified by a name
+         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consuming surface
+         * binds the name to a source of its own - a journey binds it to the value of another block -
+         * and resolves it at evaluation time, so the rule never references the surface's objects
+         * and stays reusable across journeys and forms.
+         *
+         * The kind a parameter is compared as follows from the field it sits in: `number`, `text`
+         * or `date` for comparison values, range bounds, adjustment amounts and relative date
+         * offsets, or a number, string or boolean as an `applies_when` value. One name is compared
+         * as one kind throughout a rule; a rule using a name as two kinds is rejected at write time.
+         * A parameter the surface leaves unbound or empty leaves the comparison unresolved.
+         *
+         */
+        ParameterValue;
     }
 }
 export declare namespace Paths {
@@ -1707,6 +1806,7 @@ export type NumericFactCondition = Components.Schemas.NumericFactCondition;
 export type NumericNestedCondition = Components.Schemas.NumericNestedCondition;
 export type NumericRuleType = Components.Schemas.NumericRuleType;
 export type Operator = Components.Schemas.Operator;
+export type ParameterValue = Components.Schemas.ParameterValue;
 export type PatternCondition = Components.Schemas.PatternCondition;
 export type PatternFactCondition = Components.Schemas.PatternFactCondition;
 export type PatternNestedCondition = Components.Schemas.PatternNestedCondition;

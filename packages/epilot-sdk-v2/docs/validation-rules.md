@@ -1,5 +1,6 @@
 # Validation Rules API
 
+- **Base URL:** `https://validation-rules.sls.epilot.io`
 - **Full API Docs:** [https://docs.epilot.io/api/validation-rules](https://docs.epilot.io/api/validation-rules)
 
 ## Usage
@@ -59,6 +60,7 @@ const { data } = await validationRulesClient.getValidationRules(...)
 - [`ValueReference`](#valuereference)
 - [`EnvironmentValue`](#environmentvalue)
 - [`ExternalValue`](#externalvalue)
+- [`ParameterValue`](#parametervalue)
 - [`StaticValue`](#staticvalue)
 - [`ContextValue`](#contextvalue)
 - [`ValueAdjustment`](#valueadjustment)
@@ -1737,6 +1739,10 @@ type ComparisonRuleType = {
       adjust?: { ... }
     } | {
       source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
       min: { ... }
       max: { ... }
     } | {
@@ -1789,9 +1795,31 @@ type Condition = {
       hook_id: { ... }
       result_id: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
     }
     unit: "days" | "months" | "years"
-    anchor?: "today"
+    anchor?: "today" | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }
   } | {
     source: "environment"
     key: string
@@ -1813,6 +1841,15 @@ type Condition = {
       rounding?: { ... }
     }
   } | {
+    source: "parameter"
+    name: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
     source: "range"
     min: {
       source: { ... }
@@ -1827,37 +1864,6 @@ type Condition = {
       unit: { ... }
       anchor?: { ... }
     } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      app_id: { ... }
-      hook_id: { ... }
-      result_id: { ... }
-      adjust?: { ... }
-    }
-    max: {
-      source: { ... }
-      data: { ... }
-    } | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      offset: { ... }
-      unit: { ... }
-      anchor?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      app_id: { ... }
-      hook_id: { ... }
-      result_id: { ... }
   // ...
 }
 ```
@@ -1900,6 +1906,10 @@ type ConditionValue = {
       hook_id: { ... }
       result_id: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
     }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
@@ -1935,56 +1945,52 @@ type ConditionValue = {
       direction: { ... }
       rounding?: { ... }
     }
+  } | {
+    source: "parameter"
+    name: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
   }
   unit: "days" | "months" | "years"
-  anchor?: "today"
-} | {
-  source: "environment"
-  key: string
-  adjust?: {
-    type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      app_id: { ... }
-      hook_id: { ... }
-      result_id: { ... }
-      adjust?: { ... }
+  anchor?: "today" | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
     }
-    direction: "increase" | "decrease"
-    rounding?: "up" | "down"
-  }
-} | {
-  source: "external"
-  app_id: string
-  hook_id: string
-  result_id: string
-  adjust?: {
-    type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
+  } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
   // ...
 }
 ```
 
 ### `ScalarValue`
 
-A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value.
+A single comparison value - static, resolved from context, a relative date, an organisation environment variable, an external value, or a parameter the consuming surface supplies.
 
 ```ts
 type ScalarValue = {
@@ -2009,6 +2015,10 @@ type ScalarValue = {
       hook_id: { ... }
       result_id: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
     }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
@@ -2044,49 +2054,45 @@ type ScalarValue = {
       direction: { ... }
       rounding?: { ... }
     }
+  } | {
+    source: "parameter"
+    name: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
   }
   unit: "days" | "months" | "years"
-  anchor?: "today"
-} | {
-  source: "environment"
-  key: string
-  adjust?: {
-    type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      app_id: { ... }
-      hook_id: { ... }
-      result_id: { ... }
-      adjust?: { ... }
+  anchor?: "today" | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
     }
-    direction: "increase" | "decrease"
-    rounding?: "up" | "down"
-  }
-} | {
-  source: "external"
-  app_id: string
-  hook_id: string
-  result_id: string
-  adjust?: {
-    type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
+  } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
   // ...
 }
 ```
@@ -2118,6 +2124,10 @@ type ValueReference = {
       hook_id: { ... }
       result_id: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
     }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
@@ -2140,6 +2150,10 @@ type ValueReference = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
       adjust?: { ... }
     }
     direction: "increase" | "decrease"
@@ -2166,10 +2180,32 @@ type ValueReference = {
       hook_id: { ... }
       result_id: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
     }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
   }
+} | {
+  source: "parameter"
+  name: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+  // ...
 }
 ```
 
@@ -2201,6 +2237,10 @@ type EnvironmentValue = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
       adjust?: { ... }
     }
     direction: "increase" | "decrease"
@@ -2237,6 +2277,48 @@ type ExternalValue = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }
+    direction: "increase" | "decrease"
+    rounding?: "up" | "down"
+  }
+}
+```
+
+### `ParameterValue`
+
+A comparison value supplied by the surface that evaluates the rule, identified by a name
+the rule chooses (e.g. `start_date`). The rule stores the name only. The consuming surface
+binds the name to a source of its own - a journey binds it to the value of another block -
+and resolves it at evaluation
+
+```ts
+type ParameterValue = {
+  source: "parameter"
+  name: string
+  adjust?: {
+    type: "percent" | "absolute"
+    value: number | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
       adjust?: { ... }
     }
     direction: "increase" | "decrease"
@@ -2283,6 +2365,10 @@ type ContextValue = {
       hook_id: { ... }
       result_id: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
     }
     direction: "increase" | "decrease"
     rounding?: "up" | "down"
@@ -2322,6 +2408,15 @@ type ValueAdjustment = {
     app_id: string
     hook_id: string
     result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "parameter"
+    name: string
     adjust?: {
       type: { ... }
       value: { ... }
@@ -2370,9 +2465,56 @@ type RelativeDateValue = {
       direction: { ... }
       rounding?: { ... }
     }
+  } | {
+    source: "parameter"
+    name: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
   }
   unit: "days" | "months" | "years"
-  anchor?: "today"
+  anchor?: "today" | {
+    source: "context"
+    path: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "environment"
+    key: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "external"
+    app_id: string
+    hook_id: string
+    result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "parameter"
+    name: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  }
 }
 ```
 
@@ -2411,9 +2553,31 @@ type RangeValue = {
       hook_id: { ... }
       result_id: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
     }
     unit: "days" | "months" | "years"
-    anchor?: "today"
+    anchor?: "today" | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }
   } | {
     source: "environment"
     key: string
@@ -2428,6 +2592,15 @@ type RangeValue = {
     app_id: string
     hook_id: string
     result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "parameter"
+    name: string
     adjust?: {
       type: { ... }
       value: { ... }
@@ -2450,37 +2623,6 @@ type RangeValue = {
   } | {
     source: "relative_date"
     offset: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      app_id: { ... }
-      hook_id: { ... }
-      result_id: { ... }
-      adjust?: { ... }
-    }
-    unit: "days" | "months" | "years"
-    anchor?: "today"
-  } | {
-    source: "environment"
-    key: string
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
-  } | {
-    source: "external"
-    app_id: string
-    hook_id: string
-    result_id: string
-    adjust?: {
   // ...
 }
 ```
@@ -2578,6 +2720,10 @@ type DocumentCondition = {
       hook_id: { ... }
       result_id: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
     }
     max: {
       source: { ... }
@@ -2600,6 +2746,10 @@ type DocumentCondition = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
       adjust?: { ... }
     }
   } | {
@@ -2666,9 +2816,31 @@ type DocumentConditionValue = {
       hook_id: { ... }
       result_id: { ... }
       adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
     }
     unit: "days" | "months" | "years"
-    anchor?: "today"
+    anchor?: "today" | {
+      source: { ... }
+      path: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      key: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      app_id: { ... }
+      hook_id: { ... }
+      result_id: { ... }
+      adjust?: { ... }
+    } | {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }
   } | {
     source: "environment"
     key: string
@@ -2689,6 +2861,15 @@ type DocumentConditionValue = {
       direction: { ... }
       rounding?: { ... }
     }
+  } | {
+    source: "parameter"
+    name: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
   }
   max: {
     source: "static"
@@ -2702,37 +2883,6 @@ type DocumentConditionValue = {
       direction: { ... }
       rounding?: { ... }
     }
-  } | {
-    source: "relative_date"
-    offset: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      app_id: { ... }
-      hook_id: { ... }
-      result_id: { ... }
-      adjust?: { ... }
-    }
-    unit: "days" | "months" | "years"
-    anchor?: "today"
-  } | {
-    source: "environment"
-    key: string
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
-  } | {
-    source: "external"
-    app_id: string
   // ...
 }
 ```
@@ -2797,6 +2947,15 @@ type AppliesWhen = {
     app_id: string
     hook_id: string
     result_id: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  } | {
+    source: "parameter"
+    name: string
     adjust?: {
       type: { ... }
       value: { ... }
