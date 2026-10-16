@@ -3783,6 +3783,37 @@ export declare namespace Components {
              * contact
              */
             schema: string;
+            /**
+             * Attribute names (text, email or number) used to match rows to existing entities, combined with AND.
+             * Use `["_id"]` to match by entity id only. Empty by default, which keeps the current behaviour.
+             *
+             * example:
+             * [
+             *   "email"
+             * ]
+             */
+            unique_key?: [
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+            /**
+             * Report the outcome of every row without writing any entities.
+             */
+            dry_run?: boolean;
+            /**
+             * The job id of a completed dry run that this import commits. Cannot be combined with `dry_run`.
+             */
+            dry_run_job_id?: string;
+            /**
+             * Write committed rows as normal creates and updates: they emit entity events, so automations
+             * run, and each entity gets its activities. Off by default, when imported rows trigger no
+             * automations. Cannot be combined with `dry_run: true`.
+             *
+             */
+            trigger_automations?: boolean;
         }
         /**
          * example:
@@ -4605,6 +4636,12 @@ export declare namespace Components {
              */
             draft?: boolean;
             /**
+             * When true, the entity builder requires a change comment before saving a new version of this schema. Absent is treated as false. Enforced by the builder UI only; the API does not reject schema writes without a comment.
+             * example:
+             * false
+             */
+            require_change_comment?: boolean;
+            /**
              * example:
              * person
              */
@@ -5136,6 +5173,12 @@ export declare namespace Components {
              * false
              */
             draft?: boolean;
+            /**
+             * When true, the entity builder requires a change comment before saving a new version of this schema. Absent is treated as false. Enforced by the builder UI only; the API does not reject schema writes without a comment.
+             * example:
+             * false
+             */
+            require_change_comment?: boolean;
             /**
              * example:
              * person
@@ -5768,6 +5811,23 @@ export declare namespace Components {
          * contact
          */
         export type EntitySlug = string; // ^[a-zA-Z0-9_-]+$
+        /**
+         * Latest AI generated summary of an entity
+         */
+        export interface EntitySummary {
+            /**
+             * Markdown summary
+             */
+            summary: string;
+            variant: "short" | "detailed" | "action_points";
+            /**
+             * ai-agents-api execution that generated the summary. Feedback is keyed by it.
+             * example:
+             * 7b4cfc0f-1d5e-4f3a-9b4a-2c7d1f9e8a10
+             */
+            execution_id: string;
+            created_at: string; // date-time
+        }
         export interface EntityTableFilterOption {
             /**
              * The type of filter option
@@ -6898,6 +6958,213 @@ export declare namespace Components {
             _relations: {
                 entity_id: EntityId /* uuid */;
             }[];
+        }
+        /**
+         * Machine readable reason of a failed job. `failure_reason` holds the human text.
+         * - `invalid_csv_bad_headers`: the file has neither a `_schema` nor an `_id` column
+         * - `dry_run_required`, `dry_run_mismatch`, `dry_run_expired`: the dry-run rule rejected the commit before any row
+         * - `import_file_changed`: the file was replaced after the pre-scan
+         * - `prescan_missing`: the job cannot be continued after an update
+         * - `import_too_large`: the file has more rows than a single job can report on
+         * - `token_expired`: the session that started the job expired before it finished
+         * - `max_duration_exceeded`: the job ran longer than allowed
+         * - `no_progress`: consecutive runs made no progress
+         * - `internal_error`: an unexpected error ended the job
+         *
+         */
+        export type ImportFailureCode = "invalid_csv_bad_headers" | "dry_run_required" | "dry_run_mismatch" | "dry_run_expired" | "import_file_changed" | "prescan_missing" | "import_too_large" | "token_expired" | "max_duration_exceeded" | "no_progress" | "internal_error";
+        /**
+         * Rows of an import job that share one reason not to be written.
+         */
+        export interface ImportIssue {
+            /**
+             * `blocking` for rows with the outcome `error`, `warning` for the `skipped_*` outcomes.
+             *
+             */
+            severity: "blocking" | "warning";
+            /**
+             * Blocking: the row reason's text before its first `: `, one issue per `; `-separated part, e.g.
+             * `Invalid date for birthdate` or `Unknown purpose id`. Warning: the outcome, e.g. `skipped_duplicate_in_file`.
+             *
+             */
+            reason: string;
+            /**
+             * The column the reason names (`… for <column>` or `… in <column>`), if any.
+             */
+            column?: string;
+            /**
+             * Number of rows with this issue.
+             */
+            count: number;
+            /**
+             * The first (at most 5) row numbers with this issue, 1-based data rows as in the report.
+             */
+            example_rows: number[];
+        }
+        /**
+         * One import job (import or dry run) in the import history of a schema.
+         */
+        export interface ImportJobSummary {
+            /**
+             * The ID of the import job, as returned in `jobPollId`. Poll it to resume the job.
+             */
+            job_id: string;
+            schema: string;
+            status: "PROCESSING" | "COMPLETED" | "FAILED" | "CANCELLED";
+            dry_run: boolean;
+            trigger_automations?: boolean;
+            /**
+             * User id of whoever started the job.
+             */
+            started_by?: string;
+            started_at: string; // date-time
+            finished_at?: string; // date-time
+            /**
+             * Name of the imported file, for display.
+             */
+            file_name?: string;
+            total?: number;
+            importedEntitiesCount?: number;
+            failedEntitiesCount?: number;
+            outcome_counts?: /* Number of rows per outcome, in the order the outcomes are evaluated. */ ImportRowOutcomeCounts;
+            failure_code?: /**
+             * Machine readable reason of a failed job. `failure_reason` holds the human text.
+             * - `invalid_csv_bad_headers`: the file has neither a `_schema` nor an `_id` column
+             * - `dry_run_required`, `dry_run_mismatch`, `dry_run_expired`: the dry-run rule rejected the commit before any row
+             * - `import_file_changed`: the file was replaced after the pre-scan
+             * - `prescan_missing`: the job cannot be continued after an update
+             * - `import_too_large`: the file has more rows than a single job can report on
+             * - `token_expired`: the session that started the job expired before it finished
+             * - `max_duration_exceeded`: the job ran longer than allowed
+             * - `no_progress`: consecutive runs made no progress
+             * - `internal_error`: an unexpected error ended the job
+             *
+             */
+            ImportFailureCode;
+            unique_key?: string[];
+        }
+        /**
+         * Progress of an import job. The fields `dry_run`, `unique_key`, `outcome_counts`, `report_url`,
+         * `S3Reference` and `started_by` are only set for jobs started with `unique_key`, `dry_run` or `dry_run_job_id`. For those,
+         * `importedEntitiesCount` is `create` plus `update` and `failedEntitiesCount` counts `error` rows only.
+         *
+         */
+        export interface ImportProgress {
+            /**
+             * The ID of the import job.
+             */
+            jobPollId?: string;
+            /**
+             * Whether committed rows of the job trigger automations.
+             */
+            trigger_automations?: boolean;
+            /**
+             * User id of whoever started the job. A finished job is only returned by `entity:import:latest`
+             * to this user, and only this user can commit or discard a dry run.
+             *
+             */
+            started_by?: string;
+            status?: "PROCESSING" | "COMPLETED" | "FAILED" | "CANCELLED";
+            /**
+             * Number of data rows in the file, once known.
+             */
+            total?: number;
+            importedEntitiesCount?: number;
+            failedEntitiesCount?: number;
+            importedEntitiesUrl?: string;
+            failedEntitiesUrl?: string;
+            updated_at?: string; // date-time
+            failure_reason?: string;
+            failure_code?: /**
+             * Machine readable reason of a failed job. `failure_reason` holds the human text.
+             * - `invalid_csv_bad_headers`: the file has neither a `_schema` nor an `_id` column
+             * - `dry_run_required`, `dry_run_mismatch`, `dry_run_expired`: the dry-run rule rejected the commit before any row
+             * - `import_file_changed`: the file was replaced after the pre-scan
+             * - `prescan_missing`: the job cannot be continued after an update
+             * - `import_too_large`: the file has more rows than a single job can report on
+             * - `token_expired`: the session that started the job expired before it finished
+             * - `max_duration_exceeded`: the job ran longer than allowed
+             * - `no_progress`: consecutive runs made no progress
+             * - `internal_error`: an unexpected error ended the job
+             *
+             */
+            ImportFailureCode;
+            abortable?: boolean;
+            dry_run?: boolean;
+            unique_key?: string[];
+            outcome_counts?: /* Number of rows per outcome, in the order the outcomes are evaluated. */ ImportRowOutcomeCounts;
+            /**
+             * Download link of the per-row report (CSV, UTF-8 with BOM).
+             */
+            report_url?: string;
+            /**
+             * The imported file. Send it back with `dry_run_job_id` to commit a dry run.
+             */
+            S3Reference?: {
+                bucket?: string;
+                key?: string;
+            };
+            /**
+             * The rows that are not written, grouped by why: blocking issues first, then by count, at most 20.
+             * The warnings always get a place. Blocking issues beyond the 50 tracked are counted as `Other errors`.
+             * Only for jobs started with `unique_key`, `dry_run` or `dry_run_job_id`.
+             *
+             */
+            issues?: [
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?,
+                /* Rows of an import job that share one reason not to be written. */ ImportIssue?
+            ];
+            /**
+             * What the job is doing now: `scanning` the file (pre-scan), running the `dry_run` or `importing`
+             * rows, `finalizing` the report, or `done` (every terminal status).
+             *
+             */
+            phase?: "scanning" | "dry_run" | "importing" | "finalizing" | "done";
+            /**
+             * Refreshed at every phase change and at least every few seconds while the job makes progress
+             * (rows or pre-scan). A PROCESSING job whose heartbeat is minutes old may be stuck.
+             *
+             */
+            heartbeat_at?: string; // date-time
+            /**
+             * When the job started.
+             */
+            started_at?: string; // date-time
+            /**
+             * When the job ended; set on a terminal status.
+             */
+            finished_at?: string; // date-time
+        }
+        /**
+         * Number of rows per outcome, in the order the outcomes are evaluated.
+         */
+        export interface ImportRowOutcomeCounts {
+            error?: number;
+            skipped_empty_key?: number;
+            skipped_duplicate_in_file?: number;
+            skipped_id_not_found?: number;
+            skipped_ambiguous?: number;
+            create?: number;
+            unchanged?: number;
+            update?: number;
         }
         /**
          * No UI representation
@@ -11510,10 +11777,51 @@ export declare namespace Components {
              */
             type: "string" | "number" | "date" | "daterange" | "boolean";
         }
+        export interface SchemaHead {
+            slug: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
+            id?: string;
+            version: number;
+            updated_at?: string; // date-time
+            /**
+             * Who saved this version
+             */
+            created_by?: string;
+        }
         /**
          * Generated uuid for schema
          */
         export type SchemaId = string; // uuid
+        export interface SchemaVersionConflictError {
+            /**
+             * example:
+             * 409
+             */
+            status?: number;
+            /**
+             * example:
+             * SchemaVersionConflict
+             */
+            error?: string;
+            message?: string;
+            /**
+             * The version the rejected save was made on top of
+             */
+            base_version?: number;
+            /**
+             * The version saves currently land on top of
+             */
+            current_version?: number;
+            current_updated_at?: string; // date-time
+            /**
+             * Who saved the current version
+             */
+            current_created_by?: string;
+        }
         /**
          * A subset of simplified Elasticsearch query clauses. The default operator is a logical AND. Use nested $and, $or, $not to combine filters using different logical operators.
          * example:
@@ -13632,6 +13940,61 @@ export declare namespace Components {
             type: "relation_user";
             multiple?: boolean;
         }
+        /**
+         * A request to wipe entity data of an organization, and its progress
+         */
+        export interface WipeJob {
+            id: string;
+            /**
+             * The schemas being wiped. null means all schemas.
+             */
+            schemas: /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            EntitySlug /* ^[a-zA-Z0-9_-]+$ */[] | null;
+            status: "running" | "succeeded" | "failed";
+            current_step: "SANITY_CHECK" | "DELETE_ELASTIC_INDICES" | "DELETE_DYNAMODB_ENTITIES" | "DELETE_DYNAMODB_RELATIONS" | "DELETE_DYNAMODB_ACTIVITIES" | "DELETE_CLICKHOUSE_ENTITIES" | "DELETE_CLICKHOUSE_ENTITY_OPERATIONS" | "DELETE_S3_FILES" | "SUCCESS" | "FAIL";
+            created_at: string; // date-time
+            updated_at: string; // date-time
+            finished_at?: string; // date-time
+            created_by?: {
+                user_id?: string;
+                email?: string;
+                display_name?: string;
+            };
+            /**
+             * Number of entities per schema at the time the wipe was requested
+             */
+            entity_totals: {
+                [name: string]: number;
+            };
+            /**
+             * Sum of entity_totals
+             */
+            total_entities: number;
+            progress: {
+                indices_deleted?: number;
+                entities_deleted?: number;
+                relations_deleted?: number;
+                activities_deleted?: number;
+            };
+            error?: string;
+        }
+        export interface WipeJobConflictError {
+            /**
+             * example:
+             * 409
+             */
+            status?: number;
+            error?: string;
+            message: string;
+            /**
+             * Requested schemas that are already being wiped
+             */
+            conflicting_schemas: string[];
+        }
     }
 }
 export declare namespace Paths {
@@ -14570,6 +14933,47 @@ export declare namespace Paths {
             Components.Responses.TooManyRequestsError;
         }
     }
+    namespace DiscardEntityImport {
+        namespace Parameters {
+            export type JobId = /**
+             * The unique identifier of the import job.
+             * example:
+             * abc123
+             */
+            Components.Schemas.ExportJobId;
+            export type Schema = string;
+        }
+        export interface QueryParameters {
+            job_id: Parameters.JobId;
+            schema: Parameters.Schema;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * `CANCELLED`
+                 */
+                status?: string;
+                jobPollId?: string;
+            }
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
+        }
+    }
     namespace DismissChangeset {
         namespace Parameters {
             export type Attribute = string;
@@ -14951,6 +15355,61 @@ export declare namespace Paths {
                 total?: number;
                 results?: Components.Schemas.ActivityItem[];
             }
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+        }
+    }
+    namespace GetEntityImportHistory {
+        namespace Parameters {
+            export type Limit = number;
+            export type Schema = string;
+        }
+        export interface QueryParameters {
+            schema: Parameters.Schema;
+            limit?: Parameters.Limit;
+        }
+        namespace Responses {
+            export interface $200 {
+                jobs: /* One import job (import or dry run) in the import history of a schema. */ Components.Schemas.ImportJobSummary[];
+            }
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
+        }
+    }
+    namespace GetEntitySummary {
+        namespace Parameters {
+            export type Id = Components.Schemas.EntityId /* uuid */;
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /* Latest AI generated summary of an entity */ Components.Schemas.EntitySummary;
             export type $404 = /**
              * A generic error returned by the API
              * example:
@@ -15382,6 +15841,38 @@ export declare namespace Paths {
             }
         }
     }
+    namespace GetLatestEntityImport {
+        namespace Parameters {
+            export type Schema = string;
+        }
+        export interface QueryParameters {
+            schema: Parameters.Schema;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * Progress of an import job. The fields `dry_run`, `unique_key`, `outcome_counts`, `report_url`,
+             * `S3Reference` and `started_by` are only set for jobs started with `unique_key`, `dry_run` or `dry_run_job_id`. For those,
+             * `importedEntitiesCount` is `create` plus `update` and `failedEntitiesCount` counts `error` rows only.
+             *
+             */
+            Components.Schemas.ImportProgress;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
+        }
+    }
     namespace GetRelatedEntitiesCount {
         namespace Parameters {
             export type ExcludeSchemas = /**
@@ -15805,6 +16296,40 @@ export declare namespace Paths {
             Components.Responses.NotFoundError;
         }
     }
+    namespace GetSchemaHead {
+        namespace Parameters {
+            export type Slug = /**
+             * URL-friendly identifier for the entity schema
+             * example:
+             * contact
+             */
+            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.SchemaHead;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found"
+             * }
+             */
+            Components.Responses.NotFoundError;
+            export type $429 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 429,
+             *   "error": "Too many requests. Try again later."
+             * }
+             */
+            Components.Responses.TooManyRequestsError;
+        }
+    }
     namespace GetSchemaVersions {
         namespace Parameters {
             export type DraftsFrom = number;
@@ -15995,8 +16520,13 @@ export declare namespace Paths {
         }
         export type RequestBody = /* The parameters for importing entities. */ Components.Schemas.EntityImportParams;
         namespace Responses {
-            export interface $201 {
-            }
+            export type $201 = /**
+             * Progress of an import job. The fields `dry_run`, `unique_key`, `outcome_counts`, `report_url`,
+             * `S3Reference` and `started_by` are only set for jobs started with `unique_key`, `dry_run` or `dry_run_job_id`. For those,
+             * `importedEntitiesCount` is `create` plus `update` and `failedEntitiesCount` counts `error` rows only.
+             *
+             */
+            Components.Schemas.ImportProgress;
             export type $429 = /**
              * A generic error returned by the API
              * example:
@@ -16210,6 +16740,19 @@ export declare namespace Paths {
             }
         }
     }
+    namespace ListWipeJobs {
+        namespace Parameters {
+            export type Limit = number;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+        }
+        namespace Responses {
+            export interface $200 {
+                results: /* A request to wipe entity data of an organization, and its progress */ Components.Schemas.WipeJob[];
+            }
+        }
+    }
     namespace PatchEntity {
         namespace Parameters {
             export type ActivityId = /**
@@ -16346,6 +16889,8 @@ export declare namespace Paths {
     }
     namespace PutSchema {
         namespace Parameters {
+            export type BaseUpdatedAt = string; // date-time
+            export type BaseVersion = number;
             export type Draft = boolean;
             export type Slug = /**
              * URL-friendly identifier for the entity schema
@@ -16359,10 +16904,13 @@ export declare namespace Paths {
         }
         export interface QueryParameters {
             draft?: Parameters.Draft;
+            base_version?: Parameters.BaseVersion;
+            base_updated_at?: Parameters.BaseUpdatedAt /* date-time */;
         }
         export type RequestBody = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchema;
         namespace Responses {
             export type $200 = /* The "type" of an Entity. Describes the shape. Includes Entity Attributes, Relations and Capabilities. */ Components.Schemas.EntitySchemaItem;
+            export type $409 = Components.Schemas.SchemaVersionConflictError;
             export type $429 = /**
              * A generic error returned by the API
              * example:
@@ -17384,16 +17932,564 @@ export declare namespace Paths {
     }
     namespace WipeAllEntities {
         export interface RequestBody {
-            schemas?: /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
+            /**
+             * Schemas to wipe. Omit to wipe all schemas. An empty array is rejected with 400.
              */
-            Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */[];
+            schemas?: [
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?,
+                /**
+                 * URL-friendly identifier for the entity schema
+                 * example:
+                 * contact
+                 */
+                Components.Schemas.EntitySlug /* ^[a-zA-Z0-9_-]+$ */?
+            ];
         }
         namespace Responses {
-            export interface $201 {
-            }
+            export type $201 = /* A request to wipe entity data of an organization, and its progress */ Components.Schemas.WipeJob;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $409 = Components.Schemas.WipeJobConflictError;
         }
     }
 }
@@ -17456,6 +18552,18 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSchema.Responses.$200>
+  /**
+   * getSchemaHead - getSchemaHead
+   * 
+   * Lightweight lookup of the schema version saves currently land on top of. Meant for editors
+   * to detect that someone else saved while they were editing, without fetching the schema.
+   * 
+   */
+  'getSchemaHead'(
+    parameters?: Parameters<Paths.GetSchemaHead.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSchemaHead.Responses.$200>
   /**
    * getJsonSchema - getJsonSchema
    * 
@@ -17940,12 +19048,30 @@ export interface OperationMethods {
    * 
    * Creates a request to queue the deletion of all entities in the system. This is a destructive operation and should only be used in sandbox environments.
    * 
+   * The request is persisted as a wipe job whose progress can be followed with `listWipeJobs`.
+   * Omit `schemas` to wipe all schemas of the organization. An empty `schemas` array is rejected.
+   * 
+   * Only one wipe can run per schema at a time: a request that overlaps a running wipe
+   * (same schema, or any schema while a wipe of all schemas is running) is rejected with `409`.
+   * Wipe executions are limited to 23 hours so they stop before their 24-hour locks expire.
+   * 
    */
   'wipeAllEntities'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.WipeAllEntities.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.WipeAllEntities.Responses.$201>
+  /**
+   * listWipeJobs - listWipeJobs
+   * 
+   * Lists the most recent wipe jobs of the organization, newest first.
+   * 
+   */
+  'listWipeJobs'(
+    parameters?: Parameters<Paths.ListWipeJobs.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListWipeJobs.Responses.$200>
   /**
    * createActivity - createActivity
    * 
@@ -18025,6 +19151,18 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
+  /**
+   * getEntitySummary - getEntitySummary
+   * 
+   * Get the latest AI generated summary of an entity. Summaries are generated by the
+   * ai-agents-api `skill:entity-summary` and stored here when the execution completes.
+   * 
+   */
+  'getEntitySummary'(
+    parameters?: Parameters<Paths.GetEntitySummary.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEntitySummary.Responses.$200>
   /**
    * getRelations - getRelations
    * 
@@ -18149,6 +19287,33 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ImportEntities.Responses.$201>
   /**
+   * getLatestEntityImport - Get the latest import job of a schema
+   * 
+   * Returns the progress of the latest import job for the organization and schema: the running job,
+   * whoever started it (it blocks every other import of the schema), otherwise the caller's own last
+   * finished job if it finished within the last 24 hours. Used to show the state of an import (or dry
+   * run) that was started earlier.
+   * 
+   */
+  'getLatestEntityImport'(
+    parameters?: Parameters<Paths.GetLatestEntityImport.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetLatestEntityImport.Responses.$200>
+  /**
+   * getEntityImportHistory - List the import jobs of a schema
+   * 
+   * Lists the import jobs (imports and dry runs) of a schema in the organization, newest first: the
+   * running job, if any, then the jobs that ended in the last 30 days. Every caller with access sees
+   * every job. Without jobs the list is empty; this operation does not answer 404.
+   * 
+   */
+  'getEntityImportHistory'(
+    parameters?: Parameters<Paths.GetEntityImportHistory.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetEntityImportHistory.Responses.$200>
+  /**
    * abortEntityImport - Abort a running entity import
    * 
    * Asks a running import to stop. Rows already imported are **kept** - this is a stop, not a
@@ -18167,6 +19332,25 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AbortEntityImport.Responses.$202>
+  /**
+   * discardEntityImport - Discard a finished dry run
+   * 
+   * Discards a dry run that has finished (`COMPLETED`), so it is no longer offered for import.
+   * The job becomes `CANCELLED` and `GET /v1/entity:import:latest` stops returning it as ready.
+   * For a file that requires a dry run (more than 50 rows), an import passing it as
+   * `dry_run_job_id` then fails with `dry_run_required`. The dry run wrote nothing, and its
+   * report stays available.
+   * 
+   * Only the user who ran the dry run can discard it (403 otherwise). Idempotent - discarding an
+   * already discarded dry run answers 200. A running dry run is stopped with
+   * `POST /v1/entity:abortImport` instead.
+   * 
+   */
+  'discardEntityImport'(
+    parameters?: Parameters<Paths.DiscardEntityImport.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DiscardEntityImport.Responses.$200>
   /**
    * listSavedViews - listSavedViews
    * 
@@ -18669,6 +19853,20 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSchema.Responses.$200>
+  }
+  ['/v1/entity/schemas/{slug}/head']: {
+    /**
+     * getSchemaHead - getSchemaHead
+     * 
+     * Lightweight lookup of the schema version saves currently land on top of. Meant for editors
+     * to detect that someone else saved while they were editing, without fetching the schema.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSchemaHead.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSchemaHead.Responses.$200>
   }
   ['/v1/entity/schemas/{slug}/json/schema']: {
     /**
@@ -19193,12 +20391,32 @@ export interface PathsDictionary {
      * 
      * Creates a request to queue the deletion of all entities in the system. This is a destructive operation and should only be used in sandbox environments.
      * 
+     * The request is persisted as a wipe job whose progress can be followed with `listWipeJobs`.
+     * Omit `schemas` to wipe all schemas of the organization. An empty `schemas` array is rejected.
+     * 
+     * Only one wipe can run per schema at a time: a request that overlaps a running wipe
+     * (same schema, or any schema while a wipe of all schemas is running) is rejected with `409`.
+     * Wipe executions are limited to 23 hours so they stop before their 24-hour locks expire.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.WipeAllEntities.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.WipeAllEntities.Responses.$201>
+  }
+  ['/v1/entity:wipeJobs']: {
+    /**
+     * listWipeJobs - listWipeJobs
+     * 
+     * Lists the most recent wipe jobs of the organization, newest first.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListWipeJobs.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListWipeJobs.Responses.$200>
   }
   ['/v1/entity/activity']: {
     /**
@@ -19292,6 +20510,20 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetEntityActivityFeed.Responses.$200>
+  }
+  ['/v1/entity/{slug}/{id}/summary']: {
+    /**
+     * getEntitySummary - getEntitySummary
+     * 
+     * Get the latest AI generated summary of an entity. Summaries are generated by the
+     * ai-agents-api `skill:entity-summary` and stored here when the execution completes.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetEntitySummary.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEntitySummary.Responses.$200>
   }
   ['/v1/entity/{slug}/{id}/relations']: {
     /**
@@ -19430,6 +20662,37 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ImportEntities.Responses.$201>
   }
+  ['/v1/entity:import:latest']: {
+    /**
+     * getLatestEntityImport - Get the latest import job of a schema
+     * 
+     * Returns the progress of the latest import job for the organization and schema: the running job,
+     * whoever started it (it blocks every other import of the schema), otherwise the caller's own last
+     * finished job if it finished within the last 24 hours. Used to show the state of an import (or dry
+     * run) that was started earlier.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetLatestEntityImport.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetLatestEntityImport.Responses.$200>
+  }
+  ['/v1/entity:importHistory']: {
+    /**
+     * getEntityImportHistory - List the import jobs of a schema
+     * 
+     * Lists the import jobs (imports and dry runs) of a schema in the organization, newest first: the
+     * running job, if any, then the jobs that ended in the last 30 days. Every caller with access sees
+     * every job. Without jobs the list is empty; this operation does not answer 404.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetEntityImportHistory.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetEntityImportHistory.Responses.$200>
+  }
   ['/v1/entity:abortImport']: {
     /**
      * abortEntityImport - Abort a running entity import
@@ -19450,6 +20713,27 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AbortEntityImport.Responses.$202>
+  }
+  ['/v1/entity:discardImport']: {
+    /**
+     * discardEntityImport - Discard a finished dry run
+     * 
+     * Discards a dry run that has finished (`COMPLETED`), so it is no longer offered for import.
+     * The job becomes `CANCELLED` and `GET /v1/entity:import:latest` stops returning it as ready.
+     * For a file that requires a dry run (more than 50 rows), an import passing it as
+     * `dry_run_job_id` then fails with `dry_run_required`. The dry run wrote nothing, and its
+     * report stays available.
+     * 
+     * Only the user who ran the dry run can discard it (403 otherwise). Idempotent - discarding an
+     * already discarded dry run answers 200. A running dry run is stopped with
+     * `POST /v1/entity:abortImport` instead.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.DiscardEntityImport.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DiscardEntityImport.Responses.$200>
   }
   ['/v1/entity/views']: {
     /**
@@ -20005,6 +21289,7 @@ export type EntitySearchOptions = Components.Schemas.EntitySearchOptions;
 export type EntitySearchParams = Components.Schemas.EntitySearchParams;
 export type EntitySearchResults = Components.Schemas.EntitySearchResults;
 export type EntitySlug = Components.Schemas.EntitySlug;
+export type EntitySummary = Components.Schemas.EntitySummary;
 export type EntityTableFilterOption = Components.Schemas.EntityTableFilterOption;
 export type EntityTableFilterSearch = Components.Schemas.EntityTableFilterSearch;
 export type EntityValidationError = Components.Schemas.EntityValidationError;
@@ -20037,6 +21322,11 @@ export type GroupHeadline = Components.Schemas.GroupHeadline;
 export type GroupHeadlineWithCompositeID = Components.Schemas.GroupHeadlineWithCompositeID;
 export type HydratedEntity = Components.Schemas.HydratedEntity;
 export type HydratedEntityItem = Components.Schemas.HydratedEntityItem;
+export type ImportFailureCode = Components.Schemas.ImportFailureCode;
+export type ImportIssue = Components.Schemas.ImportIssue;
+export type ImportJobSummary = Components.Schemas.ImportJobSummary;
+export type ImportProgress = Components.Schemas.ImportProgress;
+export type ImportRowOutcomeCounts = Components.Schemas.ImportRowOutcomeCounts;
 export type InternalAttribute = Components.Schemas.InternalAttribute;
 export type InternalUserAttribute = Components.Schemas.InternalUserAttribute;
 export type InvitationEmailAttribute = Components.Schemas.InvitationEmailAttribute;
@@ -20070,7 +21360,9 @@ export type SavedViewId = Components.Schemas.SavedViewId;
 export type SavedViewItem = Components.Schemas.SavedViewItem;
 export type SavedViewPartial = Components.Schemas.SavedViewPartial;
 export type ScalarConditionDefinition = Components.Schemas.ScalarConditionDefinition;
+export type SchemaHead = Components.Schemas.SchemaHead;
 export type SchemaId = Components.Schemas.SchemaId;
+export type SchemaVersionConflictError = Components.Schemas.SchemaVersionConflictError;
 export type SearchFilter = Components.Schemas.SearchFilter;
 export type SearchFilterValue = Components.Schemas.SearchFilterValue;
 export type SearchMappings = Components.Schemas.SearchMappings;
@@ -20094,3 +21386,5 @@ export type TaxonomySearchIncludeArchivedParam = Components.Schemas.TaxonomySear
 export type TaxonomySlug = Components.Schemas.TaxonomySlug;
 export type TextAttribute = Components.Schemas.TextAttribute;
 export type UserRelationAttribute = Components.Schemas.UserRelationAttribute;
+export type WipeJob = Components.Schemas.WipeJob;
+export type WipeJobConflictError = Components.Schemas.WipeJobConflictError;

@@ -48,18 +48,12 @@
                           "agent_id",
                           "binding_id",
                           "version",
-                          "name",
                           "settings",
                           "embed",
                           "created_at",
                           "updated_at"
                         ],
                         "properties": {
-                          "name": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 100
-                          },
                           "agent_id": {
                             "type": "string",
                             "format": "uuid",
@@ -70,7 +64,6 @@
                             "additionalProperties": false,
                             "required": [
                               "allowed_origins",
-                              "organisation_name",
                               "default_locale"
                             ],
                             "properties": {
@@ -83,11 +76,6 @@
                                   "type": "string",
                                   "maxLength": 2048
                                 }
-                              },
-                              "organisation_name": {
-                                "type": "string",
-                                "minLength": 1,
-                                "maxLength": 100
                               },
                               "default_locale": {
                                 "type": "string",
@@ -380,18 +368,12 @@
                     "agent_id",
                     "binding_id",
                     "version",
-                    "name",
                     "settings",
                     "embed",
                     "created_at",
                     "updated_at"
                   ],
                   "properties": {
-                    "name": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 100
-                    },
                     "agent_id": {
                       "type": "string",
                       "format": "uuid",
@@ -402,7 +384,6 @@
                       "additionalProperties": false,
                       "required": [
                         "allowed_origins",
-                        "organisation_name",
                         "default_locale"
                       ],
                       "properties": {
@@ -415,11 +396,6 @@
                             "type": "string",
                             "maxLength": 2048
                           }
-                        },
-                        "organisation_name": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
                         },
                         "default_locale": {
                           "type": "string",
@@ -680,16 +656,10 @@
                 "type": "object",
                 "additionalProperties": false,
                 "required": [
-                  "name",
                   "agent_id",
                   "settings"
                 ],
                 "properties": {
-                  "name": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 100
-                  },
                   "agent_id": {
                     "type": "string",
                     "format": "uuid",
@@ -700,7 +670,6 @@
                     "additionalProperties": false,
                     "required": [
                       "allowed_origins",
-                      "organisation_name",
                       "default_locale"
                     ],
                     "properties": {
@@ -713,11 +682,6 @@
                           "type": "string",
                           "maxLength": 2048
                         }
-                      },
-                      "organisation_name": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 100
                       },
                       "default_locale": {
                         "type": "string",
@@ -889,18 +853,12 @@
                     "agent_id",
                     "binding_id",
                     "version",
-                    "name",
                     "settings",
                     "embed",
                     "created_at",
                     "updated_at"
                   ],
                   "properties": {
-                    "name": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 100
-                    },
                     "agent_id": {
                       "type": "string",
                       "format": "uuid",
@@ -911,7 +869,6 @@
                       "additionalProperties": false,
                       "required": [
                         "allowed_origins",
-                        "organisation_name",
                         "default_locale"
                       ],
                       "properties": {
@@ -924,11 +881,6 @@
                             "type": "string",
                             "maxLength": 2048
                           }
-                        },
-                        "organisation_name": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
                         },
                         "default_locale": {
                           "type": "string",
@@ -1205,18 +1157,12 @@
                     "agent_id",
                     "binding_id",
                     "version",
-                    "name",
                     "settings",
                     "embed",
                     "created_at",
                     "updated_at"
                   ],
                   "properties": {
-                    "name": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 100
-                    },
                     "agent_id": {
                       "type": "string",
                       "format": "uuid",
@@ -1227,7 +1173,6 @@
                       "additionalProperties": false,
                       "required": [
                         "allowed_origins",
-                        "organisation_name",
                         "default_locale"
                       ],
                       "properties": {
@@ -1240,11 +1185,6 @@
                             "type": "string",
                             "maxLength": 2048
                           }
-                        },
-                        "organisation_name": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 100
                         },
                         "default_locale": {
                           "type": "string",
@@ -1508,11 +1448,6 @@
                   "version"
                 ],
                 "properties": {
-                  "name": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 100
-                  },
                   "agent_id": {
                     "type": "string",
                     "format": "uuid",
@@ -1523,7 +1458,6 @@
                     "additionalProperties": false,
                     "required": [
                       "allowed_origins",
-                      "organisation_name",
                       "default_locale"
                     ],
                     "properties": {
@@ -1536,11 +1470,6 @@
                           "type": "string",
                           "maxLength": 2048
                         }
-                      },
-                      "organisation_name": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 100
                       },
                       "default_locale": {
                         "type": "string",
@@ -1808,6 +1737,11 @@
                     "format": "uuid",
                     "nullable": true,
                     "description": "Unsaved design to preview. Omit to keep the saved design; null previews the default design."
+                  },
+                  "demo_customer": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Start the preview as a fictional, verified demo customer (no login, no sign-out). In-chat actions are simulated with demo data and write nothing; the Website Chat frame shows journeys as a simulated hand-off and never loads them."
                   }
                 }
               }
@@ -1844,8 +1778,6 @@
                       "type": "object",
                       "required": [
                         "key",
-                        "organisationName",
-                        "assistantName",
                         "defaultLocale",
                         "locales",
                         "login_methods"
@@ -1854,11 +1786,39 @@
                         "key": {
                           "type": "string"
                         },
-                        "organisationName": {
-                          "type": "string"
+                        "assistant_name": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.",
+                          "properties": {
+                            "de": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100
+                            },
+                            "en": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100
+                            }
+                          }
                         },
-                        "assistantName": {
-                          "type": "string"
+                        "greeting": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.",
+                          "properties": {
+                            "de": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 1000
+                            },
+                            "en": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 1000
+                            }
+                          }
                         },
                         "defaultLocale": {
                           "type": "string",
@@ -2182,8 +2142,6 @@
                   "type": "object",
                   "required": [
                     "key",
-                    "organisationName",
-                    "assistantName",
                     "defaultLocale",
                     "locales",
                     "login_methods"
@@ -2192,11 +2150,39 @@
                     "key": {
                       "type": "string"
                     },
-                    "organisationName": {
-                      "type": "string"
+                    "assistant_name": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.",
+                      "properties": {
+                        "de": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "en": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        }
+                      }
                     },
-                    "assistantName": {
-                      "type": "string"
+                    "greeting": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.",
+                      "properties": {
+                        "de": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1000
+                        },
+                        "en": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1000
+                        }
+                      }
                     },
                     "defaultLocale": {
                       "type": "string",
@@ -2598,7 +2584,7 @@
         },
         "responses": {
           "201": {
-            "description": "An isolated anonymous conversation",
+            "description": "An isolated conversation. Anonymous, except that an Agent Builder demo customer preview starts verified (access method demo).",
             "content": {
               "application/json": {
                 "schema": {
@@ -2625,8 +2611,6 @@
                       "type": "object",
                       "required": [
                         "key",
-                        "organisationName",
-                        "assistantName",
                         "defaultLocale",
                         "locales",
                         "login_methods"
@@ -2635,11 +2619,39 @@
                         "key": {
                           "type": "string"
                         },
-                        "organisationName": {
-                          "type": "string"
+                        "assistant_name": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.",
+                          "properties": {
+                            "de": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100
+                            },
+                            "en": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100
+                            }
+                          }
                         },
-                        "assistantName": {
-                          "type": "string"
+                        "greeting": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "description": "Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.",
+                          "properties": {
+                            "de": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 1000
+                            },
+                            "en": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 1000
+                            }
+                          }
                         },
                         "defaultLocale": {
                           "type": "string",
@@ -2848,6 +2860,33 @@
                     "preview": {
                       "type": "boolean",
                       "description": "Agent Builder preview session; the frame only runs it inside the 360 portal."
+                    },
+                    "access": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "tier"
+                      ],
+                      "properties": {
+                        "tier": {
+                          "type": "string",
+                          "enum": [
+                            "anonymous",
+                            "identified",
+                            "verified"
+                          ],
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
+                        },
+                        "method": {
+                          "type": "string",
+                          "enum": [
+                            "email_code",
+                            "portal_login",
+                            "demo"
+                          ],
+                          "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
+                        }
+                      }
                     }
                   }
                 }
@@ -3107,15 +3146,16 @@
                             "identified",
                             "verified"
                           ],
-                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
                         },
                         "method": {
                           "type": "string",
                           "enum": [
                             "email_code",
-                            "portal_login"
+                            "portal_login",
+                            "demo"
                           ],
-                          "description": "How a customer can log in or verify themselves in the chat."
+                          "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
                         }
                       }
                     }
@@ -3293,15 +3333,16 @@
                             "identified",
                             "verified"
                           ],
-                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
                         },
                         "method": {
                           "type": "string",
                           "enum": [
                             "email_code",
-                            "portal_login"
+                            "portal_login",
+                            "demo"
                           ],
-                          "description": "How a customer can log in or verify themselves in the chat."
+                          "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
                         }
                       }
                     }
@@ -3470,15 +3511,16 @@
                             "identified",
                             "verified"
                           ],
-                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
                         },
                         "method": {
                           "type": "string",
                           "enum": [
                             "email_code",
-                            "portal_login"
+                            "portal_login",
+                            "demo"
                           ],
-                          "description": "How a customer can log in or verify themselves in the chat."
+                          "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
                         }
                       }
                     }
@@ -3622,15 +3664,16 @@
                             "identified",
                             "verified"
                           ],
-                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
                         },
                         "method": {
                           "type": "string",
                           "enum": [
                             "email_code",
-                            "portal_login"
+                            "portal_login",
+                            "demo"
                           ],
-                          "description": "How a customer can log in or verify themselves in the chat."
+                          "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
                         }
                       }
                     }
@@ -3772,15 +3815,16 @@
                             "identified",
                             "verified"
                           ],
-                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
                         },
                         "method": {
                           "type": "string",
                           "enum": [
                             "email_code",
-                            "portal_login"
+                            "portal_login",
+                            "demo"
                           ],
-                          "description": "How a customer can log in or verify themselves in the chat."
+                          "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
                         }
                       }
                     }
@@ -4038,15 +4082,16 @@
                             "identified",
                             "verified"
                           ],
-                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
                         },
                         "method": {
                           "type": "string",
                           "enum": [
                             "email_code",
-                            "portal_login"
+                            "portal_login",
+                            "demo"
                           ],
-                          "description": "How a customer can log in or verify themselves in the chat."
+                          "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
                         }
                       }
                     }
@@ -4213,15 +4258,16 @@
                             "identified",
                             "verified"
                           ],
-                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
                         },
                         "method": {
                           "type": "string",
                           "enum": [
                             "email_code",
-                            "portal_login"
+                            "portal_login",
+                            "demo"
                           ],
-                          "description": "How a customer can log in or verify themselves in the chat."
+                          "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
                         }
                       }
                     }
@@ -4363,15 +4409,16 @@
                             "identified",
                             "verified"
                           ],
-                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
                         },
                         "method": {
                           "type": "string",
                           "enum": [
                             "email_code",
-                            "portal_login"
+                            "portal_login",
+                            "demo"
                           ],
-                          "description": "How a customer can log in or verify themselves in the chat."
+                          "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
                         }
                       }
                     }
@@ -4444,7 +4491,7 @@
             "AnonymousSession": []
           }
         ],
-        "description": "Clear the customer identity of any login method and pending challenges. Clearing an identity starts a new anonymous conversation.",
+        "description": "Clear the customer identity of any login method and pending challenges. Clearing an identity starts a new anonymous conversation. The demo customer of an Agent Builder preview stays signed in for the whole session (403 LOGIN_DISABLED); it cannot start an email verification or portal login either.",
         "responses": {
           "200": {
             "description": "Anonymous access",
@@ -4476,15 +4523,16 @@
                             "identified",
                             "verified"
                           ],
-                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                          "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
                         },
                         "method": {
                           "type": "string",
                           "enum": [
                             "email_code",
-                            "portal_login"
+                            "portal_login",
+                            "demo"
                           ],
-                          "description": "How a customer can log in or verify themselves in the chat."
+                          "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
                         }
                       }
                     }
@@ -5857,18 +5905,12 @@
                 "agent_id",
                 "binding_id",
                 "version",
-                "name",
                 "settings",
                 "embed",
                 "created_at",
                 "updated_at"
               ],
               "properties": {
-                "name": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 100
-                },
                 "agent_id": {
                   "type": "string",
                   "format": "uuid",
@@ -5879,7 +5921,6 @@
                   "additionalProperties": false,
                   "required": [
                     "allowed_origins",
-                    "organisation_name",
                     "default_locale"
                   ],
                   "properties": {
@@ -5892,11 +5933,6 @@
                         "type": "string",
                         "maxLength": 2048
                       }
-                    },
-                    "organisation_name": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 100
                     },
                     "default_locale": {
                       "type": "string",
@@ -6096,18 +6132,12 @@
           "agent_id",
           "binding_id",
           "version",
-          "name",
           "settings",
           "embed",
           "created_at",
           "updated_at"
         ],
         "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100
-          },
           "agent_id": {
             "type": "string",
             "format": "uuid",
@@ -6118,7 +6148,6 @@
             "additionalProperties": false,
             "required": [
               "allowed_origins",
-              "organisation_name",
               "default_locale"
             ],
             "properties": {
@@ -6131,11 +6160,6 @@
                   "type": "string",
                   "maxLength": 2048
                 }
-              },
-              "organisation_name": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 100
               },
               "default_locale": {
                 "type": "string",
@@ -6326,7 +6350,6 @@
         "additionalProperties": false,
         "required": [
           "allowed_origins",
-          "organisation_name",
           "default_locale"
         ],
         "properties": {
@@ -6339,11 +6362,6 @@
               "type": "string",
               "maxLength": 2048
             }
-          },
-          "organisation_name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100
           },
           "default_locale": {
             "type": "string",
@@ -6620,6 +6638,11 @@
             "format": "uuid",
             "nullable": true,
             "description": "Unsaved design to preview. Omit to keep the saved design; null previews the default design."
+          },
+          "demo_customer": {
+            "type": "boolean",
+            "default": false,
+            "description": "Start the preview as a fictional, verified demo customer (no login, no sign-out). In-chat actions are simulated with demo data and write nothing; the Website Chat frame shows journeys as a simulated hand-off and never loads them."
           }
         }
       },
@@ -6648,8 +6671,6 @@
             "type": "object",
             "required": [
               "key",
-              "organisationName",
-              "assistantName",
               "defaultLocale",
               "locales",
               "login_methods"
@@ -6658,11 +6679,39 @@
               "key": {
                 "type": "string"
               },
-              "organisationName": {
-                "type": "string"
+              "assistant_name": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.",
+                "properties": {
+                  "de": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "en": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
               },
-              "assistantName": {
-                "type": "string"
+              "greeting": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.",
+                "properties": {
+                  "de": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "en": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                }
               },
               "defaultLocale": {
                 "type": "string",
@@ -6888,16 +6937,10 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "name",
           "agent_id",
           "settings"
         ],
         "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100
-          },
           "agent_id": {
             "type": "string",
             "format": "uuid",
@@ -6908,7 +6951,6 @@
             "additionalProperties": false,
             "required": [
               "allowed_origins",
-              "organisation_name",
               "default_locale"
             ],
             "properties": {
@@ -6921,11 +6963,6 @@
                   "type": "string",
                   "maxLength": 2048
                 }
-              },
-              "organisation_name": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 100
               },
               "default_locale": {
                 "type": "string",
@@ -7064,11 +7101,6 @@
           "version"
         ],
         "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100
-          },
           "agent_id": {
             "type": "string",
             "format": "uuid",
@@ -7079,7 +7111,6 @@
             "additionalProperties": false,
             "required": [
               "allowed_origins",
-              "organisation_name",
               "default_locale"
             ],
             "properties": {
@@ -7092,11 +7123,6 @@
                   "type": "string",
                   "maxLength": 2048
                 }
-              },
-              "organisation_name": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 100
               },
               "default_locale": {
                 "type": "string",
@@ -7447,15 +7473,16 @@
                   "identified",
                   "verified"
                 ],
-                "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
               },
               "method": {
                 "type": "string",
                 "enum": [
                   "email_code",
-                  "portal_login"
+                  "portal_login",
+                  "demo"
                 ],
-                "description": "How a customer can log in or verify themselves in the chat."
+                "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
               }
             }
           }
@@ -7524,15 +7551,16 @@
                   "identified",
                   "verified"
                 ],
-                "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+                "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
               },
               "method": {
                 "type": "string",
                 "enum": [
                   "email_code",
-                  "portal_login"
+                  "portal_login",
+                  "demo"
                 ],
-                "description": "How a customer can log in or verify themselves in the chat."
+                "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
               }
             }
           }
@@ -7546,6 +7574,15 @@
         ],
         "description": "How a customer can log in or verify themselves in the chat."
       },
+      "AccessMethod": {
+        "type": "string",
+        "enum": [
+          "email_code",
+          "portal_login",
+          "demo"
+        ],
+        "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
+      },
       "AccessTier": {
         "type": "string",
         "enum": [
@@ -7553,7 +7590,7 @@
           "identified",
           "verified"
         ],
-        "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+        "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
       },
       "CustomerAccess": {
         "type": "object",
@@ -7569,15 +7606,16 @@
               "identified",
               "verified"
             ],
-            "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login).\n"
+            "description": "anonymous: no customer identity. identified: the Contact is known but ownership\nis not proven. verified: ownership is proven (an email code or a portal login), or the\ndemo customer of an Agent Builder preview.\n"
           },
           "method": {
             "type": "string",
             "enum": [
               "email_code",
-              "portal_login"
+              "portal_login",
+              "demo"
             ],
-            "description": "How a customer can log in or verify themselves in the chat."
+            "description": "How the current customer identity was established. demo is the fictional, verified\ncustomer of an Agent Builder preview; it is never a login method.\n"
           }
         }
       },
@@ -7594,8 +7632,6 @@
         "type": "object",
         "required": [
           "key",
-          "organisationName",
-          "assistantName",
           "defaultLocale",
           "locales",
           "login_methods"
@@ -7604,11 +7640,39 @@
           "key": {
             "type": "string"
           },
-          "organisationName": {
-            "type": "string"
+          "assistant_name": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.",
+            "properties": {
+              "de": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "en": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              }
+            }
           },
-          "assistantName": {
-            "type": "string"
+          "greeting": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.",
+            "properties": {
+              "de": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "en": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            }
           },
           "defaultLocale": {
             "type": "string",

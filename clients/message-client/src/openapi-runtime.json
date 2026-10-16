@@ -315,6 +315,24 @@
         "responses": {}
       }
     },
+    "/v1/message/threads/{id}/summary": {
+      "get": {
+        "operationId": "getThreadSummary",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "message_id",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/message/threads/{id}/trash": {
       "post": {
         "operationId": "trashThread",
@@ -601,6 +619,25 @@
         ],
         "requestBody": {
           "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/link-suggestions/dismiss": {
+      "post": {
+        "operationId": "dismissThreadLinkSuggestions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
           "content": {
             "application/json": {}
           }

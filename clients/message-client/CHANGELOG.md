@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.36.0
+
+### Minor Changes
+
+- Add `getThreadSummary`: AI summary of a thread, replacing genai-api's `getThreadInfo`.
+
 ## 1.30.0
 
 ### Minor Changes

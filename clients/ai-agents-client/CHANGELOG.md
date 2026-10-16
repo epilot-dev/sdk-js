@@ -1,5 +1,11 @@
 # @epilot/address-client
 
+## 0.3.0
+
+### Minor Changes
+
+- `executeAgent` accepts `mode: sync`, which runs a direct skill inside the request and returns the completed execution
+
 ## 0.1.0
 
 ### Minor Changes

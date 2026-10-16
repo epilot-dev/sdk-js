@@ -81,6 +81,130 @@
         "responses": {}
       }
     },
+    "/v1/customer-chat": {
+      "get": {
+        "operationId": "listCustomerChat",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createCustomerChatAgent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/customer-chat/capabilities": {
+      "get": {
+        "operationId": "listCustomerChatCapabilities",
+        "responses": {}
+      }
+    },
+    "/v1/customer-chat/{agent_id}": {
+      "get": {
+        "operationId": "getCustomerChatAgent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "renameCustomerChatAgent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatchUpdatedAt"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteCustomerChatAgent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatchUpdatedAt"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/customer-chat/{agent_id}/config": {
+      "put": {
+        "operationId": "saveCustomerChatConfig",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatchUpdatedAt"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/knowledge/sources": {
+      "get": {
+        "operationId": "listKnowledgeSources",
+        "responses": {}
+      }
+    },
+    "/v1/knowledge/file-uploads": {
+      "post": {
+        "operationId": "createKnowledgeFileUpload",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/knowledge/sources/{source_id}": {
+      "parameters": [
+        {
+          "name": "source_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getKnowledgeSource",
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteKnowledgeSource",
+        "responses": {}
+      }
+    },
     "/v1/agents/{agent_id}/execute": {
       "post": {
         "operationId": "executeAgent",
@@ -340,5 +464,18 @@
       }
     }
   },
-  "components": {}
+  "components": {
+    "parameters": {
+      "CustomerChatAgentIdPath": {
+        "name": "agent_id",
+        "in": "path",
+        "required": true
+      },
+      "IfMatchUpdatedAt": {
+        "name": "If-Match",
+        "in": "header",
+        "required": false
+      }
+    }
+  }
 }

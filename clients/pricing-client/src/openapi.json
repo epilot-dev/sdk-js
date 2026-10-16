@@ -1336,7 +1336,7 @@
                       "warnings": [
                         {
                           "code": "CATALOG_ENTRY_NOT_FOUND",
-                          "message": "The entry's price id finds no price",
+                          "message": "The entry names a price that does not exist",
                           "details": {
                             "product_id": "product-heatpump-2027",
                             "price_id": "price-retired",
@@ -3486,7 +3486,7 @@
     },
     "/v1/public/product-recommendations": {
       "post": {
-        "description": "Get a list of product recommendations based on the search parameters.",
+        "description": "Get a list of product recommendations based on the search parameters.\n\nWhen searching by `catalog_item` or `contract_id`, returns the recommendations whose source is the\ncurrent product and price, followed by the ones without a source, which apply to any product. Their\noffers never include the current product and price. At most 10, newest first within each group.\n",
         "operationId": "$productRecommendations",
         "summary": "$productRecommendations",
         "security": [
@@ -6313,6 +6313,20 @@
           }
         ]
       },
+      "PostalCodeFilter": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A listing filter on a `location` of format `postal_code_city` by its postal code alone: it\nmatches the variants pinned to that postal code, whatever their city. Only a listing filter\ntakes it; a resolve context must name the city too.\n",
+        "required": [
+          "postal_code"
+        ],
+        "properties": {
+          "postal_code": {
+            "type": "string",
+            "example": "10115"
+          }
+        }
+      },
       "ConditionDateRange": {
         "type": "object",
         "additionalProperties": false,
@@ -7107,9 +7121,16 @@
       "VariantConditionFilter": {
         "type": "object",
         "additionalProperties": {
-          "$ref": "#/components/schemas/ContextConditionValue"
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/ContextConditionValue"
+            },
+            {
+              "$ref": "#/components/schemas/PostalCodeFilter"
+            }
+          ]
         },
-        "description": "Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the\nsame exact values and predicates a resolve context does. A condition left out is not\nfiltered on. An `in` list carries at most 50,000 values.\n\nA variant matches only where it pins the condition — unlike `:resolve`, where an unpinned\ncondition matches any value. `{ \"exists\": false }` selects the variants that leave it\nunpinned.\n\n`default` is accepted as an exact boolean and takes no predicate: `true` selects the\nentity's fallback variant, `false` every variant that is not it. Names beginning with `_`\nare reserved.\n",
+        "description": "Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the\nsame exact values and predicates a resolve context does. A condition left out is not\nfiltered on. An `in` list carries at most 50,000 values.\n\nA variant matches only where it pins the condition — unlike `:resolve`, where an unpinned\ncondition matches any value. `{ \"exists\": false }` selects the variants that leave it\nunpinned.\n\nA `location` of format `postal_code_city` also takes its postal code alone,\n`{ \"postal_code\": \"10115\" }`, matching that postal code in any city.\n\n`default` is accepted as an exact boolean and takes no predicate: `true` selects the\nentity's fallback variant, `false` every variant that is not it. Names beginning with `_`\nare reserved.\n",
         "example": {
           "postal_code": "46045",
           "consumption": {
@@ -11727,7 +11748,7 @@
           {
             "type": "object",
             "additionalProperties": false,
-            "description": "An id in the entry the catalog does not find: no entity has it, the entity is deleted or\nnot yet searchable, or it is an entity of another type than the entry asked for. One\nwarning per such id.\n",
+            "description": "An id in the entry the catalog does not find: no entity has it, the entity is deleted,\nor it is an entity of another type than the entry asked for. One warning per such id.\n",
             "required": [
               "code",
               "message",

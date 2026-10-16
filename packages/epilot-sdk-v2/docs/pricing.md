@@ -105,6 +105,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`VariantConditions`](#variantconditions)
 - [`PinnedConditions`](#pinnedconditions)
 - [`PinnedConditionValue`](#pinnedconditionvalue)
+- [`PostalCodeFilter`](#postalcodefilter)
 - [`ConditionDateRange`](#conditiondaterange)
 - [`PostalCodeCity`](#postalcodecity)
 - [`ContextConditionValue`](#contextconditionvalue)
@@ -3316,6 +3317,19 @@ type PinnedConditionValue = string | number | boolean | {
 }
 ```
 
+### `PostalCodeFilter`
+
+A listing filter on a `location` of format `postal_code_city` by its postal code alone: it
+matches the variants pinned to that postal code, whatever their city. Only a listing filter
+takes it; a resolve context must name the city too.
+
+
+```ts
+type PostalCodeFilter = {
+  postal_code: string
+}
+```
+
 ### `ConditionDateRange`
 
 The value of a `daterange` condition. A bound that is absent, `null` or an empty string is an
@@ -3757,6 +3771,8 @@ type ListVariantsRequest = {
     between: string
   } | {
     exists: boolean
+  } | {
+    postal_code: string
   }>
   search?: string
   sort?: string
@@ -3791,6 +3807,8 @@ type VariantTreeRequest = {
     between: string
   } | {
     exists: boolean
+  } | {
+    postal_code: string
   }>
   search?: string
   sort?: string
@@ -3827,6 +3845,8 @@ type VariantConditionFilter = Record<string, string | number | boolean | {
   between: string
 } | {
   exists: boolean
+} | {
+  postal_code: string
 }>
 ```
 

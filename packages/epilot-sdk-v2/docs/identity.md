@@ -42,6 +42,7 @@ const { data } = await identityClient.listClients(...)
 - [`revokeClientOrganization`](#revokeclientorganization)
 - [`suspendClientOrganization`](#suspendclientorganization)
 - [`activateClientOrganization`](#activateclientorganization)
+- [`getUserSubject`](#getusersubject)
 
 **Session**
 - [`createIdentitySession`](#createidentitysession)
@@ -54,6 +55,7 @@ const { data } = await identityClient.listClients(...)
 - [`Error`](#error)
 - [`PartnerClientId`](#partnerclientid)
 - [`OrgId`](#orgid)
+- [`UserId`](#userid)
 - [`Environment`](#environment)
 - [`PartnerClientStatus`](#partnerclientstatus)
 - [`Scope`](#scope)
@@ -67,13 +69,13 @@ const { data } = await identityClient.listClients(...)
 - [`RotateSecretRequest`](#rotatesecretrequest)
 - [`AuthorizationPolicyInput`](#authorizationpolicyinput)
 - [`AuthorizationPolicy`](#authorizationpolicy)
-- [`PartnerAccount`](#partneraccount)
 - [`OrgEnablementStatus`](#orgenablementstatus)
 - [`OrgEnablementCreate`](#orgenablementcreate)
 - [`OrgEnablementUpdate`](#orgenablementupdate)
 - [`OrgEnablement`](#orgenablement)
 - [`OrgEnablementList`](#orgenablementlist)
 - [`IdentitySession`](#identitysession)
+- [`UserSubject`](#usersubject)
 
 ### `listClients`
 
@@ -523,10 +525,6 @@ const { data } = await client.listClientOrganizations({
         "recorded_by": "string",
         "recorded_at": "1970-01-01T00:00:00.000Z"
       },
-      "partner_account": {
-        "id": "string",
-        "label": "string"
-      },
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "created_by": "string",
@@ -561,10 +559,6 @@ const { data } = await client.enableClientOrganization(
       allowed_scopes: ['openid'],
       customer_approval_ref: 'string',
       approved_at: '1970-01-01T00:00:00.000Z'
-    },
-    partner_account: {
-      id: 'string',
-      label: 'string'
     }
   },
 )
@@ -589,10 +583,6 @@ const { data } = await client.enableClientOrganization(
     "mandatory_claims": ["org_id"],
     "recorded_by": "string",
     "recorded_at": "1970-01-01T00:00:00.000Z"
-  },
-  "partner_account": {
-    "id": "string",
-    "label": "string"
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -638,10 +628,6 @@ const { data } = await client.getClientOrganization({
     "recorded_by": "string",
     "recorded_at": "1970-01-01T00:00:00.000Z"
   },
-  "partner_account": {
-    "id": "string",
-    "label": "string"
-  },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": "string",
@@ -674,10 +660,6 @@ const { data } = await client.updateClientOrganization(
       allowed_scopes: ['openid'],
       customer_approval_ref: 'string',
       approved_at: '1970-01-01T00:00:00.000Z'
-    },
-    partner_account: {
-      id: 'string',
-      label: 'string'
     }
   },
 )
@@ -702,10 +684,6 @@ const { data } = await client.updateClientOrganization(
     "mandatory_claims": ["org_id"],
     "recorded_by": "string",
     "recorded_at": "1970-01-01T00:00:00.000Z"
-  },
-  "partner_account": {
-    "id": "string",
-    "label": "string"
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -758,10 +736,6 @@ const { data } = await client.revokeClientOrganization(
     "recorded_by": "string",
     "recorded_at": "1970-01-01T00:00:00.000Z"
   },
-  "partner_account": {
-    "id": "string",
-    "label": "string"
-  },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": "string",
@@ -811,10 +785,6 @@ const { data } = await client.suspendClientOrganization(
     "recorded_by": "string",
     "recorded_at": "1970-01-01T00:00:00.000Z"
   },
-  "partner_account": {
-    "id": "string",
-    "label": "string"
-  },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": "string",
@@ -859,14 +829,44 @@ const { data } = await client.activateClientOrganization({
     "recorded_by": "string",
     "recorded_at": "1970-01-01T00:00:00.000Z"
   },
-  "partner_account": {
-    "id": "string",
-    "label": "string"
-  },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "created_by": "string",
   "updated_by": "string"
+}
+```
+
+</details>
+
+---
+
+### `getUserSubject`
+
+The pairwise `sub` this client receives for one epilot user, so the partner can bind the person on its
+side **before** the first sign-in (for example a Babelforce agent provisioned through SCIM with
+`
+
+`GET /v1/identity/operator/clients/{client_id}/organizations/{org_id}/users/{user_id}:subject`
+
+```ts
+const { data } = await client.getUserSubject({
+  client_id: 'example',
+  org_id: 'example',
+  user_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "client_id": "bf-prod-x7k2",
+  "org_id": "739224",
+  "user_id": "100321",
+  "sub": "v1.dGhpcy1pcy1hLWR1bW15LXN1YmplY3QtdmFsdWUtMDAx",
+  "key_version": "v1",
+  "sector": "portal.epilot.cloud"
 }
 ```
 
@@ -956,6 +956,14 @@ epilot organization id, an opaque case-sensitive string
 
 ```ts
 type OrgId = string
+```
+
+### `UserId`
+
+epilot user id (`custom:ivy_user_id` in a 360 token). A user belongs to exactly one organization.
+
+```ts
+type UserId = string
 ```
 
 ### `Environment`
@@ -1151,17 +1159,6 @@ type AuthorizationPolicy = {
 }
 ```
 
-### `PartnerAccount`
-
-Optional audit reference to the partner tenant this organization maps to. The partner enforces the mapping.
-
-```ts
-type PartnerAccount = {
-  id: string
-  label?: string
-}
-```
-
 ### `OrgEnablementStatus`
 
 ```ts
@@ -1180,10 +1177,6 @@ type OrgEnablementCreate = {
     customer_approval_ref: string
     approved_at: string // date-time
   }
-  partner_account?: {
-    id: string
-    label?: string
-  }
 }
 ```
 
@@ -1198,10 +1191,6 @@ type OrgEnablementUpdate = {
     allowed_scopes: "openid" | "email" | "profile"[]
     customer_approval_ref: string
     approved_at: string // date-time
-  }
-  partner_account?: {
-    id: string
-    label?: string
   }
 }
 ```
@@ -1224,10 +1213,6 @@ type OrgEnablement = {
     mandatory_claims: "org_id"[]
     recorded_by: string
     recorded_at: string // date-time
-  }
-  partner_account?: {
-    id: string
-    label?: string
   }
   created_at: string // date-time
   updated_at: string // date-time
@@ -1256,10 +1241,6 @@ type OrgEnablementList = {
       recorded_by: { ... }
       recorded_at: { ... }
     }
-    partner_account?: {
-      id: { ... }
-      label?: { ... }
-    }
     created_at: string // date-time
     updated_at: string // date-time
     created_by?: string
@@ -1275,5 +1256,18 @@ type IdentitySession = {
   org_id: string
   user_id: string
   expires_at: string // date-time
+}
+```
+
+### `UserSubject`
+
+```ts
+type UserSubject = {
+  client_id: string
+  org_id: string
+  user_id: string
+  sub: string
+  key_version: string
+  sector: string
 }
 ```
