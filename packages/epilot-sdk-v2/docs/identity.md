@@ -1139,7 +1139,7 @@ type AuthorizationPolicyInput = {
   population?: "all_current_org_members"
   allowed_scopes: "openid" | "email" | "profile"[]
   customer_approval_ref: string
-  approved_at: string // date-time
+  approved_at?: string // date-time
 }
 ```
 
@@ -1175,7 +1175,7 @@ type OrgEnablementCreate = {
     population?: "all_current_org_members"
     allowed_scopes: "openid" | "email" | "profile"[]
     customer_approval_ref: string
-    approved_at: string // date-time
+    approved_at?: string // date-time
   }
 }
 ```
@@ -1190,7 +1190,7 @@ type OrgEnablementUpdate = {
     population?: "all_current_org_members"
     allowed_scopes: "openid" | "email" | "profile"[]
     customer_approval_ref: string
-    approved_at: string // date-time
+    approved_at?: string // date-time
   }
 }
 ```

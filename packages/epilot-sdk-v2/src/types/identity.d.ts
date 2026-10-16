@@ -71,6 +71,11 @@ export declare namespace Components {
              * Reference to the customer's approval evidence (ticket, signed order, contract clause)
              */
             customer_approval_ref: string;
+            /**
+             * When the customer approved. Optional: enabling an organization defaults it to the time of the
+             * request, and a policy update keeps the current value unless a new one is given.
+             *
+             */
             approved_at: string; // date-time
             version: number;
             mandatory_claims: ("org_id")[];
@@ -94,7 +99,12 @@ export declare namespace Components {
              * Reference to the customer's approval evidence (ticket, signed order, contract clause)
              */
             customer_approval_ref: string;
-            approved_at: string; // date-time
+            /**
+             * When the customer approved. Optional: enabling an organization defaults it to the time of the
+             * request, and a policy update keeps the current value unless a new one is given.
+             *
+             */
+            approved_at?: string; // date-time
         }
         /**
          * Partner-side environment this client belongs to
