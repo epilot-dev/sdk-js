@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.0-rc.4
+
+### Minor Changes
+
+- `ExternalValue.inputs`: maps an External Values hook value input (e.g. `reading_date`) to the rule value that supplies it, `{ source: "parameter", name }`; the hook receives it as `Context.<name>`
+
 ## 1.6.0-rc.1
 
 ### Minor Changes
