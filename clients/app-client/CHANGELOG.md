@@ -1,5 +1,11 @@
 # @epilot/app-client
 
+## 0.20.0
+
+### Minor Changes
+
+- EXTERNAL_VALUES hooks: typed `contexts` requirements are back in the spec (`EntityContextRequirement`, dropped by the 0.19.0 regeneration) and gain `ValueContextRequirement` (`{ type: "value", name, value_type }`) for scalar inputs such as a reading date, sent as `Context.<name>`
+
 ## 0.18.0
 
 ### Minor Changes
