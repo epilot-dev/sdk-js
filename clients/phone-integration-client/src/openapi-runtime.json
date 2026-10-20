@@ -57,7 +57,105 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/manager/status": {
+      "get": {
+        "operationId": "getManagerStatus",
+        "responses": {}
+      }
+    },
+    "/v1/manager/agents": {
+      "get": {
+        "operationId": "listPhoneAgents",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "assignPhoneAgent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/manager/agents/{user_id}": {
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "epilot user id (`custom:ivy_user_id`)"
+        }
+      ],
+      "delete": {
+        "operationId": "removePhoneAgent",
+        "responses": {}
+      }
+    },
+    "/v1/operator/organizations/{org_id}/provider": {
+      "parameters": [
+        {
+          "name": "org_id",
+          "in": "path",
+          "required": true,
+          "description": "epilot organization id"
+        }
+      ],
+      "get": {
+        "operationId": "getProviderSetup",
+        "responses": {}
+      }
+    },
+    "/v1/operator/organizations/{org_id}/provider:setup": {
+      "parameters": [
+        {
+          "name": "org_id",
+          "in": "path",
+          "required": true,
+          "description": "epilot organization id"
+        }
+      ],
+      "post": {
+        "operationId": "setupProvider",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
-  "components": {}
+  "components": {
+    "responses": {
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "BadGateway": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ServiceUnavailable": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  }
 }

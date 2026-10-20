@@ -9,6 +9,14 @@
     {
       "name": "phone-integration",
       "description": "Phone Integration"
+    },
+    {
+      "name": "manager",
+      "description": "Phone manager (epilot 360 control center): which organization members hold the phone and the\ntelephony-provider user behind each of them. Caller must hold `phone:manage` in the organization.\n"
+    },
+    {
+      "name": "operator",
+      "description": "Provider setup per organization, run by epilot CS from the admin portal. Platform operators only\n(admin-portal internal-auth token in an allowed group), never customer tokens.\n"
     }
   ],
   "servers": [
@@ -183,17 +191,660 @@
           }
         }
       }
+    },
+    "/v1/manager/status": {
+      "get": {
+        "operationId": "getManagerStatus",
+        "summary": "getManagerStatus",
+        "description": "Whether the caller's organization is ready for phone agents: the telephony provider tenant\nexists and is configured. The control center shows a \"not set up\" state when `ready` is false.\nRequires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "200": {
+            "description": "Readiness of the organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagerStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/manager/agents": {
+      "get": {
+        "operationId": "listPhoneAgents",
+        "summary": "listPhoneAgents",
+        "description": "Organization members who hold the phone (`phone:use`), each joined with the provider user behind\nthem. Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "200": {
+            "description": "The organization's phone agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "results"
+                  ],
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PhoneAgent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      },
+      "post": {
+        "operationId": "assignPhoneAgent",
+        "summary": "assignPhoneAgent",
+        "description": "Gives an organization member the phone. In order: the member is verified with user-api, their\npairwise subject for the provider is read from identity-api, the provider user is created (or\nfound) bound to that subject with the `agent` role, and only then the `phone_agent` role\n(`phone:use`) is assigned in epilot. Idempotent: an already assigned member answers `200`.\nRequires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignPhoneAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The member already held the phone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhoneAgent"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The member now holds the phone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhoneAgent"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "The user is not an active member of the organization (code `member_not_found`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The member cannot get the phone yet; `code` says why:\n- `not_set_up`: the organization is not set up for the phone (see getManagerStatus);\n- `identity_subject_unavailable`: identity-api cannot issue the member's subject (organization\n  not enabled on the identity client, or the user is not an active member there);\n- `identity_client_unavailable`: the identity client the setup points at is not active;\n- `provider_conflict`: the provider refused, e.g. this person's identity is bound to another\n  provider user.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/agents/{user_id}": {
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "epilot user id (`custom:ivy_user_id`)",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      ],
+      "delete": {
+        "operationId": "removePhoneAgent",
+        "summary": "removePhoneAgent",
+        "description": "Takes the phone away from a member: the `phone_agent` role is removed first, then the provider\nuser is deactivated (never deleted: call history keeps referring to it). Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "204": {
+            "description": "The member no longer holds the phone"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "The member does not hold the phone (code `agent_not_found`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The role was removed but the provider user could not be deactivated (code `provider_error`);\nremoving again retries the deactivation.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/operator/organizations/{org_id}/provider": {
+      "parameters": [
+        {
+          "name": "org_id",
+          "in": "path",
+          "required": true,
+          "description": "epilot organization id",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getProviderSetup",
+        "summary": "getProviderSetup",
+        "description": "What has been set up at the telephony provider for this organization.",
+        "tags": [
+          "operator"
+        ],
+        "security": [
+          {
+            "OperatorAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "internal"
+        ],
+        "responses": {
+          "200": {
+            "description": "Provider setup state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderSetup"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/operator/organizations/{org_id}/provider:setup": {
+      "parameters": [
+        {
+          "name": "org_id",
+          "in": "path",
+          "required": true,
+          "description": "epilot organization id",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "setupProvider",
+        "summary": "setupProvider",
+        "description": "Prepares the telephony provider for an organization, idempotently and in order: the provider\ntenant (Babelforce sub-account keyed by the organization id), its SCIM configuration with role\nmanagement on, and its SSO configuration pointing at the identity-api client given here. The\nclient secret is forwarded to the provider and never stored by this service. Re-running updates\nthe SSO configuration (new client or rotated secret) and leaves the rest untouched.\n",
+        "tags": [
+          "operator"
+        ],
+        "security": [
+          {
+            "OperatorAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "internal"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderSetupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Provider setup state after the run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderSetup"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The provider refused, for example the account name is taken (code `provider_conflict`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
     }
   },
   "components": {
+    "responses": {
+      "BadRequest": {
+        "description": "The request is malformed or fails validation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing or invalid bearer token",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "The caller lacks the required permission",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "BadGateway": {
+        "description": "A dependency failed: the telephony provider could not be reached or answered unexpectedly (code\n`provider_error`, with the provider's request id when it sent one), or identity-api is\ntemporarily unavailable (code `identity_unavailable`). Retrying is safe.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "The operator's admin-portal groups could not be checked right now; retry",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "securitySchemes": {
       "EpilotAuth": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      },
+      "OperatorAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Internal-auth bearer token minted for an epilot admin-portal user in an allowed group (same\npolicy as identity-api's operator API). Customer organization bearers are never accepted.\n"
       }
     },
     "schemas": {
+      "ManagerStatus": {
+        "type": "object",
+        "required": [
+          "provider",
+          "ready",
+          "reasons"
+        ],
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "Telephony provider behind this organization",
+            "enum": [
+              "babelforce"
+            ]
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "Agents can be assigned"
+          },
+          "reasons": {
+            "type": "array",
+            "description": "Why the organization is not ready (empty when ready)",
+            "items": {
+              "type": "string",
+              "enum": [
+                "provider_tenant_missing",
+                "sso_not_configured",
+                "scim_not_configured",
+                "identity_enablement_missing"
+              ]
+            }
+          }
+        }
+      },
+      "PhoneAgent": {
+        "type": "object",
+        "required": [
+          "user_id",
+          "email",
+          "status"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "epilot user id"
+          },
+          "email": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "description": "`active`: holds the phone and has an enabled provider user. `pending`: assigned in epilot but\nthe provider user is not activated yet. `disabled`: provider user disabled. `missing_provider`:\nholds `phone:use` but no provider user is bound (assign again to repair). `missing_role`:\nassigned here, but the `phone_agent` role (`phone:use`) was removed elsewhere, e.g. in the\nusers and permissions settings (assign again to restore it, or remove to deactivate the\nprovider user).\n",
+            "enum": [
+              "active",
+              "pending",
+              "disabled",
+              "missing_provider",
+              "missing_role"
+            ]
+          },
+          "provider_user_id": {
+            "type": "string",
+            "description": "The provider's id of the bound user"
+          },
+          "provider_roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assigned_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "assigned_by": {
+            "type": "string",
+            "description": "epilot user id of the manager who assigned the phone"
+          }
+        }
+      },
+      "AssignPhoneAgentRequest": {
+        "type": "object",
+        "required": [
+          "user_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "epilot user id of an active member of the caller's organization",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      },
+      "ProviderSetup": {
+        "type": "object",
+        "required": [
+          "provider",
+          "org_id",
+          "ready",
+          "tenant",
+          "scim",
+          "sso"
+        ],
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": [
+              "babelforce"
+            ]
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "Everything below is in place"
+          },
+          "tenant": {
+            "type": "object",
+            "description": "The provider tenant for this organization (null until created)",
+            "nullable": true,
+            "required": [
+              "id",
+              "name",
+              "org_key"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "org_key": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "scim": {
+            "type": "object",
+            "required": [
+              "configured",
+              "roles_enabled"
+            ],
+            "properties": {
+              "configured": {
+                "type": "boolean"
+              },
+              "roles_enabled": {
+                "type": "boolean"
+              }
+            }
+          },
+          "sso": {
+            "type": "object",
+            "required": [
+              "configured"
+            ],
+            "properties": {
+              "configured": {
+                "type": "boolean"
+              },
+              "identity_client_id": {
+                "type": "string",
+                "description": "The identity-api client the tenant's SSO configuration points at"
+              },
+              "configured_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "last_setup_by": {
+            "type": "string",
+            "description": "Admin-portal operator (email) who last ran the setup"
+          }
+        }
+      },
+      "ProviderSetupRequest": {
+        "type": "object",
+        "required": [
+          "identity_client_id",
+          "identity_client_secret"
+        ],
+        "properties": {
+          "account_name": {
+            "type": "string",
+            "description": "Provider tenant name, unique across the provider (3 to 100 characters). Required the first\ntime (`400` with code `account_name_required` without it); ignored once the tenant exists.\n",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "identity_client_id": {
+            "type": "string",
+            "description": "identity-api client registered for the provider (its partner application for this stage)",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._~-]+$"
+          },
+          "identity_client_secret": {
+            "type": "string",
+            "description": "The client's current secret, forwarded to the provider's SSO configuration and never stored",
+            "minLength": 12,
+            "maxLength": 512
+          }
+        }
+      },
       "CustomerBatchSearchResult": {
         "type": "object",
         "additionalProperties": false,

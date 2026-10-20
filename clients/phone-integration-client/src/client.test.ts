@@ -7,7 +7,15 @@ describe('Phone Integration client', () => {
 
     expect(client.api.initialized).toBe(true);
     expect(client.defaults.baseURL).toBe('https://phone-integration-api.sls.epilot.io');
-    expect(client.api.getOperations().map((operation) => operation.operationId)).toEqual(['batchSearchCustomers']);
+    expect(client.api.getOperations().map((operation) => operation.operationId)).toEqual([
+      'batchSearchCustomers',
+      'getManagerStatus',
+      'listPhoneAgents',
+      'assignPhoneAgent',
+      'removePhoneAgent',
+      'getProviderSetup',
+      'setupProvider',
+    ]);
   });
 
   it('sends batch identifiers, bearer auth and trace headers without changing the response', async () => {
