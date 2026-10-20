@@ -36,6 +36,7 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`getJourneyEnvironment`](#getjourneyenvironment)
 - [`resolveJourneyExternalValues`](#resolvejourneyexternalvalues)
 - [`getJourneyEnvironmentVariables`](#getjourneyenvironmentvariables)
+- [`getJourneyTemplateVariables`](#getjourneytemplatevariables)
 - [`getJourneyProducts`](#getjourneyproducts)
 - [`createJourney`](#createjourney)
 - [`updateJourney`](#updatejourney)
@@ -62,6 +63,11 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`JourneyExternalValuesRequest`](#journeyexternalvaluesrequest)
 - [`JourneyExternalValuesResponse`](#journeyexternalvaluesresponse)
 - [`ExternalValueError`](#externalvalueerror)
+- [`JourneyTemplatingContext`](#journeytemplatingcontext)
+- [`JourneyTemplateVariablesResponse`](#journeytemplatevariablesresponse)
+- [`JourneyTemplating`](#journeytemplating)
+- [`JourneyTemplatingLink`](#journeytemplatinglink)
+- [`JourneyTemplatingTranslatable`](#journeytemplatingtranslatable)
 - [`JourneyEnvironmentVariablesResponse`](#journeyenvironmentvariablesresponse)
 - [`GetJourneysResponse`](#getjourneysresponse)
 - [`JourneyResponse`](#journeyresponse)
@@ -241,7 +247,12 @@ const { data } = await client.getJourney({
     },
     "thirdPartyCookies": true,
     "betaFeatures": {
-      "modernProducts": true
+      "modernProducts": true,
+      "modernLauncher": true
+    },
+    "offline": {
+      "enabled": true,
+      "packTtlHours": 24
     }
   },
   "validationRules": {
@@ -253,7 +264,6 @@ const { data } = await client.getJourney({
     }
   },
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
-  "blueprint_customization": {},
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string",
@@ -263,6 +273,12 @@ const { data } = await client.getJourney({
   "version": 0,
   "revisions": 0,
   "featureFlags": {},
+  "templating": {
+    "customVariables": [
+      {}
+    ],
+    "env": {}
+  },
   "revision_id": "42"
 }
 ```
@@ -398,7 +414,12 @@ const { data } = await client.createJourneyRevision(
       },
       thirdPartyCookies: true,
       betaFeatures: {
-        modernProducts: true
+        modernProducts: true,
+        modernLauncher: true
+      },
+      offline: {
+        enabled: true,
+        packTtlHours: 24
       }
     },
     validationRules: {
@@ -410,7 +431,6 @@ const { data } = await client.createJourneyRevision(
       }
     },
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
-    blueprint_customization: {},
     createdBy: 'string',
     updatedBy: 'string',
     __lastModifiedAt: 'string',
@@ -565,7 +585,8 @@ const { data } = await client.getJourneyRevision({
       "isActive": true,
       "savingProgress": {},
       "thirdPartyCookies": true,
-      "betaFeatures": {}
+      "betaFeatures": {},
+      "offline": {}
     },
     "validationRules": {
       "block1": "rule123",
@@ -573,7 +594,6 @@ const { data } = await client.getJourneyRevision({
       "block3": {}
     },
     "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
-    "blueprint_customization": {},
     "createdBy": "string",
     "updatedBy": "string",
     "__lastModifiedAt": "string",
@@ -582,7 +602,11 @@ const { data } = await client.getJourneyRevision({
     "deletedAt": "string",
     "version": 0,
     "revisions": 0,
-    "featureFlags": {}
+    "featureFlags": {},
+    "templating": {
+      "customVariables": [],
+      "env": {}
+    }
   }
 }
 ```
@@ -791,6 +815,42 @@ const { data } = await client.getJourneyEnvironmentVariables()
 
 ---
 
+### `getJourneyTemplateVariables`
+
+List what a journey template can reference beyond the entity's own attributes: the organization's Custom Variables and its scalar environment variables (`String`, `Text`, `Number`, `Boolean`). Names o
+
+`GET /v1/journey/template-variables`
+
+```ts
+const { data } = await client.getJourneyTemplateVariables()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "customVariables": [
+    {
+      "key": "string",
+      "name": "string"
+    }
+  ],
+  "environment": [
+    {
+      "key": "string",
+      "type": "String",
+      "description": "string",
+      "group": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `getJourneyProducts`
 
 Get products available in the journey by id. requires public journey token to be passed.
@@ -954,7 +1014,12 @@ const { data } = await client.createJourney(
       },
       thirdPartyCookies: true,
       betaFeatures: {
-        modernProducts: true
+        modernProducts: true,
+        modernLauncher: true
+      },
+      offline: {
+        enabled: true,
+        packTtlHours: 24
       }
     },
     validationRules: {
@@ -966,7 +1031,6 @@ const { data } = await client.createJourney(
       }
     },
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
-    blueprint_customization: {},
     createdBy: 'string',
     updatedBy: 'string',
     __lastModifiedAt: 'string'
@@ -1080,7 +1144,12 @@ const { data } = await client.createJourney(
     },
     "thirdPartyCookies": true,
     "betaFeatures": {
-      "modernProducts": true
+      "modernProducts": true,
+      "modernLauncher": true
+    },
+    "offline": {
+      "enabled": true,
+      "packTtlHours": 24
     }
   },
   "validationRules": {
@@ -1092,7 +1161,6 @@ const { data } = await client.createJourney(
     }
   },
   "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
-  "blueprint_customization": {},
   "createdBy": "string",
   "updatedBy": "string",
   "__lastModifiedAt": "string",
@@ -1101,7 +1169,13 @@ const { data } = await client.createJourney(
   "deletedAt": "string",
   "version": 0,
   "revisions": 0,
-  "featureFlags": {}
+  "featureFlags": {},
+  "templating": {
+    "customVariables": [
+      {}
+    ],
+    "env": {}
+  }
 }
 ```
 
@@ -1220,7 +1294,12 @@ const { data } = await client.updateJourney(
       },
       thirdPartyCookies: true,
       betaFeatures: {
-        modernProducts: true
+        modernProducts: true,
+        modernLauncher: true
+      },
+      offline: {
+        enabled: true,
+        packTtlHours: 24
       }
     },
     validationRules: {
@@ -1232,7 +1311,6 @@ const { data } = await client.updateJourney(
       }
     },
     _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
-    blueprint_customization: {},
     createdBy: 'string',
     updatedBy: 'string',
     __lastModifiedAt: 'string'
@@ -1321,7 +1399,8 @@ const { data } = await client.patchUpdateJourney(
       "isActive": true,
       "savingProgress": {},
       "thirdPartyCookies": true,
-      "betaFeatures": {}
+      "betaFeatures": {},
+      "offline": {}
     },
     "validationRules": {
       "block1": "rule123",
@@ -1329,7 +1408,6 @@ const { data } = await client.patchUpdateJourney(
       "block3": {}
     },
     "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
-    "blueprint_customization": {},
     "createdBy": "string",
     "updatedBy": "string",
     "__lastModifiedAt": "string",
@@ -1338,7 +1416,11 @@ const { data } = await client.patchUpdateJourney(
     "deletedAt": "string",
     "version": 0,
     "revisions": 0,
-    "featureFlags": {}
+    "featureFlags": {},
+    "templating": {
+      "customVariables": [],
+      "env": {}
+    }
   }
 }
 ```
@@ -1580,7 +1662,12 @@ const { data } = await client.createJourneyV2(
         supportedRevision: 0
       },
       betaFeatures: {
-        modernProducts: true
+        modernProducts: true,
+        modernLauncher: true
+      },
+      offline: {
+        enabled: true,
+        packTtlHours: 24
       }
     },
     validationRules: {
@@ -1591,8 +1678,7 @@ const { data } = await client.createJourneyV2(
         field2: ['rule102', 'rule103']
       }
     },
-    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
-    blueprint_customization: {}
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -1698,7 +1784,12 @@ const { data } = await client.createJourneyV2(
       "supportedRevision": 0
     },
     "betaFeatures": {
-      "modernProducts": true
+      "modernProducts": true,
+      "modernLauncher": true
+    },
+    "offline": {
+      "enabled": true,
+      "packTtlHours": 24
     }
   },
   "validationRules": {
@@ -1709,8 +1800,7 @@ const { data } = await client.createJourneyV2(
       "field2": ["rule102", "rule103"]
     }
   },
-  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
-  "blueprint_customization": {}
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -1824,7 +1914,12 @@ const { data } = await client.updateJourneyV2(
         supportedRevision: 0
       },
       betaFeatures: {
-        modernProducts: true
+        modernProducts: true,
+        modernLauncher: true
+      },
+      offline: {
+        enabled: true,
+        packTtlHours: 24
       }
     },
     validationRules: {
@@ -1835,8 +1930,7 @@ const { data } = await client.updateJourneyV2(
         field2: ['rule102', 'rule103']
       }
     },
-    _manifest: ['123e4567-e89b-12d3-a456-426614174000'],
-    blueprint_customization: {}
+    _manifest: ['123e4567-e89b-12d3-a456-426614174000']
   },
 )
 ```
@@ -1942,7 +2036,12 @@ const { data } = await client.updateJourneyV2(
       "supportedRevision": 0
     },
     "betaFeatures": {
-      "modernProducts": true
+      "modernProducts": true,
+      "modernLauncher": true
+    },
+    "offline": {
+      "enabled": true,
+      "packTtlHours": 24
     }
   },
   "validationRules": {
@@ -1953,8 +2052,7 @@ const { data } = await client.updateJourneyV2(
       "field2": ["rule102", "rule103"]
     }
   },
-  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
-  "blueprint_customization": {}
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -2079,7 +2177,12 @@ const { data } = await client.patchUpdateJourneyV2(
       "supportedRevision": 0
     },
     "betaFeatures": {
-      "modernProducts": true
+      "modernProducts": true,
+      "modernLauncher": true
+    },
+    "offline": {
+      "enabled": true,
+      "packTtlHours": 24
     }
   },
   "validationRules": {
@@ -2090,8 +2193,7 @@ const { data } = await client.patchUpdateJourneyV2(
       "field2": ["rule102", "rule103"]
     }
   },
-  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
-  "blueprint_customization": {}
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -2213,7 +2315,12 @@ const { data } = await client.getJourneyV2({
       "supportedRevision": 0
     },
     "betaFeatures": {
-      "modernProducts": true
+      "modernProducts": true,
+      "modernLauncher": true
+    },
+    "offline": {
+      "enabled": true,
+      "packTtlHours": 24
     }
   },
   "validationRules": {
@@ -2224,8 +2331,7 @@ const { data } = await client.getJourneyV2({
       "field2": ["rule102", "rule103"]
     }
   },
-  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"],
-  "blueprint_customization": {}
+  "_manifest": ["123e4567-e89b-12d3-a456-426614174000"]
 }
 ```
 
@@ -2266,7 +2372,8 @@ const { data } = await client.getSettingsForJourney({
 {
   "organizationId": "739224",
   "canary": true,
-  "thirdPartyCookies": true
+  "thirdPartyCookies": true,
+  "offline": true
 }
 ```
 
@@ -2453,6 +2560,77 @@ type ExternalValueError = {
 }
 ```
 
+### `JourneyTemplatingContext`
+
+What the journey's Handlebars templates need from the organization, derived from the served configuration only. Present when the journey contains templates and templating is enabled for the organization. Read-only: like `featureFlags`, it is dropped from any write, so a client that sends the configu
+
+```ts
+type JourneyTemplatingContext = {
+  templating?: {
+    customVariables: Array<{
+      key: { ... }
+      template: { ... }
+    }>
+    env: Record<string, string | number | boolean | {
+      url: { ... }
+      label: { ... }
+      description?: { ... }
+    }>
+  }
+}
+```
+
+### `JourneyTemplateVariablesResponse`
+
+```ts
+type JourneyTemplateVariablesResponse = {
+  customVariables: Array<{
+    key: string
+    name: string
+  }>
+  environment: Array<{
+    key: string
+    type: "String" | "Text" | "Number" | "Boolean" | "Link"
+    description?: string
+    group?: string
+  }>
+}
+```
+
+### `JourneyTemplating`
+
+```ts
+type JourneyTemplating = {
+  customVariables: Array<{
+    key: string
+    template: string
+  }>
+  env: Record<string, string | number | boolean | {
+    url: string
+    label: string | Record<string, string>
+    description?: string | Record<string, string>
+  }>
+}
+```
+
+### `JourneyTemplatingLink`
+
+A Link variable; label and description are a string or per-language strings, resolved by the runtime
+
+```ts
+type JourneyTemplatingLink = {
+  url: string
+  label: string | Record<string, string>
+  description?: string | Record<string, string>
+}
+```
+
+### `JourneyTemplatingTranslatable`
+
+```ts
+type JourneyTemplatingTranslatable = string | Record<string, string>
+```
+
 ### `JourneyEnvironmentVariablesResponse`
 
 ```ts
@@ -2575,10 +2753,10 @@ type JourneyResponse = {
       savingProgress?: { ... }
       thirdPartyCookies?: { ... }
       betaFeatures?: { ... }
+      offline?: { ... }
     }
     validationRules?: Record<string, string | string[] | Record<string, string | string[]>>
     _manifest?: string // uuid[]
-    blueprint_customization?: Record<string, unknown>
     createdBy?: string
     updatedBy?: string
     __lastModifiedAt?: string
@@ -3277,8 +3455,8 @@ type JourneyRevision = {
       savingProgress?: { ... }
       thirdPartyCookies?: { ... }
       betaFeatures?: { ... }
+      offline?: { ... }
     }
-    validationRules?: Record<string, string | string[] | Record<string, string | string[]>>
   // ...
 }
 ```
@@ -3459,6 +3637,7 @@ type GetSettingsForJourney = {
   organizationId?: string
   canary?: boolean
   thirdPartyCookies?: boolean
+  offline?: boolean
 }
 ```
 
