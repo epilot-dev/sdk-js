@@ -48,9 +48,13 @@ declare namespace Components {
          * same in every language". A translated field must carry the fallback
          * language.
          *
-         * The URL must be absolute and `http`/`https` only. This value is served
-         * to browser-facing consumers, so `javascript:` and `data:` URLs are
-         * rejected at write time.
+         * The URL must be absolute and use `http`, `https`, `mailto` or `tel`.
+         * `mailto:` needs at least one address (`name@domain`) and may carry
+         * `?subject=…`; `tel:` needs a phone number (digits, an optional leading
+         * `+`, spaces, `-`, `.`, `(`, `)`) and may carry `;ext=…`. The checks are
+         * deliberately light. This value is served to browser-facing consumers,
+         * so every other scheme — `javascript:` and `data:` included — is rejected
+         * at write time.
          *
          * Written flat rather than composed from a shared field set: `allOf` plus
          * `additionalProperties: false` is rejected by most validators, because
@@ -75,10 +79,9 @@ declare namespace Components {
         ListValue;
         /**
          * The structure a variable's value holds. `SecretString` is encrypted at rest and
-         * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
-         * may be served to browser-facing consumers; `String` and `SecretString` may not. A
-         * `List` inherits this from its element type: a `List` is served only when its
-         * `itemType` is itself client-safe, so a `List<String>` or `List<SecretString>` is not.
+         * its value is never returned. Every other type
+         * may be served to browser-facing consumers. A `List` inherits this from its element
+         * type: a `List<SecretString>` is never served.
          *
          */
         export type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List";
@@ -86,10 +89,9 @@ declare namespace Components {
             key: string; // ^[a-z0-9][a-z0-9_.\-]{0,127}$
             type: /**
              * The structure a variable's value holds. `SecretString` is encrypted at rest and
-             * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
-             * may be served to browser-facing consumers; `String` and `SecretString` may not. A
-             * `List` inherits this from its element type: a `List` is served only when its
-             * `itemType` is itself client-safe, so a `List<String>` or `List<SecretString>` is not.
+             * its value is never returned. Every other type
+             * may be served to browser-facing consumers. A `List` inherits this from its element
+             * type: a `List<SecretString>` is never served.
              *
              */
             EnvironmentValueType;
@@ -132,9 +134,13 @@ declare namespace Components {
              * same in every language". A translated field must carry the fallback
              * language.
              *
-             * The URL must be absolute and `http`/`https` only. This value is served
-             * to browser-facing consumers, so `javascript:` and `data:` URLs are
-             * rejected at write time.
+             * The URL must be absolute and use `http`, `https`, `mailto` or `tel`.
+             * `mailto:` needs at least one address (`name@domain`) and may carry
+             * `?subject=…`; `tel:` needs a phone number (digits, an optional leading
+             * `+`, spaces, `-`, `.`, `(`, `)`) and may carry `;ext=…`. The checks are
+             * deliberately light. This value is served to browser-facing consumers,
+             * so every other scheme — `javascript:` and `data:` included — is rejected
+             * at write time.
              *
              * Written flat rather than composed from a shared field set: `allOf` plus
              * `additionalProperties: false` is rejected by most validators, because
@@ -168,10 +174,9 @@ declare namespace Components {
             key: string; // ^[a-z0-9][a-z0-9_.\-]{0,127}$
             type: /**
              * The structure a variable's value holds. `SecretString` is encrypted at rest and
-             * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
-             * may be served to browser-facing consumers; `String` and `SecretString` may not. A
-             * `List` inherits this from its element type: a `List` is served only when its
-             * `itemType` is itself client-safe, so a `List<String>` or `List<SecretString>` is not.
+             * its value is never returned. Every other type
+             * may be served to browser-facing consumers. A `List` inherits this from its element
+             * type: a `List<SecretString>` is never served.
              *
              */
             EnvironmentValueType;
@@ -198,10 +203,9 @@ declare namespace Components {
             key: string;
             type: /**
              * The structure a variable's value holds. `SecretString` is encrypted at rest and
-             * its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
-             * may be served to browser-facing consumers; `String` and `SecretString` may not. A
-             * `List` inherits this from its element type: a `List` is served only when its
-             * `itemType` is itself client-safe, so a `List<String>` or `List<SecretString>` is not.
+             * its value is never returned. Every other type
+             * may be served to browser-facing consumers. A `List` inherits this from its element
+             * type: a `List<SecretString>` is never served.
              *
              */
             EnvironmentValueType;
@@ -244,9 +248,13 @@ declare namespace Components {
              * same in every language". A translated field must carry the fallback
              * language.
              *
-             * The URL must be absolute and `http`/`https` only. This value is served
-             * to browser-facing consumers, so `javascript:` and `data:` URLs are
-             * rejected at write time.
+             * The URL must be absolute and use `http`, `https`, `mailto` or `tel`.
+             * `mailto:` needs at least one address (`name@domain`) and may carry
+             * `?subject=…`; `tel:` needs a phone number (digits, an optional leading
+             * `+`, spaces, `-`, `.`, `(`, `)`) and may carry `;ext=…`. The checks are
+             * deliberately light. This value is served to browser-facing consumers,
+             * so every other scheme — `javascript:` and `data:` included — is rejected
+             * at write time.
              *
              * Written flat rather than composed from a shared field set: `allOf` plus
              * `additionalProperties: false` is rejected by most validators, because
@@ -348,9 +356,13 @@ declare namespace Components {
          * same in every language". A translated field must carry the fallback
          * language.
          *
-         * The URL must be absolute and `http`/`https` only. This value is served
-         * to browser-facing consumers, so `javascript:` and `data:` URLs are
-         * rejected at write time.
+         * The URL must be absolute and use `http`, `https`, `mailto` or `tel`.
+         * `mailto:` needs at least one address (`name@domain`) and may carry
+         * `?subject=…`; `tel:` needs a phone number (digits, an optional leading
+         * `+`, spaces, `-`, `.`, `(`, `)`) and may carry `;ext=…`. The checks are
+         * deliberately light. This value is served to browser-facing consumers,
+         * so every other scheme — `javascript:` and `data:` included — is rejected
+         * at write time.
          *
          * Written flat rather than composed from a shared field set: `allOf` plus
          * `additionalProperties: false` is rejected by most validators, because

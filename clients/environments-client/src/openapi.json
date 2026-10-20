@@ -20,6 +20,11 @@
     "/v1/environments": {
       "get": {
         "operationId": "listEnvironmentVariables",
+        "x-epilot-permissions": [
+          {
+            "action": "environments:edit"
+          }
+        ],
         "summary": "listEnvironmentVariables",
         "description": "List all environment variables for the organization. Returns metadata only, no secret values.",
         "tags": [
@@ -49,6 +54,11 @@
       },
       "post": {
         "operationId": "createEnvironmentVariable",
+        "x-epilot-permissions": [
+          {
+            "action": "environments:edit"
+          }
+        ],
         "summary": "createEnvironmentVariable",
         "description": "Create a new environment variable or secret for the organization. If `group` is provided and the group does not yet exist, it is created automatically.",
         "tags": [
@@ -96,6 +106,11 @@
     "/v1/environments/groups": {
       "get": {
         "operationId": "listEnvironmentGroups",
+        "x-epilot-permissions": [
+          {
+            "action": "environments:edit"
+          }
+        ],
         "summary": "listEnvironmentGroups",
         "description": "List all environment groups for the organization.",
         "tags": [
@@ -137,6 +152,11 @@
       ],
       "put": {
         "operationId": "putEnvironmentGroup",
+        "x-epilot-permissions": [
+          {
+            "action": "environments:edit"
+          }
+        ],
         "summary": "putEnvironmentGroup",
         "description": "Create or update an environment group by name. Acts as an upsert — creates the group if it does not exist.",
         "tags": [
@@ -186,6 +206,11 @@
       },
       "delete": {
         "operationId": "deleteEnvironmentGroup",
+        "x-epilot-permissions": [
+          {
+            "action": "environments:delete"
+          }
+        ],
         "summary": "deleteEnvironmentGroup",
         "description": "Deletes a group. Variables assigned to this group become ungrouped.",
         "tags": [
@@ -225,6 +250,11 @@
       ],
       "get": {
         "operationId": "getEnvironmentVariable",
+        "x-epilot-permissions": [
+          {
+            "action": "environments:edit"
+          }
+        ],
         "summary": "getEnvironmentVariable",
         "description": "Get an environment variable by key. Returns value for non-secret types, omitted for SecretString.",
         "tags": [
@@ -257,6 +287,11 @@
       },
       "put": {
         "operationId": "updateEnvironmentVariable",
+        "x-epilot-permissions": [
+          {
+            "action": "environments:edit"
+          }
+        ],
         "summary": "updateEnvironmentVariable",
         "description": "Create or update an environment variable. Acts as an upsert — creates the variable if it does not exist. If `group` is provided and the group does not yet exist, it is created automatically.",
         "tags": [
@@ -312,6 +347,11 @@
       },
       "delete": {
         "operationId": "deleteEnvironmentVariable",
+        "x-epilot-permissions": [
+          {
+            "action": "environments:delete"
+          }
+        ],
         "summary": "deleteEnvironmentVariable",
         "description": "Delete an environment variable by key.",
         "tags": [
@@ -348,7 +388,7 @@
     "schemas": {
       "EnvironmentValueType": {
         "type": "string",
-        "description": "The structure a variable's value holds. `SecretString` is encrypted at rest and\nits value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`\nmay be served to browser-facing consumers; `String` and `SecretString` may not. A\n`List` inherits this from its element type: a `List` is served only when its\n`itemType` is itself client-safe, so a `List<String>` or `List<SecretString>` is not.\n",
+        "description": "The structure a variable's value holds. `SecretString` is encrypted at rest and\nits value is never returned. Every other type\nmay be served to browser-facing consumers. A `List` inherits this from its element\ntype: a `List<SecretString>` is never served.\n",
         "enum": [
           "String",
           "SecretString",
@@ -423,7 +463,7 @@
         "additionalProperties": true
       },
       "LinkValue": {
-        "description": "One URL with a label and description a customer reads. `label` and\n`description` are each either a plain string or one string per language;\nthe two fields decide that independently — a plain string means \"the\nsame in every language\". A translated field must carry the fallback\nlanguage.\n\nThe URL must be absolute and `http`/`https` only. This value is served\nto browser-facing consumers, so `javascript:` and `data:` URLs are\nrejected at write time.\n\nWritten flat rather than composed from a shared field set: `allOf` plus\n`additionalProperties: false` is rejected by most validators, because\neach branch sees the sibling's properties as unknown. The composition\nlives in zod (LinkFieldsSchema) — see src/core/value-types.ts.\n\nEach translated value of `label` and `description` is also limited to\nthe same maximum as the plain-string form above — 255 characters for\n`label`, 1024 for `description`. The limit is enforced by the server\neven though the shared `StringTranslations` schema referenced below\ndoes not itself declare it.\n",
+        "description": "One URL with a label and description a customer reads. `label` and\n`description` are each either a plain string or one string per language;\nthe two fields decide that independently — a plain string means \"the\nsame in every language\". A translated field must carry the fallback\nlanguage.\n\nThe URL must be absolute and use `http`, `https`, `mailto` or `tel`.\n`mailto:` needs at least one address (`name@domain`) and may carry\n`?subject=…`; `tel:` needs a phone number (digits, an optional leading\n`+`, spaces, `-`, `.`, `(`, `)`) and may carry `;ext=…`. The checks are\ndeliberately light. This value is served to browser-facing consumers,\nso every other scheme — `javascript:` and `data:` included — is rejected\nat write time.\n\nWritten flat rather than composed from a shared field set: `allOf` plus\n`additionalProperties: false` is rejected by most validators, because\neach branch sees the sibling's properties as unknown. The composition\nlives in zod (LinkFieldsSchema) — see src/core/value-types.ts.\n\nEach translated value of `label` and `description` is also limited to\nthe same maximum as the plain-string form above — 255 characters for\n`label`, 1024 for `description`. The limit is enforced by the server\neven though the shared `StringTranslations` schema referenced below\ndoes not itself declare it.\n",
         "type": "object",
         "required": [
           "url",
