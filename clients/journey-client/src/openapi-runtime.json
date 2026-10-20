@@ -195,6 +195,12 @@
         "responses": {}
       }
     },
+    "/v1/journey/template-variables": {
+      "get": {
+        "operationId": "getJourneyTemplateVariables",
+        "responses": {}
+      }
+    },
     "/v1/journey/products/{id}": {
       "get": {
         "operationId": "getJourneyProducts",

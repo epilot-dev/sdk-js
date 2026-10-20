@@ -201,7 +201,17 @@ declare namespace Components {
              * true
              */
             thirdPartyCookies?: boolean;
+            /**
+             * Offline journeys (ER-5432): whether the published revision has settings.offline.enabled. Absent when the setting was never set.
+             * example:
+             * true
+             */
+            offline?: boolean;
         }
+        /**
+         * What the journey's Handlebars templates need from the organization, derived from the served configuration only. Present when the journey contains templates and templating is enabled for the organization. Read-only: like `featureFlags`, it is dropped from any write, so a client that sends the configuration back never stores it.
+         *
+         */
         export interface Journey {
             [name: string]: any;
             journeyId?: string;
@@ -450,7 +460,28 @@ declare namespace Components {
                      *
                      */
                     modernProducts?: boolean;
+                    /**
+                     * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                     *
+                     */
+                    modernLauncher?: boolean;
                 };
+                /**
+                 * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                 *
+                 */
+                offline?: {
+                    /**
+                     * Prepare this journey for offline use on devices that open it online first.
+                     */
+                    enabled: boolean;
+                    /**
+                     * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                     * example:
+                     * 24
+                     */
+                    packTtlHours?: number;
+                } | null;
             };
             validationRules?: /**
              * References to validation rules organized by blocks and fields.
@@ -478,17 +509,6 @@ declare namespace Components {
              * Manifest/Blueprint ID used to create/update the entity
              */
             _manifest?: string /* uuid */[];
-            /**
-             * Blueprint field-locking contract (server-managed). Carries the
-             * author plane (locks, default level) and the org plane (server-derived
-             * overlay). Public writes never persist client-supplied values — the
-             * stored contract is authoritative; it is written only by the
-             * Blueprints install pipeline.
-             *
-             */
-            blueprint_customization?: {
-                [name: string]: any;
-            };
             createdBy?: string;
             updatedBy?: string | null;
             /**
@@ -511,6 +531,7 @@ declare namespace Components {
             featureFlags?: {
                 [name: string]: any;
             };
+            templating?: JourneyTemplating;
         }
         /**
          * Journeys read from the API always carry an explicit `settings.isActive`. The flag remains optional in request bodies.
@@ -787,7 +808,28 @@ declare namespace Components {
                      *
                      */
                     modernProducts?: boolean;
+                    /**
+                     * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                     *
+                     */
+                    modernLauncher?: boolean;
                 };
+                /**
+                 * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                 *
+                 */
+                offline?: {
+                    /**
+                     * Prepare this journey for offline use on devices that open it online first.
+                     */
+                    enabled: boolean;
+                    /**
+                     * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                     * example:
+                     * 24
+                     */
+                    packTtlHours?: number;
+                } | null;
             };
             validationRules?: /**
              * References to validation rules organized by blocks and fields.
@@ -815,17 +857,6 @@ declare namespace Components {
              * Manifest/Blueprint ID used to create/update the entity
              */
             _manifest?: string /* uuid */[];
-            /**
-             * Blueprint field-locking contract (server-managed). Carries the
-             * author plane (locks, default level) and the org plane (server-derived
-             * overlay). Public writes never persist client-supplied values — the
-             * stored contract is authoritative; it is written only by the
-             * Blueprints install pipeline.
-             *
-             */
-            blueprint_customization?: {
-                [name: string]: any;
-            };
             createdBy?: string;
             updatedBy?: string | null;
             /**
@@ -1070,7 +1101,28 @@ declare namespace Components {
                      *
                      */
                     modernProducts?: boolean;
+                    /**
+                     * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                     *
+                     */
+                    modernLauncher?: boolean;
                 };
+                /**
+                 * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                 *
+                 */
+                offline?: {
+                    /**
+                     * Prepare this journey for offline use on devices that open it online first.
+                     */
+                    enabled: boolean;
+                    /**
+                     * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                     * example:
+                     * 24
+                     */
+                    packTtlHours?: number;
+                } | null;
             };
             validationRules?: /**
              * References to validation rules organized by blocks and fields.
@@ -1098,17 +1150,6 @@ declare namespace Components {
              * Manifest/Blueprint ID used to create/update the entity
              */
             _manifest?: string /* uuid */[];
-            /**
-             * Blueprint field-locking contract (server-managed). Carries the
-             * author plane (locks, default level) and the org plane (server-derived
-             * overlay). Public writes never persist client-supplied values — the
-             * stored contract is authoritative; it is written only by the
-             * Blueprints install pipeline.
-             *
-             */
-            blueprint_customization?: {
-                [name: string]: any;
-            };
         }
         export interface JourneyEnvironmentResponse {
             items: {
@@ -1324,7 +1365,11 @@ declare namespace Components {
             published_by?: string;
         }
         export interface JourneyResponse {
-            createdJourney?: Journey;
+            createdJourney?: /**
+             * What the journey's Handlebars templates need from the organization, derived from the served configuration only. Present when the journey contains templates and templating is enabled for the organization. Read-only: like `featureFlags`, it is dropped from any write, so a client that sends the configuration back never stores it.
+             *
+             */
+            Journey;
         }
         export interface JourneyRevision {
             /**
@@ -1614,7 +1659,28 @@ declare namespace Components {
                          *
                          */
                         modernProducts?: boolean;
+                        /**
+                         * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                         *
+                         */
+                        modernLauncher?: boolean;
                     };
+                    /**
+                     * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                     *
+                     */
+                    offline?: {
+                        /**
+                         * Prepare this journey for offline use on devices that open it online first.
+                         */
+                        enabled: boolean;
+                        /**
+                         * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                         * example:
+                         * 24
+                         */
+                        packTtlHours?: number;
+                    } | null;
                 };
                 validationRules?: /**
                  * References to validation rules organized by blocks and fields.
@@ -1642,17 +1708,6 @@ declare namespace Components {
                  * Manifest/Blueprint ID used to create/update the entity
                  */
                 _manifest?: string /* uuid */[];
-                /**
-                 * Blueprint field-locking contract (server-managed). Carries the
-                 * author plane (locks, default level) and the org plane (server-derived
-                 * overlay). Public writes never persist client-supplied values — the
-                 * stored contract is authoritative; it is written only by the
-                 * Blueprints install pipeline.
-                 *
-                 */
-                blueprint_customization?: {
-                    [name: string]: any;
-                };
                 createdBy?: string;
                 updatedBy?: string | null;
                 /**
@@ -1675,6 +1730,7 @@ declare namespace Components {
                 featureFlags?: {
                     [name: string]: any;
                 };
+                templating?: JourneyTemplating;
             };
         }
         export interface JourneyRevisionConflict {
@@ -1945,7 +2001,28 @@ declare namespace Components {
                      *
                      */
                     modernProducts?: boolean;
+                    /**
+                     * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                     *
+                     */
+                    modernLauncher?: boolean;
                 };
+                /**
+                 * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                 *
+                 */
+                offline?: {
+                    /**
+                     * Prepare this journey for offline use on devices that open it online first.
+                     */
+                    enabled: boolean;
+                    /**
+                     * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                     * example:
+                     * 24
+                     */
+                    packTtlHours?: number;
+                } | null;
             };
             validationRules?: /**
              * References to validation rules organized by blocks and fields.
@@ -1973,17 +2050,6 @@ declare namespace Components {
              * Manifest/Blueprint ID used to create/update the entity
              */
             _manifest?: string /* uuid */[];
-            /**
-             * Blueprint field-locking contract (server-managed). Carries the
-             * author plane (locks, default level) and the org plane (server-derived
-             * overlay). Public writes never persist client-supplied values — the
-             * stored contract is authoritative; it is written only by the
-             * Blueprints install pipeline.
-             *
-             */
-            blueprint_customization?: {
-                [name: string]: any;
-            };
             createdBy?: string;
             updatedBy?: string | null;
             /**
@@ -2067,6 +2133,60 @@ declare namespace Components {
              */
             revision_id?: string;
         }
+        export interface JourneyTemplateVariablesResponse {
+            /**
+             * Custom Variables a template can expand as `{{key}}`
+             */
+            customVariables: {
+                key: string;
+                name: string;
+            }[];
+            /**
+             * Environment variables a template can read as `{{env.key}}`; a Link as `{{env.key.url}}` and `{{env.key.label}}`
+             */
+            environment: {
+                key: string;
+                type: "String" | "Text" | "Number" | "Boolean" | "Link";
+                description?: string;
+                /**
+                 * The environment group the variable belongs to, when it has one
+                 */
+                group?: string;
+            }[];
+        }
+        export interface JourneyTemplating {
+            /**
+             * Custom Variables the journey's templates reference, expanded transitively
+             */
+            customVariables: {
+                key: string;
+                template: string;
+            }[];
+            /**
+             * Browser-safe environment values the templates read, keyed by variable key; scalars, or a Link's fields
+             */
+            env: {
+                [name: string]: string | number | boolean | /* A Link variable; label and description are a string or per-language strings, resolved by the runtime */ JourneyTemplatingLink;
+            };
+        }
+        /**
+         * What the journey's Handlebars templates need from the organization, derived from the served configuration only. Present when the journey contains templates and templating is enabled for the organization. Read-only: like `featureFlags`, it is dropped from any write, so a client that sends the configuration back never stores it.
+         *
+         */
+        export interface JourneyTemplatingContext {
+            templating?: JourneyTemplating;
+        }
+        /**
+         * A Link variable; label and description are a string or per-language strings, resolved by the runtime
+         */
+        export interface JourneyTemplatingLink {
+            url: string;
+            label: JourneyTemplatingTranslatable;
+            description?: JourneyTemplatingTranslatable;
+        }
+        export type JourneyTemplatingTranslatable = string | {
+            [name: string]: string;
+        };
         export interface JourneyValidationError {
             /**
              * Error type identifier
@@ -2475,7 +2595,11 @@ declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.JourneyCreationRequest;
         namespace Responses {
-            export type $201 = Components.Schemas.Journey;
+            export type $201 = /**
+             * What the journey's Handlebars templates need from the organization, derived from the served configuration only. Present when the journey contains templates and templating is enabled for the organization. Read-only: like `featureFlags`, it is dropped from any write, so a client that sends the configuration back never stores it.
+             *
+             */
+            Components.Schemas.Journey;
             export type $400 = Components.Schemas.JourneyValidationError;
         }
     }
@@ -2871,7 +2995,28 @@ declare namespace Paths {
                          *
                          */
                         modernProducts?: boolean;
+                        /**
+                         * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                         *
+                         */
+                        modernLauncher?: boolean;
                     };
+                    /**
+                     * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                     *
+                     */
+                    offline?: {
+                        /**
+                         * Prepare this journey for offline use on devices that open it online first.
+                         */
+                        enabled: boolean;
+                        /**
+                         * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                         * example:
+                         * 24
+                         */
+                        packTtlHours?: number;
+                    } | null;
                 };
                 validationRules?: /**
                  * References to validation rules organized by blocks and fields.
@@ -2899,17 +3044,6 @@ declare namespace Paths {
                  * Manifest/Blueprint ID used to create/update the entity
                  */
                 _manifest?: string /* uuid */[];
-                /**
-                 * Blueprint field-locking contract (server-managed). Carries the
-                 * author plane (locks, default level) and the org plane (server-derived
-                 * overlay). Public writes never persist client-supplied values — the
-                 * stored contract is authoritative; it is written only by the
-                 * Blueprints install pipeline.
-                 *
-                 */
-                blueprint_customization?: {
-                    [name: string]: any;
-                };
                 createdBy?: string;
                 updatedBy?: string | null;
                 /**
@@ -2932,6 +3066,7 @@ declare namespace Paths {
                 featureFlags?: {
                     [name: string]: any;
                 };
+                templating?: Components.Schemas.JourneyTemplating;
                 /**
                  * example:
                  * 42
@@ -3052,6 +3187,15 @@ declare namespace Paths {
             export interface $403 {
             }
             export interface $404 {
+            }
+        }
+    }
+    namespace GetJourneyTemplateVariables {
+        namespace Responses {
+            export type $200 = Components.Schemas.JourneyTemplateVariablesResponse;
+            export interface $401 {
+            }
+            export interface $403 {
             }
         }
     }
@@ -3319,7 +3463,28 @@ declare namespace Paths {
                          *
                          */
                         modernProducts?: boolean;
+                        /**
+                         * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                         *
+                         */
+                        modernLauncher?: boolean;
                     };
+                    /**
+                     * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                     *
+                     */
+                    offline?: {
+                        /**
+                         * Prepare this journey for offline use on devices that open it online first.
+                         */
+                        enabled: boolean;
+                        /**
+                         * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                         * example:
+                         * 24
+                         */
+                        packTtlHours?: number;
+                    } | null;
                 };
                 validationRules?: /**
                  * References to validation rules organized by blocks and fields.
@@ -3347,17 +3512,6 @@ declare namespace Paths {
                  * Manifest/Blueprint ID used to create/update the entity
                  */
                 _manifest?: string /* uuid */[];
-                /**
-                 * Blueprint field-locking contract (server-managed). Carries the
-                 * author plane (locks, default level) and the org plane (server-derived
-                 * overlay). Public writes never persist client-supplied values — the
-                 * stored contract is authoritative; it is written only by the
-                 * Blueprints install pipeline.
-                 *
-                 */
-                blueprint_customization?: {
-                    [name: string]: any;
-                };
             }
         }
     }
@@ -3750,6 +3904,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJourneyEnvironmentVariables.Responses.$200>
   /**
+   * getJourneyTemplateVariables - getJourneyTemplateVariables
+   * 
+   * List what a journey template can reference beyond the entity's own attributes: the organization's Custom Variables and its scalar environment variables (`String`, `Text`, `Number`, `Boolean`). Names only, never values. Intended for the journey builder's variable picker; requires a journey authoring token, not an environments token.
+   */
+  'getJourneyTemplateVariables'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetJourneyTemplateVariables.Responses.$200>
+  /**
    * getJourneyProducts - getJourneyProducts
    * 
    * Get products available in the journey by id. requires public journey token to be passed.
@@ -4049,6 +4213,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetJourneyEnvironmentVariables.Responses.$200>
   }
+  ['/v1/journey/template-variables']: {
+    /**
+     * getJourneyTemplateVariables - getJourneyTemplateVariables
+     * 
+     * List what a journey template can reference beyond the entity's own attributes: the organization's Custom Variables and its scalar environment variables (`String`, `Text`, `Number`, `Boolean`). Names only, never values. Intended for the journey builder's variable picker; requires a journey authoring token, not an environments token.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetJourneyTemplateVariables.Responses.$200>
+  }
   ['/v1/journey/products/{id}']: {
     /**
      * getJourneyProducts - getJourneyProducts
@@ -4241,6 +4417,11 @@ export type JourneyRevisionList = Components.Schemas.JourneyRevisionList;
 export type JourneyRevisionRequest = Components.Schemas.JourneyRevisionRequest;
 export type JourneyRevisionSummary = Components.Schemas.JourneyRevisionSummary;
 export type JourneyServedRevision = Components.Schemas.JourneyServedRevision;
+export type JourneyTemplateVariablesResponse = Components.Schemas.JourneyTemplateVariablesResponse;
+export type JourneyTemplating = Components.Schemas.JourneyTemplating;
+export type JourneyTemplatingContext = Components.Schemas.JourneyTemplatingContext;
+export type JourneyTemplatingLink = Components.Schemas.JourneyTemplatingLink;
+export type JourneyTemplatingTranslatable = Components.Schemas.JourneyTemplatingTranslatable;
 export type JourneyValidationError = Components.Schemas.JourneyValidationError;
 export type JourneyValidationResponse = Components.Schemas.JourneyValidationResponse;
 export type PatchUpdateJourneyRequest = Components.Schemas.PatchUpdateJourneyRequest;
