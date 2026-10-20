@@ -145,6 +145,16 @@
         "content": {
           "application/json": {}
         }
+      },
+      "BadGateway": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ServiceUnavailable": {
+        "content": {
+          "application/json": {}
+        }
       }
     }
   }

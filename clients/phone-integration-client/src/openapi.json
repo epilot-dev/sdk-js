@@ -271,6 +271,9 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
           }
         }
       },
@@ -330,7 +333,7 @@
             "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "The user is not an active member of the organization",
+            "description": "The user is not an active member of the organization (code `member_not_found`)",
             "content": {
               "application/json": {
                 "schema": {
@@ -340,7 +343,7 @@
             }
           },
           "409": {
-            "description": "The organization is not set up for the phone (see getManagerStatus)",
+            "description": "The member cannot get the phone yet; `code` says why:\n- `not_set_up`: the organization is not set up for the phone (see getManagerStatus);\n- `identity_subject_unavailable`: identity-api cannot issue the member's subject (organization\n  not enabled on the identity client, or the user is not an active member there);\n- `identity_client_unavailable`: the identity client the setup points at is not active;\n- `provider_conflict`: the provider refused, e.g. this person's identity is bound to another\n  provider user.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -348,6 +351,9 @@
                 }
               }
             }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
           }
         }
       }
@@ -361,7 +367,9 @@
           "description": "epilot user id (`custom:ivy_user_id`)",
           "schema": {
             "type": "string",
-            "maxLength": 64
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
           }
         }
       ],
@@ -384,6 +392,9 @@
           "204": {
             "description": "The member no longer holds the phone"
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
@@ -391,7 +402,17 @@
             "$ref": "#/components/responses/Forbidden"
           },
           "404": {
-            "description": "The member does not hold the phone",
+            "description": "The member does not hold the phone (code `agent_not_found`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The role was removed but the provider user could not be deactivated (code `provider_error`);\nremoving again retries the deactivation.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -412,7 +433,9 @@
           "description": "epilot organization id",
           "schema": {
             "type": "string",
-            "maxLength": 64
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
           }
         }
       ],
@@ -442,11 +465,20 @@
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -460,7 +492,9 @@
           "description": "epilot organization id",
           "schema": {
             "type": "string",
-            "maxLength": 64
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
           }
         }
       ],
@@ -510,7 +544,7 @@
             "$ref": "#/components/responses/Forbidden"
           },
           "409": {
-            "description": "The provider refused (for example the account name is taken)",
+            "description": "The provider refused, for example the account name is taken (code `provider_conflict`)",
             "content": {
               "application/json": {
                 "schema": {
@@ -520,14 +554,10 @@
             }
           },
           "502": {
-            "description": "The provider could not be reached or answered unexpectedly",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -557,6 +587,26 @@
       },
       "Forbidden": {
         "description": "The caller lacks the required permission",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "BadGateway": {
+        "description": "A dependency failed: the telephony provider could not be reached or answered unexpectedly (code\n`provider_error`, with the provider's request id when it sent one), or identity-api is\ntemporarily unavailable (code `identity_unavailable`). Retrying is safe.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "The operator's admin-portal groups could not be checked right now; retry",
         "content": {
           "application/json": {
             "schema": {
@@ -634,12 +684,13 @@
           },
           "status": {
             "type": "string",
-            "description": "`active`: holds the phone and has an enabled provider user. `pending`: assigned in epilot but\nthe provider user is not activated yet. `disabled`: provider user disabled. `missing_provider`:\nholds `phone:use` but no provider user is bound (assign again to repair).\n",
+            "description": "`active`: holds the phone and has an enabled provider user. `pending`: assigned in epilot but\nthe provider user is not activated yet. `disabled`: provider user disabled. `missing_provider`:\nholds `phone:use` but no provider user is bound (assign again to repair). `missing_role`:\nassigned here, but the `phone_agent` role (`phone:use`) was removed elsewhere, e.g. in the\nusers and permissions settings (assign again to restore it, or remove to deactivate the\nprovider user).\n",
             "enum": [
               "active",
               "pending",
               "disabled",
-              "missing_provider"
+              "missing_provider",
+              "missing_role"
             ]
           },
           "provider_user_id": {
@@ -671,7 +722,9 @@
           "user_id": {
             "type": "string",
             "description": "epilot user id of an active member of the caller's organization",
-            "maxLength": 64
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
           }
         }
       },
@@ -773,13 +826,16 @@
         "properties": {
           "account_name": {
             "type": "string",
-            "description": "Provider tenant name, unique across the provider (3 to 100 characters). Required the first\ntime; ignored once the tenant exists.\n",
+            "description": "Provider tenant name, unique across the provider (3 to 100 characters). Required the first\ntime (`400` with code `account_name_required` without it); ignored once the tenant exists.\n",
             "minLength": 3,
             "maxLength": 100
           },
           "identity_client_id": {
             "type": "string",
-            "description": "identity-api client registered for the provider (its partner application for this stage)"
+            "description": "identity-api client registered for the provider (its partner application for this stage)",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._~-]+$"
           },
           "identity_client_secret": {
             "type": "string",

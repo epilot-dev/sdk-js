@@ -321,7 +321,7 @@ type PhoneAgent = {
   user_id: string
   email: string
   display_name?: string
-  status: "active" | "pending" | "disabled" | "missing_provider"
+  status: "active" | "pending" | "disabled" | "missing_provider" | "missing_role"
   provider_user_id?: string
   provider_roles?: string[]
   assigned_at?: string // date-time

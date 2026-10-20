@@ -8,8 +8,10 @@ import type {
 
 declare namespace Components {
     namespace Responses {
+        export type BadGateway = Schemas.ErrorResponse;
         export type BadRequest = Schemas.ErrorResponse;
         export type Forbidden = Schemas.ErrorResponse;
+        export type ServiceUnavailable = Schemas.ErrorResponse;
         export type Unauthorized = Schemas.ErrorResponse;
     }
     namespace Schemas {
@@ -17,7 +19,7 @@ declare namespace Components {
             /**
              * epilot user id of an active member of the caller's organization
              */
-            user_id: string;
+            user_id: string; // ^[A-Za-z0-9_-]+$
         }
         export interface CustomerBatchSearchResult {
             /**
@@ -109,10 +111,13 @@ declare namespace Components {
             /**
              * `active`: holds the phone and has an enabled provider user. `pending`: assigned in epilot but
              * the provider user is not activated yet. `disabled`: provider user disabled. `missing_provider`:
-             * holds `phone:use` but no provider user is bound (assign again to repair).
+             * holds `phone:use` but no provider user is bound (assign again to repair). `missing_role`:
+             * assigned here, but the `phone_agent` role (`phone:use`) was removed elsewhere, e.g. in the
+             * users and permissions settings (assign again to restore it, or remove to deactivate the
+             * provider user).
              *
              */
-            status: "active" | "pending" | "disabled" | "missing_provider";
+            status: "active" | "pending" | "disabled" | "missing_provider" | "missing_role";
             /**
              * The provider's id of the bound user
              */
@@ -160,14 +165,14 @@ declare namespace Components {
         export interface ProviderSetupRequest {
             /**
              * Provider tenant name, unique across the provider (3 to 100 characters). Required the first
-             * time; ignored once the tenant exists.
+             * time (`400` with code `account_name_required` without it); ignored once the tenant exists.
              *
              */
             account_name?: string;
             /**
              * identity-api client registered for the provider (its partner application for this stage)
              */
-            identity_client_id: string;
+            identity_client_id: string; // ^[A-Za-z0-9._~-]+$
             /**
              * The client's current secret, forwarded to the provider's SSO configuration and never stored
              */
@@ -186,6 +191,7 @@ declare namespace Paths {
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Schemas.ErrorResponse;
             export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
         }
     }
     namespace BatchSearchCustomers {
@@ -224,8 +230,11 @@ declare namespace Paths {
     namespace GetProviderSetup {
         namespace Responses {
             export type $200 = Components.Schemas.ProviderSetup;
+            export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $502 = Components.Responses.BadGateway;
+            export type $503 = Components.Responses.ServiceUnavailable;
         }
     }
     namespace ListPhoneAgents {
@@ -235,15 +244,18 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $502 = Components.Responses.BadGateway;
         }
     }
     namespace RemovePhoneAgent {
         namespace Responses {
             export interface $204 {
             }
+            export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Schemas.ErrorResponse;
         }
     }
     namespace SetupProvider {
@@ -254,31 +266,32 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $409 = Components.Schemas.ErrorResponse;
-            export type $502 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+            export type $503 = Components.Responses.ServiceUnavailable;
         }
     }
     namespace V1ManagerAgents$UserId {
         namespace Parameters {
-            export type UserId = string;
+            export type UserId = string; // ^[A-Za-z0-9_-]+$
         }
         export interface PathParameters {
-            user_id: Parameters.UserId;
+            user_id: Parameters.UserId /* ^[A-Za-z0-9_-]+$ */;
         }
     }
     namespace V1OperatorOrganizations$OrgIdProvider {
         namespace Parameters {
-            export type OrgId = string;
+            export type OrgId = string; // ^[A-Za-z0-9_-]+$
         }
         export interface PathParameters {
-            org_id: Parameters.OrgId;
+            org_id: Parameters.OrgId /* ^[A-Za-z0-9_-]+$ */;
         }
     }
     namespace V1OperatorOrganizations$OrgIdProviderSetup {
         namespace Parameters {
-            export type OrgId = string;
+            export type OrgId = string; // ^[A-Za-z0-9_-]+$
         }
         export interface PathParameters {
-            org_id: Parameters.OrgId;
+            org_id: Parameters.OrgId /* ^[A-Za-z0-9_-]+$ */;
         }
     }
 }
