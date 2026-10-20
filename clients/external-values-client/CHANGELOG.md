@@ -1,5 +1,11 @@
 # @epilot/external-values-client
 
+## 0.3.0
+
+### Minor Changes
+
+- Hook summaries and `resolve` requests support `value` context requirements (`{ type: "value", name, value_type }`): a scalar input such as a reading date, sent as `Context.<name>` and optional at runtime
+
 ## 0.2.0
 
 ### Minor Changes
