@@ -69,7 +69,7 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   CORRELATION_CLOSE_IGNORED: {
     level: 'warning',
     description:
-      'The partner declared a correlation complete, but the close was not applied: either the same request has to be retried, or none of its events was processed as interactive (the use case does not allow it, or the request did not ask for it). Retry with `correlation_complete`, or send the events with `interactive: true`',
+      'The partner declared a correlation complete, but the close was not applied: the same request has to be retried, the queue refused one of its events, the correlation does not exist and the request recorded nothing under it (its events carried their own correlation ids, were duplicates, matched no use case, or were not processed as interactive), a close without events found the organization over its interactive rate and could not create the correlation, or the correlation belongs to another integration (the one whose event or close created it). The reason names the cause. Retry with `correlation_complete`, send the close under the correlation the events were recorded under, or use a correlation id of your own',
   },
   CORRELATION_CLOSED_EMPTY: {
     level: 'info',
@@ -99,12 +99,12 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   CORRELATION_LATE_EVENT: {
     level: 'warning',
     description:
-      'An event arrived under a correlation the partner had already declared complete. It was processed, but anyone waiting on that correlation had already been answered — the partner is sending `correlation_complete` too early',
+      'An event arrived under a correlation the partner had already declared complete. It was processed, but anyone waiting on that correlation had already been answered, and once the correlation is complete the event cannot change that answer — the partner is sending `correlation_complete` too early',
   },
   CORRELATION_REQUIREMENT_FAILED: {
     level: 'error',
     description:
-      'Something a caller was waiting for can no longer arrive: every event that would have satisfied the requirement ended in an error',
+      'Something a caller was waiting for can no longer arrive: every event that would have satisfied the requirement ended in an error. Reported once per correlation',
   },
   CORRELATION_WAIT_REJECTED: {
     level: 'warning',
@@ -114,7 +114,7 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   CORRELATION_WAIT_TIMEOUT: {
     level: 'warning',
     description:
-      'A caller waited on a correlation until its time ran out without getting what it asked for — see `missing_entities` and `missing_use_cases` for what had not arrived. Reported once per correlation',
+      'A caller waited on a correlation until its time ran out without getting what it asked for — see `missing_entities` and `missing_use_cases` for what had not arrived. Reported once per correlation. When nothing at all was sent under the correlation, it carries no integration: none is known before the first event',
   },
   DEPRECATED_ENDPOINT: { level: 'error', description: 'This endpoint version is deprecated' },
   DIRECT_ENTITY_NOT_ALLOWED: {
@@ -277,6 +277,11 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   PAYLOAD_TOO_LARGE: {
     level: 'error',
     description: 'The payload exceeded the maximum size accepted by the receiving system',
+  },
+  PROCESSING_STATE_LIMIT: {
+    level: 'error',
+    description:
+      "The processing record of an interactive event could not be written, because it or its correlation reached the size the store allows, so the event was ended as an error instead of being left processing: its correlation still completes, and anyone waiting on it is answered. The event's data may have been written all the same. Usually a payload with unusually many entities or very long unique ids",
   },
   PRUNE_SCOPE_COMPLETED: { level: 'success', description: 'Scope pruning completed successfully' },
   PRUNE_SCOPE_PARTIAL_FAILURE: { level: 'error', description: 'Scope pruning completed with some failures' },

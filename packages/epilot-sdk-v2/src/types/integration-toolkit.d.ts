@@ -14,10 +14,16 @@ export declare namespace Components {
         export type CorrelationWaitRejected = Schemas.ErrorResponseBase;
         export interface ERPUpdatesResponse {
             /**
-             * The request's correlation id, echoed, or the one generated for it when the caller omitted it. This is the id to pass to `GET /v3/erp/updates/events?correlation_id=...` to wait for these events. Omitted when the request carried no correlation id and none was generated (v1 and v2).
+             * The request's correlation id, echoed, or the one generated for it when the caller omitted it. This is the id to pass to `GET /v3/erp/updates/events?correlation_id=...` to wait for these events. v3 and v2 generate one when the request has none, so they always return it, except that v2 omits it for an empty `correlation_id`. v1 never generates one: it echoes a non-empty `meta.correlation_id` and otherwise omits the field.
              *
              */
             correlation_id?: string;
+            correlation_close?: /**
+             * What became of the request's `correlation_complete`. Present exactly when the
+             * request carried `correlation_complete: true`; absent otherwise.
+             *
+             */
+            Schemas.CorrelationCloseResult;
             results?: {
                 /**
                  * ID of the processed event
@@ -28,7 +34,7 @@ export declare namespace Components {
                  */
                 status: "success" | "error" | "skipped" | "ignored";
                 /**
-                 * Whether the event was PROCESSED as interactive - its processing record exists and the correlation wait works on it. Present only when interactive processing was requested or the use case is configured `always`. `true` with a `lane` other than `interactive` means the organization was over its rate and the event was carried on its normal lane; the wait still works, it is just slower. `false` means the use case does not allow interactive processing, and `message` says so.
+                 * Whether the event was PROCESSED as interactive - its processing record exists and the correlation wait works on it. Present only when interactive processing was requested or the use case is configured `always`. `true` with a `lane` other than `interactive` means the organization was over its rate and the event was carried on its normal lane; the wait still works, it is just slower. `false` means the event was processed on its normal lane and cannot be waited on, and `message` says why: the use case does not allow interactive processing; the event's correlation id is not 1-255 letters, digits, hyphens and underscores (only on an `always` use case - a request that asks for interactive with such an id is a 400); the correlation is at its event limit or belongs to another integration; or interactive processing is unavailable.
                  *
                  */
                 interactive?: boolean;
@@ -42,10 +48,16 @@ export declare namespace Components {
         }
         export interface ERPUpdatesRetryableResponse {
             /**
-             * The request's correlation id, echoed, or the one generated for it when the caller omitted it. This is the id to pass to `GET /v3/erp/updates/events?correlation_id=...` to wait for these events. Omitted when the request carried no correlation id and none was generated (v1 and v2).
+             * The request's correlation id, echoed, or the one generated for it when the caller omitted it. This is the id to pass to `GET /v3/erp/updates/events?correlation_id=...` to wait for these events. v3 and v2 generate one when the request has none, so they always return it, except that v2 omits it for an empty `correlation_id`. v1 never generates one: it echoes a non-empty `meta.correlation_id` and otherwise omits the field.
              *
              */
             correlation_id?: string;
+            correlation_close?: /**
+             * What became of the request's `correlation_complete`. Present exactly when the
+             * request carried `correlation_complete: true`; absent otherwise.
+             *
+             */
+            Schemas.CorrelationCloseResult;
             results?: {
                 /**
                  * ID of the processed event
@@ -56,7 +68,7 @@ export declare namespace Components {
                  */
                 status: "success" | "error" | "skipped" | "ignored";
                 /**
-                 * Whether the event was PROCESSED as interactive - its processing record exists and the correlation wait works on it. Present only when interactive processing was requested or the use case is configured `always`. `true` with a `lane` other than `interactive` means the organization was over its rate and the event was carried on its normal lane; the wait still works, it is just slower. `false` means the use case does not allow interactive processing, and `message` says so.
+                 * Whether the event was PROCESSED as interactive - its processing record exists and the correlation wait works on it. Present only when interactive processing was requested or the use case is configured `always`. `true` with a `lane` other than `interactive` means the organization was over its rate and the event was carried on its normal lane; the wait still works, it is just slower. `false` means the event was processed on its normal lane and cannot be waited on, and `message` says why: the use case does not allow interactive processing; the event's correlation id is not 1-255 letters, digits, hyphens and underscores (only on an `always` use case - a request that asks for interactive with such an id is a 400); the correlation is at its event limit or belongs to another integration; or interactive processing is unavailable.
                  *
                  */
                 interactive?: boolean;
@@ -1387,6 +1399,50 @@ export declare namespace Components {
             latest_types_package_name?: string;
         }
         /**
+         * What became of the request's `correlation_complete`. Present exactly when the
+         * request carried `correlation_complete: true`; absent otherwise.
+         *
+         */
+        export interface CorrelationCloseResult {
+            /**
+             * - `applied` - the correlation is closed: by this request, before it (closing
+             *   twice is a no-op), or created closed and empty by a request without events.
+             * - `rate_limited` - a request without events found no correlation and the
+             *   organization was over its interactive rate (or the rate could not be
+             *   checked), so the correlation was not created. Send the close again a few
+             *   seconds later; until then a waiter on it is not told that nothing is
+             *   coming.
+             * - `ignored` - the close was not applied; `reasons` says why and what to do.
+             *   Each such close also raises a `CORRELATION_CLOSE_IGNORED` monitoring
+             *   warning with the same reasons.
+             *
+             */
+            outcome: "applied" | "rate_limited" | "ignored";
+            /**
+             * Why the close was not applied, each cause once. Absent when `applied`.
+             *
+             * - `retry_requested` - the response is a 422 or 429; the retry carries
+             *   `correlation_complete` again and closes then.
+             * - `queue_refused` - the queue refused an event of the request; send the
+             *   close again once every event is accepted.
+             * - `rate_limited`, `rate_limit_unavailable` - see `outcome: rate_limited`.
+             * - `other_integration` - the correlation belongs to another integration.
+             * - `events_under_own_correlation_ids`, `events_duplicate`,
+             *   `events_not_configured`, `events_not_interactive`, `events_unrecorded` -
+             *   the correlation does not exist and this request, which carries events,
+             *   recorded none under it, so there was nothing to close.
+             * - `close_failed` - the close could not be written; send it again.
+             * - `interactive_unavailable` - interactive processing is not available, so
+             *   there is no correlation to close.
+             *
+             */
+            reasons?: ("retry_requested" | "queue_refused" | "events_under_own_correlation_ids" | "events_duplicate" | "events_not_configured" | "events_not_interactive" | "events_unrecorded" | "rate_limited" | "rate_limit_unavailable" | "other_integration" | "close_failed" | "interactive_unavailable")[];
+            /**
+             * The reasons as text. Absent when `applied`.
+             */
+            message?: string;
+        }
+        /**
          * One correlation's summary.
          */
         export interface CorrelationStatus {
@@ -1397,31 +1453,81 @@ export declare namespace Components {
              */
             closed: boolean;
             closed_at?: string; // date-time
+            /**
+             * The correlation is complete — closed, and every event it received before
+             * completing has finished (or it was closed having received none). FINAL once
+             * `true`: the field to read for "is it done", on the listing as on a wait.
+             * Do not derive it from `events_done >= events_received`: a late event
+             * raises `events_received` after completion without reopening anything.
+             *
+             */
+            complete: boolean;
+            /**
+             * When the correlation became complete. Present exactly when `complete` is
+             * `true` (except on correlations completed before 2026-10-14); the
+             * correlation's `use_cases`, `entities` and `completion` are frozen at this
+             * instant.
+             *
+             */
+            completed_at?: string; // date-time
             events_received: number;
             /**
              * Events that reached a terminal status, failed ones included.
              */
             events_done: number;
             /**
-             * Events that arrived after the correlation was closed.
+             * Events that arrived after the correlation was closed. Those that arrived
+             * after it completed are counted here and in `events_received` /
+             * `events_done`, but not in `use_cases` or `entities`.
+             *
              */
             late_events: number;
+            /**
+             * When the first event of the correlation was accepted. Absent while none
+             * was — a correlation created by a zero-event close.
+             *
+             */
             first_ingested_at?: string; // date-time
             last_done_at?: string; // date-time
+            /**
+             * Per use case counts, frozen at `completed_at`.
+             */
             use_cases: /* How many of a correlation's events belong to one use case, and how they ended. */ CorrelationUseCaseCounts[];
             /**
-             * Every entity the correlation's events wrote.
+             * Every entity the correlation's events wrote before it completed, one entry
+             * per entity with its writes merged (see `operation` and `unique_ids`).
+             * A correlation lists at most 200 entity writes; see `entities_omitted`.
+             *
              */
             entities: /* An entity an interactive event wrote. */ ErpUpdateProcessedEntity[];
             /**
-             * Every failure in the correlation, whatever `completion` says.
+             * Entity writes of the correlation's events that are not in `entities`,
+             * because the list was full (at most 200), or because an event's record could
+             * not be written and the event ended `error` with `PROCESSING_STATE_LIMIT`.
+             * The entities may well have been written; they are only missing from the
+             * list, so a `wait_for_entities` requirement cannot be met by them — one that
+             * no listed entity satisfies is undecided instead (see
+             * `undecided_entity_requirements`). Present only when there are any.
+             *
+             */
+            entities_omitted?: number;
+            /**
+             * The correlation's first 50 failures, whatever `completion` says.
+             * `errors_total` counts them all.
+             *
              */
             errors: /* A failure nothing will retry. */ ErpUpdateProcessingError[];
+            /**
+             * Every failure in the correlation, including those not listed in `errors` (the first 50 are) and those of events that arrived after completion (`after_completion`), which do not change the answer.
+             */
+            errors_total: number;
         }
         export interface CorrelationStatusList {
             results: /* One correlation's summary. */ CorrelationStatus[];
             /**
-             * Cursor for the next page, or null when there are no more rows.
+             * Cursor for the next page; null when there are no more rows. Only null
+             * ends the listing: a short or even empty page can still carry a cursor.
+             *
              */
             next_cursor: string | null;
             /**
@@ -1461,6 +1567,13 @@ export declare namespace Components {
              */
             rejected_key?: string;
             /**
+             * The refused `wait_for_use_cases` entry, as passed: one that is not a use
+             * case slug, or a slug no inbound use case of the organization (or of the
+             * correlation's integration) has.
+             *
+             */
+            use_case_slug?: string;
+            /**
              * Every unique id of `slug` across the organization's inbound use cases —
              * the keys a selector on `slug` may name. Empty when no use case writes it.
              *
@@ -1478,30 +1591,95 @@ export declare namespace Components {
              */
             closed: boolean;
             closed_at?: string; // date-time
+            /**
+             * The correlation is complete — closed, and every event it received before
+             * completing has finished (or it was closed having received none). FINAL once
+             * `true`: the field to read for "is it done", on the listing as on a wait.
+             * Do not derive it from `events_done >= events_received`: a late event
+             * raises `events_received` after completion without reopening anything.
+             *
+             */
+            complete: boolean;
+            /**
+             * When the correlation became complete. Present exactly when `complete` is
+             * `true` (except on correlations completed before 2026-10-14); the
+             * correlation's `use_cases`, `entities` and `completion` are frozen at this
+             * instant.
+             *
+             */
+            completed_at?: string; // date-time
             events_received: number;
             /**
              * Events that reached a terminal status, failed ones included.
              */
             events_done: number;
             /**
-             * Events that arrived after the correlation was closed.
+             * Events that arrived after the correlation was closed. Those that arrived
+             * after it completed are counted here and in `events_received` /
+             * `events_done`, but not in `use_cases` or `entities`.
+             *
              */
             late_events: number;
+            /**
+             * When the first event of the correlation was accepted. Absent while none
+             * was — a correlation created by a zero-event close.
+             *
+             */
             first_ingested_at?: string; // date-time
             last_done_at?: string; // date-time
+            /**
+             * Per use case counts, frozen at `completed_at`.
+             */
             use_cases: /* How many of a correlation's events belong to one use case, and how they ended. */ CorrelationUseCaseCounts[];
             /**
-             * Every entity the correlation's events wrote.
+             * Every entity the correlation's events wrote before it completed, one entry
+             * per entity with its writes merged (see `operation` and `unique_ids`).
+             * A correlation lists at most 200 entity writes; see `entities_omitted`.
+             *
              */
             entities: /* An entity an interactive event wrote. */ ErpUpdateProcessedEntity[];
             /**
-             * Every failure in the correlation, whatever `completion` says.
+             * Entity writes of the correlation's events that are not in `entities`,
+             * because the list was full (at most 200), or because an event's record could
+             * not be written and the event ended `error` with `PROCESSING_STATE_LIMIT`.
+             * The entities may well have been written; they are only missing from the
+             * list, so a `wait_for_entities` requirement cannot be met by them — one that
+             * no listed entity satisfies is undecided instead (see
+             * `undecided_entity_requirements`). Present only when there are any.
+             *
+             */
+            entities_omitted?: number;
+            /**
+             * The correlation's first 50 failures, whatever `completion` says.
+             * `errors_total` counts them all.
+             *
              */
             errors: /* A failure nothing will retry. */ ErpUpdateProcessingError[];
+            /**
+             * Every failure in the correlation, including those not listed in `errors` (the first 50 are) and those of events that arrived after completion (`after_completion`), which do not change the answer.
+             */
+            errors_total: number;
             /**
              * Why the wait ended. See the operation description.
              */
             completion: "requirements_met" | "complete" | "timeout" | "error";
+            /**
+             * The `wait_for_entities` requirements this record cannot decide, each
+             * exactly as you passed it. Present only when the correlation omitted
+             * entities (`entities_omitted`) and a requirement is satisfied by none of
+             * the listed ones: the list holds at most 200 entity writes, so the entity
+             * may well have been written, and an omitted one is never listed later.
+             * Such a requirement is neither met nor missing — it never makes
+             * `completion` `error`, and the wait still ends `complete` once the
+             * correlation completes. Look the entity up yourself, e.g. by its unique
+             * id through the entity API.
+             *
+             * example:
+             * [
+             *   "contract[billing_account_number=4711]"
+             * ]
+             */
+            undecided_entity_requirements?: string[];
         }
         /**
          * Register an already-uploaded file as an import. The use case is chosen later, via `:validate` — upload and interpretation are separate decisions.
@@ -2999,7 +3177,7 @@ export declare namespace Components {
              * example:
              * customer-42
              */
-            group_id?: string;
+            group_id?: string; // ^[!-~]+$
             /**
              * Optional per-event trace id. Overrides the request-level `correlation_id` for THIS event, so a batch carrying several distinct business operations keeps its traces segregated in monitoring instead of merged under one request-level id. When absent, the event inherits the request-level `correlation_id`.
              *
@@ -3085,7 +3263,7 @@ export declare namespace Components {
              * example:
              * customer-42
              */
-            group_id?: string;
+            group_id?: string; // ^[!-~]+$
             /**
              * Optional per-event trace id. Overrides the request-level `correlation_id` for THIS event, so a batch carrying several distinct business operations keeps its traces segregated in monitoring instead of merged under one request-level id. When absent, the event inherits the request-level `correlation_id`.
              *
@@ -3211,6 +3389,18 @@ export declare namespace Components {
          * - `ATTRIBUTE_NOT_OVERRIDABLE` — the schema does not let a variant override this
          *   attribute, so the mapped value would be discarded.
          * - `ATTRIBUTE_NOT_IN_SCHEMA` — the schema does not have the attribute at all.
+         * - `VALID_FROM_NOT_MAPPED` — a conditional target maps no `valid_from`, so the variants
+         *   the file writes take effect immediately. One entry for the whole mapping:
+         *   `attributes` holds `valid_from` once per `entity` type.
+         *
+         * `UNIQUE_ID_NOT_IN_SCHEMA` (a blocker) — the mapping looks entities up by an attribute
+         * their schema does not have: a target's own `unique_ids`, or those of a relation or
+         * relation ref it sets. One entry for the whole mapping: `attributes` names every missing
+         * attribute, each with the `entity` type it belongs to.
+         * Such a lookup never finds anything, so every re-import would create the entities
+         * again, and the engine refuses the relations; the file is not read. A looked-up schema
+         * that does not exist is reported as `SCHEMA_NOT_FOUND`; one that cannot be read, or is
+         * not the org's own, is left unchecked.
          *
          * The rest reject the mapping against the entity schemas, before the file is read, and
          * name the thing at fault in `subject`: `IS_CONDITIONAL_NOT_CONSTANT`,
@@ -3226,7 +3416,7 @@ export declare namespace Components {
              * Enum of possible issue codes.
              *
              */
-            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED";
+            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "UNIQUE_ID_NOT_IN_SCHEMA" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED" | "VALID_FROM_NOT_MAPPED";
             severity: "warning" | "blocking";
             /**
              * The columns this issue is about, at most one entry per column per entity.
@@ -3243,13 +3433,17 @@ export declare namespace Components {
                 entity?: string;
             }[];
             /**
-             * The mapping fields this issue is about, where the value is not a file column as it is: an expression builds it, or the expression fails. VALUE_FORMAT_INVALID (beside `columns`, which holds the values taken from a column as they are), MAPPING_EXPRESSION_FAILED and FROM_ROWS_EXPRESSION_FAILED.
+             * The mapping fields this issue is about, where the value is not a file column as it is: an expression builds it, or the expression fails. VALUE_FORMAT_INVALID (beside `columns`, which holds the values taken from a column as they are), MAPPING_EXPRESSION_FAILED and FROM_ROWS_EXPRESSION_FAILED; on UNIQUE_ID_NOT_IN_SCHEMA, the unique identifiers that are not attributes of their entity type; on VALID_FROM_NOT_MAPPED, `valid_from` for each conditional entity type that does not map it.
              */
             attributes?: {
                 /**
                  * The attribute the mapping writes, like `unit_amount_decimal`.
                  */
                 name: string;
+                /**
+                 * The entity type the attribute belongs to, where the issue spans several (UNIQUE_ID_NOT_IN_SCHEMA, VALID_FROM_NOT_MAPPED).
+                 */
+                entity?: string;
             }[];
             /**
              * Up to five lines of the file this issue was seen on, as examples rather than the full list. The header is line 1. BLANK_ROWS_SKIPPED, VALUE_FORMAT_INVALID, MAPPING_EXPRESSION_FAILED, FROM_ROWS_EXPRESSION_FAILED, TIER_ROWS_NOT_GROUPED (where a variant's rows start again), TIER_BANDS_CONFLICT and VARIANT_VALUE_CONFLICT (the row at odds with the first).
@@ -3417,6 +3611,18 @@ export declare namespace Components {
              * - `ATTRIBUTE_NOT_OVERRIDABLE` — the schema does not let a variant override this
              *   attribute, so the mapped value would be discarded.
              * - `ATTRIBUTE_NOT_IN_SCHEMA` — the schema does not have the attribute at all.
+             * - `VALID_FROM_NOT_MAPPED` — a conditional target maps no `valid_from`, so the variants
+             *   the file writes take effect immediately. One entry for the whole mapping:
+             *   `attributes` holds `valid_from` once per `entity` type.
+             *
+             * `UNIQUE_ID_NOT_IN_SCHEMA` (a blocker) — the mapping looks entities up by an attribute
+             * their schema does not have: a target's own `unique_ids`, or those of a relation or
+             * relation ref it sets. One entry for the whole mapping: `attributes` names every missing
+             * attribute, each with the `entity` type it belongs to.
+             * Such a lookup never finds anything, so every re-import would create the entities
+             * again, and the engine refuses the relations; the file is not read. A looked-up schema
+             * that does not exist is reported as `SCHEMA_NOT_FOUND`; one that cannot be read, or is
+             * not the org's own, is left unchecked.
              *
              * The rest reject the mapping against the entity schemas, before the file is read, and
              * name the thing at fault in `subject`: `IS_CONDITIONAL_NOT_CONSTANT`,
@@ -3438,8 +3644,8 @@ export declare namespace Components {
             integration_id?: string;
             /**
              * `accepted` until the mapping ran, `processing` while its writes run, then
-             * one of the terminal states: `done`, `partial` (some writes failed) or
-             * `error`.
+             * one of the terminal states: `done`, `partial` (something was written but
+             * a write or part of the mapping failed) or `error` (nothing was written).
              *
              */
             status: "accepted" | "processing" | "done" | "partial" | "error";
@@ -3470,8 +3676,31 @@ export declare namespace Components {
              * The entity writes that have finished.
              */
             writes_done: number;
+            /**
+             * The entities the event wrote. An entity written without one of its
+             * relations, because the payload lacked the related entity's unique
+             * identifiers, is not listed; the event ends `partial` and `errors` names
+             * the relation.
+             *
+             */
             entities: /* An entity an interactive event wrote. */ ErpUpdateProcessedEntity[];
+            /**
+             * Entity writes of the event that are not in `entities`: an event lists at
+             * most 200. The entities were written all the same; they are only missing
+             * from the list. Present only when there are any.
+             *
+             */
+            entities_omitted?: number;
+            /**
+             * The event's first 10 failures. A failure repeated within one item of the
+             * partner's data is listed once. `errors_total` counts them all.
+             *
+             */
             errors: /* A failure nothing will retry. */ ErpUpdateProcessingError[];
+            /**
+             * Every failure the event had, including those not listed in `errors`.
+             */
+            errors_total: number;
         }
         /**
          * An entity an interactive event wrote.
@@ -3488,16 +3717,27 @@ export declare namespace Components {
              */
             _id: string;
             /**
-             * What the write did. `unchanged` means the entity already matched the
-             * event; it still counts as written.
+             * What the writes did, merged over every write of the entity — by the event,
+             * or on a correlation by all its events: `deleted` wins, then `created`,
+             * `updated`, `unchanged`. So an entity the event (or the correlation) created
+             * reads `created` however often it was written again, and one it deleted
+             * reads `deleted`. `unchanged` means the entity already matched; it still
+             * counts as written.
              *
              */
             operation: "created" | "updated" | "deleted" | "unchanged";
             /**
-             * The unique ids the entity was looked up by — exactly the use case's
-             * configured `unique_ids` for that entity and nothing else. These and `_id`
+             * The unique ids the entity was looked up by — the use case's configured
+             * `unique_ids` for that entity and nothing else, as far as they could be
+             * recorded. A value longer than 256 UTF-16 code units, not counting
+             * surrounding whitespace, is not recorded, and one write records its unique
+             * ids, in key order, within 1,024 bytes: an id that would not fit is left
+             * out. A selector cannot name an id that is not recorded. These and `_id`
              * are what a caller can tell several entities of one slug apart by, and the
-             * only attributes a `wait_for_entities` selector can match.
+             * only attributes a `wait_for_entities` selector can match. On a correlation
+             * they are the union over its events: two use cases that wrote one contact by
+             * different unique ids both match. A unique id two events wrote with
+             * different values shows one of them here, and a selector matches either.
              *
              * example:
              * {
@@ -3524,6 +3764,14 @@ export declare namespace Components {
              */
             event_id?: string;
             occurred_at: string; // date-time
+            /**
+             * `true` on a correlation's error of an event that arrived after the
+             * correlation completed. Listed for the record — while the list has room,
+             * and counted in `errors_total` either way; it is not part of the
+             * correlation's answer, which was final at `completed_at`. Absent otherwise.
+             *
+             */
+            after_completion?: boolean;
         }
         export interface ErpUpdatesEventsV2Request {
             /**
@@ -3545,7 +3793,16 @@ export declare namespace Components {
              */
             integration_id: string; // uuid
             /**
-             * Optional ID that identifies the specific request for debugging purposes
+             * Optional ID that identifies the specific request. Generated when omitted
+             * or empty, and returned in the response either way.
+             *
+             * Where it can be waited on - the request closes it with
+             * `correlation_complete`, or an event that asks for `interactive` inherits
+             * it - it must be 1-255 characters of letters, digits, hyphens and
+             * underscores, or the request is a 400. The same rule applies to an
+             * event's own `correlation_id` when that event asks for `interactive`.
+             * Ids nobody can wait on are not checked.
+             *
              */
             correlation_id?: string;
             /**
@@ -3570,11 +3827,13 @@ export declare namespace Components {
              * - Up to 20 groups per integration are processed concurrently. Using
              *   more distinct values than that yields no additional parallelism.
              * - Omit this field if strict per-integration ordering is required.
+             * - 1 to 128 printable ASCII characters without spaces: letters, digits and
+             *   punctuation (`!` to `~`). Anything else is a 400.
              *
              * example:
              * customer-42
              */
-            group_id?: string;
+            group_id?: string; // ^[!-~]+$
             /**
              * Request interactive processing for this request's events.
              *
@@ -3595,6 +3854,9 @@ export declare namespace Components {
              * and nothing is lost: those results still say `interactive: true`, with
              * `lane` naming the queue that actually carried them, and the correlation can
              * still be waited on - it will simply take as long as a bulk event does.
+             * Only events admitted as interactive count against that rate: an event
+             * refused at ingest (422), skipped as a duplicate, or past its correlation's
+             * event limit costs nothing. A request is admitted or spilled as a whole.
              *
              * Individual events may set their own `interactive`, which overrides this
              * request-level value for that event only.
@@ -3619,8 +3881,32 @@ export declare namespace Components {
              * empty, so a waiter is told straight away that nothing is coming rather than
              * waiting for data that will never arrive.
              *
+             * A request that carries events closes the correlation whenever it
+             * exists - also when those events came back `skipped` as duplicates of
+             * events already sent (a retry of the closing request), or were processed
+             * on the normal lane - but never creates it: only a request with no events
+             * does. A request with no events that creates the correlation costs one unit
+             * of the organization's interactive rate; closing one that exists, or finding
+             * it closed already, costs nothing. When the organization is over its rate,
+             * it still closes a correlation that exists but creates none - send it again
+             * a few seconds later. The close is not applied when the response asks for a retry (422 or
+             * 429), when the queue refused one of the request's events, or when the
+             * correlation does not exist and the request carries events or could not
+             * pay for creating it; each of these raises a `CORRELATION_CLOSE_IGNORED`
+             * monitoring warning naming the cause. The response says what became of
+             * the close in `correlation_close` - `applied`, `rate_limited` (send it again
+             * a few seconds later) or `ignored` with its `reasons`.
+             *
              * Closing a correlation twice is a no-op. Events that arrive afterwards are
-             * still processed, and raise a `CORRELATION_LATE_EVENT` monitoring warning.
+             * still processed, and raise a `CORRELATION_LATE_EVENT` monitoring warning;
+             * once the correlation is complete they can no longer change its answer
+             * (see `completion` on `GET /v3/erp/updates/events`).
+             *
+             * A correlation belongs to the integration whose event or close created it.
+             * A close sent for another integration under the same id is not applied and
+             * raises `CORRELATION_CLOSE_IGNORED`; an event sent for another integration
+             * under it is processed normally, not interactively, and its result says
+             * `interactive: false` with the reason.
              *
              * example:
              * true
@@ -3631,8 +3917,8 @@ export declare namespace Components {
              * `correlation_complete` is `true` - a request that only closes a correlation
              * may send an empty array.
              *
-             * Note: `wait` is NOT accepted on this endpoint and returns 400. Ingest never
-             * blocks; poll `GET /v3/erp/updates/events` to wait for a correlation.
+             * Note: ingest never blocks. A `wait` field, on the request or on an event, is
+             * ignored; poll `GET /v3/erp/updates/events` to wait for a correlation.
              *
              */
             events: ErpEventV3[];
@@ -6217,17 +6503,19 @@ export declare namespace Components {
          * with a fixed level (see the published code reference at
          * https://docs.epilot.io/docs/integrations/integration-toolkit/monitoring/codes).
          *
-         * This schema exists so consumers can import the union as a type. It is
-         * deliberately NOT applied to `MonitoringEventV2.code` or to the query filter:
-         * alongside these, the secure proxy emits an unbounded `HTTP_{status}` family for
-         * an upstream refusal, so constraining those fields to this enum would reject a
-         * legitimate value — `code` stays a plain string there on purpose.
+         * This schema exists so consumers can import the union as a type. It never
+         * constrains a field on its own: alongside these, the secure proxy emits an
+         * unbounded `HTTP_{status}` family for an upstream refusal, so constraining a
+         * code field to this enum would reject a legitimate value. `MonitoringEventV2.code`
+         * references it only as one `anyOf` branch next to a plain string, which types the
+         * field with the taxonomy without narrowing it; the query filter stays a plain
+         * string.
          *
          * Kept in lock-step with the `MonitoringErrorCode` taxonomy in erp-utils by
          * `monitoring-code-enum.test.ts`, which fails if the two diverge.
          *
          */
-        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED";
+        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED";
         export interface MonitoringEventV2 {
             /**
              * Unique monitoring event ID
@@ -6262,9 +6550,26 @@ export declare namespace Components {
              */
             level: "success" | "error" | "info" | "warning";
             /**
-             * Taxonomy code (e.g. OAUTH2_TOKEN_FAILURE, HTTP_502). Empty for success. One of `MonitoringCode`, or an `HTTP_{status}` family value from the secure proxy — which is why this is a string rather than that enum.
+             * Taxonomy code (e.g. OAUTH2_TOKEN_FAILURE, HTTP_502). Empty for success. One of `MonitoringCode`, or an `HTTP_{status}` family value from the secure proxy — which is why the second branch is a plain string: the field is typed with the taxonomy without being narrowed to it.
              */
-            code?: string;
+            code?: /* Taxonomy code (e.g. OAUTH2_TOKEN_FAILURE, HTTP_502). Empty for success. One of `MonitoringCode`, or an `HTTP_{status}` family value from the secure proxy — which is why the second branch is a plain string: the field is typed with the taxonomy without being narrowed to it. */ /**
+             * The monitoring code taxonomy — every code the Integration Toolkit itself emits,
+             * with a fixed level (see the published code reference at
+             * https://docs.epilot.io/docs/integrations/integration-toolkit/monitoring/codes).
+             *
+             * This schema exists so consumers can import the union as a type. It never
+             * constrains a field on its own: alongside these, the secure proxy emits an
+             * unbounded `HTTP_{status}` family for an upstream refusal, so constraining a
+             * code field to this enum would reject a legitimate value. `MonitoringEventV2.code`
+             * references it only as one `anyOf` branch next to a plain string, which types the
+             * field with the taxonomy without narrowing it; the query filter stays a plain
+             * string.
+             *
+             * Kept in lock-step with the `MonitoringErrorCode` taxonomy in erp-utils by
+             * `monitoring-code-enum.test.ts`, which fails if the two diverge.
+             *
+             */
+            MonitoringCode | string;
             /**
              * Human-readable message. Empty when not applicable.
              */
@@ -6290,7 +6595,7 @@ export declare namespace Components {
              */
             seen: number;
             /**
-             * Events that have reported something but no final outcome yet: only mapping or relation caveats so far (the success row comes last, from the final stage), or a failed attempt the queue will retry. An event stuck here with an old `last_activity_at` was most likely lost on its final attempt (processor crash) — a stall, not a slow run.
+             * Events that have reported something but no final outcome yet: only mapping or relation caveats so far (the success row comes last, from the final stage), or a failed attempt the queue will retry. An event stuck here with an old `last_activity_at` was most likely lost on its final attempt (processor crash) — a stall, not a slow run. Includes split events still waiting on some of their writes.
              */
             in_flight: number;
             /**
@@ -6313,7 +6618,7 @@ export declare namespace Components {
              * Settled events whose rows were all informational — deduplicated or skipped, nothing to apply.
              */
             info: number;
-            entries: /* The run's monitoring rows counted by level, retry markers included — the same rows its trace lists. Unlike the event counts above, one event can contribute many rows (one per entity written, plus every caveat and retry). */ MonitoringRunEntriesV2;
+            entries: /* The run's monitoring rows counted by level — the rows its trace lists, correlation-level rows (wait outcomes, closes) included. Unlike the event counts above, one event can contribute many rows (one per entity written, plus every caveat and retry). Retry markers count under `retry` only, so a failed attempt that later succeeds is not an error; `total` is the sum of the others. */ MonitoringRunEntriesV2;
             /**
              * Newest row of any level under this run; null when nothing has reported yet.
              */
@@ -6326,14 +6631,24 @@ export declare namespace Components {
             runs: /* Per-event completion of one run. Every count is in EVENTS (distinct `event_id`), never rows: `seen = in_flight + success + warning + error + info`. */ MonitoringRunCompletionV2[];
         }
         /**
-         * The run's monitoring rows counted by level, retry markers included — the same rows its trace lists. Unlike the event counts above, one event can contribute many rows (one per entity written, plus every caveat and retry).
+         * The run's monitoring rows counted by level — the rows its trace lists, correlation-level rows (wait outcomes, closes) included. Unlike the event counts above, one event can contribute many rows (one per entity written, plus every caveat and retry). Retry markers count under `retry` only, so a failed attempt that later succeeds is not an error; `total` is the sum of the others.
          */
         export interface MonitoringRunEntriesV2 {
             total: number;
+            /**
+             * Error rows that will not be retried.
+             */
             error: number;
+            /**
+             * Warning rows that are caveats, not retry markers.
+             */
             warning: number;
             success: number;
             info: number;
+            /**
+             * Retry markers (`will_retry` in `detail`) — attempts the queue delivers again.
+             */
+            retry: number;
         }
         export interface MonitoringStats {
             /**
@@ -7881,6 +8196,17 @@ export declare namespace Components {
              * Unique identifier mappings for the related entity
              */
             unique_ids: RelationUniqueIdField[];
+            /**
+             * The entity is incomplete without this relation. On an interactive event, a
+             * relation that cannot be set — even because the payload carried no reference —
+             * ends the event `partial` and leaves the entity out of `entities`. Without it,
+             * a relation whose unique ids the payload left empty is intentionally unset: the
+             * entity is written and reported without it. A relation whose reference the
+             * payload sent only in part (one unique id present, another missing) is
+             * unresolved either way. Bulk processing is the same with or without it.
+             *
+             */
+            required?: boolean;
         }
         /**
          * Configuration for a single relation reference item
@@ -9767,11 +10093,11 @@ export declare namespace Paths {
     namespace ListErpUpdateCorrelations {
         namespace Parameters {
             export type Cursor = string;
-            export type IntegrationId = string; // uuid
+            export type IntegrationId = string; // uuid ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
             export type Limit = number;
         }
         export interface QueryParameters {
-            integration_id?: Parameters.IntegrationId /* uuid */;
+            integration_id?: Parameters.IntegrationId /* uuid ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ */;
             limit?: Parameters.Limit;
             cursor?: Parameters.Cursor;
         }
@@ -10004,6 +10330,7 @@ export declare namespace Paths {
             export type $200 = Components.Responses.ERPUpdatesResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $429 = Components.Responses.ERPUpdatesRetryableResponse;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -10014,6 +10341,7 @@ export declare namespace Paths {
             export type $200 = Components.Responses.ERPUpdatesResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $429 = Components.Responses.ERPUpdatesRetryableResponse;
             export type $500 = Components.Responses.InternalServerError;
@@ -10025,6 +10353,7 @@ export declare namespace Paths {
             export type $200 = Components.Responses.ERPUpdatesResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $429 = Components.Responses.ERPUpdatesRetryableResponse;
             export type $500 = Components.Responses.InternalServerError;
@@ -10486,7 +10815,15 @@ export interface OperationMethods {
   /**
    * processErpUpdatesEvents - processErpUpdatesEvents
    * 
-   * Handles updates from ERP systems and tracks them appropriately
+   * Handles updates from ERP systems and tracks them appropriately.
+   * 
+   * Requires the `integration:ingest` grant on the integration the app component is
+   * mapped to, or on every integration (`integration:*`) for an app component
+   * without an integration mapping; the wildcard grants `integration:*` and `*`
+   * (the owner role) include it. Without it the request is refused with 403 before
+   * any event is processed. *Being rolled out:* until a stage enforces it, a missing
+   * grant is logged and the request is still processed.
+   * 
    */
   'processErpUpdatesEvents'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -10499,6 +10836,11 @@ export interface OperationMethods {
    * Handles updates from ERP systems using integration_id directly.
    * This is the v2 version that simplifies the API by accepting integration_id
    * instead of app_id and component_id.
+   * 
+   * Requires the `integration:ingest` grant on `integration_id`; the wildcard grants
+   * `integration:*` and `*` (the owner role) include it. Without it the request is
+   * refused with 403 before any event is processed. *Being rolled out:* until a
+   * stage enforces it, a missing grant is logged and the request is still processed.
    * 
    */
   'processErpUpdatesEventsV2'(
@@ -10529,13 +10871,31 @@ export interface OperationMethods {
    *   and every event it sent has finished. Nothing further can arrive, so the
    *   wait ends even if a requirement is unmet. A correlation closed with zero
    *   events is `complete` at once: the partner sent nothing and never will.
+   *   **`complete` is final.** From `completed_at` on, the correlation's answer
+   *   is frozen: an event that still arrives under it (a late event) is
+   *   processed and counted in `events_received`, `events_done` and
+   *   `late_events`, and its errors are listed with `after_completion: true`,
+   *   but it adds nothing to `use_cases` or `entities` and never changes
+   *   `completion` — every later read gives the answer the first one got.
    * - `error` — a requirement can no longer be met because an event it depends
    *   on failed: every event of a required use case ended in error, or an
    *   entity requirement is still missing when the correlation is complete and
    *   one of its events failed. Without requirements, `error` means the
-   *   correlation completed with failures.
+   *   correlation completed with failures. An event that ended `partial` counts
+   *   as failed here: a use case requirement is met only by an event that ended
+   *   `done`.
    * - `timeout` — the budget ran out first. The body still shows what has
    *   landed so far; call again to keep waiting.
+   * 
+   * **When `entities_omitted` is present, an entity requirement can be
+   * undecided.** `entities` lists at most 200 entity writes; the rest are only
+   * counted. An entity requirement that no listed entity satisfies may then still
+   * have been written, so it is neither met nor missing: it is named in
+   * `undecided_entity_requirements`, it never makes `completion` `error`, and the
+   * wait still ends `complete` once the correlation completes (if every other
+   * requirement is met, `complete` rather than `requirements_met`). Look such an
+   * entity up yourself, e.g. by its unique id through the entity API. Use case
+   * requirements are never undecided: their counts are never omitted.
    * 
    * **Every requirement is met by the first matching event.** A use case
    * requirement is satisfied by the first event of that use case to finish, and
@@ -10549,19 +10909,38 @@ export interface OperationMethods {
    * precise tool: `contract[billing_account_number=4711]` is satisfied by that
    * contract and by nothing else.
    * 
+   * An event fails when nothing will retry what went wrong, including when its
+   * mapping could not run or ran only in part: a disabled or unconfigured use
+   * case, an item without its unique identifiers, a field or relation that could
+   * not be mapped. Such an event ends `error` when it wrote nothing and `partial`
+   * when it wrote something, and `errors` says why. A mapping that writes
+   * nothing on purpose (an `enabled` expression that is false, an empty list)
+   * ends `done`.
+   * 
    * A requirement is only as good as the use case configuration it refers to:
    * model one inbound use case per partner event type, and give every use case a
-   * slug. A use case without a slug cannot be named here.
+   * slug. A legacy use case without a slug is counted, and can be named, only by
+   * its use case id, which differs between environments.
    * 
    * An unknown correlation, or one with no interactive events, reads as
    * `events_received: 0, closed: false` — "not yet" and "never" look the same,
-   * which is why `correlation_complete` exists.
+   * which is why `correlation_complete` exists. Waiting on a correlation before
+   * anything was sent under it is normal — mint the id, hand it to the partner,
+   * wait — and the wait picks the correlation up as soon as its first event is
+   * ingested.
+   * 
+   * A correlation belongs to one integration: the one whose event (or close)
+   * created it. Events and closes of another integration under the same id are
+   * not applied to it — see `correlation_complete` and the event results.
    * 
    * Waiting holds a connection, so concurrent waits are capped per organization
-   * and overall. Over the cap the call is refused with 429 and `Retry-After`;
-   * fall back to calls with `wait=0` (they never need a slot) or retry later.
-   * Calls that do not have to wait — `wait=0`, or a correlation that is already
-   * decided — are never refused.
+   * and overall. A wait that starts before anything was sent under its
+   * correlation counts against a separate, smaller per-organization cap instead,
+   * for its whole duration, so waits on ids nothing is ever sent under cannot
+   * crowd out waits on correlations that exist. Over a cap the call is refused
+   * with 429 and `Retry-After`; fall back to calls with `wait=0` (they never need
+   * a slot) or retry later. Calls that do not have to wait — `wait=0`, or a
+   * correlation that is already decided — are never refused.
    * 
    * Requires `integration:view` on the correlation's integration. The organization
    * is always the token's own, so no other organization's correlation is ever
@@ -10579,6 +10958,13 @@ export interface OperationMethods {
    * Handles updates from ERP systems using integration_id directly.
    * This is the v3 version that removes the unused event_type field and renames object_type to event_name
    * to align with the integration UI naming.
+   * 
+   * Requires the `integration:ingest` grant on `integration_id`; the wildcard grants
+   * `integration:*` and `*` (the owner role) include it. Without it the request is
+   * refused with 403 before anything is processed, charged to the interactive rate
+   * limit or recorded — closing a correlation (`correlation_complete`) included.
+   * *Being rolled out:* until a stage enforces it, a missing grant is logged and the
+   * request is still processed.
    * 
    */
   'processErpUpdatesEventsV3'(
@@ -10617,8 +11003,12 @@ export interface OperationMethods {
    * — and says so in `horizon_days`. Correlations older than that are not
    * returned, even when a wider range is being displayed.
    * 
-   * Pass `next_cursor` back as `cursor` for the next page. A page can be shorter
-   * than `limit` and still have more behind it, so stop on `next_cursor: null`.
+   * Pass `next_cursor` back as `cursor` for the next page. Only a null
+   * `next_cursor` ends the listing: a page can be shorter than `limit`, even
+   * empty, and still carry a cursor — a page filtered to an integration stops
+   * after reading a bounded number of rows, whichever integration they belong
+   * to. A cursor whose position has aged past the 7 days answers an empty last
+   * page; a cursor this endpoint did not issue is a 400.
    * 
    * Requires `integration:view` on `integration_id` when it is given, and on every
    * integration of the organization when it is not.
@@ -11047,9 +11437,13 @@ export interface OperationMethods {
   /**
    * queryInboundMonitoringEvents - queryInboundMonitoringEvents
    * 
-   * Query inbound monitoring events for a specific integration.
-   * Returns detailed information about inbound sync events from ERP systems,
-   * including success rates, error breakdowns, and processing metrics.
+   * **Deprecated and no longer implemented.** The `erp_monitoring` table this
+   * endpoint read has been retired in favour of the unified `erp_monitoring_v2`
+   * table. The endpoint is kept only so existing clients do not 404; it always
+   * responds `200` with an empty result and never reads any data.
+   * 
+   * Use `POST /v2/integrations/{integrationId}/monitoring/events` instead,
+   * filtered to `use_case_type: inbound`.
    * 
    */
   'queryInboundMonitoringEvents'(
@@ -11060,9 +11454,13 @@ export interface OperationMethods {
   /**
    * getMonitoringStats - getMonitoringStats
    * 
-   * Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
-   * Returns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,
-   * including success/error counts and optional breakdowns.
+   * **Deprecated and no longer implemented.** This endpoint aggregated the
+   * retired `erp_monitoring` table and the webhook delivery log; both are
+   * superseded by the unified `erp_monitoring_v2` table. The endpoint is kept
+   * only so existing clients do not 404; it always responds `200` with zeroed
+   * counters and never reads any data.
+   * 
+   * Use `POST /v2/integrations/{integrationId}/monitoring/stats` instead.
    * 
    */
   'getMonitoringStats'(
@@ -11073,9 +11471,13 @@ export interface OperationMethods {
   /**
    * getMonitoringTimeSeries - getMonitoringTimeSeries
    * 
-   * Get time-series aggregated event counts for monitoring charts.
-   * Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
-   * Maximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.
+   * **Deprecated and no longer implemented.** This endpoint bucketed the
+   * retired `erp_monitoring` table and the webhook delivery log; both are
+   * superseded by the unified `erp_monitoring_v2` table. The endpoint is kept
+   * only so existing clients do not 404; it always responds `200` with an empty
+   * bucket list and never reads any data.
+   * 
+   * Use `POST /v2/integrations/{integrationId}/monitoring/time-series` instead.
    * 
    */
   'getMonitoringTimeSeries'(
@@ -11263,9 +11665,17 @@ export interface OperationMethods {
   /**
    * queryOutboundMonitoringEvents - queryOutboundMonitoringEvents
    * 
-   * Query outbound monitoring events for a specific integration.
-   * Returns detailed information about outbound event deliveries,
-   * filtered by event_name (event_catalog_event) linked to the integration's outbound use cases.
+   * **Deprecated and no longer implemented.** This endpoint read the webhook
+   * delivery log directly. The endpoint is kept only so existing clients do not
+   * 404; it always responds `200` with an empty result and never reads any data.
+   * 
+   * Use instead:
+   * - `POST /v2/integrations/{integrationId}/monitoring/events` filtered to
+   *   `use_case_type: outbound` for the outcome of each delivery (level, code,
+   *   message, and URL, method and HTTP status in `detail`).
+   * - The Webhooks API (`POST /v2/webhooks/configs/{configId}/events` and
+   *   `GET /v1/webhooks/configs/{configId}/events/{eventId}`) for a delivery's
+   *   full payload and HTTP response, and to replay it.
    * 
    */
   'queryOutboundMonitoringEvents'(
@@ -11386,6 +11796,11 @@ export interface OperationMethods {
    * `will_retry: true`) means the queue will deliver it again. Everything else is
    * **in flight**. A settled event's outcome is its worst terminal row — `error`
    * beats `warning` beats `success`.
+   * 
+   * For an ERP file import, an event the mapping split into several writes (one row
+   * writing a product and a price, say) settles only once every write has reported a
+   * final result, whatever those results were; until then it is in flight. A write
+   * lost without any result keeps its event in flight.
    * 
    * Batched so a history page costs one request: pass every run on the page. A run
    * that has reported nothing yet comes back with `seen: 0`, never omitted.
@@ -11614,7 +12029,15 @@ export interface PathsDictionary {
     /**
      * processErpUpdatesEvents - processErpUpdatesEvents
      * 
-     * Handles updates from ERP systems and tracks them appropriately
+     * Handles updates from ERP systems and tracks them appropriately.
+     * 
+     * Requires the `integration:ingest` grant on the integration the app component is
+     * mapped to, or on every integration (`integration:*`) for an app component
+     * without an integration mapping; the wildcard grants `integration:*` and `*`
+     * (the owner role) include it. Without it the request is refused with 403 before
+     * any event is processed. *Being rolled out:* until a stage enforces it, a missing
+     * grant is logged and the request is still processed.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -11630,6 +12053,11 @@ export interface PathsDictionary {
      * This is the v2 version that simplifies the API by accepting integration_id
      * instead of app_id and component_id.
      * 
+     * Requires the `integration:ingest` grant on `integration_id`; the wildcard grants
+     * `integration:*` and `*` (the owner role) include it. Without it the request is
+     * refused with 403 before any event is processed. *Being rolled out:* until a
+     * stage enforces it, a missing grant is logged and the request is still processed.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -11644,6 +12072,13 @@ export interface PathsDictionary {
      * Handles updates from ERP systems using integration_id directly.
      * This is the v3 version that removes the unused event_type field and renames object_type to event_name
      * to align with the integration UI naming.
+     * 
+     * Requires the `integration:ingest` grant on `integration_id`; the wildcard grants
+     * `integration:*` and `*` (the owner role) include it. Without it the request is
+     * refused with 403 before anything is processed, charged to the interactive rate
+     * limit or recorded — closing a correlation (`correlation_complete`) included.
+     * *Being rolled out:* until a stage enforces it, a missing grant is logged and the
+     * request is still processed.
      * 
      */
     'post'(
@@ -11674,13 +12109,31 @@ export interface PathsDictionary {
      *   and every event it sent has finished. Nothing further can arrive, so the
      *   wait ends even if a requirement is unmet. A correlation closed with zero
      *   events is `complete` at once: the partner sent nothing and never will.
+     *   **`complete` is final.** From `completed_at` on, the correlation's answer
+     *   is frozen: an event that still arrives under it (a late event) is
+     *   processed and counted in `events_received`, `events_done` and
+     *   `late_events`, and its errors are listed with `after_completion: true`,
+     *   but it adds nothing to `use_cases` or `entities` and never changes
+     *   `completion` — every later read gives the answer the first one got.
      * - `error` — a requirement can no longer be met because an event it depends
      *   on failed: every event of a required use case ended in error, or an
      *   entity requirement is still missing when the correlation is complete and
      *   one of its events failed. Without requirements, `error` means the
-     *   correlation completed with failures.
+     *   correlation completed with failures. An event that ended `partial` counts
+     *   as failed here: a use case requirement is met only by an event that ended
+     *   `done`.
      * - `timeout` — the budget ran out first. The body still shows what has
      *   landed so far; call again to keep waiting.
+     * 
+     * **When `entities_omitted` is present, an entity requirement can be
+     * undecided.** `entities` lists at most 200 entity writes; the rest are only
+     * counted. An entity requirement that no listed entity satisfies may then still
+     * have been written, so it is neither met nor missing: it is named in
+     * `undecided_entity_requirements`, it never makes `completion` `error`, and the
+     * wait still ends `complete` once the correlation completes (if every other
+     * requirement is met, `complete` rather than `requirements_met`). Look such an
+     * entity up yourself, e.g. by its unique id through the entity API. Use case
+     * requirements are never undecided: their counts are never omitted.
      * 
      * **Every requirement is met by the first matching event.** A use case
      * requirement is satisfied by the first event of that use case to finish, and
@@ -11694,19 +12147,38 @@ export interface PathsDictionary {
      * precise tool: `contract[billing_account_number=4711]` is satisfied by that
      * contract and by nothing else.
      * 
+     * An event fails when nothing will retry what went wrong, including when its
+     * mapping could not run or ran only in part: a disabled or unconfigured use
+     * case, an item without its unique identifiers, a field or relation that could
+     * not be mapped. Such an event ends `error` when it wrote nothing and `partial`
+     * when it wrote something, and `errors` says why. A mapping that writes
+     * nothing on purpose (an `enabled` expression that is false, an empty list)
+     * ends `done`.
+     * 
      * A requirement is only as good as the use case configuration it refers to:
      * model one inbound use case per partner event type, and give every use case a
-     * slug. A use case without a slug cannot be named here.
+     * slug. A legacy use case without a slug is counted, and can be named, only by
+     * its use case id, which differs between environments.
      * 
      * An unknown correlation, or one with no interactive events, reads as
      * `events_received: 0, closed: false` — "not yet" and "never" look the same,
-     * which is why `correlation_complete` exists.
+     * which is why `correlation_complete` exists. Waiting on a correlation before
+     * anything was sent under it is normal — mint the id, hand it to the partner,
+     * wait — and the wait picks the correlation up as soon as its first event is
+     * ingested.
+     * 
+     * A correlation belongs to one integration: the one whose event (or close)
+     * created it. Events and closes of another integration under the same id are
+     * not applied to it — see `correlation_complete` and the event results.
      * 
      * Waiting holds a connection, so concurrent waits are capped per organization
-     * and overall. Over the cap the call is refused with 429 and `Retry-After`;
-     * fall back to calls with `wait=0` (they never need a slot) or retry later.
-     * Calls that do not have to wait — `wait=0`, or a correlation that is already
-     * decided — are never refused.
+     * and overall. A wait that starts before anything was sent under its
+     * correlation counts against a separate, smaller per-organization cap instead,
+     * for its whole duration, so waits on ids nothing is ever sent under cannot
+     * crowd out waits on correlations that exist. Over a cap the call is refused
+     * with 429 and `Retry-After`; fall back to calls with `wait=0` (they never need
+     * a slot) or retry later. Calls that do not have to wait — `wait=0`, or a
+     * correlation that is already decided — are never refused.
      * 
      * Requires `integration:view` on the correlation's integration. The organization
      * is always the token's own, so no other organization's correlation is ever
@@ -11753,8 +12225,12 @@ export interface PathsDictionary {
      * — and says so in `horizon_days`. Correlations older than that are not
      * returned, even when a wider range is being displayed.
      * 
-     * Pass `next_cursor` back as `cursor` for the next page. A page can be shorter
-     * than `limit` and still have more behind it, so stop on `next_cursor: null`.
+     * Pass `next_cursor` back as `cursor` for the next page. Only a null
+     * `next_cursor` ends the listing: a page can be shorter than `limit`, even
+     * empty, and still carry a cursor — a page filtered to an integration stops
+     * after reading a bounded number of rows, whichever integration they belong
+     * to. A cursor whose position has aged past the 7 days answers an empty last
+     * page; a cursor this endpoint did not issue is a 400.
      * 
      * Requires `integration:view` on `integration_id` when it is given, and on every
      * integration of the organization when it is not.
@@ -12225,9 +12701,13 @@ export interface PathsDictionary {
     /**
      * queryInboundMonitoringEvents - queryInboundMonitoringEvents
      * 
-     * Query inbound monitoring events for a specific integration.
-     * Returns detailed information about inbound sync events from ERP systems,
-     * including success rates, error breakdowns, and processing metrics.
+     * **Deprecated and no longer implemented.** The `erp_monitoring` table this
+     * endpoint read has been retired in favour of the unified `erp_monitoring_v2`
+     * table. The endpoint is kept only so existing clients do not 404; it always
+     * responds `200` with an empty result and never reads any data.
+     * 
+     * Use `POST /v2/integrations/{integrationId}/monitoring/events` instead,
+     * filtered to `use_case_type: inbound`.
      * 
      */
     'post'(
@@ -12240,9 +12720,13 @@ export interface PathsDictionary {
     /**
      * getMonitoringStats - getMonitoringStats
      * 
-     * Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
-     * Returns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,
-     * including success/error counts and optional breakdowns.
+     * **Deprecated and no longer implemented.** This endpoint aggregated the
+     * retired `erp_monitoring` table and the webhook delivery log; both are
+     * superseded by the unified `erp_monitoring_v2` table. The endpoint is kept
+     * only so existing clients do not 404; it always responds `200` with zeroed
+     * counters and never reads any data.
+     * 
+     * Use `POST /v2/integrations/{integrationId}/monitoring/stats` instead.
      * 
      */
     'post'(
@@ -12255,9 +12739,13 @@ export interface PathsDictionary {
     /**
      * getMonitoringTimeSeries - getMonitoringTimeSeries
      * 
-     * Get time-series aggregated event counts for monitoring charts.
-     * Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
-     * Maximum of 200 buckets per request. Returns 400 if the time range and interval would exceed this limit.
+     * **Deprecated and no longer implemented.** This endpoint bucketed the
+     * retired `erp_monitoring` table and the webhook delivery log; both are
+     * superseded by the unified `erp_monitoring_v2` table. The endpoint is kept
+     * only so existing clients do not 404; it always responds `200` with an empty
+     * bucket list and never reads any data.
+     * 
+     * Use `POST /v2/integrations/{integrationId}/monitoring/time-series` instead.
      * 
      */
     'post'(
@@ -12465,9 +12953,17 @@ export interface PathsDictionary {
     /**
      * queryOutboundMonitoringEvents - queryOutboundMonitoringEvents
      * 
-     * Query outbound monitoring events for a specific integration.
-     * Returns detailed information about outbound event deliveries,
-     * filtered by event_name (event_catalog_event) linked to the integration's outbound use cases.
+     * **Deprecated and no longer implemented.** This endpoint read the webhook
+     * delivery log directly. The endpoint is kept only so existing clients do not
+     * 404; it always responds `200` with an empty result and never reads any data.
+     * 
+     * Use instead:
+     * - `POST /v2/integrations/{integrationId}/monitoring/events` filtered to
+     *   `use_case_type: outbound` for the outcome of each delivery (level, code,
+     *   message, and URL, method and HTTP status in `detail`).
+     * - The Webhooks API (`POST /v2/webhooks/configs/{configId}/events` and
+     *   `GET /v1/webhooks/configs/{configId}/events/{eventId}`) for a delivery's
+     *   full payload and HTTP response, and to replay it.
      * 
      */
     'post'(
@@ -12602,6 +13098,11 @@ export interface PathsDictionary {
      * `will_retry: true`) means the queue will deliver it again. Everything else is
      * **in flight**. A settled event's outcome is its worst terminal row — `error`
      * beats `warning` beats `success`.
+     * 
+     * For an ERP file import, an event the mapping split into several writes (one row
+     * writing a product and a price, say) settles only once every write has reported a
+     * final result, whatever those results were; until then it is in flight. A write
+     * lost without any result keeps its event in flight.
      * 
      * Batched so a history page costs one request: pass every run on the page. A run
      * that has reported nothing yet comes back with `seen: 0`, never omitted.
@@ -12841,6 +13342,7 @@ export type AutoRefreshSettings = Components.Schemas.AutoRefreshSettings;
 export type CommitTypesRequest = Components.Schemas.CommitTypesRequest;
 export type CommitTypesResponse = Components.Schemas.CommitTypesResponse;
 export type ConnectorConfig = Components.Schemas.ConnectorConfig;
+export type CorrelationCloseResult = Components.Schemas.CorrelationCloseResult;
 export type CorrelationStatus = Components.Schemas.CorrelationStatus;
 export type CorrelationStatusList = Components.Schemas.CorrelationStatusList;
 export type CorrelationUseCaseCounts = Components.Schemas.CorrelationUseCaseCounts;
