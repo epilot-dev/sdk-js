@@ -18,13 +18,15 @@ export declare namespace Components {
     }
     namespace Schemas {
         /**
-         * Something a hook needs the consumer to supply in `context`, discriminated by `type`.
-         * Today only `entity`; more types will follow. Consumers ignore types they do not know.
+         * Something a hook needs the consumer to supply in `context`, discriminated by `type`:
+         * bound entities (`entity`) or an optional scalar input (`value`). More types may follow;
+         * consumers ignore types they do not know.
          *
          */
         export type ContextRequirement = /**
-         * Something a hook needs the consumer to supply in `context`, discriminated by `type`.
-         * Today only `entity`; more types will follow. Consumers ignore types they do not know.
+         * Something a hook needs the consumer to supply in `context`, discriminated by `type`:
+         * bound entities (`entity`) or an optional scalar input (`value`). More types may follow;
+         * consumers ignore types they do not know.
          *
          */
         /**
@@ -33,7 +35,16 @@ export declare namespace Components {
          * `{ type: entity, schema: contract }`.
          *
          */
-        EntityContextRequirement;
+        EntityContextRequirement | /**
+         * An optional scalar input. When the consumer has a value it supplies it under
+         * `Context.<name>` (dates as ISO 8601 strings, `YYYY-MM-DD` or a date-time); otherwise the
+         * key is absent, so the hook template must provide a fallback, e.g.
+         * `{{ Context.reading_date | default: "now" | date: "%Y-%m-%d" }}` declares
+         * `{ type: value, name: reading_date, value_type: date }`. `name` is unique among the hook's
+         * `value` requirements and never equals the `schema` of one of its `entity` requirements.
+         *
+         */
+        ValueContextRequirement;
         /**
          * The consumer supplies the bound entities of `schema` under `Context.<schema>`, e.g. a hook
          * interpolating `{{ Context.contract[0].external_id }}` declares
@@ -87,13 +98,15 @@ export declare namespace Components {
             /**
              * What the hook needs the consumer to supply in `context`, as declared in the hook
              * config. Omitted when the hook declares none. A rule builder must require these
-             * contexts on any rule that uses the hook, so the caller passes them in `context`.
-             * More requirement types will follow; consumers ignore types they do not know.
+             * contexts (and offer these value inputs) on any rule that uses the hook, so the
+             * caller passes them in `context`. More requirement types may follow; consumers
+             * ignore types they do not know.
              *
              */
             contexts?: /**
-             * Something a hook needs the consumer to supply in `context`, discriminated by `type`.
-             * Today only `entity`; more types will follow. Consumers ignore types they do not know.
+             * Something a hook needs the consumer to supply in `context`, discriminated by `type`:
+             * bound entities (`entity`) or an optional scalar input (`value`). More types may follow;
+             * consumers ignore types they do not know.
              *
              */
             ContextRequirement[];
@@ -130,8 +143,9 @@ export declare namespace Components {
              *
              * One entry per context requirement the consumer bound (see
              * `ExternalValueHookSummary.contexts`): for an `entity` requirement, the bound
-             * entities of that schema under its schema slug. This API gives no name special
-             * treatment.
+             * entities of that schema under its schema slug; for a `value` requirement, the
+             * bound scalar under its `name` (e.g. `"reading_date": "2026-03-01"`), omitted when
+             * the consumer has no value. This API gives no name special treatment.
              *
              */
             context: {
@@ -197,6 +211,25 @@ export declare namespace Components {
              * English translation
              */
             en?: string | null;
+        }
+        /**
+         * An optional scalar input. When the consumer has a value it supplies it under
+         * `Context.<name>` (dates as ISO 8601 strings, `YYYY-MM-DD` or a date-time); otherwise the
+         * key is absent, so the hook template must provide a fallback, e.g.
+         * `{{ Context.reading_date | default: "now" | date: "%Y-%m-%d" }}` declares
+         * `{ type: value, name: reading_date, value_type: date }`. `name` is unique among the hook's
+         * `value` requirements and never equals the `schema` of one of its `entity` requirements.
+         *
+         */
+        export interface ValueContextRequirement {
+            type: "value";
+            /**
+             * Key under `Context`, same pattern as validation rule parameter names.
+             * example:
+             * reading_date
+             */
+            name: string; // ^[a-z][a-z0-9_]{0,63}$
+            value_type: ExternalValueType;
         }
     }
 }
@@ -445,3 +478,4 @@ export type ExternalValueType = Components.Schemas.ExternalValueType;
 export type ResolveExternalValueRequest = Components.Schemas.ResolveExternalValueRequest;
 export type ResolveExternalValueResponse = Components.Schemas.ResolveExternalValueResponse;
 export type TranslatedString = Components.Schemas.TranslatedString;
+export type ValueContextRequirement = Components.Schemas.ValueContextRequirement;

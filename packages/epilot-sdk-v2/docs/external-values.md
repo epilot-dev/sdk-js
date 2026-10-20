@@ -40,6 +40,7 @@ const { data } = await externalValuesClient.listExternalValues(...)
 - [`ExternalValueHookSummary`](#externalvaluehooksummary)
 - [`ContextRequirement`](#contextrequirement)
 - [`EntityContextRequirement`](#entitycontextrequirement)
+- [`ValueContextRequirement`](#valuecontextrequirement)
 - [`ExternalValueHookList`](#externalvaluehooklist)
 
 ### `listExternalValues`
@@ -316,20 +317,29 @@ type ExternalValueHookSummary = {
   contexts?: Array<{
     type: "entity"
     schema: string
+  } | {
+    type: "value"
+    name: string
+    value_type: "number" | "text" | "date" | "boolean"
   }>
 }
 ```
 
 ### `ContextRequirement`
 
-Something a hook needs the consumer to supply in `context`, discriminated by `type`.
-Today only `entity`; more types will follow. Consumers ignore types they do not know.
+Something a hook needs the consumer to supply in `context`, discriminated by `type`:
+bound entities (`entity`) or an optional scalar input (`value`). More types may follow;
+consumers ignore types they do not know.
 
 
 ```ts
 type ContextRequirement = {
   type: "entity"
   schema: string
+} | {
+  type: "value"
+  name: string
+  value_type: "number" | "text" | "date" | "boolean"
 }
 ```
 
@@ -344,6 +354,21 @@ interpolating `{{ Context.contract[0].external_id }}` declares
 type EntityContextRequirement = {
   type: "entity"
   schema: string
+}
+```
+
+### `ValueContextRequirement`
+
+An optional scalar input. When the consumer has a value it supplies it under
+`Context.`<name>`` (dates as ISO 8601 strings, `YYYY-MM-DD` or a date-time); otherwise the
+key is absent, so the hook template must provide a fallback, e.g.
+`{{ Context.reading_date | default: "now" | date: "%Y-%m-%d" }}` dec
+
+```ts
+type ValueContextRequirement = {
+  type: "value"
+  name: string
+  value_type: "number" | "text" | "date" | "boolean"
 }
 ```
 
@@ -371,6 +396,10 @@ type ExternalValueHookList = {
     contexts?: Array<{
       type: { ... }
       schema: { ... }
+    } | {
+      type: { ... }
+      name: { ... }
+      value_type: { ... }
     }>
   }>
 }
