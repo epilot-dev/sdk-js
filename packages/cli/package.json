@@ -1,6 +1,6 @@
 {
   "name": "@epilot/cli",
-  "version": "0.1.220",
+  "version": "0.1.221",
   "description": "CLI for epilot APIs",
   "type": "module",
   "bin": {
