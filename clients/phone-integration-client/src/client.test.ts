@@ -13,6 +13,7 @@ describe('Phone Integration client', () => {
       'listPhoneAgents',
       'assignPhoneAgent',
       'removePhoneAgent',
+      'listProviderSetups',
       'getProviderSetup',
       'setupProvider',
     ]);

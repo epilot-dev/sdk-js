@@ -94,6 +94,12 @@
         "responses": {}
       }
     },
+    "/v1/operator/provider-setups": {
+      "get": {
+        "operationId": "listProviderSetups",
+        "responses": {}
+      }
+    },
     "/v1/operator/organizations/{org_id}/provider": {
       "parameters": [
         {

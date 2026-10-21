@@ -424,6 +424,59 @@
         }
       }
     },
+    "/v1/operator/provider-setups": {
+      "get": {
+        "operationId": "listProviderSetups",
+        "summary": "listProviderSetups",
+        "description": "Every organization that has a telephony provider tenant, for the admin portal's overview: the\nprovider's sub-accounts (one per organization, keyed by the organization id) joined with this\nservice's setup record. `ready` follows getManagerStatus: an organization whose tenant was created\nby hand, outside `setupProvider`, has no record and is not ready until the setup runs once.\nSorted by organization id; not paged (one tenant per organization, a few hundred at most).\n",
+        "tags": [
+          "operator"
+        ],
+        "security": [
+          {
+            "OperatorAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "internal"
+        ],
+        "responses": {
+          "200": {
+            "description": "The provider setups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "results"
+                  ],
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProviderSetupSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
     "/v1/operator/organizations/{org_id}/provider": {
       "parameters": [
         {
@@ -814,6 +867,70 @@
           "last_setup_by": {
             "type": "string",
             "description": "Admin-portal operator (email) who last ran the setup"
+          }
+        }
+      },
+      "ProviderSetupSummary": {
+        "type": "object",
+        "description": "One organization's provider setup, as listed in the overview (no live SCIM or SSO reads).",
+        "required": [
+          "org_id",
+          "provider",
+          "ready",
+          "setup_recorded",
+          "tenant"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "epilot organization id (the provider tenant's org key)"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "babelforce"
+            ]
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "Phone agents can be assigned (same rule as getManagerStatus)"
+          },
+          "setup_recorded": {
+            "type": "boolean",
+            "description": "`setupProvider` has run for this organization at least once. `false` for a tenant created by\nhand at the provider: run the setup once to record it.\n"
+          },
+          "tenant": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "org_key"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The provider's tenant id (Babelforce sub-account id)"
+              },
+              "name": {
+                "type": "string"
+              },
+              "org_key": {
+                "type": "string"
+              }
+            }
+          },
+          "sso_identity_client_id": {
+            "type": "string",
+            "description": "The identity-api client the recorded SSO configuration points at"
+          },
+          "last_setup_by": {
+            "type": "string",
+            "description": "The operator who last ran the setup (email)"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the setup record last changed"
           }
         }
       },

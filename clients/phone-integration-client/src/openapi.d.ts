@@ -178,6 +178,46 @@ declare namespace Components {
              */
             identity_client_secret: string;
         }
+        /**
+         * One organization's provider setup, as listed in the overview (no live SCIM or SSO reads).
+         */
+        export interface ProviderSetupSummary {
+            /**
+             * epilot organization id (the provider tenant's org key)
+             */
+            org_id: string;
+            provider: "babelforce";
+            /**
+             * Phone agents can be assigned (same rule as getManagerStatus)
+             */
+            ready: boolean;
+            /**
+             * `setupProvider` has run for this organization at least once. `false` for a tenant created by
+             * hand at the provider: run the setup once to record it.
+             *
+             */
+            setup_recorded: boolean;
+            tenant: {
+                /**
+                 * The provider's tenant id (Babelforce sub-account id)
+                 */
+                id: string;
+                name: string;
+                org_key: string;
+            };
+            /**
+             * The identity-api client the recorded SSO configuration points at
+             */
+            sso_identity_client_id?: string;
+            /**
+             * The operator who last ran the setup (email)
+             */
+            last_setup_by?: string;
+            /**
+             * When the setup record last changed
+             */
+            updated_at?: string; // date-time
+        }
     }
 }
 declare namespace Paths {
@@ -245,6 +285,17 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace ListProviderSetups {
+        namespace Responses {
+            export interface $200 {
+                results: /* One organization's provider setup, as listed in the overview (no live SCIM or SSO reads). */ Components.Schemas.ProviderSetupSummary[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $502 = Components.Responses.BadGateway;
+            export type $503 = Components.Responses.ServiceUnavailable;
         }
     }
     namespace RemovePhoneAgent {
@@ -379,6 +430,21 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RemovePhoneAgent.Responses.$204>
   /**
+   * listProviderSetups - listProviderSetups
+   * 
+   * Every organization that has a telephony provider tenant, for the admin portal's overview: the
+   * provider's sub-accounts (one per organization, keyed by the organization id) joined with this
+   * service's setup record. `ready` follows getManagerStatus: an organization whose tenant was created
+   * by hand, outside `setupProvider`, has no record and is not ready until the setup runs once.
+   * Sorted by organization id; not paged (one tenant per organization, a few hundred at most).
+   * 
+   */
+  'listProviderSetups'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListProviderSetups.Responses.$200>
+  /**
    * getProviderSetup - getProviderSetup
    * 
    * What has been set up at the telephony provider for this organization.
@@ -494,6 +560,23 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RemovePhoneAgent.Responses.$204>
   }
+  ['/v1/operator/provider-setups']: {
+    /**
+     * listProviderSetups - listProviderSetups
+     * 
+     * Every organization that has a telephony provider tenant, for the admin portal's overview: the
+     * provider's sub-accounts (one per organization, keyed by the organization id) joined with this
+     * service's setup record. `ready` follows getManagerStatus: an organization whose tenant was created
+     * by hand, outside `setupProvider`, has no record and is not ready until the setup runs once.
+     * Sorted by organization id; not paged (one tenant per organization, a few hundred at most).
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListProviderSetups.Responses.$200>
+  }
   ['/v1/operator/organizations/{org_id}/provider']: {
     /**
      * getProviderSetup - getProviderSetup
@@ -538,3 +621,4 @@ export type ManagerStatus = Components.Schemas.ManagerStatus;
 export type PhoneAgent = Components.Schemas.PhoneAgent;
 export type ProviderSetup = Components.Schemas.ProviderSetup;
 export type ProviderSetupRequest = Components.Schemas.ProviderSetupRequest;
+export type ProviderSetupSummary = Components.Schemas.ProviderSetupSummary;
