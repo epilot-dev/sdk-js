@@ -34,6 +34,7 @@ const { data } = await phoneIntegrationClient.batchSearchCustomers(...)
 - [`removePhoneAgent`](#removephoneagent)
 
 **operator**
+- [`listProviderSetups`](#listprovidersetups)
 - [`getProviderSetup`](#getprovidersetup)
 - [`setupProvider`](#setupprovider)
 
@@ -42,6 +43,7 @@ const { data } = await phoneIntegrationClient.batchSearchCustomers(...)
 - [`PhoneAgent`](#phoneagent)
 - [`AssignPhoneAgentRequest`](#assignphoneagentrequest)
 - [`ProviderSetup`](#providersetup)
+- [`ProviderSetupSummary`](#providersetupsummary)
 - [`ProviderSetupRequest`](#providersetuprequest)
 - [`CustomerBatchSearchResult`](#customerbatchsearchresult)
 - [`CustomerSearchResult`](#customersearchresult)
@@ -207,6 +209,46 @@ const { data } = await client.removePhoneAgent({
 
 ---
 
+### `listProviderSetups`
+
+Every organization that has a telephony provider tenant, for the admin portal's overview: the
+provider's sub-accounts (one per organization, keyed by the organization id) joined with this
+service's se
+
+`GET /v1/operator/provider-setups`
+
+```ts
+const { data } = await client.listProviderSetups()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "org_id": "string",
+      "provider": "babelforce",
+      "ready": true,
+      "setup_recorded": true,
+      "tenant": {
+        "id": "string",
+        "name": "string",
+        "org_key": "string"
+      },
+      "sso_identity_client_id": "string",
+      "last_setup_by": "string",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `getProviderSetup`
 
 What has been set up at the telephony provider for this organization.
@@ -360,6 +402,27 @@ type ProviderSetup = {
     configured_at?: string // date-time
   }
   last_setup_by?: string
+}
+```
+
+### `ProviderSetupSummary`
+
+One organization's provider setup, as listed in the overview (no live SCIM or SSO reads).
+
+```ts
+type ProviderSetupSummary = {
+  org_id: string
+  provider: "babelforce"
+  ready: boolean
+  setup_recorded: boolean
+  tenant: {
+    id: string
+    name: string
+    org_key: string
+  }
+  sso_identity_client_id?: string
+  last_setup_by?: string
+  updated_at?: string // date-time
 }
 ```
 
