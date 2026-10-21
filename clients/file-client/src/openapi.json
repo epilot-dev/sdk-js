@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "File API",
-    "version": "1.13.0",
+    "version": "1.14.0",
     "description": "The File API enables you to upload, store, manage, and share files within the epilot platform.\n\n## Key Features\n- **Upload files** to temporary storage and save them permanently as File entities\n- **Generate previews** (thumbnails) for images and documents\n- **Create public links** to share private files externally\n- **Organize files** into collections for better management\n- **Version control** with automatic file versioning on updates\n\n## File Upload Workflow\n1. Call `uploadFileV2` to get a pre-signed S3 URL\n2. Upload your file directly to S3 using the pre-signed URL (PUT request)\n3. Call `saveFileV2` with the S3 reference to create a permanent File entity\n\n## Changelog\n<a href=\"changelog\">View API Changelog</a>\n"
   },
   "tags": [
@@ -67,6 +67,12 @@
     "/v2/files/upload": {
       "post": {
         "operationId": "uploadFileV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:create",
+            "resource": "file"
+          }
+        ],
         "summary": "uploadFileV2",
         "description": "Create pre-signed S3 URL to upload a file to keep temporarily (one week).\n\nUse the saveFileV2 operation to store file file permanently.\n",
         "tags": [
@@ -136,6 +142,20 @@
     "/v2/files": {
       "post": {
         "operationId": "saveFileV2",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "entity:create",
+                "resource": "file"
+              },
+              {
+                "action": "entity:edit",
+                "resource": "file"
+              }
+            ]
+          }
+        ],
         "summary": "saveFileV2",
         "description": "Saves a permanent file entity. Updates an existing file entity when `_id` is passed.\n\nSaves metadata to file entity and stores a version when `s3ref` or `source_url` is passed.\n",
         "tags": [
@@ -296,6 +316,12 @@
     "/v1/files/upload": {
       "post": {
         "operationId": "uploadFile",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:create",
+            "resource": "file"
+          }
+        ],
         "summary": "uploadFile",
         "deprecated": true,
         "description": "**DEPRECATED** - Will be removed on **2025-06-30**. Use `POST /v2/files/upload` instead.\n\n## Migration Guide\nReplace calls to this endpoint with `uploadFileV2`:\n\n| v1 Parameter | v2 Parameter | Notes |\n|--------------|--------------|-------|\n| `file_entity_id` | `file_entity_id` | No change |\n\nThe v2 response includes the same fields with improved structure.\n\n---\n\nCreate pre-signed S3 URL to upload a file to keep temporarily (one week).\n\nUse the saveFile operation to store file file permanently.\n",
@@ -384,6 +410,20 @@
     "/v1/files": {
       "post": {
         "operationId": "saveFile",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "entity:create",
+                "resource": "file"
+              },
+              {
+                "action": "entity:edit",
+                "resource": "file"
+              }
+            ]
+          }
+        ],
         "summary": "saveFile",
         "deprecated": true,
         "description": "**DEPRECATED** - Will be removed on **2025-06-30**. Use `POST /v2/files` instead.\n\n## Migration Guide\nReplace calls to this endpoint with `saveFileV2`:\n\n| v1 Feature | v2 Feature | Notes |\n|------------|------------|-------|\n| `activity_id` param | `activity_id` param | No change |\n| `async` param | `async` param | No change |\n| - | `fill_activity` param | New in v2 |\n| - | `strict` param | New in v2 |\n| - | `delete_temp_file` param | New in v2, defaults to true |\n\nThe v2 endpoint supports additional parameters for better control over file saving behavior.\n\n---\n\nCreate / Update a permanent File entity.\n\nMakes file object permanent and saves metadata to file entity.\n",
@@ -452,6 +492,12 @@
     "/v2/files/{id}": {
       "get": {
         "operationId": "getFile",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "getFile",
         "description": "Get a file entity by id",
         "tags": [
@@ -509,6 +555,12 @@
       },
       "delete": {
         "operationId": "deleteFile",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:delete",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "deleteFile",
         "description": "Delete a file entity by id",
         "tags": [
@@ -568,6 +620,12 @@
     "/v1/files/{id}/download": {
       "get": {
         "operationId": "downloadFile",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "downloadFile",
         "description": "Generate a pre-signed download URL for a file.\n\nThe returned URL is valid for a limited time (typically 15 minutes) and can be used to download the file directly.\n\n**Download attribution (`x-track-*`):** any query parameter whose name starts with\n`x-track-` is treated as opaque tracking metadata and signed into the returned URL, so it\nshows up in the S3 access logs / CloudTrail data events when the link is actually opened.\nThis is a generic, service-agnostic channel — e.g. the customer portal sends\n`x-track-portal-id` and `x-track-contact-id`. Only the `x-track-` namespace is forwarded;\nthe values cannot affect how S3 resolves or serves the object. Parameter names must match\n`^x-track-[a-z0-9](?:[a-z0-9_-]{0,38}[a-z0-9])?$`, values are capped at 256 characters, and\nat most 10 such parameters are honoured (see the `x-track` parameter below).\n",
         "tags": [
@@ -656,6 +714,20 @@
     "/v1/files:downloadS3": {
       "post": {
         "operationId": "downloadS3File",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "entity:view",
+                "resource": "file"
+              },
+              {
+                "action": "entity:download",
+                "resource": "file"
+              }
+            ]
+          }
+        ],
         "summary": "downloadS3File",
         "description": "Generate a pre-signed download URL for a file using its S3 reference.\n\nUse this endpoint when you have the S3 bucket and key but not the file entity ID.\n",
         "tags": [
@@ -732,6 +804,16 @@
     "/v1/files:downloadFiles": {
       "post": {
         "operationId": "downloadFiles",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:download",
+            "resource": "file"
+          },
+          {
+            "action": "entity:view",
+            "resource": "file"
+          }
+        ],
         "summary": "downloadFiles",
         "description": "Bulk generate pre-signed download URLs for multiple files in a single request.\n\nThis is more efficient than calling `downloadFile` multiple times when you need to download several files.\n",
         "tags": [
@@ -812,8 +894,18 @@
     "/v1/files:zipJob": {
       "post": {
         "operationId": "createZipJob",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:download",
+            "resource": "file"
+          },
+          {
+            "action": "entity:view",
+            "resource": "file"
+          }
+        ],
         "summary": "createZipJob",
-        "description": "Create a background job to ZIP multiple files and send a download link via email.\n\nFor bulk downloads of more than 50 files, use this async endpoint instead of client-side zipping.\nThe job will:\n1. Download all requested files from S3\n2. Create a ZIP archive\n3. Upload the ZIP to temporary storage\n4. Send an email notification with the download link\n\nThe ZIP file will be available for 7 days.\n",
+        "description": "Create a background job to ZIP multiple files and send a download link via email.\n\nFor bulk downloads of more than 50 files, use this async endpoint instead of client-side zipping.\nThe job will:\n1. Download all requested files from S3\n2. Create a ZIP archive\n3. Upload the ZIP to temporary storage\n4. Send an email notification with the download link\n\nPermissions: requires `entity:download` on files. With `file_entity_ids` every file must be\nviewable by the caller, otherwise the request is rejected with 403. An `entity_query` is\nresolved with the caller's permissions when the job is created (restricted to `_schema:file`);\nonly the files it returns are zipped. A query that matches no viewable files returns 400.\n\nThe ZIP file will be available for 7 days.\n",
         "tags": [
           "File"
         ],
@@ -855,6 +947,9 @@
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -864,6 +959,11 @@
     "/v1/files:zipJob/{job_id}": {
       "get": {
         "operationId": "getZipJob",
+        "x-epilot-permissions": [
+          {
+            "access": "owner"
+          }
+        ],
         "summary": "getZipJob",
         "description": "Get the status of a ZIP job",
         "tags": [
@@ -907,6 +1007,12 @@
     "/v1/files/{id}/summary": {
       "get": {
         "operationId": "getFileSummary",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "getFileSummary",
         "description": "Get summary text for a file entity together with the current summary job status when available.",
         "tags": [
@@ -955,6 +1061,12 @@
     "/v1/files/{id}/summary/feedback": {
       "get": {
         "operationId": "getFileSummaryFeedback",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "Get file summary feedback",
         "description": "Get the authenticated user's feedback for the current generated file summary.",
         "tags": [
@@ -1001,6 +1113,12 @@
       },
       "put": {
         "operationId": "putFileSummaryFeedback",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "Submit file summary feedback",
         "description": "Upsert thumbs up/down feedback for the current generated file summary.",
         "tags": [
@@ -1062,6 +1180,12 @@
     "/v1/files/{id}/summary-jobs": {
       "post": {
         "operationId": "createFileSummaryJob",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "createFileSummaryJob",
         "description": "Create or return the current AI summary job for a file entity.",
         "tags": [
@@ -1110,6 +1234,12 @@
     "/v1/files/{id}/summary-jobs/current": {
       "get": {
         "operationId": "getCurrentFileSummaryJob",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "getCurrentFileSummaryJob",
         "description": "Get the latest AI summary job for the file entity's current source.",
         "tags": [
@@ -1158,6 +1288,12 @@
     "/v1/files/{id}/summary-jobs/{job_id}": {
       "get": {
         "operationId": "getFileSummaryJob",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "getFileSummaryJob",
         "description": "Get an AI summary job by id.",
         "tags": [
@@ -1216,6 +1352,12 @@
     "/v1/files/{id}/summary:generate": {
       "post": {
         "operationId": "generateFileSummary",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "generateFileSummary",
         "description": "Compatibility alias for creating or returning the current AI summary job for a file entity.",
         "tags": [
@@ -1261,9 +1403,283 @@
         }
       }
     },
+    "/v1/files/{id}/attribute-suggestion-jobs": {
+      "post": {
+        "operationId": "createFileAttributeSuggestionJob",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
+        "summary": "createFileAttributeSuggestionJob",
+        "description": "Start an auto-fill job that reads the file's extracted text and suggests values for the related entity's attributes. Requires `entity:view` on the file and on the related entity. Returns 404 with `error_code: file_not_extracted` while the file has not been extracted yet; callers retry until the extraction is ready.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFileAttributeSuggestionJobRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Suggestion job accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileAttributeSuggestionJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/FileAttributeSuggestionErrorResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/FileAttributeSuggestionErrorResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/FileAttributeSuggestionErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/FileAttributeSuggestionErrorResponse"
+          },
+          "503": {
+            "$ref": "#/components/responses/FileAttributeSuggestionErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/files/{id}/attribute-suggestion-jobs/latest": {
+      "get": {
+        "operationId": "getLatestFileAttributeSuggestions",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
+        "summary": "getLatestFileAttributeSuggestions",
+        "description": "Get the most recent attribute suggestion job of any status for the file and the given entity. Returns 404 with `error_code: no_file_attribute_suggestions_job` when auto-fill has not run yet.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          },
+          {
+            "name": "entity_id",
+            "in": "query",
+            "required": true,
+            "description": "The entity the suggestions are for",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest suggestion job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileAttributeSuggestionJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/FileAttributeSuggestionErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/files/{id}/attribute-suggestion-jobs/{job_id}": {
+      "get": {
+        "operationId": "getFileAttributeSuggestionJob",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
+        "summary": "getFileAttributeSuggestionJob",
+        "description": "Get an attribute suggestion job of the file. Poll until `jobStatus.status` is `COMPLETED` or `FAILED`.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          },
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "description": "The attribute suggestion job ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Suggestion job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileAttributeSuggestionJob"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/FileAttributeSuggestionErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateFileAttributeSuggestionStatus",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
+        "summary": "updateFileAttributeSuggestionStatus",
+        "description": "Record that suggestions were accepted, discarded or copied. Only the suggestion entries named in the request change; unknown attribute names are ignored. Applying a value to the entity stays with the caller.",
+        "tags": [
+          "File"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The UUID of the file entity",
+            "schema": {
+              "$ref": "#/components/schemas/FileEntityId"
+            }
+          },
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "description": "The attribute suggestion job ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFileAttributeSuggestionStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated suggestion job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileAttributeSuggestionJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/FileAttributeSuggestionErrorResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/files/{id}/text": {
       "get": {
         "operationId": "getFileText",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "getFileText",
         "description": "Get the plain-text representation of a file entity. Returns status `not_ready` while text is being prepared and `unsupported` when text is unavailable for the file or organization.",
         "tags": [
@@ -1312,6 +1728,12 @@
     "/v1/files/validations": {
       "post": {
         "operationId": "validateFile",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file"
+          }
+        ],
         "summary": "validateFile",
         "description": "Validate an uploaded file against one or more document validation rules\n(validation-rules-api rules with `input_type: document`).\n\nThe file is referenced either by its file entity id or, for an upload that has not been\nsaved as an entity yet (e.g. a journey upload in the temporary prefix), by its S3 reference.\nThe service collects an observation of the file - deterministic facts such as the sniffed\nmime type, size, page count, image resolution, blank and password-protection detection -\nand evaluates every rule against it with the shared validation rules engine.\n\nThe response carries one result per rule with a per-condition outcome (`pass`, `fail`,\n`uncertain`, `skipped`), plus the observation the results were derived from. `status` is\n`completed` for checks that finish synchronously; `pending` is reserved for check levels\nthat need asynchronous content extraction.\n",
         "tags": [
@@ -1379,6 +1801,12 @@
     "/v1/files/{id}/preview": {
       "get": {
         "operationId": "previewFile",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "previewFile",
         "description": "Generate a thumbnail preview for a file entity.\n\nSupported file types include images (PNG, JPEG, GIF, WebP), PDFs, and common document formats.\nThe preview is returned as an image (PNG or JPEG).\n\n**Tip:** Use with CookieAuth to embed previews directly in `<img>` tags.\n",
         "tags": [
@@ -1458,6 +1886,12 @@
     "/v1/files:previewS3": {
       "post": {
         "operationId": "previewS3File",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file"
+          }
+        ],
         "summary": "previewS3File",
         "description": "Generate a thumbnail preview from an S3 reference.\n\nUse this endpoint when you have the S3 bucket and key but not the file entity ID.\n",
         "tags": [
@@ -1534,6 +1968,12 @@
       },
       "get": {
         "operationId": "previewS3FileGet",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file"
+          }
+        ],
         "summary": "previewS3FileGet",
         "description": "Get a thumbnail preview from an S3 reference using query parameters.\n\nThis GET variant is useful for embedding previews directly in `<img>` tags.\n",
         "tags": [
@@ -1616,7 +2056,7 @@
       "get": {
         "operationId": "previewPublicFile",
         "summary": "previewPublicFile",
-        "description": "Generate a thumbnail preview for a public file entity.\n\n**No authentication required.** This endpoint only works for files with `access_control: public-read`.\n",
+        "description": "Generate a thumbnail preview for a public file entity.\n\n**No authentication required.** This endpoint only works for files with `access_control: public-read`.\n\nSVG files are rasterized to PNG by default. With `keep_original=true`, SVG files redirect\nto the selected version's original S3 object, preserving vector rendering. Width and\nheight parameters are ignored only for SVG files when this option is enabled.\nThis option only applies to SVG files; previews of other file formats are unchanged.\n",
         "security": [],
         "tags": [
           "Preview"
@@ -1657,6 +2097,15 @@
               "type": "integer"
             },
             "example": 200
+          },
+          {
+            "name": "keep_original",
+            "in": "query",
+            "description": "Applies only to SVG files. When true, redirects SVG files to the selected version's\noriginal S3 object instead of rasterizing to PNG and ignores width/height parameters.\nPreview behavior for all other file formats is unchanged.\n",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           },
           {
             "name": "org_id",
@@ -1704,7 +2153,7 @@
             "description": "No preview could be generated and no redirect target is available\n(the file has no public URL). No body is returned.\n"
           },
           "302": {
-            "description": "The preview could not be optimized (e.g. image dimensions above the input\npixel limit, an oversized file, or an unsupported/undecodable format).\nSince the file is public, the client is redirected to the original file,\nwhich the browser can render directly.\n",
+            "description": "With `keep_original=true`, SVG files redirect to the selected version's original S3 object without rasterization.\nPublic files also redirect to the original file when a preview cannot\nbe optimized (e.g. image dimensions above the input pixel limit, an oversized\nfile, or an unsupported/undecodable format), which the browser can render directly.\n",
             "headers": {
               "Location": {
                 "description": "URL of the original public file",
@@ -1764,6 +2213,11 @@
     "/v1/files/session": {
       "get": {
         "operationId": "getSession",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
         "summary": "getSession",
         "description": "Start a browser session by converting a Bearer token into a server-side cookie.\n\n**Use case:** After calling this endpoint, you can use preview URLs directly in `<img>` tags\nwithout needing to set the Authorization header manually.\n\n**Example flow:**\n1. Call this endpoint with your Bearer token: `GET /v1/files/session` with `Authorization: Bearer <token>`\n2. The server sets an HTTP-only cookie named `token`\n3. Use preview URLs directly: `<img src=\"https://file.sls.epilot.io/v1/files/{id}/preview\" />`\n",
         "tags": [
@@ -1789,6 +2243,11 @@
       },
       "delete": {
         "operationId": "deleteSession",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
         "summary": "deleteSession",
         "description": "End a browser session by deleting the token cookie.\n\nCall this endpoint to log out and clear the session cookie.\n",
         "tags": [
@@ -1804,6 +2263,16 @@
     "/v1/files/{id}/public/links": {
       "post": {
         "operationId": "generatePublicLink",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file"
+          },
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "generatePublicLink",
         "description": "Generate a public link to share a private file externally.\n\nThe generated link:\n- Is permanent until explicitly revoked\n- Includes the filename for user-friendly URLs\n- Does not require authentication to access\n- Redirects to a signed download URL when accessed\n\n**Use case:** Share invoices, contracts, or documents with external parties who don't have epilot accounts.\n",
         "tags": [
@@ -1849,6 +2318,12 @@
       },
       "get": {
         "operationId": "listPublicLinksForFile",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "file:{id}"
+          }
+        ],
         "summary": "listPublicLinksForFile",
         "description": "Fetches all public links previously generated for a file",
         "parameters": [
@@ -1893,6 +2368,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           },
           "501": {
             "description": "Not implemented",
@@ -1989,6 +2470,12 @@
     "/v1/files/public/links/{id}": {
       "delete": {
         "operationId": "revokePublicLink",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "file"
+          }
+        ],
         "summary": "revokePublicLink",
         "description": "Revokes a given public link by ID",
         "parameters": [
@@ -2010,6 +2497,12 @@
           "204": {
             "description": "Public link revoked successfully"
           },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
           "501": {
             "description": "Not implemented",
             "content": {
@@ -2030,6 +2523,11 @@
     "/v1/files/download:verify": {
       "post": {
         "operationId": "verifyCustomDownloadUrl",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "verifyCustomDownloadUrl",
         "description": "Verify that a custom download URL is valid and has not expired.\n\nUse this endpoint to validate custom download URLs before redirecting users.\nCustom download URLs include a signature and expiration time for security.\n",
         "tags": [
@@ -2181,6 +2679,11 @@
     "/v1/{slug}/collections": {
       "get": {
         "operationId": "getUserSchemaFileCollections",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
         "summary": "getUserSchemaFileCollections",
         "description": "Get all file collections for the current user within a specific schema.\n\nCollections help organize files into logical groups (e.g., \"Contracts\", \"Invoices\").\nUser collections are private to the creating user.\n",
         "tags": [
@@ -2234,6 +2737,11 @@
       },
       "post": {
         "operationId": "createUserSchemaFileCollection",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
         "summary": "createUserSchemaFileCollection",
         "description": "Create a new file collection for the current user within a specific schema.\n\nThe collection will be private to the creating user and associated with the specified schema.\n",
         "tags": [
@@ -2303,6 +2811,11 @@
     "/v1/{slug}/collections/{collectionSlug}": {
       "put": {
         "operationId": "updateUserSchemaFileCollection",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
         "summary": "updateUserSchemaFileCollection",
         "description": "Update an existing file collection.\n\nYou can update the name, parent relationships, starred status, and enabled locations/purposes.\n",
         "tags": [
@@ -2379,6 +2892,11 @@
       },
       "delete": {
         "operationId": "deleteUserSchemaFileCollection",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
         "summary": "deleteUserSchemaFileCollection",
         "description": "Delete a file collection.\n\n**Note:** Deleting a collection does not delete the files within it.\nFiles will remain but will no longer be associated with this collection.\n",
         "tags": [
@@ -2425,6 +2943,16 @@
     "/v1/entity/{id}/collections/{collectionSlug}/files": {
       "get": {
         "operationId": "getFilesInCollection",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view"
+          },
+          {
+            "action": "entity:view",
+            "resource": "file",
+            "filter": true
+          }
+        ],
         "summary": "getFilesInCollection",
         "description": "Get all files within a specific collection for an entity.\n\nThe schema is automatically derived from the entity. This endpoint requires\nview permission on the parent entity to access its files.\n",
         "tags": [
@@ -2499,6 +3027,11 @@
     "/v1/collections/{schemaSlug}": {
       "get": {
         "operationId": "getGlobalFileCollections",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getGlobalFileCollections",
         "description": "Get all global file collections for a specific schema.\n\nGlobal collections are shared across all users in the organization for the specified schema.\nUnlike user collections, these are visible to everyone with access to entities of that schema.\n",
         "tags": [
@@ -2877,6 +3410,288 @@
             "type": "string"
           }
         }
+      },
+      "FileAttributeSuggestionJobStatus": {
+        "type": "object",
+        "required": [
+          "status",
+          "progress"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "INITIATED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "progress": {
+            "type": "number",
+            "description": "Progress in percent (0-100)"
+          },
+          "error": {
+            "type": "string",
+            "description": "Failure reason when status is FAILED"
+          }
+        }
+      },
+      "FileAttributeSuggestion": {
+        "type": "object",
+        "properties": {
+          "attribute_name": {
+            "type": "string",
+            "description": "Schema attribute name (field key on the entity)"
+          },
+          "attribute_label": {
+            "type": "string",
+            "description": "Human readable attribute label"
+          },
+          "attribute_type": {
+            "type": "string",
+            "enum": [
+              "date",
+              "number",
+              "boolean",
+              "select",
+              "string"
+            ]
+          },
+          "suggested_value": {
+            "description": "Scalar matching the attribute schema. Dates as `YYYY-MM-DD`.",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "source_page": {
+            "type": "integer",
+            "description": "Page number in the document where the value was found"
+          },
+          "evidence": {
+            "type": "string",
+            "description": "Quote from the document followed by a short explanation of the mapping"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "suggested",
+              "accepted",
+              "discarded"
+            ],
+            "default": "suggested"
+          },
+          "status_updated_by": {
+            "type": "string",
+            "description": "User id that last updated the suggestion status"
+          },
+          "status_updated_at": {
+            "type": "number",
+            "description": "Epoch milliseconds of the last status update"
+          },
+          "discard_reason": {
+            "type": "string",
+            "description": "Reason given when the suggestion was discarded"
+          },
+          "is_copied": {
+            "type": "boolean",
+            "description": "Whether a user copied the suggested value"
+          },
+          "copied_by": {
+            "type": "string",
+            "description": "User id that copied the suggested value"
+          },
+          "copied_at": {
+            "type": "number",
+            "description": "Epoch milliseconds when the value was copied"
+          },
+          "suggestion_type": {
+            "type": "string",
+            "enum": [
+              "new_value",
+              "update"
+            ],
+            "description": "`new_value` when the entity field is empty, `update` when the suggestion proposes a change"
+          }
+        }
+      },
+      "FileAttributeSuggestionsPayload": {
+        "type": "object",
+        "required": [
+          "file_id",
+          "entity_id",
+          "entity_slug",
+          "suggestions"
+        ],
+        "properties": {
+          "file_id": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_slug": {
+            "type": "string"
+          },
+          "generated_by": {
+            "type": "string",
+            "description": "User id that requested the job"
+          },
+          "generated_at": {
+            "type": "number",
+            "description": "Epoch milliseconds when the job was requested"
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileAttributeSuggestion"
+            }
+          }
+        }
+      },
+      "FileAttributeSuggestionJob": {
+        "type": "object",
+        "required": [
+          "jobId",
+          "jobStatus",
+          "payload",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "description": "Attribute suggestion job ID (ULID)"
+          },
+          "jobStatus": {
+            "$ref": "#/components/schemas/FileAttributeSuggestionJobStatus"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/FileAttributeSuggestionsPayload"
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Epoch milliseconds"
+          },
+          "updatedAt": {
+            "type": "number",
+            "description": "Epoch milliseconds"
+          }
+        }
+      },
+      "CreateFileAttributeSuggestionJobRequest": {
+        "type": "object",
+        "required": [
+          "entity_slug",
+          "entity_id"
+        ],
+        "properties": {
+          "entity_slug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Schema slug of the entity to suggest values for",
+            "example": "opportunity"
+          },
+          "entity_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The entity to suggest values for"
+          }
+        }
+      },
+      "UpdateFileAttributeSuggestionStatusRequest": {
+        "type": "object",
+        "required": [
+          "suggestionStatusUpdates"
+        ],
+        "properties": {
+          "suggestionStatusUpdates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "attribute_name"
+              ],
+              "anyOf": [
+                {
+                  "required": [
+                    "status"
+                  ]
+                },
+                {
+                  "required": [
+                    "is_copied"
+                  ]
+                }
+              ],
+              "properties": {
+                "attribute_name": {
+                  "type": "string",
+                  "description": "The attribute_name of the suggestion to update"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "accepted",
+                    "discarded"
+                  ]
+                },
+                "is_copied": {
+                  "type": "boolean",
+                  "description": "Set to true when the user copied the suggested value"
+                },
+                "discard_reason": {
+                  "type": "string",
+                  "description": "Optional reason when status is discarded"
+                }
+              }
+            }
+          }
+        }
+      },
+      "FileAttributeSuggestionError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ErrorObject"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error_code": {
+                "type": "string",
+                "enum": [
+                  "entity_or_schema_unavailable",
+                  "file_not_extracted",
+                  "extraction_unsupported",
+                  "extraction_failed",
+                  "extraction_status_unavailable",
+                  "processing_enqueue_failed",
+                  "no_file_attribute_suggestions_job",
+                  "job_not_found"
+                ]
+              }
+            }
+          }
+        ]
       },
       "FileTextStatus": {
         "type": "string",
@@ -4148,6 +4963,16 @@
       }
     },
     "responses": {
+      "FileAttributeSuggestionErrorResponse": {
+        "description": "Attribute suggestion error with a machine readable `error_code`",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/FileAttributeSuggestionError"
+            }
+          }
+        }
+      },
       "BadRequestError": {
         "description": "Invalid request parameters or payload",
         "content": {

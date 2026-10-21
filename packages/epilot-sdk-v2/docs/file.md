@@ -41,6 +41,10 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`getCurrentFileSummaryJob`](#getcurrentfilesummaryjob)
 - [`getFileSummaryJob`](#getfilesummaryjob)
 - [`generateFileSummary`](#generatefilesummary)
+- [`createFileAttributeSuggestionJob`](#createfileattributesuggestionjob)
+- [`getLatestFileAttributeSuggestions`](#getlatestfileattributesuggestions)
+- [`getFileAttributeSuggestionJob`](#getfileattributesuggestionjob)
+- [`updateFileAttributeSuggestionStatus`](#updatefileattributesuggestionstatus)
 - [`getFileText`](#getfiletext)
 - [`validateFile`](#validatefile)
 - [`verifyCustomDownloadUrl`](#verifycustomdownloadurl)
@@ -83,6 +87,13 @@ const { data } = await fileClient.uploadFileV2(...)
 - [`FileSummaryFeedback`](#filesummaryfeedback)
 - [`FileSummaryFeedbackResponse`](#filesummaryfeedbackresponse)
 - [`PutFileSummaryFeedbackRequest`](#putfilesummaryfeedbackrequest)
+- [`FileAttributeSuggestionJobStatus`](#fileattributesuggestionjobstatus)
+- [`FileAttributeSuggestion`](#fileattributesuggestion)
+- [`FileAttributeSuggestionsPayload`](#fileattributesuggestionspayload)
+- [`FileAttributeSuggestionJob`](#fileattributesuggestionjob)
+- [`CreateFileAttributeSuggestionJobRequest`](#createfileattributesuggestionjobrequest)
+- [`UpdateFileAttributeSuggestionStatusRequest`](#updatefileattributesuggestionstatusrequest)
+- [`FileAttributeSuggestionError`](#fileattributesuggestionerror)
 - [`FileTextStatus`](#filetextstatus)
 - [`FileValidationRequest`](#filevalidationrequest)
 - [`FileValidationFileReference`](#filevalidationfilereference)
@@ -759,6 +770,211 @@ const { data } = await client.generateFileSummary({
 
 ---
 
+### `createFileAttributeSuggestionJob`
+
+Start an auto-fill job that reads the file's extracted text and suggests values for the related entity's attributes. Requires `entity:view` on the file and on the related entity. Returns 404 with `err
+
+`POST /v1/files/{id}/attribute-suggestion-jobs`
+
+```ts
+const { data } = await client.createFileAttributeSuggestionJob(
+  {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+  },
+  {
+    entity_slug: 'opportunity',
+    entity_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+  },
+)
+```
+
+---
+
+### `getLatestFileAttributeSuggestions`
+
+Get the most recent attribute suggestion job of any status for the file and the given entity. Returns 404 with `error_code: no_file_attribute_suggestions_job` when auto-fill has not run yet.
+
+`GET /v1/files/{id}/attribute-suggestion-jobs/latest`
+
+```ts
+const { data } = await client.getLatestFileAttributeSuggestions({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+  entity_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "jobId": "string",
+  "jobStatus": {
+    "status": "INITIATED",
+    "progress": 0,
+    "error": "string"
+  },
+  "payload": {
+    "file_id": "string",
+    "entity_id": "string",
+    "entity_slug": "string",
+    "generated_by": "string",
+    "generated_at": 0,
+    "suggestions": [
+      {
+        "attribute_name": "string",
+        "attribute_label": "string",
+        "attribute_type": "date",
+        "suggested_value": "string",
+        "confidence": "high",
+        "source_page": 0,
+        "evidence": "string",
+        "status": "suggested",
+        "status_updated_by": "string",
+        "status_updated_at": 0,
+        "discard_reason": "string",
+        "is_copied": true,
+        "copied_by": "string",
+        "copied_at": 0,
+        "suggestion_type": "new_value"
+      }
+    ]
+  },
+  "createdAt": 0,
+  "updatedAt": 0
+}
+```
+
+</details>
+
+---
+
+### `getFileAttributeSuggestionJob`
+
+Get an attribute suggestion job of the file. Poll until `jobStatus.status` is `COMPLETED` or `FAILED`.
+
+`GET /v1/files/{id}/attribute-suggestion-jobs/{job_id}`
+
+```ts
+const { data } = await client.getFileAttributeSuggestionJob({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+  job_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "jobId": "string",
+  "jobStatus": {
+    "status": "INITIATED",
+    "progress": 0,
+    "error": "string"
+  },
+  "payload": {
+    "file_id": "string",
+    "entity_id": "string",
+    "entity_slug": "string",
+    "generated_by": "string",
+    "generated_at": 0,
+    "suggestions": [
+      {
+        "attribute_name": "string",
+        "attribute_label": "string",
+        "attribute_type": "date",
+        "suggested_value": "string",
+        "confidence": "high",
+        "source_page": 0,
+        "evidence": "string",
+        "status": "suggested",
+        "status_updated_by": "string",
+        "status_updated_at": 0,
+        "discard_reason": "string",
+        "is_copied": true,
+        "copied_by": "string",
+        "copied_at": 0,
+        "suggestion_type": "new_value"
+      }
+    ]
+  },
+  "createdAt": 0,
+  "updatedAt": 0
+}
+```
+
+</details>
+
+---
+
+### `updateFileAttributeSuggestionStatus`
+
+Record that suggestions were accepted, discarded or copied. Only the suggestion entries named in the request change; unknown attribute names are ignored. Applying a value to the entity stays with the 
+
+`PATCH /v1/files/{id}/attribute-suggestion-jobs/{job_id}`
+
+```ts
+const { data } = await client.updateFileAttributeSuggestionStatus(
+  {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+    job_id: 'example',
+  },
+  {
+    suggestionStatusUpdates: [
+      {},
+      {}
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "jobId": "string",
+  "jobStatus": {
+    "status": "INITIATED",
+    "progress": 0,
+    "error": "string"
+  },
+  "payload": {
+    "file_id": "string",
+    "entity_id": "string",
+    "entity_slug": "string",
+    "generated_by": "string",
+    "generated_at": 0,
+    "suggestions": [
+      {
+        "attribute_name": "string",
+        "attribute_label": "string",
+        "attribute_type": "date",
+        "suggested_value": "string",
+        "confidence": "high",
+        "source_page": 0,
+        "evidence": "string",
+        "status": "suggested",
+        "status_updated_by": "string",
+        "status_updated_at": 0,
+        "discard_reason": "string",
+        "is_copied": true,
+        "copied_by": "string",
+        "copied_at": 0,
+        "suggestion_type": "new_value"
+      }
+    ]
+  },
+  "createdAt": 0,
+  "updatedAt": 0
+}
+```
+
+</details>
+
+---
+
 ### `getFileText`
 
 Get the plain-text representation of a file entity. Returns status `not_ready` while text is being prepared and `unsupported` when text is unavailable for the file or organization.
@@ -928,6 +1144,7 @@ const { data } = await client.previewPublicFile({
   version: 1,
   w: 1,
   h: 1,
+  keep_original: true,
   org_id: 'example',
 })
 ```
@@ -1484,6 +1701,133 @@ type FileSummaryFeedbackResponse = {
 type PutFileSummaryFeedbackRequest = {
   rating: "up" | "down"
   comment?: string
+}
+```
+
+### `FileAttributeSuggestionJobStatus`
+
+```ts
+type FileAttributeSuggestionJobStatus = {
+  status: "INITIATED" | "IN_PROGRESS" | "COMPLETED" | "FAILED"
+  progress: number
+  error?: string
+}
+```
+
+### `FileAttributeSuggestion`
+
+```ts
+type FileAttributeSuggestion = {
+  attribute_name?: string
+  attribute_label?: string
+  attribute_type?: "date" | "number" | "boolean" | "select" | "string"
+  suggested_value?: string | number | boolean
+  confidence?: "high" | "medium" | "low"
+  source_page?: number
+  evidence?: string
+  status?: "suggested" | "accepted" | "discarded"
+  status_updated_by?: string
+  status_updated_at?: number
+  discard_reason?: string
+  is_copied?: boolean
+  copied_by?: string
+  copied_at?: number
+  suggestion_type?: "new_value" | "update"
+}
+```
+
+### `FileAttributeSuggestionsPayload`
+
+```ts
+type FileAttributeSuggestionsPayload = {
+  file_id: string
+  entity_id: string
+  entity_slug: string
+  generated_by?: string
+  generated_at?: number
+  suggestions: Array<{
+    attribute_name?: string
+    attribute_label?: string
+    attribute_type?: "date" | "number" | "boolean" | "select" | "string"
+    suggested_value?: string | number | boolean
+    confidence?: "high" | "medium" | "low"
+    source_page?: number
+    evidence?: string
+    status?: "suggested" | "accepted" | "discarded"
+    status_updated_by?: string
+    status_updated_at?: number
+    discard_reason?: string
+    is_copied?: boolean
+    copied_by?: string
+    copied_at?: number
+    suggestion_type?: "new_value" | "update"
+  }>
+}
+```
+
+### `FileAttributeSuggestionJob`
+
+```ts
+type FileAttributeSuggestionJob = {
+  jobId: string
+  jobStatus: {
+    status: "INITIATED" | "IN_PROGRESS" | "COMPLETED" | "FAILED"
+    progress: number
+    error?: string
+  }
+  payload: {
+    file_id: string
+    entity_id: string
+    entity_slug: string
+    generated_by?: string
+    generated_at?: number
+    suggestions: Array<{
+      attribute_name?: { ... }
+      attribute_label?: { ... }
+      attribute_type?: { ... }
+      suggested_value?: { ... }
+      confidence?: { ... }
+      source_page?: { ... }
+      evidence?: { ... }
+      status?: { ... }
+      status_updated_by?: { ... }
+      status_updated_at?: { ... }
+      discard_reason?: { ... }
+      is_copied?: { ... }
+      copied_by?: { ... }
+      copied_at?: { ... }
+      suggestion_type?: { ... }
+    }>
+  }
+  createdAt: number
+  updatedAt: number
+}
+```
+
+### `CreateFileAttributeSuggestionJobRequest`
+
+```ts
+type CreateFileAttributeSuggestionJobRequest = {
+  entity_slug: string
+  entity_id: string // uuid
+}
+```
+
+### `UpdateFileAttributeSuggestionStatusRequest`
+
+```ts
+type UpdateFileAttributeSuggestionStatusRequest = {
+  suggestionStatusUpdates: unknown | unknown[]
+}
+```
+
+### `FileAttributeSuggestionError`
+
+```ts
+type FileAttributeSuggestionError = {
+  status?: number
+  error?: string
+  error_code?: "entity_or_schema_unavailable" | "file_not_extracted" | "extraction_unsupported" | "extraction_failed" | "extraction_status_unavailable" | "processing_enqueue_failed" | "no_file_attribute_suggestions_job" | "job_not_found"
 }
 ```
 
