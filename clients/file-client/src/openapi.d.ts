@@ -81,6 +81,7 @@ declare namespace Components {
              */
             error?: string;
         }
+        export type FileAttributeSuggestionErrorResponse = /* A generic error returned by the API */ Schemas.FileAttributeSuggestionError;
         /**
          * A generic error returned by the API
          * example:
@@ -278,6 +279,18 @@ declare namespace Components {
              * List of entities to relate the file to
              */
             relations?: FileRelationItem[];
+        }
+        export interface CreateFileAttributeSuggestionJobRequest {
+            /**
+             * Schema slug of the entity to suggest values for
+             * example:
+             * opportunity
+             */
+            entity_slug: string; // ^[a-zA-Z0-9_-]+$
+            /**
+             * The entity to suggest values for
+             */
+            entity_id: string; // uuid
         }
         /**
          * Request payload to create a ZIP job for bulk file download.
@@ -2425,6 +2438,118 @@ declare namespace Components {
              */
             error?: string;
         }
+        export interface FileAttributeSuggestion {
+            /**
+             * Schema attribute name (field key on the entity)
+             */
+            attribute_name?: string;
+            /**
+             * Human readable attribute label
+             */
+            attribute_label?: string;
+            attribute_type?: "date" | "number" | "boolean" | "select" | "string";
+            /**
+             * Scalar matching the attribute schema. Dates as `YYYY-MM-DD`.
+             */
+            suggested_value?: /* Scalar matching the attribute schema. Dates as `YYYY-MM-DD`. */ string | number | boolean;
+            confidence?: "high" | "medium" | "low";
+            /**
+             * Page number in the document where the value was found
+             */
+            source_page?: number;
+            /**
+             * Quote from the document followed by a short explanation of the mapping
+             */
+            evidence?: string;
+            status?: "suggested" | "accepted" | "discarded";
+            /**
+             * User id that last updated the suggestion status
+             */
+            status_updated_by?: string;
+            /**
+             * Epoch milliseconds of the last status update
+             */
+            status_updated_at?: number;
+            /**
+             * Reason given when the suggestion was discarded
+             */
+            discard_reason?: string;
+            /**
+             * Whether a user copied the suggested value
+             */
+            is_copied?: boolean;
+            /**
+             * User id that copied the suggested value
+             */
+            copied_by?: string;
+            /**
+             * Epoch milliseconds when the value was copied
+             */
+            copied_at?: number;
+            /**
+             * `new_value` when the entity field is empty, `update` when the suggestion proposes a change
+             */
+            suggestion_type?: "new_value" | "update";
+        }
+        /**
+         * A generic error returned by the API
+         */
+        export interface FileAttributeSuggestionError {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             * example:
+             * Bad Request
+             */
+            error?: string;
+            error_code?: "entity_or_schema_unavailable" | "file_not_extracted" | "extraction_unsupported" | "extraction_failed" | "extraction_status_unavailable" | "processing_enqueue_failed" | "no_file_attribute_suggestions_job" | "job_not_found";
+        }
+        export interface FileAttributeSuggestionJob {
+            /**
+             * Attribute suggestion job ID (ULID)
+             */
+            jobId: string;
+            jobStatus: FileAttributeSuggestionJobStatus;
+            payload: FileAttributeSuggestionsPayload;
+            /**
+             * Epoch milliseconds
+             */
+            createdAt: number;
+            /**
+             * Epoch milliseconds
+             */
+            updatedAt: number;
+        }
+        export interface FileAttributeSuggestionJobStatus {
+            status: "INITIATED" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
+            /**
+             * Progress in percent (0-100)
+             */
+            progress: number;
+            /**
+             * Failure reason when status is FAILED
+             */
+            error?: string;
+        }
+        export interface FileAttributeSuggestionsPayload {
+            file_id: string;
+            entity_id: string;
+            entity_slug: string;
+            /**
+             * User id that requested the job
+             */
+            generated_by?: string;
+            /**
+             * Epoch milliseconds when the job was requested
+             */
+            generated_at?: number;
+            suggestions: FileAttributeSuggestion[];
+        }
         export interface FileAttributes {
             /**
              * example:
@@ -2940,10 +3065,12 @@ declare namespace Components {
             id: string;
             /**
              * `completed` when every rule was evaluated. `pending` is reserved for check levels that
-             * need asynchronous content extraction; `failed` when the observation could not be produced.
+             * need asynchronous content extraction; `failed` when the observation could not be produced;
+             * `skipped` when document validation is not enabled for the organisation - the file was not
+             * read and `results` is empty, so callers treat the file as accepted.
              *
              */
-            status: "completed" | "pending" | "failed";
+            status: "completed" | "pending" | "failed" | "skipped";
             file: /* The file that was validated, with the identity facts collected from its content. */ FileValidationFile;
             observation: /* Everything observed about the file, as passed to the validation rules engine. */ FileValidationObservation;
             results: FileValidationRuleResult[];
@@ -3464,6 +3591,68 @@ declare namespace Components {
             file_summary_execution_id?: string; // uuid
             s3ref?: S3Ref;
         }
+        export interface UpdateFileAttributeSuggestionStatusRequest {
+            suggestionStatusUpdates: [
+                ({
+                    /**
+                     * The attribute_name of the suggestion to update
+                     */
+                    attribute_name: string;
+                    status: "accepted" | "discarded";
+                    /**
+                     * Set to true when the user copied the suggested value
+                     */
+                    is_copied?: boolean;
+                    /**
+                     * Optional reason when status is discarded
+                     */
+                    discard_reason?: string;
+                } | {
+                    /**
+                     * The attribute_name of the suggestion to update
+                     */
+                    attribute_name: string;
+                    status?: "accepted" | "discarded";
+                    /**
+                     * Set to true when the user copied the suggested value
+                     */
+                    is_copied: boolean;
+                    /**
+                     * Optional reason when status is discarded
+                     */
+                    discard_reason?: string;
+                }),
+                ...({
+                    /**
+                     * The attribute_name of the suggestion to update
+                     */
+                    attribute_name: string;
+                    status: "accepted" | "discarded";
+                    /**
+                     * Set to true when the user copied the suggested value
+                     */
+                    is_copied?: boolean;
+                    /**
+                     * Optional reason when status is discarded
+                     */
+                    discard_reason?: string;
+                } | {
+                    /**
+                     * The attribute_name of the suggestion to update
+                     */
+                    attribute_name: string;
+                    status?: "accepted" | "discarded";
+                    /**
+                     * Set to true when the user copied the suggested value
+                     */
+                    is_copied: boolean;
+                    /**
+                     * Optional reason when status is discarded
+                     */
+                    discard_reason?: string;
+                })[]
+            ];
+        }
         export interface UploadFilePayload {
             /**
              * example:
@@ -3631,6 +3820,45 @@ declare namespace Paths {
             Components.Responses.InternalServerError;
         }
     }
+    namespace CreateFileAttributeSuggestionJob {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.CreateFileAttributeSuggestionJobRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.FileAttributeSuggestionJob;
+            export type $400 = Components.Responses.FileAttributeSuggestionErrorResponse;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = Components.Responses.FileAttributeSuggestionErrorResponse;
+            export type $422 = Components.Responses.FileAttributeSuggestionErrorResponse;
+            export type $500 = Components.Responses.FileAttributeSuggestionErrorResponse;
+            export type $503 = Components.Responses.FileAttributeSuggestionErrorResponse;
+        }
+    }
     namespace CreateFileSummaryJob {
         namespace Parameters {
             export type Id = /**
@@ -3758,6 +3986,15 @@ declare namespace Paths {
              * }
              */
             Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
             export type $500 = /**
              * A generic error returned by the API
              * example:
@@ -4298,6 +4535,51 @@ declare namespace Paths {
             Components.Responses.InternalServerError;
         }
     }
+    namespace GetFileAttributeSuggestionJob {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+            export type JobId = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FileAttributeSuggestionJob;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = Components.Responses.FileAttributeSuggestionErrorResponse;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
     namespace GetFileSummary {
         namespace Parameters {
             export type Id = /**
@@ -4606,6 +4888,62 @@ declare namespace Paths {
             Components.Responses.InternalServerError;
         }
     }
+    namespace GetLatestFileAttributeSuggestions {
+        namespace Parameters {
+            export type EntityId = string; // uuid
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            entity_id: Parameters.EntityId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.FileAttributeSuggestionJob;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = Components.Responses.FileAttributeSuggestionErrorResponse;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
     namespace GetSession {
         namespace Responses {
             export interface $200 {
@@ -4699,6 +5037,24 @@ declare namespace Paths {
             export interface $200 {
                 results?: Components.Schemas.PublicLink[];
             }
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
             export type $501 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
         }
     }
@@ -4769,6 +5125,7 @@ declare namespace Paths {
              * ef7d985c-2385-44f4-9c71-ae06a52264f8
              */
             Components.Schemas.FileEntityId;
+            export type KeepOriginal = boolean;
             export type OrgId = string;
             export type Version = number;
             export type W = number;
@@ -4780,6 +5137,7 @@ declare namespace Paths {
             version?: Parameters.Version;
             w?: Parameters.W;
             h?: Parameters.H;
+            keep_original?: Parameters.KeepOriginal;
             org_id?: Parameters.OrgId;
         }
         namespace Responses {
@@ -4994,6 +5352,24 @@ declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 404,
+             *   "error": "Not Found: File entity not found"
+             * }
+             */
+            Components.Responses.NotFoundError;
             export type $501 = /* A generic error returned by the API */ Components.Schemas.ErrorObject;
         }
     }
@@ -5136,6 +5512,70 @@ declare namespace Paths {
              * }
              */
             Components.Responses.UnprocessableEntityError;
+            export type $500 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 500,
+             *   "error": "Internal Server Error"
+             * }
+             */
+            Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdateFileAttributeSuggestionStatus {
+        namespace Parameters {
+            export type Id = /**
+             * example:
+             * ef7d985c-2385-44f4-9c71-ae06a52264f8
+             */
+            Components.Schemas.FileEntityId;
+            export type JobId = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+            job_id: Parameters.JobId;
+        }
+        export type RequestBody = Components.Schemas.UpdateFileAttributeSuggestionStatusRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.FileAttributeSuggestionJob;
+            export type $400 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 400,
+             *   "error": "Bad Request: filename is required"
+             * }
+             */
+            Components.Responses.BadRequestError;
+            export type $401 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 401,
+             *   "error": "Unauthorized: Invalid or expired token"
+             * }
+             */
+            Components.Responses.UnauthorizedError;
+            export type $403 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 403,
+             *   "error": "Forbidden: You do not have permission to access this file"
+             * }
+             */
+            Components.Responses.ForbiddenError;
+            export type $404 = Components.Responses.FileAttributeSuggestionErrorResponse;
+            export type $409 = /**
+             * A generic error returned by the API
+             * example:
+             * {
+             *   "status": 409,
+             *   "error": "Extracted file content is still being prepared"
+             * }
+             */
+            Components.Responses.ConflictError;
             export type $500 = /**
              * A generic error returned by the API
              * example:
@@ -5618,6 +6058,11 @@ export interface OperationMethods {
    * 3. Upload the ZIP to temporary storage
    * 4. Send an email notification with the download link
    * 
+   * Permissions: requires `entity:download` on files. With `file_entity_ids` every file must be
+   * viewable by the caller, otherwise the request is rejected with 403. An `entity_query` is
+   * resolved with the caller's permissions when the job is created (restricted to `_schema:file`);
+   * only the files it returns are zipped. A query that matches no viewable files returns 400.
+   * 
    * The ZIP file will be available for 7 days.
    * 
    */
@@ -5707,6 +6152,46 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GenerateFileSummary.Responses.$202>
   /**
+   * createFileAttributeSuggestionJob - createFileAttributeSuggestionJob
+   * 
+   * Start an auto-fill job that reads the file's extracted text and suggests values for the related entity's attributes. Requires `entity:view` on the file and on the related entity. Returns 404 with `error_code: file_not_extracted` while the file has not been extracted yet; callers retry until the extraction is ready.
+   */
+  'createFileAttributeSuggestionJob'(
+    parameters?: Parameters<Paths.CreateFileAttributeSuggestionJob.PathParameters> | null,
+    data?: Paths.CreateFileAttributeSuggestionJob.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateFileAttributeSuggestionJob.Responses.$202>
+  /**
+   * getLatestFileAttributeSuggestions - getLatestFileAttributeSuggestions
+   * 
+   * Get the most recent attribute suggestion job of any status for the file and the given entity. Returns 404 with `error_code: no_file_attribute_suggestions_job` when auto-fill has not run yet.
+   */
+  'getLatestFileAttributeSuggestions'(
+    parameters?: Parameters<Paths.GetLatestFileAttributeSuggestions.QueryParameters & Paths.GetLatestFileAttributeSuggestions.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetLatestFileAttributeSuggestions.Responses.$200>
+  /**
+   * getFileAttributeSuggestionJob - getFileAttributeSuggestionJob
+   * 
+   * Get an attribute suggestion job of the file. Poll until `jobStatus.status` is `COMPLETED` or `FAILED`.
+   */
+  'getFileAttributeSuggestionJob'(
+    parameters?: Parameters<Paths.GetFileAttributeSuggestionJob.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetFileAttributeSuggestionJob.Responses.$200>
+  /**
+   * updateFileAttributeSuggestionStatus - updateFileAttributeSuggestionStatus
+   * 
+   * Record that suggestions were accepted, discarded or copied. Only the suggestion entries named in the request change; unknown attribute names are ignored. Applying a value to the entity stays with the caller.
+   */
+  'updateFileAttributeSuggestionStatus'(
+    parameters?: Parameters<Paths.UpdateFileAttributeSuggestionStatus.PathParameters> | null,
+    data?: Paths.UpdateFileAttributeSuggestionStatus.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateFileAttributeSuggestionStatus.Responses.$200>
+  /**
    * getFileText - getFileText
    * 
    * Get the plain-text representation of a file entity. Returns status `not_ready` while text is being prepared and `unsupported` when text is unavailable for the file or organization.
@@ -5787,6 +6272,11 @@ export interface OperationMethods {
    * Generate a thumbnail preview for a public file entity.
    * 
    * **No authentication required.** This endpoint only works for files with `access_control: public-read`.
+   * 
+   * SVG files are rasterized to PNG by default. With `keep_original=true`, SVG files redirect
+   * to the selected version's original S3 object, preserving vector rendering. Width and
+   * height parameters are ignored only for SVG files when this option is enabled.
+   * This option only applies to SVG files; previews of other file formats are unchanged.
    * 
    */
   'previewPublicFile'(
@@ -6178,6 +6668,11 @@ export interface PathsDictionary {
      * 3. Upload the ZIP to temporary storage
      * 4. Send an email notification with the download link
      * 
+     * Permissions: requires `entity:download` on files. With `file_entity_ids` every file must be
+     * viewable by the caller, otherwise the request is rejected with 403. An `entity_query` is
+     * resolved with the caller's permissions when the job is created (restricted to `_schema:file`);
+     * only the files it returns are zipped. A query that matches no viewable files returns 400.
+     * 
      * The ZIP file will be available for 7 days.
      * 
      */
@@ -6281,6 +6776,52 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GenerateFileSummary.Responses.$202>
   }
+  ['/v1/files/{id}/attribute-suggestion-jobs']: {
+    /**
+     * createFileAttributeSuggestionJob - createFileAttributeSuggestionJob
+     * 
+     * Start an auto-fill job that reads the file's extracted text and suggests values for the related entity's attributes. Requires `entity:view` on the file and on the related entity. Returns 404 with `error_code: file_not_extracted` while the file has not been extracted yet; callers retry until the extraction is ready.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateFileAttributeSuggestionJob.PathParameters> | null,
+      data?: Paths.CreateFileAttributeSuggestionJob.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateFileAttributeSuggestionJob.Responses.$202>
+  }
+  ['/v1/files/{id}/attribute-suggestion-jobs/latest']: {
+    /**
+     * getLatestFileAttributeSuggestions - getLatestFileAttributeSuggestions
+     * 
+     * Get the most recent attribute suggestion job of any status for the file and the given entity. Returns 404 with `error_code: no_file_attribute_suggestions_job` when auto-fill has not run yet.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetLatestFileAttributeSuggestions.QueryParameters & Paths.GetLatestFileAttributeSuggestions.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetLatestFileAttributeSuggestions.Responses.$200>
+  }
+  ['/v1/files/{id}/attribute-suggestion-jobs/{job_id}']: {
+    /**
+     * getFileAttributeSuggestionJob - getFileAttributeSuggestionJob
+     * 
+     * Get an attribute suggestion job of the file. Poll until `jobStatus.status` is `COMPLETED` or `FAILED`.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetFileAttributeSuggestionJob.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetFileAttributeSuggestionJob.Responses.$200>
+    /**
+     * updateFileAttributeSuggestionStatus - updateFileAttributeSuggestionStatus
+     * 
+     * Record that suggestions were accepted, discarded or copied. Only the suggestion entries named in the request change; unknown attribute names are ignored. Applying a value to the entity stays with the caller.
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateFileAttributeSuggestionStatus.PathParameters> | null,
+      data?: Paths.UpdateFileAttributeSuggestionStatus.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateFileAttributeSuggestionStatus.Responses.$200>
+  }
   ['/v1/files/{id}/text']: {
     /**
      * getFileText - getFileText
@@ -6371,6 +6912,11 @@ export interface PathsDictionary {
      * Generate a thumbnail preview for a public file entity.
      * 
      * **No authentication required.** This endpoint only works for files with `access_control: public-read`.
+     * 
+     * SVG files are rasterized to PNG by default. With `keep_original=true`, SVG files redirect
+     * to the selected version's original S3 object, preserving vector rendering. Width and
+     * height parameters are ignored only for SVG files when this option is enabled.
+     * This option only applies to SVG files; previews of other file formats are unchanged.
      * 
      */
     'get'(
@@ -6611,6 +7157,7 @@ export type BaseEntityAcl = Components.Schemas.BaseEntityAcl;
 export type BaseEntityOwner = Components.Schemas.BaseEntityOwner;
 export type BatchSaveFileVersionPayload = Components.Schemas.BatchSaveFileVersionPayload;
 export type CommonSaveFilePayload = Components.Schemas.CommonSaveFilePayload;
+export type CreateFileAttributeSuggestionJobRequest = Components.Schemas.CreateFileAttributeSuggestionJobRequest;
 export type CreateZipJobPayload = Components.Schemas.CreateZipJobPayload;
 export type CustomDownloadUrl = Components.Schemas.CustomDownloadUrl;
 export type CustomDownloadUrlAuth = Components.Schemas.CustomDownloadUrlAuth;
@@ -6618,6 +7165,11 @@ export type DownloadFilesPayload = Components.Schemas.DownloadFilesPayload;
 export type EntityId = Components.Schemas.EntityId;
 export type EntitySlug = Components.Schemas.EntitySlug;
 export type ErrorObject = Components.Schemas.ErrorObject;
+export type FileAttributeSuggestion = Components.Schemas.FileAttributeSuggestion;
+export type FileAttributeSuggestionError = Components.Schemas.FileAttributeSuggestionError;
+export type FileAttributeSuggestionJob = Components.Schemas.FileAttributeSuggestionJob;
+export type FileAttributeSuggestionJobStatus = Components.Schemas.FileAttributeSuggestionJobStatus;
+export type FileAttributeSuggestionsPayload = Components.Schemas.FileAttributeSuggestionsPayload;
 export type FileAttributes = Components.Schemas.FileAttributes;
 export type FileCollectionAttributes = Components.Schemas.FileCollectionAttributes;
 export type FileCollectionCreateRequest = Components.Schemas.FileCollectionCreateRequest;
@@ -6657,6 +7209,7 @@ export type SaveFileFromSourceURLPayload = Components.Schemas.SaveFileFromSource
 export type SaveFilePayload = Components.Schemas.SaveFilePayload;
 export type SaveFilePayloadV2 = Components.Schemas.SaveFilePayloadV2;
 export type SaveS3FilePayload = Components.Schemas.SaveS3FilePayload;
+export type UpdateFileAttributeSuggestionStatusRequest = Components.Schemas.UpdateFileAttributeSuggestionStatusRequest;
 export type UploadFilePayload = Components.Schemas.UploadFilePayload;
 export type VerifyCustomDownloadUrlPayload = Components.Schemas.VerifyCustomDownloadUrlPayload;
 export type ZipJob = Components.Schemas.ZipJob;
