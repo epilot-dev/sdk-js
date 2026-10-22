@@ -424,6 +424,502 @@
         }
       }
     },
+    "/v1/manager/live": {
+      "get": {
+        "operationId": "getLiveSnapshot",
+        "summary": "getLiveSnapshot",
+        "description": "One snapshot of the organization's live phone state for the control center's Overview: agent\npresence counters and per-queue health (waiting calls, longest wait, eligible vs available\nagents). Read from the provider on every call (no caching); the control center polls it about\nevery 20 seconds. Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "200": {
+            "description": "The live snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveSnapshot"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/agents/live": {
+      "get": {
+        "operationId": "listLiveAgents",
+        "summary": "listLiveAgents",
+        "description": "The organization's phone agents with their live phone status, their skills (as the phone system\nholds them) and the queues they can take calls from. Agents that are epilot phone agents carry\nthe epilot `user_id`. Queue eligibility is derived from every queue's routing steps (skills and\npeople). The control center filters and searches this list client-side and polls it about every\n20 seconds. Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "200": {
+            "description": "The organization's agents with live state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "captured_at",
+                    "results"
+                  ],
+                  "properties": {
+                    "captured_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LiveAgent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/agents/{provider_agent_id}/routing": {
+      "parameters": [
+        {
+          "name": "provider_agent_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's agent id (`LiveAgent.provider_agent_id`)",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      ],
+      "put": {
+        "operationId": "setAgentRouting",
+        "summary": "setAgentRouting",
+        "description": "Sets an agent's skills and direct queue membership (full sets, not deltas), in this order:\n1. Skills: the agent's skills in the phone system are replaced by `skills`, so the phone system\n   routes on them right away. The phone system is the source of truth for phone skills; they are\n   independent of the skills in epilot's Access Management.\n2. Direct queue membership: each listed queue gets the agent in its epilot-managed routing step\n   (created on first use, lowest precedence, never touching the organization's own routing in\n   the phone system); every other queue's epilot-managed step drops the agent. Eligibility\n   through the phone system's own routing is not changed (`locked`).\nIdempotent; a failure part-way answers `502` and repeating the call completes it. Requires\n`phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRoutingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The agent's skills and queue eligibility after the change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRouting"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Unknown agent or queue (code `agent_not_found` / `queue_not_found`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/agents/{provider_agent_id}/routing:preview": {
+      "parameters": [
+        {
+          "name": "provider_agent_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's agent id (`LiveAgent.provider_agent_id`)",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "previewAgentRouting",
+        "summary": "previewAgentRouting",
+        "description": "The routing impact of `setAgentRouting` with the same body, without changing anything: the\nqueues the agent can take calls from now (as the phone system routes today) and after the\nchange, what is added and removed, the queues that would lose their last available agent, and\nthe queues the agent stays in through the phone system's own routing. Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRoutingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The impact preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRoutingPreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Unknown agent or queue (code `agent_not_found` / `queue_not_found`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/queues": {
+      "get": {
+        "operationId": "listQueues",
+        "summary": "listQueues",
+        "description": "The organization's queues with live demand (waiting calls, longest wait), staffing (eligible\nvs available agents), derived health and who can take their calls: the routing steps in the\norder the phone system tries them, each naming skills and people. Routing is read-only in the\ncontrol center except the epilot-managed step that `setAgentRouting` maintains. Polled about\nevery 20 seconds. Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "200": {
+            "description": "The organization's queues",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "captured_at",
+                    "results"
+                  ],
+                  "properties": {
+                    "captured_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/QueueOverview"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/queues/{queue_id}": {
+      "parameters": [
+        {
+          "name": "queue_id",
+          "in": "path",
+          "required": true,
+          "description": "The provider's queue id",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getQueue",
+        "summary": "getQueue",
+        "description": "One queue for the control center's queue drawer: the overview fields plus the agents currently\neligible for it (with live status and how they are eligible) and the calls waiting in it.\nRequires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "200": {
+            "description": "The queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Unknown queue (code `queue_not_found`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/reporting/calls": {
+      "get": {
+        "operationId": "getCallReport",
+        "summary": "getCallReport",
+        "description": "Inbound call outcomes for a period, from the provider's call reporting: how many inbound calls\nthere were, how many an agent handled (bridged) and how many ended without an agent (abandoned\nor failed), plus the inbound total of the period of the same length just before, for the\ntrend. The window is at most 31 days. Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "description": "Start of the period (inclusive), RFC 3339 with an offset",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "description": "End of the period (exclusive), RFC 3339 with an offset",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The call outcomes of the period",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CallReport"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
     "/v1/operator/provider-setups": {
       "get": {
         "operationId": "listProviderSetups",
@@ -1054,6 +1550,654 @@
             "type": "string",
             "description": "Omitted when the contact has none",
             "example": "4711"
+          }
+        }
+      },
+      "AgentState": {
+        "type": "string",
+        "description": "The agent's live line state as the provider reports it, plus `offline` for an agent whose\npresence is not available (not signed in or on a busy presence) and `unknown` when the\nprovider gives no state. `in_call` covers ringing-to-bridged; `wrap_up` is the post-call time.\n",
+        "enum": [
+          "available",
+          "ringing",
+          "in_call",
+          "wrap_up",
+          "busy",
+          "declined",
+          "unreachable",
+          "selected",
+          "offline",
+          "unknown"
+        ]
+      },
+      "AgentPresence": {
+        "type": "object",
+        "description": "The provider presence the agent has selected (e.g. Available, Break, Meeting)",
+        "required": [
+          "name",
+          "label",
+          "available"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Whether this presence lets the agent take calls"
+          }
+        }
+      },
+      "Skill": {
+        "type": "string",
+        "description": "A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is\n`<skill category>:<label>` (e.g. `language:german`), which the control center shows as\n\"Category · Label\"; a skill without a colon has no category.\n",
+        "minLength": 1,
+        "maxLength": 100,
+        "pattern": "^\\S(.*\\S)?$"
+      },
+      "QueueRef": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "PersonRef": {
+        "type": "object",
+        "description": "An agent as a routing step names them",
+        "required": [
+          "provider_agent_id",
+          "name"
+        ],
+        "properties": {
+          "provider_agent_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "The epilot user id, when the agent is an epilot phone agent"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "EligibilityPath": {
+        "type": "string",
+        "description": "How an agent can take a queue's calls:\n- `skill`: the queue routes to people with a skill the agent has (changes with the agent's skills);\n- `direct`: the agent is in the queue's epilot-managed step (added from the control center);\n- `routing`: the phone system's own routing names the agent (a team or a person set up there);\n  epilot does not change it.\n",
+        "enum": [
+          "skill",
+          "direct",
+          "routing"
+        ]
+      },
+      "AgentQueueEligibility": {
+        "type": "object",
+        "description": "A queue an agent can take calls from, and why",
+        "required": [
+          "id",
+          "name",
+          "via",
+          "skills",
+          "locked"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "via": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/EligibilityPath"
+            }
+          },
+          "skills": {
+            "type": "array",
+            "description": "The agent's skills that make the queue route to them (empty unless `via` has `skill`)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "locked": {
+            "type": "boolean",
+            "description": "The phone system's own routing names the agent (`via` has `routing`), so changing skills or\ndirect membership cannot remove the queue; the control center shows it checked and disabled.\n"
+          }
+        }
+      },
+      "LiveAgent": {
+        "type": "object",
+        "required": [
+          "provider_agent_id",
+          "name",
+          "enabled",
+          "state",
+          "skills",
+          "queues"
+        ],
+        "properties": {
+          "provider_agent_id": {
+            "type": "string",
+            "description": "The phone system's agent id"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "The epilot user id, when the agent is an epilot phone agent (matched by email)"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the phone system routes queue calls to this agent at all"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AgentState"
+          },
+          "presence": {
+            "$ref": "#/components/schemas/AgentPresence"
+          },
+          "display_status": {
+            "type": "string",
+            "description": "The phone system's human-readable status label"
+          },
+          "skills": {
+            "type": "array",
+            "description": "The agent's skills as the phone system holds them (the source of truth for phone routing)",
+            "items": {
+              "$ref": "#/components/schemas/Skill"
+            }
+          },
+          "queues": {
+            "type": "array",
+            "description": "Queues the agent can take calls from, derived from every queue's routing steps",
+            "items": {
+              "$ref": "#/components/schemas/AgentQueueEligibility"
+            }
+          },
+          "current_call": {
+            "type": "object",
+            "description": "The call the agent is on, when the phone system reports one",
+            "required": [
+              "started_at"
+            ],
+            "properties": {
+              "started_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "queue_name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "LiveAgentCounters": {
+        "type": "object",
+        "description": "Presence counters over the organization's agents",
+        "required": [
+          "total",
+          "online",
+          "available",
+          "on_call",
+          "wrap_up",
+          "offline"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "online": {
+            "type": "integer",
+            "description": "Agents on an available presence, i.e. everyone not offline (available + on call + wrap-up + other busy line states)"
+          },
+          "available": {
+            "type": "integer"
+          },
+          "on_call": {
+            "type": "integer",
+            "description": "Ringing or bridged"
+          },
+          "wrap_up": {
+            "type": "integer"
+          },
+          "offline": {
+            "type": "integer"
+          }
+        }
+      },
+      "QueueHealth": {
+        "type": "string",
+        "description": "`at_risk`: calls are waiting and no eligible agent is available. `healthy`: at least one\neligible agent is available. `quiet`: nothing waiting and nobody available.\n",
+        "enum": [
+          "healthy",
+          "at_risk",
+          "quiet"
+        ]
+      },
+      "QueueLive": {
+        "type": "object",
+        "description": "Live demand and staffing of one queue",
+        "required": [
+          "id",
+          "name",
+          "waiting",
+          "eligible",
+          "available",
+          "health"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "waiting": {
+            "type": "integer",
+            "description": "Calls waiting in the queue right now"
+          },
+          "longest_wait_seconds": {
+            "type": "integer",
+            "description": "How long the longest-waiting call has waited; absent when nothing waits"
+          },
+          "eligible": {
+            "type": "integer",
+            "description": "Agents the queue's routing steps resolve to"
+          },
+          "available": {
+            "type": "integer",
+            "description": "Eligible agents whose state is `available` right now"
+          },
+          "health": {
+            "$ref": "#/components/schemas/QueueHealth"
+          }
+        }
+      },
+      "LiveSnapshot": {
+        "type": "object",
+        "required": [
+          "captured_at",
+          "agents",
+          "queues",
+          "calls_waiting"
+        ],
+        "properties": {
+          "captured_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "agents": {
+            "$ref": "#/components/schemas/LiveAgentCounters"
+          },
+          "queues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueLive"
+            }
+          },
+          "calls_waiting": {
+            "type": "integer",
+            "description": "Waiting calls across all queues"
+          },
+          "longest_wait_seconds": {
+            "type": "integer",
+            "description": "The longest wait across all queues; absent when nothing waits"
+          }
+        }
+      },
+      "QueueRoutingStep": {
+        "type": "object",
+        "description": "One step of who can take a queue's calls, in the order the phone system tries them. A step\noffers calls to the people it names and to everyone with any of its skills. Teams set up in the\nphone system appear as the people they contain. The epilot-managed step holds the people added\nfrom the control center; every other step is the organization's own routing, read-only here.\n",
+        "required": [
+          "id",
+          "order",
+          "label",
+          "enabled",
+          "skills",
+          "people",
+          "managed_by_epilot"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Lower is tried first"
+          },
+          "label": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "skills": {
+            "type": "array",
+            "description": "Skills the step routes on (anyone with any of them)",
+            "items": {
+              "$ref": "#/components/schemas/Skill"
+            }
+          },
+          "people": {
+            "type": "array",
+            "description": "People the step names, directly or through a team set up in the phone system",
+            "items": {
+              "$ref": "#/components/schemas/PersonRef"
+            }
+          },
+          "managed_by_epilot": {
+            "type": "boolean",
+            "description": "The step `setAgentRouting` maintains; the only one the control center writes"
+          }
+        }
+      },
+      "QueueOverview": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/QueueLive"
+          },
+          {
+            "type": "object",
+            "required": [
+              "routing"
+            ],
+            "properties": {
+              "numbers": {
+                "type": "array",
+                "description": "Service numbers routed into this queue, when the phone system makes that derivable",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "routing": {
+                "type": "array",
+                "description": "Who can take the queue's calls, in the order the phone system tries them",
+                "items": {
+                  "$ref": "#/components/schemas/QueueRoutingStep"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "EligibleAgent": {
+        "type": "object",
+        "description": "An agent who can take the queue's calls, with live status",
+        "required": [
+          "provider_agent_id",
+          "name",
+          "state",
+          "via",
+          "skills"
+        ],
+        "properties": {
+          "provider_agent_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AgentState"
+          },
+          "presence": {
+            "$ref": "#/components/schemas/AgentPresence"
+          },
+          "via": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/EligibilityPath"
+            }
+          },
+          "skills": {
+            "type": "array",
+            "description": "The agent's skills that make the queue route to them (empty unless `via` has `skill`)",
+            "items": {
+              "$ref": "#/components/schemas/Skill"
+            }
+          }
+        }
+      },
+      "WaitingCall": {
+        "type": "object",
+        "required": [
+          "id",
+          "waited_seconds",
+          "state"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "from_masked": {
+            "type": "string",
+            "description": "The caller's number with all but the last four digits hidden"
+          },
+          "waited_seconds": {
+            "type": "integer"
+          },
+          "state": {
+            "type": "string",
+            "description": "The provider's call state (e.g. `queued`, `ringing`)"
+          }
+        }
+      },
+      "QueueDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/QueueOverview"
+          },
+          {
+            "type": "object",
+            "required": [
+              "captured_at",
+              "eligible_agents",
+              "waiting_calls"
+            ],
+            "properties": {
+              "captured_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "eligible_agents": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EligibleAgent"
+                }
+              },
+              "waiting_calls": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/WaitingCall"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "AgentRoutingRequest": {
+        "type": "object",
+        "required": [
+          "skills",
+          "queue_ids"
+        ],
+        "properties": {
+          "skills": {
+            "type": "array",
+            "description": "The agent's skills in the phone system (full set, not a delta); at most 200",
+            "items": {
+              "$ref": "#/components/schemas/Skill"
+            }
+          },
+          "queue_ids": {
+            "type": "array",
+            "description": "The queues the agent is directly in, through the epilot-managed step (full set); at most 200",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            }
+          }
+        }
+      },
+      "AgentRouting": {
+        "type": "object",
+        "required": [
+          "provider_agent_id",
+          "skills",
+          "queues"
+        ],
+        "properties": {
+          "provider_agent_id": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Skill"
+            }
+          },
+          "queues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentQueueEligibility"
+            }
+          }
+        }
+      },
+      "AgentRoutingPreview": {
+        "type": "object",
+        "required": [
+          "provider_agent_id",
+          "before",
+          "after",
+          "added",
+          "removed",
+          "coverage_lost",
+          "locked"
+        ],
+        "properties": {
+          "provider_agent_id": {
+            "type": "string"
+          },
+          "before": {
+            "type": "array",
+            "description": "Queues the agent can take calls from now, as the phone system routes today",
+            "items": {
+              "$ref": "#/components/schemas/QueueRef"
+            }
+          },
+          "after": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueRef"
+            }
+          },
+          "added": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueRef"
+            }
+          },
+          "removed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueRef"
+            }
+          },
+          "coverage_lost": {
+            "type": "array",
+            "description": "Removed queues where this agent is currently the only available eligible agent",
+            "items": {
+              "$ref": "#/components/schemas/QueueRef"
+            }
+          },
+          "locked": {
+            "type": "array",
+            "description": "Queues the agent stays in through the phone system's own routing, which this call cannot remove",
+            "items": {
+              "$ref": "#/components/schemas/QueueRef"
+            }
+          }
+        }
+      },
+      "CallReport": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "inbound_total",
+          "handled_by_agent",
+          "abandoned_or_failed",
+          "previous_period"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "inbound_total": {
+            "type": "integer"
+          },
+          "handled_by_agent": {
+            "type": "integer",
+            "description": "Inbound calls bridged to an agent"
+          },
+          "abandoned_or_failed": {
+            "type": "integer",
+            "description": "Inbound calls that ended without reaching an agent"
+          },
+          "previous_period": {
+            "type": "object",
+            "description": "The same window shifted back by whole days (its length rounded up to days), for the trend: a\nrunning \"today\" compares with yesterday up to the same time, \"last 7 days\" with the 7 days before\n",
+            "required": [
+              "from",
+              "to",
+              "inbound_total"
+            ],
+            "properties": {
+              "from": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "to": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "inbound_total": {
+                "type": "integer"
+              }
+            }
           }
         }
       },
