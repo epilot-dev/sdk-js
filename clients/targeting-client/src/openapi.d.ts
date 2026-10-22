@@ -1879,6 +1879,19 @@ declare namespace Components {
                      */
                     BaseUUID /* uuid */;
                 };
+                /**
+                 * Entity-UI (Next Best Action) card shown to agents on contact and account pages.
+                 * Persisted verbatim on the campaign's `entity_ui` attribute.
+                 * Only sent by the consumer once the channel has been enabled and configured.
+                 *
+                 */
+                entity_ui?: /**
+                 * A Next Best Action configured on a campaign's Entity-UI channel.
+                 * This is the canonical NBA contract shared by discovery (this API), authoring, and rendering.
+                 * NBA content is single-language in v1; text fields may contain `{{placeholders}}` resolved at render time.
+                 *
+                 */
+                NextBestAction;
             };
         }
         export interface SetupTariffChangeCampaignResponse {
@@ -1930,9 +1943,48 @@ declare namespace Components {
             name?: string;
             description?: string;
             entity_schema?: string;
-            entity_filters?: {
+            entity_filters?: /**
+             * Search state of the target. `filter` and `search` use the same shape as the search state of entity views.
+             * Besides the filters, it optionally defines the order and maximum number of results.
+             *
+             */
+            TargetEntityFilters;
+        }
+        /**
+         * Search state of the target. `filter` and `search` use the same shape as the search state of entity views.
+         * Besides the filters, it optionally defines the order and maximum number of results.
+         *
+         */
+        export interface TargetEntityFilters {
+            [name: string]: any;
+            /**
+             * Group of filters that define which entities match the target.
+             */
+            filter?: {
                 [name: string]: any;
             };
+            /**
+             * Free text search entered in the target builder.
+             * Not applied when resolving the target, e.g. by `getTargetQueries` or `matchTargets`.
+             *
+             */
+            search?: string;
+            /**
+             * Optional sort order of the target results, in priority order.
+             * Only changes the order of the results, never which entities match the target.
+             *
+             * Uses the same key and order pairs as the sort of entity views, but as structured items:
+             * entity views persist their sort as a `key:order,key:order` string instead.
+             *
+             */
+            sort?: TargetSortItem[];
+            /**
+             * Optional maximum number of results returned by the target, applied after sorting.
+             * At most 1000, the maximum number of results entity search returns; larger values are capped to 1000.
+             * Only caps how many results are returned, never which entities match the target.
+             *
+             */
+            limit?: number;
         }
         export interface TargetQueryResult {
             target_id: /**
@@ -1948,6 +2000,32 @@ declare namespace Components {
              * Error message if query transformation failed.
              */
             error?: string;
+            /**
+             * Elasticsearch sort fields for the target's sort order, ready to be passed to entity search.
+             * Ends with an `_id` tie-breaker so the order is stable. Omitted when the target has no sort.
+             *
+             * example:
+             * [
+             *   "billing_date:desc",
+             *   "_title.keyword:asc",
+             *   "_id:desc"
+             * ]
+             */
+            sort?: string[];
+            /**
+             * Maximum number of results the target returns, at most 1000. Omitted when the target has no limit.
+             *
+             */
+            limit?: number;
+        }
+        export interface TargetSortItem {
+            /**
+             * Attribute to sort by. Sub-fields of addresses and relations use a dot path.
+             * example:
+             * billing_address.postal_code
+             */
+            key: string;
+            order: "asc" | "desc";
         }
         export interface UpdateEntityUiStatusRequest {
             status: /**
@@ -2189,6 +2267,7 @@ declare namespace Paths {
             export type $201 = Components.Responses.SetupCampaignResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
+            export type $504 = Components.Responses.ServerErrorResponse;
         }
     }
     namespace UpdateRecipient {
@@ -2383,6 +2462,7 @@ export interface OperationMethods {
    * 
    * Transform target filters into Lucene queries for the provided target IDs.
    * Returns the transformed query string for each target along with any errors encountered.
+   * If the target defines a sort order or a result limit, they are returned as well.
    * 
    */
   'getTargetQueries'(
@@ -2632,6 +2712,7 @@ export interface PathsDictionary {
      * 
      * Transform target filters into Lucene queries for the provided target IDs.
      * Returns the transformed query string for each target along with any errors encountered.
+     * If the target defines a sort order or a result limit, they are returned as well.
      * 
      */
     'post'(
@@ -2807,7 +2888,9 @@ export type SetupCampaignRequest = Components.Schemas.SetupCampaignRequest;
 export type SetupTariffChangeCampaignRequest = Components.Schemas.SetupTariffChangeCampaignRequest;
 export type SetupTariffChangeCampaignResponse = Components.Schemas.SetupTariffChangeCampaignResponse;
 export type Target = Components.Schemas.Target;
+export type TargetEntityFilters = Components.Schemas.TargetEntityFilters;
 export type TargetQueryResult = Components.Schemas.TargetQueryResult;
+export type TargetSortItem = Components.Schemas.TargetSortItem;
 export type UpdateEntityUiStatusRequest = Components.Schemas.UpdateEntityUiStatusRequest;
 export type UpdatePortalStatusRequest = Components.Schemas.UpdatePortalStatusRequest;
 export type UpdateRecipientPayload = Components.Schemas.UpdateRecipientPayload;
