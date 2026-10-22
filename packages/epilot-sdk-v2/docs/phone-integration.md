@@ -32,6 +32,13 @@ const { data } = await phoneIntegrationClient.batchSearchCustomers(...)
 - [`listPhoneAgents`](#listphoneagents)
 - [`assignPhoneAgent`](#assignphoneagent)
 - [`removePhoneAgent`](#removephoneagent)
+- [`getLiveSnapshot`](#getlivesnapshot)
+- [`listLiveAgents`](#listliveagents)
+- [`setAgentRouting`](#setagentrouting)
+- [`previewAgentRouting`](#previewagentrouting)
+- [`listQueues`](#listqueues)
+- [`getQueue`](#getqueue)
+- [`getCallReport`](#getcallreport)
 
 **operator**
 - [`listProviderSetups`](#listprovidersetups)
@@ -49,6 +56,27 @@ const { data } = await phoneIntegrationClient.batchSearchCustomers(...)
 - [`CustomerSearchResult`](#customersearchresult)
 - [`CustomerIdentifier`](#customeridentifier)
 - [`CustomerSummary`](#customersummary)
+- [`AgentState`](#agentstate)
+- [`AgentPresence`](#agentpresence)
+- [`Skill`](#skill)
+- [`QueueRef`](#queueref)
+- [`PersonRef`](#personref)
+- [`EligibilityPath`](#eligibilitypath)
+- [`AgentQueueEligibility`](#agentqueueeligibility)
+- [`LiveAgent`](#liveagent)
+- [`LiveAgentCounters`](#liveagentcounters)
+- [`QueueHealth`](#queuehealth)
+- [`QueueLive`](#queuelive)
+- [`LiveSnapshot`](#livesnapshot)
+- [`QueueRoutingStep`](#queueroutingstep)
+- [`QueueOverview`](#queueoverview)
+- [`EligibleAgent`](#eligibleagent)
+- [`WaitingCall`](#waitingcall)
+- [`QueueDetail`](#queuedetail)
+- [`AgentRoutingRequest`](#agentroutingrequest)
+- [`AgentRouting`](#agentrouting)
+- [`AgentRoutingPreview`](#agentroutingpreview)
+- [`CallReport`](#callreport)
 - [`ErrorResponse`](#errorresponse)
 
 ### `batchSearchCustomers`
@@ -206,6 +234,386 @@ const { data } = await client.removePhoneAgent({
   user_id: 'example',
 })
 ```
+
+---
+
+### `getLiveSnapshot`
+
+One snapshot of the organization's live phone state for the control center's Overview: agent
+presence counters and per-queue health (waiting calls, longest wait, eligible vs available
+agents). Read fr
+
+`GET /v1/manager/live`
+
+```ts
+const { data } = await client.getLiveSnapshot()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "captured_at": "1970-01-01T00:00:00.000Z",
+  "agents": {
+    "total": 0,
+    "online": 0,
+    "available": 0,
+    "on_call": 0,
+    "wrap_up": 0,
+    "offline": 0
+  },
+  "queues": [
+    {
+      "id": "string",
+      "name": "string",
+      "waiting": 0,
+      "longest_wait_seconds": 0,
+      "eligible": 0,
+      "available": 0,
+      "health": "healthy"
+    }
+  ],
+  "calls_waiting": 0,
+  "longest_wait_seconds": 0
+}
+```
+
+</details>
+
+---
+
+### `listLiveAgents`
+
+The organization's phone agents with their live phone status, their skills (as the phone system
+holds them) and the queues they can take calls from. Agents that are epilot phone agents carry
+the epilo
+
+`GET /v1/manager/agents/live`
+
+```ts
+const { data } = await client.listLiveAgents()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "captured_at": "1970-01-01T00:00:00.000Z",
+  "results": [
+    {
+      "provider_agent_id": "string",
+      "user_id": "string",
+      "name": "string",
+      "email": "string",
+      "enabled": true,
+      "state": "available",
+      "presence": {
+        "name": "string",
+        "label": "string",
+        "available": true
+      },
+      "display_status": "string",
+      "skills": ["string"],
+      "queues": [
+        {
+          "id": "string",
+          "name": "string",
+          "via": ["skill"],
+          "skills": ["string"],
+          "locked": true
+        }
+      ],
+      "current_call": {
+        "started_at": "1970-01-01T00:00:00.000Z",
+        "queue_name": "string"
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `setAgentRouting`
+
+Sets an agent's skills and direct queue membership (full sets, not deltas), in this order:
+1. Skills: the agent's skills in the phone system are replaced by `skills`, so the phone system
+   routes on 
+
+`PUT /v1/manager/agents/{provider_agent_id}/routing`
+
+```ts
+const { data } = await client.setAgentRouting(
+  {
+    provider_agent_id: 'example',
+  },
+  {
+    skills: ['string'],
+    queue_ids: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "provider_agent_id": "string",
+  "skills": ["string"],
+  "queues": [
+    {
+      "id": "string",
+      "name": "string",
+      "via": ["skill"],
+      "skills": ["string"],
+      "locked": true
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `previewAgentRouting`
+
+The routing impact of `setAgentRouting` with the same body, without changing anything: the
+queues the agent can take calls from now (as the phone system routes today) and after the
+change, what is add
+
+`POST /v1/manager/agents/{provider_agent_id}/routing:preview`
+
+```ts
+const { data } = await client.previewAgentRouting(
+  {
+    provider_agent_id: 'example',
+  },
+  {
+    skills: ['string'],
+    queue_ids: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "provider_agent_id": "string",
+  "before": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ],
+  "after": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ],
+  "added": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ],
+  "removed": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ],
+  "coverage_lost": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ],
+  "locked": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `listQueues`
+
+The organization's queues with live demand (waiting calls, longest wait), staffing (eligible
+vs available agents), derived health and who can take their calls: the routing steps in the
+order the phone
+
+`GET /v1/manager/queues`
+
+```ts
+const { data } = await client.listQueues()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "captured_at": "1970-01-01T00:00:00.000Z",
+  "results": [
+    {
+      "id": "string",
+      "name": "string",
+      "waiting": 0,
+      "longest_wait_seconds": 0,
+      "eligible": 0,
+      "available": 0,
+      "health": "healthy",
+      "numbers": ["string"],
+      "routing": [
+        {
+          "id": "string",
+          "order": 0,
+          "label": "string",
+          "enabled": true,
+          "skills": ["string"],
+          "people": [
+            {
+              "provider_agent_id": "string",
+              "user_id": "string",
+              "name": "string"
+            }
+          ],
+          "managed_by_epilot": true
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getQueue`
+
+One queue for the control center's queue drawer: the overview fields plus the agents currently
+eligible for it (with live status and how they are eligible) and the calls waiting in it.
+Requires `phone
+
+`GET /v1/manager/queues/{queue_id}`
+
+```ts
+const { data } = await client.getQueue({
+  queue_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "name": "string",
+  "waiting": 0,
+  "longest_wait_seconds": 0,
+  "eligible": 0,
+  "available": 0,
+  "health": "healthy",
+  "numbers": ["string"],
+  "routing": [
+    {
+      "id": "string",
+      "order": 0,
+      "label": "string",
+      "enabled": true,
+      "skills": ["string"],
+      "people": [
+        {
+          "provider_agent_id": "string",
+          "user_id": "string",
+          "name": "string"
+        }
+      ],
+      "managed_by_epilot": true
+    }
+  ],
+  "captured_at": "1970-01-01T00:00:00.000Z",
+  "eligible_agents": [
+    {
+      "provider_agent_id": "string",
+      "user_id": "string",
+      "name": "string",
+      "email": "string",
+      "state": "available",
+      "presence": {
+        "name": "string",
+        "label": "string",
+        "available": true
+      },
+      "via": ["skill"],
+      "skills": ["string"]
+    }
+  ],
+  "waiting_calls": [
+    {
+      "id": "string",
+      "from_masked": "string",
+      "waited_seconds": 0,
+      "state": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getCallReport`
+
+Inbound call outcomes for a period, from the provider's call reporting: how many inbound calls
+there were, how many an agent handled (bridged) and how many ended without an agent (abandoned
+or failed)
+
+`GET /v1/manager/reporting/calls`
+
+```ts
+const { data } = await client.getCallReport({
+  from: 'example',
+  to: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "from": "1970-01-01T00:00:00.000Z",
+  "to": "1970-01-01T00:00:00.000Z",
+  "inbound_total": 0,
+  "handled_by_agent": 0,
+  "abandoned_or_failed": 0,
+  "previous_period": {
+    "from": "1970-01-01T00:00:00.000Z",
+    "to": "1970-01-01T00:00:00.000Z",
+    "inbound_total": 0
+  }
+}
+```
+
+</details>
 
 ---
 
@@ -490,6 +898,370 @@ type CustomerSummary = {
   id: string
   name: string
   customer_number?: string
+}
+```
+
+### `AgentState`
+
+The agent's live line state as the provider reports it, plus `offline` for an agent whose
+presence is not available (not signed in or on a busy presence) and `unknown` when the
+provider gives no state. `in_call` covers ringing-to-bridged; `wrap_up` is the post-call time.
+
+
+```ts
+type AgentState = "available" | "ringing" | "in_call" | "wrap_up" | "busy" | "declined" | "unreachable" | "selected" | "offline" | "unknown"
+```
+
+### `AgentPresence`
+
+The provider presence the agent has selected (e.g. Available, Break, Meeting)
+
+```ts
+type AgentPresence = {
+  name: string
+  label: string
+  available: boolean
+}
+```
+
+### `Skill`
+
+A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is
+`<skill category>:`<label>`` (e.g. `language:german`), which the control center shows as
+"Category · Label"; a skill without a colon has no category.
+
+
+```ts
+type Skill = string
+```
+
+### `QueueRef`
+
+```ts
+type QueueRef = {
+  id: string
+  name: string
+}
+```
+
+### `PersonRef`
+
+An agent as a routing step names them
+
+```ts
+type PersonRef = {
+  provider_agent_id: string
+  user_id?: string
+  name: string
+}
+```
+
+### `EligibilityPath`
+
+How an agent can take a queue's calls:
+- `skill`: the queue routes to people with a skill the agent has (changes with the agent's skills);
+- `direct`: the agent is in the queue's epilot-managed step (added from the control center);
+- `routing`: the phone system's own routing names the agent (a team 
+
+```ts
+type EligibilityPath = "skill" | "direct" | "routing"
+```
+
+### `AgentQueueEligibility`
+
+A queue an agent can take calls from, and why
+
+```ts
+type AgentQueueEligibility = {
+  id: string
+  name: string
+  via: "skill" | "direct" | "routing"[]
+  skills: string[]
+  locked: boolean
+}
+```
+
+### `LiveAgent`
+
+```ts
+type LiveAgent = {
+  provider_agent_id: string
+  user_id?: string
+  name: string
+  email?: string
+  enabled: boolean
+  state: "available" | "ringing" | "in_call" | "wrap_up" | "busy" | "declined" | "unreachable" | "selected" | "offline" | "unknown"
+  presence?: {
+    name: string
+    label: string
+    available: boolean
+  }
+  display_status?: string
+  skills: string[]
+  queues: Array<{
+    id: string
+    name: string
+    via: "skill" | "direct" | "routing"[]
+    skills: string[]
+    locked: boolean
+  }>
+  current_call?: {
+    started_at: string // date-time
+    queue_name?: string
+  }
+}
+```
+
+### `LiveAgentCounters`
+
+Presence counters over the organization's agents
+
+```ts
+type LiveAgentCounters = {
+  total: number
+  online: number
+  available: number
+  on_call: number
+  wrap_up: number
+  offline: number
+}
+```
+
+### `QueueHealth`
+
+`at_risk`: calls are waiting and no eligible agent is available. `healthy`: at least one
+eligible agent is available. `quiet`: nothing waiting and nobody available.
+
+
+```ts
+type QueueHealth = "healthy" | "at_risk" | "quiet"
+```
+
+### `QueueLive`
+
+Live demand and staffing of one queue
+
+```ts
+type QueueLive = {
+  id: string
+  name: string
+  waiting: number
+  longest_wait_seconds?: number
+  eligible: number
+  available: number
+  health: "healthy" | "at_risk" | "quiet"
+}
+```
+
+### `LiveSnapshot`
+
+```ts
+type LiveSnapshot = {
+  captured_at: string // date-time
+  agents: {
+    total: number
+    online: number
+    available: number
+    on_call: number
+    wrap_up: number
+    offline: number
+  }
+  queues: Array<{
+    id: string
+    name: string
+    waiting: number
+    longest_wait_seconds?: number
+    eligible: number
+    available: number
+    health: "healthy" | "at_risk" | "quiet"
+  }>
+  calls_waiting: number
+  longest_wait_seconds?: number
+}
+```
+
+### `QueueRoutingStep`
+
+One step of who can take a queue's calls, in the order the phone system tries them. A step
+offers calls to the people it names and to everyone with any of its skills. Teams set up in the
+phone system appear as the people they contain. The epilot-managed step holds the people added
+from the control c
+
+```ts
+type QueueRoutingStep = {
+  id: string
+  order: number
+  label: string
+  enabled: boolean
+  skills: string[]
+  people: Array<{
+    provider_agent_id: string
+    user_id?: string
+    name: string
+  }>
+  managed_by_epilot: boolean
+}
+```
+
+### `QueueOverview`
+
+```ts
+type QueueOverview = {
+  id: string
+  name: string
+  waiting: number
+  longest_wait_seconds?: number
+  eligible: number
+  available: number
+  health: "healthy" | "at_risk" | "quiet"
+  numbers?: string[]
+  routing: Array<{
+    id: string
+    order: number
+    label: string
+    enabled: boolean
+    skills: string[]
+    people: Array<{
+      provider_agent_id: { ... }
+      user_id?: { ... }
+      name: { ... }
+    }>
+    managed_by_epilot: boolean
+  }>
+}
+```
+
+### `EligibleAgent`
+
+An agent who can take the queue's calls, with live status
+
+```ts
+type EligibleAgent = {
+  provider_agent_id: string
+  user_id?: string
+  name: string
+  email?: string
+  state: "available" | "ringing" | "in_call" | "wrap_up" | "busy" | "declined" | "unreachable" | "selected" | "offline" | "unknown"
+  presence?: {
+    name: string
+    label: string
+    available: boolean
+  }
+  via: "skill" | "direct" | "routing"[]
+  skills: string[]
+}
+```
+
+### `WaitingCall`
+
+```ts
+type WaitingCall = {
+  id: string
+  from_masked?: string
+  waited_seconds: number
+  state: string
+}
+```
+
+### `QueueDetail`
+
+```ts
+type QueueDetail = {
+  captured_at: string // date-time
+  eligible_agents: Array<{
+    provider_agent_id: string
+    user_id?: string
+    name: string
+    email?: string
+    state: "available" | "ringing" | "in_call" | "wrap_up" | "busy" | "declined" | "unreachable" | "selected" | "offline" | "unknown"
+    presence?: {
+      name: { ... }
+      label: { ... }
+      available: { ... }
+    }
+    via: "skill" | "direct" | "routing"[]
+    skills: string[]
+  }>
+  waiting_calls: Array<{
+    id: string
+    from_masked?: string
+    waited_seconds: number
+    state: string
+  }>
+}
+```
+
+### `AgentRoutingRequest`
+
+```ts
+type AgentRoutingRequest = {
+  skills: string[]
+  queue_ids: string[]
+}
+```
+
+### `AgentRouting`
+
+```ts
+type AgentRouting = {
+  provider_agent_id: string
+  skills: string[]
+  queues: Array<{
+    id: string
+    name: string
+    via: "skill" | "direct" | "routing"[]
+    skills: string[]
+    locked: boolean
+  }>
+}
+```
+
+### `AgentRoutingPreview`
+
+```ts
+type AgentRoutingPreview = {
+  provider_agent_id: string
+  before: Array<{
+    id: string
+    name: string
+  }>
+  after: Array<{
+    id: string
+    name: string
+  }>
+  added: Array<{
+    id: string
+    name: string
+  }>
+  removed: Array<{
+    id: string
+    name: string
+  }>
+  coverage_lost: Array<{
+    id: string
+    name: string
+  }>
+  locked: Array<{
+    id: string
+    name: string
+  }>
+}
+```
+
+### `CallReport`
+
+```ts
+type CallReport = {
+  from: string // date-time
+  to: string // date-time
+  inbound_total: number
+  handled_by_agent: number
+  abandoned_or_failed: number
+  previous_period: {
+    from: string // date-time
+    to: string // date-time
+    inbound_total: number
+  }
 }
 ```
 

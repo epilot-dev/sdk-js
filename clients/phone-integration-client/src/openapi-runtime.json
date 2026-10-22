@@ -94,6 +94,96 @@
         "responses": {}
       }
     },
+    "/v1/manager/live": {
+      "get": {
+        "operationId": "getLiveSnapshot",
+        "responses": {}
+      }
+    },
+    "/v1/manager/agents/live": {
+      "get": {
+        "operationId": "listLiveAgents",
+        "responses": {}
+      }
+    },
+    "/v1/manager/agents/{provider_agent_id}/routing": {
+      "parameters": [
+        {
+          "name": "provider_agent_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's agent id (`LiveAgent.provider_agent_id`)"
+        }
+      ],
+      "put": {
+        "operationId": "setAgentRouting",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/manager/agents/{provider_agent_id}/routing:preview": {
+      "parameters": [
+        {
+          "name": "provider_agent_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's agent id (`LiveAgent.provider_agent_id`)"
+        }
+      ],
+      "post": {
+        "operationId": "previewAgentRouting",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/manager/queues": {
+      "get": {
+        "operationId": "listQueues",
+        "responses": {}
+      }
+    },
+    "/v1/manager/queues/{queue_id}": {
+      "parameters": [
+        {
+          "name": "queue_id",
+          "in": "path",
+          "required": true,
+          "description": "The provider's queue id"
+        }
+      ],
+      "get": {
+        "operationId": "getQueue",
+        "responses": {}
+      }
+    },
+    "/v1/manager/reporting/calls": {
+      "get": {
+        "operationId": "getCallReport",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/operator/provider-setups": {
       "get": {
         "operationId": "listProviderSetups",
