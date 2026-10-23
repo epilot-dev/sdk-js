@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.50.0",
+    "version": "1.52.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -7965,6 +7965,50 @@
           },
           "conditional": {
             "$ref": "#/components/schemas/IntegrationEntityConditional"
+          },
+          "sharing": {
+            "$ref": "#/components/schemas/IntegrationEntitySharing"
+          }
+        }
+      },
+      "IntegrationEntitySharing": {
+        "type": "object",
+        "description": "Keeps the mapped entity's sharing with partner organizations in sync. After the entity is written, it is shared with every listed partner whose `enabled` is true and unshared from every listed partner whose `enabled` is false. Changes are computed against the entity's current `_acl`, so a repeated event with the same outcome makes no sharing call. Each partner org needs an existing partnership; partners without one are skipped and reported as `SHARING_PARTNER_NOT_CONNECTED`.",
+        "required": [
+          "partners"
+        ],
+        "properties": {
+          "partners": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/IntegrationEntitySharingPartner"
+            }
+          }
+        }
+      },
+      "IntegrationEntitySharingPartner": {
+        "type": "object",
+        "required": [
+          "partner_org_id"
+        ],
+        "properties": {
+          "partner_org_id": {
+            "type": "string",
+            "description": "The partner organization to keep the entity's sharing in sync with.",
+            "example": "739224"
+          },
+          "enabled": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Whether the entity should be shared with this partner. A boolean, or a JSONata expression evaluated against the mapped payload item (the same input as field-level `enabled`). Defaults to true. When false, the entity is unshared from the partner.",
+            "example": "salesPartner.number = 'SP-1001'"
           }
         }
       },
@@ -11187,6 +11231,11 @@
               }
             }
           },
+          "sharing": {
+            "type": "object",
+            "description": "Present when the entity mapping has a `sharing` block: each partner with its `enabled` evaluated against the payload.",
+            "additionalProperties": true
+          },
           "mode": {
             "type": "string",
             "enum": [
@@ -13637,6 +13686,9 @@
           "ENTITY_NO_OP",
           "ENTITY_REFERENCE_NOT_FOUND",
           "ENTITY_UPDATED",
+          "ENV_VAR_REF_JSONATA_FAILED",
+          "ENV_VAR_REF_LOOKUP_FAILED",
+          "ENV_VAR_REF_NOT_FOUND",
           "EVENT_NOT_CONFIGURED",
           "EXTERNAL_API_ERROR",
           "EXTERNAL_ERROR",
@@ -13666,6 +13718,8 @@
           "METER_READING_GROUP_FAILED",
           "METER_READING_GROUP_RETRYING",
           "METER_READING_UPSERTED",
+          "MISSING_METER_COUNTER_UNIQUE_IDS",
+          "MISSING_METER_UNIQUE_IDS",
           "MISSING_REQUIRED_PARAM",
           "MISSING_UNIQUE_IDENTIFIERS",
           "MSG_ACKED",
@@ -13675,11 +13729,17 @@
           "MSG_HEAD_BLOCKED",
           "MSG_LATE_ARRIVAL",
           "OAUTH2_TOKEN_FAILURE",
+          "ORG_DROPPED",
           "PAYLOAD_TOO_LARGE",
+          "PORTAL_REF_AMBIGUOUS",
+          "PORTAL_REF_JSONATA_FAILED",
+          "PORTAL_REF_LOOKUP_FAILED",
+          "PORTAL_REF_NO_MATCH",
           "PROCESSING_STATE_LIMIT",
           "PRUNE_SCOPE_COMPLETED",
           "PRUNE_SCOPE_PARTIAL_FAILURE",
           "RECURSION_DEPTH_EXCEEDED",
+          "RELATION_MISSING_UNIQUE_IDS",
           "RELATION_REF_ITEM_NOT_FOUND",
           "RELATION_REF_VALUE_UNDEFINED",
           "REQUIRED_PARAM_MISSING",
@@ -13693,7 +13753,11 @@
           "SECURE_PROXY_IP_BLOCKED",
           "SECURE_PROXY_IP_NOT_ALLOWED",
           "SECURE_PROXY_NOT_FOUND",
+          "SECURE_PROXY_OK",
           "SECURE_PROXY_UNAVAILABLE",
+          "SHARING_FAILED",
+          "SHARING_PARTNER_NOT_CONNECTED",
+          "SHARING_REJECTED",
           "SIGNATURE_VERIFICATION_FAILED",
           "SIGNATURE_VERIFICATION_UNAVAILABLE",
           "SOFT_DELETED_ENTITY_MATCHED",
@@ -13702,12 +13766,15 @@
           "UNIQUE_ID_LOOKUP_UNRESOLVABLE",
           "UNIQUE_ID_MULTIPLE_MATCHES",
           "UNIQUE_ID_NOT_IN_SCHEMA",
+          "UNIQUE_ID_TYPE_DERIVATION_FAILED",
           "UNKNOWN_ERROR",
           "USE_CASE_DISABLED",
           "USE_CASE_INVALID_TYPE",
           "USE_CASE_MISSING_CONFIG",
           "USE_CASE_NOT_FOUND",
-          "WEBHOOK_DELIVERED"
+          "WEBHOOK_DELIVERED",
+          "WEBHOOK_DELIVERY_FAILED",
+          "WEBHOOK_SKIPPED"
         ]
       },
       "MonitoringEventV2": {

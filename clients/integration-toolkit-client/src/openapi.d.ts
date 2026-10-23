@@ -2476,6 +2476,12 @@ declare namespace Components {
                     }[];
                 };
                 /**
+                 * Present when the entity mapping has a `sharing` block: each partner with its `enabled` evaluated against the payload.
+                 */
+                sharing?: {
+                    [name: string]: any;
+                };
+                /**
                  * Effective operation mode applied to this entity at runtime. `upsert-prune-scope-purge` / `upsert-prune-scope-delete` configurations report `upsert` here, because the individual entities in the payload are upserted — the destructive part of those modes is reported separately in `prune_scope_updates`. For `delete` / `purge`, `attributes` are still mapped and returned but ignored at runtime: only `unique_identifiers` are used to locate the entity to remove.
                  */
                 mode: "upsert" | "delete" | "purge";
@@ -2993,6 +2999,12 @@ declare namespace Components {
                 data: {
                     [name: string]: any;
                 }[];
+            };
+            /**
+             * Present when the entity mapping has a `sharing` block: each partner with its `enabled` evaluated against the payload.
+             */
+            sharing?: {
+                [name: string]: any;
             };
             /**
              * Effective operation mode applied to this entity at runtime. `upsert-prune-scope-purge` / `upsert-prune-scope-delete` configurations report `upsert` here, because the individual entities in the payload are upserted — the destructive part of those modes is reported separately in `prune_scope_updates`. For `delete` / `purge`, `attributes` are still mapped and returned but ignored at runtime: only `unique_identifiers` are used to locate the entity to remove.
@@ -5779,6 +5791,7 @@ declare namespace Components {
              */
             fields?: IntegrationEntityField[];
             conditional?: /* Conditional Pricing extras for this target, used when it writes a conditional entity (a Product, Price or Coupon carrying context-dependent variants). The conditions themselves are declared on the entity schema, not here. */ IntegrationEntityConditional;
+            sharing?: /* Keeps the mapped entity's sharing with partner organizations in sync. After the entity is written, it is shared with every listed partner whose `enabled` is true and unshared from every listed partner whose `enabled` is false. Changes are computed against the entity's current `_acl`, so a repeated event with the same outcome makes no sharing call. Each partner org needs an existing partnership; partners without one are skipped and reported as `SHARING_PARTNER_NOT_CONNECTED`. */ IntegrationEntitySharing;
         }
         /**
          * Conditional Pricing extras for this target, used when it writes a conditional entity (a Product, Price or Coupon carrying context-dependent variants). The conditions themselves are declared on the entity schema, not here.
@@ -5875,6 +5888,34 @@ declare namespace Components {
             item: {
                 [name: string]: /* One mapped value. Exactly one of field, constant or jsonataExpression must be set — the same three forms `IntegrationEntityField` accepts. */ MappedFieldValue;
             };
+        }
+        /**
+         * Keeps the mapped entity's sharing with partner organizations in sync. After the entity is written, it is shared with every listed partner whose `enabled` is true and unshared from every listed partner whose `enabled` is false. Changes are computed against the entity's current `_acl`, so a repeated event with the same outcome makes no sharing call. Each partner org needs an existing partnership; partners without one are skipped and reported as `SHARING_PARTNER_NOT_CONNECTED`.
+         */
+        export interface IntegrationEntitySharing {
+            partners: [
+                IntegrationEntitySharingPartner,
+                ...IntegrationEntitySharingPartner[]
+            ];
+        }
+        export interface IntegrationEntitySharingPartner {
+            /**
+             * The partner organization to keep the entity's sharing in sync with.
+             * example:
+             * 739224
+             */
+            partner_org_id: string;
+            /**
+             * Whether the entity should be shared with this partner. A boolean, or a JSONata expression evaluated against the mapped payload item (the same input as field-level `enabled`). Defaults to true. When false, the entity is unshared from the partner.
+             * example:
+             * salesPartner.number = 'SP-1001'
+             */
+            enabled?: /**
+             * Whether the entity should be shared with this partner. A boolean, or a JSONata expression evaluated against the mapped payload item (the same input as field-level `enabled`). Defaults to true. When false, the entity is unshared from the partner.
+             * example:
+             * salesPartner.number = 'SP-1001'
+             */
+            boolean | string;
         }
         export interface IntegrationFieldV1 {
             /**
@@ -6514,7 +6555,7 @@ declare namespace Components {
          * `monitoring-code-enum.test.ts`, which fails if the two diverge.
          *
          */
-        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED";
+        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED";
         export interface MonitoringEventV2 {
             /**
              * Unique monitoring event ID
@@ -13441,6 +13482,8 @@ export type IntegrationEntity = Components.Schemas.IntegrationEntity;
 export type IntegrationEntityConditional = Components.Schemas.IntegrationEntityConditional;
 export type IntegrationEntityField = Components.Schemas.IntegrationEntityField;
 export type IntegrationEntityFromRows = Components.Schemas.IntegrationEntityFromRows;
+export type IntegrationEntitySharing = Components.Schemas.IntegrationEntitySharing;
+export type IntegrationEntitySharingPartner = Components.Schemas.IntegrationEntitySharingPartner;
 export type IntegrationFieldV1 = Components.Schemas.IntegrationFieldV1;
 export type IntegrationMap = Components.Schemas.IntegrationMap;
 export type IntegrationMeterReading = Components.Schemas.IntegrationMeterReading;

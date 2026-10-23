@@ -21,7 +21,7 @@
  * separate client release. See CONTRIBUTING.md.
  *
  * Usage: npm run codes:local
- * Assumes erp-integration-api is checked out at ../../../erp-integration-api.
+ * Assumes integration-toolkit-api is checked out at ../../../integration-toolkit-api.
  */
 
 const fs = require('node:fs');
@@ -29,7 +29,7 @@ const path = require('node:path');
 
 const SNAPSHOT = path.resolve(
   __dirname,
-  '../../../../erp-integration-api/packages/erp-utils/src/monitoring/__snapshots__/monitoring-codes.json',
+  '../../../../integration-toolkit-api/packages/erp-utils/src/monitoring/__snapshots__/monitoring-codes.json',
 );
 const OUT = path.resolve(__dirname, '../src/schema-model.ts');
 
