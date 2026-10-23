@@ -31,12 +31,23 @@ declare namespace Components {
         }
         export type NotFound = /* Standard error response format for all API errors. */ Schemas.ErrorResponse;
         export type OutlookErrorResponse = Schemas.OutlookConnectionError;
+        export type PricingTierRequired = /* Standard error response format for all API errors. */ Schemas.ErrorResponse;
         export type ProvisionEpilotEmailAddressSuccessResponse = /* Email address configuration with all associated metadata. */ Schemas.EmailAddressResponse;
         export type SetEmailAddressPrimarySuccessResponse = /* Email address configuration with all associated metadata. */ Schemas.EmailAddressResponse;
         export type UpdateEmailAddressSuccessResponse = /* Email address configuration with all associated metadata. */ Schemas.EmailAddressResponse;
         export type UpdateSharedInboxSuccessResponse = /* Shared inbox configuration with all associated metadata. */ Schemas.SharedInboxResponse;
     }
     namespace Schemas {
+        /**
+         * - Extra recipient domain allowed for outbound email from a sandbox organization.
+         * - Sandbox orgs (organization_use) with the sandbox recipient allowlist enabled may only
+         *   send unattended emails (workflow/automation/bulk/system) to epilot domains, the
+         *   verified sending domains of the org and its parent production org, plus the domains
+         *   listed in settings of this type.
+         * - One setting per domain, stored in `value` (e.g. "partner-company.de").
+         *
+         */
+        export type AllowedRecipientDomainsSetting = "allowed_recipient_domains";
         export interface CalendarAdminConsentStatus {
             /**
              * True when the tenant admin has consented to epilot's Microsoft 365
@@ -421,7 +432,13 @@ declare namespace Components {
         export interface MailboxSyncStatus {
             execution_id: string;
             status: MailboxSyncStatuses;
-            timeframe: MailboxSyncTimeframePeriods;
+            timeframe: /**
+             * Mailbox sync period. The long timeframes `3m`, `6m` and `1y` are only available to organizations
+             * with the `outlook-mailbox-sync-long-timeframes` feature enabled; connecting a mailbox, starting a sync,
+             * or retrying one of these syncs returns 403 otherwise.
+             *
+             */
+            MailboxSyncTimeframePeriods;
             started_at: string; // date-time
             completed_at?: string; // date-time
             inbox?: {
@@ -438,7 +455,13 @@ declare namespace Components {
             };
         }
         export type MailboxSyncStatuses = "RUNNING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "CANCELLED";
-        export type MailboxSyncTimeframePeriods = "5m" | "1w" | "2w" | "1m";
+        /**
+         * Mailbox sync period. The long timeframes `3m`, `6m` and `1y` are only available to organizations
+         * with the `outlook-mailbox-sync-long-timeframes` feature enabled; connecting a mailbox, starting a sync,
+         * or retrying one of these syncs returns 403 otherwise.
+         *
+         */
+        export type MailboxSyncTimeframePeriods = "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y";
         /**
          * Per-user calendar connection metadata, or null when the caller has
          * not connected their personal calendar yet.
@@ -592,6 +615,7 @@ declare namespace Components {
          * - **email_domain**: Uses `value` (domain name)
          * - **whitelist_email_address**: Uses `value` (email address)
          * - **restrict_duplicates_within**: Uses `value` (time duration)
+         * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
          *
          */
         export interface Setting {
@@ -710,7 +734,16 @@ declare namespace Components {
          * - Cannot have multiple values
          *
          */
-        RestrictDuplicatesWithinSetting;
+        RestrictDuplicatesWithinSetting | /**
+         * - Extra recipient domain allowed for outbound email from a sandbox organization.
+         * - Sandbox orgs (organization_use) with the sandbox recipient allowlist enabled may only
+         *   send unattended emails (workflow/automation/bulk/system) to epilot domains, the
+         *   verified sending domains of the org and its parent production org, plus the domains
+         *   listed in settings of this type.
+         * - One setting per domain, stored in `value` (e.g. "partner-company.de").
+         *
+         */
+        AllowedRecipientDomainsSetting;
         export type SettingsResponse = /**
          * Generic setting object used for various email configuration types.
          * The applicable fields depend on the setting type:
@@ -718,6 +751,7 @@ declare namespace Components {
          * - **email_domain**: Uses `value` (domain name)
          * - **whitelist_email_address**: Uses `value` (email address)
          * - **restrict_duplicates_within**: Uses `value` (time duration)
+         * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
          *
          */
         Setting[] | /**
@@ -727,6 +761,7 @@ declare namespace Components {
          * - **email_domain**: Uses `value` (domain name)
          * - **whitelist_email_address**: Uses `value` (email address)
          * - **restrict_duplicates_within**: Uses `value` (time duration)
+         * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
          *
          */
         Setting;
@@ -1020,6 +1055,7 @@ declare namespace Paths {
          * - **email_domain**: Uses `value` (domain name)
          * - **whitelist_email_address**: Uses `value` (email address)
          * - **restrict_duplicates_within**: Uses `value` (time duration)
+         * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
          *
          */
         Components.Schemas.Setting;
@@ -1039,16 +1075,34 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace CancelMailboxSync {
+        namespace Parameters {
+            export type Email = string; // email
+        }
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * Execution ID of the stopped sync
+                 */
+                execution_id: string;
+                status: Components.Schemas.MailboxSyncStatuses;
+            }
+            export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace ConnectMsTeams {
         namespace Responses {
             export interface $200 {
                 connected?: boolean;
                 connected_at?: string; // date-time
             }
-            export interface $400 {
-                error?: string;
-                message?: string;
-            }
+            export type $403 = Components.Responses.PricingTierRequired;
         }
     }
     namespace ConnectOutlook {
@@ -1096,9 +1150,11 @@ declare namespace Paths {
             /**
              * Optional timeframe for initial mailbox sync. When provided, triggers an automatic
              * mailbox sync after connecting the mailbox, syncing emails from the specified period.
+             * `3m`, `6m` and `1y` require the `outlook-mailbox-sync-long-timeframes` feature for the
+             * organization; the request is rejected with 403 before anything is connected otherwise.
              *
              */
-            mailboxSyncTimeframe?: "5m" | "1w" | "2w" | "1m";
+            mailboxSyncTimeframe?: "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y";
         }
         namespace Responses {
             export interface $201 {
@@ -1202,16 +1258,8 @@ declare namespace Paths {
             id: string;
         }
         namespace Responses {
-            export type $200 = /**
-             * Generic setting object used for various email configuration types.
-             * The applicable fields depend on the setting type:
-             * - **signature**: Uses `name`, `value` (plain text), and `html` (rich text)
-             * - **email_domain**: Uses `value` (domain name)
-             * - **whitelist_email_address**: Uses `value` (email address)
-             * - **restrict_duplicates_within**: Uses `value` (time duration)
-             *
-             */
-            Components.Schemas.Setting;
+            export interface $204 {
+            }
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
         }
@@ -1598,6 +1646,7 @@ declare namespace Paths {
                  */
                 messages_queued: number;
             }
+            export type $403 = Components.Responses.PricingTierRequired;
             export interface $404 {
             }
             export interface $409 {
@@ -1630,9 +1679,12 @@ declare namespace Paths {
              * - 1w: 1 week
              * - 2w: 2 weeks
              * - 1m: 1 month
+             * - 3m: 3 months
+             * - 6m: 6 months
+             * - 1y: 1 year
              *
              */
-            timeframe: "5m" | "1w" | "2w" | "1m";
+            timeframe: "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y";
         }
         namespace Responses {
             export interface $202 {
@@ -1641,10 +1693,17 @@ declare namespace Paths {
                  */
                 execution_id: string;
                 status: Components.Schemas.MailboxSyncStatuses;
-                timeframe: Components.Schemas.MailboxSyncTimeframePeriods;
+                timeframe: /**
+                 * Mailbox sync period. The long timeframes `3m`, `6m` and `1y` are only available to organizations
+                 * with the `outlook-mailbox-sync-long-timeframes` feature enabled; connecting a mailbox, starting a sync,
+                 * or retrying one of these syncs returns 403 otherwise.
+                 *
+                 */
+                Components.Schemas.MailboxSyncTimeframePeriods;
             }
             export interface $400 {
             }
+            export type $403 = Components.Responses.PricingTierRequired;
             export interface $404 {
             }
             export interface $409 {
@@ -1696,6 +1755,7 @@ declare namespace Paths {
          * - **email_domain**: Uses `value` (domain name)
          * - **whitelist_email_address**: Uses `value` (email address)
          * - **restrict_duplicates_within**: Uses `value` (time duration)
+         * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
          *
          */
         Components.Schemas.Setting;
@@ -1707,6 +1767,7 @@ declare namespace Paths {
              * - **email_domain**: Uses `value` (domain name)
              * - **whitelist_email_address**: Uses `value` (email address)
              * - **restrict_duplicates_within**: Uses `value` (time duration)
+             * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
              *
              */
             Components.Schemas.Setting;
@@ -1960,8 +2021,8 @@ export interface OperationMethods {
    * 
    * Retrieves all shared inboxes configured for the organization.
    * 
-   * **Note**: The default inbox (with ID `default`) is not included in this list but is
-   * always available for all organizations. You do not need to create it explicitly.
+   * **Note**: The list always includes the default inbox (ID `default`, `bucket_id` `default`).
+   * It is provisioned for the organization on first access, so you never need to create it.
    * 
    */
   'listSharedInboxes'(
@@ -2010,6 +2071,10 @@ export interface OperationMethods {
    * endpoint again with a superset of features (e.g. `mail` already connected,
    * and `calendar` added) triggers Microsoft's incremental-consent flow —
    * the user only sees a consent prompt for the new scopes.
+   * 
+   * Requires the Professional pricing tier or higher, except when reconnecting an
+   * existing connection (the org's connection, or the user's own calendar) for
+   * features it already has.
    * 
    */
   'connectOutlook'(
@@ -2096,7 +2161,9 @@ export interface OperationMethods {
    * connectMsTeams - connectMsTeams
    * 
    * Connects Microsoft Teams channel (click-to-call deep links, meetings) for the organization.
-   * Requires an active Microsoft 365 / Outlook connection.
+   * Independent of the Microsoft 365 / Outlook connection.
+   * 
+   * Requires the Professional pricing tier or higher.
    * 
    */
   'connectMsTeams'(
@@ -2190,6 +2257,18 @@ export interface OperationMethods {
     data?: Paths.RetryMailboxSync.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RetryMailboxSync.Responses.$202>
+  /**
+   * cancelMailboxSync - Stop Mailbox Sync
+   * 
+   * Stops the running sync of an Outlook mailbox and marks it CANCELLED.
+   * Emails imported before the stop are kept; a new sync can be started afterwards.
+   * 
+   */
+  'cancelMailboxSync'(
+    parameters?: Parameters<Paths.CancelMailboxSync.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelMailboxSync.Responses.$200>
   /**
    * getConnectedOutlookEmails - getConnectedOutlookEmails
    * 
@@ -2335,6 +2414,7 @@ export interface OperationMethods {
    * | `email_address` | Sender email addresses |
    * | `whitelist_email_address` | Addresses exempt from duplicate detection |
    * | `restrict_duplicates_within` | Time window for duplicate email detection |
+   * | `allowed_recipient_domains` | Extra recipient domains allowed for sandbox org sends |
    * 
    */
   'getSettings'(
@@ -2352,6 +2432,7 @@ export interface OperationMethods {
    * - **email_domain**: Requires `value` (domain name)
    * - **whitelist_email_address**: Requires `value` (email address)
    * - **restrict_duplicates_within**: Requires `value` (time duration like "5m", "1d")
+   * - **allowed_recipient_domains**: Requires `value` (recipient domain, e.g. "partner-company.de")
    * 
    */
   'addSetting'(
@@ -2373,7 +2454,7 @@ export interface OperationMethods {
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.DeleteSetting.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteSetting.Responses.$200>
+  ): OperationResponse<Paths.DeleteSetting.Responses.$204>
   /**
    * updateSetting - updateSetting
    * 
@@ -2381,6 +2462,8 @@ export interface OperationMethods {
    * 
    * Include the `type` field in the request body to specify which setting type
    * is being updated. Only the fields provided will be updated.
+   * 
+   * Returns 404 if no setting of that type exists with the given ID.
    * 
    */
   'updateSetting'(
@@ -2654,8 +2737,8 @@ export interface PathsDictionary {
      * 
      * Retrieves all shared inboxes configured for the organization.
      * 
-     * **Note**: The default inbox (with ID `default`) is not included in this list but is
-     * always available for all organizations. You do not need to create it explicitly.
+     * **Note**: The list always includes the default inbox (ID `default`, `bucket_id` `default`).
+     * It is provisioned for the organization on first access, so you never need to create it.
      * 
      */
     'get'(
@@ -2708,6 +2791,10 @@ export interface PathsDictionary {
      * endpoint again with a superset of features (e.g. `mail` already connected,
      * and `calendar` added) triggers Microsoft's incremental-consent flow —
      * the user only sees a consent prompt for the new scopes.
+     * 
+     * Requires the Professional pricing tier or higher, except when reconnecting an
+     * existing connection (the org's connection, or the user's own calendar) for
+     * features it already has.
      * 
      */
     'post'(
@@ -2804,7 +2891,9 @@ export interface PathsDictionary {
      * connectMsTeams - connectMsTeams
      * 
      * Connects Microsoft Teams channel (click-to-call deep links, meetings) for the organization.
-     * Requires an active Microsoft 365 / Outlook connection.
+     * Independent of the Microsoft 365 / Outlook connection.
+     * 
+     * Requires the Professional pricing tier or higher.
      * 
      */
     'post'(
@@ -2912,6 +3001,20 @@ export interface PathsDictionary {
       data?: Paths.RetryMailboxSync.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RetryMailboxSync.Responses.$202>
+  }
+  ['/v2/outlook/mailbox/{email}/sync/cancel']: {
+    /**
+     * cancelMailboxSync - Stop Mailbox Sync
+     * 
+     * Stops the running sync of an Outlook mailbox and marks it CANCELLED.
+     * Emails imported before the stop are kept; a new sync can be started afterwards.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CancelMailboxSync.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelMailboxSync.Responses.$200>
   }
   ['/v2/outlook/mailbox/mappings']: {
     /**
@@ -3073,6 +3176,7 @@ export interface PathsDictionary {
      * | `email_address` | Sender email addresses |
      * | `whitelist_email_address` | Addresses exempt from duplicate detection |
      * | `restrict_duplicates_within` | Time window for duplicate email detection |
+     * | `allowed_recipient_domains` | Extra recipient domains allowed for sandbox org sends |
      * 
      */
     'get'(
@@ -3090,6 +3194,7 @@ export interface PathsDictionary {
      * - **email_domain**: Requires `value` (domain name)
      * - **whitelist_email_address**: Requires `value` (email address)
      * - **restrict_duplicates_within**: Requires `value` (time duration like "5m", "1d")
+     * - **allowed_recipient_domains**: Requires `value` (recipient domain, e.g. "partner-company.de")
      * 
      */
     'post'(
@@ -3111,7 +3216,7 @@ export interface PathsDictionary {
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.DeleteSetting.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteSetting.Responses.$200>
+    ): OperationResponse<Paths.DeleteSetting.Responses.$204>
   }
   ['/v1/email-settings/{id}']: {
     /**
@@ -3121,6 +3226,8 @@ export interface PathsDictionary {
      * 
      * Include the `type` field in the request body to specify which setting type
      * is being updated. Only the fields provided will be updated.
+     * 
+     * Returns 404 if no setting of that type exists with the given ID.
      * 
      */
     'post'(
@@ -3239,6 +3346,7 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AllowedRecipientDomainsSetting = Components.Schemas.AllowedRecipientDomainsSetting;
 export type CalendarAdminConsentStatus = Components.Schemas.CalendarAdminConsentStatus;
 export type CalendarConnectionInfo = Components.Schemas.CalendarConnectionInfo;
 export type ConnectOutlookRequest = Components.Schemas.ConnectOutlookRequest;

@@ -23,6 +23,10 @@
       "description": "Entity Events"
     },
     {
+      "name": "AI",
+      "description": "AI generated content for entities"
+    },
+    {
       "name": "Import-Export",
       "description": "Import and Export entities via portable files (CSV)"
     },
@@ -59,6 +63,11 @@
     "/v1/entity/schemas": {
       "get": {
         "operationId": "listSchemas",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listSchemas",
         "description": "Get the latest versions of all schemas",
         "parameters": [
@@ -137,6 +146,11 @@
     "/v2/entity/schemas": {
       "get": {
         "operationId": "listSchemasV2",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listSchemasV2",
         "description": "Get the latest versions of all schemas.\nReturns summary schemas by default (only summary attributes, no capabilities).\nUse ?full=true for complete schemas.\n",
         "parameters": [
@@ -224,6 +238,11 @@
     "/v1/entity/schemas/{slug}": {
       "get": {
         "operationId": "getSchema",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getSchema",
         "description": "Gets the latest version of the Schema.\nPass ?id= to get a specific version by ID.\n",
         "tags": [
@@ -269,6 +288,12 @@
       },
       "put": {
         "operationId": "putSchema",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update",
+            "resource": "{slug}"
+          }
+        ],
         "summary": "putSchema",
         "description": "Create or update a schema with a new version.\n",
         "tags": [
@@ -285,6 +310,24 @@
             "schema": {
               "default": false,
               "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "base_version",
+            "description": "The schema version these edits were made on top of. When passed, the save is rejected\nwith `409` if another save has landed since, instead of silently overwriting it.\nIgnored for drafts.\n",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "base_updated_at",
+            "description": "The `updated_at` of the `base_version` the edits were made on top of. Narrows the check to\nthat exact write, since some schema writes replace the current version in place. Requires\n`base_version`.\n",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         ],
@@ -308,6 +351,16 @@
               }
             }
           },
+          "409": {
+            "description": "The schema was changed since `base_version`. Nothing was written.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchemaVersionConflictError"
+                }
+              }
+            }
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
           }
@@ -315,6 +368,12 @@
       },
       "delete": {
         "operationId": "deleteSchema",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update",
+            "resource": "{slug}"
+          }
+        ],
         "summary": "deleteSchema",
         "description": "Delete a schema, or a specific version of a schema",
         "tags": [
@@ -335,9 +394,52 @@
         }
       }
     },
+    "/v1/entity/schemas/{slug}/head": {
+      "get": {
+        "operationId": "getSchemaHead",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "getSchemaHead",
+        "description": "Lightweight lookup of the schema version saves currently land on top of. Meant for editors\nto detect that someone else saved while they were editing, without fetching the schema.\n",
+        "tags": [
+          "Schemas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchemaHead"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsError"
+          }
+        }
+      }
+    },
     "/v1/entity/schemas/{slug}/json/schema": {
       "get": {
         "operationId": "getJsonSchema",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getJsonSchema",
         "description": "Get formal JSON schema definition draft 2020-12 for the given epilot schema",
         "tags": [
@@ -669,6 +771,11 @@
     "/v1/entity/schemas/{slug}/json/example": {
       "get": {
         "operationId": "getSchemaExample",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getSchemaExample",
         "description": "Get a full example entity for the given schema",
         "tags": [
@@ -704,6 +811,11 @@
     "/v1/entity/schemas/{slug}/versions": {
       "get": {
         "operationId": "getSchemaVersions",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getSchemaVersions",
         "description": "Get all versions of this schema ordered by the latest versions including drafts.",
         "tags": [
@@ -818,6 +930,12 @@
     "/v1/entity/schemas/{slug}/freeze": {
       "post": {
         "operationId": "freezeSchema",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update",
+            "resource": "{slug}"
+          }
+        ],
         "summary": "freezeSchema",
         "deprecated": true,
         "description": "Deprecated no-op: schema freezing is retired and every read returns the latest version.\nReturns the latest version of the schema unchanged. This endpoint will be removed.\n",
@@ -868,6 +986,12 @@
     "/v1/entity/schemas/{slug}/unfreeze": {
       "post": {
         "operationId": "unfreezeSchema",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update",
+            "resource": "{slug}"
+          }
+        ],
         "summary": "unfreezeSchema",
         "deprecated": true,
         "description": "Deprecated: schema freezing is retired. Cleans up a leftover frozen pointer by promoting the\nlatest version to the current version, and succeeds when there is nothing to clean up.\nThis endpoint will be removed.\n",
@@ -899,6 +1023,11 @@
     "/v1/entity/schemas/{slug}/capabilities/available": {
       "get": {
         "operationId": "listAvailableCapabilities",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listAvailableCapabilities",
         "description": "List available capabilities for schema",
         "tags": [
@@ -934,6 +1063,11 @@
     "/v1/entity/schemas/blueprints": {
       "get": {
         "operationId": "listSchemaBlueprints",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listSchemaBlueprints",
         "description": "List canonical versions of all available schemas",
         "tags": [
@@ -964,6 +1098,12 @@
     "/v1/entity:search": {
       "post": {
         "operationId": "searchEntities",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "filter": true
+          }
+        ],
         "summary": "searchEntities",
         "x-rate-limit": {
           "limit": 5000,
@@ -1008,6 +1148,12 @@
     "/v1/entity:list": {
       "post": {
         "operationId": "listEntities",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "filter": true
+          }
+        ],
         "summary": "listEntities",
         "x-rate-limit": {
           "limit": 5000,
@@ -1052,6 +1198,12 @@
     "/v1/entity:graph": {
       "post": {
         "operationId": "queryEntityGraph",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "filter": true
+          }
+        ],
         "summary": "queryEntityGraph",
         "description": "Traverse an entity relationship graph starting from a seed entity.\n\nDefine the shape of the graph using nodes (entity schemas) and edges (relationships with cardinality).\nThe API will traverse the graph bidirectionally and return all discovered entity IDs.\n\nExample: Find all entities connected to a contact through portal_user -> contact -> billing_account -> files\n",
         "tags": [
@@ -1090,6 +1242,12 @@
     "/v1/entity/{slug}": {
       "post": {
         "operationId": "createEntity",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:create",
+            "resource": "{slug}"
+          }
+        ],
         "summary": "createEntity",
         "description": "Creates a new entity using a key.\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityCreated`\n\n## Relations\n\nTo create a relation, store a property object that defines a `$relation` array.\n\nExample:\n\n```json\n{\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\" }\n    ]\n  }\n}\n```\n\nThe items in `$relation` support two properties:\n- `entity_id` - The ID of the entity to link\n- `_tags` - Tags or labels for the relation (optional)\n",
         "tags": [
@@ -1186,6 +1344,11 @@
     "/v1/entity/{slug}:validate": {
       "post": {
         "operationId": "validateEntity",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "validateEntity",
         "description": "Validates an entity against the schema.",
         "tags": [
@@ -1243,6 +1406,11 @@
     "/v2/entity/{slug}:validate": {
       "post": {
         "operationId": "validateEntityV2",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "validateEntityV2",
         "description": "Validates an entity against the schema.",
         "tags": [
@@ -1300,6 +1468,20 @@
     "/v1/entity/{slug}:upsert": {
       "patch": {
         "operationId": "upsertEntity",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "entity:create",
+                "resource": "{slug}"
+              },
+              {
+                "action": "entity:edit",
+                "resource": "{slug}"
+              }
+            ]
+          }
+        ],
         "summary": "upsertEntity",
         "description": "Create or update an entity using `unique_key`\n\n- If no entities are matched, a new entity is created.\n- If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityCreated` or `EntityUpdated`\n",
         "tags": [
@@ -1410,6 +1592,12 @@
     "/v2/entity/{slug}/{id}": {
       "get": {
         "operationId": "getEntityV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "getEntityV2",
         "description": "Gets Entity by id.\n\nSupports `hydrate` and `fields` parameters to control the shape of the response.\n",
         "tags": [
@@ -1462,6 +1650,12 @@
     "/v1/entity/{slug}/{id}:restore": {
       "patch": {
         "operationId": "restoreEntity",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "restoreEntity",
         "description": "Restores an entity by id\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityRestore`\n",
         "tags": [
@@ -1514,6 +1708,12 @@
     "/v1/entity/{slug}/{id}:reindex": {
       "post": {
         "operationId": "reindexEntity",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "reindexEntity",
         "description": "Triggers a reindex for the Entity for search.\n",
         "tags": [
@@ -1563,6 +1763,12 @@
     "/v1/entity/{slug}/{id}": {
       "get": {
         "operationId": "getEntity",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "getEntity",
         "description": "Gets Entity and relations by id.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  },\n  \"addresses\": {\n    \"$relation_ref\": [\n      { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ],\n  \"addresses\": [\n    {\n      \"$relation_ref\": { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      \"_id\": \"123\",\n      \"address\": \"address 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation_ref\": { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n      \"_id\": \"234\",\n      \"address\": \"address 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
         "tags": [
@@ -1611,6 +1817,12 @@
       },
       "put": {
         "operationId": "updateEntity",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "updateEntity",
         "description": "Updates an Entity\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityUpdated`\n\n## Relations\n\nTo create a relation, store a property that defines a `$relation` array.\n\nExample:\n\n```json\n{\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\" }\n    ]\n  }\n}\n```\n\nThe items in `$relation` support two properties:\n- `entity_id` - The ID of the entity to link\n- `_tags` - Tags or labels for the relation (optional)\n",
         "tags": [
@@ -1674,6 +1886,12 @@
       },
       "patch": {
         "operationId": "patchEntity",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "patchEntity",
         "description": "Partially updates an entity with the passed in entity data.\n\n- If an _updated_at is passed and the server contains a newer version of the entity a `409` Error is returned\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityUpdated`\n\n## Relations\n\nTo create a relation, store a property that defines a `$relation` array.\n\nExample:\n\n```json\n{\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"3fa85f64-5717-4562-b3fc-2c963f66afa6\" }\n    ]\n  }\n}\n```\n\nThe items in `$relation` support two properties:\n- `entity_id` - The ID of the entity to link\n- `_tags` - Tags or labels for the relation (optional)\n",
         "tags": [
@@ -1744,6 +1962,12 @@
       },
       "delete": {
         "operationId": "deleteEntity",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:delete",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "deleteEntity",
         "description": "Deletes an Entity\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityDeleted`\n\n## Deletion Mode\n\nAll entities are soft deleted by default. To force an actual deletion from the system, provide `purge:true` to delete the entity and all its activity history permanently.\n",
         "tags": [
@@ -1782,6 +2006,12 @@
     "/v1/entity:autocomplete": {
       "get": {
         "operationId": "autocomplete",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "filter": true
+          }
+        ],
         "summary": "autocomplete",
         "description": "Autocomplete entity attributes.\n\nSuggestions are derived from the values **currently stored on entities** the caller is allowed to read.\nA value only shows up while at least one entity carries it, so this endpoint reflects usage, not\nconfiguration.\n\nTo enumerate the label catalogue managed in the Label Builder (including labels that are not\nassigned to any entity yet, and excluding archived ones), use the Taxonomy endpoints instead:\n`POST /v1/entity/taxonomies/classifications:search` (`taxonomiesClassificationsSearch`) or\n`GET /v1/entity/taxonomies/{taxonomySlug}:autocomplete` (`taxonomyAutocomplete`).\n\nFor `attribute=_tags` the distinct values are aggregated across all matching entities, `hits` is the exact\nnumber of distinct values (capped at 1000) and results are ordered by usage. For other attributes the\n1000 most recently updated entities are scanned and `hits` is the number of distinct values found so far.\n",
         "tags": [
@@ -1884,8 +2114,20 @@
     "/v1/entity:wipeAllEntities": {
       "post": {
         "operationId": "wipeAllEntities",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "access": "internal"
+              },
+              {
+                "access": "owner"
+              }
+            ]
+          }
+        ],
         "summary": "wipeAllEntities",
-        "description": "Creates a request to queue the deletion of all entities in the system. This is a destructive operation and should only be used in sandbox environments.\n",
+        "description": "Creates a request to queue the deletion of all entities in the system. This is a destructive operation and should only be used in sandbox environments.\n\nThe request is persisted as a wipe job whose progress can be followed with `listWipeJobs`.\nOmit `schemas` to wipe all schemas of the organization. An empty `schemas` array is rejected.\n\nOnly one wipe can run per schema at a time: a request that overlaps a running wipe\n(same schema, or any schema while a wipe of all schemas is running) is rejected with `409`.\nWipe executions are limited to 23 hours so they stop before their 24-hour locks expire.\n",
         "tags": [
           "Entities"
         ],
@@ -1897,6 +2139,8 @@
                 "properties": {
                   "schemas": {
                     "type": "array",
+                    "description": "Schemas to wipe. Omit to wipe all schemas. An empty array is rejected with 400.",
+                    "maxItems": 90,
                     "items": {
                       "$ref": "#/components/schemas/EntitySlug"
                     }
@@ -1908,7 +2152,85 @@
         },
         "responses": {
           "201": {
-            "description": "Wipe request was created"
+            "description": "Wipe request was created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WipeJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "409": {
+            "description": "A wipe of one or more of the requested schemas is already running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WipeJobConflictError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entity:wipeJobs": {
+      "get": {
+        "operationId": "listWipeJobs",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "access": "internal"
+              },
+              {
+                "access": "owner"
+              }
+            ]
+          }
+        ],
+        "summary": "listWipeJobs",
+        "description": "Lists the most recent wipe jobs of the organization, newest first.\n",
+        "tags": [
+          "Entities"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of jobs to return",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "results"
+                  ],
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WipeJob"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1916,6 +2238,11 @@
     "/v1/entity/activity": {
       "post": {
         "operationId": "createActivity",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view"
+          }
+        ],
         "summary": "createActivity",
         "description": "Create an activity that can be displayed in activity feeds.\n\n- All activites are published as events on the event bus\n- Entity mutations are always part of an activity\n- When more than 10 entities are passed, the first 10 are attached synchronously and the rest are processed asynchronously to avoid DynamoDB throttling\n",
         "tags": [
@@ -1965,6 +2292,11 @@
     "/v1/entity/activity/{id}": {
       "get": {
         "operationId": "getActivity",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getActivity",
         "description": "Get activity by id",
         "tags": [
@@ -2019,6 +2351,11 @@
     "/v1/entity/activity/{id}:attach": {
       "post": {
         "operationId": "attachActivity",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view"
+          }
+        ],
         "summary": "attachActivity",
         "description": "Attach existing activity to entity activity feeds",
         "tags": [
@@ -2065,6 +2402,12 @@
     "/v1/entity/{slug}/{id}/changesets/{attribute}:apply": {
       "post": {
         "operationId": "applyChangeset",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "applyChangeset",
         "description": "Applies the proposed value from a pending changeset to the entity attribute\nand removes the changeset. Used for human approval of pending changes.\n",
         "tags": [
@@ -2107,6 +2450,12 @@
     "/v1/entity/{slug}/{id}/changesets/{attribute}:dismiss": {
       "post": {
         "operationId": "dismissChangeset",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "dismissChangeset",
         "description": "Removes a pending changeset without applying it. The attribute value remains unchanged.\n",
         "tags": [
@@ -2164,6 +2513,12 @@
     "/v1/entity/{slug}/{id}/changesets": {
       "get": {
         "operationId": "listChangesets",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "listChangesets",
         "description": "Returns all pending changesets for an entity.",
         "tags": [
@@ -2200,6 +2555,12 @@
     "/v1/entity/{slug}/{id}/activity": {
       "get": {
         "operationId": "getEntityActivityFeed",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "getEntityActivityFeed",
         "description": "Get activity feed for an entity\n",
         "tags": [
@@ -2343,9 +2704,58 @@
         }
       }
     },
+    "/v1/entity/{slug}/{id}/summary": {
+      "get": {
+        "operationId": "getEntitySummary",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}:{id}"
+          }
+        ],
+        "summary": "getEntitySummary",
+        "description": "Get the latest AI generated summary of an entity. Summaries are generated by the\nai-agents-api `skill:entity-summary` and stored here when the execution completes.\n",
+        "tags": [
+          "AI"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/EntitySlugPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/EntityIdPathParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
     "/v1/entity/{slug}/{id}/relations": {
       "get": {
         "operationId": "getRelations",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}:{id}"
+          },
+          {
+            "action": "entity:view",
+            "filter": true
+          }
+        ],
         "summary": "getRelations",
         "description": "Returns 1st level direct relations for an entity.\n\nYou can control whether to return the full entity or just the relation item with the `?hydrate` query param.\n\nReverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.\n",
         "tags": [
@@ -2445,6 +2855,12 @@
       },
       "post": {
         "operationId": "addRelations",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "addRelations",
         "description": "Relates one or more entities to parent entity by adding items to a relation attribute",
         "tags": [
@@ -2511,6 +2927,12 @@
       },
       "delete": {
         "operationId": "removeRelations",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "removeRelations",
         "description": "Disassociate one or more entities to parent entity by removing items to a relation attribute",
         "tags": [
@@ -2575,6 +2997,16 @@
     "/v2/entity/{slug}/{id}/relations": {
       "get": {
         "operationId": "getRelationsV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}:{id}"
+          },
+          {
+            "action": "entity:view",
+            "filter": true
+          }
+        ],
         "summary": "getRelationsV2",
         "description": "Returns 1st level direct relations for an entity with pagination.\n\nYou can control whether to return the full entity or just the relation item with the `?hydrate` query param.\n\nReverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.\n",
         "tags": [
@@ -2647,6 +3079,16 @@
     "/v3/entity/{slug}/{id}/relations": {
       "get": {
         "operationId": "getRelationsV3",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}:{id}"
+          },
+          {
+            "action": "entity:view",
+            "filter": true
+          }
+        ],
         "summary": "getRelationsV3",
         "description": "Returns 1st level direct relations for an entity with pagination.\n\nYou can control whether to return the full entity or just the relation item with the `?hydrate` query param.\n\nReverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.\n",
         "tags": [
@@ -2730,6 +3172,12 @@
     "/v2/entity/{slug}/{id}/relations/count": {
       "get": {
         "operationId": "getRelatedEntitiesCount",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "getRelatedEntitiesCount",
         "description": "Returns the amount of unique related entities for an entity - includes direct and reverse relations.\n",
         "tags": [
@@ -2766,6 +3214,12 @@
     "/v1/entity/{slug}/{id}/relations/{attribute}/{entity_id}": {
       "put": {
         "operationId": "updateRelation",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "updateRelation",
         "description": "Updates an existing relation between two entities.",
         "tags": [
@@ -2845,6 +3299,12 @@
       },
       "delete": {
         "operationId": "deleteRelation",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "{slug}:{id}"
+          }
+        ],
         "summary": "deleteRelation",
         "description": "Removes relation between two entities",
         "tags": [
@@ -2898,6 +3358,12 @@
     "/v1/entity:export": {
       "post": {
         "operationId": "exportEntities",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "filter": true
+          }
+        ],
         "summary": "exportEntities",
         "description": "Export entity data in a CSV-format. The export will export data as close as possible to what is visible on Entity UI tables.\nThe values exported as in some cases, transformed to human-readable values.\n\nTo force the export of raw values, use the `#` prefix in front of your field name when specifying the field on the `fields` param.\n",
         "tags": [
@@ -2951,6 +3417,18 @@
     "/v1/entity:import": {
       "post": {
         "operationId": "importEntities",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "entity:create"
+              },
+              {
+                "action": "entity:edit"
+              }
+            ]
+          }
+        ],
         "summary": "Import Entities",
         "description": "This endpoint enables the import of entities into the platform.\nThe entities should be provided in a CSV format inside an S3 bucket.\nThis API will return the `job_id`` which can be used to fetch the status of the import process.\n",
         "tags": [
@@ -2977,7 +3455,146 @@
         },
         "responses": {
           "201": {
-            "description": "The import operation was initiated successfully.\nThe response includes the URLs for the files containing the successful and failed imported entities.\n"
+            "description": "The import operation was initiated successfully.\nThe response includes the URLs for the files containing the successful and failed imported entities.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportProgress"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsError"
+          }
+        }
+      }
+    },
+    "/v1/entity:import:latest": {
+      "get": {
+        "operationId": "getLatestEntityImport",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "entity:create"
+              },
+              {
+                "action": "entity:edit"
+              }
+            ]
+          }
+        ],
+        "summary": "Get the latest import job of a schema",
+        "description": "Returns the progress of the latest import job for the organization and schema: the running job,\nwhoever started it (it blocks every other import of the schema), otherwise the caller's own last\nfinished job if it finished within the last 24 hours. Used to show the state of an import (or dry\nrun) that was started earlier.\n",
+        "tags": [
+          "Import-Export"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "schema",
+            "required": true,
+            "description": "Slug of the schema.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Progress of the latest import job.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportProgress"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "No import job for this schema in the last 24 hours"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsError"
+          }
+        }
+      }
+    },
+    "/v1/entity:importHistory": {
+      "get": {
+        "operationId": "getEntityImportHistory",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "entity:create"
+              },
+              {
+                "action": "entity:edit"
+              }
+            ]
+          }
+        ],
+        "summary": "List the import jobs of a schema",
+        "description": "Lists the import jobs (imports and dry runs) of a schema in the organization, newest first: the\nrunning job, if any, then the jobs that ended in the last 30 days. Every caller with access sees\nevery job. Without jobs the list is empty; this operation does not answer 404.\n",
+        "tags": [
+          "Import-Export"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "schema",
+            "required": true,
+            "description": "Slug of the schema.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "description": "Maximum number of jobs to return. Values outside 1 to 50 are clamped.",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The import jobs of the schema, newest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "jobs"
+                  ],
+                  "properties": {
+                    "jobs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ImportJobSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
@@ -2988,6 +3605,11 @@
     "/v1/entity:abortImport": {
       "post": {
         "operationId": "abortEntityImport",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "Abort a running entity import",
         "description": "Asks a running import to stop. Rows already imported are **kept** - this is a stop, not a\nrollback - and the job still produces its result reports for everything that landed before\nthe stop, then reaches the terminal status `CANCELLED`.\n\nThe stop is cooperative: the worker notices the request at its next batch boundary, so the\njob typically reaches `CANCELLED` within seconds. Poll `POST /v1/entity:import` with the\n`job_id` as usual to observe it.\n\nIdempotent - aborting an already-aborted or already-finished job is not an error.\n",
         "tags": [
@@ -3048,9 +3670,85 @@
         }
       }
     },
+    "/v1/entity:discardImport": {
+      "post": {
+        "operationId": "discardEntityImport",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "Discard a finished dry run",
+        "description": "Discards a dry run that has finished (`COMPLETED`), so it is no longer offered for import.\nThe job becomes `CANCELLED` and `GET /v1/entity:import:latest` stops returning it as ready.\nFor a file that requires a dry run (more than 50 rows), an import passing it as\n`dry_run_job_id` then fails with `dry_run_required`. The dry run wrote nothing, and its\nreport stays available.\n\nOnly the user who ran the dry run can discard it (403 otherwise). Idempotent - discarding an\nalready discarded dry run answers 200. A running dry run is stopped with\n`POST /v1/entity:abortImport` instead.\n",
+        "tags": [
+          "Import-Export"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "job_id",
+            "required": true,
+            "description": "The ID of the dry run to discard.",
+            "schema": {
+              "$ref": "#/components/schemas/ExportJobId"
+            }
+          },
+          {
+            "in": "query",
+            "name": "schema",
+            "required": true,
+            "description": "Slug of the schema of the dry run, used to authorize the caller.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The dry run is discarded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "`CANCELLED`"
+                    },
+                    "jobPollId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "No such import job"
+          },
+          "409": {
+            "description": "The job is not a finished dry run (still running, or a real import)"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsError"
+          }
+        }
+      }
+    },
     "/v1/entity/views": {
       "get": {
         "operationId": "listSavedViews",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listSavedViews",
         "description": "Get the Saved Views based on the schema",
         "tags": [
@@ -3133,6 +3831,11 @@
     "/v1/entity/view": {
       "post": {
         "operationId": "createSavedView",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "createSavedView",
         "description": "Creates a new saved view",
         "tags": [
@@ -3167,6 +3870,11 @@
     "/v1/entity/view/{id}": {
       "get": {
         "operationId": "getSavedView",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getSavedView",
         "description": "Gets Saved View configuration by id.",
         "tags": [
@@ -3195,6 +3903,12 @@
       },
       "put": {
         "operationId": "updateSavedView",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}"
+          }
+        ],
         "summary": "updateSavedView",
         "description": "Updates a saved view",
         "tags": [
@@ -3229,6 +3943,12 @@
       },
       "patch": {
         "operationId": "patchSavedView",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}"
+          }
+        ],
         "summary": "patchSavedView",
         "description": "Partially updates a saved view with the provided payload. If an updated_at is passed and the server contains a newer version of the view a `409` error is returned",
         "tags": [
@@ -3263,6 +3983,12 @@
       },
       "delete": {
         "operationId": "deleteSavedView",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{slug}"
+          }
+        ],
         "summary": "deleteSavedView",
         "description": "Deletes a saved view",
         "parameters": [
@@ -3289,6 +4015,11 @@
     "/v1/entity/views/favorites": {
       "get": {
         "operationId": "listFavoriteViewsForUser",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
         "summary": "listFavoriteViewsForUser",
         "description": "Get the Favorite Saved Views for user based on the schema",
         "tags": [
@@ -3319,6 +4050,11 @@
     "/v1/entity/taxonomies": {
       "get": {
         "operationId": "listTaxonomies",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listTaxonomies",
         "description": "List taxonomies in an organization",
         "parameters": [
@@ -3371,6 +4107,11 @@
       },
       "post": {
         "operationId": "createTaxonomy",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:create"
+          }
+        ],
         "summary": "createTaxonomy",
         "description": "Create a new taxonomy",
         "tags": [
@@ -3408,6 +4149,11 @@
     "/v1/entity/taxonomies/{taxonomySlug}": {
       "get": {
         "operationId": "getTaxonomy",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getTaxonomy",
         "description": "Get taxonomy by slug",
         "tags": [
@@ -3436,6 +4182,11 @@
       },
       "put": {
         "operationId": "updateTaxonomy",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:edit"
+          }
+        ],
         "summary": "updateTaxonomy",
         "description": "Update a taxonomy",
         "tags": [
@@ -3470,6 +4221,11 @@
       },
       "delete": {
         "operationId": "deleteTaxonomy",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:delete"
+          }
+        ],
         "summary": "deleteTaxonomy",
         "description": "Delete a taxonomy",
         "tags": [
@@ -3503,6 +4259,21 @@
     "/v1/entity/taxonomies/{taxonomySlug}/classifications": {
       "post": {
         "operationId": "updateClassificationsForTaxonomy",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "label_builder:create"
+              },
+              {
+                "action": "label_builder:edit"
+              },
+              {
+                "action": "label_builder:delete"
+              }
+            ]
+          }
+        ],
         "summary": "updateClassificationsForTaxonomy",
         "description": "Update the classifications for a taxonomy",
         "tags": [
@@ -3565,6 +4336,11 @@
     "/v2/entity/taxonomies/classifications": {
       "post": {
         "operationId": "createTaxonomyClassification",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:create"
+          }
+        ],
         "summary": "createTaxonomyClassification",
         "description": "Create a new classification for a taxonomy\n",
         "tags": [
@@ -3602,6 +4378,11 @@
     "/v2/entity/taxonomies/classifications/{classificationSlug}": {
       "get": {
         "operationId": "getTaxonomyClassification",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getTaxonomyClassification",
         "description": "Get a classification for a taxonomy by slug\n\nFor backwards compatibility with purposes, you can also pass the classification id instead of the slug.\n",
         "tags": [
@@ -3630,6 +4411,11 @@
       },
       "put": {
         "operationId": "updateTaxonomyClassification",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:edit"
+          }
+        ],
         "summary": "updateTaxonomyClassification",
         "description": "Update a classification for a taxonomy",
         "tags": [
@@ -3667,6 +4453,11 @@
       },
       "delete": {
         "operationId": "deleteTaxonomyClassification",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:delete"
+          }
+        ],
         "summary": "deleteTaxonomyClassification",
         "description": "Delete a classification for a taxonomy",
         "tags": [
@@ -3700,6 +4491,11 @@
     "/v1/entity/taxonomies/{taxonomySlug}:autocomplete": {
       "get": {
         "operationId": "taxonomyAutocomplete",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "taxonomyAutocomplete",
         "description": "Taxonomies autocomplete",
         "tags": [
@@ -3751,6 +4547,11 @@
     "/v1/entity/taxonomies/classifications:search": {
       "post": {
         "operationId": "taxonomiesClassificationsSearch",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "taxonomiesClassificationsSearch",
         "description": "List taxonomy classifications in an organization based on taxonomy slug",
         "tags": [
@@ -3879,6 +4680,11 @@
     "/v1/entity/schemas/{slug}/taxonomy/{taxonomySlug}": {
       "get": {
         "operationId": "listTaxonomyClassificationsForSchema",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listTaxonomyClassificationsForSchema",
         "description": "List taxonomy classifications for a given schema",
         "tags": [
@@ -3931,6 +4737,11 @@
     "/v1/entity/taxonomies/bulk-jobs": {
       "get": {
         "operationId": "getTaxonomyBulkActionJobs",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getTaxonomyBulkActionJobs",
         "description": "Gets bulk actions jobs by job status:\n- <undefined> = all active jobs\n- PENDING = all active jobs\n- FAILED = all failed jobs\n- COMPLETED = all completed jobs\n",
         "tags": [
@@ -4011,6 +4822,11 @@
     "/v1/entity/taxonomies/bulk-jobs/{job_id}": {
       "get": {
         "operationId": "getTaxonomyBulkActionJobById",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getTaxonomyBulkActionJobById",
         "description": "Gets a bulk action job by job id",
         "tags": [
@@ -4043,6 +4859,11 @@
     "/v1/entity/taxonomies/bulk-jobs/{job_id}/cancel": {
       "post": {
         "operationId": "cancelBulkAction",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:*"
+          }
+        ],
         "summary": "cancelBulkAction",
         "description": "Cancels a running bulk action job. The job status will be updated to CANCELLED\nand the job will be stopped.\n",
         "tags": [
@@ -4091,6 +4912,11 @@
     "/v1/entity/taxonomies/classifications:move": {
       "post": {
         "operationId": "bulkMoveClassifications",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:*"
+          }
+        ],
         "summary": "bulkMoveClassifications",
         "description": "Moves classifications from one taxonomy to another, through a bulk async operation which\nalso updates all references from the old classification to the new one under the target taxonomy.\n",
         "tags": [
@@ -4159,6 +4985,11 @@
     "/v1/entity/taxonomies/classifications:merge": {
       "post": {
         "operationId": "bulkMergeClassifications",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:*"
+          }
+        ],
         "summary": "bulkMergeClassifications",
         "description": "Merges classifications from one taxonomy into one individual classification, through a bulk async operation which\nalso updates all references from the old Classifications to the new one.\n",
         "tags": [
@@ -4227,6 +5058,11 @@
     "/v1/entity/taxonomies/classifications:delete": {
       "post": {
         "operationId": "bulkDeleteClassifications",
+        "x-epilot-permissions": [
+          {
+            "action": "label_builder:*"
+          }
+        ],
         "summary": "bulkDeleteClassifications",
         "description": "Permanently deletes taxonomy classifications. The classifications are deleted through a bulk\nasync operation which also deletes all references of the deleted classifications from the entities\nreferencing them.\n",
         "tags": [
@@ -4285,6 +5121,11 @@
     "/v1/entity/schemas/attributes": {
       "post": {
         "operationId": "createSchemaAttribute",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
         "summary": "createSchemaAttribute",
         "description": "Create a schema attribute",
         "tags": [
@@ -4319,6 +5160,11 @@
     "/v1/entity/schemas/attributes/{composite_id}": {
       "get": {
         "operationId": "getSchemaAttribute",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getSchemaAttribute",
         "description": "Get a schema attribute from given attribute ID",
         "tags": [
@@ -4355,6 +5201,11 @@
       },
       "put": {
         "operationId": "putSchemaAttribute",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
         "summary": "putSchemaAttribute",
         "description": "Updates an attribute in the schema",
         "tags": [
@@ -4397,6 +5248,11 @@
       },
       "delete": {
         "operationId": "deleteSchemaAttribute",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
         "summary": "deleteSchemaAttribute",
         "description": "Deletes an attribute from a schema",
         "tags": [
@@ -4435,6 +5291,11 @@
     "/v1/entity/schemas/capabilities": {
       "post": {
         "operationId": "createSchemaCapability",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
         "summary": "createSchemaCapability",
         "description": "Create a schema capability",
         "tags": [
@@ -4469,6 +5330,11 @@
     "/v1/entity/schemas/capabilities/{composite_id}": {
       "get": {
         "operationId": "getSchemaCapability",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getSchemaCapability",
         "description": "Get a schema capability from given capability ID",
         "tags": [
@@ -4505,6 +5371,11 @@
       },
       "put": {
         "operationId": "putSchemaCapability",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
         "summary": "putSchemaCapability",
         "description": "Adds or updates an capability in the schema",
         "tags": [
@@ -4547,6 +5418,11 @@
       },
       "delete": {
         "operationId": "deleteSchemaCapability",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
         "summary": "deleteSchemaCapability",
         "description": "Deletes a Capability from a schema",
         "tags": [
@@ -4585,6 +5461,11 @@
     "/v1/entity/schemas/group": {
       "post": {
         "operationId": "createSchemaGroup",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
         "summary": "createSchemaGroup",
         "description": "Create a schema group",
         "tags": [
@@ -4619,6 +5500,11 @@
     "/v1/entity/schemas/group/{composite_id}": {
       "get": {
         "operationId": "getSchemaGroup",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getSchemaGroup",
         "description": "Get a schema group from given group composite ID",
         "tags": [
@@ -4655,6 +5541,11 @@
       },
       "put": {
         "operationId": "putSchemaGroup",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
         "summary": "putSchemaGroup",
         "description": "Adds or updates an capability in the schema",
         "tags": [
@@ -4697,6 +5588,11 @@
       },
       "delete": {
         "operationId": "deleteSchemaGroup",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
         "summary": "deleteSchemaGroup",
         "description": "Deletes a Capability from a schema",
         "tags": [
@@ -4735,6 +5631,11 @@
     "/v1/entity/schemas/headline": {
       "post": {
         "operationId": "createSchemaGroupHeadline",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
         "summary": "createSchemaGroupHeadline",
         "description": "Create a headline in a schema group",
         "tags": [
@@ -4769,6 +5670,11 @@
     "/v1/entity/schemas/headline/{composite_id}": {
       "get": {
         "operationId": "getSchemaGroupHeadline",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getSchemaGroupHeadline",
         "description": "Get a group headline from schema from given headline composite ID",
         "tags": [
@@ -4805,6 +5711,11 @@
       },
       "put": {
         "operationId": "putSchemaGroupHeadline",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
         "summary": "putSchemaGroupHeadline",
         "description": "Adds or updates a group headline in the schema",
         "tags": [
@@ -4847,6 +5758,11 @@
       },
       "delete": {
         "operationId": "deleteSchemaGroupHeadline",
+        "x-epilot-permissions": [
+          {
+            "action": "schema:update"
+          }
+        ],
         "summary": "deleteSchemaGroupHeadline",
         "description": "Deletes a group headline from a schema",
         "tags": [
@@ -4973,6 +5889,11 @@
           "draft": {
             "deprecated": true,
             "type": "boolean",
+            "example": false
+          },
+          "require_change_comment": {
+            "type": "boolean",
+            "description": "When true, the entity builder requires a change comment before saving a new version of this schema. Absent is treated as false. Enforced by the builder UI only; the API does not reject schema writes without a comment.",
             "example": false
           },
           "icon": {
@@ -5382,6 +6303,198 @@
           "attributes",
           "capabilities"
         ]
+      },
+      "SchemaHead": {
+        "type": "object",
+        "required": [
+          "slug",
+          "version"
+        ],
+        "properties": {
+          "slug": {
+            "$ref": "#/components/schemas/EntitySlug"
+          },
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "Who saved this version"
+          }
+        }
+      },
+      "WipeJob": {
+        "type": "object",
+        "description": "A request to wipe entity data of an organization, and its progress",
+        "required": [
+          "id",
+          "schemas",
+          "status",
+          "current_step",
+          "created_at",
+          "updated_at",
+          "entity_totals",
+          "total_entities",
+          "progress"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schemas": {
+            "type": "array",
+            "nullable": true,
+            "description": "The schemas being wiped. null means all schemas.",
+            "items": {
+              "$ref": "#/components/schemas/EntitySlug"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "running",
+              "succeeded",
+              "failed"
+            ]
+          },
+          "current_step": {
+            "type": "string",
+            "enum": [
+              "SANITY_CHECK",
+              "DELETE_ELASTIC_INDICES",
+              "DELETE_DYNAMODB_ENTITIES",
+              "DELETE_DYNAMODB_RELATIONS",
+              "DELETE_DYNAMODB_ACTIVITIES",
+              "DELETE_CLICKHOUSE_ENTITIES",
+              "DELETE_CLICKHOUSE_ENTITY_OPERATIONS",
+              "DELETE_S3_FILES",
+              "SUCCESS",
+              "FAIL"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "object",
+            "properties": {
+              "user_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              }
+            }
+          },
+          "entity_totals": {
+            "type": "object",
+            "description": "Number of entities per schema at the time the wipe was requested",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "total_entities": {
+            "type": "integer",
+            "description": "Sum of entity_totals"
+          },
+          "progress": {
+            "type": "object",
+            "properties": {
+              "indices_deleted": {
+                "type": "integer"
+              },
+              "entities_deleted": {
+                "type": "integer"
+              },
+              "relations_deleted": {
+                "type": "integer"
+              },
+              "activities_deleted": {
+                "type": "integer"
+              }
+            }
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "WipeJobConflictError": {
+        "type": "object",
+        "required": [
+          "message",
+          "conflicting_schemas"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 409
+          },
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "conflicting_schemas": {
+            "type": "array",
+            "description": "Requested schemas that are already being wiped",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SchemaVersionConflictError": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 409
+          },
+          "error": {
+            "type": "string",
+            "example": "SchemaVersionConflict"
+          },
+          "message": {
+            "type": "string"
+          },
+          "base_version": {
+            "type": "integer",
+            "description": "The version the rejected save was made on top of"
+          },
+          "current_version": {
+            "type": "integer",
+            "description": "The version saves currently land on top of"
+          },
+          "current_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "current_created_by": {
+            "type": "string",
+            "description": "Who saved the current version"
+          }
+        }
       },
       "EntitySchemaItem": {
         "allOf": [
@@ -7538,8 +8651,8 @@
                 "type": "string",
                 "description": "The shape of the location value. Immutable once the condition has been saved.",
                 "enum": [
-                  "zipcode",
-                  "zipcode_town"
+                  "postal_code",
+                  "postal_code_city"
                 ]
               }
             },
@@ -9002,6 +10115,31 @@
             "type": "string",
             "description": "The schema of the entities being imported. This must match the schema of the entities on the platform.",
             "example": "contact"
+          },
+          "unique_key": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "type": "string"
+            },
+            "description": "Attribute names (text, email or number) used to match rows to existing entities, combined with AND.\nUse `[\"_id\"]` to match by entity id only. Empty by default, which keeps the current behaviour.\n",
+            "example": [
+              "email"
+            ]
+          },
+          "dry_run": {
+            "type": "boolean",
+            "default": false,
+            "description": "Report the outcome of every row without writing any entities."
+          },
+          "dry_run_job_id": {
+            "type": "string",
+            "description": "The job id of a completed dry run that this import commits. Cannot be combined with `dry_run`."
+          },
+          "trigger_automations": {
+            "type": "boolean",
+            "default": false,
+            "description": "Write committed rows as normal creates and updates: they emit entity events, so automations\nrun, and each entity gets its activities. Off by default, when imported rows trigger no\nautomations. Cannot be combined with `dry_run: true`.\n"
           }
         },
         "required": [
@@ -9009,6 +10147,282 @@
           "schema"
         ],
         "description": "The parameters for importing entities."
+      },
+      "ImportRowOutcomeCounts": {
+        "type": "object",
+        "description": "Number of rows per outcome, in the order the outcomes are evaluated.",
+        "properties": {
+          "error": {
+            "type": "integer"
+          },
+          "skipped_empty_key": {
+            "type": "integer"
+          },
+          "skipped_duplicate_in_file": {
+            "type": "integer"
+          },
+          "skipped_id_not_found": {
+            "type": "integer"
+          },
+          "skipped_ambiguous": {
+            "type": "integer"
+          },
+          "create": {
+            "type": "integer"
+          },
+          "unchanged": {
+            "type": "integer"
+          },
+          "update": {
+            "type": "integer"
+          }
+        }
+      },
+      "ImportJobSummary": {
+        "type": "object",
+        "description": "One import job (import or dry run) in the import history of a schema.",
+        "required": [
+          "job_id",
+          "schema",
+          "status",
+          "dry_run",
+          "started_at"
+        ],
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "description": "The ID of the import job, as returned in `jobPollId`. Poll it to resume the job."
+          },
+          "schema": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "dry_run": {
+            "type": "boolean"
+          },
+          "trigger_automations": {
+            "type": "boolean"
+          },
+          "started_by": {
+            "type": "string",
+            "description": "User id of whoever started the job."
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "file_name": {
+            "type": "string",
+            "description": "Name of the imported file, for display."
+          },
+          "total": {
+            "type": "integer"
+          },
+          "importedEntitiesCount": {
+            "type": "integer"
+          },
+          "failedEntitiesCount": {
+            "type": "integer"
+          },
+          "outcome_counts": {
+            "$ref": "#/components/schemas/ImportRowOutcomeCounts"
+          },
+          "failure_code": {
+            "$ref": "#/components/schemas/ImportFailureCode"
+          },
+          "unique_key": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ImportIssue": {
+        "type": "object",
+        "description": "Rows of an import job that share one reason not to be written.",
+        "required": [
+          "severity",
+          "reason",
+          "count",
+          "example_rows"
+        ],
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "`blocking` for rows with the outcome `error`, `warning` for the `skipped_*` outcomes.\n",
+            "enum": [
+              "blocking",
+              "warning"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "description": "Blocking: the row reason's text before its first `: `, one issue per `; `-separated part, e.g.\n`Invalid date for birthdate` or `Unknown purpose id`. Warning: the outcome, e.g. `skipped_duplicate_in_file`.\n"
+          },
+          "column": {
+            "type": "string",
+            "description": "The column the reason names (`… for <column>` or `… in <column>`), if any."
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of rows with this issue."
+          },
+          "example_rows": {
+            "type": "array",
+            "description": "The first (at most 5) row numbers with this issue, 1-based data rows as in the report.",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "ImportFailureCode": {
+        "type": "string",
+        "description": "Machine readable reason of a failed job. `failure_reason` holds the human text.\n- `invalid_csv_bad_headers`: the file has neither a `_schema` nor an `_id` column\n- `dry_run_required`, `dry_run_mismatch`, `dry_run_expired`: the dry-run rule rejected the commit before any row\n- `import_file_changed`: the file was replaced after the pre-scan\n- `prescan_missing`: the job cannot be continued after an update\n- `import_too_large`: the file has more rows than a single job can report on\n- `token_expired`: the session that started the job expired before it finished\n- `max_duration_exceeded`: the job ran longer than allowed\n- `no_progress`: consecutive runs made no progress\n- `internal_error`: an unexpected error ended the job\n",
+        "enum": [
+          "invalid_csv_bad_headers",
+          "dry_run_required",
+          "dry_run_mismatch",
+          "dry_run_expired",
+          "import_file_changed",
+          "prescan_missing",
+          "import_too_large",
+          "token_expired",
+          "max_duration_exceeded",
+          "no_progress",
+          "internal_error"
+        ]
+      },
+      "ImportProgress": {
+        "type": "object",
+        "description": "Progress of an import job. The fields `dry_run`, `unique_key`, `outcome_counts`, `report_url`,\n`S3Reference` and `started_by` are only set for jobs started with `unique_key`, `dry_run` or `dry_run_job_id`. For those,\n`importedEntitiesCount` is `create` plus `update` and `failedEntitiesCount` counts `error` rows only.\n",
+        "properties": {
+          "jobPollId": {
+            "type": "string",
+            "description": "The ID of the import job."
+          },
+          "trigger_automations": {
+            "type": "boolean",
+            "description": "Whether committed rows of the job trigger automations."
+          },
+          "started_by": {
+            "type": "string",
+            "description": "User id of whoever started the job. A finished job is only returned by `entity:import:latest`\nto this user, and only this user can commit or discard a dry run.\n"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of data rows in the file, once known."
+          },
+          "importedEntitiesCount": {
+            "type": "integer"
+          },
+          "failedEntitiesCount": {
+            "type": "integer"
+          },
+          "importedEntitiesUrl": {
+            "type": "string"
+          },
+          "failedEntitiesUrl": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "failure_reason": {
+            "type": "string"
+          },
+          "failure_code": {
+            "$ref": "#/components/schemas/ImportFailureCode"
+          },
+          "abortable": {
+            "type": "boolean"
+          },
+          "dry_run": {
+            "type": "boolean"
+          },
+          "unique_key": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "outcome_counts": {
+            "$ref": "#/components/schemas/ImportRowOutcomeCounts"
+          },
+          "report_url": {
+            "type": "string",
+            "description": "Download link of the per-row report (CSV, UTF-8 with BOM)."
+          },
+          "S3Reference": {
+            "type": "object",
+            "description": "The imported file. Send it back with `dry_run_job_id` to commit a dry run.",
+            "properties": {
+              "bucket": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              }
+            }
+          },
+          "issues": {
+            "type": "array",
+            "description": "The rows that are not written, grouped by why: blocking issues first, then by count, at most 20.\nThe warnings always get a place. Blocking issues beyond the 50 tracked are counted as `Other errors`.\nOnly for jobs started with `unique_key`, `dry_run` or `dry_run_job_id`.\n",
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/ImportIssue"
+            }
+          },
+          "phase": {
+            "type": "string",
+            "description": "What the job is doing now: `scanning` the file (pre-scan), running the `dry_run` or `importing`\nrows, `finalizing` the report, or `done` (every terminal status).\n",
+            "enum": [
+              "scanning",
+              "dry_run",
+              "importing",
+              "finalizing",
+              "done"
+            ]
+          },
+          "heartbeat_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Refreshed at every phase change and at least every few seconds while the job makes progress\n(rows or pre-scan). A PROCESSING job whose heartbeat is minutes old may be stuck.\n"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the job started."
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the job ended; set on a terminal status."
+          }
+        }
       },
       "GraphQueryRequest": {
         "type": "object",
@@ -9707,6 +11121,39 @@
             }
           }
         ]
+      },
+      "EntitySummary": {
+        "type": "object",
+        "description": "Latest AI generated summary of an entity",
+        "required": [
+          "summary",
+          "variant",
+          "execution_id",
+          "created_at"
+        ],
+        "properties": {
+          "summary": {
+            "type": "string",
+            "description": "Markdown summary"
+          },
+          "variant": {
+            "type": "string",
+            "enum": [
+              "short",
+              "detailed",
+              "action_points"
+            ]
+          },
+          "execution_id": {
+            "type": "string",
+            "description": "ai-agents-api execution that generated the summary. Feedback is keyed by it.",
+            "example": "7b4cfc0f-1d5e-4f3a-9b4a-2c7d1f9e8a10"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "BlueprintEntityId": {
         "description": "Reference to blueprint",

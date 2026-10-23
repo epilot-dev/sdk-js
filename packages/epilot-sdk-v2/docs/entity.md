@@ -30,6 +30,7 @@ const { data } = await entityClient.listSchemas(...)
 - [`getSchema`](#getschema)
 - [`putSchema`](#putschema)
 - [`deleteSchema`](#deleteschema)
+- [`getSchemaHead`](#getschemahead)
 - [`getJsonSchema`](#getjsonschema)
 - [`getSchemaExample`](#getschemaexample)
 - [`getSchemaVersions`](#getschemaversions)
@@ -70,6 +71,7 @@ const { data } = await entityClient.listSchemas(...)
 - [`deleteEntity`](#deleteentity)
 - [`autocomplete`](#autocomplete)
 - [`wipeAllEntities`](#wipeallentities)
+- [`listWipeJobs`](#listwipejobs)
 - [`applyChangeset`](#applychangeset)
 - [`dismissChangeset`](#dismisschangeset)
 - [`listChangesets`](#listchangesets)
@@ -79,6 +81,9 @@ const { data } = await entityClient.listSchemas(...)
 - [`getActivity`](#getactivity)
 - [`attachActivity`](#attachactivity)
 - [`getEntityActivityFeed`](#getentityactivityfeed)
+
+**AI**
+- [`getEntitySummary`](#getentitysummary)
 
 **Relations**
 - [`getRelations`](#getrelations)
@@ -93,7 +98,10 @@ const { data } = await entityClient.listSchemas(...)
 **Import-Export**
 - [`exportEntities`](#exportentities)
 - [`importEntities`](#importentities)
+- [`getLatestEntityImport`](#getlatestentityimport)
+- [`getEntityImportHistory`](#getentityimporthistory)
 - [`abortEntityImport`](#abortentityimport)
+- [`discardEntityImport`](#discardentityimport)
 
 **Saved Views**
 - [`listSavedViews`](#listsavedviews)
@@ -130,6 +138,10 @@ const { data } = await entityClient.listSchemas(...)
 - [`IsTemplate`](#istemplate)
 - [`SchemaId`](#schemaid)
 - [`EntitySchema`](#entityschema)
+- [`SchemaHead`](#schemahead)
+- [`WipeJob`](#wipejob)
+- [`WipeJobConflictError`](#wipejobconflicterror)
+- [`SchemaVersionConflictError`](#schemaversionconflicterror)
 - [`EntitySchemaItem`](#entityschemaitem)
 - [`GenerateEntityTableAIFiltersRequest`](#generateentitytableaifiltersrequest)
 - [`GenerateEntityTableAIFiltersResponse`](#generateentitytableaifiltersresponse)
@@ -226,6 +238,11 @@ const { data } = await entityClient.listSchemas(...)
 - [`EntitySearchOptions`](#entitysearchoptions)
 - [`FieldsParam`](#fieldsparam)
 - [`EntityImportParams`](#entityimportparams)
+- [`ImportRowOutcomeCounts`](#importrowoutcomecounts)
+- [`ImportJobSummary`](#importjobsummary)
+- [`ImportIssue`](#importissue)
+- [`ImportFailureCode`](#importfailurecode)
+- [`ImportProgress`](#importprogress)
 - [`GraphQueryRequest`](#graphqueryrequest)
 - [`GraphSeed`](#graphseed)
 - [`GraphDefinition`](#graphdefinition)
@@ -243,6 +260,7 @@ const { data } = await entityClient.listSchemas(...)
 - [`EntityOperationSourceContext`](#entityoperationsourcecontext)
 - [`BaseActivityItem`](#baseactivityitem)
 - [`ActivityItem`](#activityitem)
+- [`EntitySummary`](#entitysummary)
 - [`BlueprintEntityId`](#blueprintentityid)
 - [`ListSavedViewsResults`](#listsavedviewsresults)
 - [`SavedViewId`](#savedviewid)
@@ -316,6 +334,7 @@ const { data } = await client.listSchemas({
       "category": "customer_relations",
       "published": false,
       "draft": false,
+      "require_change_comment": false,
       "icon": "person",
       "title_template": "{{first_name}} {{last_name}}",
       "ui_config": {},
@@ -383,6 +402,7 @@ const { data } = await client.listSchemasV2({
       "category": "customer_relations",
       "published": false,
       "draft": false,
+      "require_change_comment": false,
       "icon": "person",
       "title_template": "{{first_name}} {{last_name}}",
       "ui_config": {},
@@ -448,6 +468,7 @@ const { data } = await client.getSchema({
   "category": "customer_relations",
   "published": false,
   "draft": false,
+  "require_change_comment": false,
   "icon": "person",
   "title_template": "{{first_name}} {{last_name}}",
   "ui_config": {
@@ -599,6 +620,8 @@ const { data } = await client.putSchema(
   {
     slug: 'example',
     draft: true,
+    base_version: 1,
+    base_updated_at: 'example',
   },
   {
     slug: 'contact',
@@ -613,6 +636,7 @@ const { data } = await client.putSchema(
     category: 'customer_relations',
     published: false,
     draft: false,
+    require_change_comment: false,
     icon: 'person',
     title_template: '{{first_name}} {{last_name}}',
     ui_config: {
@@ -779,6 +803,7 @@ const { data } = await client.putSchema(
   "category": "customer_relations",
   "published": false,
   "draft": false,
+  "require_change_comment": false,
   "icon": "person",
   "title_template": "{{first_name}} {{last_name}}",
   "ui_config": {
@@ -930,6 +955,36 @@ const { data } = await client.deleteSchema({
   slug: 'example',
 })
 ```
+
+---
+
+### `getSchemaHead`
+
+Lightweight lookup of the schema version saves currently land on top of. Meant for editors
+to detect that someone else saved while they were editing, without fetching the schema.
+
+`GET /v1/entity/schemas/{slug}/head`
+
+```ts
+const { data } = await client.getSchemaHead({
+  slug: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "slug": "contact",
+  "id": "string",
+  "version": 0,
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string"
+}
+```
+
+</details>
 
 ---
 
@@ -1128,6 +1183,7 @@ const { data } = await client.getSchemaVersions({
       "category": "customer_relations",
       "published": false,
       "draft": false,
+      "require_change_comment": false,
       "icon": "person",
       "title_template": "{{first_name}} {{last_name}}",
       "ui_config": {},
@@ -1165,6 +1221,7 @@ const { data } = await client.getSchemaVersions({
       "category": "customer_relations",
       "published": false,
       "draft": false,
+      "require_change_comment": false,
       "icon": "person",
       "title_template": "{{first_name}} {{last_name}}",
       "ui_config": {},
@@ -1270,6 +1327,7 @@ const { data } = await client.listSchemaBlueprints()
       "category": "customer_relations",
       "published": false,
       "draft": false,
+      "require_change_comment": false,
       "icon": "person",
       "title_template": "{{first_name}} {{last_name}}",
       "ui_config": {},
@@ -2249,6 +2307,86 @@ const { data } = await client.wipeAllEntities(
 )
 ```
 
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "schemas": ["contact"],
+  "status": "running",
+  "current_step": "SANITY_CHECK",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "finished_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "user_id": "string",
+    "email": "string",
+    "display_name": "string"
+  },
+  "entity_totals": {},
+  "total_entities": 0,
+  "progress": {
+    "indices_deleted": 0,
+    "entities_deleted": 0,
+    "relations_deleted": 0,
+    "activities_deleted": 0
+  },
+  "error": "string"
+}
+```
+
+</details>
+
+---
+
+### `listWipeJobs`
+
+Lists the most recent wipe jobs of the organization, newest first.
+
+`GET /v1/entity:wipeJobs`
+
+```ts
+const { data } = await client.listWipeJobs({
+  limit: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "id": "string",
+      "schemas": ["contact"],
+      "status": "running",
+      "current_step": "SANITY_CHECK",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "finished_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {
+        "user_id": "string",
+        "email": "string",
+        "display_name": "string"
+      },
+      "entity_totals": {},
+      "total_entities": 0,
+      "progress": {
+        "indices_deleted": 0,
+        "entities_deleted": 0,
+        "relations_deleted": 0,
+        "activities_deleted": 0
+      },
+      "error": "string"
+    }
+  ]
+}
+```
+
+</details>
+
 ---
 
 ### `createActivity`
@@ -2603,6 +2741,36 @@ const { data } = await client.getEntityActivityFeed({
       "operations": []
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `getEntitySummary`
+
+Get the latest AI generated summary of an entity. Summaries are generated by the
+ai-agents-api `skill:entity-summary` and stored here when the execution completes.
+
+`GET /v1/entity/{slug}/{id}/summary`
+
+```ts
+const { data } = await client.getEntitySummary({
+  slug: 'example',
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "summary": "string",
+  "variant": "short",
+  "execution_id": "7b4cfc0f-1d5e-4f3a-9b4a-2c7d1f9e8a10",
+  "created_at": "1970-01-01T00:00:00.000Z"
 }
 ```
 
@@ -3016,10 +3184,187 @@ const { data } = await client.importEntities(
       bucket: 'my-bucket',
       key: 'imports/my-import.json'
     },
-    schema: 'contact'
+    schema: 'contact',
+    unique_key: ['email'],
+    dry_run: false,
+    dry_run_job_id: 'string',
+    trigger_automations: false
   },
 )
 ```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "jobPollId": "string",
+  "trigger_automations": true,
+  "started_by": "string",
+  "status": "PROCESSING",
+  "total": 0,
+  "importedEntitiesCount": 0,
+  "failedEntitiesCount": 0,
+  "importedEntitiesUrl": "string",
+  "failedEntitiesUrl": "string",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "failure_reason": "string",
+  "failure_code": "invalid_csv_bad_headers",
+  "abortable": true,
+  "dry_run": true,
+  "unique_key": ["string"],
+  "outcome_counts": {
+    "error": 0,
+    "skipped_empty_key": 0,
+    "skipped_duplicate_in_file": 0,
+    "skipped_id_not_found": 0,
+    "skipped_ambiguous": 0,
+    "create": 0,
+    "unchanged": 0,
+    "update": 0
+  },
+  "report_url": "string",
+  "S3Reference": {
+    "bucket": "string",
+    "key": "string"
+  },
+  "issues": [
+    {
+      "severity": "blocking",
+      "reason": "string",
+      "column": "string",
+      "count": 0,
+      "example_rows": [0]
+    }
+  ],
+  "phase": "scanning",
+  "heartbeat_at": "1970-01-01T00:00:00.000Z",
+  "started_at": "1970-01-01T00:00:00.000Z",
+  "finished_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `getLatestEntityImport`
+
+Get the latest import job of a schema
+
+`GET /v1/entity:import:latest`
+
+```ts
+const { data } = await client.getLatestEntityImport({
+  schema: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "jobPollId": "string",
+  "trigger_automations": true,
+  "started_by": "string",
+  "status": "PROCESSING",
+  "total": 0,
+  "importedEntitiesCount": 0,
+  "failedEntitiesCount": 0,
+  "importedEntitiesUrl": "string",
+  "failedEntitiesUrl": "string",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "failure_reason": "string",
+  "failure_code": "invalid_csv_bad_headers",
+  "abortable": true,
+  "dry_run": true,
+  "unique_key": ["string"],
+  "outcome_counts": {
+    "error": 0,
+    "skipped_empty_key": 0,
+    "skipped_duplicate_in_file": 0,
+    "skipped_id_not_found": 0,
+    "skipped_ambiguous": 0,
+    "create": 0,
+    "unchanged": 0,
+    "update": 0
+  },
+  "report_url": "string",
+  "S3Reference": {
+    "bucket": "string",
+    "key": "string"
+  },
+  "issues": [
+    {
+      "severity": "blocking",
+      "reason": "string",
+      "column": "string",
+      "count": 0,
+      "example_rows": [0]
+    }
+  ],
+  "phase": "scanning",
+  "heartbeat_at": "1970-01-01T00:00:00.000Z",
+  "started_at": "1970-01-01T00:00:00.000Z",
+  "finished_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `getEntityImportHistory`
+
+List the import jobs of a schema
+
+`GET /v1/entity:importHistory`
+
+```ts
+const { data } = await client.getEntityImportHistory({
+  schema: 'example',
+  limit: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "jobs": [
+    {
+      "job_id": "string",
+      "schema": "string",
+      "status": "PROCESSING",
+      "dry_run": true,
+      "trigger_automations": true,
+      "started_by": "string",
+      "started_at": "1970-01-01T00:00:00.000Z",
+      "finished_at": "1970-01-01T00:00:00.000Z",
+      "file_name": "string",
+      "total": 0,
+      "importedEntitiesCount": 0,
+      "failedEntitiesCount": 0,
+      "outcome_counts": {
+        "error": 0,
+        "skipped_empty_key": 0,
+        "skipped_duplicate_in_file": 0,
+        "skipped_id_not_found": 0,
+        "skipped_ambiguous": 0,
+        "create": 0,
+        "unchanged": 0,
+        "update": 0
+      },
+      "failure_code": "invalid_csv_bad_headers",
+      "unique_key": ["string"]
+    }
+  ]
+}
+```
+
+</details>
 
 ---
 
@@ -3035,6 +3380,33 @@ const { data } = await client.abortEntityImport({
   schema: 'example',
 })
 ```
+
+---
+
+### `discardEntityImport`
+
+Discard a finished dry run
+
+`POST /v1/entity:discardImport`
+
+```ts
+const { data } = await client.discardEntityImport({
+  job_id: 'example',
+  schema: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status": "string",
+  "jobPollId": "string"
+}
+```
+
+</details>
 
 ---
 
@@ -6093,6 +6465,7 @@ type EntitySchema = {
   category?: string
   published?: boolean
   draft?: boolean
+  require_change_comment?: boolean
   icon?: string
   title_template?: string
   ui_config?: {
@@ -6179,8 +6552,74 @@ type EntitySchema = {
       readonly?: { ... }
       deprecated?: { ... }
       overridable_attribute?: { ... }
-      default_value?: { ... }
   // ...
+}
+```
+
+### `SchemaHead`
+
+```ts
+type SchemaHead = {
+  slug: string
+  id?: string
+  version: number
+  updated_at?: string // date-time
+  created_by?: string
+}
+```
+
+### `WipeJob`
+
+A request to wipe entity data of an organization, and its progress
+
+```ts
+type WipeJob = {
+  id: string
+  schemas: string[]
+  status: "running" | "succeeded" | "failed"
+  current_step: "SANITY_CHECK" | "DELETE_ELASTIC_INDICES" | "DELETE_DYNAMODB_ENTITIES" | "DELETE_DYNAMODB_RELATIONS" | "DELETE_DYNAMODB_ACTIVITIES" | "DELETE_CLICKHOUSE_ENTITIES" | "DELETE_CLICKHOUSE_ENTITY_OPERATIONS" | "DELETE_S3_FILES" | "SUCCESS" | "FAIL"
+  created_at: string // date-time
+  updated_at: string // date-time
+  finished_at?: string // date-time
+  created_by?: {
+    user_id?: string
+    email?: string
+    display_name?: string
+  }
+  entity_totals: Record<string, number>
+  total_entities: number
+  progress: {
+    indices_deleted?: number
+    entities_deleted?: number
+    relations_deleted?: number
+    activities_deleted?: number
+  }
+  error?: string
+}
+```
+
+### `WipeJobConflictError`
+
+```ts
+type WipeJobConflictError = {
+  status?: number
+  error?: string
+  message: string
+  conflicting_schemas: string[]
+}
+```
+
+### `SchemaVersionConflictError`
+
+```ts
+type SchemaVersionConflictError = {
+  status?: number
+  error?: string
+  message?: string
+  base_version?: number
+  current_version?: number
+  current_updated_at?: string // date-time
+  current_created_by?: string
 }
 ```
 
@@ -6211,6 +6650,7 @@ type EntitySchemaItem = {
   category?: string
   published?: boolean
   draft?: boolean
+  require_change_comment?: boolean
   icon?: string
   title_template?: string
   ui_config?: {
@@ -6286,7 +6726,6 @@ type EntitySchemaItem = {
     name: string
     title?: string
     attributes?: Array<{
-      id?: { ... }
   // ...
 }
 ```
@@ -9227,7 +9666,7 @@ type LocationConditionDefinition = {
   name: string
   label: string
   type: "location"
-  format?: "zipcode" | "zipcode_town"
+  format?: "postal_code" | "postal_code_city"
 }
 ```
 
@@ -9258,7 +9697,7 @@ type ConditionDefinition = {
   name: string
   label: string
   type: "location"
-  format?: "zipcode" | "zipcode_town"
+  format?: "postal_code" | "postal_code_city"
 }
 ```
 
@@ -10309,6 +10748,137 @@ type EntityImportParams = {
     key: string
   }
   schema: string
+  unique_key?: string[]
+  dry_run?: boolean
+  dry_run_job_id?: string
+  trigger_automations?: boolean
+}
+```
+
+### `ImportRowOutcomeCounts`
+
+Number of rows per outcome, in the order the outcomes are evaluated.
+
+```ts
+type ImportRowOutcomeCounts = {
+  error?: number
+  skipped_empty_key?: number
+  skipped_duplicate_in_file?: number
+  skipped_id_not_found?: number
+  skipped_ambiguous?: number
+  create?: number
+  unchanged?: number
+  update?: number
+}
+```
+
+### `ImportJobSummary`
+
+One import job (import or dry run) in the import history of a schema.
+
+```ts
+type ImportJobSummary = {
+  job_id: string
+  schema: string
+  status: "PROCESSING" | "COMPLETED" | "FAILED" | "CANCELLED"
+  dry_run: boolean
+  trigger_automations?: boolean
+  started_by?: string
+  started_at: string // date-time
+  finished_at?: string // date-time
+  file_name?: string
+  total?: number
+  importedEntitiesCount?: number
+  failedEntitiesCount?: number
+  outcome_counts?: {
+    error?: number
+    skipped_empty_key?: number
+    skipped_duplicate_in_file?: number
+    skipped_id_not_found?: number
+    skipped_ambiguous?: number
+    create?: number
+    unchanged?: number
+    update?: number
+  }
+  failure_code?: "invalid_csv_bad_headers" | "dry_run_required" | "dry_run_mismatch" | "dry_run_expired" | "import_file_changed" | "prescan_missing" | "import_too_large" | "token_expired" | "max_duration_exceeded" | "no_progress" | "internal_error"
+  unique_key?: string[]
+}
+```
+
+### `ImportIssue`
+
+Rows of an import job that share one reason not to be written.
+
+```ts
+type ImportIssue = {
+  severity: "blocking" | "warning"
+  reason: string
+  column?: string
+  count: number
+  example_rows: number[]
+}
+```
+
+### `ImportFailureCode`
+
+Machine readable reason of a failed job. `failure_reason` holds the human text.
+- `invalid_csv_bad_headers`: the file has neither a `_schema` nor an `_id` column
+- `dry_run_required`, `dry_run_mismatch`, `dry_run_expired`: the dry-run rule rejected the commit before any row
+- `import_file_changed`: 
+
+```ts
+type ImportFailureCode = "invalid_csv_bad_headers" | "dry_run_required" | "dry_run_mismatch" | "dry_run_expired" | "import_file_changed" | "prescan_missing" | "import_too_large" | "token_expired" | "max_duration_exceeded" | "no_progress" | "internal_error"
+```
+
+### `ImportProgress`
+
+Progress of an import job. The fields `dry_run`, `unique_key`, `outcome_counts`, `report_url`,
+`S3Reference` and `started_by` are only set for jobs started with `unique_key`, `dry_run` or `dry_run_job_id`. For those,
+`importedEntitiesCount` is `create` plus `update` and `failedEntitiesCount` counts 
+
+```ts
+type ImportProgress = {
+  jobPollId?: string
+  trigger_automations?: boolean
+  started_by?: string
+  status?: "PROCESSING" | "COMPLETED" | "FAILED" | "CANCELLED"
+  total?: number
+  importedEntitiesCount?: number
+  failedEntitiesCount?: number
+  importedEntitiesUrl?: string
+  failedEntitiesUrl?: string
+  updated_at?: string // date-time
+  failure_reason?: string
+  failure_code?: "invalid_csv_bad_headers" | "dry_run_required" | "dry_run_mismatch" | "dry_run_expired" | "import_file_changed" | "prescan_missing" | "import_too_large" | "token_expired" | "max_duration_exceeded" | "no_progress" | "internal_error"
+  abortable?: boolean
+  dry_run?: boolean
+  unique_key?: string[]
+  outcome_counts?: {
+    error?: number
+    skipped_empty_key?: number
+    skipped_duplicate_in_file?: number
+    skipped_id_not_found?: number
+    skipped_ambiguous?: number
+    create?: number
+    unchanged?: number
+    update?: number
+  }
+  report_url?: string
+  S3Reference?: {
+    bucket?: string
+    key?: string
+  }
+  issues?: Array<{
+    severity: "blocking" | "warning"
+    reason: string
+    column?: string
+    count: number
+    example_rows: number[]
+  }>
+  phase?: "scanning" | "dry_run" | "importing" | "finalizing" | "done"
+  heartbeat_at?: string // date-time
+  started_at?: string // date-time
+  finished_at?: string // date-time
 }
 ```
 
@@ -10780,6 +11350,19 @@ type ActivityItem = {
     }
     _automation_chain?: string[]
   }>
+}
+```
+
+### `EntitySummary`
+
+Latest AI generated summary of an entity
+
+```ts
+type EntitySummary = {
+  summary: string
+  variant: "short" | "detailed" | "action_points"
+  execution_id: string
+  created_at: string // date-time
 }
 ```
 

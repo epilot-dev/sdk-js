@@ -1,0 +1,58 @@
+{
+  "name": "@epilot/agent-auth",
+  "version": "0.1.0",
+  "description": "Agent Auth Protocol (AAP) client for epilot: Ed25519 keys, host/agent JWTs, capability requests and epilot access token issuance",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check src test",
+    "lint:fix": "biome check --write src test",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build && pnpm test"
+  },
+  "keywords": [
+    "epilot",
+    "agent-auth-protocol",
+    "aap",
+    "agent",
+    "authentication",
+    "ed25519"
+  ],
+  "author": "epilot GmbH",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/epilot-dev/sdk-js.git",
+    "directory": "packages/agent-auth"
+  },
+  "homepage": "https://github.com/epilot-dev/sdk-js/tree/main/packages/agent-auth#readme",
+  "bugs": {
+    "url": "https://github.com/epilot-dev/sdk-js/issues"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  }
+}

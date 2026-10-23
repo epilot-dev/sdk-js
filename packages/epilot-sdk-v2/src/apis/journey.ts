@@ -12,9 +12,16 @@ export type * from '../types/journey';
 export type { OpenAPIClient } from 'openapi-client-axios';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
+let _definition: Document | null = null;
+
+// One definition object per API, shared by getClient() and every createClient():
+// openapi-client-axios caches the dereferenced definition per definition object.
 const loadDefinition = (): Document => {
-  const mod = require('../definitions/journey-runtime.json');
-  return expand((mod.default ?? mod) as CompactDefinition) as Document;
+  if (!_definition) {
+    const mod = require('../definitions/journey-runtime.json');
+    _definition = expand((mod.default ?? mod) as CompactDefinition) as Document;
+  }
+  return _definition;
 };
 
 let _instance: Client | null = null;

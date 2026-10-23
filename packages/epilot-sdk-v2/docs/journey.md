@@ -34,7 +34,9 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`publishJourneyRevision`](#publishjourneyrevision)
 - [`getJourneyPublishState`](#getjourneypublishstate)
 - [`getJourneyEnvironment`](#getjourneyenvironment)
+- [`resolveJourneyExternalValues`](#resolvejourneyexternalvalues)
 - [`getJourneyEnvironmentVariables`](#getjourneyenvironmentvariables)
+- [`getJourneyTemplateVariables`](#getjourneytemplatevariables)
 - [`getJourneyProducts`](#getjourneyproducts)
 - [`createJourney`](#createjourney)
 - [`updateJourney`](#updatejourney)
@@ -56,7 +58,16 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`EnvironmentMap`](#environmentmap)
 - [`EnvironmentLink`](#environmentlink)
 - [`EnvironmentLinkList`](#environmentlinklist)
+- [`EnvironmentScalarList`](#environmentscalarlist)
 - [`JourneyEnvironmentResponse`](#journeyenvironmentresponse)
+- [`JourneyExternalValuesRequest`](#journeyexternalvaluesrequest)
+- [`JourneyExternalValuesResponse`](#journeyexternalvaluesresponse)
+- [`ExternalValueError`](#externalvalueerror)
+- [`JourneyTemplatingContext`](#journeytemplatingcontext)
+- [`JourneyTemplateVariablesResponse`](#journeytemplatevariablesresponse)
+- [`JourneyTemplating`](#journeytemplating)
+- [`JourneyTemplatingLink`](#journeytemplatinglink)
+- [`JourneyTemplatingTranslatable`](#journeytemplatingtranslatable)
 - [`JourneyEnvironmentVariablesResponse`](#journeyenvironmentvariablesresponse)
 - [`GetJourneysResponse`](#getjourneysresponse)
 - [`JourneyResponse`](#journeyresponse)
@@ -149,6 +160,7 @@ const { data } = await client.getJourney({
       "showStepperLabels": true,
       "stepperType": "numbers",
       "hideNextButton": true,
+      "guestVisible": true,
       "name": "string",
       "stepId": "string",
       "schema": {},
@@ -233,7 +245,15 @@ const { data } = await client.getJourney({
       "mode": "auto",
       "supportedRevision": 0
     },
-    "thirdPartyCookies": true
+    "thirdPartyCookies": true,
+    "betaFeatures": {
+      "modernProducts": true,
+      "modernLauncher": true
+    },
+    "offline": {
+      "enabled": true,
+      "packTtlHours": 24
+    }
   },
   "validationRules": {
     "block1": "rule123",
@@ -253,6 +273,12 @@ const { data } = await client.getJourney({
   "version": 0,
   "revisions": 0,
   "featureFlags": {},
+  "templating": {
+    "customVariables": [
+      {}
+    ],
+    "env": {}
+  },
   "revision_id": "42"
 }
 ```
@@ -301,6 +327,7 @@ const { data } = await client.createJourneyRevision(
         showStepperLabels: true,
         stepperType: 'numbers',
         hideNextButton: true,
+        guestVisible: true,
         name: 'string',
         stepId: 'string',
         schema: {},
@@ -385,7 +412,15 @@ const { data } = await client.createJourneyRevision(
         mode: 'auto',
         supportedRevision: 0
       },
-      thirdPartyCookies: true
+      thirdPartyCookies: true,
+      betaFeatures: {
+        modernProducts: true,
+        modernLauncher: true
+      },
+      offline: {
+        enabled: true,
+        packTtlHours: 24
+      }
     },
     validationRules: {
       block1: 'rule123',
@@ -549,7 +584,9 @@ const { data } = await client.getJourneyRevision({
       "status": "string",
       "isActive": true,
       "savingProgress": {},
-      "thirdPartyCookies": true
+      "thirdPartyCookies": true,
+      "betaFeatures": {},
+      "offline": {}
     },
     "validationRules": {
       "block1": "rule123",
@@ -565,7 +602,11 @@ const { data } = await client.getJourneyRevision({
     "deletedAt": "string",
     "version": 0,
     "revisions": 0,
-    "featureFlags": {}
+    "featureFlags": {},
+    "templating": {
+      "customVariables": [],
+      "env": {}
+    }
   }
 }
 ```
@@ -640,7 +681,7 @@ const { data } = await client.getJourneyPublishState({
 
 ### `getJourneyEnvironment`
 
-Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.
+Resolve the environment variables referenced by this journey: the environment-backed datasources declared in its steps, whether they source a block's options or supply the value an attached validation
 
 `GET /v1/journey/configuration/{id}/environment`
 
@@ -667,6 +708,75 @@ const { data } = await client.getJourneyEnvironment({
       "datasourceId": "string",
       "code": "not_found"
     }
+  ],
+  "variables": [
+    {
+      "key": "string",
+      "type": "Text",
+      "value": "string"
+    }
+  ],
+  "variableErrors": [
+    {
+      "key": "string",
+      "code": "not_found"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `resolveJourneyExternalValues`
+
+Resolve the External Values hooks this journey's validation rules compare against.
+
+`POST /v1/journey/configuration/{id}/external-values`
+
+```ts
+const { data } = await client.resolveJourneyExternalValues(
+  {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+  },
+  {
+    items: [
+      {
+        datasourceId: 'string',
+        context: {}
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "items": [
+    {
+      "datasourceId": "string",
+      "values": {},
+      "errors": [
+        {
+          "result_id": "string",
+          "code": "string",
+          "message": "string"
+        }
+      ],
+      "policy": {
+        "on_unavailable": "skip"
+      }
+    }
+  ],
+  "errors": [
+    {
+      "datasourceId": "string",
+      "code": "unknown_datasource"
+    }
   ]
 }
 ```
@@ -677,7 +787,7 @@ const { data } = await client.getJourneyEnvironment({
 
 ### `getJourneyEnvironmentVariables`
 
-List the organization's environment variables that a journey block may use as an options source. Only Map variables that currently hold a valid value are returned. Intended for the journey builder's a
+List the organization's client-safe environment variables a journey may use: Map and List``<Link>`` as an options source; Text, Number, Boolean and lists of them in logic conditions. Only variables that c
 
 `GET /v1/journey/environment-variables`
 
@@ -693,17 +803,45 @@ const { data } = await client.getJourneyEnvironmentVariables()
   "items": [
     {
       "key": "string",
-      "type": "Map",
-      "value": {
-        "fallbackLanguage": "de",
-        "options": [
-          {
-            "key": "string",
-            "value": "string"
-          }
-        ]
-      },
+      "type": "Text",
+      "value": "string",
       "description": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getJourneyTemplateVariables`
+
+List what a journey template can reference beyond the entity's own attributes: the organization's Custom Variables and its scalar environment variables (`String`, `Text`, `Number`, `Boolean`). Names o
+
+`GET /v1/journey/template-variables`
+
+```ts
+const { data } = await client.getJourneyTemplateVariables()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "customVariables": [
+    {
+      "key": "string",
+      "name": "string"
+    }
+  ],
+  "environment": [
+    {
+      "key": "string",
+      "type": "String",
+      "description": "string",
+      "group": "string"
     }
   ]
 }
@@ -789,6 +927,7 @@ const { data } = await client.createJourney(
         showStepperLabels: true,
         stepperType: 'numbers',
         hideNextButton: true,
+        guestVisible: true,
         name: 'string',
         stepId: 'string',
         schema: {},
@@ -873,7 +1012,15 @@ const { data } = await client.createJourney(
         mode: 'auto',
         supportedRevision: 0
       },
-      thirdPartyCookies: true
+      thirdPartyCookies: true,
+      betaFeatures: {
+        modernProducts: true,
+        modernLauncher: true
+      },
+      offline: {
+        enabled: true,
+        packTtlHours: 24
+      }
     },
     validationRules: {
       block1: 'rule123',
@@ -910,6 +1057,7 @@ const { data } = await client.createJourney(
       "showStepperLabels": true,
       "stepperType": "numbers",
       "hideNextButton": true,
+      "guestVisible": true,
       "name": "string",
       "stepId": "string",
       "schema": {},
@@ -994,7 +1142,15 @@ const { data } = await client.createJourney(
       "mode": "auto",
       "supportedRevision": 0
     },
-    "thirdPartyCookies": true
+    "thirdPartyCookies": true,
+    "betaFeatures": {
+      "modernProducts": true,
+      "modernLauncher": true
+    },
+    "offline": {
+      "enabled": true,
+      "packTtlHours": 24
+    }
   },
   "validationRules": {
     "block1": "rule123",
@@ -1013,7 +1169,13 @@ const { data } = await client.createJourney(
   "deletedAt": "string",
   "version": 0,
   "revisions": 0,
-  "featureFlags": {}
+  "featureFlags": {},
+  "templating": {
+    "customVariables": [
+      {}
+    ],
+    "env": {}
+  }
 }
 ```
 
@@ -1045,6 +1207,7 @@ const { data } = await client.updateJourney(
         showStepperLabels: true,
         stepperType: 'numbers',
         hideNextButton: true,
+        guestVisible: true,
         name: 'string',
         stepId: 'string',
         schema: {},
@@ -1129,7 +1292,15 @@ const { data } = await client.updateJourney(
         mode: 'auto',
         supportedRevision: 0
       },
-      thirdPartyCookies: true
+      thirdPartyCookies: true,
+      betaFeatures: {
+        modernProducts: true,
+        modernLauncher: true
+      },
+      offline: {
+        enabled: true,
+        packTtlHours: 24
+      }
     },
     validationRules: {
       block1: 'rule123',
@@ -1227,7 +1398,9 @@ const { data } = await client.patchUpdateJourney(
       "status": "string",
       "isActive": true,
       "savingProgress": {},
-      "thirdPartyCookies": true
+      "thirdPartyCookies": true,
+      "betaFeatures": {},
+      "offline": {}
     },
     "validationRules": {
       "block1": "rule123",
@@ -1243,7 +1416,11 @@ const { data } = await client.patchUpdateJourney(
     "deletedAt": "string",
     "version": 0,
     "revisions": 0,
-    "featureFlags": {}
+    "featureFlags": {},
+    "templating": {
+      "customVariables": [],
+      "env": {}
+    }
   }
 }
 ```
@@ -1402,6 +1579,7 @@ const { data } = await client.createJourneyV2(
         showStepperLabels: true,
         stepperType: 'numbers',
         hideNextButton: true,
+        guestVisible: true,
         name: 'string',
         stepId: 'string',
         schema: {},
@@ -1482,6 +1660,14 @@ const { data } = await client.createJourneyV2(
       savingProgress: {
         mode: 'auto',
         supportedRevision: 0
+      },
+      betaFeatures: {
+        modernProducts: true,
+        modernLauncher: true
+      },
+      offline: {
+        enabled: true,
+        packTtlHours: 24
       }
     },
     validationRules: {
@@ -1515,6 +1701,7 @@ const { data } = await client.createJourneyV2(
       "showStepperLabels": true,
       "stepperType": "numbers",
       "hideNextButton": true,
+      "guestVisible": true,
       "name": "string",
       "stepId": "string",
       "schema": {},
@@ -1595,6 +1782,14 @@ const { data } = await client.createJourneyV2(
     "savingProgress": {
       "mode": "auto",
       "supportedRevision": 0
+    },
+    "betaFeatures": {
+      "modernProducts": true,
+      "modernLauncher": true
+    },
+    "offline": {
+      "enabled": true,
+      "packTtlHours": 24
     }
   },
   "validationRules": {
@@ -1636,6 +1831,7 @@ const { data } = await client.updateJourneyV2(
         showStepperLabels: true,
         stepperType: 'numbers',
         hideNextButton: true,
+        guestVisible: true,
         name: 'string',
         stepId: 'string',
         schema: {},
@@ -1716,6 +1912,14 @@ const { data } = await client.updateJourneyV2(
       savingProgress: {
         mode: 'auto',
         supportedRevision: 0
+      },
+      betaFeatures: {
+        modernProducts: true,
+        modernLauncher: true
+      },
+      offline: {
+        enabled: true,
+        packTtlHours: 24
       }
     },
     validationRules: {
@@ -1749,6 +1953,7 @@ const { data } = await client.updateJourneyV2(
       "showStepperLabels": true,
       "stepperType": "numbers",
       "hideNextButton": true,
+      "guestVisible": true,
       "name": "string",
       "stepId": "string",
       "schema": {},
@@ -1829,6 +2034,14 @@ const { data } = await client.updateJourneyV2(
     "savingProgress": {
       "mode": "auto",
       "supportedRevision": 0
+    },
+    "betaFeatures": {
+      "modernProducts": true,
+      "modernLauncher": true
+    },
+    "offline": {
+      "enabled": true,
+      "packTtlHours": 24
     }
   },
   "validationRules": {
@@ -1881,6 +2094,7 @@ const { data } = await client.patchUpdateJourneyV2(
       "showStepperLabels": true,
       "stepperType": "numbers",
       "hideNextButton": true,
+      "guestVisible": true,
       "name": "string",
       "stepId": "string",
       "schema": {},
@@ -1961,6 +2175,14 @@ const { data } = await client.patchUpdateJourneyV2(
     "savingProgress": {
       "mode": "auto",
       "supportedRevision": 0
+    },
+    "betaFeatures": {
+      "modernProducts": true,
+      "modernLauncher": true
+    },
+    "offline": {
+      "enabled": true,
+      "packTtlHours": 24
     }
   },
   "validationRules": {
@@ -2010,6 +2232,7 @@ const { data } = await client.getJourneyV2({
       "showStepperLabels": true,
       "stepperType": "numbers",
       "hideNextButton": true,
+      "guestVisible": true,
       "name": "string",
       "stepId": "string",
       "schema": {},
@@ -2090,6 +2313,14 @@ const { data } = await client.getJourneyV2({
     "savingProgress": {
       "mode": "auto",
       "supportedRevision": 0
+    },
+    "betaFeatures": {
+      "modernProducts": true,
+      "modernLauncher": true
+    },
+    "offline": {
+      "enabled": true,
+      "packTtlHours": 24
     }
   },
   "validationRules": {
@@ -2141,7 +2372,8 @@ const { data } = await client.getSettingsForJourney({
 {
   "organizationId": "739224",
   "canary": true,
-  "thirdPartyCookies": true
+  "thirdPartyCookies": true,
+  "offline": true
 }
 ```
 
@@ -2235,6 +2467,20 @@ type EnvironmentLinkList = {
 }
 ```
 
+### `EnvironmentScalarList`
+
+A list of scalars, served under this service's own `List`<Text>``,
+`List`<Number>`` or `List`<Boolean>`` token (ER-5455). Read by logic
+conditions; flattened to `items` by the journey runtime.
+
+
+```ts
+type EnvironmentScalarList = {
+  itemType: "Text" | "Number" | "Boolean"
+  items: string | number | boolean[]
+}
+```
+
 ### `JourneyEnvironmentResponse`
 
 ```ts
@@ -2255,7 +2501,134 @@ type JourneyEnvironmentResponse = {
     datasourceId: string
     code: "not_found" | "unsupported_type" | "not_set" | "invalid_value" | "incompatible_consumer"
   }>
+  variables?: Array<{
+    key: string
+    type: "Text" | "Number" | "Boolean" | "List<Text>" | "List<Number>" | "List<Boolean>"
+    value: string | number | boolean | {
+      itemType: { ... }
+      items: { ... }
+    }
+  }>
+  variableErrors?: Array<{
+    key: string
+    code: "not_found" | "unsupported_type" | "not_set" | "invalid_value"
+  }>
 }
+```
+
+### `JourneyExternalValuesRequest`
+
+```ts
+type JourneyExternalValuesRequest = {
+  items: Array<{
+    datasourceId: string
+    context: Record<string, unknown>
+  }>
+}
+```
+
+### `JourneyExternalValuesResponse`
+
+```ts
+type JourneyExternalValuesResponse = {
+  items: Array<{
+    datasourceId: string
+    values: Record<string, unknown>
+    errors?: Array<{
+      result_id?: { ... }
+      code: { ... }
+      message?: { ... }
+    }>
+    policy?: {
+      on_unavailable?: { ... }
+    }
+  }>
+  errors: Array<{
+    datasourceId: string
+    code: "unknown_datasource" | "resolver_unavailable"
+  }>
+}
+```
+
+### `ExternalValueError`
+
+```ts
+type ExternalValueError = {
+  result_id?: string
+  code: string
+  message?: string
+}
+```
+
+### `JourneyTemplatingContext`
+
+What the journey's Handlebars templates need from the organization, derived from the served configuration only. Present when the journey contains templates and templating is enabled for the organization. Read-only: like `featureFlags`, it is dropped from any write, so a client that sends the configu
+
+```ts
+type JourneyTemplatingContext = {
+  templating?: {
+    customVariables: Array<{
+      key: { ... }
+      template: { ... }
+    }>
+    env: Record<string, string | number | boolean | {
+      url: { ... }
+      label: { ... }
+      description?: { ... }
+    }>
+  }
+}
+```
+
+### `JourneyTemplateVariablesResponse`
+
+```ts
+type JourneyTemplateVariablesResponse = {
+  customVariables: Array<{
+    key: string
+    name: string
+  }>
+  environment: Array<{
+    key: string
+    type: "String" | "Text" | "Number" | "Boolean" | "Link"
+    description?: string
+    group?: string
+  }>
+}
+```
+
+### `JourneyTemplating`
+
+```ts
+type JourneyTemplating = {
+  customVariables: Array<{
+    key: string
+    template: string
+  }>
+  env: Record<string, string | number | boolean | {
+    url: string
+    label: string | Record<string, string>
+    description?: string | Record<string, string>
+  }>
+}
+```
+
+### `JourneyTemplatingLink`
+
+A Link variable; label and description are a string or per-language strings, resolved by the runtime
+
+```ts
+type JourneyTemplatingLink = {
+  url: string
+  label: string | Record<string, string>
+  description?: string | Record<string, string>
+}
+```
+
+### `JourneyTemplatingTranslatable`
+
+```ts
+type JourneyTemplatingTranslatable = string | Record<string, string>
 ```
 
 ### `JourneyEnvironmentVariablesResponse`
@@ -2264,13 +2637,16 @@ type JourneyEnvironmentResponse = {
 type JourneyEnvironmentVariablesResponse = {
   items: Array<{
     key: string
-    type: "Map" | "List<Link>"
-    value: {
+    type: "Text" | "Number" | "Boolean" | "Map" | "List<Link>" | "List<Text>" | "List<Number>" | "List<Boolean>"
+    value: string | number | boolean | {
       fallbackLanguage?: { ... }
       options: { ... }
     } | {
       itemType: { ... }
       fallbackLanguage?: { ... }
+      items: { ... }
+    } | {
+      itemType: { ... }
       items: { ... }
     }
     description?: string
@@ -2302,6 +2678,7 @@ type JourneyResponse = {
       showStepperLabels?: { ... }
       stepperType?: { ... }
       hideNextButton?: { ... }
+      guestVisible?: { ... }
       name: { ... }
       stepId?: { ... }
       schema: { ... }
@@ -2375,6 +2752,8 @@ type JourneyResponse = {
       isActive?: { ... }
       savingProgress?: { ... }
       thirdPartyCookies?: { ... }
+      betaFeatures?: { ... }
+      offline?: { ... }
     }
     validationRules?: Record<string, string | string[] | Record<string, string | string[]>>
     _manifest?: string // uuid[]
@@ -2384,9 +2763,6 @@ type JourneyResponse = {
     createdAt: string
     lastModifiedAt: string
     deletedAt?: string
-    version: number
-    revisions: number
-    featureFlags?: Record<string, unknown>
   // ...
 }
 ```
@@ -2440,6 +2816,7 @@ type JourneyCreationRequest = {
     showStepperLabels?: boolean
     stepperType?: "numbers" | "progress bar"
     hideNextButton?: boolean
+    guestVisible?: boolean
     name: string
     stepId?: string
     schema: unknown
@@ -2525,7 +2902,6 @@ type JourneyCreationRequest = {
     }
     isPublished?: boolean
     status?: string
-    isActive?: boolean
   // ...
 }
 ```
@@ -2546,6 +2922,7 @@ type JourneyCreationRequestV2 = {
     showStepperLabels?: boolean
     stepperType?: "numbers" | "progress bar"
     hideNextButton?: boolean
+    guestVisible?: boolean
     name: string
     stepId?: string
     schema: unknown
@@ -2632,7 +3009,6 @@ type JourneyCreationRequestV2 = {
     savingProgress?: {
       mode?: { ... }
       supportedRevision?: { ... }
-    }
   // ...
 }
 ```
@@ -2691,6 +3067,7 @@ type Journey = {
     showStepperLabels?: boolean
     stepperType?: "numbers" | "progress bar"
     hideNextButton?: boolean
+    guestVisible?: boolean
     name: string
     stepId?: string
     schema: unknown
@@ -2776,7 +3153,6 @@ type Journey = {
     }
     isPublished?: boolean
     status?: string
-    isActive?: boolean
   // ...
 }
 ```
@@ -2845,6 +3221,7 @@ type JourneyRevisionRequest = {
     showStepperLabels?: boolean
     stepperType?: "numbers" | "progress bar"
     hideNextButton?: boolean
+    guestVisible?: boolean
     name: string
     stepId?: string
     schema: unknown
@@ -2930,7 +3307,6 @@ type JourneyRevisionRequest = {
     }
     isPublished?: boolean
     status?: string
-    isActive?: boolean
   // ...
 }
 ```
@@ -3004,6 +3380,7 @@ type JourneyRevision = {
       showStepperLabels?: { ... }
       stepperType?: { ... }
       hideNextButton?: { ... }
+      guestVisible?: { ... }
       name: { ... }
       stepId?: { ... }
       schema: { ... }
@@ -3077,10 +3454,9 @@ type JourneyRevision = {
       isActive?: { ... }
       savingProgress?: { ... }
       thirdPartyCookies?: { ... }
+      betaFeatures?: { ... }
+      offline?: { ... }
     }
-    validationRules?: Record<string, string | string[] | Record<string, string | string[]>>
-    _manifest?: string // uuid[]
-    createdBy?: string
   // ...
 }
 ```
@@ -3261,6 +3637,7 @@ type GetSettingsForJourney = {
   organizationId?: string
   canary?: boolean
   thirdPartyCookies?: boolean
+  offline?: boolean
 }
 ```
 

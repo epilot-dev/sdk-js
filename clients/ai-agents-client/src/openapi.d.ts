@@ -7,8 +7,56 @@ import type {
 } from 'openapi-client-axios';
 
 declare namespace Components {
+    export interface HeaderParameters {
+        IfMatchUpdatedAt?: Parameters.IfMatchUpdatedAt;
+    }
+    namespace Parameters {
+        export type CustomerChatAgentIdPath = string;
+        export type IfMatchUpdatedAt = string;
+    }
+    export interface PathParameters {
+        CustomerChatAgentIdPath?: Parameters.CustomerChatAgentIdPath;
+    }
     namespace Schemas {
+        /**
+         * Action capabilities only (`open_quick_actions`): per-capability autonomy.
+         * `draft` = suggest only (proposal + deep link, nothing opens),
+         * `approval` = the customer confirms in a card first,
+         * `automatic` = run immediately. Defaults to `approval` when the
+         * capability is enabled without one; unknown values become `approval`;
+         * values above the capability's maximum are clamped down.
+         *
+         */
+        export type ActionAutonomy = "draft" | "approval" | "automatic";
+        export interface AgentConfig {
+            /**
+             * Configured capability instances, up to 30 per agent. The same
+             * catalog `type` may appear more than once when `label` (name) or
+             * `guidance` (when to use) differs between siblings.
+             *
+             */
+            capabilities: CapabilityInstance[];
+            knowledgeSources: CustomerChatKnowledgeSource[];
+            escalation: EscalationConfig;
+            appearance: AppearanceConfig;
+            /**
+             * Admin-editable briefing in the default `appearance.language`. Prefilled with a place default on create; omitted on save keeps the saved value.
+             */
+            instructions?: string;
+            /**
+             * Briefings for each language in `appearance.languages` other than `appearance.language`. Only present once the agent speaks a second language.
+             */
+            instructionTranslations?: {
+                de?: string;
+                en?: string;
+            };
+            /**
+             * Languages whose briefing changed in another language and are not checked yet.
+             */
+            instructionsNeedsReview?: ("de" | "en")[];
+        }
         export interface AgentDefinition {
+            domain?: /* Business domain selected in the agent builder. */ AgentDomain;
             agent_id?: /**
              * Agent identifier. Can be either:
              * - System skill ID (prefixed): "skill:email-categorizer", "skill:email-labeler"
@@ -42,7 +90,8 @@ declare namespace Components {
              * - flows: Available in workflow automations
              * - copilot: Available as a sub-agent in copilot
              * - portals: Available in end-user self-service portals
-             * - all: Available everywhere
+             * - website: Website chat, explicitly selected; currently supports anonymous execution
+             * - all: Available on the existing non-website surfaces; website requires explicit selection
              *
              */
             SkillAvailability[];
@@ -111,11 +160,16 @@ declare namespace Components {
              * }
              */
             InputParametersSchema;
+            knowledge_source_ids?: /* Knowledge source IDs available to this agent. An empty array clears the selection. */ KnowledgeSourceIds;
             version?: number;
             created_at?: string; // date-time
             updated_at?: string; // date-time
             created_by?: string;
         }
+        /**
+         * Business domain selected in the agent builder.
+         */
+        export type AgentDomain = "customer_service" | "sales" | "billing" | "metering_grid" | "other";
         /**
          * Detail payload of the `agent-execution-status-update` event, published on
          * the AI Agents event bus with source `ai-agents`.
@@ -149,6 +203,10 @@ declare namespace Components {
              * `cancelled` surfaces as `failed`. Consumers must not assume the two
              * vocabularies are interchangeable.
              *
+             * `queued` is non-terminal: the execution is waiting for executor capacity and will
+             * be followed by `started`, and it can be published more than once if a throttled
+             * execution is put back on the queue. Consumers must not treat it as an outcome.
+             *
              */
             AgentExecutionEventStatus;
             execution_context?: /**
@@ -156,6 +214,7 @@ declare namespace Components {
              * - flows: Triggered from workflow automation
              * - copilot: Triggered from copilot assistant
              * - api: Direct API call
+             * - sharing: Triggered by sharing-api auto-sharing rules
              *
              */
             ExecutionContext;
@@ -205,8 +264,12 @@ declare namespace Components {
          * `cancelled` surfaces as `failed`. Consumers must not assume the two
          * vocabularies are interchangeable.
          *
+         * `queued` is non-terminal: the execution is waiting for executor capacity and will
+         * be followed by `started`, and it can be published more than once if a throttled
+         * execution is put back on the queue. Consumers must not treat it as an outcome.
+         *
          */
-        export type AgentExecutionEventStatus = "started" | "completed" | "failed" | "approval_required";
+        export type AgentExecutionEventStatus = "started" | "queued" | "completed" | "failed" | "approval_required";
         /**
          * Agent identifier. Can be either:
          * - System skill ID (prefixed): "skill:email-categorizer", "skill:email-labeler"
@@ -222,6 +285,34 @@ declare namespace Components {
          *
          */
         export type AgentSource = "system" | "custom";
+        export interface AppearanceConfig {
+            displayName: string;
+            greeting: string;
+            starters: string[];
+            /**
+             * Default language. The top-level texts are written in it.
+             */
+            language: "de" | "en";
+            formOfAddress: "sie" | "du";
+            /**
+             * Languages customers can chat in. Only present with two or more; always includes `language`.
+             */
+            languages?: ("de" | "en")[];
+            /**
+             * Texts for each language in `languages` other than `language`.
+             */
+            translations?: {
+                de?: LocalizedAppearance;
+                en?: LocalizedAppearance;
+            };
+            /**
+             * Per language, texts that changed in another language and are not checked yet.
+             */
+            needsReview?: {
+                de?: LocalizedFieldList;
+                en?: LocalizedFieldList;
+            };
+        }
         export interface ApproveExecutionRequest {
             /**
              * Optional reason for approval
@@ -235,6 +326,164 @@ declare namespace Components {
              * For batch approval - list of action IDs to reject. Actions not in approved_action_ids are implicitly rejected.
              */
             rejected_action_ids?: string[];
+        }
+        export type CapabilityId = "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy";
+        export interface CapabilityInstance {
+            type: CapabilityId;
+            /**
+             * Stable id for this instance within the agent. Generated when
+             * omitted; send it back unchanged on later saves.
+             *
+             */
+            instanceId?: string;
+            enabled: boolean;
+            meterTypes?: string[];
+            ticketType?: string;
+            /**
+             * `search_web` only. Websites web search may use, normalized to
+             * `host[/path]` (scheme, `www.`, query, fragment and trailing slash
+             * removed; host lowercased; duplicates dropped). Empty or missing
+             * allows any website. When set, only `web_search.search` is granted.
+             *
+             */
+            allowedDomains?: [
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+            autonomy?: /**
+             * Action capabilities only (`open_quick_actions`): per-capability autonomy.
+             * `draft` = suggest only (proposal + deep link, nothing opens),
+             * `approval` = the customer confirms in a card first,
+             * `automatic` = run immediately. Defaults to `approval` when the
+             * capability is enabled without one; unknown values become `approval`;
+             * values above the capability's maximum are clamped down.
+             *
+             */
+            ActionAutonomy;
+            /**
+             * Admin label override. Kept on every capability so a disabled row stays listed.
+             */
+            label?: string;
+            /**
+             * Admin guidance. Kept on every capability so a disabled row stays listed; action capabilities also inject it into the prompt.
+             */
+            guidance?: string;
+            /**
+             * `open_quick_actions` only. Reserved tile allowlist (at most 200);
+             * empty or missing allows every quick-action tile on the linked portal.
+             *
+             */
+            blockIds?: string[];
+            /**
+             * `view_hems_energy` only. Hub integration installation id used by
+             * HEMS portal tools (`portal.hems.snapshot` via list_devices, and
+             * when searchDeviceDocs is on also get_vendors /
+             * get_connection_options). Chosen in Agent Builder via the
+             * integration picker.
+             *
+             */
+            integrationId?: string; // uuid
+            /**
+             * `view_hems_energy` only. When true or omitted, grants device
+             * onboarding docs tools (`portal.hems.vendors` via get_vendors +
+             * `portal.hems.onboarding_docs` via get_connection_options) once
+             * an integrationId is set. Set false to disable. Portal place only.
+             *
+             */
+            searchDeviceDocs?: boolean;
+        }
+        export interface CapabilityState {
+            enabled: boolean;
+            meterTypes?: string[];
+            ticketType?: string;
+            /**
+             * `search_web` only. Websites web search may use, normalized to
+             * `host[/path]` (scheme, `www.`, query, fragment and trailing slash
+             * removed; host lowercased; duplicates dropped). Empty or missing
+             * allows any website. When set, only `web_search.search` is granted.
+             *
+             */
+            allowedDomains?: [
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+            autonomy?: /**
+             * Action capabilities only (`open_quick_actions`): per-capability autonomy.
+             * `draft` = suggest only (proposal + deep link, nothing opens),
+             * `approval` = the customer confirms in a card first,
+             * `automatic` = run immediately. Defaults to `approval` when the
+             * capability is enabled without one; unknown values become `approval`;
+             * values above the capability's maximum are clamped down.
+             *
+             */
+            ActionAutonomy;
+            /**
+             * Admin label override. Kept on every capability so a disabled row stays listed.
+             */
+            label?: string;
+            /**
+             * Admin guidance. Kept on every capability so a disabled row stays listed; action capabilities also inject it into the prompt.
+             */
+            guidance?: string;
+            /**
+             * `open_quick_actions` only. Reserved tile allowlist (at most 200);
+             * empty or missing allows every quick-action tile on the linked portal.
+             *
+             */
+            blockIds?: string[];
+            /**
+             * `view_hems_energy` only. Hub integration installation id used by
+             * HEMS portal tools (`portal.hems.snapshot` via list_devices, and
+             * when searchDeviceDocs is on also get_vendors /
+             * get_connection_options). Chosen in Agent Builder via the
+             * integration picker.
+             *
+             */
+            integrationId?: string; // uuid
+            /**
+             * `view_hems_energy` only. When true or omitted, grants device
+             * onboarding docs tools (`portal.hems.vendors` via get_vendors +
+             * `portal.hems.onboarding_docs` via get_connection_options) once
+             * an integrationId is set. Set false to disable. Portal place only.
+             *
+             */
+            searchDeviceDocs?: boolean;
         }
         export interface ChatMessage {
             role: "user" | "assistant" | "tool" | "system";
@@ -272,6 +521,13 @@ declare namespace Components {
                 };
             };
             streaming?: StreamingOptions;
+            /**
+             * Agent Builder place-agent preview: when true, portal tools return
+             * synthetic demo fixtures instead of calling customer-portal-api,
+             * and execution mode is forced to draft.
+             *
+             */
+            preview_demo?: boolean;
         }
         export interface ConversationItem {
             conversation_id?: string; // uuid
@@ -298,6 +554,29 @@ declare namespace Components {
             messages?: MessageItem[];
         }
         export interface CreateAgentRequest {
+            domain?: /* Business domain selected in the agent builder. */ AgentDomain;
+            availability?: [
+                /**
+                 * Where the skill/agent is available:
+                 * - flows: Available in workflow automations
+                 * - copilot: Available as a sub-agent in copilot
+                 * - portals: Available in end-user self-service portals
+                 * - website: Website chat, explicitly selected; currently supports anonymous execution
+                 * - all: Available on the existing non-website surfaces; website requires explicit selection
+                 *
+                 */
+                SkillAvailability,
+                .../**
+                 * Where the skill/agent is available:
+                 * - flows: Available in workflow automations
+                 * - copilot: Available as a sub-agent in copilot
+                 * - portals: Available in end-user self-service portals
+                 * - website: Website chat, explicitly selected; currently supports anonymous execution
+                 * - all: Available on the existing non-website surfaces; website requires explicit selection
+                 *
+                 */
+                SkillAvailability[]
+            ];
             /**
              * example:
              * Email Reply Generator
@@ -384,6 +663,75 @@ declare namespace Components {
              * }
              */
             InputParametersSchema;
+            knowledge_source_ids?: /* Knowledge source IDs available to this agent. An empty array clears the selection. */ KnowledgeSourceIds;
+        }
+        export interface CreateCustomerChatAgentRequest {
+            place: CustomerChatPlace;
+            internal_name?: string;
+        }
+        export interface CreateKnowledgeFileUploadRequest {
+            filename: string;
+            mime_type: string;
+            size_bytes: number; // int64
+        }
+        export interface CreateKnowledgeFileUploadResponse {
+            source_id: string; // uuid
+            upload_url: string; // uri
+            upload_fields: {
+                [name: string]: string;
+            };
+            expires_at: string; // date-time
+        }
+        export interface CustomerChatAgent {
+            org_id: string;
+            /**
+             * Stable id of the customer chat agent; equal to runtime_agent_id.
+             */
+            agent_id: string; // uuid
+            place: CustomerChatPlace;
+            internal_name: string;
+            runtime_agent_id: string; // uuid
+            config: AgentConfig;
+            created_at: string; // date-time
+            updated_at: string; // date-time
+        }
+        export interface CustomerChatCapabilityCatalogEntry {
+            id: CapabilityId;
+            places: CustomerChatPlace[];
+            /**
+             * An agent can have this capability at most once. Agents that already
+             * have more instances keep them, but cannot add another.
+             *
+             */
+            singleInstance?: boolean;
+            /**
+             * Only offer this capability when the organization has a matching
+             * integration set up.
+             *
+             */
+            requiresIntegration?: boolean;
+        }
+        export interface CustomerChatCasRequest {
+            updated_at?: string; // date-time
+        }
+        export interface CustomerChatKnowledgeSource {
+            id: string;
+            type: CustomerChatKnowledgeSourceType;
+            title: string;
+            targetId: string;
+            detail?: string;
+        }
+        export type CustomerChatKnowledgeSourceType = "portal_page" | "document" | "catalogue" | "url";
+        export type CustomerChatPlace = "website" | "portal";
+        export interface DeleteCustomerChatAgentRequest {
+            updated_at?: string; // date-time
+            /**
+             * Portal linked to this agent (`feature_settings.portal_copilot_agent_id`).
+             * When set, only that portal is unlinked. When omitted for a portal agent,
+             * org portal configs are scanned for matching links.
+             *
+             */
+            portal_id?: string; // uuid
         }
         export interface Error {
             error?: string;
@@ -392,8 +740,22 @@ declare namespace Components {
                 [key: string]: any;
             };
         }
+        export interface EscalationConfig {
+            websiteHandover: WebsiteHandover;
+        }
         export interface ExecuteAgentRequest {
+            /**
+             * `sync` runs the skill inside the request and answers 200 with the completed execution, or 422/504/500
+             * with the failed execution's id in `details.execution_id`. Only for direct, tool-less, automatic skills;
+             * the model call is cut off after 27 seconds.
+             *
+             */
+            mode?: "auto" | "stream" | "async" | "sync";
             input?: {
+                /**
+                 * Free-text instruction or query for the agent
+                 */
+                message?: string;
                 /**
                  * Primary entity ID for context
                  */
@@ -415,6 +777,26 @@ declare namespace Components {
                     entity_id: string;
                     entity_schema: string;
                 }[];
+                /**
+                 * The file the agent should look at, referenced by S3 object. Only accepted by skills
+                 * that declare attachment support (currently direct-mode document skills). The object is
+                 * read by the execution Lambda and passed to the model as an image or document content
+                 * block; images must be JPEG, PNG, GIF or WebP, documents PDF, DOCX, DOC, XLSX, XLS,
+                 * CSV, TXT, HTML or Markdown. Callers are expected to downscale images and cap document
+                 * pages before referencing them.
+                 *
+                 */
+                attachment?: {
+                    s3ref: {
+                        bucket: string;
+                        key: string;
+                    };
+                    /**
+                     * Mime type of the object, decides whether it is sent as an image or a document block.
+                     */
+                    mime_type: string;
+                    filename?: string;
+                };
             };
             /**
              * Runtime parameters (validated against input_parameters_schema)
@@ -434,6 +816,7 @@ declare namespace Components {
              * - flows: Triggered from workflow automation
              * - copilot: Triggered from copilot assistant
              * - api: Direct API call
+             * - sharing: Triggered by sharing-api auto-sharing rules
              *
              */
             ExecutionContext;
@@ -451,9 +834,10 @@ declare namespace Components {
          * - flows: Triggered from workflow automation
          * - copilot: Triggered from copilot assistant
          * - api: Direct API call
+         * - sharing: Triggered by sharing-api auto-sharing rules
          *
          */
-        export type ExecutionContext = "flows" | "copilot" | "api";
+        export type ExecutionContext = "flows" | "copilot" | "api" | "sharing";
         export type ExecutionError = {
             code?: "TIMEOUT" | "MAX_ITERATIONS_EXCEEDED" | "TOOL_EXECUTION_FAILED" | "LLM_ERROR" | "INVALID_OUTPUT" | "REJECTED" | "INTERNAL_ERROR";
             message?: string;
@@ -553,6 +937,7 @@ declare namespace Components {
              * - flows: Triggered from workflow automation
              * - copilot: Triggered from copilot assistant
              * - api: Direct API call
+             * - sharing: Triggered by sharing-api auto-sharing rules
              *
              */
             ExecutionContext;
@@ -597,7 +982,7 @@ declare namespace Components {
             status?: "completed" | "failed" | "max_iterations" | "rejected";
             metrics?: ExecutionMetrics;
         }
-        export type ExecutionStatus = "pending" | "running" | "waiting_approval" | "completed" | "failed" | "cancelled";
+        export type ExecutionStatus = "pending" | "queued" | "running" | "waiting_approval" | "completed" | "failed" | "cancelled";
         export interface ExecutionTrace {
             execution_id?: string; // uuid
             iterations?: ExecutionIteration[];
@@ -744,6 +1129,63 @@ declare namespace Components {
              */
             required?: string[];
         }
+        export interface KnowledgeFileSource {
+            type: "file";
+            source_id: string; // uuid
+            filename: string;
+            mime_type: string;
+            size_bytes: number; // int64
+            /**
+             * Whether the source is available for agent retrieval.
+             */
+            ready: boolean;
+            created_at: string; // date-time
+            updated_at: string; // date-time
+        }
+        export interface KnowledgeFileSourceRegisteredEvent {
+            orgId: string;
+            sourceId: string; // uuid
+            type: "file";
+            bucket: string;
+            key: string;
+        }
+        export type KnowledgeSource = KnowledgeFileSource;
+        /**
+         * Published when a knowledge source is deleted.
+         */
+        export interface KnowledgeSourceDeletedEvent {
+            orgId: string;
+            sourceId: string; // uuid
+            type: "file";
+        }
+        /**
+         * Knowledge source IDs available to this agent. An empty array clears the selection.
+         */
+        export type KnowledgeSourceIds = string /* uuid */[];
+        /**
+         * Published by a knowledge processing pipeline after all derived data for
+         * the source has been stored and is available for agent retrieval. The
+         * event uses source `knowledge-processing` and detail type
+         * `knowledge-source-processing-completed` on the AI Agents event bus.
+         *
+         */
+        export interface KnowledgeSourceProcessingCompletedEvent {
+            orgId: string;
+            sourceId: string; // uuid
+        }
+        /**
+         * Detail payload of the `knowledge-source-registered` event, published on
+         * the AI Agents event bus with source `ai-agents` after the source record
+         * exists in DynamoDB. Consumers must process `sourceId` idempotently.
+         *
+         */
+        export type KnowledgeSourceRegisteredEvent = /**
+         * Detail payload of the `knowledge-source-registered` event, published on
+         * the AI Agents event bus with source `ai-agents` after the source record
+         * exists in DynamoDB. Consumers must process `sourceId` idempotently.
+         *
+         */
+        KnowledgeFileSourceRegisteredEvent;
         export interface ListAgentsResponse {
             agents?: AgentDefinition[];
             next_cursor?: string | null;
@@ -752,10 +1194,25 @@ declare namespace Components {
             conversations?: ConversationItem[];
             next_cursor?: string | null;
         }
+        export interface ListCustomerChatCapabilitiesResponse {
+            capabilities: CustomerChatCapabilityCatalogEntry[];
+        }
+        export interface ListCustomerChatResponse {
+            agents: CustomerChatAgent[];
+        }
         export interface ListExecutionsResponse {
             executions?: ExecutionResponse[];
             next_cursor?: string | null;
         }
+        export interface ListKnowledgeSourcesResponse {
+            sources: KnowledgeSource[];
+        }
+        export interface LocalizedAppearance {
+            displayName: string;
+            greeting: string;
+            starters: string[];
+        }
+        export type LocalizedFieldList = ("displayName" | "greeting" | "starters")[];
         export interface MessageFeedback {
             rating: "up" | "down";
             comment?: string;
@@ -932,15 +1389,24 @@ declare namespace Components {
              */
             reason: string;
         }
+        export interface RenameCustomerChatAgentRequest {
+            internal_name: string;
+            updated_at?: string; // date-time
+        }
+        export interface SaveCustomerChatConfigRequest {
+            config: AgentConfig;
+            updated_at?: string; // date-time
+        }
         /**
          * Where the skill/agent is available:
          * - flows: Available in workflow automations
          * - copilot: Available as a sub-agent in copilot
          * - portals: Available in end-user self-service portals
-         * - all: Available everywhere
+         * - website: Website chat, explicitly selected; currently supports anonymous execution
+         * - all: Available on the existing non-website surfaces; website requires explicit selection
          *
          */
-        export type SkillAvailability = "flows" | "copilot" | "portals" | "all";
+        export type SkillAvailability = "flows" | "copilot" | "portals" | "website" | "all";
         export type SkillCategory = "message" | "entity" | "document" | "classification" | "custom";
         /**
          * Server-Sent Event for streaming responses
@@ -1075,6 +1541,29 @@ declare namespace Components {
             summary?: string;
         }
         export interface UpdateAgentRequest {
+            domain?: /* Business domain selected in the agent builder. */ AgentDomain;
+            availability?: [
+                /**
+                 * Where the skill/agent is available:
+                 * - flows: Available in workflow automations
+                 * - copilot: Available as a sub-agent in copilot
+                 * - portals: Available in end-user self-service portals
+                 * - website: Website chat, explicitly selected; currently supports anonymous execution
+                 * - all: Available on the existing non-website surfaces; website requires explicit selection
+                 *
+                 */
+                SkillAvailability,
+                .../**
+                 * Where the skill/agent is available:
+                 * - flows: Available in workflow automations
+                 * - copilot: Available as a sub-agent in copilot
+                 * - portals: Available in end-user self-service portals
+                 * - website: Website chat, explicitly selected; currently supports anonymous execution
+                 * - all: Available on the existing non-website surfaces; website requires explicit selection
+                 *
+                 */
+                SkillAvailability[]
+            ];
             name?: string;
             description?: string;
             category?: SkillCategory;
@@ -1136,6 +1625,13 @@ declare namespace Components {
              * }
              */
             InputParametersSchema;
+            knowledge_source_ids?: /* Knowledge source IDs available to this agent. An empty array clears the selection. */ KnowledgeSourceIds;
+        }
+        export interface WebsiteHandover {
+            kind: "phone" | "email" | "journey" | "unset";
+            value: string;
+            journeyId?: string;
+            journeyName?: string;
         }
     }
 }
@@ -1182,6 +1678,22 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace CreateCustomerChatAgent {
+        export type RequestBody = Components.Schemas.CreateCustomerChatAgentRequest;
+        namespace Responses {
+            export type $201 = Components.Schemas.CustomerChatAgent;
+            export type $400 = Components.Schemas.Error;
+            export type $409 = Components.Schemas.Error;
+        }
+    }
+    namespace CreateKnowledgeFileUpload {
+        export type RequestBody = Components.Schemas.CreateKnowledgeFileUploadRequest;
+        namespace Responses {
+            export type $201 = Components.Schemas.CreateKnowledgeFileUploadResponse;
+            export type $400 = Components.Schemas.Error;
+            export type $409 = Components.Schemas.Error;
+        }
+    }
     namespace DeleteAgentById {
         namespace Parameters {
             export type AgentId = /**
@@ -1216,6 +1728,32 @@ declare namespace Paths {
             export type $404 = Components.Schemas.Error;
         }
     }
+    namespace DeleteCustomerChatAgent {
+        export interface HeaderParameters {
+            "If-Match"?: Parameters.IfMatch;
+        }
+        namespace Parameters {
+            export type AgentId = string;
+            export type IfMatch = string;
+        }
+        export interface PathParameters {
+            agent_id: Parameters.AgentId;
+        }
+        export type RequestBody = Components.Schemas.DeleteCustomerChatAgentRequest;
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $404 = Components.Schemas.Error;
+            export type $409 = Components.Schemas.Error;
+        }
+    }
+    namespace DeleteKnowledgeSource {
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $409 = Components.Schemas.Error;
+        }
+    }
     namespace ExecuteAgent {
         namespace Parameters {
             export type AgentId = /**
@@ -1234,8 +1772,11 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.ExecuteAgentRequest;
         namespace Responses {
             export type $200 = Components.Schemas.ExecutionResponse;
+            export type $201 = Components.Schemas.ExecutionResponse;
             export type $400 = Components.Schemas.Error;
             export type $404 = Components.Schemas.Error;
+            export type $422 = Components.Schemas.Error;
+            export type $504 = Components.Schemas.Error;
         }
     }
     namespace ExecuteAgentStream {
@@ -1296,6 +1837,18 @@ declare namespace Paths {
             export type $404 = Components.Schemas.Error;
         }
     }
+    namespace GetCustomerChatAgent {
+        namespace Parameters {
+            export type AgentId = string;
+        }
+        export interface PathParameters {
+            agent_id: Parameters.AgentId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.CustomerChatAgent;
+            export type $404 = Components.Schemas.Error;
+        }
+    }
     namespace GetExecution {
         namespace Parameters {
             export type ExecutionId = string; // uuid
@@ -1332,6 +1885,12 @@ declare namespace Paths {
             export type $404 = Components.Schemas.Error;
         }
     }
+    namespace GetKnowledgeSource {
+        namespace Responses {
+            export type $200 = Components.Schemas.KnowledgeSource;
+            export type $404 = Components.Schemas.Error;
+        }
+    }
     namespace ListAgents {
         namespace Parameters {
             export type Availability = /**
@@ -1339,7 +1898,8 @@ declare namespace Paths {
              * - flows: Available in workflow automations
              * - copilot: Available as a sub-agent in copilot
              * - portals: Available in end-user self-service portals
-             * - all: Available everywhere
+             * - website: Website chat, explicitly selected; currently supports anonymous execution
+             * - all: Available on the existing non-website surfaces; website requires explicit selection
              *
              */
             Components.Schemas.SkillAvailability;
@@ -1377,6 +1937,17 @@ declare namespace Paths {
             export type $400 = Components.Schemas.Error;
         }
     }
+    namespace ListCustomerChat {
+        namespace Responses {
+            export type $200 = Components.Schemas.ListCustomerChatResponse;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
+    namespace ListCustomerChatCapabilities {
+        namespace Responses {
+            export type $200 = Components.Schemas.ListCustomerChatCapabilitiesResponse;
+        }
+    }
     namespace ListExecutions {
         namespace Parameters {
             export type AgentId = string;
@@ -1391,6 +1962,11 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.ListExecutionsResponse;
             export type $400 = Components.Schemas.Error;
+        }
+    }
+    namespace ListKnowledgeSources {
+        namespace Responses {
+            export type $200 = Components.Schemas.ListKnowledgeSourcesResponse;
         }
     }
     namespace PutExecutionFeedback {
@@ -1420,6 +1996,44 @@ declare namespace Paths {
             export type $200 = Components.Schemas.ExecutionResponse;
             export type $400 = Components.Schemas.Error;
             export type $404 = Components.Schemas.Error;
+        }
+    }
+    namespace RenameCustomerChatAgent {
+        export interface HeaderParameters {
+            "If-Match"?: Parameters.IfMatch;
+        }
+        namespace Parameters {
+            export type AgentId = string;
+            export type IfMatch = string;
+        }
+        export interface PathParameters {
+            agent_id: Parameters.AgentId;
+        }
+        export type RequestBody = Components.Schemas.RenameCustomerChatAgentRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.CustomerChatAgent;
+            export type $400 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
+            export type $409 = Components.Schemas.Error;
+        }
+    }
+    namespace SaveCustomerChatConfig {
+        export interface HeaderParameters {
+            "If-Match"?: Parameters.IfMatch;
+        }
+        namespace Parameters {
+            export type AgentId = string;
+            export type IfMatch = string;
+        }
+        export interface PathParameters {
+            agent_id: Parameters.AgentId;
+        }
+        export type RequestBody = Components.Schemas.SaveCustomerChatConfigRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.CustomerChatAgent;
+            export type $400 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
+            export type $409 = Components.Schemas.Error;
         }
     }
     namespace StreamExecution {
@@ -1473,6 +2087,16 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.AgentDefinition;
             export type $400 = Components.Schemas.Error;
+            export type $404 = Components.Schemas.Error;
+            export type $409 = Components.Schemas.Error;
+        }
+    }
+    namespace V1KnowledgeSources$SourceId {
+        namespace Parameters {
+            export type SourceId = string; // uuid
+        }
+        export interface PathParameters {
+            source_id: Parameters.SourceId /* uuid */;
         }
     }
 }
@@ -1480,7 +2104,7 @@ declare namespace Paths {
 
 export interface OperationMethods {
   /**
-   * listAgents - listAgents
+   * listAgents - List all agent configurations
    * 
    * Lists agents from both system skills and custom agents.
    * Use query parameters to filter by source, availability, or entity schema.
@@ -1492,7 +2116,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListAgents.Responses.$200>
   /**
-   * createAgent - createAgent
+   * createAgent - Create Agent definition
    * 
    * Creates a new custom agent. System skills cannot be created via this endpoint.
    */
@@ -1502,7 +2126,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateAgent.Responses.$201>
   /**
-   * getAgentById - getAgentById
+   * getAgentById - Get the agent configuration by ID
    * 
    * Retrieves an agent by ID. Supports both:
    * - System skill IDs (prefixed): "skill:email-categorizer"
@@ -1515,7 +2139,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetAgentById.Responses.$200>
   /**
-   * updateAgentById - updateAgentById
+   * updateAgentById - Update the agent configuration by ID
    * 
    * Updates a custom agent. System skills cannot be updated via this endpoint.
    */
@@ -1525,7 +2149,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateAgentById.Responses.$200>
   /**
-   * deleteAgentById - deleteAgentById
+   * deleteAgentById - Delete the agent configuration by ID
    * 
    * Deletes a custom agent. System skills cannot be deleted via this endpoint.
    */
@@ -1535,7 +2159,113 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteAgentById.Responses.$204>
   /**
-   * executeAgent - executeAgent
+   * listCustomerChat - List customer chat agents
+   * 
+   * Returns the org's website agent (at most one) first, then its portal agents ordered by created_at ascending.
+   */
+  'listCustomerChat'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListCustomerChat.Responses.$200>
+  /**
+   * createCustomerChatAgent - Create a customer chat agent with default config
+   * 
+   * Mints agent_id (equal to runtime_agent_id) and compiles the runtime AgentRecord. An org can have at most one website agent (409 on a second one) and any number of portal agents.
+   */
+  'createCustomerChatAgent'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateCustomerChatAgent.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateCustomerChatAgent.Responses.$201>
+  /**
+   * listCustomerChatCapabilities - List the capability catalog
+   * 
+   * Capabilities admins can enable and the places they are offered on.
+   * Single source of truth for Agent Builder; capabilities that are no
+   * longer offered are omitted, while already-enabled instances of them
+   * keep working.
+   * 
+   */
+  'listCustomerChatCapabilities'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListCustomerChatCapabilities.Responses.$200>
+  /**
+   * getCustomerChatAgent - Get a customer chat agent
+   */
+  'getCustomerChatAgent'(
+    parameters?: Parameters<Paths.GetCustomerChatAgent.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCustomerChatAgent.Responses.$200>
+  /**
+   * renameCustomerChatAgent - Rename a customer chat agent
+   */
+  'renameCustomerChatAgent'(
+    parameters?: Parameters<Paths.RenameCustomerChatAgent.HeaderParameters & Paths.RenameCustomerChatAgent.PathParameters> | null,
+    data?: Paths.RenameCustomerChatAgent.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RenameCustomerChatAgent.Responses.$200>
+  /**
+   * deleteCustomerChatAgent - Remove a customer chat agent and its runtime projection
+   * 
+   * Deletes the place agent. For portal agents, also clears
+   * `feature_settings.portal_copilot_agent_id` on linked portals (pass
+   * `portal_id` when known, otherwise the API scans org portal configs)
+   * before deleting, so a single request cannot leave an orphan agent.
+   * 
+   */
+  'deleteCustomerChatAgent'(
+    parameters?: Parameters<Paths.DeleteCustomerChatAgent.HeaderParameters & Paths.DeleteCustomerChatAgent.PathParameters> | null,
+    data?: Paths.DeleteCustomerChatAgent.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteCustomerChatAgent.Responses.$204>
+  /**
+   * saveCustomerChatConfig - Replace the AgentConfig and compile the runtime AgentRecord
+   */
+  'saveCustomerChatConfig'(
+    parameters?: Parameters<Paths.SaveCustomerChatConfig.HeaderParameters & Paths.SaveCustomerChatConfig.PathParameters> | null,
+    data?: Paths.SaveCustomerChatConfig.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SaveCustomerChatConfig.Responses.$200>
+  /**
+   * listKnowledgeSources - List knowledge sources
+   */
+  'listKnowledgeSources'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListKnowledgeSources.Responses.$200>
+  /**
+   * createKnowledgeFileUpload - Create a knowledge file upload
+   * 
+   * Returns a direct S3 upload. The source becomes available after S3 confirms the completed object.
+   */
+  'createKnowledgeFileUpload'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateKnowledgeFileUpload.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateKnowledgeFileUpload.Responses.$201>
+  /**
+   * getKnowledgeSource - Get a knowledge source
+   */
+  'getKnowledgeSource'(
+    parameters?: Parameters<Paths.V1KnowledgeSources$SourceId.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetKnowledgeSource.Responses.$200>
+  /**
+   * deleteKnowledgeSource - Delete a knowledge source
+   */
+  'deleteKnowledgeSource'(
+    parameters?: Parameters<Paths.V1KnowledgeSources$SourceId.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteKnowledgeSource.Responses.$204>
+  /**
+   * executeAgent - Execute an agent
    * 
    * Executes an agent (system skill or custom agent).
    * Supports both:
@@ -1547,9 +2277,9 @@ export interface OperationMethods {
     parameters?: Parameters<Paths.ExecuteAgent.PathParameters> | null,
     data?: Paths.ExecuteAgent.RequestBody,
     config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ExecuteAgent.Responses.$200>
+  ): OperationResponse<Paths.ExecuteAgent.Responses.$200 | Paths.ExecuteAgent.Responses.$201>
   /**
-   * executeAgentStream - executeAgentStream
+   * executeAgentStream - Execute an agent with streaming response
    * 
    * Executes an agent with real-time streaming of tokens and tool events.
    * Returns Server-Sent Events (SSE) stream with token-by-token output,
@@ -1569,7 +2299,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExecuteAgentStream.Responses.$200>
   /**
-   * listExecutions - listExecutions
+   * listExecutions - List executions
    * 
    * List executions
    */
@@ -1579,7 +2309,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListExecutions.Responses.$200>
   /**
-   * getExecution - getExecution
+   * getExecution - Get execution by ID
    * 
    * Get execution by ID
    */
@@ -1589,7 +2319,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetExecution.Responses.$200>
   /**
-   * cancelExecution - cancelExecution
+   * cancelExecution - Cancel execution
    * 
    * Cancel execution
    */
@@ -1599,7 +2329,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CancelExecution.Responses.$200>
   /**
-   * getExecutionTrace - getExecutionTrace
+   * getExecutionTrace - Get execution trace/iterations
    * 
    * Returns the step-by-step reasoning and tool calls for ReAct mode executions. Returns empty iterations array for direct mode executions.
    */
@@ -1629,7 +2359,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PutExecutionFeedback.Responses.$200>
   /**
-   * approveExecution - approveExecution
+   * approveExecution - Approve pending action
    * 
    * Approves a pending tool action when execution is in waiting_approval status
    */
@@ -1639,7 +2369,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ApproveExecution.Responses.$200>
   /**
-   * rejectExecution - rejectExecution
+   * rejectExecution - Reject pending action
    * 
    * Rejects a pending tool action when execution is in waiting_approval status
    */
@@ -1649,7 +2379,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RejectExecution.Responses.$200>
   /**
-   * streamExecution - streamExecution
+   * streamExecution - Reconnect to execution stream
    * 
    * Reconnects to an execution's event stream after approval. Replays missed events from event log and continues streaming if execution is still running.
    */
@@ -1659,7 +2389,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.StreamExecution.Responses.$200>
   /**
-   * chat - chat
+   * chat - Streaming chat with AI agent
    * 
    * Initiates a streaming chat session with an AI agent. Supports server-side conversation memory via conversationId or client-provided history via clientHistory.
    */
@@ -1669,7 +2399,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.Chat.Responses.$200>
   /**
-   * listConversations - listConversations
+   * listConversations - List conversations
    * 
    * Lists conversations for the authenticated user, sorted by most recent.
    */
@@ -1679,7 +2409,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListConversations.Responses.$200>
   /**
-   * getConversation - getConversation
+   * getConversation - Get conversation with messages
    * 
    * Retrieves a conversation and its message history.
    */
@@ -1689,7 +2419,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConversation.Responses.$200>
   /**
-   * deleteConversation - deleteConversation
+   * deleteConversation - Delete conversation
    * 
    * Deletes a conversation and all its messages.
    */
@@ -1699,7 +2429,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteConversation.Responses.$204>
   /**
-   * submitConversationFeedback - submitConversationFeedback
+   * submitConversationFeedback - Submit feedback for an assistant turn
    * 
    * Records a thumbs up/down (with optional comment) for the assistant turn identified by its Langfuse trace id. The rating is persisted on the message and mirrored to Langfuse as a trace score.
    * 
@@ -1714,7 +2444,7 @@ export interface OperationMethods {
 export interface PathsDictionary {
   ['/v1/agents']: {
     /**
-     * createAgent - createAgent
+     * createAgent - Create Agent definition
      * 
      * Creates a new custom agent. System skills cannot be created via this endpoint.
      */
@@ -1724,7 +2454,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateAgent.Responses.$201>
     /**
-     * listAgents - listAgents
+     * listAgents - List all agent configurations
      * 
      * Lists agents from both system skills and custom agents.
      * Use query parameters to filter by source, availability, or entity schema.
@@ -1738,7 +2468,7 @@ export interface PathsDictionary {
   }
   ['/v1/agents/{agent_id}']: {
     /**
-     * getAgentById - getAgentById
+     * getAgentById - Get the agent configuration by ID
      * 
      * Retrieves an agent by ID. Supports both:
      * - System skill IDs (prefixed): "skill:email-categorizer"
@@ -1751,7 +2481,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetAgentById.Responses.$200>
     /**
-     * updateAgentById - updateAgentById
+     * updateAgentById - Update the agent configuration by ID
      * 
      * Updates a custom agent. System skills cannot be updated via this endpoint.
      */
@@ -1761,7 +2491,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateAgentById.Responses.$200>
     /**
-     * deleteAgentById - deleteAgentById
+     * deleteAgentById - Delete the agent configuration by ID
      * 
      * Deletes a custom agent. System skills cannot be deleted via this endpoint.
      */
@@ -1771,9 +2501,129 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteAgentById.Responses.$204>
   }
+  ['/v1/customer-chat']: {
+    /**
+     * listCustomerChat - List customer chat agents
+     * 
+     * Returns the org's website agent (at most one) first, then its portal agents ordered by created_at ascending.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListCustomerChat.Responses.$200>
+    /**
+     * createCustomerChatAgent - Create a customer chat agent with default config
+     * 
+     * Mints agent_id (equal to runtime_agent_id) and compiles the runtime AgentRecord. An org can have at most one website agent (409 on a second one) and any number of portal agents.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateCustomerChatAgent.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateCustomerChatAgent.Responses.$201>
+  }
+  ['/v1/customer-chat/capabilities']: {
+    /**
+     * listCustomerChatCapabilities - List the capability catalog
+     * 
+     * Capabilities admins can enable and the places they are offered on.
+     * Single source of truth for Agent Builder; capabilities that are no
+     * longer offered are omitted, while already-enabled instances of them
+     * keep working.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListCustomerChatCapabilities.Responses.$200>
+  }
+  ['/v1/customer-chat/{agent_id}']: {
+    /**
+     * getCustomerChatAgent - Get a customer chat agent
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetCustomerChatAgent.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCustomerChatAgent.Responses.$200>
+    /**
+     * renameCustomerChatAgent - Rename a customer chat agent
+     */
+    'patch'(
+      parameters?: Parameters<Paths.RenameCustomerChatAgent.HeaderParameters & Paths.RenameCustomerChatAgent.PathParameters> | null,
+      data?: Paths.RenameCustomerChatAgent.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RenameCustomerChatAgent.Responses.$200>
+    /**
+     * deleteCustomerChatAgent - Remove a customer chat agent and its runtime projection
+     * 
+     * Deletes the place agent. For portal agents, also clears
+     * `feature_settings.portal_copilot_agent_id` on linked portals (pass
+     * `portal_id` when known, otherwise the API scans org portal configs)
+     * before deleting, so a single request cannot leave an orphan agent.
+     * 
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteCustomerChatAgent.HeaderParameters & Paths.DeleteCustomerChatAgent.PathParameters> | null,
+      data?: Paths.DeleteCustomerChatAgent.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteCustomerChatAgent.Responses.$204>
+  }
+  ['/v1/customer-chat/{agent_id}/config']: {
+    /**
+     * saveCustomerChatConfig - Replace the AgentConfig and compile the runtime AgentRecord
+     */
+    'put'(
+      parameters?: Parameters<Paths.SaveCustomerChatConfig.HeaderParameters & Paths.SaveCustomerChatConfig.PathParameters> | null,
+      data?: Paths.SaveCustomerChatConfig.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SaveCustomerChatConfig.Responses.$200>
+  }
+  ['/v1/knowledge/sources']: {
+    /**
+     * listKnowledgeSources - List knowledge sources
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListKnowledgeSources.Responses.$200>
+  }
+  ['/v1/knowledge/file-uploads']: {
+    /**
+     * createKnowledgeFileUpload - Create a knowledge file upload
+     * 
+     * Returns a direct S3 upload. The source becomes available after S3 confirms the completed object.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateKnowledgeFileUpload.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateKnowledgeFileUpload.Responses.$201>
+  }
+  ['/v1/knowledge/sources/{source_id}']: {
+    /**
+     * getKnowledgeSource - Get a knowledge source
+     */
+    'get'(
+      parameters?: Parameters<Paths.V1KnowledgeSources$SourceId.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetKnowledgeSource.Responses.$200>
+    /**
+     * deleteKnowledgeSource - Delete a knowledge source
+     */
+    'delete'(
+      parameters?: Parameters<Paths.V1KnowledgeSources$SourceId.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteKnowledgeSource.Responses.$204>
+  }
   ['/v1/agents/{agent_id}/execute']: {
     /**
-     * executeAgent - executeAgent
+     * executeAgent - Execute an agent
      * 
      * Executes an agent (system skill or custom agent).
      * Supports both:
@@ -1785,11 +2635,11 @@ export interface PathsDictionary {
       parameters?: Parameters<Paths.ExecuteAgent.PathParameters> | null,
       data?: Paths.ExecuteAgent.RequestBody,
       config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ExecuteAgent.Responses.$200>
+    ): OperationResponse<Paths.ExecuteAgent.Responses.$200 | Paths.ExecuteAgent.Responses.$201>
   }
   ['/v1/agents/{agent_id}/execute/stream']: {
     /**
-     * executeAgentStream - executeAgentStream
+     * executeAgentStream - Execute an agent with streaming response
      * 
      * Executes an agent with real-time streaming of tokens and tool events.
      * Returns Server-Sent Events (SSE) stream with token-by-token output,
@@ -1811,7 +2661,7 @@ export interface PathsDictionary {
   }
   ['/v1/executions']: {
     /**
-     * listExecutions - listExecutions
+     * listExecutions - List executions
      * 
      * List executions
      */
@@ -1823,7 +2673,7 @@ export interface PathsDictionary {
   }
   ['/v1/executions/{execution_id}']: {
     /**
-     * getExecution - getExecution
+     * getExecution - Get execution by ID
      * 
      * Get execution by ID
      */
@@ -1833,7 +2683,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetExecution.Responses.$200>
     /**
-     * cancelExecution - cancelExecution
+     * cancelExecution - Cancel execution
      * 
      * Cancel execution
      */
@@ -1845,7 +2695,7 @@ export interface PathsDictionary {
   }
   ['/v1/executions/{execution_id}/trace']: {
     /**
-     * getExecutionTrace - getExecutionTrace
+     * getExecutionTrace - Get execution trace/iterations
      * 
      * Returns the step-by-step reasoning and tool calls for ReAct mode executions. Returns empty iterations array for direct mode executions.
      */
@@ -1879,7 +2729,7 @@ export interface PathsDictionary {
   }
   ['/v1/executions/{execution_id}/approve']: {
     /**
-     * approveExecution - approveExecution
+     * approveExecution - Approve pending action
      * 
      * Approves a pending tool action when execution is in waiting_approval status
      */
@@ -1891,7 +2741,7 @@ export interface PathsDictionary {
   }
   ['/v1/executions/{execution_id}/reject']: {
     /**
-     * rejectExecution - rejectExecution
+     * rejectExecution - Reject pending action
      * 
      * Rejects a pending tool action when execution is in waiting_approval status
      */
@@ -1903,7 +2753,7 @@ export interface PathsDictionary {
   }
   ['/v1/executions/{execution_id}/stream']: {
     /**
-     * streamExecution - streamExecution
+     * streamExecution - Reconnect to execution stream
      * 
      * Reconnects to an execution's event stream after approval. Replays missed events from event log and continues streaming if execution is still running.
      */
@@ -1915,7 +2765,7 @@ export interface PathsDictionary {
   }
   ['/v1/chat']: {
     /**
-     * chat - chat
+     * chat - Streaming chat with AI agent
      * 
      * Initiates a streaming chat session with an AI agent. Supports server-side conversation memory via conversationId or client-provided history via clientHistory.
      */
@@ -1927,7 +2777,7 @@ export interface PathsDictionary {
   }
   ['/v1/conversations']: {
     /**
-     * listConversations - listConversations
+     * listConversations - List conversations
      * 
      * Lists conversations for the authenticated user, sorted by most recent.
      */
@@ -1939,7 +2789,7 @@ export interface PathsDictionary {
   }
   ['/v1/conversations/{conversation_id}']: {
     /**
-     * getConversation - getConversation
+     * getConversation - Get conversation with messages
      * 
      * Retrieves a conversation and its message history.
      */
@@ -1949,7 +2799,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConversation.Responses.$200>
     /**
-     * deleteConversation - deleteConversation
+     * deleteConversation - Delete conversation
      * 
      * Deletes a conversation and all its messages.
      */
@@ -1961,7 +2811,7 @@ export interface PathsDictionary {
   }
   ['/v1/conversations/{conversation_id}/feedback']: {
     /**
-     * submitConversationFeedback - submitConversationFeedback
+     * submitConversationFeedback - Submit feedback for an assistant turn
      * 
      * Records a thumbs up/down (with optional comment) for the assistant turn identified by its Langfuse trace id. The rating is persisted on the message and mirrored to Langfuse as a trace score.
      * 
@@ -1977,18 +2827,36 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type ActionAutonomy = Components.Schemas.ActionAutonomy;
+export type AgentConfig = Components.Schemas.AgentConfig;
 export type AgentDefinition = Components.Schemas.AgentDefinition;
+export type AgentDomain = Components.Schemas.AgentDomain;
 export type AgentExecutionEvent = Components.Schemas.AgentExecutionEvent;
 export type AgentExecutionEventStatus = Components.Schemas.AgentExecutionEventStatus;
 export type AgentId = Components.Schemas.AgentId;
 export type AgentSource = Components.Schemas.AgentSource;
+export type AppearanceConfig = Components.Schemas.AppearanceConfig;
 export type ApproveExecutionRequest = Components.Schemas.ApproveExecutionRequest;
+export type CapabilityId = Components.Schemas.CapabilityId;
+export type CapabilityInstance = Components.Schemas.CapabilityInstance;
+export type CapabilityState = Components.Schemas.CapabilityState;
 export type ChatMessage = Components.Schemas.ChatMessage;
 export type ChatRequest = Components.Schemas.ChatRequest;
 export type ConversationItem = Components.Schemas.ConversationItem;
 export type ConversationWithMessages = Components.Schemas.ConversationWithMessages;
 export type CreateAgentRequest = Components.Schemas.CreateAgentRequest;
+export type CreateCustomerChatAgentRequest = Components.Schemas.CreateCustomerChatAgentRequest;
+export type CreateKnowledgeFileUploadRequest = Components.Schemas.CreateKnowledgeFileUploadRequest;
+export type CreateKnowledgeFileUploadResponse = Components.Schemas.CreateKnowledgeFileUploadResponse;
+export type CustomerChatAgent = Components.Schemas.CustomerChatAgent;
+export type CustomerChatCapabilityCatalogEntry = Components.Schemas.CustomerChatCapabilityCatalogEntry;
+export type CustomerChatCasRequest = Components.Schemas.CustomerChatCasRequest;
+export type CustomerChatKnowledgeSource = Components.Schemas.CustomerChatKnowledgeSource;
+export type CustomerChatKnowledgeSourceType = Components.Schemas.CustomerChatKnowledgeSourceType;
+export type CustomerChatPlace = Components.Schemas.CustomerChatPlace;
+export type DeleteCustomerChatAgentRequest = Components.Schemas.DeleteCustomerChatAgentRequest;
 export type Error = Components.Schemas.Error;
+export type EscalationConfig = Components.Schemas.EscalationConfig;
 export type ExecuteAgentRequest = Components.Schemas.ExecuteAgentRequest;
 export type ExecutionContext = Components.Schemas.ExecutionContext;
 export type ExecutionError = Components.Schemas.ExecutionError;
@@ -2005,9 +2873,21 @@ export type ExecutionStatus = Components.Schemas.ExecutionStatus;
 export type ExecutionTrace = Components.Schemas.ExecutionTrace;
 export type InputParameterDefinition = Components.Schemas.InputParameterDefinition;
 export type InputParametersSchema = Components.Schemas.InputParametersSchema;
+export type KnowledgeFileSource = Components.Schemas.KnowledgeFileSource;
+export type KnowledgeFileSourceRegisteredEvent = Components.Schemas.KnowledgeFileSourceRegisteredEvent;
+export type KnowledgeSource = Components.Schemas.KnowledgeSource;
+export type KnowledgeSourceDeletedEvent = Components.Schemas.KnowledgeSourceDeletedEvent;
+export type KnowledgeSourceIds = Components.Schemas.KnowledgeSourceIds;
+export type KnowledgeSourceProcessingCompletedEvent = Components.Schemas.KnowledgeSourceProcessingCompletedEvent;
+export type KnowledgeSourceRegisteredEvent = Components.Schemas.KnowledgeSourceRegisteredEvent;
 export type ListAgentsResponse = Components.Schemas.ListAgentsResponse;
 export type ListConversationsResponse = Components.Schemas.ListConversationsResponse;
+export type ListCustomerChatCapabilitiesResponse = Components.Schemas.ListCustomerChatCapabilitiesResponse;
+export type ListCustomerChatResponse = Components.Schemas.ListCustomerChatResponse;
 export type ListExecutionsResponse = Components.Schemas.ListExecutionsResponse;
+export type ListKnowledgeSourcesResponse = Components.Schemas.ListKnowledgeSourcesResponse;
+export type LocalizedAppearance = Components.Schemas.LocalizedAppearance;
+export type LocalizedFieldList = Components.Schemas.LocalizedFieldList;
 export type MessageFeedback = Components.Schemas.MessageFeedback;
 export type MessageItem = Components.Schemas.MessageItem;
 export type ModelConfig = Components.Schemas.ModelConfig;
@@ -2019,6 +2899,8 @@ export type PreviewEntity = Components.Schemas.PreviewEntity;
 export type PreviewValue = Components.Schemas.PreviewValue;
 export type PutExecutionFeedbackRequest = Components.Schemas.PutExecutionFeedbackRequest;
 export type RejectExecutionRequest = Components.Schemas.RejectExecutionRequest;
+export type RenameCustomerChatAgentRequest = Components.Schemas.RenameCustomerChatAgentRequest;
+export type SaveCustomerChatConfigRequest = Components.Schemas.SaveCustomerChatConfigRequest;
 export type SkillAvailability = Components.Schemas.SkillAvailability;
 export type SkillCategory = Components.Schemas.SkillCategory;
 export type StreamEvent = Components.Schemas.StreamEvent;
@@ -2027,3 +2909,4 @@ export type SubmitFeedbackRequest = Components.Schemas.SubmitFeedbackRequest;
 export type ToolDefinition = Components.Schemas.ToolDefinition;
 export type ToolPreview = Components.Schemas.ToolPreview;
 export type UpdateAgentRequest = Components.Schemas.UpdateAgentRequest;
+export type WebsiteHandover = Components.Schemas.WebsiteHandover;

@@ -54,6 +54,7 @@ const { data } = await messageClient.sendMessage(...)
 - [`markThreadAsDone`](#markthreadasdone)
 - [`markThreadAsOpen`](#markthreadasopen)
 - [`getThreadTimeline`](#getthreadtimeline)
+- [`getThreadSummary`](#getthreadsummary)
 - [`trashThread`](#trashthread)
 - [`untrashThread`](#untrashthread)
 - [`spamThread`](#spamthread)
@@ -74,6 +75,7 @@ const { data } = await messageClient.sendMessage(...)
 - [`markUnreadThread`](#markunreadthread)
 - [`markUnreadThreadV2`](#markunreadthreadv2)
 - [`assignThread`](#assignthread)
+- [`dismissThreadLinkSuggestions`](#dismissthreadlinksuggestions)
 - [`unassignThread`](#unassignthread)
 - [`assignUsers`](#assignusers)
 - [`assignUsersV2`](#assignusersv2)
@@ -108,6 +110,16 @@ const { data } = await messageClient.sendMessage(...)
 - [`AssigneeWorkloadResults`](#assigneeworkloadresults)
 - [`ReadMessagePayload`](#readmessagepayload)
 - [`ReadingScope`](#readingscope)
+- [`ThreadReplyContext`](#threadreplycontext)
+- [`ReplyContextMessage`](#replycontextmessage)
+- [`ReplyContextEntityRef`](#replycontextentityref)
+- [`ThreadSummary`](#threadsummary)
+- [`ThreadSummaryPayload`](#threadsummarypayload)
+- [`ThreadSummaryEntityRef`](#threadsummaryentityref)
+- [`ThreadSummaryContext`](#threadsummarycontext)
+- [`SimilarSentMessagesRequest`](#similarsentmessagesrequest)
+- [`SimilarSentMessagesResponse`](#similarsentmessagesresponse)
+- [`SimilarSentMessage`](#similarsentmessage)
 - [`ThreadTimeline`](#threadtimeline)
 - [`ThreadDoneEvent`](#threaddoneevent)
 - [`ThreadOpenEvent`](#threadopenevent)
@@ -121,6 +133,11 @@ const { data } = await messageClient.sendMessage(...)
 - [`ThreadMovedToInboxEvent`](#threadmovedtoinboxevent)
 - [`ThreadTrashedEvent`](#threadtrashedevent)
 - [`ThreadRestoredEvent`](#threadrestoredevent)
+- [`LinkSuggestionCandidate`](#linksuggestioncandidate)
+- [`LinkSuggestion`](#linksuggestion)
+- [`TimelineLinkSuggestion`](#timelinelinksuggestion)
+- [`MessageEntityLinkSuggestedEvent`](#messageentitylinksuggestedevent)
+- [`MessageEntityLinkSuggestionDismissedEvent`](#messageentitylinksuggestiondismissedevent)
 - [`TimelineLinkedEntity`](#timelinelinkedentity)
 - [`TimelineActor`](#timelineactor)
 - [`TimelineEventData`](#timelineeventdata)
@@ -1082,7 +1099,7 @@ const { data } = await client.getThreadTimeline({
         "user_id": "123",
         "organization_id": "456"
       },
-      "timestamp": "2024-01-01T00:00:00.000Z",
+      "timestamp": "2024-01-01T00:00:00Z",
       "message_id": "string",
       "source": "user",
       "automated": true,
@@ -1096,6 +1113,52 @@ const { data } = await client.getThreadTimeline({
       }
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `getThreadSummary`
+
+AI summary of a thread. Returns `202` while it is generated; poll until `jobStatus.status` is `COMPLETED` or `FAILED`.
+
+`GET /v1/message/threads/{id}/summary`
+
+```ts
+const { data } = await client.getThreadSummary({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+  message_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "orgId": "string",
+  "jobId": "string",
+  "executionId": "string",
+  "jobStatus": {
+    "status": "INITIATED",
+    "error": "string"
+  },
+  "payload": {
+    "summary": ["string"],
+    "topics": ["string"],
+    "next_steps": ["string"],
+    "refs": [
+      {
+        "id": "string",
+        "displayText": "Raven GmbH",
+        "schema": "contact"
+      }
+    ]
+  },
+  "createdAt": "1970-01-01T00:00:00.000Z",
+  "updatedAt": "1970-01-01T00:00:00.000Z"
 }
 ```
 
@@ -1476,6 +1539,37 @@ const { data } = await client.assignThread(
 
 ---
 
+### `dismissThreadLinkSuggestions`
+
+Dismiss pending candidates of entity-link suggestions on a thread. A suggestion is recorded on a message when an identifier in it matched entities of different customers, so nothing was linked automat
+
+`POST /v1/message/threads/{id}/link-suggestions/dismiss`
+
+```ts
+const { data } = await client.dismissThreadLinkSuggestions(
+  {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+  },
+  {
+    suggestion_ids: ['string'],
+    entity_ids: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "dismissed": ["string"]
+}
+```
+
+</details>
+
+---
+
 ### `unassignThread`
 
 Unassign thread from entities
@@ -1669,7 +1763,7 @@ const { data } = await client.createDraft(
 
 ### `sendDraft`
 
-Send the existing draft to the recipients
+Send the existing draft to the recipients.
 
 `POST /v1/message/drafts:send`
 
@@ -1786,6 +1880,19 @@ const { data } = await client.getMessageV2({
 
 ```json
 {
+  "link_suggestions": [
+    {
+      "id": "string",
+      "identifier": "string",
+      "found_in": "string",
+      "status": "pending",
+      "candidates": [],
+      "accepted_entity_ids": ["string"],
+      "resolved_by": {},
+      "resolved_at": "1970-01-01T00:00:00.000Z",
+      "created_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
   "html_omitted": false,
   "html_download_url": "https://s3.eu-central-1.amazonaws.com/epilot-attachments/3f34ce73-089c-4d45-a5ee-c161234e41c3/3f34ce73-089c-4d45-a5ee-c161234e41c3.html",
   "_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -1844,16 +1951,7 @@ const { data } = await client.getMessageV2({
   ],
   "file": {
     "$relation": [
-      {
-        "entity_id": "f820ce3b-07b0-45ae-bcc6-babb2f53f79f",
-        "filename": "Produktinformationen_epilot360_Double_Opt_in.pdf",
-        "is_message_attachment": true,
-        "may_be_signature_attachment": true,
-        "cid": "fb222496-a1a5-4639-94f2-07b5e35e4068",
-        "inline": false,
-        "send_as_link": false,
-        "save_to_entity": true
-      }
+      {}
     ]
   },
   "references": "<0102017b97a502f8-a67f01c2-68cc-4928-b91b-45853f34e259-000000@eu-west-1.amazonses.com> <CALHgQpziyxW9NaFUs+nRMykzr6Ljq6vjq4WO9SaihAuMasuDyg@mail.gmail.com>",
@@ -2463,6 +2561,161 @@ Who is marking an item as read or unread.
 type ReadingScope = "organization" | "user"
 ```
 
+### `ThreadReplyContext`
+
+```ts
+type ThreadReplyContext = {
+  thread_id: string
+  topic?: string
+  reply_to_message_id?: string
+  messages: Array<{
+    id: string
+    created_at?: string // date-time
+    type: "RECEIVED" | "SENT"
+    role: "customer" | "agent" | "partner"
+    subject?: string
+    from?: {
+      address?: { ... }
+      name?: { ... }
+    }
+    text: string
+  }>
+  related_entities: Array<{
+    _id: string
+    _schema: string
+  }>
+}
+```
+
+### `ReplyContextMessage`
+
+```ts
+type ReplyContextMessage = {
+  id: string
+  created_at?: string // date-time
+  type: "RECEIVED" | "SENT"
+  role: "customer" | "agent" | "partner"
+  subject?: string
+  from?: {
+    address?: string
+    name?: string
+  }
+  text: string
+}
+```
+
+### `ReplyContextEntityRef`
+
+```ts
+type ReplyContextEntityRef = {
+  _id: string
+  _schema: string
+}
+```
+
+### `ThreadSummary`
+
+```ts
+type ThreadSummary = {
+  orgId: string
+  jobId: string
+  executionId?: string
+  jobStatus: {
+    status: "INITIATED" | "IN_PROGRESS" | "COMPLETED" | "FAILED"
+    error?: string
+  }
+  payload?: {
+    summary?: string[]
+    topics?: string[]
+    next_steps?: string[]
+    refs?: Array<{
+      id: { ... }
+      displayText: { ... }
+      schema: { ... }
+    }>
+  }
+  createdAt: string // date-time
+  updatedAt: string // date-time
+}
+```
+
+### `ThreadSummaryPayload`
+
+Present once the summary is generated
+
+```ts
+type ThreadSummaryPayload = {
+  summary?: string[]
+  topics?: string[]
+  next_steps?: string[]
+  refs?: Array<{
+    id: string
+    displayText: string
+    schema: string
+  }>
+}
+```
+
+### `ThreadSummaryEntityRef`
+
+```ts
+type ThreadSummaryEntityRef = {
+  id: string
+  displayText: string
+  schema: string
+}
+```
+
+### `ThreadSummaryContext`
+
+```ts
+type ThreadSummaryContext = {
+  thread_id: string
+  message_id: string
+  subject: string
+  conversation: string
+  entity_context: string
+}
+```
+
+### `SimilarSentMessagesRequest`
+
+```ts
+type SimilarSentMessagesRequest = {
+  queries: string[]
+  limit?: number
+  min_score?: number
+}
+```
+
+### `SimilarSentMessagesResponse`
+
+```ts
+type SimilarSentMessagesResponse = {
+  results: Array<{
+    message_id: string
+    thread_id?: string
+    subject?: string
+    text: string
+    created_at?: string
+    score: number
+  }>
+}
+```
+
+### `SimilarSentMessage`
+
+```ts
+type SimilarSentMessage = {
+  message_id: string
+  thread_id?: string
+  subject?: string
+  text: string
+  created_at?: string
+  score: number
+}
+```
+
 ### `ThreadTimeline`
 
 ```ts
@@ -2497,10 +2750,17 @@ type ThreadTimeline = {
       type: { ... }
       entities?: { ... }
       link_kind?: { ... }
+      from_suggestion?: { ... }
     } | {
       type: { ... }
       entities?: { ... }
       link_kind?: { ... }
+    } | {
+      type: { ... }
+      suggestions?: { ... }
+    } | {
+      type: { ... }
+      suggestions?: { ... }
     } | {
       type: { ... }
       reply_message_id?: { ... }
@@ -2600,6 +2860,7 @@ type MessageEntityLinkedEvent = {
     schema?: string
   }>
   link_kind?: "manual" | "auto"
+  from_suggestion?: boolean
 }
 ```
 
@@ -2649,6 +2910,100 @@ type ThreadTrashedEvent = {
 ```ts
 type ThreadRestoredEvent = {
   type: "THREAD_RESTORED"
+}
+```
+
+### `LinkSuggestionCandidate`
+
+```ts
+type LinkSuggestionCandidate = {
+  entity_id: string
+  schema: string
+  attribute?: string
+  attribute_value?: string
+  title?: string
+  status?: "pending" | "linked" | "dismissed"
+  resolved_by?: {
+    user_id?: string
+    email?: string
+  }
+  resolved_at?: string // date-time
+}
+```
+
+### `LinkSuggestion`
+
+```ts
+type LinkSuggestion = {
+  id: string
+  identifier: string
+  found_in?: string
+  status: "pending" | "accepted" | "dismissed"
+  candidates: Array<{
+    entity_id: string
+    schema: string
+    attribute?: string
+    attribute_value?: string
+    title?: string
+    status?: "pending" | "linked" | "dismissed"
+    resolved_by?: {
+      user_id?: { ... }
+      email?: { ... }
+    }
+    resolved_at?: string // date-time
+  }>
+  accepted_entity_ids?: string[]
+  resolved_by?: {
+    user_id?: string
+    email?: string
+  }
+  resolved_at?: string // date-time
+  created_at?: string // date-time
+}
+```
+
+### `TimelineLinkSuggestion`
+
+```ts
+type TimelineLinkSuggestion = {
+  id?: string
+  identifier: string
+  candidates?: Array<{
+    entity_id: string
+    schema?: string
+  }>
+}
+```
+
+### `MessageEntityLinkSuggestedEvent`
+
+```ts
+type MessageEntityLinkSuggestedEvent = {
+  type: "MESSAGE_ENTITY_LINK_SUGGESTED"
+  suggestions?: Array<{
+    id?: string
+    identifier: string
+    candidates?: Array<{
+      entity_id: { ... }
+      schema?: { ... }
+    }>
+  }>
+}
+```
+
+### `MessageEntityLinkSuggestionDismissedEvent`
+
+```ts
+type MessageEntityLinkSuggestionDismissedEvent = {
+  type: "MESSAGE_ENTITY_LINK_SUGGESTION_DISMISSED"
+  suggestions?: Array<{
+    id?: string
+    identifier: string
+    candidates?: Array<{
+      entity_id: { ... }
+      schema?: { ... }
+    }>
+  }>
 }
 ```
 
@@ -2704,6 +3059,7 @@ type TimelineEventData = {
     schema?: string
   }>
   link_kind?: "manual" | "auto"
+  from_suggestion?: boolean
 } | {
   type: "MESSAGE_ENTITY_UNLINKED"
   entities?: Array<{
@@ -2711,6 +3067,26 @@ type TimelineEventData = {
     schema?: string
   }>
   link_kind?: "manual" | "auto"
+} | {
+  type: "MESSAGE_ENTITY_LINK_SUGGESTED"
+  suggestions?: Array<{
+    id?: string
+    identifier: string
+    candidates?: Array<{
+      entity_id: { ... }
+      schema?: { ... }
+    }>
+  }>
+} | {
+  type: "MESSAGE_ENTITY_LINK_SUGGESTION_DISMISSED"
+  suggestions?: Array<{
+    id?: string
+    identifier: string
+    candidates?: Array<{
+      entity_id: { ... }
+      schema?: { ... }
+    }>
+  }>
 } | {
   type: "MESSAGE_AUTO_REPLY_SENT"
   reply_message_id?: string
@@ -2762,6 +3138,7 @@ type TimelineEvent = {
       schema?: { ... }
     }>
     link_kind?: "manual" | "auto"
+    from_suggestion?: boolean
   } | {
     type: "MESSAGE_ENTITY_UNLINKED"
     entities?: Array<{
@@ -2769,6 +3146,20 @@ type TimelineEvent = {
       schema?: { ... }
     }>
     link_kind?: "manual" | "auto"
+  } | {
+    type: "MESSAGE_ENTITY_LINK_SUGGESTED"
+    suggestions?: Array<{
+      id?: { ... }
+      identifier: { ... }
+      candidates?: { ... }
+    }>
+  } | {
+    type: "MESSAGE_ENTITY_LINK_SUGGESTION_DISMISSED"
+    suggestions?: Array<{
+      id?: { ... }
+      identifier: { ... }
+      candidates?: { ... }
+    }>
   } | {
     type: "MESSAGE_AUTO_REPLY_SENT"
     reply_message_id?: string

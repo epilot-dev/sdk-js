@@ -7,7 +7,7 @@ const OpenAPIClientAxios =
   OpenAPIClientAxiosModule;
 
 import { loadDefinition } from './definition-loader.js';
-import { resolveToken } from './auth-store.js';
+import { resolveTokenAsync } from './auth-store.js';
 import { getResolvedProfile, getStage } from './profiles.js';
 import { collectParams, getOperationParams, getMissingRequired } from './param-collector.js';
 import { resolveBody, getRequestBodyInfo } from './body-handler.js';
@@ -42,10 +42,13 @@ export type CallArgs = {
 /**
  * Rewrite a production URL to target a different stage.
  * e.g. https://entity.sls.epilot.io → https://entity.dev.sls.epilot.io
+ * Identity uses https://id.epilot.cloud → https://id.dev.epilot.cloud.
  */
 const toStageUrl = (prodUrl: string, stage: string): string => {
   if (stage === 'prod') return prodUrl;
-  return prodUrl.replace('.sls.epilot.io', `.${stage}.sls.epilot.io`);
+  return prodUrl
+    .replace(/^https:\/\/id\.epilot\.cloud(?=\/|$)/, `https://id.${stage}.epilot.cloud`)
+    .replace('.sls.epilot.io', `.${stage}.sls.epilot.io`);
 };
 
 /**
@@ -427,7 +430,7 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
   }
 
   // Resolve auth (--token > EPILOT_TOKEN > profile > credentials.json > interactive prompt)
-  let token = resolveToken(args.token, args.profile);
+  let token = await resolveTokenAsync(args.token, args.profile);
   if (!token) {
     if (isInteractive({ interactive: args.interactive })) {
       const { promptToken } = await import('./interactive.js');

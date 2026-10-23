@@ -59,12 +59,62 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   CONDITIONAL_VARIANT_WRITE_WARNING: {
     level: 'warning',
     description:
-      'A variant write succeeded but not exactly as sent: a value the schema does not let a variant override was dropped, a live or past-dated version was rewritten, or the entity is near its variant cap. The pricing code in details says which',
+      'One variant write succeeded with a warning. The variant is stored and the rest of the batch and the run continue. details.code names the warning',
   },
   CONDITIONAL_VARIANTS_WRITTEN: {
     level: 'success',
     description:
       'Conditional price variants were written for one imported entity: emitted once per chunk, with a per-outcome count and the variant ids in details',
+  },
+  CORRELATION_CLOSE_IGNORED: {
+    level: 'warning',
+    description:
+      'The partner declared a correlation complete, but the close was not applied: the same request has to be retried, the queue refused one of its events, the correlation does not exist and the request recorded nothing under it (its events carried their own correlation ids, were duplicates, matched no use case, or were not processed as interactive), a close without events found the organization over its interactive rate and could not create the correlation, or the correlation belongs to another integration (the one whose event or close created it). The reason names the cause. Retry with `correlation_complete`, send the close under the correlation the events were recorded under, or use a correlation id of your own',
+  },
+  CORRELATION_CLOSED_EMPTY: {
+    level: 'info',
+    description:
+      'The partner declared a correlation complete without sending any event for it. That is the partner reporting "I found nothing", and anyone waiting is told so at once instead of waiting it out',
+  },
+  CORRELATION_CLOSED_INCOMPLETE: {
+    level: 'warning',
+    description:
+      'The partner declared a correlation complete and everything it sent was processed, but what the caller was waiting for was not in it — see `missing_entities` and `missing_use_cases`. Reported once per correlation',
+  },
+  CORRELATION_COMPLETED: {
+    level: 'info',
+    description:
+      'Every event the partner sent under this correlation has finished processing and the partner declared the correlation complete',
+  },
+  CORRELATION_EVENT_LIMIT_EXCEEDED: {
+    level: 'warning',
+    description:
+      'This correlation already holds as many events as one correlation may, so further events sent under it were processed normally and cannot be waited on. A correlation is meant to cover one registration or one change; this usually means the partner sends the same correlation id with every push. Each request that should be waited on needs its own id',
+  },
+  CORRELATION_ID_MISSING: {
+    level: 'error',
+    description:
+      'A request asked for something that only makes sense for a correlation, but did not say which correlation',
+  },
+  CORRELATION_LATE_EVENT: {
+    level: 'warning',
+    description:
+      'An event arrived under a correlation the partner had already declared complete. It was processed, but anyone waiting on that correlation had already been answered, and once the correlation is complete the event cannot change that answer — the partner is sending `correlation_complete` too early',
+  },
+  CORRELATION_REQUIREMENT_FAILED: {
+    level: 'error',
+    description:
+      'Something a caller was waiting for can no longer arrive: every event that would have satisfied the requirement ended in an error. Reported once per correlation',
+  },
+  CORRELATION_WAIT_REJECTED: {
+    level: 'warning',
+    description:
+      'A caller tried to wait on a correlation while too many waits were already open, so it was asked to retry. Its data is unaffected — only the answer it was waiting for is slower',
+  },
+  CORRELATION_WAIT_TIMEOUT: {
+    level: 'warning',
+    description:
+      'A caller waited on a correlation until its time ran out without getting what it asked for — see `missing_entities` and `missing_use_cases` for what had not arrived. Reported once per correlation. When nothing at all was sent under the correlation, it carries no integration: none is known before the first event',
   },
   DEPRECATED_ENDPOINT: { level: 'error', description: 'This endpoint version is deprecated' },
   DIRECT_ENTITY_NOT_ALLOWED: {
@@ -88,6 +138,18 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     description: 'A direct-by-id entity reference points at an entity that does not exist or has a different schema',
   },
   ENTITY_UPDATED: { level: 'success', description: 'An existing entity was updated in epilot' },
+  ENV_VAR_REF_JSONATA_FAILED: {
+    level: 'error',
+    description: 'The JSONata expression of an env_var_ref field failed to evaluate, so the field was skipped',
+  },
+  ENV_VAR_REF_LOOKUP_FAILED: {
+    level: 'error',
+    description: 'The environment variables could not be looked up for an env_var_ref field, so the field was skipped',
+  },
+  ENV_VAR_REF_NOT_FOUND: {
+    level: 'warning',
+    description: 'The environment variable an env_var_ref field points at does not exist, so the field was left unset',
+  },
   EVENT_NOT_CONFIGURED: { level: 'error', description: 'No mapping configuration found for this event type' },
   EXTERNAL_API_ERROR: { level: 'error', description: 'An external API returned an error' },
   EXTERNAL_ERROR: {
@@ -146,6 +208,21 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     description:
       "The inbound event referenced an integration_id that does not exist in the calling token's organization. Check the integration id and that the token belongs to the same org.",
   },
+  INTERACTIVE_CROSS_LANE_WRITE: {
+    level: 'warning',
+    description:
+      'The same entity was updated from two different processing lanes within seconds of each other, one of them the interactive lane. Both updates were applied; this reports that they overlapped, so the order they landed in was decided by timing',
+  },
+  INTERACTIVE_NOT_ALLOWED: {
+    level: 'info',
+    description:
+      'Interactive processing was requested for a use case that is not configured for it, so the events were processed normally. Set `interactive` to `on_request` or `always` on the use case if the caller is meant to be able to wait for these events',
+  },
+  INTERACTIVE_RATE_LIMITED: {
+    level: 'warning',
+    description:
+      'The organization asked for interactive processing more often than its agreed rate, so these events were processed on its normal lane instead. Nothing was lost and the correlation can still be waited on — it will simply take as long as a bulk event does',
+  },
   INVALID_METER_READING_ATTRIBUTES: { level: 'error', description: 'Meter reading has invalid attributes' },
   LOOKUP_UNMAPPED: {
     level: 'warning',
@@ -175,6 +252,16 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
       'One or more meter readings were created or updated — emitted once per batch, not per reading (reading_count and external_ids in details)',
   },
   METERING_API_ERROR: { level: 'error', description: 'The metering API returned an error' },
+  MISSING_METER_COUNTER_UNIQUE_IDS: {
+    level: 'error',
+    description:
+      'A meter reading was skipped because the event did not contain the unique IDs configured to identify its meter counter',
+  },
+  MISSING_METER_UNIQUE_IDS: {
+    level: 'error',
+    description:
+      'A meter reading was skipped because the event did not contain the unique IDs configured to identify its meter',
+  },
   MISSING_REQUIRED_PARAM: { level: 'error', description: 'A required parameter is missing from the request' },
   MISSING_UNIQUE_IDENTIFIERS: {
     level: 'error',
@@ -191,7 +278,8 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   },
   MSG_ENQUEUED: {
     level: 'info',
-    description: 'Outbound message enqueued to the poll queue, awaiting consumption by the ERP',
+    description:
+      'Outbound message enqueued to the poll queue, awaiting consumption by the ERP. When the use case maps the payload, the detail carries the mapped payload as delivered and its mapping_version (or payload_omitted when it exceeds 48 KiB)',
   },
   MSG_EXPIRED_UNPOLLED: {
     level: 'error',
@@ -208,17 +296,50 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
       'An event arrived after the poll consumer had already received later events, so it was placed at the end of the stream instead of at its event time — it is delivered, but out of event-time order',
   },
   OAUTH2_TOKEN_FAILURE: { level: 'error', description: 'Failed to obtain an OAuth2 access token' },
+  ORG_DROPPED: {
+    level: 'info',
+    description:
+      'Events from this organization are configured to be dropped, so the event was consumed without being processed',
+  },
   PAYLOAD_TOO_LARGE: {
     level: 'error',
     description: 'The payload exceeded the maximum size accepted by the receiving system',
   },
+  PORTAL_REF_AMBIGUOUS: {
+    level: 'warning',
+    description:
+      'Several portals matched the portal_ref filter and the oldest one was used. Narrow the filter so it matches exactly one portal',
+  },
+  PORTAL_REF_JSONATA_FAILED: {
+    level: 'error',
+    description: 'The JSONata expression of a portal_ref field failed to evaluate, so the field was skipped',
+  },
+  PORTAL_REF_LOOKUP_FAILED: {
+    level: 'error',
+    description: 'The portals could not be looked up for a portal_ref field, so the field was skipped',
+  },
+  PORTAL_REF_NO_MATCH: {
+    level: 'warning',
+    description:
+      'No portal matched the portal_ref filter, so the field was left unset. Check the filter against the portals in this organization',
+  },
+  PROCESSING_STATE_LIMIT: {
+    level: 'error',
+    description:
+      "The processing record of an interactive event could not be written, because it or its correlation reached the size the store allows, so the event was ended as an error instead of being left processing: its correlation still completes, and anyone waiting on it is answered. The event's data may have been written all the same. Usually a payload with unusually many entities or very long unique ids",
+  },
   PRUNE_SCOPE_COMPLETED: { level: 'success', description: 'Scope pruning completed successfully' },
   PRUNE_SCOPE_PARTIAL_FAILURE: { level: 'error', description: 'Scope pruning completed with some failures' },
   RECURSION_DEPTH_EXCEEDED: { level: 'error', description: 'Maximum recursion depth was exceeded during processing' },
+  RELATION_MISSING_UNIQUE_IDS: {
+    level: 'warning',
+    description:
+      "A relation was skipped because the event did not contain all unique IDs of the relation's target. The entity was still written, without that relation — check that the mapping sends every unique ID the relation is configured with",
+  },
   RELATION_REF_ITEM_NOT_FOUND: {
     level: 'error',
     description:
-      'The relation_ref target entity exists but the referenced item/value could not be matched — skipped as non-retryable. Check the mapping configuration and the entity data.',
+      'The relation_ref value could not be matched on the target entity (invalid mapped value, or still no match after writing it to the target) — skipped as non-retryable. Check the mapping configuration and the entity data.',
   },
   RELATION_REF_VALUE_UNDEFINED: {
     level: 'error',
@@ -239,7 +360,23 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   SECURE_PROXY_IP_BLOCKED: { level: 'error', description: 'The target IP address is blocked' },
   SECURE_PROXY_IP_NOT_ALLOWED: { level: 'error', description: 'The target IP address is not in the allowlist' },
   SECURE_PROXY_NOT_FOUND: { level: 'error', description: 'The secure proxy use case was not found' },
+  SECURE_PROXY_OK: { level: 'success', description: 'The secure proxy reached the target and returned its answer' },
   SECURE_PROXY_UNAVAILABLE: { level: 'error', description: 'Secure proxy service is unavailable' },
+  SHARING_FAILED: {
+    level: 'error',
+    description:
+      'Sharing the entity with its partner orgs kept failing with a temporary error and the retries were used up. The entity itself was written; the next event for it syncs its sharing again',
+  },
+  SHARING_PARTNER_NOT_CONNECTED: {
+    level: 'warning',
+    description:
+      'The entity was written but not shared with the partner orgs in partner_org_ids: this organization has no partnership with them. Set up the partnership, or fix the partner_org_id in the mapping',
+  },
+  SHARING_REJECTED: {
+    level: 'warning',
+    description:
+      'The entity was written but the sharing service rejected sharing it with its partner orgs (details.status). Check the sharing configuration of the partners in partner_org_ids',
+  },
   SIGNATURE_VERIFICATION_FAILED: { level: 'error', description: 'Request signature could not be verified' },
   SIGNATURE_VERIFICATION_UNAVAILABLE: {
     level: 'error',
@@ -256,10 +393,20 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
       'A request step\'s "run this step when" expression returned false, so this step and every step after it were skipped. This is the configuration working as written, not a fault.',
   },
   TIMEOUT: { level: 'error', description: 'The operation timed out' },
+  UNIQUE_ID_LOOKUP_UNRESOLVABLE: {
+    level: 'error',
+    description:
+      'A related entity created for this event still could not be found by its unique ID, so the relation was skipped instead of creating a duplicate. Check that the unique ID value type matches the entity schema.',
+  },
   UNIQUE_ID_MULTIPLE_MATCHES: { level: 'error', description: 'Multiple entities matched the unique ID' },
   UNIQUE_ID_NOT_IN_SCHEMA: {
     level: 'error',
     description: 'The unique ID attribute is not defined in the entity schema',
+  },
+  UNIQUE_ID_TYPE_DERIVATION_FAILED: {
+    level: 'warning',
+    description:
+      "Direct mode could not derive a unique ID's type from the entity schema, so the value was used exactly as sent",
   },
   UNKNOWN_ERROR: { level: 'error', description: 'An unexpected error occurred during processing' },
   USE_CASE_DISABLED: { level: 'error', description: 'The use case is currently disabled' },
@@ -267,6 +414,15 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   USE_CASE_MISSING_CONFIG: { level: 'error', description: 'The use case is missing required configuration' },
   USE_CASE_NOT_FOUND: { level: 'error', description: 'The use case could not be found' },
   WEBHOOK_DELIVERED: { level: 'success', description: 'Webhook was delivered successfully' },
+  WEBHOOK_DELIVERY_FAILED: {
+    level: 'error',
+    description:
+      "The webhook could not be delivered and the target returned no HTTP status (for example a connection or timeout error). The webhook service's own error code is in the event detail",
+  },
+  WEBHOOK_SKIPPED: {
+    level: 'info',
+    description: 'The webhook was not delivered because its filters did not match the event',
+  },
 };
 
 /**

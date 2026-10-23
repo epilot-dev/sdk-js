@@ -208,7 +208,7 @@
             }
           },
           "400": {
-            "description": "Bad Request - Invalid request body. Invalid external or environment comparison values additionally\ncarry a `code`: `external_value_not_found` when the app is not installed or the hook / result does not\nexist, `external_value_incompatible` when the result type does not match the compared kind,\n`environment_variable_not_found` when the referenced environment variable does not exist in the\norganisation, `environment_variable_incompatible` when its type cannot be compared as required\n(`Number` for numbers, `Text` for text and dates, `Number` / `Text` / `Boolean` for `applies_when`;\n`String`, `SecretString`, `Map` and `JSON` never).\n",
+            "description": "Bad Request - Invalid request body. Invalid external or environment comparison values additionally\ncarry a `code`: `external_value_not_found` when the app is not installed or the hook / result does not\nexist or an `inputs` key is not a value input the hook declares, `external_value_incompatible` when the\nresult type does not match the compared kind or an input's parameter is used as another kind in the rule,\n`environment_variable_not_found` when the referenced environment variable does not exist in the\norganisation, `environment_variable_incompatible` when its type cannot be compared as required\n(`Number` for numbers, `Text` for text and dates, `Number` / `Text` / `Boolean` for `applies_when`;\n`String`, `SecretString`, `Map` and `JSON` never).\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -493,7 +493,7 @@
             }
           },
           "400": {
-            "description": "Bad Request - Invalid request body. Invalid external or environment comparison values additionally\ncarry a `code`: `external_value_not_found` when the app is not installed or the hook / result does not\nexist, `external_value_incompatible` when the result type does not match the compared kind,\n`environment_variable_not_found` when the referenced environment variable does not exist in the\norganisation, `environment_variable_incompatible` when its type cannot be compared as required\n(`Number` for numbers, `Text` for text and dates, `Number` / `Text` / `Boolean` for `applies_when`;\n`String`, `SecretString`, `Map` and `JSON` never).\n",
+            "description": "Bad Request - Invalid request body. Invalid external or environment comparison values additionally\ncarry a `code`: `external_value_not_found` when the app is not installed or the hook / result does not\nexist or an `inputs` key is not a value input the hook declares, `external_value_incompatible` when the\nresult type does not match the compared kind or an input's parameter is used as another kind in the rule,\n`environment_variable_not_found` when the referenced environment variable does not exist in the\norganisation, `environment_variable_incompatible` when its type cannot be compared as required\n(`Number` for numbers, `Text` for text and dates, `Number` / `Text` / `Boolean` for `applies_when`;\n`String`, `SecretString`, `Map` and `JSON` never).\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -2116,6 +2116,9 @@
             "$ref": "#/components/schemas/ExternalValue"
           },
           {
+            "$ref": "#/components/schemas/ParameterValue"
+          },
+          {
             "$ref": "#/components/schemas/RangeValue"
           },
           {
@@ -2124,7 +2127,7 @@
         ]
       },
       "ScalarValue": {
-        "description": "A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value.",
+        "description": "A single comparison value - static, resolved from context, a relative date, an organisation environment variable, an external value, or a parameter the consuming surface supplies.",
         "oneOf": [
           {
             "$ref": "#/components/schemas/StaticValue"
@@ -2140,12 +2143,32 @@
           },
           {
             "$ref": "#/components/schemas/ExternalValue"
+          },
+          {
+            "$ref": "#/components/schemas/ParameterValue"
+          }
+        ]
+      },
+      "ValueReference": {
+        "description": "A value resolved at evaluation time instead of written into the rule, identified by\n`source`. Each field that accepts a reference lists the sources it allows; a rule using\nany other source is rejected when it is saved.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ContextValue"
+          },
+          {
+            "$ref": "#/components/schemas/EnvironmentValue"
+          },
+          {
+            "$ref": "#/components/schemas/ExternalValue"
+          },
+          {
+            "$ref": "#/components/schemas/ParameterValue"
           }
         ]
       },
       "EnvironmentValue": {
         "type": "object",
-        "description": "A comparison value resolved at evaluation time from an organisation environment variable\n(environments-api). The rule stores the key, never the value, so one change to the variable\nreaches every rule that references it and a blueprint install never overwrites the\norganisation's own value.\n\nOnly browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for\ntext comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.\n`String` and `SecretString` variables are rejected at write time. Write-time validation also\nchecks that the variable exists in the organisation; a variable that exists without a value\n(for example seeded by a blueprint install) is accepted and resolves as unavailable until set.\n",
+        "description": "A comparison value resolved at evaluation time from an organisation environment variable\n(environments-api). The rule stores the key, never the value, so one change to the variable\nreaches every rule that references it and a blueprint install never overwrites the\norganisation's own value.\n\nOnly browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment\namounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601\nstring), `Boolean` for `applies_when` values.\n`String` and `SecretString` variables are rejected at write time. Write-time validation also\nchecks that the variable exists in the organisation; a variable that exists without a value\n(for example seeded by a blueprint install) is accepted and resolves as unavailable until set.\n",
         "required": [
           "source",
           "key"
@@ -2170,7 +2193,7 @@
       },
       "ExternalValue": {
         "type": "object",
-        "description": "A comparison value produced at evaluation time by an External Values hook of an installed\napp (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is\nresolved server-side by the external-values-api, which executes the hook's HTTP call with\nthe app's credentials and returns the typed result identified by `result_id`.\n\nWrite-time validation checks that the app is installed in the organisation, that the hook\nand result exist, and that the result's type is compatible with the compared kind\n(`number` results for numeric comparisons, `text` for text, `date` for date). External values\nare resolved only for authenticated consumers (epilot 360 users and portal end customers);\nin public journeys the dependent conditions are skipped.\n",
+        "description": "A comparison value produced at evaluation time by an External Values hook of an installed\napp (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is\nresolved server-side by the external-values-api, which executes the hook's HTTP call with\nthe app's credentials and returns the typed result identified by `result_id`.\n\nWrite-time validation checks that the app is installed in the organisation, that the hook\nand result exist, and that the result's type is compatible with the compared kind\n(`number` results for numeric comparisons, `text` for text, `date` for date). External values\nare resolved only for authenticated consumers (epilot 360 users and portal end customers);\nin public journeys the dependent conditions are skipped.\n\nA hook may declare value inputs (`contexts` entries `{ \"type\": \"value\", \"name\", \"value_type\" }`)\nbesides the entities it receives. `inputs` supplies them from rule parameters, which the\nconsumer binds like any other parameter and sends to the hook as `Context.<name>`.\n",
         "required": [
           "source",
           "app_id",
@@ -2204,6 +2227,39 @@
             "maxLength": 100,
             "pattern": "^[a-zA-Z0-9_-]+$",
             "description": "ID of the result entry within the hook whose value is compared."
+          },
+          "inputs": {
+            "type": "object",
+            "maxProperties": 10,
+            "description": "Values for the hook's value inputs, keyed by the input name the hook declares\n(`contexts` entry of type `value`), e.g. `{ \"reading_date\": { \"source\": \"parameter\", \"name\": \"reading_date\" } }`.\nOnly parameters are supported. Write-time validation checks that every key is a value input the\nhook declares and uses the input's `value_type` (`number`, `text`, `date` or `boolean`) as the\nparameter's kind, so the parameter must not be compared as another kind elsewhere in the rule.\nAn input parameter must not carry an adjustment. Declared inputs without an entry are allowed;\nthe consumer omits an input that has no value.\n",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ParameterValue"
+            }
+          },
+          "adjust": {
+            "$ref": "#/components/schemas/ValueAdjustment"
+          }
+        }
+      },
+      "ParameterValue": {
+        "type": "object",
+        "description": "A comparison value supplied by the consumer that evaluates the rule, identified by a name\nthe rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the\nname to a source of its own - a journey binds it to the value of another block - and\nresolves it at evaluation time, so the rule never references the consumer's objects and\nstays reusable across journeys and forms.\n\nA parameter's kind is determined by the field it is used in: `number`, `text` or `date`\nfor comparison values, range bounds, adjustment amounts and relative date offsets, or a\nnumber, string or boolean as an `applies_when` value, or the `value_type` of the External\nValues hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind\nthroughout a rule; a rule using a name as two kinds is rejected at write time. A parameter\nthe consumer leaves unbound or empty leaves the comparison unresolved.\n",
+        "required": [
+          "source",
+          "name"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "parameter"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "description": "Parameter name, e.g. `start_date`."
           },
           "adjust": {
             "$ref": "#/components/schemas/ValueAdjustment"
@@ -2286,17 +2342,14 @@
             ]
           },
           "value": {
-            "description": "The adjustment amount - a fixed number, or a context path resolving to a number\n(e.g. a per-contract percentage limit). Contextual adjustment values must not\ncarry a nested adjustment.\n",
+            "description": "The adjustment amount - a fixed non-negative number, or a reference resolving to a\nnumber at evaluation time. Accepted reference sources: `context` (e.g. a per-contract\npercentage limit), `environment` (a `Number` organisation environment variable) and\n`parameter` (a number the consuming surface supplies). Any other source is rejected at\nwrite time, and the reference must not carry its own `adjust`.\n",
             "oneOf": [
               {
                 "type": "number",
                 "minimum": 0
               },
               {
-                "$ref": "#/components/schemas/ContextValue"
-              },
-              {
-                "$ref": "#/components/schemas/EnvironmentValue"
+                "$ref": "#/components/schemas/ValueReference"
               }
             ]
           },
@@ -2313,7 +2366,7 @@
               "up",
               "down"
             ],
-            "description": "Rounds the adjusted result to a whole number - `up` (ceiling) or `down` (floor).\nOmitted means no rounding. Used for bounds like \"round up(current \u00d7 0.9) to whole euros\".\n"
+            "description": "Rounds the adjusted result to a whole number - `up` (ceiling) or `down` (floor).\nOmitted means no rounding. Used for bounds like \"round up(current × 0.9) to whole euros\".\n"
           }
         }
       },
@@ -2334,10 +2387,17 @@
             ]
           },
           "offset": {
-            "type": "integer",
-            "minimum": -36500,
-            "maximum": 36500,
-            "description": "Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself."
+            "description": "Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.\nEither a fixed whole number, or a reference resolved at evaluation time. Accepted reference sources:\n`environment` (a `Number` organisation environment variable) and `parameter` (a number the consuming\nsurface supplies). Any other source is rejected at write time, and the reference must not carry an\n`adjust`. If the referenced value is missing or is not a whole number within ±36500, the comparison\nis unresolved.\n",
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": -36500,
+                "maximum": 36500
+              },
+              {
+                "$ref": "#/components/schemas/ValueReference"
+              }
+            ]
           },
           "unit": {
             "type": "string",
@@ -2348,11 +2408,19 @@
             ]
           },
           "anchor": {
-            "type": "string",
-            "enum": [
-              "today"
-            ],
-            "default": "today"
+            "description": "The date the offset is applied to. `today` (the default) is the evaluation moment. A\nreference resolves to a date at evaluation time - for example a `parameter` bound to\nanother field's date, so \"at least one day after the start date\" is `offset: 1`,\n`unit: days` on that anchor. Accepted reference sources: `context`, `environment` (a\n`Text` variable holding an ISO 8601 date), `external` (a `date` result) and `parameter`.\nThe reference must not carry an `adjust`; if it does not resolve to a date, the\ncomparison is unresolved.\n",
+            "default": "today",
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "today"
+                ]
+              },
+              {
+                "$ref": "#/components/schemas/ValueReference"
+              }
+            ]
           }
         }
       },
@@ -2598,7 +2666,7 @@
             "description": "Comparison applied to the resolved context value. `isEmpty` / `isNotEmpty`\ntake no `value`; all other operators require one.\n"
           },
           "value": {
-            "description": "Comparison value for binary operators: a static number, string or boolean, or an\norganisation environment variable (`Number`, `Text` or `Boolean`) so a precondition\ncan act as a per-organisation switch or threshold.\n",
+            "description": "Comparison value for binary operators: a static number, string or boolean, or a\nreference resolved at evaluation time. Accepted reference sources: `environment` (a\n`Number`, `Text` or `Boolean` organisation environment variable), so a precondition\ncan act as a per-organisation switch or threshold, and `parameter` (a value the\nconsuming surface supplies, e.g. another field's answer). Any other source is rejected\nat write time, and the reference must not carry an `adjust`.\n",
             "oneOf": [
               {
                 "type": "number"
@@ -2610,7 +2678,7 @@
                 "type": "boolean"
               },
               {
-                "$ref": "#/components/schemas/EnvironmentValue"
+                "$ref": "#/components/schemas/ValueReference"
               }
             ]
           }

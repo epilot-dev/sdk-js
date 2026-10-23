@@ -68,6 +68,24 @@ declare namespace Components {
                 [name: string]: string;
             };
         }
+        /**
+         * A list of scalars, served under this service's own `List<Text>`,
+         * `List<Number>` or `List<Boolean>` token (ER-5455). Read by logic
+         * conditions; flattened to `items` by the journey runtime.
+         *
+         */
+        export interface EnvironmentScalarList {
+            itemType: "Text" | "Number" | "Boolean";
+            items: (string | number | boolean)[];
+        }
+        export interface ExternalValueError {
+            /**
+             * Absent for hook-level failures, when no result was produced.
+             */
+            result_id?: string;
+            code: string;
+            message?: string;
+        }
         export interface GenerateDocumentRequest {
             /**
              * Entity id for the template being used
@@ -183,7 +201,17 @@ declare namespace Components {
              * true
              */
             thirdPartyCookies?: boolean;
+            /**
+             * Offline journeys (ER-5432): whether the published revision has settings.offline.enabled. Absent when the setting was never set.
+             * example:
+             * true
+             */
+            offline?: boolean;
         }
+        /**
+         * What the journey's Handlebars templates need from the organization, derived from the served configuration only. Present when the journey contains templates and templating is enabled for the organization. Read-only: like `featureFlags`, it is dropped from any write, so a client that sends the configuration back never stores it.
+         *
+         */
         export interface Journey {
             [name: string]: any;
             journeyId?: string;
@@ -199,6 +227,7 @@ declare namespace Components {
                 showStepperLabels?: boolean | null;
                 stepperType?: "numbers" | "progress bar";
                 hideNextButton?: boolean | null;
+                guestVisible?: boolean | null;
                 name: string;
                 stepId?: string;
                 schema: any;
@@ -258,7 +287,7 @@ declare namespace Components {
                              */
                             id?: string; // uuid
                             /**
-                             * Indicates reference type (block or context parameter)
+                             * Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)
                              */
                             referenceType?: string;
                             /**
@@ -421,6 +450,38 @@ declare namespace Components {
                  * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
                  */
                 thirdPartyCookies?: boolean;
+                /**
+                 * Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.
+                 *
+                 */
+                betaFeatures?: {
+                    /**
+                     * Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.
+                     *
+                     */
+                    modernProducts?: boolean;
+                    /**
+                     * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                     *
+                     */
+                    modernLauncher?: boolean;
+                };
+                /**
+                 * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                 *
+                 */
+                offline?: {
+                    /**
+                     * Prepare this journey for offline use on devices that open it online first.
+                     */
+                    enabled: boolean;
+                    /**
+                     * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                     * example:
+                     * 24
+                     */
+                    packTtlHours?: number;
+                } | null;
             };
             validationRules?: /**
              * References to validation rules organized by blocks and fields.
@@ -470,6 +531,7 @@ declare namespace Components {
             featureFlags?: {
                 [name: string]: any;
             };
+            templating?: JourneyTemplating;
         }
         /**
          * Journeys read from the API always carry an explicit `settings.isActive`. The flag remains optional in request bodies.
@@ -513,6 +575,7 @@ declare namespace Components {
                 showStepperLabels?: boolean | null;
                 stepperType?: "numbers" | "progress bar";
                 hideNextButton?: boolean | null;
+                guestVisible?: boolean | null;
                 name: string;
                 stepId?: string;
                 schema: any;
@@ -572,7 +635,7 @@ declare namespace Components {
                              */
                             id?: string; // uuid
                             /**
-                             * Indicates reference type (block or context parameter)
+                             * Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)
                              */
                             referenceType?: string;
                             /**
@@ -735,6 +798,38 @@ declare namespace Components {
                  * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
                  */
                 thirdPartyCookies?: boolean;
+                /**
+                 * Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.
+                 *
+                 */
+                betaFeatures?: {
+                    /**
+                     * Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.
+                     *
+                     */
+                    modernProducts?: boolean;
+                    /**
+                     * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                     *
+                     */
+                    modernLauncher?: boolean;
+                };
+                /**
+                 * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                 *
+                 */
+                offline?: {
+                    /**
+                     * Prepare this journey for offline use on devices that open it online first.
+                     */
+                    enabled: boolean;
+                    /**
+                     * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                     * example:
+                     * 24
+                     */
+                    packTtlHours?: number;
+                } | null;
             };
             validationRules?: /**
              * References to validation rules organized by blocks and fields.
@@ -782,6 +877,7 @@ declare namespace Components {
                 showStepperLabels?: boolean | null;
                 stepperType?: "numbers" | "progress bar";
                 hideNextButton?: boolean | null;
+                guestVisible?: boolean | null;
                 name: string;
                 stepId?: string;
                 schema: any;
@@ -841,7 +937,7 @@ declare namespace Components {
                              */
                             id?: string; // uuid
                             /**
-                             * Indicates reference type (block or context parameter)
+                             * Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)
                              */
                             referenceType?: string;
                             /**
@@ -995,6 +1091,38 @@ declare namespace Components {
                     mode?: "auto" | "local" | "remote" | "none";
                     supportedRevision?: number;
                 };
+                /**
+                 * Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.
+                 *
+                 */
+                betaFeatures?: {
+                    /**
+                     * Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.
+                     *
+                     */
+                    modernProducts?: boolean;
+                    /**
+                     * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                     *
+                     */
+                    modernLauncher?: boolean;
+                };
+                /**
+                 * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                 *
+                 */
+                offline?: {
+                    /**
+                     * Prepare this journey for offline use on devices that open it online first.
+                     */
+                    enabled: boolean;
+                    /**
+                     * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                     * example:
+                     * 24
+                     */
+                    packTtlHours?: number;
+                } | null;
             };
             validationRules?: /**
              * References to validation rules organized by blocks and fields.
@@ -1040,20 +1168,166 @@ declare namespace Components {
                 datasourceId: string;
                 code: "not_found" | "unsupported_type" | "not_set" | "invalid_value" | "incompatible_consumer";
             }[];
+            /**
+             * Values read by logic conditions, keyed by variable key.
+             */
+            variables?: {
+                key: string;
+                type: "Text" | "Number" | "Boolean" | "List<Text>" | "List<Number>" | "List<Boolean>";
+                value: string | number | boolean | /**
+                 * A list of scalars, served under this service's own `List<Text>`,
+                 * `List<Number>` or `List<Boolean>` token (ER-5455). Read by logic
+                 * conditions; flattened to `items` by the journey runtime.
+                 *
+                 */
+                EnvironmentScalarList;
+            }[];
+            /**
+             * Logic-condition keys that did not resolve, keyed by variable key.
+             */
+            variableErrors?: {
+                key: string;
+                code: "not_found" | "unsupported_type" | "not_set" | "invalid_value";
+            }[];
         }
         export interface JourneyEnvironmentVariablesResponse {
             items: {
                 key: string;
-                type: "Map" | "List<Link>";
-                value: EnvironmentMap | /**
+                type: "Text" | "Number" | "Boolean" | "Map" | "List<Link>" | "List<Text>" | "List<Number>" | "List<Boolean>";
+                value: string | number | boolean | EnvironmentMap | /**
                  * A list of links, served under this service's own `List<Link>` type
                  * token. environments-api types the variable `List` and declares the
                  * element type inside the value; journey-api composes the two so a
                  * consumer needs only one discriminant.
                  *
                  */
-                EnvironmentLinkList;
+                EnvironmentLinkList | /**
+                 * A list of scalars, served under this service's own `List<Text>`,
+                 * `List<Number>` or `List<Boolean>` token (ER-5455). Read by logic
+                 * conditions; flattened to `items` by the journey runtime.
+                 *
+                 */
+                EnvironmentScalarList;
                 description?: string;
+            }[];
+        }
+        export interface JourneyExternalValuesRequest {
+            /**
+             * The External Values datasources to resolve. A datasource is named by the id the journey config declares; the app and hook it points at are read from that config, never from this request.
+             */
+            items: [
+                {
+                    datasourceId: string;
+                    /**
+                     * Everything the hook reads, as one named map passed to it as `Context`: the validated value under `input`, plus each configured context binding under the name it was bound as.
+                     */
+                    context: {
+                        [name: string]: any;
+                    };
+                },
+                {
+                    datasourceId: string;
+                    /**
+                     * Everything the hook reads, as one named map passed to it as `Context`: the validated value under `input`, plus each configured context binding under the name it was bound as.
+                     */
+                    context: {
+                        [name: string]: any;
+                    };
+                }?,
+                {
+                    datasourceId: string;
+                    /**
+                     * Everything the hook reads, as one named map passed to it as `Context`: the validated value under `input`, plus each configured context binding under the name it was bound as.
+                     */
+                    context: {
+                        [name: string]: any;
+                    };
+                }?,
+                {
+                    datasourceId: string;
+                    /**
+                     * Everything the hook reads, as one named map passed to it as `Context`: the validated value under `input`, plus each configured context binding under the name it was bound as.
+                     */
+                    context: {
+                        [name: string]: any;
+                    };
+                }?,
+                {
+                    datasourceId: string;
+                    /**
+                     * Everything the hook reads, as one named map passed to it as `Context`: the validated value under `input`, plus each configured context binding under the name it was bound as.
+                     */
+                    context: {
+                        [name: string]: any;
+                    };
+                }?,
+                {
+                    datasourceId: string;
+                    /**
+                     * Everything the hook reads, as one named map passed to it as `Context`: the validated value under `input`, plus each configured context binding under the name it was bound as.
+                     */
+                    context: {
+                        [name: string]: any;
+                    };
+                }?,
+                {
+                    datasourceId: string;
+                    /**
+                     * Everything the hook reads, as one named map passed to it as `Context`: the validated value under `input`, plus each configured context binding under the name it was bound as.
+                     */
+                    context: {
+                        [name: string]: any;
+                    };
+                }?,
+                {
+                    datasourceId: string;
+                    /**
+                     * Everything the hook reads, as one named map passed to it as `Context`: the validated value under `input`, plus each configured context binding under the name it was bound as.
+                     */
+                    context: {
+                        [name: string]: any;
+                    };
+                }?,
+                {
+                    datasourceId: string;
+                    /**
+                     * Everything the hook reads, as one named map passed to it as `Context`: the validated value under `input`, plus each configured context binding under the name it was bound as.
+                     */
+                    context: {
+                        [name: string]: any;
+                    };
+                }?,
+                {
+                    datasourceId: string;
+                    /**
+                     * Everything the hook reads, as one named map passed to it as `Context`: the validated value under `input`, plus each configured context binding under the name it was bound as.
+                     */
+                    context: {
+                        [name: string]: any;
+                    };
+                }?
+            ];
+        }
+        export interface JourneyExternalValuesResponse {
+            items: {
+                datasourceId: string;
+                /**
+                 * Successfully extracted and coerced results, keyed by `result_id` and narrowed to the results the journey declares.
+                 */
+                values: {
+                    [name: string]: any;
+                };
+                errors?: ExternalValueError[];
+                policy?: {
+                    on_unavailable?: "skip" | "block";
+                };
+            }[];
+            /**
+             * Datasources that produced no result at all.
+             */
+            errors: {
+                datasourceId: string;
+                code: "unknown_datasource" | "resolver_unavailable";
             }[];
         }
         export interface JourneyFeatureFlags {
@@ -1091,7 +1365,11 @@ declare namespace Components {
             published_by?: string;
         }
         export interface JourneyResponse {
-            createdJourney?: Journey;
+            createdJourney?: /**
+             * What the journey's Handlebars templates need from the organization, derived from the served configuration only. Present when the journey contains templates and templating is enabled for the organization. Read-only: like `featureFlags`, it is dropped from any write, so a client that sends the configuration back never stores it.
+             *
+             */
+            Journey;
         }
         export interface JourneyRevision {
             /**
@@ -1148,6 +1426,7 @@ declare namespace Components {
                     showStepperLabels?: boolean | null;
                     stepperType?: "numbers" | "progress bar";
                     hideNextButton?: boolean | null;
+                    guestVisible?: boolean | null;
                     name: string;
                     stepId?: string;
                     schema: any;
@@ -1207,7 +1486,7 @@ declare namespace Components {
                                  */
                                 id?: string; // uuid
                                 /**
-                                 * Indicates reference type (block or context parameter)
+                                 * Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)
                                  */
                                 referenceType?: string;
                                 /**
@@ -1370,6 +1649,38 @@ declare namespace Components {
                      * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
                      */
                     thirdPartyCookies?: boolean;
+                    /**
+                     * Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.
+                     *
+                     */
+                    betaFeatures?: {
+                        /**
+                         * Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.
+                         *
+                         */
+                        modernProducts?: boolean;
+                        /**
+                         * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                         *
+                         */
+                        modernLauncher?: boolean;
+                    };
+                    /**
+                     * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                     *
+                     */
+                    offline?: {
+                        /**
+                         * Prepare this journey for offline use on devices that open it online first.
+                         */
+                        enabled: boolean;
+                        /**
+                         * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                         * example:
+                         * 24
+                         */
+                        packTtlHours?: number;
+                    } | null;
                 };
                 validationRules?: /**
                  * References to validation rules organized by blocks and fields.
@@ -1419,6 +1730,7 @@ declare namespace Components {
                 featureFlags?: {
                     [name: string]: any;
                 };
+                templating?: JourneyTemplating;
             };
         }
         export interface JourneyRevisionConflict {
@@ -1456,6 +1768,7 @@ declare namespace Components {
                 showStepperLabels?: boolean | null;
                 stepperType?: "numbers" | "progress bar";
                 hideNextButton?: boolean | null;
+                guestVisible?: boolean | null;
                 name: string;
                 stepId?: string;
                 schema: any;
@@ -1515,7 +1828,7 @@ declare namespace Components {
                              */
                             id?: string; // uuid
                             /**
-                             * Indicates reference type (block or context parameter)
+                             * Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)
                              */
                             referenceType?: string;
                             /**
@@ -1678,6 +1991,38 @@ declare namespace Components {
                  * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
                  */
                 thirdPartyCookies?: boolean;
+                /**
+                 * Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.
+                 *
+                 */
+                betaFeatures?: {
+                    /**
+                     * Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.
+                     *
+                     */
+                    modernProducts?: boolean;
+                    /**
+                     * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                     *
+                     */
+                    modernLauncher?: boolean;
+                };
+                /**
+                 * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                 *
+                 */
+                offline?: {
+                    /**
+                     * Prepare this journey for offline use on devices that open it online first.
+                     */
+                    enabled: boolean;
+                    /**
+                     * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                     * example:
+                     * 24
+                     */
+                    packTtlHours?: number;
+                } | null;
             };
             validationRules?: /**
              * References to validation rules organized by blocks and fields.
@@ -1788,6 +2133,60 @@ declare namespace Components {
              */
             revision_id?: string;
         }
+        export interface JourneyTemplateVariablesResponse {
+            /**
+             * Custom Variables a template can expand as `{{key}}`
+             */
+            customVariables: {
+                key: string;
+                name: string;
+            }[];
+            /**
+             * Environment variables a template can read as `{{env.key}}`; a Link as `{{env.key.url}}` and `{{env.key.label}}`
+             */
+            environment: {
+                key: string;
+                type: "String" | "Text" | "Number" | "Boolean" | "Link";
+                description?: string;
+                /**
+                 * The environment group the variable belongs to, when it has one
+                 */
+                group?: string;
+            }[];
+        }
+        export interface JourneyTemplating {
+            /**
+             * Custom Variables the journey's templates reference, expanded transitively
+             */
+            customVariables: {
+                key: string;
+                template: string;
+            }[];
+            /**
+             * Browser-safe environment values the templates read, keyed by variable key; scalars, or a Link's fields
+             */
+            env: {
+                [name: string]: string | number | boolean | /* A Link variable; label and description are a string or per-language strings, resolved by the runtime */ JourneyTemplatingLink;
+            };
+        }
+        /**
+         * What the journey's Handlebars templates need from the organization, derived from the served configuration only. Present when the journey contains templates and templating is enabled for the organization. Read-only: like `featureFlags`, it is dropped from any write, so a client that sends the configuration back never stores it.
+         *
+         */
+        export interface JourneyTemplatingContext {
+            templating?: JourneyTemplating;
+        }
+        /**
+         * A Link variable; label and description are a string or per-language strings, resolved by the runtime
+         */
+        export interface JourneyTemplatingLink {
+            url: string;
+            label: JourneyTemplatingTranslatable;
+            description?: JourneyTemplatingTranslatable;
+        }
+        export type JourneyTemplatingTranslatable = string | {
+            [name: string]: string;
+        };
         export interface JourneyValidationError {
             /**
              * Error type identifier
@@ -2196,7 +2595,11 @@ declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.JourneyCreationRequest;
         namespace Responses {
-            export type $201 = Components.Schemas.Journey;
+            export type $201 = /**
+             * What the journey's Handlebars templates need from the organization, derived from the served configuration only. Present when the journey contains templates and templating is enabled for the organization. Read-only: like `featureFlags`, it is dropped from any write, so a client that sends the configuration back never stores it.
+             *
+             */
+            Components.Schemas.Journey;
             export type $400 = Components.Schemas.JourneyValidationError;
         }
     }
@@ -2356,6 +2759,7 @@ declare namespace Paths {
                     showStepperLabels?: boolean | null;
                     stepperType?: "numbers" | "progress bar";
                     hideNextButton?: boolean | null;
+                    guestVisible?: boolean | null;
                     name: string;
                     stepId?: string;
                     schema: any;
@@ -2415,7 +2819,7 @@ declare namespace Paths {
                                  */
                                 id?: string; // uuid
                                 /**
-                                 * Indicates reference type (block or context parameter)
+                                 * Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)
                                  */
                                 referenceType?: string;
                                 /**
@@ -2581,6 +2985,38 @@ declare namespace Paths {
                      * If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent.
                      */
                     thirdPartyCookies?: boolean;
+                    /**
+                     * Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.
+                     *
+                     */
+                    betaFeatures?: {
+                        /**
+                         * Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.
+                         *
+                         */
+                        modernProducts?: boolean;
+                        /**
+                         * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                         *
+                         */
+                        modernLauncher?: boolean;
+                    };
+                    /**
+                     * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                     *
+                     */
+                    offline?: {
+                        /**
+                         * Prepare this journey for offline use on devices that open it online first.
+                         */
+                        enabled: boolean;
+                        /**
+                         * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                         * example:
+                         * 24
+                         */
+                        packTtlHours?: number;
+                    } | null;
                 };
                 validationRules?: /**
                  * References to validation rules organized by blocks and fields.
@@ -2630,6 +3066,7 @@ declare namespace Paths {
                 featureFlags?: {
                     [name: string]: any;
                 };
+                templating?: Components.Schemas.JourneyTemplating;
                 /**
                  * example:
                  * 42
@@ -2753,6 +3190,15 @@ declare namespace Paths {
             }
         }
     }
+    namespace GetJourneyTemplateVariables {
+        namespace Responses {
+            export type $200 = Components.Schemas.JourneyTemplateVariablesResponse;
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+        }
+    }
     namespace GetJourneyV2 {
         namespace Parameters {
             /**
@@ -2790,6 +3236,7 @@ declare namespace Paths {
                     showStepperLabels?: boolean | null;
                     stepperType?: "numbers" | "progress bar";
                     hideNextButton?: boolean | null;
+                    guestVisible?: boolean | null;
                     name: string;
                     stepId?: string;
                     schema: any;
@@ -2849,7 +3296,7 @@ declare namespace Paths {
                                  */
                                 id?: string; // uuid
                                 /**
-                                 * Indicates reference type (block or context parameter)
+                                 * Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)
                                  */
                                 referenceType?: string;
                                 /**
@@ -3006,6 +3453,38 @@ declare namespace Paths {
                         mode?: "auto" | "local" | "remote" | "none";
                         supportedRevision?: number;
                     };
+                    /**
+                     * Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.
+                     *
+                     */
+                    betaFeatures?: {
+                        /**
+                         * Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.
+                         *
+                         */
+                        modernProducts?: boolean;
+                        /**
+                         * Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.
+                         *
+                         */
+                        modernLauncher?: boolean;
+                    };
+                    /**
+                     * Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.
+                     *
+                     */
+                    offline?: {
+                        /**
+                         * Prepare this journey for offline use on devices that open it online first.
+                         */
+                        enabled: boolean;
+                        /**
+                         * How long a prepared pack stays fresh before the next online open refreshes it. Default 24.
+                         * example:
+                         * 24
+                         */
+                        packTtlHours?: number;
+                    } | null;
                 };
                 validationRules?: /**
                  * References to validation rules organized by blocks and fields.
@@ -3236,6 +3715,22 @@ declare namespace Paths {
             Parameters.Id /* uuid */;
         }
     }
+    namespace ResolveJourneyExternalValues {
+        namespace Parameters {
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: Parameters.Id /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.JourneyExternalValuesRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.JourneyExternalValuesResponse;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+        }
+    }
     namespace SearchJourneys {
         export type RequestBody = Components.Schemas.SearchJourneysQueryRequest;
         namespace Responses {
@@ -3370,7 +3865,7 @@ export interface OperationMethods {
   /**
    * getJourneyEnvironment - getJourneyEnvironment
    * 
-   * Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.
+   * Resolve the environment variables referenced by this journey: the environment-backed datasources declared in its steps, whether they source a block's options or supply the value an attached validation rule compares against, answered per datasource id; and the variables its logic conditions read, keyed by variable key (`variables` / `variableErrors`). Only browser-safe value types are returned; validation-rule values additionally exclude `Map`. Accepts either the public journey access token bound to this journey, or the caller's own portal (ECP) or epilot user token. A PRIVATE journey is served only to a portal or user token permitted to view it, the same rule getJourney applies.
    */
   'getJourneyEnvironment'(
     parameters?: Parameters<Paths.GetJourneyEnvironment.PathParameters> | null,
@@ -3378,15 +3873,46 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJourneyEnvironment.Responses.$200>
   /**
+   * resolveJourneyExternalValues - resolveJourneyExternalValues
+   * 
+   * Resolve the External Values hooks this journey's validation rules compare against.
+   * 
+   * The journey runtime never calls external-values-api itself. A request names a datasource
+   * id declared by the saved journey config; the app and hook it resolves are read from that
+   * config, so a visitor cannot aim an installed app's integration at an arbitrary hook.
+   * 
+   * Requires a portal token: a hook call reaches the organization's third-party system, so it
+   * stays behind the identified-customer boundary. Public journeys skip these conditions.
+   * 
+   * Answers 200 whenever the request itself was valid, including when a hook failed — per
+   * datasource, so one unreachable system never fails the rules that did resolve.
+   * 
+   */
+  'resolveJourneyExternalValues'(
+    parameters?: Parameters<Paths.ResolveJourneyExternalValues.PathParameters> | null,
+    data?: Paths.ResolveJourneyExternalValues.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ResolveJourneyExternalValues.Responses.$200>
+  /**
    * getJourneyEnvironmentVariables - getJourneyEnvironmentVariables
    * 
-   * List the organization's environment variables that a journey block may use as an options source. Only Map variables that currently hold a valid value are returned. Intended for the journey builder's authoring UI; requires a journey authoring token, not an environments token.
+   * List the organization's client-safe environment variables a journey may use: Map and List<Link> as an options source; Text, Number, Boolean and lists of them in logic conditions. Only variables that currently hold a valid value are returned. Intended for the journey builder's authoring UI; requires a journey authoring token, not an environments token.
    */
   'getJourneyEnvironmentVariables'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJourneyEnvironmentVariables.Responses.$200>
+  /**
+   * getJourneyTemplateVariables - getJourneyTemplateVariables
+   * 
+   * List what a journey template can reference beyond the entity's own attributes: the organization's Custom Variables and its scalar environment variables (`String`, `Text`, `Number`, `Boolean`). Names only, never values. Intended for the journey builder's variable picker; requires a journey authoring token, not an environments token.
+   */
+  'getJourneyTemplateVariables'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetJourneyTemplateVariables.Responses.$200>
   /**
    * getJourneyProducts - getJourneyProducts
    * 
@@ -3644,7 +4170,7 @@ export interface PathsDictionary {
     /**
      * getJourneyEnvironment - getJourneyEnvironment
      * 
-     * Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.
+     * Resolve the environment variables referenced by this journey: the environment-backed datasources declared in its steps, whether they source a block's options or supply the value an attached validation rule compares against, answered per datasource id; and the variables its logic conditions read, keyed by variable key (`variables` / `variableErrors`). Only browser-safe value types are returned; validation-rule values additionally exclude `Map`. Accepts either the public journey access token bound to this journey, or the caller's own portal (ECP) or epilot user token. A PRIVATE journey is served only to a portal or user token permitted to view it, the same rule getJourney applies.
      */
     'get'(
       parameters?: Parameters<Paths.GetJourneyEnvironment.PathParameters> | null,
@@ -3652,17 +4178,52 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetJourneyEnvironment.Responses.$200>
   }
+  ['/v1/journey/configuration/{id}/external-values']: {
+    /**
+     * resolveJourneyExternalValues - resolveJourneyExternalValues
+     * 
+     * Resolve the External Values hooks this journey's validation rules compare against.
+     * 
+     * The journey runtime never calls external-values-api itself. A request names a datasource
+     * id declared by the saved journey config; the app and hook it resolves are read from that
+     * config, so a visitor cannot aim an installed app's integration at an arbitrary hook.
+     * 
+     * Requires a portal token: a hook call reaches the organization's third-party system, so it
+     * stays behind the identified-customer boundary. Public journeys skip these conditions.
+     * 
+     * Answers 200 whenever the request itself was valid, including when a hook failed — per
+     * datasource, so one unreachable system never fails the rules that did resolve.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ResolveJourneyExternalValues.PathParameters> | null,
+      data?: Paths.ResolveJourneyExternalValues.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ResolveJourneyExternalValues.Responses.$200>
+  }
   ['/v1/journey/environment-variables']: {
     /**
      * getJourneyEnvironmentVariables - getJourneyEnvironmentVariables
      * 
-     * List the organization's environment variables that a journey block may use as an options source. Only Map variables that currently hold a valid value are returned. Intended for the journey builder's authoring UI; requires a journey authoring token, not an environments token.
+     * List the organization's client-safe environment variables a journey may use: Map and List<Link> as an options source; Text, Number, Boolean and lists of them in logic conditions. Only variables that currently hold a valid value are returned. Intended for the journey builder's authoring UI; requires a journey authoring token, not an environments token.
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetJourneyEnvironmentVariables.Responses.$200>
+  }
+  ['/v1/journey/template-variables']: {
+    /**
+     * getJourneyTemplateVariables - getJourneyTemplateVariables
+     * 
+     * List what a journey template can reference beyond the entity's own attributes: the organization's Custom Variables and its scalar environment variables (`String`, `Text`, `Number`, `Boolean`). Names only, never values. Intended for the journey builder's variable picker; requires a journey authoring token, not an environments token.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetJourneyTemplateVariables.Responses.$200>
   }
   ['/v1/journey/products/{id}']: {
     /**
@@ -3831,6 +4392,8 @@ export type EnvironmentLink = Components.Schemas.EnvironmentLink;
 export type EnvironmentLinkList = Components.Schemas.EnvironmentLinkList;
 export type EnvironmentMap = Components.Schemas.EnvironmentMap;
 export type EnvironmentMapEntry = Components.Schemas.EnvironmentMapEntry;
+export type EnvironmentScalarList = Components.Schemas.EnvironmentScalarList;
+export type ExternalValueError = Components.Schemas.ExternalValueError;
 export type GenerateDocumentRequest = Components.Schemas.GenerateDocumentRequest;
 export type GenerateDocumentResponse = Components.Schemas.GenerateDocumentResponse;
 export type GetJourneysResponse = Components.Schemas.GetJourneysResponse;
@@ -3842,6 +4405,8 @@ export type JourneyCreationRequest = Components.Schemas.JourneyCreationRequest;
 export type JourneyCreationRequestV2 = Components.Schemas.JourneyCreationRequestV2;
 export type JourneyEnvironmentResponse = Components.Schemas.JourneyEnvironmentResponse;
 export type JourneyEnvironmentVariablesResponse = Components.Schemas.JourneyEnvironmentVariablesResponse;
+export type JourneyExternalValuesRequest = Components.Schemas.JourneyExternalValuesRequest;
+export type JourneyExternalValuesResponse = Components.Schemas.JourneyExternalValuesResponse;
 export type JourneyFeatureFlags = Components.Schemas.JourneyFeatureFlags;
 export type JourneyProductsResponse = Components.Schemas.JourneyProductsResponse;
 export type JourneyPublishState = Components.Schemas.JourneyPublishState;
@@ -3852,6 +4417,11 @@ export type JourneyRevisionList = Components.Schemas.JourneyRevisionList;
 export type JourneyRevisionRequest = Components.Schemas.JourneyRevisionRequest;
 export type JourneyRevisionSummary = Components.Schemas.JourneyRevisionSummary;
 export type JourneyServedRevision = Components.Schemas.JourneyServedRevision;
+export type JourneyTemplateVariablesResponse = Components.Schemas.JourneyTemplateVariablesResponse;
+export type JourneyTemplating = Components.Schemas.JourneyTemplating;
+export type JourneyTemplatingContext = Components.Schemas.JourneyTemplatingContext;
+export type JourneyTemplatingLink = Components.Schemas.JourneyTemplatingLink;
+export type JourneyTemplatingTranslatable = Components.Schemas.JourneyTemplatingTranslatable;
 export type JourneyValidationError = Components.Schemas.JourneyValidationError;
 export type JourneyValidationResponse = Components.Schemas.JourneyValidationResponse;
 export type PatchUpdateJourneyRequest = Components.Schemas.PatchUpdateJourneyRequest;

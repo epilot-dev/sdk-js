@@ -66,6 +66,72 @@
           }
         },
         "responses": {}
+      },
+      "get": {
+        "operationId": "queryErpUpdateEvents",
+        "parameters": [
+          {
+            "name": "correlation_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "wait",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "wait_for_entities",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "wait_for_use_cases",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/erp/updates/events/{event_id}": {
+      "get": {
+        "operationId": "getErpUpdateEvent",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/erp/updates/correlations": {
+      "get": {
+        "operationId": "listErpUpdateCorrelations",
+        "parameters": [
+          {
+            "name": "integration_id",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
       }
     },
     "/v2/erp/updates/mapping_simulation": {
@@ -600,6 +666,7 @@
     },
     "/v1/integrations/{integrationId}/monitoring/inbound-events": {
       "post": {
+        "deprecated": true,
         "operationId": "queryInboundMonitoringEvents",
         "parameters": [
           {
@@ -619,6 +686,7 @@
     },
     "/v1/integrations/{integrationId}/monitoring/stats": {
       "post": {
+        "deprecated": true,
         "operationId": "getMonitoringStats",
         "parameters": [
           {
@@ -638,6 +706,7 @@
     },
     "/v1/integrations/{integrationId}/monitoring/timeseries": {
       "post": {
+        "deprecated": true,
         "operationId": "getMonitoringTimeSeries",
         "parameters": [
           {
@@ -825,6 +894,7 @@
     },
     "/v1/integrations/{integrationId}/monitoring/outbound-events": {
       "post": {
+        "deprecated": true,
         "operationId": "queryOutboundMonitoringEvents",
         "parameters": [
           {
@@ -951,6 +1021,25 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v2/integrations/{integrationId}/monitoring/runs/completion": {
+      "post": {
+        "operationId": "getMonitoringRunCompletionV2",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
@@ -1094,6 +1183,32 @@
         "responses": {}
       }
     },
+    "/v2/erp/imports/{importId}/preview": {
+      "get": {
+        "operationId": "getErpImportPreview",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/erp/imports/{importId}/download": {
+      "get": {
+        "operationId": "downloadErpImportFile",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/erp/imports/{importId}:validate": {
       "post": {
         "operationId": "validateErpImport",
@@ -1187,6 +1302,14 @@
         }
       },
       "InternalServerError": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "CorrelationWaitRejected": {
+        "headers": {
+          "Retry-After": {}
+        },
         "content": {
           "application/json": {}
         }

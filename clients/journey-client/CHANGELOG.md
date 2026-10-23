@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.0
+
+### Minor Changes
+
+- Add `resolveJourneyExternalValues` — resolve the External Values hooks a journey's validation rules compare against, per datasource (ER-5455)
+- Environment variables of type `Text`, `Number`, `Boolean` and `List<Text|Number|Boolean>` can be used in logic conditions, and rule facts can reference them with the `environment` reference type
+
 ## 0.9.0
 
 ### Minor Changes

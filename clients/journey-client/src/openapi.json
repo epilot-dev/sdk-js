@@ -44,6 +44,12 @@
     "/v1/journey/organization/{id}": {
       "get": {
         "operationId": "getJourneysByOrgId",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "getJourneysByOrgId",
         "description": "Get all journeys by organization id",
         "tags": [
@@ -88,6 +94,19 @@
     "/v1/journey/configuration/{id}": {
       "get": {
         "operationId": "getJourney",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "entity:view",
+                "resource": "journey:*"
+              },
+              {
+                "access": "portal"
+              }
+            ]
+          }
+        ],
         "summary": "getJourney",
         "description": "Get journey by id. Private journeys requires valid private token to be passed",
         "security": [
@@ -178,6 +197,12 @@
       },
       "delete": {
         "operationId": "removeJourney",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:delete",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "removeJourney",
         "description": "Remove journey by id",
         "tags": [
@@ -223,6 +248,12 @@
     "/v1/journey/configuration/{id}/revisions": {
       "post": {
         "operationId": "createJourneyRevision",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "createJourneyRevision",
         "description": "Creates a revision: an immutable copy of the complete journey configuration, identified by `revision_id`. Nothing customers receive changes; the revision only becomes the published version when it is published. The payload is complete and is not merged against the journey record or the previous revision. The entity datasource set of the revision is stored separately through the datasources API under the same `revision_id`.\n\nOnly available for organizations with journey versioning enabled; returns `404` otherwise.\n",
         "tags": [
@@ -291,6 +322,12 @@
       },
       "get": {
         "operationId": "listJourneyRevisions",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "listJourneyRevisions",
         "description": "Lists the journey's revision history, newest first. Metadata only, no configuration payload. `is_published` says whether a revision is the published version right now, which is a different question from `published_at`, which records the last time it was published.\n\nOnly available for organizations with journey versioning enabled; returns `404` otherwise.\n",
         "tags": [
@@ -361,6 +398,12 @@
     "/v1/journey/configuration/{id}/revisions/{revision_id}": {
       "get": {
         "operationId": "getJourneyRevision",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "getJourneyRevision",
         "description": "Returns one revision with its full configuration, in the shape the builder holds a journey in, so it can be loaded straight into the editor as unsaved changes. Reading a revision changes nothing; a client persists it, if at all, by posting it back to `POST .../revisions`.\n\nOnly available for organizations with journey versioning enabled; returns `404` otherwise.\n",
         "tags": [
@@ -417,6 +460,12 @@
     "/v1/journey/configuration/{id}/publish": {
       "post": {
         "operationId": "publishJourneyRevision",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "publishJourneyRevision",
         "description": "Makes one revision the published version, the one customers receive, in a single transaction: the revision's configuration is copied onto the journey record, its datasource set onto the published datasources, and `name`, `description`, `published_at` and `published_by` are stamped onto the revision. Any revision can be published, old or new, so publishing an older revision is the rollback.\n\n`name` is generated server-side when omitted, so every published revision carries one; an omitted name never replaces a name a previous publish already set. `settings.isActive` is never changed by a publish.\n\nOnly available for organizations with journey versioning enabled; returns `404` otherwise.\n",
         "tags": [
@@ -480,6 +529,12 @@
     "/v1/journey/configuration/{id}/publish-state": {
       "get": {
         "operationId": "getJourneyPublishState",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "getJourneyPublishState",
         "description": "Answers which revision is the published version without paging through the history. A journey that has not adopted versioning yet returns `200` with `published_revision_id: null`, not `404`.\n\nOnly available for organizations with journey versioning enabled; returns `404` otherwise.\n",
         "tags": [
@@ -526,11 +581,26 @@
     "/v1/journey/configuration/{id}/environment": {
       "get": {
         "operationId": "getJourneyEnvironment",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "access": "org"
+              },
+              {
+                "access": "portal"
+              }
+            ]
+          }
+        ],
         "summary": "getJourneyEnvironment",
-        "description": "Resolve the environment variables referenced by this journey. Only browser-safe value types are returned.",
+        "description": "Resolve the environment variables referenced by this journey: the environment-backed datasources declared in its steps, whether they source a block's options or supply the value an attached validation rule compares against, answered per datasource id; and the variables its logic conditions read, keyed by variable key (`variables` / `variableErrors`). Only browser-safe value types are returned; validation-rule values additionally exclude `Map`. Accepts either the public journey access token bound to this journey, or the caller's own portal (ECP) or epilot user token. A PRIVATE journey is served only to a portal or user token permitted to view it, the same rule getJourney applies.",
         "security": [
           {
             "EpilotAuth": []
+          },
+          {
+            "PortalAuth": []
           }
         ],
         "tags": [
@@ -540,7 +610,7 @@
           {
             "name": "id",
             "in": "path",
-            "description": "Journey ID bound to the supplied journey access token",
+            "description": "Journey ID",
             "required": true,
             "schema": {
               "type": "string",
@@ -550,7 +620,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Resolved environment-backed datasources",
+            "description": "Resolved environment-backed datasources and validation-rule environment values",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -568,10 +638,10 @@
             }
           },
           "401": {
-            "description": "Journey access token missing"
+            "description": "Token missing, invalid, or naming no organization"
           },
           "403": {
-            "description": "Journey access token does not match the journey"
+            "description": "Journey access token does not match the journey, or the journey is PRIVATE and the token is not permitted to view it"
           },
           "502": {
             "description": "Environment resolver unavailable"
@@ -579,11 +649,85 @@
         }
       }
     },
+    "/v1/journey/configuration/{id}/external-values": {
+      "post": {
+        "operationId": "resolveJourneyExternalValues",
+        "x-epilot-permissions": [
+          {
+            "access": "portal"
+          }
+        ],
+        "summary": "resolveJourneyExternalValues",
+        "description": "Resolve the External Values hooks this journey's validation rules compare against.\n\nThe journey runtime never calls external-values-api itself. A request names a datasource\nid declared by the saved journey config; the app and hook it resolves are read from that\nconfig, so a visitor cannot aim an installed app's integration at an arbitrary hook.\n\nRequires a portal token: a hook call reaches the organization's third-party system, so it\nstays behind the identified-customer boundary. Public journeys skip these conditions.\n\nAnswers 200 whenever the request itself was valid, including when a hook failed — per\ndatasource, so one unreachable system never fails the rules that did resolve.\n",
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "tags": [
+          "Journeys"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JourneyExternalValuesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resolution result per requested datasource",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Always private, no-store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyExternalValuesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed request body"
+          },
+          "403": {
+            "description": "Not an identified portal user, or not permitted to read this journey"
+          }
+        }
+      }
+    },
     "/v1/journey/environment-variables": {
       "get": {
         "operationId": "getJourneyEnvironmentVariables",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "getJourneyEnvironmentVariables",
-        "description": "List the organization's environment variables that a journey block may use as an options source. Only Map variables that currently hold a valid value are returned. Intended for the journey builder's authoring UI; requires a journey authoring token, not an environments token.",
+        "description": "List the organization's client-safe environment variables a journey may use: Map and List<Link> as an options source; Text, Number, Boolean and lists of them in logic conditions. Only variables that currently hold a valid value are returned. Intended for the journey builder's authoring UI; requires a journey authoring token, not an environments token.",
         "security": [
           {
             "EpilotAuth": []
@@ -594,7 +738,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Map environment variables available as an options source",
+            "description": "Environment variables available to journeys",
             "headers": {
               "Cache-Control": {
                 "schema": {
@@ -623,9 +767,61 @@
         }
       }
     },
+    "/v1/journey/template-variables": {
+      "get": {
+        "operationId": "getJourneyTemplateVariables",
+        "summary": "getJourneyTemplateVariables",
+        "description": "List what a journey template can reference beyond the entity's own attributes: the organization's Custom Variables and its scalar environment variables (`String`, `Text`, `Number`, `Boolean`). Names only, never values. Intended for the journey builder's variable picker; requires a journey authoring token, not an environments token.",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "journey:*"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "tags": [
+          "Journeys"
+        ],
+        "responses": {
+          "200": {
+            "description": "Custom Variables and scalar environment variables available to templates",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Always private, no-store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyTemplateVariablesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization token missing"
+          },
+          "403": {
+            "description": "Not permitted to read this organization's journeys"
+          }
+        }
+      }
+    },
     "/v1/journey/products/{id}": {
       "get": {
         "operationId": "getJourneyProducts",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getJourneyProducts",
         "description": "Get products available in the journey by id. requires public journey token to be passed.",
         "security": [
@@ -711,6 +907,12 @@
     "/v1/journey/configuration": {
       "post": {
         "operationId": "createJourney",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:create",
+            "resource": "journey"
+          }
+        ],
         "summary": "createJourney",
         "description": "Create a Journey",
         "tags": [
@@ -764,6 +966,12 @@
       },
       "put": {
         "operationId": "updateJourney",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "updateJourney",
         "description": "Update a Journey",
         "tags": [
@@ -810,6 +1018,12 @@
       },
       "patch": {
         "operationId": "patchUpdateJourney",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "patchUpdateJourney",
         "description": "Update a Journey (partially / patch). Support for nested properties updates (e.g. \"property[0].name\").",
         "tags": [
@@ -877,6 +1091,12 @@
     "/v1/journey/configuration/search": {
       "post": {
         "operationId": "searchJourneys",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "searchJourneys",
         "description": "Search Journeys",
         "tags": [
@@ -910,6 +1130,11 @@
     "/v1/journey/document:generate": {
       "post": {
         "operationId": "generateDocument",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "generateDocument",
         "description": "Builds document generated from a template with journey values.\"\n\nSupported input document types:\n- .docx\n\nSupported output document types:\n- .pdf\n- .docx but limited to only text based variables\n\nUses [Document API](https://gitlab.com/e-pilot/product/file-management/document-api) to generate the document.\nUses [Template Variables API](https://docs.epilot.io/api/template-variables) to replace variables in the document.\n",
         "security": [
@@ -947,6 +1172,12 @@
     "/v2/journey/configuration": {
       "post": {
         "operationId": "createJourneyV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:create",
+            "resource": "journey"
+          }
+        ],
         "summary": "createJourneyV2",
         "description": "Create a Journey",
         "tags": [
@@ -1000,6 +1231,12 @@
       },
       "put": {
         "operationId": "updateJourneyV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "updateJourneyV2",
         "description": "Update a Journey",
         "tags": [
@@ -1057,6 +1294,12 @@
       },
       "patch": {
         "operationId": "patchUpdateJourneyV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "patchUpdateJourneyV2",
         "description": "Update a Journey (partially / patch). Support for nested properties updates (e.g. \"property[0].name\").",
         "tags": [
@@ -1175,6 +1418,12 @@
       },
       "delete": {
         "operationId": "removeJourneyV2",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:delete",
+            "resource": "journey:*"
+          }
+        ],
         "summary": "removeJourneyV2",
         "description": "Remove journey by id",
         "tags": [
@@ -1209,9 +1458,7 @@
         "tags": [
           "Journeys"
         ],
-        "security": [
-          {}
-        ],
+        "security": [],
         "parameters": [
           {
             "name": "id",
@@ -1274,6 +1521,11 @@
     "/v1/journey/button-options": {
       "get": {
         "operationId": "getButtonOptions",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getButtonOptions",
         "description": "Get button options from a csv file.",
         "security": [
@@ -1476,6 +1728,40 @@
           }
         }
       },
+      "EnvironmentScalarList": {
+        "description": "A list of scalars, served under this service's own `List<Text>`,\n`List<Number>` or `List<Boolean>` token (ER-5455). Read by logic\nconditions; flattened to `items` by the journey runtime.\n",
+        "type": "object",
+        "required": [
+          "itemType",
+          "items"
+        ],
+        "properties": {
+          "itemType": {
+            "type": "string",
+            "enum": [
+              "Text",
+              "Number",
+              "Boolean"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          }
+        }
+      },
       "JourneyEnvironmentResponse": {
         "type": "object",
         "required": [
@@ -1552,8 +1838,346 @@
                 }
               }
             }
+          },
+          "variables": {
+            "description": "Values read by logic conditions, keyed by variable key.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "type",
+                "value"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "Text",
+                    "Number",
+                    "Boolean",
+                    "List<Text>",
+                    "List<Number>",
+                    "List<Boolean>"
+                  ]
+                },
+                "value": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EnvironmentScalarList"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "variableErrors": {
+            "description": "Logic-condition keys that did not resolve, keyed by variable key.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "code"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "not_found",
+                    "unsupported_type",
+                    "not_set",
+                    "invalid_value"
+                  ]
+                }
+              }
+            }
           }
         }
+      },
+      "JourneyExternalValuesRequest": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "description": "The External Values datasources to resolve. A datasource is named by the id the journey config declares; the app and hook it points at are read from that config, never from this request.",
+            "items": {
+              "type": "object",
+              "required": [
+                "datasourceId",
+                "context"
+              ],
+              "properties": {
+                "datasourceId": {
+                  "type": "string"
+                },
+                "context": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Everything the hook reads, as one named map passed to it as `Context`: the validated value under `input`, plus each configured context binding under the name it was bound as."
+                }
+              }
+            }
+          }
+        }
+      },
+      "JourneyExternalValuesResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "errors"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "datasourceId",
+                "values"
+              ],
+              "properties": {
+                "datasourceId": {
+                  "type": "string"
+                },
+                "values": {
+                  "type": "object",
+                  "description": "Successfully extracted and coerced results, keyed by `result_id` and narrowed to the results the journey declares.",
+                  "additionalProperties": true
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalValueError"
+                  }
+                },
+                "policy": {
+                  "type": "object",
+                  "properties": {
+                    "on_unavailable": {
+                      "type": "string",
+                      "enum": [
+                        "skip",
+                        "block"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "errors": {
+            "type": "array",
+            "description": "Datasources that produced no result at all.",
+            "items": {
+              "type": "object",
+              "required": [
+                "datasourceId",
+                "code"
+              ],
+              "properties": {
+                "datasourceId": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "unknown_datasource",
+                    "resolver_unavailable"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "ExternalValueError": {
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "result_id": {
+            "type": "string",
+            "description": "Absent for hook-level failures, when no result was produced."
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "JourneyTemplatingContext": {
+        "description": "What the journey's Handlebars templates need from the organization, derived from the served configuration only. Present when the journey contains templates and templating is enabled for the organization. Read-only: like `featureFlags`, it is dropped from any write, so a client that sends the configuration back never stores it.\n",
+        "type": "object",
+        "properties": {
+          "templating": {
+            "$ref": "#/components/schemas/JourneyTemplating"
+          }
+        }
+      },
+      "JourneyTemplateVariablesResponse": {
+        "type": "object",
+        "required": [
+          "customVariables",
+          "environment"
+        ],
+        "properties": {
+          "customVariables": {
+            "type": "array",
+            "description": "Custom Variables a template can expand as `{{key}}`",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "name"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "environment": {
+            "type": "array",
+            "description": "Environment variables a template can read as `{{env.key}}`; a Link as `{{env.key.url}}` and `{{env.key.label}}`",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "type"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "String",
+                    "Text",
+                    "Number",
+                    "Boolean",
+                    "Link"
+                  ]
+                },
+                "description": {
+                  "type": "string"
+                },
+                "group": {
+                  "type": "string",
+                  "description": "The environment group the variable belongs to, when it has one"
+                }
+              }
+            }
+          }
+        }
+      },
+      "JourneyTemplating": {
+        "type": "object",
+        "required": [
+          "customVariables",
+          "env"
+        ],
+        "properties": {
+          "customVariables": {
+            "type": "array",
+            "description": "Custom Variables the journey's templates reference, expanded transitively",
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "template"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "template": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "env": {
+            "type": "object",
+            "description": "Browser-safe environment values the templates read, keyed by variable key; scalars, or a Link's fields",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/components/schemas/JourneyTemplatingLink"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "JourneyTemplatingLink": {
+        "type": "object",
+        "description": "A Link variable; label and description are a string or per-language strings, resolved by the runtime",
+        "required": [
+          "url",
+          "label"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "label": {
+            "$ref": "#/components/schemas/JourneyTemplatingTranslatable"
+          },
+          "description": {
+            "$ref": "#/components/schemas/JourneyTemplatingTranslatable"
+          }
+        }
+      },
+      "JourneyTemplatingTranslatable": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        ]
       },
       "JourneyEnvironmentVariablesResponse": {
         "type": "object",
@@ -1577,17 +2201,35 @@
                 "type": {
                   "type": "string",
                   "enum": [
+                    "Text",
+                    "Number",
+                    "Boolean",
                     "Map",
-                    "List<Link>"
+                    "List<Link>",
+                    "List<Text>",
+                    "List<Number>",
+                    "List<Boolean>"
                   ]
                 },
                 "value": {
                   "oneOf": [
                     {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
                       "$ref": "#/components/schemas/EnvironmentMap"
                     },
                     {
                       "$ref": "#/components/schemas/EnvironmentLinkList"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EnvironmentScalarList"
                     }
                   ]
                 },
@@ -1733,6 +2375,10 @@
                   ]
                 },
                 "hideNextButton": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "guestVisible": {
                   "type": "boolean",
                   "nullable": true
                 },
@@ -1889,7 +2535,7 @@
                             },
                             "referenceType": {
                               "type": "string",
-                              "description": "Indicates reference type (block or context parameter)"
+                              "description": "Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)"
                             },
                             "referenceId": {
                               "type": "string",
@@ -2198,6 +2844,43 @@
               "thirdPartyCookies": {
                 "type": "boolean",
                 "description": "If false, third-party cookies are disabled to comply with GDPR regulations without asking for consent."
+              },
+              "betaFeatures": {
+                "type": "object",
+                "description": "Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.\n",
+                "additionalProperties": false,
+                "properties": {
+                  "modernProducts": {
+                    "type": "boolean",
+                    "description": "Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.\n"
+                  },
+                  "modernLauncher": {
+                    "type": "boolean",
+                    "description": "Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.\n"
+                  }
+                }
+              },
+              "offline": {
+                "type": "object",
+                "nullable": true,
+                "description": "Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.\n",
+                "additionalProperties": false,
+                "required": [
+                  "enabled"
+                ],
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Prepare this journey for offline use on devices that open it online first."
+                  },
+                  "packTtlHours": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 720,
+                    "description": "How long a prepared pack stays fresh before the next online open refreshes it. Default 24.",
+                    "example": 24
+                  }
+                }
               }
             },
             "required": [
@@ -2287,6 +2970,10 @@
                   ]
                 },
                 "hideNextButton": {
+                  "type": "boolean",
+                  "nullable": true
+                },
+                "guestVisible": {
                   "type": "boolean",
                   "nullable": true
                 },
@@ -2443,7 +3130,7 @@
                             },
                             "referenceType": {
                               "type": "string",
-                              "description": "Indicates reference type (block or context parameter)"
+                              "description": "Indicates reference type: block, context-parameter, datasource, global or environment (an organization environment variable, by key; ER-5455)"
                             },
                             "referenceId": {
                               "type": "string",
@@ -2734,6 +3421,43 @@
                     "type": "number"
                   }
                 }
+              },
+              "betaFeatures": {
+                "type": "object",
+                "description": "Per-journey opt-ins to beta features. One named boolean per feature (no free-form map), so a mistyped key is rejected with 400 and generated client types stay explicit. Additive: a feature is on when its key is true OR the organization-wide PostHog flag for that feature is on.\n",
+                "additionalProperties": false,
+                "properties": {
+                  "modernProducts": {
+                    "type": "boolean",
+                    "description": "Opt this journey into the modern product presentation (product tiles and details modal). Effective when true OR the organization flag `journey-modern-products` is on.\n"
+                  },
+                  "modernLauncher": {
+                    "type": "boolean",
+                    "description": "Opt this launcher journey into the modern Journey Launcher (picker, card and hero shells). Launcher journeys only. Effective when true OR the organization flag `journey-modern-launcher` is on.\n"
+                  }
+                }
+              },
+              "offline": {
+                "type": "object",
+                "nullable": true,
+                "description": "Offline journeys (ER-5432). Revision-owned like every other setting: effective on publish. The runtime prepares an offline pack for this journey only when the organization flag `journey-offline` is on AND `enabled` is true.\n",
+                "additionalProperties": false,
+                "required": [
+                  "enabled"
+                ],
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Prepare this journey for offline use on devices that open it online first."
+                  },
+                  "packTtlHours": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 720,
+                    "description": "How long a prepared pack stays fresh before the next online open refreshes it. Default 24.",
+                    "example": 24
+                  }
+                }
               }
             },
             "additionalProperties": false
@@ -2902,6 +3626,9 @@
           },
           {
             "$ref": "#/components/schemas/JourneyFeatureFlags"
+          },
+          {
+            "$ref": "#/components/schemas/JourneyTemplatingContext"
           }
         ]
       },
@@ -3553,6 +4280,11 @@
           "thirdPartyCookies": {
             "type": "boolean",
             "description": "When set to false, third-party cookies and resources should be completely disabled to comply with GDPR regulations.",
+            "example": true
+          },
+          "offline": {
+            "type": "boolean",
+            "description": "Offline journeys (ER-5432): whether the published revision has settings.offline.enabled. Absent when the setting was never set.",
             "example": true
           }
         }

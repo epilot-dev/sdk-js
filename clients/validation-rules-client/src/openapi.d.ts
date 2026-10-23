@@ -27,31 +27,30 @@ declare namespace Components {
              */
             operator: "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "isEmpty" | "isNotEmpty";
             /**
-             * Comparison value for binary operators: a static number, string or boolean, or an
-             * organisation environment variable (`Number`, `Text` or `Boolean`) so a precondition
-             * can act as a per-organisation switch or threshold.
+             * Comparison value for binary operators: a static number, string or boolean, or a
+             * reference resolved at evaluation time. Accepted reference sources: `environment` (a
+             * `Number`, `Text` or `Boolean` organisation environment variable), so a precondition
+             * can act as a per-organisation switch or threshold, and `parameter` (a value the
+             * consuming surface supplies, e.g. another field's answer). Any other source is rejected
+             * at write time, and the reference must not carry an `adjust`.
              *
              */
             value?: /**
-             * Comparison value for binary operators: a static number, string or boolean, or an
-             * organisation environment variable (`Number`, `Text` or `Boolean`) so a precondition
-             * can act as a per-organisation switch or threshold.
+             * Comparison value for binary operators: a static number, string or boolean, or a
+             * reference resolved at evaluation time. Accepted reference sources: `environment` (a
+             * `Number`, `Text` or `Boolean` organisation environment variable), so a precondition
+             * can act as a per-organisation switch or threshold, and `parameter` (a value the
+             * consuming surface supplies, e.g. another field's answer). Any other source is rejected
+             * at write time, and the reference must not carry an `adjust`.
              *
              */
             number | string | boolean | /**
-             * A comparison value resolved at evaluation time from an organisation environment variable
-             * (environments-api). The rule stores the key, never the value, so one change to the variable
-             * reaches every rule that references it and a blueprint install never overwrites the
-             * organisation's own value.
-             *
-             * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-             * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
-             * `String` and `SecretString` variables are rejected at write time. Write-time validation also
-             * checks that the variable exists in the organisation; a variable that exists without a value
-             * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
+             * A value resolved at evaluation time instead of written into the rule, identified by
+             * `source`. Each field that accepts a reference lists the sources it allows; a rule using
+             * any other source is rejected when it is saved.
              *
              */
-            EnvironmentValue;
+            ValueReference;
         }
         /**
          * Declarative validation rule (schema version v2). Supports predefined comparison operators
@@ -136,8 +135,9 @@ declare namespace Components {
          * reaches every rule that references it and a blueprint install never overwrites the
          * organisation's own value.
          *
-         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+         * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+         * string), `Boolean` for `applies_when` values.
          * `String` and `SecretString` variables are rejected at write time. Write-time validation also
          * checks that the variable exists in the organisation; a variable that exists without a value
          * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
@@ -155,8 +155,27 @@ declare namespace Components {
          * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
          * in public journeys the dependent conditions are skipped.
          *
+         * A hook may declare value inputs (`contexts` entries `{ "type": "value", "name", "value_type" }`)
+         * besides the entities it receives. `inputs` supplies them from rule parameters, which the
+         * consumer binds like any other parameter and sends to the hook as `Context.<name>`.
+         *
          */
-        ExternalValue | /* A lower and upper bound for range operators (between, dateBetween, lengthBetween). Bounds are inclusive. */ RangeValue | /* No comparison value - used by unary operators such as notInFuture / notInPast. */ NoValue;
+        ExternalValue | /**
+         * A comparison value supplied by the consumer that evaluates the rule, identified by a name
+         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the
+         * name to a source of its own - a journey binds it to the value of another block - and
+         * resolves it at evaluation time, so the rule never references the consumer's objects and
+         * stays reusable across journeys and forms.
+         *
+         * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
+         * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
+         * number, string or boolean as an `applies_when` value, or the `value_type` of the External
+         * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+         * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
+         * the consumer leaves unbound or empty leaves the comparison unresolved.
+         *
+         */
+        ParameterValue | /* A lower and upper bound for range operators (between, dateBetween, lengthBetween). Bounds are inclusive. */ RangeValue | /* No comparison value - used by unary operators such as notInFuture / notInPast. */ NoValue;
         /**
          * An entity context source the rule needs at evaluation time, referenced by `context`
          * value paths via the schema slug as their first segment (e.g. `contract.installment_amount`).
@@ -357,8 +376,9 @@ declare namespace Components {
          * reaches every rule that references it and a blueprint install never overwrites the
          * organisation's own value.
          *
-         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+         * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+         * string), `Boolean` for `applies_when` values.
          * `String` and `SecretString` variables are rejected at write time. Write-time validation also
          * checks that the variable exists in the organisation; a variable that exists without a value
          * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
@@ -389,6 +409,10 @@ declare namespace Components {
          * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
          * in public journeys the dependent conditions are skipped.
          *
+         * A hook may declare value inputs (`contexts` entries `{ "type": "value", "name", "value_type" }`)
+         * besides the entities it receives. `inputs` supplies them from rule parameters, which the
+         * consumer binds like any other parameter and sends to the hook as `Context.<name>`.
+         *
          */
         export interface ExternalValue {
             source: "external";
@@ -404,6 +428,34 @@ declare namespace Components {
              * ID of the result entry within the hook whose value is compared.
              */
             result_id: string; // ^[a-zA-Z0-9_-]+$
+            /**
+             * Values for the hook's value inputs, keyed by the input name the hook declares
+             * (`contexts` entry of type `value`), e.g. `{ "reading_date": { "source": "parameter", "name": "reading_date" } }`.
+             * Only parameters are supported. Write-time validation checks that every key is a value input the
+             * hook declares and uses the input's `value_type` (`number`, `text`, `date` or `boolean`) as the
+             * parameter's kind, so the parameter must not be compared as another kind elsewhere in the rule.
+             * An input parameter must not carry an adjustment. Declared inputs without an entry are allowed;
+             * the consumer omits an input that has no value.
+             *
+             */
+            inputs?: {
+                [name: string]: /**
+                 * A comparison value supplied by the consumer that evaluates the rule, identified by a name
+                 * the rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the
+                 * name to a source of its own - a journey binds it to the value of another block - and
+                 * resolves it at evaluation time, so the rule never references the consumer's objects and
+                 * stays reusable across journeys and forms.
+                 *
+                 * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
+                 * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
+                 * number, string or boolean as an `applies_when` value, or the `value_type` of the External
+                 * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+                 * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
+                 * the consumer leaves unbound or empty leaves the comparison unresolved.
+                 *
+                 */
+                ParameterValue;
+            };
             adjust?: /**
              * Adjusts a context-resolved numeric value before comparison, e.g. "context value plus 10 percent".
              * Used to express tolerance bands such as "at most 10% above the current instalment amount".
@@ -585,6 +637,34 @@ declare namespace Components {
          */
         export type Operator = "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "between" | "dateBefore" | "dateOnOrBefore" | "dateAfter" | "dateOnOrAfter" | "dateBetween" | "notInFuture" | "notInPast" | "contains" | "doesNotContain" | "startsWith" | "endsWith" | "regexMatch" | "lengthBetween" | "maxDigits" | "maxDecimals";
         /**
+         * A comparison value supplied by the consumer that evaluates the rule, identified by a name
+         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the
+         * name to a source of its own - a journey binds it to the value of another block - and
+         * resolves it at evaluation time, so the rule never references the consumer's objects and
+         * stays reusable across journeys and forms.
+         *
+         * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
+         * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
+         * number, string or boolean as an `applies_when` value, or the `value_type` of the External
+         * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+         * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
+         * the consumer leaves unbound or empty leaves the comparison unresolved.
+         *
+         */
+        export interface ParameterValue {
+            source: "parameter";
+            /**
+             * Parameter name, e.g. `start_date`.
+             */
+            name: string; // ^[a-z][a-z0-9_]{0,63}$
+            adjust?: /**
+             * Adjusts a context-resolved numeric value before comparison, e.g. "context value plus 10 percent".
+             * Used to express tolerance bands such as "at most 10% above the current instalment amount".
+             *
+             */
+            ValueAdjustment;
+        }
+        /**
          * Condition definition for a pattern-based validation rule (2 levels deep)
          */
         export type PatternCondition = /* Condition definition for a pattern-based validation rule (2 levels deep) */ {
@@ -746,8 +826,8 @@ declare namespace Components {
          */
         export interface RangeValue {
             source: "range";
-            min: /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value. */ ScalarValue;
-            max: /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value. */ ScalarValue;
+            min: /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, an external value, or a parameter the consuming surface supplies. */ ScalarValue;
+            max: /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, an external value, or a parameter the consuming surface supplies. */ ScalarValue;
         }
         /**
          * Condition definition for a regex-based validation rule (2 levels deep)
@@ -815,15 +895,62 @@ declare namespace Components {
             source: "relative_date";
             /**
              * Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.
+             * Either a fixed whole number, or a reference resolved at evaluation time. Accepted reference sources:
+             * `environment` (a `Number` organisation environment variable) and `parameter` (a number the consuming
+             * surface supplies). Any other source is rejected at write time, and the reference must not carry an
+             * `adjust`. If the referenced value is missing or is not a whole number within ±36500, the comparison
+             * is unresolved.
+             *
              */
-            offset: number;
+            offset: /**
+             * Offset from the anchor. Negative values are in the past, positive in the future, 0 is the anchor itself.
+             * Either a fixed whole number, or a reference resolved at evaluation time. Accepted reference sources:
+             * `environment` (a `Number` organisation environment variable) and `parameter` (a number the consuming
+             * surface supplies). Any other source is rejected at write time, and the reference must not carry an
+             * `adjust`. If the referenced value is missing or is not a whole number within ±36500, the comparison
+             * is unresolved.
+             *
+             */
+            number | /**
+             * A value resolved at evaluation time instead of written into the rule, identified by
+             * `source`. Each field that accepts a reference lists the sources it allows; a rule using
+             * any other source is rejected when it is saved.
+             *
+             */
+            ValueReference;
             unit: "days" | "months" | "years";
-            anchor?: "today";
+            /**
+             * The date the offset is applied to. `today` (the default) is the evaluation moment. A
+             * reference resolves to a date at evaluation time - for example a `parameter` bound to
+             * another field's date, so "at least one day after the start date" is `offset: 1`,
+             * `unit: days` on that anchor. Accepted reference sources: `context`, `environment` (a
+             * `Text` variable holding an ISO 8601 date), `external` (a `date` result) and `parameter`.
+             * The reference must not carry an `adjust`; if it does not resolve to a date, the
+             * comparison is unresolved.
+             *
+             */
+            anchor?: /**
+             * The date the offset is applied to. `today` (the default) is the evaluation moment. A
+             * reference resolves to a date at evaluation time - for example a `parameter` bound to
+             * another field's date, so "at least one day after the start date" is `offset: 1`,
+             * `unit: days` on that anchor. Accepted reference sources: `context`, `environment` (a
+             * `Text` variable holding an ISO 8601 date), `external` (a `date` result) and `parameter`.
+             * The reference must not carry an `adjust`; if it does not resolve to a date, the
+             * comparison is unresolved.
+             *
+             */
+            ("today") | /**
+             * A value resolved at evaluation time instead of written into the rule, identified by
+             * `source`. Each field that accepts a reference lists the sources it allows; a rule using
+             * any other source is rejected when it is saved.
+             *
+             */
+            ValueReference;
         }
         /**
-         * A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value.
+         * A single comparison value - static, resolved from context, a relative date, an organisation environment variable, an external value, or a parameter the consuming surface supplies.
          */
-        export type ScalarValue = /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, or an external value. */ /* A fixed comparison value. */ StaticValue | /**
+        export type ScalarValue = /* A single comparison value - static, resolved from context, a relative date, an organisation environment variable, an external value, or a parameter the consuming surface supplies. */ /* A fixed comparison value. */ StaticValue | /**
          * A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`
          * or `previous_reading.value`. The first path segment must match the `name` of a declared
          * context requirement.
@@ -835,8 +962,9 @@ declare namespace Components {
          * reaches every rule that references it and a blueprint install never overwrites the
          * organisation's own value.
          *
-         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-         * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+         * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+         * string), `Boolean` for `applies_when` values.
          * `String` and `SecretString` variables are rejected at write time. Write-time validation also
          * checks that the variable exists in the organisation; a variable that exists without a value
          * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
@@ -854,8 +982,27 @@ declare namespace Components {
          * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
          * in public journeys the dependent conditions are skipped.
          *
+         * A hook may declare value inputs (`contexts` entries `{ "type": "value", "name", "value_type" }`)
+         * besides the entities it receives. `inputs` supplies them from rule parameters, which the
+         * consumer binds like any other parameter and sends to the hook as `Context.<name>`.
+         *
          */
-        ExternalValue;
+        ExternalValue | /**
+         * A comparison value supplied by the consumer that evaluates the rule, identified by a name
+         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the
+         * name to a source of its own - a journey binds it to the value of another block - and
+         * resolves it at evaluation time, so the rule never references the consumer's objects and
+         * stays reusable across journeys and forms.
+         *
+         * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
+         * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
+         * number, string or boolean as an `applies_when` value, or the `value_type` of the External
+         * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+         * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
+         * the consumer leaves unbound or empty leaves the comparison unresolved.
+         *
+         */
+        ParameterValue;
         /**
          * A fixed comparison value.
          */
@@ -1104,37 +1251,28 @@ declare namespace Components {
         export interface ValueAdjustment {
             type: "percent" | "absolute";
             /**
-             * The adjustment amount - a fixed number, or a context path resolving to a number
-             * (e.g. a per-contract percentage limit). Contextual adjustment values must not
-             * carry a nested adjustment.
+             * The adjustment amount - a fixed non-negative number, or a reference resolving to a
+             * number at evaluation time. Accepted reference sources: `context` (e.g. a per-contract
+             * percentage limit), `environment` (a `Number` organisation environment variable) and
+             * `parameter` (a number the consuming surface supplies). Any other source is rejected at
+             * write time, and the reference must not carry its own `adjust`.
              *
              */
             value: /**
-             * The adjustment amount - a fixed number, or a context path resolving to a number
-             * (e.g. a per-contract percentage limit). Contextual adjustment values must not
-             * carry a nested adjustment.
+             * The adjustment amount - a fixed non-negative number, or a reference resolving to a
+             * number at evaluation time. Accepted reference sources: `context` (e.g. a per-contract
+             * percentage limit), `environment` (a `Number` organisation environment variable) and
+             * `parameter` (a number the consuming surface supplies). Any other source is rejected at
+             * write time, and the reference must not carry its own `adjust`.
              *
              */
             number | /**
-             * A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`
-             * or `previous_reading.value`. The first path segment must match the `name` of a declared
-             * context requirement.
+             * A value resolved at evaluation time instead of written into the rule, identified by
+             * `source`. Each field that accepts a reference lists the sources it allows; a rule using
+             * any other source is rejected when it is saved.
              *
              */
-            ContextValue | /**
-             * A comparison value resolved at evaluation time from an organisation environment variable
-             * (environments-api). The rule stores the key, never the value, so one change to the variable
-             * reaches every rule that references it and a blueprint install never overwrites the
-             * organisation's own value.
-             *
-             * Only browser-safe variable types are allowed: `Number` for numeric comparisons, `Text` for
-             * text comparisons and for dates (ISO 8601 string), `Boolean` for `applies_when` values.
-             * `String` and `SecretString` variables are rejected at write time. Write-time validation also
-             * checks that the variable exists in the organisation; a variable that exists without a value
-             * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
-             *
-             */
-            EnvironmentValue;
+            ValueReference;
             direction: "increase" | "decrease";
             /**
              * Rounds the adjusted result to a whole number - `up` (ceiling) or `down` (floor).
@@ -1143,6 +1281,71 @@ declare namespace Components {
              */
             rounding?: "up" | "down";
         }
+        /**
+         * A value resolved at evaluation time instead of written into the rule, identified by
+         * `source`. Each field that accepts a reference lists the sources it allows; a rule using
+         * any other source is rejected when it is saved.
+         *
+         */
+        export type ValueReference = /**
+         * A value resolved at evaluation time instead of written into the rule, identified by
+         * `source`. Each field that accepts a reference lists the sources it allows; a rule using
+         * any other source is rejected when it is saved.
+         *
+         */
+        /**
+         * A dynamic comparison value resolved from runtime context, e.g. `contract.installment_amount`
+         * or `previous_reading.value`. The first path segment must match the `name` of a declared
+         * context requirement.
+         *
+         */
+        ContextValue | /**
+         * A comparison value resolved at evaluation time from an organisation environment variable
+         * (environments-api). The rule stores the key, never the value, so one change to the variable
+         * reaches every rule that references it and a blueprint install never overwrites the
+         * organisation's own value.
+         *
+         * Only browser-safe variable types are allowed: `Number` for numeric comparisons, adjustment
+         * amounts and relative-date offsets, `Text` for text comparisons and for dates (ISO 8601
+         * string), `Boolean` for `applies_when` values.
+         * `String` and `SecretString` variables are rejected at write time. Write-time validation also
+         * checks that the variable exists in the organisation; a variable that exists without a value
+         * (for example seeded by a blueprint install) is accepted and resolves as unavailable until set.
+         *
+         */
+        EnvironmentValue | /**
+         * A comparison value produced at evaluation time by an External Values hook of an installed
+         * app (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is
+         * resolved server-side by the external-values-api, which executes the hook's HTTP call with
+         * the app's credentials and returns the typed result identified by `result_id`.
+         *
+         * Write-time validation checks that the app is installed in the organisation, that the hook
+         * and result exist, and that the result's type is compatible with the compared kind
+         * (`number` results for numeric comparisons, `text` for text, `date` for date). External values
+         * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
+         * in public journeys the dependent conditions are skipped.
+         *
+         * A hook may declare value inputs (`contexts` entries `{ "type": "value", "name", "value_type" }`)
+         * besides the entities it receives. `inputs` supplies them from rule parameters, which the
+         * consumer binds like any other parameter and sends to the hook as `Context.<name>`.
+         *
+         */
+        ExternalValue | /**
+         * A comparison value supplied by the consumer that evaluates the rule, identified by a name
+         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the
+         * name to a source of its own - a journey binds it to the value of another block - and
+         * resolves it at evaluation time, so the rule never references the consumer's objects and
+         * stays reusable across journeys and forms.
+         *
+         * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
+         * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
+         * number, string or boolean as an `applies_when` value, or the `value_type` of the External
+         * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+         * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
+         * the consumer leaves unbound or empty leaves the comparison unresolved.
+         *
+         */
+        ParameterValue;
     }
 }
 declare namespace Paths {
@@ -1650,6 +1853,7 @@ export type NumericFactCondition = Components.Schemas.NumericFactCondition;
 export type NumericNestedCondition = Components.Schemas.NumericNestedCondition;
 export type NumericRuleType = Components.Schemas.NumericRuleType;
 export type Operator = Components.Schemas.Operator;
+export type ParameterValue = Components.Schemas.ParameterValue;
 export type PatternCondition = Components.Schemas.PatternCondition;
 export type PatternFactCondition = Components.Schemas.PatternFactCondition;
 export type PatternNestedCondition = Components.Schemas.PatternNestedCondition;
@@ -1667,3 +1871,4 @@ export type UsedBy = Components.Schemas.UsedBy;
 export type ValidationRule = Components.Schemas.ValidationRule;
 export type ValidationRuleBase = Components.Schemas.ValidationRuleBase;
 export type ValueAdjustment = Components.Schemas.ValueAdjustment;
+export type ValueReference = Components.Schemas.ValueReference;

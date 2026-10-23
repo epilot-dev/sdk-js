@@ -8,14 +8,511 @@ import type {
 } from 'openapi-client-axios';
 
 export declare namespace Components {
+    namespace Parameters {
+        export type ActionId = string; // uuid
+    }
+    export interface PathParameters {
+        ActionId?: Parameters.ActionId /* uuid */;
+    }
     namespace Responses {
         export interface Error {
-            code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+            code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+            /**
+             * Remaining code attempts; only with INVALID_LOGIN_CODE.
+             */
+            attempts_left?: number;
         }
     }
     namespace Schemas {
+        /**
+         * How the current customer identity was established. demo is the fictional, verified
+         * customer of an Agent Builder preview; it is never a login method.
+         *
+         */
+        export type AccessMethod = "email_code" | "portal_login" | "demo";
+        /**
+         * anonymous: no customer identity. identified: the Contact is known but ownership
+         * is not proven. verified: ownership is proven (an email code or a portal login), or the
+         * demo customer of an Agent Builder preview.
+         *
+         */
+        export type AccessTier = "anonymous" | "identified" | "verified";
+        export interface ActionRevision {
+            expected_revision: number;
+        }
+        export interface ActionState {
+            conversation_id: string; // uuid
+            status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff";
+            action_id?: string; // uuid
+            revision?: number;
+            options?: [
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?,
+                {
+                    meter_id: string;
+                    counter_id: string;
+                    meter_number: string;
+                    label: string;
+                    unit: string;
+                    min_value?: number;
+                    max_value?: number;
+                }?
+            ];
+            values?: {
+                meter_id: string;
+                counter_id: string;
+                value: number;
+            };
+            field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE";
+            receipt?: {
+                reference: string;
+                meter_number: string;
+                value: number;
+                unit: string;
+                submitted_at: string;
+            };
+            reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
+        }
         export interface CreateWebsiteChatRequest {
-            name: string;
             agent_id: string | null; // uuid
             settings: {
                 /**
@@ -73,21 +570,474 @@ export declare namespace Components {
                     string?,
                     string?
                 ];
-                organisation_name: string;
                 default_locale: "en" | "de";
                 /**
                  * Design Builder configuration for the Website Chat only.
                  */
                 design_id?: string | null; // uuid
                 /**
-                 * Email Builder template selection. Does not enable verification by itself.
+                 * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                  */
                 authentication?: {
-                    email_code: {
+                    /**
+                     * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    email_code?: {
                         email_template_id?: string | null; // uuid
-                    };
+                    } | null;
+                    /**
+                     * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    portal?: {
+                        portal_id: string; // uuid
+                    } | null;
+                } | null;
+                /**
+                 * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                 */
+                self_service?: {
+                    /**
+                     * Each action can be added once.
+                     */
+                    actions: [
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?
+                    ];
                 } | null;
             };
+        }
+        export interface CustomerAccess {
+            /**
+             * anonymous: no customer identity. identified: the Contact is known but ownership
+             * is not proven. verified: ownership is proven (an email code or a portal login), or the
+             * demo customer of an Agent Builder preview.
+             *
+             */
+            tier: "anonymous" | "identified" | "verified";
+            /**
+             * How the current customer identity was established. demo is the fictional, verified
+             * customer of an Agent Builder preview; it is never a login method.
+             *
+             */
+            method?: "email_code" | "portal_login" | "demo";
         }
         export interface Error {
             error?: string;
@@ -98,7 +1048,6 @@ export declare namespace Components {
         }
         export interface ListWebsiteChatsResponse {
             website_chats: {
-                name: string;
                 agent_id: string | null; // uuid
                 settings: {
                     /**
@@ -156,19 +1105,457 @@ export declare namespace Components {
                         string?,
                         string?
                     ];
-                    organisation_name: string;
                     default_locale: "en" | "de";
                     /**
                      * Design Builder configuration for the Website Chat only.
                      */
                     design_id?: string | null; // uuid
                     /**
-                     * Email Builder template selection. Does not enable verification by itself.
+                     * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                      */
                     authentication?: {
-                        email_code: {
+                        /**
+                         * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        email_code?: {
                             email_template_id?: string | null; // uuid
-                        };
+                        } | null;
+                        /**
+                         * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        portal?: {
+                            portal_id: string; // uuid
+                        } | null;
+                    } | null;
+                    /**
+                     * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                     */
+                    self_service?: {
+                        /**
+                         * Each action can be added once.
+                         */
+                        actions: [
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?
+                        ];
                     } | null;
                 };
                 /**
@@ -191,8 +1578,44 @@ export declare namespace Components {
             }[];
             next_cursor?: string;
         }
+        /**
+         * How a customer can log in or verify themselves in the chat.
+         */
+        export type LoginMethod = "email_code" | "portal_login";
+        export interface PortalLoginState {
+            available: boolean;
+            conversation_id: string; // uuid
+            status: "anonymous" | "pending" | "verified";
+            challenge_id?: string; // uuid
+            /**
+             * Unix seconds
+             */
+            code_expires_at?: number;
+            attempts_left?: number;
+            email?: string; // email
+            contact_resolution?: "matched" | "not_found";
+            access: {
+                /**
+                 * anonymous: no customer identity. identified: the Contact is known but ownership
+                 * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                 * demo customer of an Agent Builder preview.
+                 *
+                 */
+                tier: "anonymous" | "identified" | "verified";
+                /**
+                 * How the current customer identity was established. demo is the fictional, verified
+                 * customer of an Agent Builder preview; it is never a login method.
+                 *
+                 */
+                method?: "email_code" | "portal_login" | "demo";
+            };
+        }
         export interface PublicChatError {
-            code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+            code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+            /**
+             * Remaining code attempts; only with INVALID_LOGIN_CODE.
+             */
+            attempts_left?: number;
         }
         /**
          * JSON payload of one SSE data frame from sendAnonymousChatMessage.
@@ -209,14 +1632,63 @@ export declare namespace Components {
             type: "error";
             code: "UNAVAILABLE";
             request_id: string; // uuid
+        } | {
+            type: "action";
+            action: {
+                action: string; // ^[a-z][a-z_]{0,59}$
+                /**
+                 * in_chat uses the guided action endpoints; journey embeds journey_id; link opens url.
+                 */
+                fulfilment: "in_chat" | "journey" | "link";
+                journey_id?: string; // uuid
+                url?: string; // ^https://
+                /**
+                 * The least the customer must have before the action opens. Log in first when below it.
+                 */
+                access: "anonymous" | "identified" | "verified";
+            };
+            request_id: string; // uuid
         };
         export interface PublicWebsiteChat {
             key: string;
-            organisationName: string;
-            assistantName: string;
+            /**
+             * Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+             */
+            assistant_name?: {
+                de?: string;
+                en?: string;
+            };
+            /**
+             * Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+             */
+            greeting?: {
+                de?: string;
+                en?: string;
+            };
             defaultLocale: "en" | "de";
-            authentication?: {
-                email_code: boolean;
+            /**
+             * Login methods currently available to the customer.
+             */
+            login_methods: ("email_code" | "portal_login")[];
+            /**
+             * Starter questions of the assigned Agent Builder website agent, by locale. Absent when the agent has none; clients then show their own defaults.
+             */
+            starters?: {
+                /**
+                 * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                 */
+                de?: string[];
+                /**
+                 * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                 */
+                en?: string[];
+            };
+            /**
+             * Prototype Guided Actions offered by this Website Chat.
+             */
+            actions?: {
+                meter_reading?: boolean;
+                meter_reading_journey_id?: string; // uuid
             };
             design?: {
                 id: string; // uuid
@@ -254,10 +1726,483 @@ export declare namespace Components {
                     highContrast?: boolean;
                 };
             };
+            /**
+             * Languages the chat offers, default first: the assigned Agent Builder website agent's languages, or both for a legacy agent. Hide the language choice when there is one.
+             */
             locales: ("en" | "de")[];
         }
+        /**
+         * How a self-service action is done and who can start it. A journey needs journey_id, a link needs url. in_chat is only available for submit_meter_reading and requires a verified customer.
+         */
+        export interface SelfServiceAction {
+            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+            enabled: boolean;
+            fulfilment: "in_chat" | "journey" | "link";
+            /**
+             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+             */
+            journey_id?: string; // uuid
+            /**
+             * HTTPS address to open; only for link.
+             */
+            url?: string;
+            /**
+             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+             */
+            access: "anonymous" | "identified" | "verified";
+            /**
+             * When the assistant should start this action.
+             */
+            guidance?: string;
+        }
+        export interface SelfServiceDirective {
+            action: string; // ^[a-z][a-z_]{0,59}$
+            /**
+             * in_chat uses the guided action endpoints; journey embeds journey_id; link opens url.
+             */
+            fulfilment: "in_chat" | "journey" | "link";
+            journey_id?: string; // uuid
+            url?: string; // ^https://
+            /**
+             * The least the customer must have before the action opens. Log in first when below it.
+             */
+            access: "anonymous" | "identified" | "verified";
+        }
+        /**
+         * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+         */
+        export type SelfServiceSettings = {
+            /**
+             * Each action can be added once.
+             */
+            actions: [
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?,
+                {
+                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                    enabled: boolean;
+                    fulfilment: "in_chat" | "journey" | "link";
+                    /**
+                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                     */
+                    journey_id?: string; // uuid
+                    /**
+                     * HTTPS address to open; only for link.
+                     */
+                    url?: string;
+                    /**
+                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                     */
+                    access: "anonymous" | "identified" | "verified";
+                    /**
+                     * When the assistant should start this action.
+                     */
+                    guidance?: string;
+                }?
+            ];
+        } | null;
+        /**
+         * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+         */
+        export type StarterQuestions = string[];
         export interface UpdateWebsiteChatRequest {
-            name?: string;
             agent_id?: string | null; // uuid
             settings?: {
                 /**
@@ -315,19 +2260,457 @@ export declare namespace Components {
                     string?,
                     string?
                 ];
-                organisation_name: string;
                 default_locale: "en" | "de";
                 /**
                  * Design Builder configuration for the Website Chat only.
                  */
                 design_id?: string | null; // uuid
                 /**
-                 * Email Builder template selection. Does not enable verification by itself.
+                 * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                  */
                 authentication?: {
-                    email_code: {
+                    /**
+                     * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    email_code?: {
                         email_template_id?: string | null; // uuid
-                    };
+                    } | null;
+                    /**
+                     * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    portal?: {
+                        portal_id: string; // uuid
+                    } | null;
+                } | null;
+                /**
+                 * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                 */
+                self_service?: {
+                    /**
+                     * Each action can be added once.
+                     */
+                    actions: [
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?
+                    ];
                 } | null;
             };
             /**
@@ -350,9 +2733,23 @@ export declare namespace Components {
             resend_after?: number;
             email?: string; // email
             contact_resolution?: "matched" | "ambiguous" | "not_found";
+            access: {
+                /**
+                 * anonymous: no customer identity. identified: the Contact is known but ownership
+                 * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                 * demo customer of an Agent Builder preview.
+                 *
+                 */
+                tier: "anonymous" | "identified" | "verified";
+                /**
+                 * How the current customer identity was established. demo is the fictional, verified
+                 * customer of an Agent Builder preview; it is never a login method.
+                 *
+                 */
+                method?: "email_code" | "portal_login" | "demo";
+            };
         }
         export interface WebsiteChat {
-            name: string;
             agent_id: string | null; // uuid
             settings: {
                 /**
@@ -410,19 +2807,457 @@ export declare namespace Components {
                     string?,
                     string?
                 ];
-                organisation_name: string;
                 default_locale: "en" | "de";
                 /**
                  * Design Builder configuration for the Website Chat only.
                  */
                 design_id?: string | null; // uuid
                 /**
-                 * Email Builder template selection. Does not enable verification by itself.
+                 * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                  */
                 authentication?: {
-                    email_code: {
+                    /**
+                     * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    email_code?: {
                         email_template_id?: string | null; // uuid
-                    };
+                    } | null;
+                    /**
+                     * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    portal?: {
+                        portal_id: string; // uuid
+                    } | null;
+                } | null;
+                /**
+                 * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                 */
+                self_service?: {
+                    /**
+                     * Each action can be added once.
+                     */
+                    actions: [
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?
+                    ];
                 } | null;
             };
             /**
@@ -478,6 +3313,109 @@ export declare namespace Components {
                 cardColor?: string;
                 highContrast?: boolean;
             };
+        }
+        export interface WebsiteChatPreviewGrant {
+            /**
+             * Single-use grant for POST /v1/sessions.
+             */
+            grant: string;
+            /**
+             * Seconds until the grant expires.
+             */
+            expires_in: number;
+            frame_origin: string; // uri
+            website_chat: {
+                key: string;
+                /**
+                 * Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                 */
+                assistant_name?: {
+                    de?: string;
+                    en?: string;
+                };
+                /**
+                 * Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                 */
+                greeting?: {
+                    de?: string;
+                    en?: string;
+                };
+                defaultLocale: "en" | "de";
+                /**
+                 * Login methods currently available to the customer.
+                 */
+                login_methods: ("email_code" | "portal_login")[];
+                /**
+                 * Starter questions of the assigned Agent Builder website agent, by locale. Absent when the agent has none; clients then show their own defaults.
+                 */
+                starters?: {
+                    /**
+                     * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                     */
+                    de?: string[];
+                    /**
+                     * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                     */
+                    en?: string[];
+                };
+                /**
+                 * Prototype Guided Actions offered by this Website Chat.
+                 */
+                actions?: {
+                    meter_reading?: boolean;
+                    meter_reading_journey_id?: string; // uuid
+                };
+                design?: {
+                    id: string; // uuid
+                    last_modified_at?: string;
+                    style?: {
+                        palette?: {
+                            primary?: string;
+                            background?: string;
+                        };
+                        typography?: {
+                            font?: {
+                                font_family?: string;
+                            };
+                        };
+                        shape?: {
+                            border_radius?: number;
+                        };
+                    };
+                    spark_theme?: {
+                        accentColor?: string;
+                        backgroundColor?: string;
+                        fontBody?: string;
+                        fontHeading?: string;
+                        radius?: string;
+                        scaling?: string;
+                        spacing?: string;
+                        appearance?: string;
+                        neutralColor?: string;
+                        styleVariant?: string;
+                        labelPosition?: string;
+                        inputStyle?: string;
+                        inputColor?: string;
+                        cardVariant?: string;
+                        cardColor?: string;
+                        highContrast?: boolean;
+                    };
+                };
+                /**
+                 * Languages the chat offers, default first: the assigned Agent Builder website agent's languages, or both for a legacy agent. Hide the language choice when there is one.
+                 */
+                locales: ("en" | "de")[];
+            };
+        }
+        export interface WebsiteChatPreviewGrantRequest {
+            /**
+             * Unsaved design to preview. Omit to keep the saved design; null previews the default design.
+             */
+            design_id?: string | null; // uuid
+            /**
+             * Start the preview as a fictional, verified demo customer (no login, no sign-out). In-chat actions are simulated with demo data and write nothing; the Website Chat frame shows journeys as a simulated hand-off and never loads them.
+             */
+            demo_customer?: boolean;
         }
         export interface WebsiteChatSettings {
             /**
@@ -535,24 +3473,993 @@ export declare namespace Components {
                 string?,
                 string?
             ];
-            organisation_name: string;
             default_locale: "en" | "de";
             /**
              * Design Builder configuration for the Website Chat only.
              */
             design_id?: string | null; // uuid
             /**
-             * Email Builder template selection. Does not enable verification by itself.
+             * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
              */
             authentication?: {
-                email_code: {
+                /**
+                 * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                 */
+                email_code?: {
                     email_template_id?: string | null; // uuid
-                };
+                } | null;
+                /**
+                 * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                 */
+                portal?: {
+                    portal_id: string; // uuid
+                } | null;
+            } | null;
+            /**
+             * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+             */
+            self_service?: {
+                /**
+                 * Each action can be added once.
+                 */
+                actions: [
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?,
+                    {
+                        action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                        enabled: boolean;
+                        fulfilment: "in_chat" | "journey" | "link";
+                        /**
+                         * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                         */
+                        journey_id?: string; // uuid
+                        /**
+                         * HTTPS address to open; only for link.
+                         */
+                        url?: string;
+                        /**
+                         * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                         */
+                        access: "anonymous" | "identified" | "verified";
+                        /**
+                         * When the assistant should start this action.
+                         */
+                        guidance?: string;
+                    }?
+                ];
             } | null;
         }
     }
 }
 export declare namespace Paths {
+    namespace CancelChatAction {
+        namespace Parameters {
+            export type ActionId = string; // uuid
+        }
+        export interface PathParameters {
+            action_id: Parameters.ActionId /* uuid */;
+        }
+        export interface RequestBody {
+            expected_revision: number;
+        }
+        namespace Responses {
+            export interface $200 {
+                conversation_id: string; // uuid
+                status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff";
+                action_id?: string; // uuid
+                revision?: number;
+                options?: [
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?
+                ];
+                values?: {
+                    meter_id: string;
+                    counter_id: string;
+                    value: number;
+                };
+                field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE";
+                receipt?: {
+                    reference: string;
+                    meter_number: string;
+                    value: number;
+                    unit: string;
+                    submitted_at: string;
+                };
+                reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace CancelChatPortalLogin {
+        namespace Responses {
+            export interface $200 {
+                available: boolean;
+                conversation_id: string; // uuid
+                status: "anonymous" | "pending" | "verified";
+                challenge_id?: string; // uuid
+                /**
+                 * Unix seconds
+                 */
+                code_expires_at?: number;
+                attempts_left?: number;
+                email?: string; // email
+                contact_resolution?: "matched" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
+                     */
+                    method?: "email_code" | "portal_login" | "demo";
+                };
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
     namespace CancelChatVerification {
         namespace Responses {
             export interface $200 {
@@ -570,9 +4477,520 @@ export declare namespace Paths {
                 resend_after?: number;
                 email?: string; // email
                 contact_resolution?: "matched" | "ambiguous" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
+                     */
+                    method?: "email_code" | "portal_login" | "demo";
+                };
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace ConfirmChatAction {
+        namespace Parameters {
+            export type ActionId = string; // uuid
+        }
+        export interface PathParameters {
+            action_id: Parameters.ActionId /* uuid */;
+        }
+        export interface RequestBody {
+            expected_revision: number;
+        }
+        namespace Responses {
+            export interface $200 {
+                conversation_id: string; // uuid
+                status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff";
+                action_id?: string; // uuid
+                revision?: number;
+                options?: [
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?
+                ];
+                values?: {
+                    meter_id: string;
+                    counter_id: string;
+                    value: number;
+                };
+                field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE";
+                receipt?: {
+                    reference: string;
+                    meter_number: string;
+                    value: number;
+                    unit: string;
+                    submitted_at: string;
+                };
+                reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -590,11 +5008,44 @@ export declare namespace Paths {
                 expires_at: number;
                 website_chat: {
                     key: string;
-                    organisationName: string;
-                    assistantName: string;
+                    /**
+                     * Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                     */
+                    assistant_name?: {
+                        de?: string;
+                        en?: string;
+                    };
+                    /**
+                     * Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                     */
+                    greeting?: {
+                        de?: string;
+                        en?: string;
+                    };
                     defaultLocale: "en" | "de";
-                    authentication?: {
-                        email_code: boolean;
+                    /**
+                     * Login methods currently available to the customer.
+                     */
+                    login_methods: ("email_code" | "portal_login")[];
+                    /**
+                     * Starter questions of the assigned Agent Builder website agent, by locale. Absent when the agent has none; clients then show their own defaults.
+                     */
+                    starters?: {
+                        /**
+                         * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                         */
+                        de?: string[];
+                        /**
+                         * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                         */
+                        en?: string[];
+                    };
+                    /**
+                     * Prototype Guided Actions offered by this Website Chat.
+                     */
+                    actions?: {
+                        meter_reading?: boolean;
+                        meter_reading_journey_id?: string; // uuid
                     };
                     design?: {
                         id: string; // uuid
@@ -632,11 +5083,37 @@ export declare namespace Paths {
                             highContrast?: boolean;
                         };
                     };
+                    /**
+                     * Languages the chat offers, default first: the assigned Agent Builder website agent's languages, or both for a legacy agent. Hide the language choice when there is one.
+                     */
                     locales: ("en" | "de")[];
+                };
+                /**
+                 * Agent Builder preview session; the frame only runs it inside the 360 portal.
+                 */
+                preview?: boolean;
+                access?: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
+                     */
+                    method?: "email_code" | "portal_login" | "demo";
                 };
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -655,13 +5132,16 @@ export declare namespace Paths {
                 frame_origin: string; // uri
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
     namespace CreateWebsiteChat {
         export interface RequestBody {
-            name: string;
             agent_id: string | null; // uuid
             settings: {
                 /**
@@ -719,25 +5199,462 @@ export declare namespace Paths {
                     string?,
                     string?
                 ];
-                organisation_name: string;
                 default_locale: "en" | "de";
                 /**
                  * Design Builder configuration for the Website Chat only.
                  */
                 design_id?: string | null; // uuid
                 /**
-                 * Email Builder template selection. Does not enable verification by itself.
+                 * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                  */
                 authentication?: {
-                    email_code: {
+                    /**
+                     * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    email_code?: {
                         email_template_id?: string | null; // uuid
-                    };
+                    } | null;
+                    /**
+                     * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    portal?: {
+                        portal_id: string; // uuid
+                    } | null;
+                } | null;
+                /**
+                 * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                 */
+                self_service?: {
+                    /**
+                     * Each action can be added once.
+                     */
+                    actions: [
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?
+                    ];
                 } | null;
             };
         }
         namespace Responses {
             export interface $201 {
-                name: string;
                 agent_id: string | null; // uuid
                 settings: {
                     /**
@@ -795,19 +5712,457 @@ export declare namespace Paths {
                         string?,
                         string?
                     ];
-                    organisation_name: string;
                     default_locale: "en" | "de";
                     /**
                      * Design Builder configuration for the Website Chat only.
                      */
                     design_id?: string | null; // uuid
                     /**
-                     * Email Builder template selection. Does not enable verification by itself.
+                     * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                      */
                     authentication?: {
-                        email_code: {
+                        /**
+                         * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        email_code?: {
                             email_template_id?: string | null; // uuid
-                        };
+                        } | null;
+                        /**
+                         * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        portal?: {
+                            portal_id: string; // uuid
+                        } | null;
+                    } | null;
+                    /**
+                     * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                     */
+                    self_service?: {
+                        /**
+                         * Each action can be added once.
+                         */
+                        actions: [
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?
+                        ];
                     } | null;
                 };
                 /**
@@ -851,6 +6206,141 @@ export declare namespace Paths {
             }
         }
     }
+    namespace CreateWebsiteChatPreviewGrant {
+        export interface RequestBody {
+            /**
+             * Unsaved design to preview. Omit to keep the saved design; null previews the default design.
+             */
+            design_id?: string | null; // uuid
+            /**
+             * Start the preview as a fictional, verified demo customer (no login, no sign-out). In-chat actions are simulated with demo data and write nothing; the Website Chat frame shows journeys as a simulated hand-off and never loads them.
+             */
+            demo_customer?: boolean;
+        }
+        namespace Responses {
+            export interface $201 {
+                /**
+                 * Single-use grant for POST /v1/sessions.
+                 */
+                grant: string;
+                /**
+                 * Seconds until the grant expires.
+                 */
+                expires_in: number;
+                frame_origin: string; // uri
+                website_chat: {
+                    key: string;
+                    /**
+                     * Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                     */
+                    assistant_name?: {
+                        de?: string;
+                        en?: string;
+                    };
+                    /**
+                     * Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                     */
+                    greeting?: {
+                        de?: string;
+                        en?: string;
+                    };
+                    defaultLocale: "en" | "de";
+                    /**
+                     * Login methods currently available to the customer.
+                     */
+                    login_methods: ("email_code" | "portal_login")[];
+                    /**
+                     * Starter questions of the assigned Agent Builder website agent, by locale. Absent when the agent has none; clients then show their own defaults.
+                     */
+                    starters?: {
+                        /**
+                         * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                         */
+                        de?: string[];
+                        /**
+                         * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                         */
+                        en?: string[];
+                    };
+                    /**
+                     * Prototype Guided Actions offered by this Website Chat.
+                     */
+                    actions?: {
+                        meter_reading?: boolean;
+                        meter_reading_journey_id?: string; // uuid
+                    };
+                    design?: {
+                        id: string; // uuid
+                        last_modified_at?: string;
+                        style?: {
+                            palette?: {
+                                primary?: string;
+                                background?: string;
+                            };
+                            typography?: {
+                                font?: {
+                                    font_family?: string;
+                                };
+                            };
+                            shape?: {
+                                border_radius?: number;
+                            };
+                        };
+                        spark_theme?: {
+                            accentColor?: string;
+                            backgroundColor?: string;
+                            fontBody?: string;
+                            fontHeading?: string;
+                            radius?: string;
+                            scaling?: string;
+                            spacing?: string;
+                            appearance?: string;
+                            neutralColor?: string;
+                            styleVariant?: string;
+                            labelPosition?: string;
+                            inputStyle?: string;
+                            inputColor?: string;
+                            cardVariant?: string;
+                            cardColor?: string;
+                            highContrast?: boolean;
+                        };
+                    };
+                    /**
+                     * Languages the chat offers, default first: the assigned Agent Builder website agent's languages, or both for a legacy agent. Hide the language choice when there is one.
+                     */
+                    locales: ("en" | "de")[];
+                };
+            }
+            export interface $400 {
+                error?: string;
+                message?: string;
+                details?: {
+                    [key: string]: any;
+                };
+            }
+            export interface $403 {
+                error?: string;
+                message?: string;
+                details?: {
+                    [key: string]: any;
+                };
+            }
+            export interface $404 {
+                error?: string;
+                message?: string;
+                details?: {
+                    [key: string]: any;
+                };
+            }
+            export interface $429 {
+                error?: string;
+                message?: string;
+                details?: {
+                    [key: string]: any;
+                };
+            }
+        }
+    }
     namespace DeleteWebsiteChat {
         namespace Parameters {
             export type Version = number;
@@ -884,6 +6374,546 @@ export declare namespace Paths {
             }
         }
     }
+    namespace GetChatAction {
+        namespace Responses {
+            export interface $200 {
+                conversation_id: string; // uuid
+                status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff";
+                action_id?: string; // uuid
+                revision?: number;
+                options?: [
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?
+                ];
+                values?: {
+                    meter_id: string;
+                    counter_id: string;
+                    value: number;
+                };
+                field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE";
+                receipt?: {
+                    reference: string;
+                    meter_number: string;
+                    value: number;
+                    unit: string;
+                    submitted_at: string;
+                };
+                reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace GetChatPortalJourneyToken {
+        namespace Responses {
+            export interface $200 {
+                id_token: string;
+                /**
+                 * Unix seconds
+                 */
+                expires_at: number;
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace GetChatPortalLogin {
+        namespace Responses {
+            export interface $200 {
+                available: boolean;
+                conversation_id: string; // uuid
+                status: "anonymous" | "pending" | "verified";
+                challenge_id?: string; // uuid
+                /**
+                 * Unix seconds
+                 */
+                code_expires_at?: number;
+                attempts_left?: number;
+                email?: string; // email
+                contact_resolution?: "matched" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
+                     */
+                    method?: "email_code" | "portal_login" | "demo";
+                };
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
     namespace GetChatVerification {
         namespace Responses {
             export interface $200 {
@@ -901,9 +6931,28 @@ export declare namespace Paths {
                 resend_after?: number;
                 email?: string; // email
                 contact_resolution?: "matched" | "ambiguous" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
+                     */
+                    method?: "email_code" | "portal_login" | "demo";
+                };
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -917,11 +6966,44 @@ export declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 key: string;
-                organisationName: string;
-                assistantName: string;
+                /**
+                 * Display name of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                 */
+                assistant_name?: {
+                    de?: string;
+                    en?: string;
+                };
+                /**
+                 * Greeting of the assigned Agent Builder website agent, by locale. Only locales with a value are present, and the object is absent when none has one; clients then show their own default.
+                 */
+                greeting?: {
+                    de?: string;
+                    en?: string;
+                };
                 defaultLocale: "en" | "de";
-                authentication?: {
-                    email_code: boolean;
+                /**
+                 * Login methods currently available to the customer.
+                 */
+                login_methods: ("email_code" | "portal_login")[];
+                /**
+                 * Starter questions of the assigned Agent Builder website agent, by locale. Absent when the agent has none; clients then show their own defaults.
+                 */
+                starters?: {
+                    /**
+                     * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                     */
+                    de?: string[];
+                    /**
+                     * At most six. (No maxItems, which generated clients turn into fixed-length tuples.)
+                     */
+                    en?: string[];
+                };
+                /**
+                 * Prototype Guided Actions offered by this Website Chat.
+                 */
+                actions?: {
+                    meter_reading?: boolean;
+                    meter_reading_journey_id?: string; // uuid
                 };
                 design?: {
                     id: string; // uuid
@@ -959,17 +7041,23 @@ export declare namespace Paths {
                         highContrast?: boolean;
                     };
                 };
+                /**
+                 * Languages the chat offers, default first: the assigned Agent Builder website agent's languages, or both for a legacy agent. Hide the language choice when there is one.
+                 */
                 locales: ("en" | "de")[];
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
     namespace GetWebsiteChat {
         namespace Responses {
             export interface $200 {
-                name: string;
                 agent_id: string | null; // uuid
                 settings: {
                     /**
@@ -1027,19 +7115,457 @@ export declare namespace Paths {
                         string?,
                         string?
                     ];
-                    organisation_name: string;
                     default_locale: "en" | "de";
                     /**
                      * Design Builder configuration for the Website Chat only.
                      */
                     design_id?: string | null; // uuid
                     /**
-                     * Email Builder template selection. Does not enable verification by itself.
+                     * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                      */
                     authentication?: {
-                        email_code: {
+                        /**
+                         * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        email_code?: {
                             email_template_id?: string | null; // uuid
-                        };
+                        } | null;
+                        /**
+                         * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        portal?: {
+                            portal_id: string; // uuid
+                        } | null;
+                    } | null;
+                    /**
+                     * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                     */
+                    self_service?: {
+                        /**
+                         * Each action can be added once.
+                         */
+                        actions: [
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?
+                        ];
                     } | null;
                 };
                 /**
@@ -1093,7 +7619,6 @@ export declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 website_chats: {
-                    name: string;
                     agent_id: string | null; // uuid
                     settings: {
                         /**
@@ -1151,19 +7676,457 @@ export declare namespace Paths {
                             string?,
                             string?
                         ];
-                        organisation_name: string;
                         default_locale: "en" | "de";
                         /**
                          * Design Builder configuration for the Website Chat only.
                          */
                         design_id?: string | null; // uuid
                         /**
-                         * Email Builder template selection. Does not enable verification by itself.
+                         * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                          */
                         authentication?: {
-                            email_code: {
+                            /**
+                             * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                             */
+                            email_code?: {
                                 email_template_id?: string | null; // uuid
-                            };
+                            } | null;
+                            /**
+                             * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                             */
+                            portal?: {
+                                portal_id: string; // uuid
+                            } | null;
+                        } | null;
+                        /**
+                         * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                         */
+                        self_service?: {
+                            /**
+                             * Each action can be added once.
+                             */
+                            actions: [
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?,
+                                {
+                                    action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                    enabled: boolean;
+                                    fulfilment: "in_chat" | "journey" | "link";
+                                    /**
+                                     * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                     */
+                                    journey_id?: string; // uuid
+                                    /**
+                                     * HTTPS address to open; only for link.
+                                     */
+                                    url?: string;
+                                    /**
+                                     * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                     */
+                                    access: "anonymous" | "identified" | "verified";
+                                    /**
+                                     * When the assistant should start this action.
+                                     */
+                                    guidance?: string;
+                                }?
+                            ];
                         } | null;
                     };
                     /**
@@ -1209,6 +8172,23 @@ export declare namespace Paths {
             }
         }
     }
+    namespace ReportChatActionEvent {
+        export interface RequestBody {
+            action: string; // ^[a-z][a-z_]{0,59}$
+            event: "journey_submitted" | "journey_closed";
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
     namespace SendAnonymousChatMessage {
         export interface RequestBody {
             request_id: string; // uuid ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
@@ -1219,7 +8199,527 @@ export declare namespace Paths {
         namespace Responses {
             export type $200 = string;
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace SignOutChatCustomer {
+        namespace Responses {
+            export interface $200 {
+                conversation_id: string; // uuid
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
+                     */
+                    method?: "email_code" | "portal_login" | "demo";
+                };
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace StartChatAction {
+        export interface RequestBody {
+            request_id: string; // uuid
+            action_type: "submit_meter_reading";
+        }
+        namespace Responses {
+            export interface $200 {
+                conversation_id: string; // uuid
+                status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff";
+                action_id?: string; // uuid
+                revision?: number;
+                options?: [
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?
+                ];
+                values?: {
+                    meter_id: string;
+                    counter_id: string;
+                    value: number;
+                };
+                field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE";
+                receipt?: {
+                    reference: string;
+                    meter_number: string;
+                    value: number;
+                    unit: string;
+                    submitted_at: string;
+                };
+                reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -1245,15 +8745,571 @@ export declare namespace Paths {
                 resend_after?: number;
                 email?: string; // email
                 contact_resolution?: "matched" | "ambiguous" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
+                     */
+                    method?: "email_code" | "portal_login" | "demo";
+                };
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace StartChatPortalLogin {
+        export interface RequestBody {
+            request_id: string; // uuid
+            email: string; // email
+        }
+        namespace Responses {
+            export interface $200 {
+                available: boolean;
+                conversation_id: string; // uuid
+                status: "anonymous" | "pending" | "verified";
+                challenge_id?: string; // uuid
+                /**
+                 * Unix seconds
+                 */
+                code_expires_at?: number;
+                attempts_left?: number;
+                email?: string; // email
+                contact_resolution?: "matched" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
+                     */
+                    method?: "email_code" | "portal_login" | "demo";
+                };
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace SubmitChatAction {
+        namespace Parameters {
+            export type ActionId = string; // uuid
+        }
+        export interface PathParameters {
+            action_id: Parameters.ActionId /* uuid */;
+        }
+        export interface RequestBody {
+            expected_revision: number;
+            meter_id: string;
+            counter_id: string;
+            value: number;
+        }
+        namespace Responses {
+            export interface $200 {
+                conversation_id: string; // uuid
+                status: "none" | "needs_input" | "needs_confirmation" | "executing" | "completed" | "pending" | "rejected" | "handoff";
+                action_id?: string; // uuid
+                revision?: number;
+                options?: [
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?,
+                    {
+                        meter_id: string;
+                        counter_id: string;
+                        meter_number: string;
+                        label: string;
+                        unit: string;
+                        min_value?: number;
+                        max_value?: number;
+                    }?
+                ];
+                values?: {
+                    meter_id: string;
+                    counter_id: string;
+                    value: number;
+                };
+                field_error?: "VALUE_INVALID" | "VALUE_OUT_OF_RANGE" | "TARGET_UNAVAILABLE";
+                receipt?: {
+                    reference: string;
+                    meter_number: string;
+                    value: number;
+                    unit: string;
+                    submitted_at: string;
+                };
+                reason?: "NO_METERS" | "SUBMISSION_REJECTED" | "SUBMISSION_UNCERTAIN";
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
     namespace UpdateWebsiteChat {
         export interface RequestBody {
-            name?: string;
             agent_id?: string | null; // uuid
             settings?: {
                 /**
@@ -1311,19 +9367,457 @@ export declare namespace Paths {
                     string?,
                     string?
                 ];
-                organisation_name: string;
                 default_locale: "en" | "de";
                 /**
                  * Design Builder configuration for the Website Chat only.
                  */
                 design_id?: string | null; // uuid
                 /**
-                 * Email Builder template selection. Does not enable verification by itself.
+                 * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                  */
                 authentication?: {
-                    email_code: {
+                    /**
+                     * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    email_code?: {
                         email_template_id?: string | null; // uuid
-                    };
+                    } | null;
+                    /**
+                     * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                     */
+                    portal?: {
+                        portal_id: string; // uuid
+                    } | null;
+                } | null;
+                /**
+                 * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                 */
+                self_service?: {
+                    /**
+                     * Each action can be added once.
+                     */
+                    actions: [
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?,
+                        {
+                            action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                            enabled: boolean;
+                            fulfilment: "in_chat" | "journey" | "link";
+                            /**
+                             * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                             */
+                            journey_id?: string; // uuid
+                            /**
+                             * HTTPS address to open; only for link.
+                             */
+                            url?: string;
+                            /**
+                             * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                             */
+                            access: "anonymous" | "identified" | "verified";
+                            /**
+                             * When the assistant should start this action.
+                             */
+                            guidance?: string;
+                        }?
+                    ];
                 } | null;
             };
             /**
@@ -1333,7 +9827,6 @@ export declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
-                name: string;
                 agent_id: string | null; // uuid
                 settings: {
                     /**
@@ -1391,19 +9884,457 @@ export declare namespace Paths {
                         string?,
                         string?
                     ];
-                    organisation_name: string;
                     default_locale: "en" | "de";
                     /**
                      * Design Builder configuration for the Website Chat only.
                      */
                     design_id?: string | null; // uuid
                     /**
-                     * Email Builder template selection. Does not enable verification by itself.
+                     * Customer login settings. The email template selection does not enable verification by itself. On update, each login method is merged separately; null removes all login settings.
                      */
                     authentication?: {
-                        email_code: {
+                        /**
+                         * Email code verification. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        email_code?: {
                             email_template_id?: string | null; // uuid
-                        };
+                        } | null;
+                        /**
+                         * Optional portal login. Customers log in with their customer portal account (email one-time code); the portal must belong to this organisation. On update, omit to keep the current setting or send null to remove it.
+                         */
+                        portal?: {
+                            portal_id: string; // uuid
+                        } | null;
+                    } | null;
+                    /**
+                     * Self-service actions customers can start in this Website Chat. On update, the list is replaced as a whole; null removes all actions.
+                     */
+                    self_service?: {
+                        /**
+                         * Each action can be added once.
+                         */
+                        actions: [
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?,
+                            {
+                                action: "submit_meter_reading" | "change_installment_rate" | "update_payment_method" | "change_billing_address" | "update_customer_details" | "change_tariff" | "report_move" | "terminate_contract";
+                                enabled: boolean;
+                                fulfilment: "in_chat" | "journey" | "link";
+                                /**
+                                 * Journey to open; only for journey. Must be a journey of this organisation that the saving user can access.
+                                 */
+                                journey_id?: string; // uuid
+                                /**
+                                 * HTTPS address to open; only for link.
+                                 */
+                                url?: string;
+                                /**
+                                 * Who can start the action. verified customers log in first. identified is not available yet (identifiers login is planned) and is rejected.
+                                 */
+                                access: "anonymous" | "identified" | "verified";
+                                /**
+                                 * When the assistant should start this action.
+                                 */
+                                guidance?: string;
+                            }?
+                        ];
                     } | null;
                 };
                 /**
@@ -1455,6 +10386,14 @@ export declare namespace Paths {
             website_chat_id: Parameters.WebsiteChatId /* uuid */;
         }
     }
+    namespace V1WebsiteChats$WebsiteChatIdPreviewGrant {
+        namespace Parameters {
+            export type WebsiteChatId = string; // uuid
+        }
+        export interface PathParameters {
+            website_chat_id: Parameters.WebsiteChatId /* uuid */;
+        }
+    }
     namespace VerifyChatEmailCode {
         export interface RequestBody {
             challenge_id: string; // uuid
@@ -1476,9 +10415,71 @@ export declare namespace Paths {
                 resend_after?: number;
                 email?: string; // email
                 contact_resolution?: "matched" | "ambiguous" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
+                     */
+                    method?: "email_code" | "portal_login" | "demo";
+                };
             }
             export interface Default {
-                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE";
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
+            }
+        }
+    }
+    namespace VerifyChatPortalLogin {
+        export interface RequestBody {
+            challenge_id: string; // uuid
+            code: string; // ^\d{6}$
+        }
+        namespace Responses {
+            export interface $200 {
+                available: boolean;
+                conversation_id: string; // uuid
+                status: "anonymous" | "pending" | "verified";
+                challenge_id?: string; // uuid
+                /**
+                 * Unix seconds
+                 */
+                code_expires_at?: number;
+                attempts_left?: number;
+                email?: string; // email
+                contact_resolution?: "matched" | "not_found";
+                access: {
+                    /**
+                     * anonymous: no customer identity. identified: the Contact is known but ownership
+                     * is not proven. verified: ownership is proven (an email code or a portal login), or the
+                     * demo customer of an Agent Builder preview.
+                     *
+                     */
+                    tier: "anonymous" | "identified" | "verified";
+                    /**
+                     * How the current customer identity was established. demo is the fictional, verified
+                     * customer of an Agent Builder preview; it is never a login method.
+                     *
+                     */
+                    method?: "email_code" | "portal_login" | "demo";
+                };
+            }
+            export interface Default {
+                code: "INVALID_VERIFICATION_CODE" | "VERIFICATION_EXPIRED" | "VERIFICATION_CONFLICT" | "VERIFICATION_DISABLED" | "VERIFICATION_UNAVAILABLE" | "IDENTITY_CHANGED" | "INVALID_REQUEST" | "ORIGIN_DENIED" | "NOT_FOUND" | "INVALID_GRANT" | "SESSION_EXPIRED" | "RATE_LIMITED" | "SESSION_LIMIT" | "USAGE_LIMIT" | "REQUEST_CONFLICT" | "IN_PROGRESS" | "UNAVAILABLE" | "TEMPORARILY_UNAVAILABLE" | "IDENTITY_REQUIRED" | "ACTION_UNAVAILABLE" | "ACTION_CONFLICT" | "ACTION_TARGET_DENIED" | "INVALID_LOGIN_CODE" | "LOGIN_EXPIRED" | "LOGIN_DISABLED" | "LOGIN_UNAVAILABLE" | "LOGIN_CONFLICT" | "LOGIN_REJECTED";
+                /**
+                 * Remaining code attempts; only with INVALID_LOGIN_CODE.
+                 */
+                attempts_left?: number;
             }
         }
     }
@@ -1526,6 +10527,14 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteWebsiteChat.Responses.$204>
+  /**
+   * createWebsiteChatPreviewGrant - Issues a single-use grant for an Agent Builder preview of this Website Chat. Only callable from the 360 portal; the preview runs without allowed websites (also before any are added), is exempt from Website Chat analytics and ends after 15 minutes. The grant is exchanged at POST /v1/sessions within 60 seconds.
+   */
+  'createWebsiteChatPreviewGrant'(
+    parameters?: Parameters<Paths.V1WebsiteChats$WebsiteChatIdPreviewGrant.PathParameters> | null,
+    data?: Paths.CreateWebsiteChatPreviewGrant.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateWebsiteChatPreviewGrant.Responses.$201>
   /**
    * getPublicWebsiteChat - Resolve visitor-facing configuration for an independent Website Chat and its current agent assignment. The Website Chat ID is not an organisation ID or a destination such as website or portal.
    */
@@ -1595,6 +10604,109 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CancelChatVerification.Responses.$200 | Paths.CancelChatVerification.Responses.Default>
+  /**
+   * getChatPortalLogin - Read this session's portal login state. Tokens never leave the server.
+   */
+  'getChatPortalLogin'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetChatPortalLogin.Responses.$200 | Paths.GetChatPortalLogin.Responses.Default>
+  /**
+   * getChatPortalJourneyToken - Prototype. The portal ID token of this session's portal login, for an embedded Journey running in the Journey app's parent-auth mode, so the customer does not log in twice. Only for a valid portal login; the frame keeps it in memory and posts it only to the Journey origin.
+   */
+  'getChatPortalJourneyToken'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetChatPortalJourneyToken.Responses.$200 | Paths.GetChatPortalJourneyToken.Responses.Default>
+  /**
+   * startChatPortalLogin - Send a one-time code for the customer portal account with this email, using the portal
+   * configured on this session's Website Chat. The response is pending whether or not an
+   * account exists. Repeating the same request_id and email does not send another email.
+   * 
+   */
+  'startChatPortalLogin'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.StartChatPortalLogin.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.StartChatPortalLogin.Responses.$200 | Paths.StartChatPortalLogin.Responses.Default>
+  /**
+   * verifyChatPortalLogin - Answer the current portal login challenge. Success logs the customer in with their
+   * portal account and starts a new conversation. A wrong code returns 400
+   * INVALID_LOGIN_CODE with attempts_left (the Portal emails a new code while attempts
+   * remain); an expired or replaced challenge returns 409 LOGIN_EXPIRED.
+   * 
+   */
+  'verifyChatPortalLogin'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.VerifyChatPortalLogin.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.VerifyChatPortalLogin.Responses.$200 | Paths.VerifyChatPortalLogin.Responses.Default>
+  /**
+   * cancelChatPortalLogin - Cancel a pending portal login or end a portal login. Ending it starts a new anonymous conversation.
+   */
+  'cancelChatPortalLogin'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelChatPortalLogin.Responses.$200 | Paths.CancelChatPortalLogin.Responses.Default>
+  /**
+   * signOutChatCustomer - Clear the customer identity of any login method and pending challenges. Clearing an identity starts a new anonymous conversation. The demo customer of an Agent Builder preview stays signed in for the whole session (403 LOGIN_DISABLED); it cannot start an email verification or portal login either.
+   */
+  'signOutChatCustomer'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SignOutChatCustomer.Responses.$200 | Paths.SignOutChatCustomer.Responses.Default>
+  /**
+   * getChatAction - Prototype. Read this session's current Guided Action. Values never reach the AI or the host page.
+   */
+  'getChatAction'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetChatAction.Responses.$200 | Paths.GetChatAction.Responses.Default>
+  /**
+   * startChatAction - Prototype. Start a Guided Action for the verified Contact. The eligible targets are resolved on the server.
+   */
+  'startChatAction'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.StartChatAction.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.StartChatAction.Responses.$200 | Paths.StartChatAction.Responses.Default>
+  /**
+   * reportChatActionEvent - Report what an embedded journey did, so the assistant can refer to it. Accepted only for a journey action this Website Chat offers. Browser input: the assistant is told it is not confirmed.
+   */
+  'reportChatActionEvent'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.ReportChatActionEvent.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReportChatActionEvent.Responses.$204 | Paths.ReportChatActionEvent.Responses.Default>
+  /**
+   * submitChatAction - Prototype. Submit values for review. Targets must be one of the server-offered options; values are validated before confirmation.
+   */
+  'submitChatAction'(
+    parameters?: Parameters<Paths.SubmitChatAction.PathParameters> | null,
+    data?: Paths.SubmitChatAction.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SubmitChatAction.Responses.$200 | Paths.SubmitChatAction.Responses.Default>
+  /**
+   * confirmChatAction - Prototype. Execute the confirmed values once. Ownership is checked again before the domain write. Repeating a completed confirmation returns the same receipt.
+   */
+  'confirmChatAction'(
+    parameters?: Parameters<Paths.ConfirmChatAction.PathParameters> | null,
+    data?: Paths.ConfirmChatAction.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ConfirmChatAction.Responses.$200 | Paths.ConfirmChatAction.Responses.Default>
+  /**
+   * cancelChatAction - Prototype. Cancel an unfinished action.
+   */
+  'cancelChatAction'(
+    parameters?: Parameters<Paths.CancelChatAction.PathParameters> | null,
+    data?: Paths.CancelChatAction.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CancelChatAction.Responses.$200 | Paths.CancelChatAction.Responses.Default>
 }
 
 export interface PathsDictionary {
@@ -1641,6 +10753,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteWebsiteChat.Responses.$204>
+  }
+  ['/v1/website-chats/{website_chat_id}/preview-grant']: {
+    /**
+     * createWebsiteChatPreviewGrant - Issues a single-use grant for an Agent Builder preview of this Website Chat. Only callable from the 360 portal; the preview runs without allowed websites (also before any are added), is exempt from Website Chat analytics and ends after 15 minutes. The grant is exchanged at POST /v1/sessions within 60 seconds.
+     */
+    'post'(
+      parameters?: Parameters<Paths.V1WebsiteChats$WebsiteChatIdPreviewGrant.PathParameters> | null,
+      data?: Paths.CreateWebsiteChatPreviewGrant.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateWebsiteChatPreviewGrant.Responses.$201>
   }
   ['/v1/website-chats/{website_chat_id}/configuration']: {
     /**
@@ -1727,19 +10849,157 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CancelChatVerification.Responses.$200 | Paths.CancelChatVerification.Responses.Default>
   }
+  ['/v1/login/portal']: {
+    /**
+     * getChatPortalLogin - Read this session's portal login state. Tokens never leave the server.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetChatPortalLogin.Responses.$200 | Paths.GetChatPortalLogin.Responses.Default>
+  }
+  ['/v1/login/portal/journey-token']: {
+    /**
+     * getChatPortalJourneyToken - Prototype. The portal ID token of this session's portal login, for an embedded Journey running in the Journey app's parent-auth mode, so the customer does not log in twice. Only for a valid portal login; the frame keeps it in memory and posts it only to the Journey origin.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetChatPortalJourneyToken.Responses.$200 | Paths.GetChatPortalJourneyToken.Responses.Default>
+  }
+  ['/v1/login/portal/start']: {
+    /**
+     * startChatPortalLogin - Send a one-time code for the customer portal account with this email, using the portal
+     * configured on this session's Website Chat. The response is pending whether or not an
+     * account exists. Repeating the same request_id and email does not send another email.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.StartChatPortalLogin.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.StartChatPortalLogin.Responses.$200 | Paths.StartChatPortalLogin.Responses.Default>
+  }
+  ['/v1/login/portal/verify']: {
+    /**
+     * verifyChatPortalLogin - Answer the current portal login challenge. Success logs the customer in with their
+     * portal account and starts a new conversation. A wrong code returns 400
+     * INVALID_LOGIN_CODE with attempts_left (the Portal emails a new code while attempts
+     * remain); an expired or replaced challenge returns 409 LOGIN_EXPIRED.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.VerifyChatPortalLogin.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.VerifyChatPortalLogin.Responses.$200 | Paths.VerifyChatPortalLogin.Responses.Default>
+  }
+  ['/v1/login/portal/cancel']: {
+    /**
+     * cancelChatPortalLogin - Cancel a pending portal login or end a portal login. Ending it starts a new anonymous conversation.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelChatPortalLogin.Responses.$200 | Paths.CancelChatPortalLogin.Responses.Default>
+  }
+  ['/v1/login/sign-out']: {
+    /**
+     * signOutChatCustomer - Clear the customer identity of any login method and pending challenges. Clearing an identity starts a new anonymous conversation. The demo customer of an Agent Builder preview stays signed in for the whole session (403 LOGIN_DISABLED); it cannot start an email verification or portal login either.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SignOutChatCustomer.Responses.$200 | Paths.SignOutChatCustomer.Responses.Default>
+  }
+  ['/v1/actions']: {
+    /**
+     * getChatAction - Prototype. Read this session's current Guided Action. Values never reach the AI or the host page.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetChatAction.Responses.$200 | Paths.GetChatAction.Responses.Default>
+    /**
+     * startChatAction - Prototype. Start a Guided Action for the verified Contact. The eligible targets are resolved on the server.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.StartChatAction.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.StartChatAction.Responses.$200 | Paths.StartChatAction.Responses.Default>
+  }
+  ['/v1/actions/events']: {
+    /**
+     * reportChatActionEvent - Report what an embedded journey did, so the assistant can refer to it. Accepted only for a journey action this Website Chat offers. Browser input: the assistant is told it is not confirmed.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.ReportChatActionEvent.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReportChatActionEvent.Responses.$204 | Paths.ReportChatActionEvent.Responses.Default>
+  }
+  ['/v1/actions/{action_id}/submit']: {
+    /**
+     * submitChatAction - Prototype. Submit values for review. Targets must be one of the server-offered options; values are validated before confirmation.
+     */
+    'post'(
+      parameters?: Parameters<Paths.SubmitChatAction.PathParameters> | null,
+      data?: Paths.SubmitChatAction.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SubmitChatAction.Responses.$200 | Paths.SubmitChatAction.Responses.Default>
+  }
+  ['/v1/actions/{action_id}/confirm']: {
+    /**
+     * confirmChatAction - Prototype. Execute the confirmed values once. Ownership is checked again before the domain write. Repeating a completed confirmation returns the same receipt.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ConfirmChatAction.PathParameters> | null,
+      data?: Paths.ConfirmChatAction.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ConfirmChatAction.Responses.$200 | Paths.ConfirmChatAction.Responses.Default>
+  }
+  ['/v1/actions/{action_id}/cancel']: {
+    /**
+     * cancelChatAction - Prototype. Cancel an unfinished action.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CancelChatAction.PathParameters> | null,
+      data?: Paths.CancelChatAction.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CancelChatAction.Responses.$200 | Paths.CancelChatAction.Responses.Default>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AccessMethod = Components.Schemas.AccessMethod;
+export type AccessTier = Components.Schemas.AccessTier;
+export type ActionRevision = Components.Schemas.ActionRevision;
+export type ActionState = Components.Schemas.ActionState;
 export type CreateWebsiteChatRequest = Components.Schemas.CreateWebsiteChatRequest;
+export type CustomerAccess = Components.Schemas.CustomerAccess;
 export type Error = Components.Schemas.Error;
 export type ListWebsiteChatsResponse = Components.Schemas.ListWebsiteChatsResponse;
+export type LoginMethod = Components.Schemas.LoginMethod;
+export type PortalLoginState = Components.Schemas.PortalLoginState;
 export type PublicChatError = Components.Schemas.PublicChatError;
 export type PublicEvent = Components.Schemas.PublicEvent;
 export type PublicWebsiteChat = Components.Schemas.PublicWebsiteChat;
+export type SelfServiceAction = Components.Schemas.SelfServiceAction;
+export type SelfServiceDirective = Components.Schemas.SelfServiceDirective;
+export type SelfServiceSettings = Components.Schemas.SelfServiceSettings;
+export type StarterQuestions = Components.Schemas.StarterQuestions;
 export type UpdateWebsiteChatRequest = Components.Schemas.UpdateWebsiteChatRequest;
 export type VerificationState = Components.Schemas.VerificationState;
 export type WebsiteChat = Components.Schemas.WebsiteChat;
 export type WebsiteChatDesign = Components.Schemas.WebsiteChatDesign;
+export type WebsiteChatPreviewGrant = Components.Schemas.WebsiteChatPreviewGrant;
+export type WebsiteChatPreviewGrantRequest = Components.Schemas.WebsiteChatPreviewGrantRequest;
 export type WebsiteChatSettings = Components.Schemas.WebsiteChatSettings;

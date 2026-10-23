@@ -1,0 +1,74 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "paths": {
+    "/v1/external-values": {
+      "get": {
+        "operationId": "listExternalValues",
+        "responses": {}
+      }
+    },
+    "/v1/external-values/{app_id}/hooks/{hook_id}:resolve": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/AppId"
+        },
+        {
+          "$ref": "#/components/parameters/HookId"
+        }
+      ],
+      "post": {
+        "operationId": "resolveExternalValue",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/portal/external-values/{app_id}/hooks/{hook_id}:resolve": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/AppId"
+        },
+        {
+          "$ref": "#/components/parameters/HookId"
+        }
+      ],
+      "post": {
+        "operationId": "resolvePortalExternalValue",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "AppId": {
+        "name": "app_id",
+        "in": "path",
+        "required": true
+      },
+      "HookId": {
+        "name": "hook_id",
+        "in": "path",
+        "required": true
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://external-values.sls.epilot.io"
+    }
+  ]
+}

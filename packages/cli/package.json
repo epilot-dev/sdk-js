@@ -1,6 +1,6 @@
 {
   "name": "@epilot/cli",
-  "version": "0.1.177",
+  "version": "0.1.225",
   "description": "CLI for epilot APIs",
   "type": "module",
   "bin": {
@@ -50,6 +50,7 @@
     "openapi-client-axios": "^7.8.0"
   },
   "devDependencies": {
+    "@epilot/agent-auth": "workspace:^",
     "msw": "^2.12.10",
     "tsup": "^8.0.0",
     "tsx": "^4.0.0",

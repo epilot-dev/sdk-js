@@ -26,6 +26,9 @@ const VALUE_TAKING_FLAGS = new Set([
   '--server',
   '--jsonata',
   '--definition',
+  '--org',
+  '--access',
+  '--reason',
   // short
   '-t',
   '-s',

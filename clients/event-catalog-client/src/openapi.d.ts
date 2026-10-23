@@ -398,6 +398,12 @@ declare namespace Components {
              */
             event_status?: "active" | "deprecated" | "draft" | "disabled";
             /**
+             * When a custom event was deprecated. Only present on deprecated custom events.
+             * example:
+             * 2026-09-30T12:00:00.000Z
+             */
+            deprecated_at?: string; // date-time
+            /**
              * Tags associated with the event for categorization and filtering
              *
              * The "builtin" tag indicates events that are built into the epilot system.
@@ -619,6 +625,12 @@ declare namespace Components {
              * active
              */
             event_status?: "active" | "deprecated" | "draft" | "disabled";
+            /**
+             * When a custom event was deprecated. Only present on deprecated custom events.
+             * example:
+             * 2026-09-30T12:00:00.000Z
+             */
+            deprecated_at?: string; // date-time
             /**
              * Tags associated with the event for categorization and filtering
              *
@@ -954,6 +966,15 @@ declare namespace Components {
         export interface EventMapping {
             mode: "guided" | "jsonata";
             jsonata?: string;
+            /**
+             * How the mapped fields relate to the entity data. `extend` emits the mapped fields followed by
+             * every graph node; `replace` emits only the mapped fields, so the graph is hydrated to compute
+             * them but never travels with the event. A replace-mode event can only gain fields in later
+             * versions, because remapping an existing field needs the entity data in the payload to
+             * rebuild its previous value.
+             *
+             */
+            payload?: "extend" | "replace";
         }
         /**
          * A lightweight event summary returned by the v2 history endpoint.

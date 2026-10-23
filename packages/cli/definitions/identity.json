@@ -1,0 +1,1546 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Identity API",
+    "version": "1.0.0",
+    "description": "epilot as an OpenID Connect provider (\"Sign in with epilot\").\n\nThe standard OpenID Connect endpoints (discovery, JWKS, authorize, token, UserInfo, revocation)\nare described by the discovery document at `/.well-known/openid-configuration` and are not\nrepeated here. Partners integrate against that document with any certified OpenID Connect\nrelying-party library.\n\nThis specification covers the epilot-specific parts of the service:\n\n- the **operator API** used by epilot platform staff to register partner applications\n  (clients) and to enable organizations on them,\n- the **360 session endpoints** that let the portal prove a live 360 session during an\n  authorization (the session hop).\n\nTenant model: one confidential client per partner application and environment; the organization\na person is acting in travels in every ID token as the claim `https://id.epilot.cloud/claims/org_id`.\nA relying party must key everything on `(iss, sub, org_id)`.\n"
+  },
+  "tags": [
+    {
+      "name": "Operator Clients",
+      "description": "Register and manage partner applications (OIDC clients). Platform operators only."
+    },
+    {
+      "name": "Operator Organizations",
+      "description": "Enable, suspend and revoke organizations on a partner client. Platform operators only."
+    },
+    {
+      "name": "Session",
+      "description": "360 session hop used by the epilot portal during an authorization."
+    },
+    {
+      "name": "Launch",
+      "description": "Start a partner login from an epilot link (OpenID Connect third-party initiated login)."
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://id.epilot.cloud"
+    }
+  ],
+  "security": [
+    {
+      "OperatorAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/identity/operator/clients": {
+      "get": {
+        "operationId": "listClients",
+        "summary": "listClients",
+        "description": "List registered partner clients. The client secret is never returned.",
+        "tags": [
+          "Operator Clients"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerKeyQuery"
+          },
+          {
+            "$ref": "#/components/parameters/ClientStatusQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          },
+          {
+            "$ref": "#/components/parameters/CursorQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerClientList"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createOidcClient",
+        "summary": "createOidcClient",
+        "description": "Create a partner client in `draft` status. The client secret is returned exactly once in this\nresponse and can never be read again; use `rotateClientSecret` to obtain a new one.\n",
+        "tags": [
+          "Operator Clients"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerClientCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created client including its one-time secret",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerClientWithSecret"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "get": {
+        "operationId": "getOidcClient",
+        "summary": "getOidcClient",
+        "description": "Read a partner client. The client secret is never returned.",
+        "tags": [
+          "Operator Clients"
+        ],
+        "responses": {
+          "200": {
+            "description": "Client",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerClient"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateClient",
+        "summary": "updateClient",
+        "description": "Replace the mutable configuration of a client. `config_version` must equal the current\nversion (compare-and-swap); a mismatch is rejected with `409`.\n",
+        "tags": [
+          "Operator Clients"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerClientUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated client",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerClient"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "retireClient",
+        "summary": "retireClient",
+        "description": "Retire a client. The record is kept as a tombstone, the `client_id` is never reused, every\norganization enablement is revoked and all provider-side artefacts are revoked.\n",
+        "tags": [
+          "Operator Clients"
+        ],
+        "responses": {
+          "200": {
+            "description": "Retired client",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerClient"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}:activate": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "post": {
+        "operationId": "activateClient",
+        "summary": "activateClient",
+        "description": "Activate a `draft` or `suspended` client. Validates that every redirect URI is an absolute\nHTTPS URL without fragment, that `scopes_allowed` contains `openid`, and that the\nauthentication method is `client_secret_basic`.\n",
+        "tags": [
+          "Operator Clients"
+        ],
+        "responses": {
+          "200": {
+            "description": "Activated client",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerClient"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}:suspend": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "post": {
+        "operationId": "suspendClient",
+        "summary": "suspendClient",
+        "description": "Immediately block the client for every organization. Provider-side artefacts (codes, tokens,\ngrants) are revoked; the audit trail is kept. Reversible with `activateClient`.\n",
+        "tags": [
+          "Operator Clients"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Suspended client",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerClient"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}:rotateSecret": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "post": {
+        "operationId": "rotateClientSecret",
+        "summary": "rotateClientSecret",
+        "description": "Issue a new client secret. The new secret is returned exactly once. The previous secret\nkeeps working until `previous_secret_expires_at` unless `compromise_mode` is set, in which\ncase it stops working immediately.\n",
+        "tags": [
+          "Operator Clients"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RotateSecretRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Client including its new one-time secret",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerClientWithSecret"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}/organizations": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "get": {
+        "operationId": "listClientOrganizations",
+        "summary": "listClientOrganizations",
+        "description": "List the organizations enabled on a client, including suspended and revoked ones.",
+        "tags": [
+          "Operator Organizations"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrgEnablementStatusQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization enablements",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgEnablementList"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "post": {
+        "operationId": "enableClientOrganization",
+        "summary": "enableClientOrganization",
+        "description": "Enable an epilot organization on a client, recording the customer's authorization policy\n(version 1). `allowed_scopes` must contain `openid` and be a subset of the client's\n`scopes_allowed`.\n",
+        "tags": [
+          "Operator Organizations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgEnablementCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created enablement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgEnablement"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}/organizations/{org_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        },
+        {
+          "$ref": "#/components/parameters/OrgIdPath"
+        }
+      ],
+      "get": {
+        "operationId": "getClientOrganization",
+        "summary": "getClientOrganization",
+        "description": "Read one organization enablement.",
+        "tags": [
+          "Operator Organizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Enablement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgEnablement"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateClientOrganization",
+        "summary": "updateClientOrganization",
+        "description": "Record a new version of the customer's authorization policy. `expected_policy_version` must\nequal the current version (compare-and-swap); a mismatch is rejected with `409`.\n",
+        "tags": [
+          "Operator Organizations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrgEnablementUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated enablement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgEnablement"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "revokeClientOrganization",
+        "summary": "revokeClientOrganization",
+        "description": "Revoke an organization's enablement. The record is kept as an audited tombstone; future\nauthorizations for this organization fail with `access_denied` and provider-side artefacts\nbound to it are revoked.\n",
+        "tags": [
+          "Operator Organizations"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Revoked enablement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgEnablement"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}/organizations/{org_id}:suspend": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        },
+        {
+          "$ref": "#/components/parameters/OrgIdPath"
+        }
+      ],
+      "post": {
+        "operationId": "suspendClientOrganization",
+        "summary": "suspendClientOrganization",
+        "description": "Temporarily block one organization on this client. Reversible with `activateClientOrganization`.",
+        "tags": [
+          "Operator Organizations"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Suspended enablement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgEnablement"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/identity/operator/clients/{client_id}/organizations/{org_id}:activate": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        },
+        {
+          "$ref": "#/components/parameters/OrgIdPath"
+        }
+      ],
+      "post": {
+        "operationId": "activateClientOrganization",
+        "summary": "activateClientOrganization",
+        "description": "Resume a suspended organization on this client. Revoked enablements cannot be re-activated; enabling the organization again (`POST …/organizations`) replaces the revoked entry and continues its policy version.",
+        "tags": [
+          "Operator Organizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Active enablement",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgEnablement"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/v1/identity/session": {
+      "get": {
+        "operationId": "createIdentitySession",
+        "summary": "createIdentitySession",
+        "description": "Called by the epilot portal through the portal-host proxy after every persisted 360 session.\nValidates the 360 bearer token itself and mirrors it into the `identity_session` cookie\n(`HttpOnly; Secure; Path=/v1/identity`) whose lifetime equals the remaining token lifetime.\nThe cookie is what proves the live 360 session during `completeInteraction`.\n",
+        "tags": [
+          "Session"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session mirrored into the cookie",
+            "headers": {
+              "Set-Cookie": {
+                "description": "`identity_session=<360 ID token>; HttpOnly; Secure; SameSite=None; Path=/v1/identity; Max-Age=<remaining lifetime>`",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentitySession"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteIdentitySession",
+        "summary": "deleteIdentitySession",
+        "description": "Clears the `identity_session` cookie. Called by the portal on logout.",
+        "tags": [
+          "Session"
+        ],
+        "security": [],
+        "responses": {
+          "204": {
+            "description": "Cookie cleared",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Expired `identity_session` cookie",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/identity/interaction/{interaction_id}": {
+      "parameters": [
+        {
+          "name": "interaction_id",
+          "in": "path",
+          "required": true,
+          "description": "Opaque identifier of the parked authorization request",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        }
+      ]
+    },
+    "/v1/identity/launch/{client_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "get": {
+        "operationId": "launchClient",
+        "summary": "launchClient",
+        "description": "One validated place for partner start links (manager UI, hosted apps). Redirects the browser to the\nclient's registered `initiate_login_uri` with `iss` set to this issuer and, when given, the deep link as\n`target_link_uri` (OpenID Connect Core §4, third-party initiated login). Authenticates nobody: the partner\nthen starts a normal \"Sign in with epilot\" authorization.\n\n`target` must be an absolute HTTPS URL starting with one of the client's registered\n`launch_target_prefixes`; anything else is rejected. Retired, suspended or draft clients, and clients\nwithout an `initiate_login_uri`, answer `404`.\n",
+        "tags": [
+          "Launch"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "target",
+            "in": "query",
+            "required": false,
+            "description": "Deep link inside the partner application to continue to after login",
+            "schema": {
+              "type": "string",
+              "format": "uri",
+              "maxLength": 2048
+            }
+          },
+          {
+            "$ref": "#/components/parameters/AnyOtherQueryParameters"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to the partner's initiate_login_uri",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "OperatorAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Internal-auth bearer token minted for an epilot admin-portal user. Customer organization\nbearers are never accepted; the caller must belong to an allowed admin-portal group.\n"
+      },
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Authorization header with the caller's epilot 360 bearer token."
+      },
+      "IdentitySessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "identity_session",
+        "description": "Cookie set by `createIdentitySession`, carrying the live 360 credential."
+      }
+    },
+    "parameters": {
+      "AnyOtherQueryParameters": {
+        "name": "extra",
+        "in": "query",
+        "required": false,
+        "description": "Any other query parameters (marketing tags on a start link, parameters a proxy appends) are accepted\nand ignored. Start links and the session hop must never fail on an unknown parameter.\n",
+        "style": "form",
+        "explode": true,
+        "schema": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "ClientIdPath": {
+        "name": "client_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/PartnerClientId"
+        }
+      },
+      "OrgIdPath": {
+        "name": "org_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/OrgId"
+        }
+      },
+      "PartnerKeyQuery": {
+        "name": "partner_key",
+        "in": "query",
+        "required": false,
+        "description": "Filter by partner key",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ClientStatusQuery": {
+        "name": "status",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/PartnerClientStatus"
+        }
+      },
+      "OrgEnablementStatusQuery": {
+        "name": "status",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/OrgEnablementStatus"
+        }
+      },
+      "SizeQuery": {
+        "name": "size",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "default": 50
+        }
+      },
+      "CursorQuery": {
+        "name": "cursor",
+        "in": "query",
+        "required": false,
+        "description": "Opaque cursor from a previous response",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing or invalid credentials",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Caller is not a platform operator",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Version mismatch or invalid state transition",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "status",
+          "error"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 404
+          },
+          "error": {
+            "type": "string",
+            "example": "Client not found"
+          },
+          "details": {
+            "type": "array",
+            "description": "Request validation problems (only on `400` from schema validation)",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "PartnerClientId": {
+        "type": "string",
+        "description": "Opaque client identifier, unique within the issuer, never reused",
+        "example": "bf-prod-x7k2",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[A-Za-z0-9._~-]+$"
+      },
+      "OrgId": {
+        "type": "string",
+        "description": "epilot organization id, an opaque case-sensitive string",
+        "example": "739224",
+        "minLength": 1,
+        "maxLength": 64,
+        "pattern": "^[A-Za-z0-9_-]+$"
+      },
+      "Environment": {
+        "type": "string",
+        "description": "Partner-side environment this client belongs to",
+        "enum": [
+          "dev",
+          "staging",
+          "production"
+        ]
+      },
+      "PartnerClientStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "active",
+          "suspended",
+          "retired"
+        ]
+      },
+      "Scope": {
+        "type": "string",
+        "enum": [
+          "openid",
+          "email",
+          "profile"
+        ]
+      },
+      "HttpsUri": {
+        "type": "string",
+        "format": "uri",
+        "description": "Absolute HTTPS URL without fragment",
+        "example": "https://partner.example.com/auth/callback"
+      },
+      "PartnerClientCreate": {
+        "type": "object",
+        "required": [
+          "partner_key",
+          "display_name",
+          "environment",
+          "redirect_uris"
+        ],
+        "properties": {
+          "partner_key": {
+            "type": "string",
+            "description": "Stable key of the partner application, shared by its environments",
+            "example": "babelforce",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "display_name": {
+            "type": "string",
+            "example": "Babelforce",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "environment": {
+            "$ref": "#/components/schemas/Environment"
+          },
+          "redirect_uris": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/HttpsUri"
+            }
+          },
+          "sector_identifier_uri": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HttpsUri"
+              }
+            ],
+            "description": "Optional. Pairwise sector for `sub` derivation. Required when the redirect URIs span\nmore than one host, so one person keeps one `sub` at this partner.\n"
+          },
+          "initiate_login_uri": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HttpsUri"
+              }
+            ],
+            "description": "Where a login started from epilot should begin at the partner"
+          },
+          "launch_target_prefixes": {
+            "type": "array",
+            "description": "Allowed prefixes for deep-link targets when a login is started from epilot",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scopes_allowed": {
+            "type": "array",
+            "description": "Upper bound for every organization enablement's `allowed_scopes`. Defaults to all scopes.",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/Scope"
+            }
+          }
+        }
+      },
+      "PartnerClientUpdate": {
+        "type": "object",
+        "required": [
+          "config_version",
+          "display_name",
+          "redirect_uris",
+          "scopes_allowed"
+        ],
+        "properties": {
+          "config_version": {
+            "type": "integer",
+            "description": "Current configuration version, for compare-and-swap",
+            "minimum": 1
+          },
+          "allow_sector_change": {
+            "type": "boolean",
+            "default": false,
+            "description": "Required (true) when the update changes the pairwise sector of an **active** client, i.e. the\n`sector_identifier_uri` host or, without one, the redirect host. Changing the sector changes the\n`sub` of every person at this partner; without this flag such an update is rejected with `409`.\n"
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "redirect_uris": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/HttpsUri"
+            }
+          },
+          "sector_identifier_uri": {
+            "$ref": "#/components/schemas/HttpsUri"
+          },
+          "initiate_login_uri": {
+            "$ref": "#/components/schemas/HttpsUri"
+          },
+          "launch_target_prefixes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scopes_allowed": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/Scope"
+            }
+          }
+        }
+      },
+      "PartnerClient": {
+        "type": "object",
+        "required": [
+          "client_id",
+          "partner_key",
+          "display_name",
+          "environment",
+          "redirect_uris",
+          "token_endpoint_auth_method",
+          "grant_types",
+          "scopes_allowed",
+          "status",
+          "config_version",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "client_id": {
+            "$ref": "#/components/schemas/PartnerClientId"
+          },
+          "partner_key": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/Environment"
+          },
+          "redirect_uris": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HttpsUri"
+            }
+          },
+          "sector_identifier_uri": {
+            "$ref": "#/components/schemas/HttpsUri"
+          },
+          "initiate_login_uri": {
+            "$ref": "#/components/schemas/HttpsUri"
+          },
+          "launch_target_prefixes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "token_endpoint_auth_method": {
+            "type": "string",
+            "enum": [
+              "client_secret_basic"
+            ]
+          },
+          "grant_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "authorization_code"
+              ]
+            }
+          },
+          "scopes_allowed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Scope"
+            }
+          },
+          "status": {
+            "$ref": "#/components/schemas/PartnerClientStatus"
+          },
+          "status_reason": {
+            "type": "string",
+            "description": "Operator-supplied reason for the last suspension or retirement"
+          },
+          "config_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "secret_rotated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "previous_secret_expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Until when the previous secret still authenticates after a rotation"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "Admin-portal identity of the operator who created the client"
+          },
+          "updated_by": {
+            "type": "string"
+          }
+        }
+      },
+      "PartnerClientWithSecret": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PartnerClient"
+          },
+          {
+            "type": "object",
+            "required": [
+              "client_secret"
+            ],
+            "properties": {
+              "client_secret": {
+                "type": "string",
+                "description": "Returned exactly once. Store it securely; it cannot be retrieved again."
+              }
+            }
+          }
+        ]
+      },
+      "PartnerClientList": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartnerClient"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "StatusChangeRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 1024
+          }
+        }
+      },
+      "RotateSecretRequest": {
+        "type": "object",
+        "properties": {
+          "compromise_mode": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true the previous secret stops working immediately"
+          },
+          "migration_window_seconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2592000,
+            "default": 86400,
+            "description": "How long the previous secret keeps working (ignored in compromise mode)"
+          }
+        }
+      },
+      "AuthorizationPolicyInput": {
+        "type": "object",
+        "required": [
+          "allowed_scopes",
+          "customer_approval_ref",
+          "approved_at"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "preauthorized"
+            ],
+            "default": "preauthorized"
+          },
+          "population": {
+            "type": "string",
+            "enum": [
+              "all_current_org_members"
+            ],
+            "default": "all_current_org_members"
+          },
+          "allowed_scopes": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "description": "Must contain `openid` and be a subset of the client's `scopes_allowed`",
+            "items": {
+              "$ref": "#/components/schemas/Scope"
+            }
+          },
+          "customer_approval_ref": {
+            "type": "string",
+            "description": "Reference to the customer's approval evidence (ticket, signed order, contract clause)",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AuthorizationPolicy": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuthorizationPolicyInput"
+          },
+          {
+            "type": "object",
+            "required": [
+              "version",
+              "mandatory_claims",
+              "recorded_by",
+              "recorded_at"
+            ],
+            "properties": {
+              "version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "mandatory_claims": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "org_id"
+                  ]
+                }
+              },
+              "recorded_by": {
+                "type": "string"
+              },
+              "recorded_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        ]
+      },
+      "PartnerAccount": {
+        "type": "object",
+        "description": "Optional audit reference to the partner tenant this organization maps to. The partner enforces the mapping.",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 256
+          }
+        }
+      },
+      "OrgEnablementStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "suspended",
+          "revoked"
+        ]
+      },
+      "OrgEnablementCreate": {
+        "type": "object",
+        "required": [
+          "org_id",
+          "authorization_policy"
+        ],
+        "properties": {
+          "org_id": {
+            "$ref": "#/components/schemas/OrgId"
+          },
+          "authorization_policy": {
+            "$ref": "#/components/schemas/AuthorizationPolicyInput"
+          },
+          "partner_account": {
+            "$ref": "#/components/schemas/PartnerAccount"
+          }
+        }
+      },
+      "OrgEnablementUpdate": {
+        "type": "object",
+        "required": [
+          "expected_policy_version",
+          "authorization_policy"
+        ],
+        "properties": {
+          "expected_policy_version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Current policy version, for compare-and-swap"
+          },
+          "authorization_policy": {
+            "$ref": "#/components/schemas/AuthorizationPolicyInput"
+          },
+          "partner_account": {
+            "$ref": "#/components/schemas/PartnerAccount"
+          }
+        }
+      },
+      "OrgEnablement": {
+        "type": "object",
+        "required": [
+          "client_id",
+          "org_id",
+          "status",
+          "authorization_policy",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "client_id": {
+            "$ref": "#/components/schemas/PartnerClientId"
+          },
+          "org_id": {
+            "$ref": "#/components/schemas/OrgId"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrgEnablementStatus"
+          },
+          "status_reason": {
+            "type": "string"
+          },
+          "authorization_policy": {
+            "$ref": "#/components/schemas/AuthorizationPolicy"
+          },
+          "partner_account": {
+            "$ref": "#/components/schemas/PartnerAccount"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "updated_by": {
+            "type": "string"
+          }
+        }
+      },
+      "OrgEnablementList": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrgEnablement"
+            }
+          }
+        }
+      },
+      "IdentitySession": {
+        "type": "object",
+        "required": [
+          "org_id",
+          "user_id",
+          "expires_at"
+        ],
+        "properties": {
+          "org_id": {
+            "$ref": "#/components/schemas/OrgId"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "epilot user id of the session owner"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the mirrored credential, and therefore the cookie, expires"
+          }
+        }
+      }
+    }
+  }
+}

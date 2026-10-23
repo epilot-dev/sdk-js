@@ -1,6 +1,6 @@
 {
   "name": "@epilot/sdk",
-  "version": "2.20.36",
+  "version": "2.20.85",
   "description": "JavaScript/TypeScript SDK for epilot APIs",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -165,6 +165,12 @@
       "require": "./dist/apis/event-catalog.cjs"
     },
     "./event-catalog/openapi.json": "./definitions/event-catalog.json",
+    "./external-values": {
+      "types": "./dist/apis/external-values.d.ts",
+      "import": "./dist/apis/external-values.js",
+      "require": "./dist/apis/external-values.cjs"
+    },
+    "./external-values/openapi.json": "./definitions/external-values.json",
     "./file": {
       "types": "./dist/apis/file.d.ts",
       "import": "./dist/apis/file.js",
@@ -177,6 +183,12 @@
       "require": "./dist/apis/iban.cjs"
     },
     "./iban/openapi.json": "./definitions/iban.json",
+    "./identity": {
+      "types": "./dist/apis/identity.d.ts",
+      "import": "./dist/apis/identity.js",
+      "require": "./dist/apis/identity.cjs"
+    },
+    "./identity/openapi.json": "./definitions/identity.json",
     "./integration-toolkit": {
       "types": "./dist/apis/integration-toolkit.d.ts",
       "import": "./dist/apis/integration-toolkit.js",
@@ -237,6 +249,12 @@
       "require": "./dist/apis/permissions.cjs"
     },
     "./permissions/openapi.json": "./definitions/permissions.json",
+    "./phone-integration": {
+      "types": "./dist/apis/phone-integration.d.ts",
+      "import": "./dist/apis/phone-integration.js",
+      "require": "./dist/apis/phone-integration.cjs"
+    },
+    "./phone-integration/openapi.json": "./definitions/phone-integration.json",
     "./pricing": {
       "types": "./dist/apis/pricing.d.ts",
       "import": "./dist/apis/pricing.js",
@@ -452,11 +470,17 @@
       "event-catalog": [
         "./dist/apis/event-catalog.d.ts"
       ],
+      "external-values": [
+        "./dist/apis/external-values.d.ts"
+      ],
       "file": [
         "./dist/apis/file.d.ts"
       ],
       "iban": [
         "./dist/apis/iban.d.ts"
+      ],
+      "identity": [
+        "./dist/apis/identity.d.ts"
       ],
       "integration-toolkit": [
         "./dist/apis/integration-toolkit.d.ts"
@@ -487,6 +511,9 @@
       ],
       "permissions": [
         "./dist/apis/permissions.d.ts"
+      ],
+      "phone-integration": [
+        "./dist/apis/phone-integration.d.ts"
       ],
       "pricing": [
         "./dist/apis/pricing.d.ts"

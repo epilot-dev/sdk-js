@@ -1,0 +1,257 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://phone-integration-api.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/customer:batchSearch": {
+      "get": {
+        "operationId": "batchSearchCustomers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "customer_number",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "external_id",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "phone_number",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "x-trace-id",
+            "in": "header",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/manager/status": {
+      "get": {
+        "operationId": "getManagerStatus",
+        "responses": {}
+      }
+    },
+    "/v1/manager/agents": {
+      "get": {
+        "operationId": "listPhoneAgents",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "assignPhoneAgent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/manager/agents/{user_id}": {
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "epilot user id (`custom:ivy_user_id`)"
+        }
+      ],
+      "delete": {
+        "operationId": "removePhoneAgent",
+        "responses": {}
+      }
+    },
+    "/v1/manager/live": {
+      "get": {
+        "operationId": "getLiveSnapshot",
+        "responses": {}
+      }
+    },
+    "/v1/manager/agents/live": {
+      "get": {
+        "operationId": "listLiveAgents",
+        "responses": {}
+      }
+    },
+    "/v1/manager/agents/{provider_agent_id}/routing": {
+      "parameters": [
+        {
+          "name": "provider_agent_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's agent id (`LiveAgent.provider_agent_id`)"
+        }
+      ],
+      "put": {
+        "operationId": "setAgentRouting",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/manager/agents/{provider_agent_id}/routing:preview": {
+      "parameters": [
+        {
+          "name": "provider_agent_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's agent id (`LiveAgent.provider_agent_id`)"
+        }
+      ],
+      "post": {
+        "operationId": "previewAgentRouting",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/manager/queues": {
+      "get": {
+        "operationId": "listQueues",
+        "responses": {}
+      }
+    },
+    "/v1/manager/queues/{queue_id}": {
+      "parameters": [
+        {
+          "name": "queue_id",
+          "in": "path",
+          "required": true,
+          "description": "The provider's queue id"
+        }
+      ],
+      "get": {
+        "operationId": "getQueue",
+        "responses": {}
+      }
+    },
+    "/v1/manager/reporting/calls": {
+      "get": {
+        "operationId": "getCallReport",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/operator/provider-setups": {
+      "get": {
+        "operationId": "listProviderSetups",
+        "responses": {}
+      }
+    },
+    "/v1/operator/organizations/{org_id}/provider": {
+      "parameters": [
+        {
+          "name": "org_id",
+          "in": "path",
+          "required": true,
+          "description": "epilot organization id"
+        }
+      ],
+      "get": {
+        "operationId": "getProviderSetup",
+        "responses": {}
+      }
+    },
+    "/v1/operator/organizations/{org_id}/provider:setup": {
+      "parameters": [
+        {
+          "name": "org_id",
+          "in": "path",
+          "required": true,
+          "description": "epilot organization id"
+        }
+      ],
+      "post": {
+        "operationId": "setupProvider",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "BadGateway": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ServiceUnavailable": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  }
+}

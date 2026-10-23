@@ -27,6 +27,10 @@
       "description": "Everything about AI Agent configuration"
     },
     {
+      "name": "Customer Chat",
+      "description": "Org-scoped configuration for website and portal chat agents"
+    },
+    {
       "name": "Agent Execution",
       "description": "Execute AI agents and manage executions"
     },
@@ -37,6 +41,10 @@
     {
       "name": "Conversations",
       "description": "Manage conversation history"
+    },
+    {
+      "name": "Knowledge",
+      "description": "Manage knowledge sources used by custom agents"
     }
   ],
   "paths": {
@@ -45,7 +53,7 @@
         "tags": [
           "Agents Configuration"
         ],
-        "summary": "createAgent",
+        "summary": "Create Agent definition",
         "description": "Creates a new custom agent. System skills cannot be created via this endpoint.",
         "operationId": "createAgent",
         "security": [
@@ -90,7 +98,7 @@
         "tags": [
           "Agents Configuration"
         ],
-        "summary": "listAgents",
+        "summary": "List all agent configurations",
         "description": "Lists agents from both system skills and custom agents.\nUse query parameters to filter by source, availability, or entity schema.\n",
         "operationId": "listAgents",
         "parameters": [
@@ -148,7 +156,7 @@
         "tags": [
           "Agents Configuration"
         ],
-        "summary": "getAgentById",
+        "summary": "Get the agent configuration by ID",
         "description": "Retrieves an agent by ID. Supports both:\n- System skill IDs (prefixed): \"skill:email-categorizer\"\n- Custom agent IDs (UUID): \"0336a235-9417-4dd8-894c-fe81285bba75\"\n",
         "operationId": "getAgentById",
         "security": [
@@ -193,7 +201,7 @@
         "tags": [
           "Agents Configuration"
         ],
-        "summary": "updateAgentById",
+        "summary": "Update the agent configuration by ID",
         "description": "Updates a custom agent. System skills cannot be updated via this endpoint.",
         "operationId": "updateAgentById",
         "security": [
@@ -241,6 +249,26 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Agent changed during the update; retry the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
@@ -248,7 +276,7 @@
         "tags": [
           "Agents Configuration"
         ],
-        "summary": "deleteAgentById",
+        "summary": "Delete the agent configuration by ID",
         "description": "Deletes a custom agent. System skills cannot be deleted via this endpoint.",
         "security": [
           {
@@ -283,12 +311,511 @@
         }
       }
     },
+    "/v1/customer-chat": {
+      "get": {
+        "tags": [
+          "Customer Chat"
+        ],
+        "summary": "List customer chat agents",
+        "description": "Returns the org's website agent (at most one) first, then its portal agents ordered by created_at ascending.",
+        "operationId": "listCustomerChat",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer Chat agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCustomerChatResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error listing customer chat",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Customer Chat"
+        ],
+        "summary": "Create a customer chat agent with default config",
+        "description": "Mints agent_id (equal to runtime_agent_id) and compiles the runtime AgentRecord. An org can have at most one website agent (409 on a second one) and any number of portal agents.",
+        "operationId": "createCustomerChatAgent",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCustomerChatAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Customer Chat agent created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerChatAgent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The org already has a website agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/customer-chat/capabilities": {
+      "get": {
+        "tags": [
+          "Customer Chat"
+        ],
+        "summary": "List the capability catalog",
+        "description": "Capabilities admins can enable and the places they are offered on.\nSingle source of truth for Agent Builder; capabilities that are no\nlonger offered are omitted, while already-enabled instances of them\nkeep working.\n",
+        "operationId": "listCustomerChatCapabilities",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Capability catalog",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCustomerChatCapabilitiesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/customer-chat/{agent_id}": {
+      "get": {
+        "tags": [
+          "Customer Chat"
+        ],
+        "summary": "Get a customer chat agent",
+        "operationId": "getCustomerChatAgent",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer Chat agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerChatAgent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Customer Chat agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Customer Chat"
+        ],
+        "summary": "Rename a customer chat agent",
+        "operationId": "renameCustomerChatAgent",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatchUpdatedAt"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameCustomerChatAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Customer Chat agent renamed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerChatAgent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Customer Chat agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Customer Chat"
+        ],
+        "summary": "Remove a customer chat agent and its runtime projection",
+        "description": "Deletes the place agent. For portal agents, also clears\n`feature_settings.portal_copilot_agent_id` on linked portals (pass\n`portal_id` when known, otherwise the API scans org portal configs)\nbefore deleting, so a single request cannot leave an orphan agent.\n",
+        "operationId": "deleteCustomerChatAgent",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatchUpdatedAt"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteCustomerChatAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Customer Chat agent deleted"
+          },
+          "404": {
+            "description": "Customer Chat agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/customer-chat/{agent_id}/config": {
+      "put": {
+        "tags": [
+          "Customer Chat"
+        ],
+        "summary": "Replace the AgentConfig and compile the runtime AgentRecord",
+        "operationId": "saveCustomerChatConfig",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatchUpdatedAt"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCustomerChatConfigRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Config saved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerChatAgent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Customer Chat agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/knowledge/sources": {
+      "get": {
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "List knowledge sources",
+        "operationId": "listKnowledgeSources",
+        "responses": {
+          "200": {
+            "description": "Knowledge sources available to the organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListKnowledgeSourcesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/knowledge/file-uploads": {
+      "post": {
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Create a knowledge file upload",
+        "description": "Returns a direct S3 upload. The source becomes available after S3 confirms the completed object.",
+        "operationId": "createKnowledgeFileUpload",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateKnowledgeFileUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Upload created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateKnowledgeFileUploadResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid file metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Organization knowledge source limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/knowledge/sources/{source_id}": {
+      "parameters": [
+        {
+          "name": "source_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Get a knowledge source",
+        "operationId": "getKnowledgeSource",
+        "responses": {
+          "200": {
+            "description": "Knowledge source",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeSource"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Knowledge source not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Delete a knowledge source",
+        "operationId": "deleteKnowledgeSource",
+        "responses": {
+          "204": {
+            "description": "Knowledge source deleted"
+          },
+          "409": {
+            "description": "Knowledge source is referenced by an agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/agents/{agent_id}/execute": {
       "post": {
         "tags": [
           "Agent Execution"
         ],
-        "summary": "executeAgent",
+        "summary": "Execute an agent",
         "description": "Executes an agent (system skill or custom agent).\nSupports both:\n- System skill IDs (prefixed): \"skill:email-categorizer\"\n- Custom agent IDs (UUID): \"0336a235-9417-4dd8-894c-fe81285bba75\"\n",
         "operationId": "executeAgent",
         "security": [
@@ -318,7 +845,17 @@
         },
         "responses": {
           "200": {
-            "description": "Agent execution initiated or completed",
+            "description": "Completed execution (`mode: sync`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecutionResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Execution accepted; poll it by `execution_id`",
             "content": {
               "application/json": {
                 "schema": {
@@ -346,6 +883,26 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "`mode: sync`: the input exceeds the model's context window (`error: INPUT_TOO_LONG`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "`mode: sync`: the model did not answer within the request deadline (`error: TIMEOUT`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -355,7 +912,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "executeAgentStream",
+        "summary": "Execute an agent with streaming response",
         "description": "Executes an agent with real-time streaming of tokens and tool events.\nReturns Server-Sent Events (SSE) stream with token-by-token output,\ntool call progress, and completion status.\n\nUnlike the async `/execute` endpoint which returns immediately with\nan execution_id for polling, this endpoint streams all events in real-time.\n\nSupports both:\n- System skill IDs (prefixed): \"skill:email-categorizer\"\n- Custom agent IDs (UUID): \"0336a235-9417-4dd8-894c-fe81285bba75\"\n",
         "operationId": "executeAgentStream",
         "security": [
@@ -422,7 +979,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "listExecutions",
+        "summary": "List executions",
         "description": "List executions",
         "operationId": "listExecutions",
         "security": [
@@ -486,7 +1043,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "getExecution",
+        "summary": "Get execution by ID",
         "description": "Get execution by ID",
         "operationId": "getExecution",
         "security": [
@@ -532,7 +1089,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "cancelExecution",
+        "summary": "Cancel execution",
         "description": "Cancel execution",
         "operationId": "cancelExecution",
         "security": [
@@ -590,7 +1147,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "getExecutionTrace",
+        "summary": "Get execution trace/iterations",
         "description": "Returns the step-by-step reasoning and tool calls for ReAct mode executions. Returns empty iterations array for direct mode executions.",
         "operationId": "getExecutionTrace",
         "security": [
@@ -762,7 +1319,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "approveExecution",
+        "summary": "Approve pending action",
         "description": "Approves a pending tool action when execution is in waiting_approval status",
         "operationId": "approveExecution",
         "security": [
@@ -829,7 +1386,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "rejectExecution",
+        "summary": "Reject pending action",
         "description": "Rejects a pending tool action when execution is in waiting_approval status",
         "operationId": "rejectExecution",
         "security": [
@@ -897,7 +1454,7 @@
         "tags": [
           "Agent Execution"
         ],
-        "summary": "streamExecution",
+        "summary": "Reconnect to execution stream",
         "description": "Reconnects to an execution's event stream after approval. Replays missed events from event log and continues streaming if execution is still running.",
         "operationId": "streamExecution",
         "security": [
@@ -953,7 +1510,7 @@
         "tags": [
           "Chat"
         ],
-        "summary": "chat",
+        "summary": "Streaming chat with AI agent",
         "description": "Initiates a streaming chat session with an AI agent. Supports server-side conversation memory via conversationId or client-provided history via clientHistory.",
         "operationId": "chat",
         "security": [
@@ -1010,7 +1567,7 @@
         "tags": [
           "Conversations"
         ],
-        "summary": "listConversations",
+        "summary": "List conversations",
         "description": "Lists conversations for the authenticated user, sorted by most recent.",
         "operationId": "listConversations",
         "security": [
@@ -1074,7 +1631,7 @@
         "tags": [
           "Conversations"
         ],
-        "summary": "getConversation",
+        "summary": "Get conversation with messages",
         "description": "Retrieves a conversation and its message history.",
         "operationId": "getConversation",
         "security": [
@@ -1129,7 +1686,7 @@
         "tags": [
           "Conversations"
         ],
-        "summary": "deleteConversation",
+        "summary": "Delete conversation",
         "description": "Deletes a conversation and all its messages.",
         "operationId": "deleteConversation",
         "security": [
@@ -1170,7 +1727,7 @@
         "tags": [
           "Conversations"
         ],
-        "summary": "submitConversationFeedback",
+        "summary": "Submit feedback for an assistant turn",
         "description": "Records a thumbs up/down (with optional comment) for the assistant turn identified by its Langfuse trace id. The rating is persisted on the message and mirrored to Langfuse as a trace score.\n",
         "operationId": "submitConversationFeedback",
         "security": [
@@ -1248,11 +1805,704 @@
         "bearerFormat": "JWT"
       }
     },
+    "parameters": {
+      "CustomerChatAgentIdPath": {
+        "name": "agent_id",
+        "in": "path",
+        "required": true,
+        "description": "Customer Chat agent id",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "IfMatchUpdatedAt": {
+        "name": "If-Match",
+        "in": "header",
+        "required": false,
+        "description": "Compare-and-swap token. The agent's current `updated_at`; may be sent as `updated_at` in the body instead.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
     "schemas": {
+      "AgentConfig": {
+        "type": "object",
+        "required": [
+          "capabilities",
+          "knowledgeSources",
+          "escalation",
+          "appearance"
+        ],
+        "properties": {
+          "capabilities": {
+            "description": "Configured capability instances, up to 30 per agent. The same\ncatalog `type` may appear more than once when `label` (name) or\n`guidance` (when to use) differs between siblings.\n",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CapabilityInstance"
+            }
+          },
+          "knowledgeSources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerChatKnowledgeSource"
+            }
+          },
+          "escalation": {
+            "$ref": "#/components/schemas/EscalationConfig"
+          },
+          "appearance": {
+            "$ref": "#/components/schemas/AppearanceConfig"
+          },
+          "instructions": {
+            "type": "string",
+            "maxLength": 8000,
+            "description": "Admin-editable briefing in the default `appearance.language`. Prefilled with a place default on create; omitted on save keeps the saved value."
+          },
+          "instructionTranslations": {
+            "type": "object",
+            "description": "Briefings for each language in `appearance.languages` other than `appearance.language`. Only present once the agent speaks a second language.",
+            "properties": {
+              "de": {
+                "type": "string",
+                "maxLength": 8000
+              },
+              "en": {
+                "type": "string",
+                "maxLength": 8000
+              }
+            }
+          },
+          "instructionsNeedsReview": {
+            "type": "array",
+            "description": "Languages whose briefing changed in another language and are not checked yet.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          }
+        }
+      },
+      "AppearanceConfig": {
+        "type": "object",
+        "required": [
+          "displayName",
+          "greeting",
+          "starters",
+          "language",
+          "formOfAddress"
+        ],
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "greeting": {
+            "type": "string"
+          },
+          "starters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "language": {
+            "type": "string",
+            "description": "Default language. The top-level texts are written in it.",
+            "enum": [
+              "de",
+              "en"
+            ]
+          },
+          "formOfAddress": {
+            "type": "string",
+            "enum": [
+              "sie",
+              "du"
+            ]
+          },
+          "languages": {
+            "type": "array",
+            "description": "Languages customers can chat in. Only present with two or more; always includes `language`.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "de",
+                "en"
+              ]
+            }
+          },
+          "translations": {
+            "type": "object",
+            "description": "Texts for each language in `languages` other than `language`.",
+            "properties": {
+              "de": {
+                "$ref": "#/components/schemas/LocalizedAppearance"
+              },
+              "en": {
+                "$ref": "#/components/schemas/LocalizedAppearance"
+              }
+            }
+          },
+          "needsReview": {
+            "type": "object",
+            "description": "Per language, texts that changed in another language and are not checked yet.",
+            "properties": {
+              "de": {
+                "$ref": "#/components/schemas/LocalizedFieldList"
+              },
+              "en": {
+                "$ref": "#/components/schemas/LocalizedFieldList"
+              }
+            }
+          }
+        }
+      },
+      "LocalizedAppearance": {
+        "type": "object",
+        "required": [
+          "displayName",
+          "greeting",
+          "starters"
+        ],
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "greeting": {
+            "type": "string"
+          },
+          "starters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "LocalizedFieldList": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "displayName",
+            "greeting",
+            "starters"
+          ]
+        }
+      },
+      "CapabilityId": {
+        "type": "string",
+        "enum": [
+          "navigate_portal_pages",
+          "search_portal_records",
+          "view_billing",
+          "view_meter_readings",
+          "view_contracts",
+          "search_web",
+          "open_quick_actions",
+          "view_hems_energy"
+        ]
+      },
+      "ActionAutonomy": {
+        "type": "string",
+        "description": "Action capabilities only (`open_quick_actions`): per-capability autonomy.\n`draft` = suggest only (proposal + deep link, nothing opens),\n`approval` = the customer confirms in a card first,\n`automatic` = run immediately. Defaults to `approval` when the\ncapability is enabled without one; unknown values become `approval`;\nvalues above the capability's maximum are clamped down.\n",
+        "enum": [
+          "draft",
+          "approval",
+          "automatic"
+        ]
+      },
+      "CapabilityState": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "meterTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ticketType": {
+            "type": "string"
+          },
+          "allowedDomains": {
+            "type": "array",
+            "maxItems": 20,
+            "description": "`search_web` only. Websites web search may use, normalized to\n`host[/path]` (scheme, `www.`, query, fragment and trailing slash\nremoved; host lowercased; duplicates dropped). Empty or missing\nallows any website. When set, only `web_search.search` is granted.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "autonomy": {
+            "$ref": "#/components/schemas/ActionAutonomy"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Admin label override. Kept on every capability so a disabled row stays listed."
+          },
+          "guidance": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Admin guidance. Kept on every capability so a disabled row stays listed; action capabilities also inject it into the prompt."
+          },
+          "blockIds": {
+            "type": "array",
+            "description": "`open_quick_actions` only. Reserved tile allowlist (at most 200);\nempty or missing allows every quick-action tile on the linked portal.\n",
+            "items": {
+              "type": "string"
+            }
+          },
+          "integrationId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "`view_hems_energy` only. Hub integration installation id used by\nHEMS portal tools (`portal.hems.snapshot` via list_devices, and\nwhen searchDeviceDocs is on also get_vendors /\nget_connection_options). Chosen in Agent Builder via the\nintegration picker.\n"
+          },
+          "searchDeviceDocs": {
+            "type": "boolean",
+            "description": "`view_hems_energy` only. When true or omitted, grants device\nonboarding docs tools (`portal.hems.vendors` via get_vendors +\n`portal.hems.onboarding_docs` via get_connection_options) once\nan integrationId is set. Set false to disable. Portal place only.\n"
+          }
+        }
+      },
+      "CapabilityInstance": {
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "enabled"
+            ],
+            "properties": {
+              "type": {
+                "$ref": "#/components/schemas/CapabilityId"
+              },
+              "instanceId": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Stable id for this instance within the agent. Generated when\nomitted; send it back unchanged on later saves.\n"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/CapabilityState"
+          }
+        ]
+      },
+      "CreateCustomerChatAgentRequest": {
+        "type": "object",
+        "required": [
+          "place"
+        ],
+        "properties": {
+          "place": {
+            "$ref": "#/components/schemas/CustomerChatPlace"
+          },
+          "internal_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "CustomerChatAgent": {
+        "type": "object",
+        "required": [
+          "org_id",
+          "agent_id",
+          "place",
+          "internal_name",
+          "runtime_agent_id",
+          "config",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string"
+          },
+          "agent_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Stable id of the customer chat agent; equal to runtime_agent_id."
+          },
+          "place": {
+            "$ref": "#/components/schemas/CustomerChatPlace"
+          },
+          "internal_name": {
+            "type": "string"
+          },
+          "runtime_agent_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "config": {
+            "$ref": "#/components/schemas/AgentConfig"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CustomerChatCasRequest": {
+        "type": "object",
+        "properties": {
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DeleteCustomerChatAgentRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CustomerChatCasRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "portal_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Portal linked to this agent (`feature_settings.portal_copilot_agent_id`).\nWhen set, only that portal is unlinked. When omitted for a portal agent,\norg portal configs are scanned for matching links.\n"
+              }
+            }
+          }
+        ]
+      },
+      "CustomerChatPlace": {
+        "type": "string",
+        "enum": [
+          "website",
+          "portal"
+        ]
+      },
+      "EscalationConfig": {
+        "type": "object",
+        "required": [
+          "websiteHandover"
+        ],
+        "properties": {
+          "websiteHandover": {
+            "$ref": "#/components/schemas/WebsiteHandover"
+          }
+        }
+      },
+      "CustomerChatKnowledgeSource": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "title",
+          "targetId"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CustomerChatKnowledgeSourceType"
+          },
+          "title": {
+            "type": "string"
+          },
+          "targetId": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomerChatKnowledgeSourceType": {
+        "type": "string",
+        "enum": [
+          "portal_page",
+          "document",
+          "catalogue",
+          "url"
+        ]
+      },
+      "ListCustomerChatResponse": {
+        "type": "object",
+        "required": [
+          "agents"
+        ],
+        "properties": {
+          "agents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerChatAgent"
+            }
+          }
+        }
+      },
+      "CustomerChatCapabilityCatalogEntry": {
+        "type": "object",
+        "required": [
+          "id",
+          "places"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/CapabilityId"
+          },
+          "places": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerChatPlace"
+            }
+          },
+          "singleInstance": {
+            "type": "boolean",
+            "description": "An agent can have this capability at most once. Agents that already\nhave more instances keep them, but cannot add another.\n"
+          },
+          "requiresIntegration": {
+            "type": "boolean",
+            "description": "Only offer this capability when the organization has a matching\nintegration set up.\n"
+          }
+        }
+      },
+      "ListCustomerChatCapabilitiesResponse": {
+        "type": "object",
+        "required": [
+          "capabilities"
+        ],
+        "properties": {
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerChatCapabilityCatalogEntry"
+            }
+          }
+        }
+      },
+      "RenameCustomerChatAgentRequest": {
+        "type": "object",
+        "required": [
+          "internal_name"
+        ],
+        "properties": {
+          "internal_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaveCustomerChatConfigRequest": {
+        "type": "object",
+        "required": [
+          "config"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/AgentConfig"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WebsiteHandover": {
+        "type": "object",
+        "required": [
+          "kind",
+          "value"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "phone",
+              "email",
+              "journey",
+              "unset"
+            ]
+          },
+          "value": {
+            "type": "string"
+          },
+          "journeyId": {
+            "type": "string"
+          },
+          "journeyName": {
+            "type": "string"
+          }
+        }
+      },
       "AgentId": {
         "type": "string",
         "description": "Agent identifier. Can be either:\n- System skill ID (prefixed): \"skill:email-categorizer\", \"skill:email-labeler\"\n- Custom agent UUID: \"0336a235-9417-4dd8-894c-fe81285bba75\"\n",
         "example": "skill:email-categorizer"
+      },
+      "KnowledgeSourceIds": {
+        "type": "array",
+        "description": "Knowledge source IDs available to this agent. An empty array clears the selection.",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "KnowledgeSource": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/KnowledgeFileSource"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "file": "#/components/schemas/KnowledgeFileSource"
+          }
+        }
+      },
+      "KnowledgeFileSource": {
+        "type": "object",
+        "required": [
+          "type",
+          "source_id",
+          "filename",
+          "mime_type",
+          "size_bytes",
+          "ready",
+          "created_at",
+          "updated_at"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "file"
+            ]
+          },
+          "source_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "mime_type": {
+            "type": "string"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "Whether the source is available for agent retrieval."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateKnowledgeFileUploadRequest": {
+        "type": "object",
+        "required": [
+          "filename",
+          "mime_type",
+          "size_bytes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "filename": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "mime_type": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "size_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 1000000000
+          }
+        }
+      },
+      "CreateKnowledgeFileUploadResponse": {
+        "type": "object",
+        "required": [
+          "source_id",
+          "upload_url",
+          "upload_fields",
+          "expires_at"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "upload_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "upload_fields": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ListKnowledgeSourcesResponse": {
+        "type": "object",
+        "required": [
+          "sources"
+        ],
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeSource"
+            }
+          }
+        }
+      },
+      "AgentDomain": {
+        "type": "string",
+        "description": "Business domain selected in the agent builder.",
+        "enum": [
+          "customer_service",
+          "sales",
+          "billing",
+          "metering_grid",
+          "other"
+        ]
       },
       "CreateAgentRequest": {
         "type": "object",
@@ -1262,6 +2512,17 @@
           "execution_pattern"
         ],
         "properties": {
+          "domain": {
+            "$ref": "#/components/schemas/AgentDomain"
+          },
+          "availability": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/SkillAvailability"
+            }
+          },
           "name": {
             "type": "string",
             "minLength": 1,
@@ -1317,12 +2578,26 @@
           },
           "input_parameters_schema": {
             "$ref": "#/components/schemas/InputParametersSchema"
+          },
+          "knowledge_source_ids": {
+            "$ref": "#/components/schemas/KnowledgeSourceIds"
           }
         }
       },
       "UpdateAgentRequest": {
         "type": "object",
         "properties": {
+          "domain": {
+            "$ref": "#/components/schemas/AgentDomain"
+          },
+          "availability": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/SkillAvailability"
+            }
+          },
           "name": {
             "type": "string",
             "minLength": 1,
@@ -1367,12 +2642,18 @@
           },
           "input_parameters_schema": {
             "$ref": "#/components/schemas/InputParametersSchema"
+          },
+          "knowledge_source_ids": {
+            "$ref": "#/components/schemas/KnowledgeSourceIds"
           }
         }
       },
       "AgentDefinition": {
         "type": "object",
         "properties": {
+          "domain": {
+            "$ref": "#/components/schemas/AgentDomain"
+          },
           "agent_id": {
             "$ref": "#/components/schemas/AgentId"
           },
@@ -1441,6 +2722,9 @@
           },
           "input_parameters_schema": {
             "$ref": "#/components/schemas/InputParametersSchema"
+          },
+          "knowledge_source_ids": {
+            "$ref": "#/components/schemas/KnowledgeSourceIds"
           },
           "version": {
             "type": "integer"
@@ -1526,9 +2810,24 @@
       "ExecuteAgentRequest": {
         "type": "object",
         "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "stream",
+              "async",
+              "sync"
+            ],
+            "default": "auto",
+            "description": "`sync` runs the skill inside the request and answers 200 with the completed execution, or 422/504/500\nwith the failed execution's id in `details.execution_id`. Only for direct, tool-less, automatic skills;\nthe model call is cut off after 27 seconds.\n"
+          },
           "input": {
             "type": "object",
             "properties": {
+              "message": {
+                "type": "string",
+                "description": "Free-text instruction or query for the agent"
+              },
               "entity_id": {
                 "type": "string",
                 "description": "Primary entity ID for context"
@@ -1567,6 +2866,38 @@
                     "entity_id",
                     "entity_schema"
                   ]
+                }
+              },
+              "attachment": {
+                "type": "object",
+                "description": "The file the agent should look at, referenced by S3 object. Only accepted by skills\nthat declare attachment support (currently direct-mode document skills). The object is\nread by the execution Lambda and passed to the model as an image or document content\nblock; images must be JPEG, PNG, GIF or WebP, documents PDF, DOCX, DOC, XLSX, XLS,\nCSV, TXT, HTML or Markdown. Callers are expected to downscale images and cap document\npages before referencing them.\n",
+                "required": [
+                  "s3ref",
+                  "mime_type"
+                ],
+                "properties": {
+                  "s3ref": {
+                    "type": "object",
+                    "required": [
+                      "bucket",
+                      "key"
+                    ],
+                    "properties": {
+                      "bucket": {
+                        "type": "string"
+                      },
+                      "key": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "mime_type": {
+                    "type": "string",
+                    "description": "Mime type of the object, decides whether it is sent as an image or a document block."
+                  },
+                  "filename": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -1884,9 +3215,10 @@
       },
       "AgentExecutionEventStatus": {
         "type": "string",
-        "description": "Lifecycle status carried on an agent execution event.\n\nDeliberately narrower than `ExecutionStatus`, which is the stored status of\nthe execution row: `pending` and `running` both surface as `started`, and\n`cancelled` surfaces as `failed`. Consumers must not assume the two\nvocabularies are interchangeable.\n",
+        "description": "Lifecycle status carried on an agent execution event.\n\nDeliberately narrower than `ExecutionStatus`, which is the stored status of\nthe execution row: `pending` and `running` both surface as `started`, and\n`cancelled` surfaces as `failed`. Consumers must not assume the two\nvocabularies are interchangeable.\n\n`queued` is non-terminal: the execution is waiting for executor capacity and will\nbe followed by `started`, and it can be published more than once if a throttled\nexecution is put back on the queue. Consumers must not treat it as an outcome.\n",
         "enum": [
           "started",
+          "queued",
           "completed",
           "failed",
           "approval_required"
@@ -1978,6 +3310,93 @@
           "timestamp": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "KnowledgeSourceRegisteredEvent": {
+        "description": "Detail payload of the `knowledge-source-registered` event, published on\nthe AI Agents event bus with source `ai-agents` after the source record\nexists in DynamoDB. Consumers must process `sourceId` idempotently.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/KnowledgeFileSourceRegisteredEvent"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "file": "#/components/schemas/KnowledgeFileSourceRegisteredEvent"
+          }
+        }
+      },
+      "KnowledgeFileSourceRegisteredEvent": {
+        "type": "object",
+        "required": [
+          "orgId",
+          "sourceId",
+          "type",
+          "bucket",
+          "key"
+        ],
+        "properties": {
+          "orgId": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "file"
+            ]
+          },
+          "bucket": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "KnowledgeSourceDeletedEvent": {
+        "type": "object",
+        "description": "Published when a knowledge source is deleted.",
+        "required": [
+          "orgId",
+          "sourceId",
+          "type"
+        ],
+        "properties": {
+          "orgId": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "file"
+            ]
+          }
+        }
+      },
+      "KnowledgeSourceProcessingCompletedEvent": {
+        "type": "object",
+        "description": "Published by a knowledge processing pipeline after all derived data for\nthe source has been stored and is available for agent retrieval. The\nevent uses source `knowledge-processing` and detail type\n`knowledge-source-processing-completed` on the AI Agents event bus.\n",
+        "required": [
+          "orgId",
+          "sourceId"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "orgId": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -2217,18 +3636,20 @@
           "flows",
           "copilot",
           "portals",
+          "website",
           "all"
         ],
-        "description": "Where the skill/agent is available:\n- flows: Available in workflow automations\n- copilot: Available as a sub-agent in copilot\n- portals: Available in end-user self-service portals\n- all: Available everywhere\n"
+        "description": "Where the skill/agent is available:\n- flows: Available in workflow automations\n- copilot: Available as a sub-agent in copilot\n- portals: Available in end-user self-service portals\n- website: Website chat, explicitly selected; currently supports anonymous execution\n- all: Available on the existing non-website surfaces; website requires explicit selection\n"
       },
       "ExecutionContext": {
         "type": "string",
         "enum": [
           "flows",
           "copilot",
-          "api"
+          "api",
+          "sharing"
         ],
-        "description": "Where the execution was triggered from:\n- flows: Triggered from workflow automation\n- copilot: Triggered from copilot assistant\n- api: Direct API call\n"
+        "description": "Where the execution was triggered from:\n- flows: Triggered from workflow automation\n- copilot: Triggered from copilot assistant\n- api: Direct API call\n- sharing: Triggered by sharing-api auto-sharing rules\n"
       },
       "ExecutionPattern": {
         "type": "string",
@@ -2251,6 +3672,7 @@
         "type": "string",
         "enum": [
           "pending",
+          "queued",
           "running",
           "waiting_approval",
           "completed",
@@ -2520,6 +3942,10 @@
           },
           "streaming": {
             "$ref": "#/components/schemas/StreamingOptions"
+          },
+          "preview_demo": {
+            "type": "boolean",
+            "description": "Agent Builder place-agent preview: when true, portal tools return\nsynthetic demo fixtures instead of calling customer-portal-api,\nand execution mode is forced to draft.\n"
           }
         }
       },

@@ -74,8 +74,10 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.entityMapping` | `@epilot/sdk/entity-mapping` | [docs](./packages/epilot-sdk-v2/docs/entity-mapping.md) |
 | `epilot.environments` | `@epilot/sdk/environments` | [docs](./packages/epilot-sdk-v2/docs/environments.md) |
 | `epilot.eventCatalog` | `@epilot/sdk/event-catalog` | [docs](./packages/epilot-sdk-v2/docs/event-catalog.md) |
+| `epilot.externalValues` | `@epilot/sdk/external-values` | [docs](./packages/epilot-sdk-v2/docs/external-values.md) |
 | `epilot.file` | `@epilot/sdk/file` | [docs](./packages/epilot-sdk-v2/docs/file.md) |
 | `epilot.iban` | `@epilot/sdk/iban` | [docs](./packages/epilot-sdk-v2/docs/iban.md) |
+| `epilot.identity` | `@epilot/sdk/identity` | [docs](./packages/epilot-sdk-v2/docs/identity.md) |
 | `epilot.integrationToolkit` | `@epilot/sdk/integration-toolkit` | [docs](./packages/epilot-sdk-v2/docs/integration-toolkit.md) |
 | `epilot.journey` | `@epilot/sdk/journey` | [docs](./packages/epilot-sdk-v2/docs/journey.md) |
 | `epilot.kanban` | `@epilot/sdk/kanban` | [docs](./packages/epilot-sdk-v2/docs/kanban.md) |
@@ -86,6 +88,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.organization` | `@epilot/sdk/organization` | [docs](./packages/epilot-sdk-v2/docs/organization.md) |
 | `epilot.partnerDirectory` | `@epilot/sdk/partner-directory` | [docs](./packages/epilot-sdk-v2/docs/partner-directory.md) |
 | `epilot.permissions` | `@epilot/sdk/permissions` | [docs](./packages/epilot-sdk-v2/docs/permissions.md) |
+| `epilot.phoneIntegration` | `@epilot/sdk/phone-integration` | [docs](./packages/epilot-sdk-v2/docs/phone-integration.md) |
 | `epilot.pricing` | `@epilot/sdk/pricing` | [docs](./packages/epilot-sdk-v2/docs/pricing.md) |
 | `epilot.pricingTier` | `@epilot/sdk/pricing-tier` | [docs](./packages/epilot-sdk-v2/docs/pricing-tier.md) |
 | `epilot.purpose` | `@epilot/sdk/purpose` | [docs](./packages/epilot-sdk-v2/docs/purpose.md) |

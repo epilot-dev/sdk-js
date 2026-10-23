@@ -137,6 +137,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'externalValues',
+    loader: () => expandDef(require('../definitions/external-values-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'file',
     loader: () => expandDef(require('../definitions/file-runtime.json')),
   });
@@ -144,6 +149,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
     registry,
     name: 'iban',
     loader: () => expandDef(require('../definitions/iban-runtime.json')),
+  });
+  registerApi({
+    registry,
+    name: 'identity',
+    loader: () => expandDef(require('../definitions/identity-runtime.json')),
   });
   registerApi({
     registry,
@@ -194,6 +204,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
     registry,
     name: 'permissions',
     loader: () => expandDef(require('../definitions/permissions-runtime.json')),
+  });
+  registerApi({
+    registry,
+    name: 'phoneIntegration',
+    loader: () => expandDef(require('../definitions/phone-integration-runtime.json')),
   });
   registerApi({
     registry,

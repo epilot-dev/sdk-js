@@ -28,6 +28,9 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`acknowledgeTracking`](#acknowledgetracking)
 - [`triggerErp`](#triggererp)
 - [`processErpUpdatesEventsV3`](#processerpupdateseventsv3)
+- [`queryErpUpdateEvents`](#queryerpupdateevents)
+- [`getErpUpdateEvent`](#geterpupdateevent)
+- [`listErpUpdateCorrelations`](#listerpupdatecorrelations)
 - [`simulateMappingV2`](#simulatemappingv2)
 - [`simulateDirect`](#simulatedirect)
 - [`simulateMapping`](#simulatemapping)
@@ -77,17 +80,14 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`commitTypes`](#committypes)
 
 **monitoring**
-- [`queryInboundMonitoringEvents`](#queryinboundmonitoringevents)
-- [`getMonitoringStats`](#getmonitoringstats)
-- [`getMonitoringTimeSeries`](#getmonitoringtimeseries)
 - [`queryAccessLogs`](#queryaccesslogs)
-- [`queryOutboundMonitoringEvents`](#queryoutboundmonitoringevents)
 - [`queryMonitoringEventsV2`](#querymonitoringeventsv2)
 - [`getMonitoringStatsV2`](#getmonitoringstatsv2)
 - [`getMonitoringTimeSeriesV2`](#getmonitoringtimeseriesv2)
 - [`getAssociatedMonitoringEvents`](#getassociatedmonitoringevents)
 - [`ingestExternalMonitoringEvents`](#ingestexternalmonitoringevents)
 - [`getMonitoringTraceByCorrelation`](#getmonitoringtracebycorrelation)
+- [`getMonitoringRunCompletionV2`](#getmonitoringruncompletionv2)
 
 **proxy**
 - [`secureProxy`](#secureproxy)
@@ -100,6 +100,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`listErpImports`](#listerpimports)
 - [`getErpImport`](#geterpimport)
 - [`deleteErpImport`](#deleteerpimport)
+- [`getErpImportPreview`](#geterpimportpreview)
+- [`downloadErpImportFile`](#downloaderpimportfile)
 - [`validateErpImport`](#validateerpimport)
 - [`suggestErpImportUseCases`](#suggesterpimportusecases)
 - [`executeErpImport`](#executeerpimport)
@@ -118,6 +120,7 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`ErpImportProgress`](#erpimportprogress)
 - [`ErpImportError`](#erpimporterror)
 - [`ErpImportFilePreview`](#erpimportfilepreview)
+- [`ErpImportDownload`](#erpimportdownload)
 - [`CreateErpImportResponse`](#createerpimportresponse)
 - [`ErpImportJob`](#erpimportjob)
 - [`ErpImportList`](#erpimportlist)
@@ -134,6 +137,15 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`ErpUpdatesEventsV2Request`](#erpupdateseventsv2request)
 - [`ErpEventV3`](#erpeventv3)
 - [`ErpUpdatesEventsV3Request`](#erpupdateseventsv3request)
+- [`ErpUpdateProcessedEntity`](#erpupdateprocessedentity)
+- [`CorrelationCloseResult`](#correlationcloseresult)
+- [`ErpUpdateProcessingError`](#erpupdateprocessingerror)
+- [`ErpUpdateEventStatus`](#erpupdateeventstatus)
+- [`CorrelationUseCaseCounts`](#correlationusecasecounts)
+- [`CorrelationStatus`](#correlationstatus)
+- [`CorrelationWaitResult`](#correlationwaitresult)
+- [`CorrelationWaitBadRequest`](#correlationwaitbadrequest)
+- [`CorrelationStatusList`](#correlationstatuslist)
 - [`TriggerErpActionRequest`](#triggererpactionrequest)
 - [`TriggerWebhookResp`](#triggerwebhookresp)
 - [`IntegrationEditableFields`](#integrationeditablefields)
@@ -159,6 +171,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`InboundIntegrationEventConfiguration`](#inboundintegrationeventconfiguration)
 - [`OutboundIntegrationEventConfiguration`](#outboundintegrationeventconfiguration)
 - [`IntegrationEntity`](#integrationentity)
+- [`IntegrationEntitySharing`](#integrationentitysharing)
+- [`IntegrationEntitySharingPartner`](#integrationentitysharingpartner)
 - [`IntegrationEntityConditional`](#integrationentityconditional)
 - [`IntegrationEntityFromRows`](#integrationentityfromrows)
 - [`MappedFieldValue`](#mappedfieldvalue)
@@ -315,6 +329,10 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`MonitoringCode`](#monitoringcode)
 - [`MonitoringEventV2`](#monitoringeventv2)
 - [`GetMonitoringStatsV2Request`](#getmonitoringstatsv2request)
+- [`GetMonitoringRunCompletionV2Request`](#getmonitoringruncompletionv2request)
+- [`MonitoringRunCompletionV2Response`](#monitoringruncompletionv2response)
+- [`MonitoringRunCompletionV2`](#monitoringruncompletionv2)
+- [`MonitoringRunEntriesV2`](#monitoringrunentriesv2)
 - [`MonitoringStatsV2`](#monitoringstatsv2)
 - [`GetMonitoringTimeSeriesV2Request`](#getmonitoringtimeseriesv2request)
 - [`TimeSeriesBreakdownItemV2`](#timeseriesbreakdownitemv2)
@@ -410,6 +428,8 @@ const { data } = await client.processErpUpdatesEventsV3(
     integration_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     correlation_id: 'string',
     group_id: 'customer-42',
+    interactive: true,
+    correlation_complete: true,
     events: [
       {},
       {}
@@ -423,13 +443,223 @@ const { data } = await client.processErpUpdatesEventsV3(
 
 ```json
 {
+  "correlation_id": "string",
+  "correlation_close": {
+    "outcome": "applied",
+    "reasons": ["retry_requested"],
+    "message": "string"
+  },
   "results": [
     {
       "event_id": "string",
       "status": "success",
+      "interactive": true,
+      "lane": "interactive",
       "message": "string"
     }
   ]
+}
+```
+
+</details>
+
+---
+
+### `queryErpUpdateEvents`
+
+Waits for the events of one correlation — the long poll behind interactive
+registration — and returns the correlation's summary.
+
+`GET /v3/erp/updates/events`
+
+```ts
+const { data } = await client.queryErpUpdateEvents({
+  correlation_id: 'example',
+  wait: 1,
+  wait_for_entities: ['...'],
+  wait_for_use_cases: ['...'],
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "correlation_id": "string",
+  "integration_id": "string",
+  "closed": true,
+  "closed_at": "1970-01-01T00:00:00.000Z",
+  "complete": true,
+  "completed_at": "1970-01-01T00:00:00.000Z",
+  "events_received": 0,
+  "events_done": 0,
+  "late_events": 0,
+  "first_ingested_at": "1970-01-01T00:00:00.000Z",
+  "last_done_at": "1970-01-01T00:00:00.000Z",
+  "use_cases": [
+    {
+      "use_case_slug": "string",
+      "received": 0,
+      "done": 0,
+      "error": 0
+    }
+  ],
+  "entities": [
+    {
+      "slug": "contact",
+      "_id": "string",
+      "operation": "created",
+      "unique_ids": {
+        "reenumber": "4711"
+      }
+    }
+  ],
+  "entities_omitted": 0,
+  "errors": [
+    {
+      "code": "string",
+      "message": "string",
+      "event_id": "string",
+      "occurred_at": "1970-01-01T00:00:00.000Z",
+      "after_completion": true
+    }
+  ],
+  "errors_total": 0,
+  "completion": "requirements_met",
+  "undecided_entity_requirements": ["contract[billing_account_number=4711]"]
+}
+```
+
+</details>
+
+---
+
+### `getErpUpdateEvent`
+
+Returns one interactive event's processing record, without waiting.
+
+`GET /v3/erp/updates/events/{event_id}`
+
+```ts
+const { data } = await client.getErpUpdateEvent({
+  event_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "event_id": "string",
+  "correlation_id": "string",
+  "integration_id": "string",
+  "status": "accepted",
+  "lane": "interactive",
+  "use_case_id": "string",
+  "use_case_slug": "string",
+  "event_name": "string",
+  "ingested_at": "1970-01-01T00:00:00.000Z",
+  "mapped_at": "1970-01-01T00:00:00.000Z",
+  "done_at": "1970-01-01T00:00:00.000Z",
+  "writes_total": 0,
+  "writes_done": 0,
+  "entities": [
+    {
+      "slug": "contact",
+      "_id": "string",
+      "operation": "created",
+      "unique_ids": {
+        "reenumber": "4711"
+      }
+    }
+  ],
+  "entities_omitted": 0,
+  "errors": [
+    {
+      "code": "string",
+      "message": "string",
+      "event_id": "string",
+      "occurred_at": "1970-01-01T00:00:00.000Z",
+      "after_completion": true
+    }
+  ],
+  "errors_total": 0
+}
+```
+
+</details>
+
+---
+
+### `listErpUpdateCorrelations`
+
+Lists the organization's interactive correlations, newest first by the time
+their first event was ingested, with the same summary the correlation wait
+returns.
+
+`GET /v3/erp/updates/correlations`
+
+```ts
+const { data } = await client.listErpUpdateCorrelations({
+  integration_id: 'example',
+  limit: 1,
+  cursor: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "correlation_id": "string",
+      "integration_id": "string",
+      "closed": true,
+      "closed_at": "1970-01-01T00:00:00.000Z",
+      "complete": true,
+      "completed_at": "1970-01-01T00:00:00.000Z",
+      "events_received": 0,
+      "events_done": 0,
+      "late_events": 0,
+      "first_ingested_at": "1970-01-01T00:00:00.000Z",
+      "last_done_at": "1970-01-01T00:00:00.000Z",
+      "use_cases": [
+        {
+          "use_case_slug": "string",
+          "received": 0,
+          "done": 0,
+          "error": 0
+        }
+      ],
+      "entities": [
+        {
+          "slug": "contact",
+          "_id": "string",
+          "operation": "created",
+          "unique_ids": {
+            "reenumber": "4711"
+          }
+        }
+      ],
+      "entities_omitted": 0,
+      "errors": [
+        {
+          "code": "string",
+          "message": "string",
+          "event_id": "string",
+          "occurred_at": "1970-01-01T00:00:00.000Z",
+          "after_completion": true
+        }
+      ],
+      "errors_total": 0
+    }
+  ],
+  "next_cursor": "string",
+  "horizon_days": 7
 }
 ```
 
@@ -449,6 +679,7 @@ const { data } = await client.simulateMappingV2(
   {
     event_configuration: {
       direct: true,
+      interactive: 'on_request',
       entities: [
         { /* ... */ }
       ],
@@ -478,6 +709,7 @@ const { data } = await client.simulateMappingV2(
           {}
         ]
       },
+      "sharing": {},
       "mode": "upsert"
     }
   ],
@@ -548,6 +780,7 @@ const { data } = await client.simulateDirect(
   {
     event_configuration: {
       direct: true,
+      interactive: 'on_request',
       entities: [
         { /* ... */ }
       ],
@@ -591,6 +824,7 @@ const { data } = await client.simulateDirect(
           {}
         ]
       },
+      "sharing": {},
       "mode": "upsert",
       "unique_identifiers_metadata": {}
     }
@@ -656,6 +890,7 @@ const { data } = await client.simulateMapping(
           {}
         ]
       },
+      "sharing": {},
       "mode": "upsert"
     }
   ],
@@ -1275,6 +1510,7 @@ const { data } = await client.createUseCase(
     type: 'inbound',
     configuration: {
       direct: true,
+      interactive: 'on_request',
       entities: [
         { /* ... */ }
       ],
@@ -1303,6 +1539,7 @@ const { data } = await client.createUseCase(
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
     "direct": true,
+    "interactive": "on_request",
     "entities": [
       {}
     ],
@@ -1347,6 +1584,7 @@ const { data } = await client.getUseCase({
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
     "direct": true,
+    "interactive": "on_request",
     "entities": [
       {}
     ],
@@ -1381,6 +1619,7 @@ const { data } = await client.updateUseCase(
     type: 'inbound',
     configuration: {
       direct: true,
+      interactive: 'on_request',
       entities: [
         { /* ... */ }
       ],
@@ -1409,6 +1648,7 @@ const { data } = await client.updateUseCase(
   "updated_at": "1970-01-01T00:00:00.000Z",
   "configuration": {
     "direct": true,
+    "interactive": "on_request",
     "entities": [
       {}
     ],
@@ -2493,189 +2733,6 @@ const { data } = await client.deleteIntegrationAppMapping(
 
 ---
 
-### `queryInboundMonitoringEvents`
-
-Query inbound monitoring events for a specific integration.
-Returns detailed information about inbound sync events from ERP systems,
-including success rates, error breakdowns, and processing metrics.
-
-`POST /v1/integrations/{integrationId}/monitoring/inbound-events`
-
-```ts
-const { data } = await client.queryInboundMonitoringEvents(
-  {
-    integrationId: 'example',
-  },
-  {
-    use_case_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-    event_type: 'CREATE',
-    sync_type: 'entity',
-    status: 'success',
-    error_category: 'validation',
-    correlation_id: 'string',
-    object_type: 'string',
-    event_name: 'string',
-    event_id: 'string',
-    from_date: '2025-01-01T00:00:00Z',
-    to_date: '2025-01-31T23:59:59Z',
-    limit: 50,
-    cursor: {
-      completed_at: '1970-01-01T00:00:00.000Z',
-      event_id: 'string'
-    }
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "org_id": "string",
-      "event_id": "string",
-      "correlation_id": "string",
-      "integration_id": "string",
-      "use_case_id": "string",
-      "event_type": "CREATE",
-      "object_type": "string",
-      "sync_type": "entity",
-      "status": "success",
-      "error_code": "string",
-      "error_message": "string",
-      "error_category": "validation",
-      "processing_duration_ms": 0,
-      "received_at": "1970-01-01T00:00:00.000Z",
-      "completed_at": "1970-01-01T00:00:00.000Z"
-    }
-  ],
-  "next_cursor": {
-    "completed_at": "1970-01-01T00:00:00.000Z",
-    "event_id": "string"
-  },
-  "has_more": true
-}
-```
-
-</details>
-
----
-
-### `getMonitoringStats`
-
-Get aggregated statistics for both inbound and outbound monitoring events for a specific integration.
-Returns summary metrics for inbound (ERP sync) and outbound (webhook delivery) events,
-including s
-
-`POST /v1/integrations/{integrationId}/monitoring/stats`
-
-```ts
-const { data } = await client.getMonitoringStats(
-  {
-    integrationId: 'example',
-  },
-  {
-    from_date: '2025-01-01T00:00:00Z',
-    to_date: '2025-01-31T23:59:59Z',
-    inbound_group_by: ['use_case_id', 'status'],
-    outbound_group_by: ['event_name', 'status']
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "inbound": {
-    "total_events": 0,
-    "total_correlations": 0,
-    "success_count": 0,
-    "error_count": 0,
-    "skipped_count": 0,
-    "warning_count": 0,
-    "success_rate": 0,
-    "last_error_at": "1970-01-01T00:00:00.000Z",
-    "breakdown": [
-      {}
-    ]
-  },
-  "outbound": {
-    "total_events": 0,
-    "success_count": 0,
-    "error_count": 0,
-    "pending_count": 0,
-    "success_rate": 0,
-    "last_error_at": "1970-01-01T00:00:00.000Z",
-    "breakdown": [
-      {}
-    ]
-  }
-}
-```
-
-</details>
-
----
-
-### `getMonitoringTimeSeries`
-
-Get time-series aggregated event counts for monitoring charts.
-Returns pre-bucketed counts at configurable intervals for both inbound and outbound events.
-Maximum of 200 buckets per request. Returns 4
-
-`POST /v1/integrations/{integrationId}/monitoring/timeseries`
-
-```ts
-const { data } = await client.getMonitoringTimeSeries(
-  {
-    integrationId: 'example',
-  },
-  {
-    from_date: '2025-01-01T00:00:00Z',
-    to_date: '2025-01-31T23:59:59Z',
-    interval: '1h',
-    direction: 'both'
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "interval": "5m",
-  "from_date": "1970-01-01T00:00:00.000Z",
-  "to_date": "1970-01-01T00:00:00.000Z",
-  "buckets": [
-    {
-      "timestamp": "1970-01-01T00:00:00.000Z",
-      "inbound": {
-        "success_count": 0,
-        "error_count": 0,
-        "warning_count": 0,
-        "skipped_count": 0,
-        "total_count": 0
-      },
-      "outbound": {
-        "success_count": 0,
-        "error_count": 0,
-        "pending_count": 0,
-        "total_count": 0
-      }
-    }
-  ]
-}
-```
-
-</details>
-
----
-
 ### `getOutboundStatus`
 
 Get the status of all outbound use cases for a specific integration.
@@ -3103,68 +3160,6 @@ const { data } = await client.queryAccessLogs(
 
 ---
 
-### `queryOutboundMonitoringEvents`
-
-Query outbound monitoring events for a specific integration.
-Returns detailed information about outbound event deliveries,
-filtered by event_name (event_catalog_event) linked to the integration's outb
-
-`POST /v1/integrations/{integrationId}/monitoring/outbound-events`
-
-```ts
-const { data } = await client.queryOutboundMonitoringEvents(
-  {
-    integrationId: 'example',
-  },
-  {
-    event_name: 'automation_flow_target',
-    status: 'succeeded',
-    webhook_config_id: 'string',
-    from_date: '2025-01-01T00:00:00Z',
-    to_date: '2025-01-31T23:59:59Z',
-    limit: 50,
-    cursor: {
-      created_at: '1970-01-01T00:00:00.000Z',
-      event_id: 'string'
-    }
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "data": [
-    {
-      "org_id": "string",
-      "event_id": "string",
-      "event_name": "string",
-      "status": "succeeded",
-      "url": "string",
-      "http_method": "string",
-      "http_response": {},
-      "webhook_config_id": "string",
-      "metadata": {},
-      "execution_context": {},
-      "payload": {},
-      "created_at": "1970-01-01T00:00:00.000Z",
-      "updated_at": "1970-01-01T00:00:00.000Z"
-    }
-  ],
-  "next_cursor": {
-    "created_at": "1970-01-01T00:00:00.000Z",
-    "event_id": "string"
-  },
-  "has_more": true
-}
-```
-
-</details>
-
----
-
 ### `queryMonitoringEventsV2`
 
 Query monitoring events from the unified erp_monitoring_v2 table.
@@ -3211,7 +3206,7 @@ const { data } = await client.queryMonitoringEventsV2(
       "use_case_id": "string",
       "use_case_type": "inbound",
       "level": "success",
-      "code": "string",
+      "code": "ACK_CONFIRMED",
       "message": "string",
       "detail": {},
       "created_at": "1970-01-01T00:00:00.000Z"
@@ -3244,6 +3239,8 @@ const { data } = await client.getMonitoringStatsV2(
   {
     from_date: '2025-01-01T00:00:00Z',
     to_date: '2025-01-31T23:59:59Z',
+    correlation_id: 'imp_01M3799K98B6TG7GV7Q2DQT554',
+    correlation_ids: ['imp_01M3799K98B6TG7GV7Q2DQT554', 'imp_01M374YPQ0E7ZB0VYJZSK72M4E'],
     use_case_type: 'inbound',
     use_case_types: ['inbound'],
     group_by: 'use_case_id',
@@ -3266,6 +3263,7 @@ const { data } = await client.getMonitoringStatsV2(
   "ack_timeout_count": 0,
   "success_rate": 0,
   "last_error_at": "1970-01-01T00:00:00.000Z",
+  "last_event_at": "1970-01-01T00:00:00.000Z",
   "breakdown": [
     {}
   ]
@@ -3366,7 +3364,7 @@ const { data } = await client.getAssociatedMonitoringEvents({
       "use_case_id": "string",
       "use_case_type": "inbound",
       "level": "success",
-      "code": "string",
+      "code": "ACK_CONFIRMED",
       "message": "string",
       "detail": {},
       "created_at": "1970-01-01T00:00:00.000Z"
@@ -3446,13 +3444,65 @@ const { data } = await client.getMonitoringTraceByCorrelation({
       "use_case_id": "string",
       "use_case_type": "inbound",
       "level": "success",
-      "code": "string",
+      "code": "ACK_CONFIRMED",
       "message": "string",
       "detail": {},
       "created_at": "1970-01-01T00:00:00.000Z"
     }
   ],
   "inbound_event": {}
+}
+```
+
+</details>
+
+---
+
+### `getMonitoringRunCompletionV2`
+
+Per-event completion of one or more runs (every monitoring event sharing a
+`correlation_id`), each reduced to "how many events have reached a final
+outcome, and how many are still going". Unlike `getM
+
+`POST /v2/integrations/{integrationId}/monitoring/runs/completion`
+
+```ts
+const { data } = await client.getMonitoringRunCompletionV2(
+  {
+    integrationId: 'example',
+  },
+  {
+    correlation_ids: ['string']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "runs": [
+    {
+      "correlation_id": "string",
+      "seen": 0,
+      "in_flight": 0,
+      "retrying": 0,
+      "success": 0,
+      "warning": 0,
+      "error": 0,
+      "info": 0,
+      "entries": {
+        "total": 0,
+        "error": 0,
+        "warning": 0,
+        "success": 0,
+        "info": 0,
+        "retry": 0
+      },
+      "last_activity_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
 }
 ```
 
@@ -3701,10 +3751,11 @@ const { data } = await client.createErpImport(
           "entity_schema": "string",
           "business_key": {},
           "variants": 0,
-          "versions": 0
+          "versions": 0,
+          "condition_attributes": ["grid_area"],
+          "version_attribute": "valid_from"
         }
       ],
-      "entity_details_truncated": true,
       "issues": [
         {
           "code": "UNIQUE_ID_COLUMN_MISSING",
@@ -3715,14 +3766,23 @@ const { data } = await client.createErpImport(
               "entity": "string"
             }
           ],
+          "attributes": [
+            {
+              "name": "string",
+              "entity": "string"
+            }
+          ],
+          "lines": [0],
           "subject": "string",
-          "row": 0
+          "row": 0,
+          "expected": "number"
         }
       ]
     },
     "progress": {
       "processed_rows": 0,
-      "total_rows": 0
+      "total_rows": 0,
+      "events_published": 0
     },
     "error": {
       "code": "VALIDATION_BLOCKED",
@@ -3790,10 +3850,11 @@ const { data } = await client.listErpImports({
             "entity_schema": "string",
             "business_key": {},
             "variants": 0,
-            "versions": 0
+            "versions": 0,
+            "condition_attributes": ["grid_area"],
+            "version_attribute": "valid_from"
           }
         ],
-        "entity_details_truncated": true,
         "issues": [
           {
             "code": "UNIQUE_ID_COLUMN_MISSING",
@@ -3804,14 +3865,23 @@ const { data } = await client.listErpImports({
                 "entity": "string"
               }
             ],
+            "attributes": [
+              {
+                "name": "string",
+                "entity": "string"
+              }
+            ],
+            "lines": [0],
             "subject": "string",
-            "row": 0
+            "row": 0,
+            "expected": "number"
           }
         ]
       },
       "progress": {
         "processed_rows": 0,
-        "total_rows": 0
+        "total_rows": 0,
+        "events_published": 0
       },
       "error": {
         "code": "VALIDATION_BLOCKED",
@@ -3872,10 +3942,11 @@ const { data } = await client.getErpImport({
         "entity_schema": "string",
         "business_key": {},
         "variants": 0,
-        "versions": 0
+        "versions": 0,
+        "condition_attributes": ["grid_area"],
+        "version_attribute": "valid_from"
       }
     ],
-    "entity_details_truncated": true,
     "issues": [
       {
         "code": "UNIQUE_ID_COLUMN_MISSING",
@@ -3886,14 +3957,23 @@ const { data } = await client.getErpImport({
             "entity": "string"
           }
         ],
+        "attributes": [
+          {
+            "name": "string",
+            "entity": "string"
+          }
+        ],
+        "lines": [0],
         "subject": "string",
-        "row": 0
+        "row": 0,
+        "expected": "number"
       }
     ]
   },
   "progress": {
     "processed_rows": 0,
-    "total_rows": 0
+    "total_rows": 0,
+    "events_published": 0
   },
   "error": {
     "code": "VALIDATION_BLOCKED",
@@ -3921,6 +4001,61 @@ const { data } = await client.deleteErpImport({
   importId: 'example',
 })
 ```
+
+---
+
+### `getErpImportPreview`
+
+The file preview of an existing import: its columns and first data rows, the same sample `createErpImport` returns with `include_preview`. Lets a client that opens a job later show its file, and is in
+
+`GET /v2/erp/imports/{importId}/preview`
+
+```ts
+const { data } = await client.getErpImportPreview({
+  importId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "columns": ["string"],
+  "rows": [
+    ["string"]
+  ]
+}
+```
+
+</details>
+
+---
+
+### `downloadErpImportFile`
+
+A short-lived presigned URL that downloads the file this import was registered with — the import's own copy, so exactly what `:validate` and `:execute` read. The URL serves the file as an attachment u
+
+`GET /v2/erp/imports/{importId}/download`
+
+```ts
+const { data } = await client.downloadErpImportFile({
+  importId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "download_url": "https://example.com/path",
+  "filename": "string",
+  "expires_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
 
 ---
 
@@ -4095,19 +4230,25 @@ A problem found during validation, scoped to the file as a whole rather than to
 individual rows.
 
 `code` is the translation key and the other fields are its parameters — there is
-deliberately no message to display. Each code appears at most once, with
-everything it has to say aggregated into that on
+deliberately no message to display. Each code appears at most once (once per
+`expected` for `VALUE_FORMAT_INVALID`), with
 
 ```ts
 type ErpImportIssue = {
-  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED"
+  code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "UNIQUE_ID_NOT_IN_SCHEMA" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED" | "VALID_FROM_NOT_MAPPED"
   severity: "warning" | "blocking"
   columns?: Array<{
     name: string
     entity?: string
   }>
+  attributes?: Array<{
+    name: string
+    entity?: string
+  }>
+  lines?: number[]
   subject?: string
   row?: number
+  expected?: "number" | "text" | "decimal" | "date"
 }
 ```
 
@@ -4127,17 +4268,24 @@ type ErpImportValidation = {
     business_key: Record<string, string>
     variants?: number
     versions?: number
+    condition_attributes?: string[]
+    version_attribute?: string
   }>
-  entity_details_truncated?: boolean
   issues?: Array<{
-    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED"
+    code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "UNIQUE_ID_NOT_IN_SCHEMA" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED" | "VALID_FROM_NOT_MAPPED"
     severity: "warning" | "blocking"
     columns?: Array<{
       name: { ... }
       entity?: { ... }
     }>
+    attributes?: Array<{
+      name: { ... }
+      entity?: { ... }
+    }>
+    lines?: number[]
     subject?: string
     row?: number
+    expected?: "number" | "text" | "decimal" | "date"
   }>
 }
 ```
@@ -4153,6 +4301,8 @@ type ErpImportEntityDetail = {
   business_key: Record<string, string>
   variants?: number
   versions?: number
+  condition_attributes?: string[]
+  version_attribute?: string
 }
 ```
 
@@ -4165,6 +4315,7 @@ How far the currently running phase has got. Written at every batch boundary, so
 type ErpImportProgress = {
   processed_rows: number
   total_rows?: number
+  events_published?: number
 }
 ```
 
@@ -4187,6 +4338,16 @@ Sample of the file's first rows, using the same parser as `:validate`. Registrat
 type ErpImportFilePreview = {
   columns: string[]
   rows: string[][]
+}
+```
+
+### `ErpImportDownload`
+
+```ts
+type ErpImportDownload = {
+  download_url: string // uri
+  filename: string
+  expires_at: string // date-time
 }
 ```
 
@@ -4214,12 +4375,12 @@ type CreateErpImportResponse = {
       warnings: { ... }
       entities: { ... }
       entity_details?: { ... }
-      entity_details_truncated?: { ... }
       issues?: { ... }
     }
     progress?: {
       processed_rows: { ... }
       total_rows?: { ... }
+      events_published?: { ... }
     }
     error?: {
       code: { ... }
@@ -4265,19 +4426,24 @@ type ErpImportJob = {
       business_key: { ... }
       variants?: { ... }
       versions?: { ... }
+      condition_attributes?: { ... }
+      version_attribute?: { ... }
     }>
-    entity_details_truncated?: boolean
     issues?: Array<{
       code: { ... }
       severity: { ... }
       columns?: { ... }
+      attributes?: { ... }
+      lines?: { ... }
       subject?: { ... }
       row?: { ... }
+      expected?: { ... }
     }>
   }
   progress?: {
     processed_rows: number
     total_rows?: number
+    events_published?: number
   }
   error?: {
     code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "INTERNAL_ERROR"
@@ -4314,12 +4480,12 @@ type ErpImportList = {
       warnings: { ... }
       entities: { ... }
       entity_details?: { ... }
-      entity_details_truncated?: { ... }
       issues?: { ... }
     }
     progress?: {
       processed_rows: { ... }
       total_rows?: { ... }
+      events_published?: { ... }
     }
     error?: {
       code: { ... }
@@ -4540,7 +4706,237 @@ type ErpUpdatesEventsV3Request = {
   integration_id: string // uuid
   correlation_id?: string
   group_id?: string
+  interactive?: boolean
+  correlation_complete?: boolean
   events: unknown | unknown[]
+}
+```
+
+### `ErpUpdateProcessedEntity`
+
+An entity an interactive event wrote.
+
+```ts
+type ErpUpdateProcessedEntity = {
+  slug: string
+  _id: string
+  operation: "created" | "updated" | "deleted" | "unchanged"
+  unique_ids: Record<string, string>
+}
+```
+
+### `CorrelationCloseResult`
+
+What became of the request's `correlation_complete`. Present exactly when the
+request carried `correlation_complete: true`; absent otherwise.
+
+
+```ts
+type CorrelationCloseResult = {
+  outcome: "applied" | "rate_limited" | "ignored"
+  reasons?: "retry_requested" | "queue_refused" | "events_under_own_correlation_ids" | "events_duplicate" | "events_not_configured" | "events_not_interactive" | "events_unrecorded" | "rate_limited" | "rate_limit_unavailable" | "other_integration" | "close_failed" | "interactive_unavailable"[]
+  message?: string
+}
+```
+
+### `ErpUpdateProcessingError`
+
+A failure nothing will retry.
+
+```ts
+type ErpUpdateProcessingError = {
+  code: string
+  message: string
+  event_id?: string
+  occurred_at: string // date-time
+  after_completion?: boolean
+}
+```
+
+### `ErpUpdateEventStatus`
+
+One interactive event's processing record.
+
+```ts
+type ErpUpdateEventStatus = {
+  event_id: string
+  correlation_id?: string
+  integration_id?: string
+  status: "accepted" | "processing" | "done" | "partial" | "error"
+  lane: "interactive" | "priority" | "default" | "deferred"
+  use_case_id?: string
+  use_case_slug?: string
+  event_name?: string
+  ingested_at: string // date-time
+  mapped_at?: string // date-time
+  done_at?: string // date-time
+  writes_total: number
+  writes_done: number
+  entities: Array<{
+    slug: string
+    _id: string
+    operation: "created" | "updated" | "deleted" | "unchanged"
+    unique_ids: Record<string, string>
+  }>
+  entities_omitted?: number
+  errors: Array<{
+    code: string
+    message: string
+    event_id?: string
+    occurred_at: string // date-time
+    after_completion?: boolean
+  }>
+  errors_total: number
+}
+```
+
+### `CorrelationUseCaseCounts`
+
+How many of a correlation's events belong to one use case, and how they ended.
+
+```ts
+type CorrelationUseCaseCounts = {
+  use_case_slug: string
+  received: number
+  done: number
+  error: number
+}
+```
+
+### `CorrelationStatus`
+
+One correlation's summary.
+
+```ts
+type CorrelationStatus = {
+  correlation_id: string
+  integration_id?: string
+  closed: boolean
+  closed_at?: string // date-time
+  complete: boolean
+  completed_at?: string // date-time
+  events_received: number
+  events_done: number
+  late_events: number
+  first_ingested_at?: string // date-time
+  last_done_at?: string // date-time
+  use_cases: Array<{
+    use_case_slug: string
+    received: number
+    done: number
+    error: number
+  }>
+  entities: Array<{
+    slug: string
+    _id: string
+    operation: "created" | "updated" | "deleted" | "unchanged"
+    unique_ids: Record<string, string>
+  }>
+  entities_omitted?: number
+  errors: Array<{
+    code: string
+    message: string
+    event_id?: string
+    occurred_at: string // date-time
+    after_completion?: boolean
+  }>
+  errors_total: number
+}
+```
+
+### `CorrelationWaitResult`
+
+```ts
+type CorrelationWaitResult = {
+  correlation_id: string
+  integration_id?: string
+  closed: boolean
+  closed_at?: string // date-time
+  complete: boolean
+  completed_at?: string // date-time
+  events_received: number
+  events_done: number
+  late_events: number
+  first_ingested_at?: string // date-time
+  last_done_at?: string // date-time
+  use_cases: Array<{
+    use_case_slug: string
+    received: number
+    done: number
+    error: number
+  }>
+  entities: Array<{
+    slug: string
+    _id: string
+    operation: "created" | "updated" | "deleted" | "unchanged"
+    unique_ids: Record<string, string>
+  }>
+  entities_omitted?: number
+  errors: Array<{
+    code: string
+    message: string
+    event_id?: string
+    occurred_at: string // date-time
+    after_completion?: boolean
+  }>
+  errors_total: number
+  completion: "requirements_met" | "complete" | "timeout" | "error"
+  undecided_entity_requirements?: string[]
+}
+```
+
+### `CorrelationWaitBadRequest`
+
+```ts
+type CorrelationWaitBadRequest = {
+  message: string
+  slug?: string
+  rejected_key?: string
+  use_case_slug?: string
+  allowed_keys?: string[]
+}
+```
+
+### `CorrelationStatusList`
+
+```ts
+type CorrelationStatusList = {
+  results: Array<{
+    correlation_id: string
+    integration_id?: string
+    closed: boolean
+    closed_at?: string // date-time
+    complete: boolean
+    completed_at?: string // date-time
+    events_received: number
+    events_done: number
+    late_events: number
+    first_ingested_at?: string // date-time
+    last_done_at?: string // date-time
+    use_cases: Array<{
+      use_case_slug: { ... }
+      received: { ... }
+      done: { ... }
+      error: { ... }
+    }>
+    entities: Array<{
+      slug: { ... }
+      _id: { ... }
+      operation: { ... }
+      unique_ids: { ... }
+    }>
+    entities_omitted?: number
+    errors: Array<{
+      code: { ... }
+      message: { ... }
+      event_id?: { ... }
+      occurred_at: { ... }
+      after_completion?: { ... }
+    }>
+    errors_total: number
+  }>
+  next_cursor: string
+  horizon_days: number
 }
 ```
 
@@ -5167,6 +5563,7 @@ type IntegrationWithUseCases = {
     updated_at: string // date-time
     configuration?: {
       direct?: { ... }
+      interactive?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }
@@ -5329,6 +5726,7 @@ type UpsertIntegrationWithUseCasesRequest = {
     type: "inbound"
     configuration?: {
       direct?: { ... }
+      interactive?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }
@@ -5354,7 +5752,6 @@ type UpsertIntegrationWithUseCasesRequest = {
     type: "file_proxy"
     configuration?: {
       direction?: { ... }
-      upload?: { ... }
   // ...
 }
 ```
@@ -5366,6 +5763,7 @@ Configuration for inbound use cases (ERP to epilot)
 ```ts
 type InboundIntegrationEventConfiguration = {
   direct?: boolean
+  interactive?: "disabled" | "on_request" | "always"
   entities?: Array<{
     entity_schema: string
     unique_ids: string[]
@@ -5393,6 +5791,9 @@ type InboundIntegrationEventConfiguration = {
     }>
     conditional?: {
       from_rows: { ... }
+    }
+    sharing?: {
+      partners: { ... }
     }
   }>
   meter_readings?: Array<{
@@ -5538,6 +5939,34 @@ type IntegrationEntity = {
       item: { ... }
     }>
   }
+  sharing?: {
+    partners: Array<{
+      partner_org_id: { ... }
+      enabled?: { ... }
+    }>
+  }
+}
+```
+
+### `IntegrationEntitySharing`
+
+Keeps the mapped entity's sharing with partner organizations in sync. After the entity is written, it is shared with every listed partner whose `enabled` is true and unshared from every listed partner whose `enabled` is false. Changes are computed against the entity's current `_acl`, so a repeated e
+
+```ts
+type IntegrationEntitySharing = {
+  partners: Array<{
+    partner_org_id: string
+    enabled?: boolean | string
+  }>
+}
+```
+
+### `IntegrationEntitySharingPartner`
+
+```ts
+type IntegrationEntitySharingPartner = {
+  partner_org_id: string
+  enabled?: boolean | string
 }
 ```
 
@@ -5751,6 +6180,7 @@ type IntegrationEntityField = {
       entity_schema: { ... }
       _tags?: { ... }
       unique_ids: { ... }
+      required?: { ... }
     }>
     jsonataExpression?: string
   }
@@ -5959,6 +6389,7 @@ type EmbeddedUseCaseRequest = {
   type: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -5968,6 +6399,7 @@ type EmbeddedUseCaseRequest = {
       scope?: { ... }
       fields?: { ... }
       conditional?: { ... }
+      sharing?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6048,8 +6480,6 @@ type EmbeddedUseCaseRequest = {
       enabled?: { ... }
       body?: { ... }
       response_type: { ... }
-    }>
-    response?: {
   // ...
 }
 ```
@@ -6078,6 +6508,7 @@ type EmbeddedInboundUseCaseRequest = {
   type: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6087,6 +6518,7 @@ type EmbeddedInboundUseCaseRequest = {
       scope?: { ... }
       fields?: { ... }
       conditional?: { ... }
+      sharing?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6266,6 +6698,7 @@ type InboundUseCase = {
   updated_at: string // date-time
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6275,6 +6708,7 @@ type InboundUseCase = {
       scope?: { ... }
       fields?: { ... }
       conditional?: { ... }
+      sharing?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6458,6 +6892,7 @@ type UseCase = {
   updated_at: string // date-time
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6467,6 +6902,7 @@ type UseCase = {
       scope?: { ... }
       fields?: { ... }
       conditional?: { ... }
+      sharing?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6543,8 +6979,6 @@ type UseCase = {
     }
     params?: Array<{
       name: { ... }
-      required: { ... }
-      description?: { ... }
   // ...
 }
 ```
@@ -6559,6 +6993,7 @@ type CreateUseCaseRequest = {
   type: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6568,6 +7003,7 @@ type CreateUseCaseRequest = {
       scope?: { ... }
       fields?: { ... }
       conditional?: { ... }
+      sharing?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6650,8 +7086,6 @@ type CreateUseCaseRequest = {
       encoding: { ... }
       filename?: { ... }
       content_type?: { ... }
-    }
-    prevent_indirect_serving?: boolean
   // ...
 }
 ```
@@ -6676,6 +7110,7 @@ type CreateInboundUseCaseRequest = {
   type: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6685,6 +7120,7 @@ type CreateInboundUseCaseRequest = {
       scope?: { ... }
       fields?: { ... }
       conditional?: { ... }
+      sharing?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6834,6 +7270,7 @@ type UpdateUseCaseRequest = {
   type?: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6843,6 +7280,7 @@ type UpdateUseCaseRequest = {
       scope?: { ... }
       fields?: { ... }
       conditional?: { ... }
+      sharing?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -6924,8 +7362,6 @@ type UpdateUseCaseRequest = {
     }>
     response?: {
       body: { ... }
-      encoding: { ... }
-      filename?: { ... }
   // ...
 }
 ```
@@ -6952,6 +7388,7 @@ type UpdateInboundUseCaseRequest = {
   type?: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -6961,6 +7398,7 @@ type UpdateInboundUseCaseRequest = {
       scope?: { ... }
       fields?: { ... }
       conditional?: { ... }
+      sharing?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -7125,6 +7563,7 @@ type UseCaseHistoryEntry = {
   type: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -7134,6 +7573,7 @@ type UseCaseHistoryEntry = {
       scope?: { ... }
       fields?: { ... }
       conditional?: { ... }
+      sharing?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -7208,8 +7648,6 @@ type UseCaseHistoryEntry = {
       resource?: { ... }
       username?: { ... }
       password?: { ... }
-      body_params?: { ... }
-      headers?: { ... }
   // ...
 }
 ```
@@ -7250,6 +7688,7 @@ type InboundUseCaseHistoryEntry = {
   type: "inbound"
   configuration?: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -7259,6 +7698,7 @@ type InboundUseCaseHistoryEntry = {
       scope?: { ... }
       fields?: { ... }
       conditional?: { ... }
+      sharing?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -8034,6 +8474,7 @@ making it easier to test configurations before saving them.
 type MappingSimulationV2Request = {
   event_configuration: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -8043,6 +8484,7 @@ type MappingSimulationV2Request = {
       scope?: { ... }
       fields?: { ... }
       conditional?: { ... }
+      sharing?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -8071,6 +8513,7 @@ type MappingSimulationResponse = {
       config: { ... }
       data: { ... }
     }
+    sharing?: Record<string, unknown>
     mode: "upsert" | "delete" | "purge"
   }>
   meter_readings_updates?: Array<{
@@ -8361,6 +8804,7 @@ against, and the payload to validate and translate.
 type DirectSimulationRequest = {
   event_configuration: {
     direct?: boolean
+    interactive?: "disabled" | "on_request" | "always"
     entities?: Array<{
       entity_schema: { ... }
       unique_ids: { ... }
@@ -8370,6 +8814,7 @@ type DirectSimulationRequest = {
       scope?: { ... }
       fields?: { ... }
       conditional?: { ... }
+      sharing?: { ... }
     }>
     meter_readings?: Array<{
       jsonataExpression?: { ... }
@@ -8430,6 +8875,7 @@ type DirectSimulationResponse = {
       config: { ... }
       data: { ... }
     }
+    sharing?: Record<string, unknown>
     mode: "upsert" | "delete" | "purge"
     unique_identifiers_metadata?: Record<string, {
       fieldType?: { ... }
@@ -8475,6 +8921,7 @@ type EntityUpdate = {
     config: Record<string, unknown>
     data: Record<string, unknown>[]
   }
+  sharing?: Record<string, unknown>
   mode: "upsert" | "delete" | "purge"
 }
 ```
@@ -8576,6 +9023,7 @@ type IntegrationConfigurationV2 = {
   mapping: {
     events: Record<string, {
       direct?: { ... }
+      interactive?: { ... }
       entities?: { ... }
       meter_readings?: { ... }
     }>
@@ -9081,6 +9529,7 @@ type RelationConfig = {
       jsonataExpression?: { ... }
       constant?: { ... }
     }>
+    required?: boolean
   }>
   jsonataExpression?: string
 }
@@ -9099,6 +9548,7 @@ type RelationItemConfig = {
     jsonataExpression?: string
     constant?: unknown
   }>
+  required?: boolean
 }
 ```
 
@@ -9495,7 +9945,7 @@ type MonitoringTraceResponse = {
     use_case_id?: string
     use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | ""
     level: "success" | "error" | "info" | "warning"
-    code?: string
+    code?: "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED" | string
     message?: string
     detail?: Record<string, unknown>
     created_at: string // date-time
@@ -9510,11 +9960,11 @@ The monitoring code taxonomy — every code the Integration Toolkit itself emits
 with a fixed level (see the published code reference at
 https://docs.epilot.io/docs/integrations/integration-toolkit/monitoring/codes).
 
-This schema exists so consumers can import the union as a type. It is
-deliberately 
+This schema exists so consumers can import the union as a type. It never
+constrains
 
 ```ts
-type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "PAYLOAD_TOO_LARGE" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_UNAVAILABLE" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED"
+type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED"
 ```
 
 ### `MonitoringEventV2`
@@ -9529,7 +9979,7 @@ type MonitoringEventV2 = {
   use_case_id?: string
   use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | ""
   level: "success" | "error" | "info" | "warning"
-  code?: string
+  code?: "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED" | string
   message?: string
   detail?: Record<string, unknown>
   created_at: string // date-time
@@ -9542,10 +9992,87 @@ type MonitoringEventV2 = {
 type GetMonitoringStatsV2Request = {
   from_date?: string // date-time
   to_date?: string // date-time
+  correlation_id?: string
+  correlation_ids?: string[]
   use_case_type?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"
   use_case_types?: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy"[]
-  group_by?: "use_case_id" | "use_case_type" | "level" | "code" | "date"
+  group_by?: "use_case_id" | "use_case_type" | "level" | "code" | "correlation_id" | "date"
   source?: "monitoring" | "incoming"
+}
+```
+
+### `GetMonitoringRunCompletionV2Request`
+
+```ts
+type GetMonitoringRunCompletionV2Request = {
+  correlation_ids: string[]
+}
+```
+
+### `MonitoringRunCompletionV2Response`
+
+```ts
+type MonitoringRunCompletionV2Response = {
+  runs: Array<{
+    correlation_id: string
+    seen: number
+    in_flight: number
+    retrying: number
+    success: number
+    warning: number
+    error: number
+    info: number
+    entries: {
+      total: { ... }
+      error: { ... }
+      warning: { ... }
+      success: { ... }
+      info: { ... }
+      retry: { ... }
+    }
+    last_activity_at: string // date-time
+  }>
+}
+```
+
+### `MonitoringRunCompletionV2`
+
+Per-event completion of one run. Every count is in EVENTS (distinct `event_id`), never rows: `seen = in_flight + success + warning + error + info`.
+
+```ts
+type MonitoringRunCompletionV2 = {
+  correlation_id: string
+  seen: number
+  in_flight: number
+  retrying: number
+  success: number
+  warning: number
+  error: number
+  info: number
+  entries: {
+    total: number
+    error: number
+    warning: number
+    success: number
+    info: number
+    retry: number
+  }
+  last_activity_at: string // date-time
+}
+```
+
+### `MonitoringRunEntriesV2`
+
+The run's monitoring rows counted by level — the rows its trace lists, correlation-level rows (wait outcomes, closes) included. Unlike the event counts above, one event can contribute many rows (one per entity written, plus every caveat and retry). Retry markers count under `retry` only, so a failed
+
+```ts
+type MonitoringRunEntriesV2 = {
+  total: number
+  error: number
+  warning: number
+  success: number
+  info: number
+  retry: number
 }
 ```
 
@@ -9562,6 +10089,7 @@ type MonitoringStatsV2 = {
   ack_timeout_count?: number
   success_rate?: number
   last_error_at?: string // date-time
+  last_event_at?: string // date-time
   breakdown?: Record<string, unknown>[]
 }
 ```

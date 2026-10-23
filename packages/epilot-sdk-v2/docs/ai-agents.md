@@ -31,6 +31,21 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`updateAgentById`](#updateagentbyid)
 - [`deleteAgentById`](#deleteagentbyid)
 
+**Customer Chat**
+- [`listCustomerChat`](#listcustomerchat)
+- [`createCustomerChatAgent`](#createcustomerchatagent)
+- [`listCustomerChatCapabilities`](#listcustomerchatcapabilities)
+- [`getCustomerChatAgent`](#getcustomerchatagent)
+- [`renameCustomerChatAgent`](#renamecustomerchatagent)
+- [`deleteCustomerChatAgent`](#deletecustomerchatagent)
+- [`saveCustomerChatConfig`](#savecustomerchatconfig)
+
+**Knowledge**
+- [`listKnowledgeSources`](#listknowledgesources)
+- [`createKnowledgeFileUpload`](#createknowledgefileupload)
+- [`getKnowledgeSource`](#getknowledgesource)
+- [`deleteKnowledgeSource`](#deleteknowledgesource)
+
 **Agent Execution**
 - [`executeAgent`](#executeagent)
 - [`executeAgentStream`](#executeagentstream)
@@ -54,7 +69,36 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`submitConversationFeedback`](#submitconversationfeedback)
 
 **Schemas**
+- [`AgentConfig`](#agentconfig)
+- [`AppearanceConfig`](#appearanceconfig)
+- [`LocalizedAppearance`](#localizedappearance)
+- [`LocalizedFieldList`](#localizedfieldlist)
+- [`CapabilityId`](#capabilityid)
+- [`ActionAutonomy`](#actionautonomy)
+- [`CapabilityState`](#capabilitystate)
+- [`CapabilityInstance`](#capabilityinstance)
+- [`CreateCustomerChatAgentRequest`](#createcustomerchatagentrequest)
+- [`CustomerChatAgent`](#customerchatagent)
+- [`CustomerChatCasRequest`](#customerchatcasrequest)
+- [`DeleteCustomerChatAgentRequest`](#deletecustomerchatagentrequest)
+- [`CustomerChatPlace`](#customerchatplace)
+- [`EscalationConfig`](#escalationconfig)
+- [`CustomerChatKnowledgeSource`](#customerchatknowledgesource)
+- [`CustomerChatKnowledgeSourceType`](#customerchatknowledgesourcetype)
+- [`ListCustomerChatResponse`](#listcustomerchatresponse)
+- [`CustomerChatCapabilityCatalogEntry`](#customerchatcapabilitycatalogentry)
+- [`ListCustomerChatCapabilitiesResponse`](#listcustomerchatcapabilitiesresponse)
+- [`RenameCustomerChatAgentRequest`](#renamecustomerchatagentrequest)
+- [`SaveCustomerChatConfigRequest`](#savecustomerchatconfigrequest)
+- [`WebsiteHandover`](#websitehandover)
 - [`AgentId`](#agentid)
+- [`KnowledgeSourceIds`](#knowledgesourceids)
+- [`KnowledgeSource`](#knowledgesource)
+- [`KnowledgeFileSource`](#knowledgefilesource)
+- [`CreateKnowledgeFileUploadRequest`](#createknowledgefileuploadrequest)
+- [`CreateKnowledgeFileUploadResponse`](#createknowledgefileuploadresponse)
+- [`ListKnowledgeSourcesResponse`](#listknowledgesourcesresponse)
+- [`AgentDomain`](#agentdomain)
 - [`CreateAgentRequest`](#createagentrequest)
 - [`UpdateAgentRequest`](#updateagentrequest)
 - [`AgentDefinition`](#agentdefinition)
@@ -75,6 +119,10 @@ const { data } = await aiAgentsClient.createAgent(...)
 - [`ExecutionMetrics`](#executionmetrics)
 - [`AgentExecutionEventStatus`](#agentexecutioneventstatus)
 - [`AgentExecutionEvent`](#agentexecutionevent)
+- [`KnowledgeSourceRegisteredEvent`](#knowledgesourceregisteredevent)
+- [`KnowledgeFileSourceRegisteredEvent`](#knowledgefilesourceregisteredevent)
+- [`KnowledgeSourceDeletedEvent`](#knowledgesourcedeletedevent)
+- [`KnowledgeSourceProcessingCompletedEvent`](#knowledgesourceprocessingcompletedevent)
 - [`ToolPreview`](#toolpreview)
 - [`PreviewActionType`](#previewactiontype)
 - [`PreviewEntity`](#previewentity)
@@ -107,7 +155,7 @@ const { data } = await aiAgentsClient.createAgent(...)
 
 ### `createAgent`
 
-Creates a new custom agent. System skills cannot be created via this endpoint.
+Create Agent definition
 
 `POST /v1/agents`
 
@@ -115,6 +163,8 @@ Creates a new custom agent. System skills cannot be created via this endpoint.
 const { data } = await client.createAgent(
   null,
   {
+    domain: 'customer_service',
+    availability: ['flows'],
     name: 'Email Reply Generator',
     description: 'string',
     category: 'message',
@@ -152,7 +202,8 @@ const { data } = await client.createAgent(
         /* ... 1 more */
       ],
       required: ['target_schema']
-    }
+    },
+    knowledge_source_ids: ['3fa85f64-5717-4562-b3fc-2c963f66afa6']
   },
 )
 ```
@@ -162,6 +213,7 @@ const { data } = await client.createAgent(
 
 ```json
 {
+  "domain": "customer_service",
   "agent_id": "skill:email-categorizer",
   "org_id": "string",
   "name": "string",
@@ -204,6 +256,7 @@ const { data } = await client.createAgent(
     ],
     "required": ["target_schema"]
   },
+  "knowledge_source_ids": ["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
   "version": 0,
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -217,8 +270,7 @@ const { data } = await client.createAgent(
 
 ### `listAgents`
 
-Lists agents from both system skills and custom agents.
-Use query parameters to filter by source, availability, or entity schema.
+List all agent configurations
 
 `GET /v1/agents`
 
@@ -237,6 +289,7 @@ const { data } = await client.listAgents({
 {
   "agents": [
     {
+      "domain": "customer_service",
       "agent_id": "skill:email-categorizer",
       "org_id": "string",
       "name": "string",
@@ -279,6 +332,7 @@ const { data } = await client.listAgents({
         ],
         "required": ["target_schema"]
       },
+      "knowledge_source_ids": ["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
       "version": 0,
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
@@ -295,9 +349,7 @@ const { data } = await client.listAgents({
 
 ### `getAgentById`
 
-Retrieves an agent by ID. Supports both:
-- System skill IDs (prefixed): "skill:email-categorizer"
-- Custom agent IDs (UUID): "0336a235-9417-4dd8-894c-fe81285bba75"
+Get the agent configuration by ID
 
 `GET /v1/agents/{agent_id}`
 
@@ -312,6 +364,7 @@ const { data } = await client.getAgentById({
 
 ```json
 {
+  "domain": "customer_service",
   "agent_id": "skill:email-categorizer",
   "org_id": "string",
   "name": "string",
@@ -354,6 +407,7 @@ const { data } = await client.getAgentById({
     ],
     "required": ["target_schema"]
   },
+  "knowledge_source_ids": ["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
   "version": 0,
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -367,7 +421,7 @@ const { data } = await client.getAgentById({
 
 ### `updateAgentById`
 
-Updates a custom agent. System skills cannot be updated via this endpoint.
+Update the agent configuration by ID
 
 `PUT /v1/agents/{agent_id}`
 
@@ -377,6 +431,8 @@ const { data } = await client.updateAgentById(
     agent_id: 'example',
   },
   {
+    domain: 'customer_service',
+    availability: ['flows'],
     name: 'string',
     description: 'string',
     category: 'message',
@@ -414,7 +470,8 @@ const { data } = await client.updateAgentById(
         /* ... 1 more */
       ],
       required: ['target_schema']
-    }
+    },
+    knowledge_source_ids: ['3fa85f64-5717-4562-b3fc-2c963f66afa6']
   },
 )
 ```
@@ -424,6 +481,7 @@ const { data } = await client.updateAgentById(
 
 ```json
 {
+  "domain": "customer_service",
   "agent_id": "skill:email-categorizer",
   "org_id": "string",
   "name": "string",
@@ -466,6 +524,7 @@ const { data } = await client.updateAgentById(
     ],
     "required": ["target_schema"]
   },
+  "knowledge_source_ids": ["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
   "version": 0,
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -479,7 +538,7 @@ const { data } = await client.updateAgentById(
 
 ### `deleteAgentById`
 
-Deletes a custom agent. System skills cannot be deleted via this endpoint.
+Delete the agent configuration by ID
 
 `DELETE /v1/agents/{agent_id}`
 
@@ -491,12 +550,737 @@ const { data } = await client.deleteAgentById({
 
 ---
 
+### `listCustomerChat`
+
+List customer chat agents
+
+`GET /v1/customer-chat`
+
+```ts
+const { data } = await client.listCustomerChat()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "agents": [
+    {
+      "org_id": "string",
+      "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "place": "website",
+      "internal_name": "string",
+      "runtime_agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "config": {
+        "capabilities": [
+          {
+            "type": "navigate_portal_pages",
+            "instanceId": "string",
+            "enabled": true,
+            "meterTypes": ["string"],
+            "ticketType": "string",
+            "allowedDomains": ["string"],
+            "autonomy": "draft",
+            "label": "string",
+            "guidance": "string",
+            "blockIds": ["string"],
+            "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "searchDeviceDocs": true
+          }
+        ],
+        "knowledgeSources": [
+          {
+            "id": "string",
+            "type": "portal_page",
+            "title": "string",
+            "targetId": "string",
+            "detail": "string"
+          }
+        ],
+        "escalation": {
+          "websiteHandover": {
+            "kind": "phone",
+            "value": "string",
+            "journeyId": "string",
+            "journeyName": "string"
+          }
+        },
+        "appearance": {
+          "displayName": "string",
+          "greeting": "string",
+          "starters": ["string"],
+          "language": "de",
+          "formOfAddress": "sie",
+          "languages": ["de"],
+          "translations": {
+            "de": {
+              "displayName": "string",
+              "greeting": "string",
+              "starters": ["string"]
+            },
+            "en": {
+              "displayName": "string",
+              "greeting": "string",
+              "starters": ["string"]
+            }
+          },
+          "needsReview": {
+            "de": ["displayName"],
+            "en": ["displayName"]
+          }
+        },
+        "instructions": "string",
+        "instructionTranslations": {
+          "de": "string",
+          "en": "string"
+        },
+        "instructionsNeedsReview": ["de"]
+      },
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createCustomerChatAgent`
+
+Create a customer chat agent with default config
+
+`POST /v1/customer-chat`
+
+```ts
+const { data } = await client.createCustomerChatAgent(
+  null,
+  {
+    place: 'website',
+    internal_name: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "org_id": "string",
+  "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "place": "website",
+  "internal_name": "string",
+  "runtime_agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "config": {
+    "capabilities": [
+      {
+        "type": "navigate_portal_pages",
+        "instanceId": "string",
+        "enabled": true,
+        "meterTypes": ["string"],
+        "ticketType": "string",
+        "allowedDomains": ["string"],
+        "autonomy": "draft",
+        "label": "string",
+        "guidance": "string",
+        "blockIds": ["string"],
+        "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "searchDeviceDocs": true
+      }
+    ],
+    "knowledgeSources": [
+      {
+        "id": "string",
+        "type": "portal_page",
+        "title": "string",
+        "targetId": "string",
+        "detail": "string"
+      }
+    ],
+    "escalation": {
+      "websiteHandover": {
+        "kind": "phone",
+        "value": "string",
+        "journeyId": "string",
+        "journeyName": "string"
+      }
+    },
+    "appearance": {
+      "displayName": "string",
+      "greeting": "string",
+      "starters": ["string"],
+      "language": "de",
+      "formOfAddress": "sie",
+      "languages": ["de"],
+      "translations": {
+        "de": {
+          "displayName": "string",
+          "greeting": "string",
+          "starters": ["string"]
+        },
+        "en": {
+          "displayName": "string",
+          "greeting": "string",
+          "starters": ["string"]
+        }
+      },
+      "needsReview": {
+        "de": ["displayName"],
+        "en": ["displayName"]
+      }
+    },
+    "instructions": "string",
+    "instructionTranslations": {
+      "de": "string",
+      "en": "string"
+    },
+    "instructionsNeedsReview": ["de"]
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `listCustomerChatCapabilities`
+
+List the capability catalog
+
+`GET /v1/customer-chat/capabilities`
+
+```ts
+const { data } = await client.listCustomerChatCapabilities()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "capabilities": [
+    {
+      "id": "navigate_portal_pages",
+      "places": ["website"],
+      "singleInstance": true,
+      "requiresIntegration": true
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getCustomerChatAgent`
+
+Get a customer chat agent
+
+`GET /v1/customer-chat/{agent_id}`
+
+```ts
+const { data } = await client.getCustomerChatAgent({
+  agent_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "org_id": "string",
+  "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "place": "website",
+  "internal_name": "string",
+  "runtime_agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "config": {
+    "capabilities": [
+      {
+        "type": "navigate_portal_pages",
+        "instanceId": "string",
+        "enabled": true,
+        "meterTypes": ["string"],
+        "ticketType": "string",
+        "allowedDomains": ["string"],
+        "autonomy": "draft",
+        "label": "string",
+        "guidance": "string",
+        "blockIds": ["string"],
+        "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "searchDeviceDocs": true
+      }
+    ],
+    "knowledgeSources": [
+      {
+        "id": "string",
+        "type": "portal_page",
+        "title": "string",
+        "targetId": "string",
+        "detail": "string"
+      }
+    ],
+    "escalation": {
+      "websiteHandover": {
+        "kind": "phone",
+        "value": "string",
+        "journeyId": "string",
+        "journeyName": "string"
+      }
+    },
+    "appearance": {
+      "displayName": "string",
+      "greeting": "string",
+      "starters": ["string"],
+      "language": "de",
+      "formOfAddress": "sie",
+      "languages": ["de"],
+      "translations": {
+        "de": {
+          "displayName": "string",
+          "greeting": "string",
+          "starters": ["string"]
+        },
+        "en": {
+          "displayName": "string",
+          "greeting": "string",
+          "starters": ["string"]
+        }
+      },
+      "needsReview": {
+        "de": ["displayName"],
+        "en": ["displayName"]
+      }
+    },
+    "instructions": "string",
+    "instructionTranslations": {
+      "de": "string",
+      "en": "string"
+    },
+    "instructionsNeedsReview": ["de"]
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `renameCustomerChatAgent`
+
+Rename a customer chat agent
+
+`PATCH /v1/customer-chat/{agent_id}`
+
+```ts
+const { data } = await client.renameCustomerChatAgent(
+  {
+    agent_id: 'example',
+    If-Match: 'example',
+  },
+  {
+    internal_name: 'string',
+    updated_at: '1970-01-01T00:00:00.000Z'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "org_id": "string",
+  "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "place": "website",
+  "internal_name": "string",
+  "runtime_agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "config": {
+    "capabilities": [
+      {
+        "type": "navigate_portal_pages",
+        "instanceId": "string",
+        "enabled": true,
+        "meterTypes": ["string"],
+        "ticketType": "string",
+        "allowedDomains": ["string"],
+        "autonomy": "draft",
+        "label": "string",
+        "guidance": "string",
+        "blockIds": ["string"],
+        "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "searchDeviceDocs": true
+      }
+    ],
+    "knowledgeSources": [
+      {
+        "id": "string",
+        "type": "portal_page",
+        "title": "string",
+        "targetId": "string",
+        "detail": "string"
+      }
+    ],
+    "escalation": {
+      "websiteHandover": {
+        "kind": "phone",
+        "value": "string",
+        "journeyId": "string",
+        "journeyName": "string"
+      }
+    },
+    "appearance": {
+      "displayName": "string",
+      "greeting": "string",
+      "starters": ["string"],
+      "language": "de",
+      "formOfAddress": "sie",
+      "languages": ["de"],
+      "translations": {
+        "de": {
+          "displayName": "string",
+          "greeting": "string",
+          "starters": ["string"]
+        },
+        "en": {
+          "displayName": "string",
+          "greeting": "string",
+          "starters": ["string"]
+        }
+      },
+      "needsReview": {
+        "de": ["displayName"],
+        "en": ["displayName"]
+      }
+    },
+    "instructions": "string",
+    "instructionTranslations": {
+      "de": "string",
+      "en": "string"
+    },
+    "instructionsNeedsReview": ["de"]
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `deleteCustomerChatAgent`
+
+Remove a customer chat agent and its runtime projection
+
+`DELETE /v1/customer-chat/{agent_id}`
+
+```ts
+const { data } = await client.deleteCustomerChatAgent(
+  {
+    agent_id: 'example',
+    If-Match: 'example',
+  },
+  {
+    updated_at: '1970-01-01T00:00:00.000Z',
+    portal_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+  },
+)
+```
+
+---
+
+### `saveCustomerChatConfig`
+
+Replace the AgentConfig and compile the runtime AgentRecord
+
+`PUT /v1/customer-chat/{agent_id}/config`
+
+```ts
+const { data } = await client.saveCustomerChatConfig(
+  {
+    agent_id: 'example',
+    If-Match: 'example',
+  },
+  {
+    config: {
+      capabilities: [
+        {
+          type: 'navigate_portal_pages',
+          instanceId: 'string',
+          enabled: true,
+          meterTypes: ['string'],
+          ticketType: 'string',
+          allowedDomains: ['string'],
+          autonomy: 'draft',
+          label: 'string',
+          guidance: 'string',
+          blockIds: ['string'],
+          integrationId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+          searchDeviceDocs: true
+        }
+      ],
+      knowledgeSources: [
+        {
+          id: 'string',
+          type: 'portal_page',
+          title: 'string',
+          targetId: 'string',
+          detail: 'string'
+        }
+      ],
+      escalation: {
+        websiteHandover: {
+          kind: 'phone',
+          value: 'string',
+          journeyId: 'string',
+          journeyName: 'string'
+        }
+      },
+      appearance: {
+        displayName: 'string',
+        greeting: 'string',
+        starters: ['string'],
+        language: 'de',
+        formOfAddress: 'sie',
+        languages: ['de'],
+        translations: {
+          de: {
+            displayName: 'string',
+            greeting: 'string',
+            starters: ['string']
+          },
+          en: {
+            displayName: 'string',
+            greeting: 'string',
+            starters: ['string']
+          }
+        },
+        needsReview: {
+          de: ['displayName'],
+          en: ['displayName']
+        }
+      },
+      instructions: 'string',
+      instructionTranslations: {
+        de: 'string',
+        en: 'string'
+      },
+      instructionsNeedsReview: ['de']
+    },
+    updated_at: '1970-01-01T00:00:00.000Z'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "org_id": "string",
+  "agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "place": "website",
+  "internal_name": "string",
+  "runtime_agent_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "config": {
+    "capabilities": [
+      {
+        "type": "navigate_portal_pages",
+        "instanceId": "string",
+        "enabled": true,
+        "meterTypes": ["string"],
+        "ticketType": "string",
+        "allowedDomains": ["string"],
+        "autonomy": "draft",
+        "label": "string",
+        "guidance": "string",
+        "blockIds": ["string"],
+        "integrationId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "searchDeviceDocs": true
+      }
+    ],
+    "knowledgeSources": [
+      {
+        "id": "string",
+        "type": "portal_page",
+        "title": "string",
+        "targetId": "string",
+        "detail": "string"
+      }
+    ],
+    "escalation": {
+      "websiteHandover": {
+        "kind": "phone",
+        "value": "string",
+        "journeyId": "string",
+        "journeyName": "string"
+      }
+    },
+    "appearance": {
+      "displayName": "string",
+      "greeting": "string",
+      "starters": ["string"],
+      "language": "de",
+      "formOfAddress": "sie",
+      "languages": ["de"],
+      "translations": {
+        "de": {
+          "displayName": "string",
+          "greeting": "string",
+          "starters": ["string"]
+        },
+        "en": {
+          "displayName": "string",
+          "greeting": "string",
+          "starters": ["string"]
+        }
+      },
+      "needsReview": {
+        "de": ["displayName"],
+        "en": ["displayName"]
+      }
+    },
+    "instructions": "string",
+    "instructionTranslations": {
+      "de": "string",
+      "en": "string"
+    },
+    "instructionsNeedsReview": ["de"]
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `listKnowledgeSources`
+
+List knowledge sources
+
+`GET /v1/knowledge/sources`
+
+```ts
+const { data } = await client.listKnowledgeSources()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "sources": [
+    {
+      "type": "file",
+      "source_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "filename": "string",
+      "mime_type": "string",
+      "size_bytes": 0,
+      "ready": true,
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createKnowledgeFileUpload`
+
+Create a knowledge file upload
+
+`POST /v1/knowledge/file-uploads`
+
+```ts
+const { data } = await client.createKnowledgeFileUpload(
+  null,
+  {
+    filename: 'string',
+    mime_type: 'string',
+    size_bytes: 1
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "source_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "upload_url": "https://example.com/path",
+  "upload_fields": {},
+  "expires_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `getKnowledgeSource`
+
+Get a knowledge source
+
+`GET /v1/knowledge/sources/{source_id}`
+
+```ts
+const { data } = await client.getKnowledgeSource({
+  source_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "type": "file",
+  "source_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "filename": "string",
+  "mime_type": "string",
+  "size_bytes": 0,
+  "ready": true,
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `deleteKnowledgeSource`
+
+Delete a knowledge source
+
+`DELETE /v1/knowledge/sources/{source_id}`
+
+```ts
+const { data } = await client.deleteKnowledgeSource({
+  source_id: 'example',
+})
+```
+
+---
+
 ### `executeAgent`
 
-Executes an agent (system skill or custom agent).
-Supports both:
-- System skill IDs (prefixed): "skill:email-categorizer"
-- Custom agent IDs (UUID): "0336a235-9417-4dd8-894c-fe81285bba75"
+Execute an agent
 
 `POST /v1/agents/{agent_id}/execute`
 
@@ -506,7 +1290,9 @@ const { data } = await client.executeAgent(
     agent_id: 'example',
   },
   {
+    mode: 'auto',
     input: {
+      message: 'string',
       entity_id: 'string',
       entity_schema: 'string',
       workflow_id: 'string',
@@ -518,7 +1304,15 @@ const { data } = await client.executeAgent(
           entity_id: 'string',
           entity_schema: 'string'
         }
-      ]
+      ],
+      attachment: {
+        s3ref: {
+          bucket: 'string',
+          key: 'string'
+        },
+        mime_type: 'string',
+        filename: 'string'
+      }
     },
     parameters: {},
     execution_mode_override: 'automatic',
@@ -632,9 +1426,7 @@ const { data } = await client.executeAgent(
 
 ### `executeAgentStream`
 
-Executes an agent with real-time streaming of tokens and tool events.
-Returns Server-Sent Events (SSE) stream with token-by-token output,
-tool call progress, and completion status.
+Execute an agent with streaming response
 
 `POST /v1/agents/{agent_id}/execute/stream`
 
@@ -644,7 +1436,9 @@ const { data } = await client.executeAgentStream(
     agent_id: 'example',
   },
   {
+    mode: 'auto',
     input: {
+      message: 'string',
       entity_id: 'string',
       entity_schema: 'string',
       workflow_id: 'string',
@@ -656,7 +1450,15 @@ const { data } = await client.executeAgentStream(
           entity_id: 'string',
           entity_schema: 'string'
         }
-      ]
+      ],
+      attachment: {
+        s3ref: {
+          bucket: 'string',
+          key: 'string'
+        },
+        mime_type: 'string',
+        filename: 'string'
+      }
     },
     parameters: {},
     execution_mode_override: 'automatic',
@@ -1017,7 +1819,7 @@ const { data } = await client.cancelExecution({
 
 ### `getExecutionTrace`
 
-Returns the step-by-step reasoning and tool calls for ReAct mode executions. Returns empty iterations array for direct mode executions.
+Get execution trace/iterations
 
 `GET /v1/executions/{execution_id}/trace`
 
@@ -1123,7 +1925,7 @@ const { data } = await client.putExecutionFeedback(
 
 ### `approveExecution`
 
-Approves a pending tool action when execution is in waiting_approval status
+Approve pending action
 
 `POST /v1/executions/{execution_id}/approve`
 
@@ -1243,7 +2045,7 @@ const { data } = await client.approveExecution(
 
 ### `rejectExecution`
 
-Rejects a pending tool action when execution is in waiting_approval status
+Reject pending action
 
 `POST /v1/executions/{execution_id}/reject`
 
@@ -1361,7 +2163,7 @@ const { data } = await client.rejectExecution(
 
 ### `streamExecution`
 
-Reconnects to an execution's event stream after approval. Replays missed events from event log and continues streaming if execution is still running.
+Reconnect to execution stream
 
 `GET /v1/executions/{execution_id}/stream`
 
@@ -1376,7 +2178,7 @@ const { data } = await client.streamExecution({
 
 ### `chat`
 
-Initiates a streaming chat session with an AI agent. Supports server-side conversation memory via conversationId or client-provided history via clientHistory.
+Streaming chat with AI agent
 
 `POST /v1/chat`
 
@@ -1409,7 +2211,8 @@ const { data } = await client.chat(
       mode: 'updates',
       streamTokens: false,
       includeMetadata: false
-    }
+    },
+    preview_demo: true
   },
 )
 ```
@@ -1418,7 +2221,7 @@ const { data } = await client.chat(
 
 ### `listConversations`
 
-Lists conversations for the authenticated user, sorted by most recent.
+List conversations
 
 `GET /v1/conversations`
 
@@ -1462,7 +2265,7 @@ const { data } = await client.listConversations({
 
 ### `getConversation`
 
-Retrieves a conversation and its message history.
+Get conversation with messages
 
 `GET /v1/conversations/{conversation_id}`
 
@@ -1526,7 +2329,7 @@ const { data } = await client.getConversation({
 
 ### `deleteConversation`
 
-Deletes a conversation and all its messages.
+Delete conversation
 
 `DELETE /v1/conversations/{conversation_id}`
 
@@ -1540,7 +2343,7 @@ const { data } = await client.deleteConversation({
 
 ### `submitConversationFeedback`
 
-Records a thumbs up/down (with optional comment) for the assistant turn identified by its Langfuse trace id. The rating is persisted on the message and mirrored to Langfuse as a trace score.
+Submit feedback for an assistant turn
 
 `POST /v1/conversations/{conversation_id}/feedback`
 
@@ -1577,6 +2380,401 @@ const { data } = await client.submitConversationFeedback(
 
 ## Schemas
 
+### `AgentConfig`
+
+```ts
+type AgentConfig = {
+  capabilities: Array<{
+    type: "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy"
+    instanceId?: string
+    enabled: boolean
+    meterTypes?: string[]
+    ticketType?: string
+    allowedDomains?: string[]
+    autonomy?: "draft" | "approval" | "automatic"
+    label?: string
+    guidance?: string
+    blockIds?: string[]
+    integrationId?: string // uuid
+    searchDeviceDocs?: boolean
+  }>
+  knowledgeSources: Array<{
+    id: string
+    type: "portal_page" | "document" | "catalogue" | "url"
+    title: string
+    targetId: string
+    detail?: string
+  }>
+  escalation: {
+    websiteHandover: {
+      kind: { ... }
+      value: { ... }
+      journeyId?: { ... }
+      journeyName?: { ... }
+    }
+  }
+  appearance: {
+    displayName: string
+    greeting: string
+    starters: string[]
+    language: "de" | "en"
+    formOfAddress: "sie" | "du"
+    languages?: "de" | "en"[]
+    translations?: {
+      de?: { ... }
+      en?: { ... }
+    }
+    needsReview?: {
+      de?: { ... }
+      en?: { ... }
+    }
+  }
+  instructions?: string
+  instructionTranslations?: {
+    de?: string
+    en?: string
+  }
+  instructionsNeedsReview?: "de" | "en"[]
+}
+```
+
+### `AppearanceConfig`
+
+```ts
+type AppearanceConfig = {
+  displayName: string
+  greeting: string
+  starters: string[]
+  language: "de" | "en"
+  formOfAddress: "sie" | "du"
+  languages?: "de" | "en"[]
+  translations?: {
+    de?: {
+      displayName: { ... }
+      greeting: { ... }
+      starters: { ... }
+    }
+    en?: {
+      displayName: { ... }
+      greeting: { ... }
+      starters: { ... }
+    }
+  }
+  needsReview?: {
+    de?: "displayName" | "greeting" | "starters"[]
+    en?: "displayName" | "greeting" | "starters"[]
+  }
+}
+```
+
+### `LocalizedAppearance`
+
+```ts
+type LocalizedAppearance = {
+  displayName: string
+  greeting: string
+  starters: string[]
+}
+```
+
+### `LocalizedFieldList`
+
+```ts
+type LocalizedFieldList = "displayName" | "greeting" | "starters"[]
+```
+
+### `CapabilityId`
+
+```ts
+type CapabilityId = "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy"
+```
+
+### `ActionAutonomy`
+
+Action capabilities only (`open_quick_actions`): per-capability autonomy.
+`draft` = suggest only (proposal + deep link, nothing opens),
+`approval` = the customer confirms in a card first,
+`automatic` = run immediately. Defaults to `approval` when the
+capability is enabled without one; unknown values
+
+```ts
+type ActionAutonomy = "draft" | "approval" | "automatic"
+```
+
+### `CapabilityState`
+
+```ts
+type CapabilityState = {
+  enabled: boolean
+  meterTypes?: string[]
+  ticketType?: string
+  allowedDomains?: string[]
+  autonomy?: "draft" | "approval" | "automatic"
+  label?: string
+  guidance?: string
+  blockIds?: string[]
+  integrationId?: string // uuid
+  searchDeviceDocs?: boolean
+}
+```
+
+### `CapabilityInstance`
+
+```ts
+type CapabilityInstance = {
+  type: "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy"
+  instanceId?: string
+  enabled: boolean
+  meterTypes?: string[]
+  ticketType?: string
+  allowedDomains?: string[]
+  autonomy?: "draft" | "approval" | "automatic"
+  label?: string
+  guidance?: string
+  blockIds?: string[]
+  integrationId?: string // uuid
+  searchDeviceDocs?: boolean
+}
+```
+
+### `CreateCustomerChatAgentRequest`
+
+```ts
+type CreateCustomerChatAgentRequest = {
+  place: "website" | "portal"
+  internal_name?: string
+}
+```
+
+### `CustomerChatAgent`
+
+```ts
+type CustomerChatAgent = {
+  org_id: string
+  agent_id: string // uuid
+  place: "website" | "portal"
+  internal_name: string
+  runtime_agent_id: string // uuid
+  config: {
+    capabilities: Array<{
+      type: { ... }
+      instanceId?: { ... }
+      enabled: { ... }
+      meterTypes?: { ... }
+      ticketType?: { ... }
+      allowedDomains?: { ... }
+      autonomy?: { ... }
+      label?: { ... }
+      guidance?: { ... }
+      blockIds?: { ... }
+      integrationId?: { ... }
+      searchDeviceDocs?: { ... }
+    }>
+    knowledgeSources: Array<{
+      id: { ... }
+      type: { ... }
+      title: { ... }
+      targetId: { ... }
+      detail?: { ... }
+    }>
+    escalation: {
+      websiteHandover: { ... }
+    }
+    appearance: {
+      displayName: { ... }
+      greeting: { ... }
+      starters: { ... }
+      language: { ... }
+      formOfAddress: { ... }
+      languages?: { ... }
+      translations?: { ... }
+      needsReview?: { ... }
+    }
+    instructions?: string
+    instructionTranslations?: {
+      de?: { ... }
+      en?: { ... }
+    }
+    instructionsNeedsReview?: "de" | "en"[]
+  }
+  created_at: string // date-time
+  updated_at: string // date-time
+}
+```
+
+### `CustomerChatCasRequest`
+
+```ts
+type CustomerChatCasRequest = {
+  updated_at?: string // date-time
+}
+```
+
+### `DeleteCustomerChatAgentRequest`
+
+```ts
+type DeleteCustomerChatAgentRequest = {
+  updated_at?: string // date-time
+  portal_id?: string // uuid
+}
+```
+
+### `CustomerChatPlace`
+
+```ts
+type CustomerChatPlace = "website" | "portal"
+```
+
+### `EscalationConfig`
+
+```ts
+type EscalationConfig = {
+  websiteHandover: {
+    kind: "phone" | "email" | "journey" | "unset"
+    value: string
+    journeyId?: string
+    journeyName?: string
+  }
+}
+```
+
+### `CustomerChatKnowledgeSource`
+
+```ts
+type CustomerChatKnowledgeSource = {
+  id: string
+  type: "portal_page" | "document" | "catalogue" | "url"
+  title: string
+  targetId: string
+  detail?: string
+}
+```
+
+### `CustomerChatKnowledgeSourceType`
+
+```ts
+type CustomerChatKnowledgeSourceType = "portal_page" | "document" | "catalogue" | "url"
+```
+
+### `ListCustomerChatResponse`
+
+```ts
+type ListCustomerChatResponse = {
+  agents: Array<{
+    org_id: string
+    agent_id: string // uuid
+    place: "website" | "portal"
+    internal_name: string
+    runtime_agent_id: string // uuid
+    config: {
+      capabilities: { ... }
+      knowledgeSources: { ... }
+      escalation: { ... }
+      appearance: { ... }
+      instructions?: { ... }
+      instructionTranslations?: { ... }
+      instructionsNeedsReview?: { ... }
+    }
+    created_at: string // date-time
+    updated_at: string // date-time
+  }>
+}
+```
+
+### `CustomerChatCapabilityCatalogEntry`
+
+```ts
+type CustomerChatCapabilityCatalogEntry = {
+  id: "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy"
+  places: "website" | "portal"[]
+  singleInstance?: boolean
+  requiresIntegration?: boolean
+}
+```
+
+### `ListCustomerChatCapabilitiesResponse`
+
+```ts
+type ListCustomerChatCapabilitiesResponse = {
+  capabilities: Array<{
+    id: "navigate_portal_pages" | "search_portal_records" | "view_billing" | "view_meter_readings" | "view_contracts" | "search_web" | "open_quick_actions" | "view_hems_energy"
+    places: "website" | "portal"[]
+    singleInstance?: boolean
+    requiresIntegration?: boolean
+  }>
+}
+```
+
+### `RenameCustomerChatAgentRequest`
+
+```ts
+type RenameCustomerChatAgentRequest = {
+  internal_name: string
+  updated_at?: string // date-time
+}
+```
+
+### `SaveCustomerChatConfigRequest`
+
+```ts
+type SaveCustomerChatConfigRequest = {
+  config: {
+    capabilities: Array<{
+      type: { ... }
+      instanceId?: { ... }
+      enabled: { ... }
+      meterTypes?: { ... }
+      ticketType?: { ... }
+      allowedDomains?: { ... }
+      autonomy?: { ... }
+      label?: { ... }
+      guidance?: { ... }
+      blockIds?: { ... }
+      integrationId?: { ... }
+      searchDeviceDocs?: { ... }
+    }>
+    knowledgeSources: Array<{
+      id: { ... }
+      type: { ... }
+      title: { ... }
+      targetId: { ... }
+      detail?: { ... }
+    }>
+    escalation: {
+      websiteHandover: { ... }
+    }
+    appearance: {
+      displayName: { ... }
+      greeting: { ... }
+      starters: { ... }
+      language: { ... }
+      formOfAddress: { ... }
+      languages?: { ... }
+      translations?: { ... }
+      needsReview?: { ... }
+    }
+    instructions?: string
+    instructionTranslations?: {
+      de?: { ... }
+      en?: { ... }
+    }
+    instructionsNeedsReview?: "de" | "en"[]
+  }
+  updated_at?: string // date-time
+}
+```
+
+### `WebsiteHandover`
+
+```ts
+type WebsiteHandover = {
+  kind: "phone" | "email" | "journey" | "unset"
+  value: string
+  journeyId?: string
+  journeyName?: string
+}
+```
+
 ### `AgentId`
 
 Agent identifier. Can be either:
@@ -1588,10 +2786,96 @@ Agent identifier. Can be either:
 type AgentId = string
 ```
 
+### `KnowledgeSourceIds`
+
+Knowledge source IDs available to this agent. An empty array clears the selection.
+
+```ts
+type KnowledgeSourceIds = string // uuid[]
+```
+
+### `KnowledgeSource`
+
+```ts
+type KnowledgeSource = {
+  type: "file"
+  source_id: string // uuid
+  filename: string
+  mime_type: string
+  size_bytes: number
+  ready: boolean
+  created_at: string // date-time
+  updated_at: string // date-time
+}
+```
+
+### `KnowledgeFileSource`
+
+```ts
+type KnowledgeFileSource = {
+  type: "file"
+  source_id: string // uuid
+  filename: string
+  mime_type: string
+  size_bytes: number
+  ready: boolean
+  created_at: string // date-time
+  updated_at: string // date-time
+}
+```
+
+### `CreateKnowledgeFileUploadRequest`
+
+```ts
+type CreateKnowledgeFileUploadRequest = {
+  filename: string
+  mime_type: string
+  size_bytes: number
+}
+```
+
+### `CreateKnowledgeFileUploadResponse`
+
+```ts
+type CreateKnowledgeFileUploadResponse = {
+  source_id: string // uuid
+  upload_url: string // uri
+  upload_fields: Record<string, string>
+  expires_at: string // date-time
+}
+```
+
+### `ListKnowledgeSourcesResponse`
+
+```ts
+type ListKnowledgeSourcesResponse = {
+  sources: Array<{
+    type: "file"
+    source_id: string // uuid
+    filename: string
+    mime_type: string
+    size_bytes: number
+    ready: boolean
+    created_at: string // date-time
+    updated_at: string // date-time
+  }>
+}
+```
+
+### `AgentDomain`
+
+Business domain selected in the agent builder.
+
+```ts
+type AgentDomain = "customer_service" | "sales" | "billing" | "metering_grid" | "other"
+```
+
 ### `CreateAgentRequest`
 
 ```ts
 type CreateAgentRequest = {
+  domain?: "customer_service" | "sales" | "billing" | "metering_grid" | "other"
+  availability?: "flows" | "copilot" | "portals" | "website" | "all"[]
   name: string
   description?: string
   category?: "message" | "entity" | "document" | "classification" | "custom"
@@ -1632,6 +2916,7 @@ type CreateAgentRequest = {
     }>
     required?: string[]
   }
+  knowledge_source_ids?: string // uuid[]
 }
 ```
 
@@ -1639,6 +2924,8 @@ type CreateAgentRequest = {
 
 ```ts
 type UpdateAgentRequest = {
+  domain?: "customer_service" | "sales" | "billing" | "metering_grid" | "other"
+  availability?: "flows" | "copilot" | "portals" | "website" | "all"[]
   name?: string
   description?: string
   category?: "message" | "entity" | "document" | "classification" | "custom"
@@ -1679,6 +2966,7 @@ type UpdateAgentRequest = {
     }>
     required?: string[]
   }
+  knowledge_source_ids?: string // uuid[]
 }
 ```
 
@@ -1686,6 +2974,7 @@ type UpdateAgentRequest = {
 
 ```ts
 type AgentDefinition = {
+  domain?: "customer_service" | "sales" | "billing" | "metering_grid" | "other"
   agent_id?: string
   org_id?: string
   name?: string
@@ -1693,7 +2982,7 @@ type AgentDefinition = {
   category?: "message" | "entity" | "document" | "classification" | "custom"
   icon?: string
   source?: "system" | "custom"
-  availability?: "flows" | "copilot" | "portals" | "all"[]
+  availability?: "flows" | "copilot" | "portals" | "website" | "all"[]
   allowed_entity_schemas?: string[]
   system_prompt?: string
   tools?: string[]
@@ -1731,6 +3020,7 @@ type AgentDefinition = {
     }>
     required?: string[]
   }
+  knowledge_source_ids?: string // uuid[]
   version?: number
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -1743,6 +3033,7 @@ type AgentDefinition = {
 ```ts
 type ListAgentsResponse = {
   agents?: Array<{
+    domain?: "customer_service" | "sales" | "billing" | "metering_grid" | "other"
     agent_id?: string
     org_id?: string
     name?: string
@@ -1750,7 +3041,7 @@ type ListAgentsResponse = {
     category?: "message" | "entity" | "document" | "classification" | "custom"
     icon?: string
     source?: "system" | "custom"
-    availability?: "flows" | "copilot" | "portals" | "all"[]
+    availability?: "flows" | "copilot" | "portals" | "website" | "all"[]
     allowed_entity_schemas?: string[]
     system_prompt?: string
     tools?: string[]
@@ -1770,6 +3061,7 @@ type ListAgentsResponse = {
       parameters: { ... }
       required?: { ... }
     }
+    knowledge_source_ids?: string // uuid[]
     version?: number
     created_at?: string // date-time
     updated_at?: string // date-time
@@ -1788,9 +3080,9 @@ type ListExecutionsResponse = {
     agent_id?: string
     agent_source?: "system" | "custom"
     agent_name?: string
-    execution_context?: "flows" | "copilot" | "api"
+    execution_context?: "flows" | "copilot" | "api" | "sharing"
     org_id?: string
-    status?: "pending" | "running" | "waiting_approval" | "completed" | "failed" | "cancelled"
+    status?: "pending" | "queued" | "running" | "waiting_approval" | "completed" | "failed" | "cancelled"
     input?: object
     parameters?: object
     result?: {
@@ -1851,7 +3143,9 @@ type RejectExecutionRequest = {
 
 ```ts
 type ExecuteAgentRequest = {
+  mode?: "auto" | "stream" | "async" | "sync"
   input?: {
+    message?: string
     entity_id?: string
     entity_schema?: string
     workflow_id?: string
@@ -1862,10 +3156,15 @@ type ExecuteAgentRequest = {
       entity_id: { ... }
       entity_schema: { ... }
     }>
+    attachment?: {
+      s3ref: { ... }
+      mime_type: { ... }
+      filename?: { ... }
+    }
   }
   parameters?: Record<string, unknown>
   execution_mode_override?: "automatic" | "approval" | "draft"
-  execution_context?: "flows" | "copilot" | "api"
+  execution_context?: "flows" | "copilot" | "api" | "sharing"
   callback_url?: string // uri
   timeout_ms?: number
 }
@@ -1879,9 +3178,9 @@ type ExecutionResponse = {
   agent_id?: string
   agent_source?: "system" | "custom"
   agent_name?: string
-  execution_context?: "flows" | "copilot" | "api"
+  execution_context?: "flows" | "copilot" | "api" | "sharing"
   org_id?: string
-  status?: "pending" | "running" | "waiting_approval" | "completed" | "failed" | "cancelled"
+  status?: "pending" | "queued" | "running" | "waiting_approval" | "completed" | "failed" | "cancelled"
   input?: object
   parameters?: object
   result?: {
@@ -2090,7 +3389,7 @@ the execution row: `pending` and `running` both surface as `started`, and
 vocabularies are interchang
 
 ```ts
-type AgentExecutionEventStatus = "started" | "completed" | "failed" | "approval_required"
+type AgentExecutionEventStatus = "started" | "queued" | "completed" | "failed" | "approval_required"
 ```
 
 ### `AgentExecutionEvent`
@@ -2108,8 +3407,8 @@ type AgentExecutionEvent = {
   agentId: string
   orgId: string
   userId?: string
-  execution_status: "started" | "completed" | "failed" | "approval_required"
-  execution_context?: "flows" | "copilot" | "api"
+  execution_status: "started" | "queued" | "completed" | "failed" | "approval_required"
+  execution_context?: "flows" | "copilot" | "api" | "sharing"
   input?: Record<string, unknown>
   output?: Record<string, unknown>
   error?: {
@@ -2126,6 +3425,62 @@ type AgentExecutionEvent = {
     args?: Record<string, unknown>
   }>
   timestamp?: string // date-time
+}
+```
+
+### `KnowledgeSourceRegisteredEvent`
+
+Detail payload of the `knowledge-source-registered` event, published on
+the AI Agents event bus with source `ai-agents` after the source record
+exists in DynamoDB. Consumers must process `sourceId` idempotently.
+
+
+```ts
+type KnowledgeSourceRegisteredEvent = {
+  orgId: string
+  sourceId: string // uuid
+  type: "file"
+  bucket: string
+  key: string
+}
+```
+
+### `KnowledgeFileSourceRegisteredEvent`
+
+```ts
+type KnowledgeFileSourceRegisteredEvent = {
+  orgId: string
+  sourceId: string // uuid
+  type: "file"
+  bucket: string
+  key: string
+}
+```
+
+### `KnowledgeSourceDeletedEvent`
+
+Published when a knowledge source is deleted.
+
+```ts
+type KnowledgeSourceDeletedEvent = {
+  orgId: string
+  sourceId: string // uuid
+  type: "file"
+}
+```
+
+### `KnowledgeSourceProcessingCompletedEvent`
+
+Published by a knowledge processing pipeline after all derived data for
+the source has been stored and is available for agent retrieval. The
+event uses source `knowledge-processing` and detail type
+`knowledge-source-processing-completed` on the AI Agents event bus.
+
+
+```ts
+type KnowledgeSourceProcessingCompletedEvent = {
+  orgId: string
+  sourceId: string // uuid
 }
 ```
 
@@ -2295,11 +3650,11 @@ Where the skill/agent is available:
 - flows: Available in workflow automations
 - copilot: Available as a sub-agent in copilot
 - portals: Available in end-user self-service portals
-- all: Available everywhere
-
+- website: Website chat, explicitly selected; currently supports anonymous execution
+- all: Available on the existing no
 
 ```ts
-type SkillAvailability = "flows" | "copilot" | "portals" | "all"
+type SkillAvailability = "flows" | "copilot" | "portals" | "website" | "all"
 ```
 
 ### `ExecutionContext`
@@ -2308,10 +3663,11 @@ Where the execution was triggered from:
 - flows: Triggered from workflow automation
 - copilot: Triggered from copilot assistant
 - api: Direct API call
+- sharing: Triggered by sharing-api auto-sharing rules
 
 
 ```ts
-type ExecutionContext = "flows" | "copilot" | "api"
+type ExecutionContext = "flows" | "copilot" | "api" | "sharing"
 ```
 
 ### `ExecutionPattern`
@@ -2338,7 +3694,7 @@ type ExecutionMode = "automatic" | "approval" | "draft"
 ### `ExecutionStatus`
 
 ```ts
-type ExecutionStatus = "pending" | "running" | "waiting_approval" | "completed" | "failed" | "cancelled"
+type ExecutionStatus = "pending" | "queued" | "running" | "waiting_approval" | "completed" | "failed" | "cancelled"
 ```
 
 ### `ParameterType`
@@ -2458,6 +3814,7 @@ type ChatRequest = {
     streamTokens?: boolean
     includeMetadata?: boolean
   }
+  preview_demo?: boolean
 }
 ```
 

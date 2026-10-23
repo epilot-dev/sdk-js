@@ -323,6 +323,83 @@
         "responses": {}
       }
     },
+    "/v1/files/{id}/attribute-suggestion-jobs": {
+      "post": {
+        "operationId": "createFileAttributeSuggestionJob",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/files/{id}/attribute-suggestion-jobs/latest": {
+      "get": {
+        "operationId": "getLatestFileAttributeSuggestions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "entity_id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/files/{id}/attribute-suggestion-jobs/{job_id}": {
+      "get": {
+        "operationId": "getFileAttributeSuggestionJob",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateFileAttributeSuggestionStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/files/{id}/text": {
       "get": {
         "operationId": "getFileText",
@@ -437,6 +514,10 @@
           },
           {
             "name": "h",
+            "in": "query"
+          },
+          {
+            "name": "keep_original",
             "in": "query"
           },
           {
@@ -678,6 +759,11 @@
       }
     },
     "responses": {
+      "FileAttributeSuggestionErrorResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "BadRequestError": {
         "content": {
           "application/json": {}
