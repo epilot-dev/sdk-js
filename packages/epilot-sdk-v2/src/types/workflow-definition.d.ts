@@ -41,6 +41,14 @@ export declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            /**
+             * When true, the task is required and users cannot skip it while the flow is running. Unrelated to `requirements`, which gate when a task becomes enabled. System-driven skips are unaffected — tasks on a not-taken decision branch, and automation tasks whose automation execution itself reports a skipped verdict (e.g. unmet trigger conditions). Only a manual task, or an automation or AI task whose `trigger_mode` is `manual` or absent, can carry it: on a decision or an automatic kind it is normalised to false on create, update and load.
+             */
+            required?: boolean;
+            /**
+             * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) on every create, update and load — a client-supplied array is replaced. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins; an id occurring twice in one task is rejected. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate task completion while the flow is running.
+             */
+            subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
@@ -52,6 +60,43 @@ export declare namespace Components {
             phase_id?: string;
             task_type: TaskType;
             agent_config?: /* Configuration for AI Agent to run */ AgentConfig;
+            /**
+             * How the agent run is started. `automatic` starts it as soon as the task becomes current; `manual` waits for a person to run it and to approve the result. An absent value is read as `manual` everywhere: the engine dispatches only an explicit `automatic`, the builder shows the task as manual, and the task may carry the skip gate and required subtasks.
+             */
+            trigger_mode?: "manual" | "automatic";
+        }
+        /**
+         * AI extraction + prefill configuration for the attached journey (Flows v2 only)
+         */
+        export interface AiPrefillConfig {
+            enabled?: boolean;
+            source?: {
+                type?: "flow_context";
+                input_entity?: "thread" | "first_email" | "last_email";
+            };
+            extraction_fields?: AiPrefillExtractionField[];
+            mappings?: AiPrefillMapping[];
+            min_confidence?: number;
+            /**
+             * Free-text, cross-field context for the extractor (e.g. "amounts are always in euros")
+             */
+            instructions?: string;
+        }
+        export interface AiPrefillExtractionField {
+            key: string;
+            type: "string" | "number" | "boolean" | "date" | "enum";
+            description?: string;
+            /**
+             * Set when the author replaced the derived description with their own; the builder preserves flagged descriptions across re-derivations
+             */
+            description_overridden?: boolean;
+            enum?: string[];
+        }
+        export interface AiPrefillMapping {
+            source: string;
+            block_id: string;
+            block_type: "text-input" | "number-input" | "personal-information" | "meter-reading";
+            block_field?: string;
         }
         /**
          * Configuration for automation execution to run
@@ -84,18 +129,36 @@ export declare namespace Components {
              */
             duplicated_flow_id?: string;
             input_context?: /**
-             * Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.
+             * Optional. Source of the entity fed into this automation task. If omitted, the entity of the trigger that started the run is used.
              *
              */
             AutomationInputContext;
+            output_context?: /**
+             * Optional. What happens to the entity produced by this automation task (the last successful entity-producing action of its automation).
+             *
+             */
+            AutomationOutputContext;
+            /**
+             * The closing reasons a person may choose from when running this task, making a `cancel-flow-execution` automation semi-automated: the step is configured here, the reason is picked at execution time. Every id must also appear in the flow template's `closing_reasons` — the step narrows the flow's vocabulary rather than introducing its own, which is what keeps the chosen reason a member of the execution's `configured_reasons` and what lets blueprints export the reasons a step depends on. Only a task whose `trigger_mode` is `manual` or absent can carry it; the template healer clears it from an `automatic` task, which has no assignee moment to choose in. Empty or absent means the automation runs with the reasons fixed in its own action config.
+             */
+            eligible_closing_reason_ids?: string[];
+            email_review?: /* Whether the person running a semi-automated send-email step may adjust the email before it goes out, and what they may adjust. Meaningful only on a task a person triggers — the engine's own dispatch has nobody to review — so the template healer clears it from an `automatic` task. With `enabled` false the email is sent exactly as configured and the person only triggers it. */ EmailReviewConfig;
+            /**
+             * Whether the person running a semi-automated cancel step may add a free-text note alongside the reason they choose. Only meaningful with `eligible_closing_reason_ids`, since the note is written in the same prompt; the template healer clears it from a step that asks nothing.
+             */
+            allow_execution_note?: boolean;
         }
         /**
-         * Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.
+         * What the flow does when this automation ends in a failed state. `stop` waits on the failed task until it is retried or skipped. `continue` proceeds to the next task. An absent value means `stop`.
+         */
+        export type AutomationFailurePolicy = "stop" | "continue";
+        /**
+         * Optional. Source of the entity fed into this automation task. If omitted, the entity of the trigger that started the run is used.
          *
          */
         export interface AutomationInputContext {
             /**
-             * `trigger` = workflow's primary (trigger) entity. `task` = entity produced by an upstream task in the graph.
+             * `trigger` = the entity of the trigger that started the run, or of the specific configured trigger named by `trigger_id`. `task` = entity produced by an upstream task in the graph.
              *
              */
             source: "trigger" | "task";
@@ -103,6 +166,27 @@ export declare namespace Components {
              * Required when source is `task`. The id of the upstream task whose output entity should feed this task.
              */
             task_id?: string;
+            /**
+             * Optional when source is `trigger`. Pins the input to one specific configured trigger (primary or additional) by its id. When absent, the trigger that started the run supplies the entity.
+             *
+             */
+            trigger_id?: string;
+        }
+        /**
+         * Optional. What happens to the entity produced by this automation task (the last successful entity-producing action of its automation).
+         *
+         */
+        export interface AutomationOutputContext {
+            /**
+             * When true, the entity this task's automation produces becomes the run's primary context ("main context") when the task completes. Downstream tasks and decisions configured with the default input context then act on that entity. When the task is reverted or reset, the previous primary context is restored.
+             *
+             */
+            set_as_primary?: boolean;
+            /**
+             * When true, the entity this task's automation produces is added to the run's contexts without becoming the main one. `set_as_primary` implies this: an entity cannot be the primary context without being a context. Contexts are unique by entity id, so a task that re-produces an entity already on the run adds nothing.
+             *
+             */
+            attach_to_contexts?: boolean;
         }
         export interface AutomationTask {
             id: string;
@@ -119,6 +203,14 @@ export declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            /**
+             * When true, the task is required and users cannot skip it while the flow is running. Unrelated to `requirements`, which gate when a task becomes enabled. System-driven skips are unaffected — tasks on a not-taken decision branch, and automation tasks whose automation execution itself reports a skipped verdict (e.g. unmet trigger conditions). Only a manual task, or an automation or AI task whose `trigger_mode` is `manual` or absent, can carry it: on a decision or an automatic kind it is normalised to false on create, update and load.
+             */
+            required?: boolean;
+            /**
+             * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) on every create, update and load — a client-supplied array is replaced. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins; an id occurring twice in one task is rejected. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate task completion while the flow is running.
+             */
+            subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
@@ -130,6 +222,7 @@ export declare namespace Components {
             phase_id?: string;
             task_type: TaskType;
             automation_config: /* Configuration for automation execution to run */ AutomationConfig;
+            on_failure?: /* What the flow does when this automation ends in a failed state. `stop` waits on the failed task until it is retried or skipped. `continue` proceeds to the next task. An absent value means `stop`. */ AutomationFailurePolicy;
             trigger_mode?: TriggerMode;
             schedule?: ActionSchedule;
             /**
@@ -239,6 +332,19 @@ export declare namespace Components {
              * Optional detailed description of the workflow's purpose and behavior.
              */
             description?: string;
+            /**
+             * Portal-facing overrides of the flow name. Portal surfaces (the End Customer and Installer portals, and the builder's portal views) show the matching override instead of `name`; an absent key falls back to `name`. Has no effect on execution behaviour.
+             */
+            portal_titles?: {
+                /**
+                 * Flow title shown to end customers.
+                 */
+                ecp?: string;
+                /**
+                 * Flow title shown to installers.
+                 */
+                installer?: string;
+            };
             trigger?: /**
              * example:
              * {
@@ -286,7 +392,15 @@ export declare namespace Components {
              */
             available_in_ecp?: boolean;
             /**
-             * Additional trigger configurations that can also start this flow. Useful for flows that should be startable via multiple methods (e.g., both automation AND manual).
+             * Additional trigger configurations that can also start this flow.
+             * Useful for flows that should be startable via multiple methods
+             * (e.g., both automation AND manual). Each additional trigger may
+             * target its own entity and may carry its own entry edge (an edge
+             * whose `from_id` is the trigger's `id`); without an entry edge of
+             * its own it starts the flow at the primary entry. Triggers must be
+             * complementary — no two triggers on a flow may cover the same
+             * entity and event.
+             *
              */
             additional_triggers?: /**
              * example:
@@ -297,6 +411,10 @@ export declare namespace Components {
              */
             Trigger[];
             phases?: Phase[];
+            /**
+             * Customer-facing progress segments layered on top of the flow graph. Stages are strictly ordered boundaries: the first is anchored at the trigger, every later one is an edge cut (or a legacy entry-node anchor whose in-edges form the cut). The array order is the boundary order and must match the graph. Per-node stage membership is always computed from the graph, never stored, and a run may end in any stage.
+             */
+            stages?: /* A customer-facing progress segment layered on top of the flow graph. Unlike phases (internal task grouping), stages exist to communicate progress to outside users (e.g. end customers) with a title and description. Stages form a strict total order; the array order is the boundary order and must match the graph. The first stage's entry node is always the trigger node. */ Stage[];
             tasks: Task[];
             edges: Edge[];
             closing_reasons?: /* One Closing reason for a workflow */ ClosingReason[];
@@ -332,10 +450,21 @@ export declare namespace Components {
              * When true, this is a linear flow: task enablement is computed at runtime from the graph — a task is enabled only when all of its direct predecessor tasks in its branch are done. This fully overrides any explicit per-task requirements.
              */
             linear?: boolean;
+            context_settings?: /**
+             * Where a flow runs, and where people see it.
+             * A run is ALWAYS visible on the entities it runs on — the entity its trigger supplied and every context it picks up. That is not configurable: it is what running there means, and hiding a run from its own entity is what `visibility: background` is for.
+             * `displays` lists ADDITIONAL entity kinds, reached by relation. It is written once and holds for every trigger: which entry point started a run says how it began, not who the process concerns. A flow that finance must see on the Account must be seen there whether it started from a web form or an inbound email.
+             *
+             */
+            FlowContextSettings;
             /**
              * Non-blocking warnings for configuration limits the flow exceeds. Returned on read (get-flow) and on create/update responses. Size/count limits are soft: a flow exceeding them is still accepted and stored, and the violations are reported here so the UI can surface an informational banner. The flow is still fully editable and usable.
              */
             limit_warnings?: /* A configuration limit that the flow currently exceeds. Returned by the get-flow endpoint and by create/update responses so the UI can show a non-blocking banner. Size/count limit violations never cause a 400 — only structural errors do. The flow remains fully usable; users are encouraged to bring values within the limits. */ FlowLimitWarning[];
+            /**
+             * Persisted preference for how the flow's task automations relate to the flow's `enabled` state. When `true`, task automations always mirror the flow: their enabled state is re-synced on every update and new task automations are created with the flow's current enabled state. When `false`, task automations are managed independently: updates never change their enabled state and new task automations are always created enabled, so a flow that is built or edited while disabled does not accumulate automations that stay off after the flow is re-enabled. When unset, legacy behavior applies: new task automations inherit the flow's enabled state and updates leave existing ones untouched. Safety: on updates that do NOT change `enabled`, the in-sync mode never re-enables automations that were disabled by the system (e.g. infinite-loop protection) — only a deliberate `enabled` flip on the flow re-arms those.
+             */
+            keep_task_automations_in_sync?: boolean;
         }
         export interface DecisionTask {
             id: string;
@@ -352,6 +481,14 @@ export declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            /**
+             * When true, the task is required and users cannot skip it while the flow is running. Unrelated to `requirements`, which gate when a task becomes enabled. System-driven skips are unaffected — tasks on a not-taken decision branch, and automation tasks whose automation execution itself reports a skipped verdict (e.g. unmet trigger conditions). Only a manual task, or an automation or AI task whose `trigger_mode` is `manual` or absent, can carry it: on a decision or an automatic kind it is normalised to false on create, update and load.
+             */
+            required?: boolean;
+            /**
+             * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) on every create, update and load — a client-supplied array is replaced. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins; an id occurring twice in one task is rejected. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate task completion while the flow is running.
+             */
+            subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
@@ -365,7 +502,7 @@ export declare namespace Components {
             trigger_mode: TriggerMode;
             conditions: Condition[];
             /**
-             * When true, all branches with met conditions execute in parallel. When false, only the first branch with a met condition is executed. Defaults to true for backwards compatibility.
+             * When true, all branches with met conditions execute in parallel. When false, only the first branch with a met condition is executed. The default depends on the trigger mode: automatic decisions treat an absent field as true (backwards compatibility), while manual decisions require an explicit true before multiple branches can be selected at execution time (absent = single-select).
              */
             allow_parallel_execution?: boolean;
             schedule?: DelayedSchedule | RelativeSchedule;
@@ -438,6 +575,13 @@ export declare namespace Components {
         }
         export interface Edge {
             id: string;
+            /**
+             * Source node of the edge: a task id, a phase id, the literal `trigger`
+             * (the primary trigger's entry edge), or an additional trigger's `id`
+             * (that trigger's own entry edge — allowing the flow to start at a
+             * different node depending on which trigger fired).
+             *
+             */
             from_id: string;
             to_id?: string | null;
             condition_id?: string;
@@ -445,6 +589,20 @@ export declare namespace Components {
              * Indicates a default case for a decision task. Only decision task edges can have this field and the flow advances using this edge if no conditions are met.
              */
             none_met?: boolean;
+        }
+        /**
+         * Whether the person running a semi-automated send-email step may adjust the email before it goes out, and what they may adjust. Meaningful only on a task a person triggers — the engine's own dispatch has nobody to review — so the template healer clears it from an `automatic` task. With `enabled` false the email is sent exactly as configured and the person only triggers it.
+         */
+        export interface EmailReviewConfig {
+            enabled?: boolean;
+            /**
+             * The assignee may attach documents from the task's entity at execution, in addition to whatever the configured rules match.
+             */
+            allow_document_selection?: boolean;
+            /**
+             * The assignee may rewrite the rendered subject and body. They edit the rendered text, not the template, so the template is unchanged and other flows using it are unaffected.
+             */
+            allow_subject_and_body_edit?: boolean;
         }
         /**
          * describe the requirement for a task to be enabled
@@ -540,7 +698,12 @@ export declare namespace Components {
              */
             id?: string;
             origin?: "trigger" | "action";
-            origin_type?: "entity" | "workflow" | "journey_block";
+            /**
+             * `trigger_source` (with origin `trigger`) marks a "started by" statement: the run's fired trigger is compared against the configured trigger ids in `values` — no entity attribute is involved.
+             * `main_context` (with origin `trigger`, no `id`) marks a statement evaluated against the run's PRIMARY context: the fired trigger's entity, re-bound by any completed task that promotes its output to main context (`output_context.set_as_primary`). `schema` carries the subject's schema for attribute selection only — resolution is by the primary flag, never by schema.
+             *
+             */
+            origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context";
             schema?: string;
             attribute?: string;
             attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address";
@@ -593,6 +756,69 @@ export declare namespace Components {
             };
         }
         /**
+         * Where a flow runs, and where people see it.
+         * A run is ALWAYS visible on the entities it runs on — the entity its trigger supplied and every context it picks up. That is not configurable: it is what running there means, and hiding a run from its own entity is what `visibility: background` is for.
+         * `displays` lists ADDITIONAL entity kinds, reached by relation. It is written once and holds for every trigger: which entry point started a run says how it began, not who the process concerns. A flow that finance must see on the Account must be seen there whether it started from a web form or an inbound email.
+         *
+         */
+        export interface FlowContextSettings {
+            /**
+             * `entity_views` — the flow appears on entity pages, table views and the portal, as decided by `displays`.
+             * `background` — the flow is hidden from every entity view. It runs and records exactly the same way; only the surfaces are suppressed.
+             *
+             */
+            visibility?: "entity_views" | "background";
+            main_context?: /**
+             * Which of a flow's contexts owns the run: the entity conditions, automations and entity sync resolve against by default.
+             * ABSENT means the historical behaviour — the primary trigger's entity. That default exists because it describes every flow built so far, not because the primary trigger is special: a flow with several complementary triggers has no natural primary, which is exactly when stating it explicitly earns its place.
+             * This decides the STARTING main context only. A task with `output_context.set_as_primary` still moves it mid-run; the setting seeds the run and the graph moves it from there.
+             *
+             */
+            MainContextSetting;
+            /**
+             * Additional entity kinds this flow is visible on, beyond the entities it runs on. Empty or absent means it is seen only where it runs.
+             * ORDERED. An entry may anchor (`from`) only on the main context or on an EARLIER entry. That ordering is what makes a cycle (contact anchored on account anchored on contact) unrepresentable rather than something to detect at runtime.
+             *
+             */
+            displays?: /**
+             * One additional entity kind the flow should be visible on, found by relation from the main context or from an earlier entry.
+             * An entity reached this way has no context of its own: it shows the main context's run, and acting on it acts on the main context. Nothing is copied and no second run starts.
+             * There is no `enabled` flag and no entry for an entity the flow already runs on. An entry exists because someone wants the flow seen there; remove it to stop. Whether an entity is a context at all is decided by the trigger, by a task's `output_context`, or by `attach_to_contexts` below — never by a display setting.
+             *
+             */
+            FlowDisplayRule[];
+        }
+        /**
+         * One additional entity kind the flow should be visible on, found by relation from the main context or from an earlier entry.
+         * An entity reached this way has no context of its own: it shows the main context's run, and acting on it acts on the main context. Nothing is copied and no second run starts.
+         * There is no `enabled` flag and no entry for an entity the flow already runs on. An entry exists because someone wants the flow seen there; remove it to stop. Whether an entity is a context at all is decided by the trigger, by a task's `output_context`, or by `attach_to_contexts` below — never by a display setting.
+         *
+         */
+        export interface FlowDisplayRule {
+            id: string;
+            /**
+             * The schema of the entity this rule is about.
+             */
+            entity_schema: string;
+            from?: /**
+             * Where an entry starts looking. Absent means `main_context`.
+             * A ROLE, not a schema: an entry anchored on `main_context` follows the primary when a task promotes another entity, where naming a schema would freeze it on the old one.
+             *
+             */
+            FlowRuleAnchor;
+            /**
+             * Relation `_tags` to match (`family:label` form supported). Absent or empty matches every relation of `entity_schema`.
+             *
+             */
+            relation_labels?: string[];
+            /**
+             * Governs CONTEXT. When true the matched entity is added to the run's contexts, so later rules can anchor on it and conditions, entity sync and task automations can address it. Resolved by the ENGINE — at start and whenever the contexts change — never as a side effect of rendering, which would make a run's context set depend on who opened which page.
+             * A context must resolve to one entity: when several match, none is attached. Display is unaffected and still shows all of them.
+             *
+             */
+            attach_to_contexts?: boolean;
+        }
+        /**
          * A configuration limit that the flow currently exceeds. Returned by the get-flow endpoint and by create/update responses so the UI can show a non-blocking banner. Size/count limit violations never cause a 400 — only structural errors do. The flow remains fully usable; users are encouraged to bring values within the limits.
          */
         export interface FlowLimitWarning {
@@ -628,6 +854,21 @@ export declare namespace Components {
             path: any[];
         }
         /**
+         * Where an entry starts looking. Absent means `main_context`.
+         * A ROLE, not a schema: an entry anchored on `main_context` follows the primary when a task promotes another entity, where naming a schema would freeze it on the old one.
+         *
+         */
+        export type FlowRuleAnchor = /**
+         * Where an entry starts looking. Absent means `main_context`.
+         * A ROLE, not a schema: an entry anchored on `main_context` follows the primary when a task promotes another entity, where naming a schema would freeze it on the old one.
+         *
+         */
+        /* The run's primary context, whatever it currently is. */ MainContextAnchor | /**
+         * An earlier entry in `displays`, by its id: this entry searches from whatever that one matched. Chaining ticket -> contact -> account this way keeps both hops DISPLAY-only; making the contact a real context first is a separate decision (`attach_to_contexts`), not a prerequisite for reaching the account.
+         *
+         */
+        RuleAnchor;
+        /**
          * Base schema for V2 flow templates. A flow template defines the structure of a workflow
          * including phases, tasks, edges, triggers, and other configuration. Flow templates serve
          * as blueprints that can be instantiated as flow executions.
@@ -650,6 +891,19 @@ export declare namespace Components {
              * Optional detailed description of the workflow's purpose and behavior.
              */
             description?: string;
+            /**
+             * Portal-facing overrides of the flow name. Portal surfaces (the End Customer and Installer portals, and the builder's portal views) show the matching override instead of `name`; an absent key falls back to `name`. Has no effect on execution behaviour.
+             */
+            portal_titles?: {
+                /**
+                 * Flow title shown to end customers.
+                 */
+                ecp?: string;
+                /**
+                 * Flow title shown to installers.
+                 */
+                installer?: string;
+            };
             trigger?: /**
              * example:
              * {
@@ -697,7 +951,15 @@ export declare namespace Components {
              */
             available_in_ecp?: boolean;
             /**
-             * Additional trigger configurations that can also start this flow. Useful for flows that should be startable via multiple methods (e.g., both automation AND manual).
+             * Additional trigger configurations that can also start this flow.
+             * Useful for flows that should be startable via multiple methods
+             * (e.g., both automation AND manual). Each additional trigger may
+             * target its own entity and may carry its own entry edge (an edge
+             * whose `from_id` is the trigger's `id`); without an entry edge of
+             * its own it starts the flow at the primary entry. Triggers must be
+             * complementary — no two triggers on a flow may cover the same
+             * entity and event.
+             *
              */
             additional_triggers?: /**
              * example:
@@ -708,6 +970,10 @@ export declare namespace Components {
              */
             Trigger[];
             phases?: Phase[];
+            /**
+             * Customer-facing progress segments layered on top of the flow graph. Stages are strictly ordered boundaries: the first is anchored at the trigger, every later one is an edge cut (or a legacy entry-node anchor whose in-edges form the cut). The array order is the boundary order and must match the graph. Per-node stage membership is always computed from the graph, never stored, and a run may end in any stage.
+             */
+            stages?: /* A customer-facing progress segment layered on top of the flow graph. Unlike phases (internal task grouping), stages exist to communicate progress to outside users (e.g. end customers) with a title and description. Stages form a strict total order; the array order is the boundary order and must match the graph. The first stage's entry node is always the trigger node. */ Stage[];
             tasks: Task[];
             edges: Edge[];
             closing_reasons?: /* One Closing reason for a workflow */ ClosingReason[];
@@ -743,10 +1009,21 @@ export declare namespace Components {
              * When true, this is a linear flow: task enablement is computed at runtime from the graph — a task is enabled only when all of its direct predecessor tasks in its branch are done. This fully overrides any explicit per-task requirements.
              */
             linear?: boolean;
+            context_settings?: /**
+             * Where a flow runs, and where people see it.
+             * A run is ALWAYS visible on the entities it runs on — the entity its trigger supplied and every context it picks up. That is not configurable: it is what running there means, and hiding a run from its own entity is what `visibility: background` is for.
+             * `displays` lists ADDITIONAL entity kinds, reached by relation. It is written once and holds for every trigger: which entry point started a run says how it began, not who the process concerns. A flow that finance must see on the Account must be seen there whether it started from a web form or an inbound email.
+             *
+             */
+            FlowContextSettings;
             /**
              * Non-blocking warnings for configuration limits the flow exceeds. Returned on read (get-flow) and on create/update responses. Size/count limits are soft: a flow exceeding them is still accepted and stored, and the violations are reported here so the UI can surface an informational banner. The flow is still fully editable and usable.
              */
             limit_warnings?: /* A configuration limit that the flow currently exceeds. Returned by the get-flow endpoint and by create/update responses so the UI can show a non-blocking banner. Size/count limit violations never cause a 400 — only structural errors do. The flow remains fully usable; users are encouraged to bring values within the limits. */ FlowLimitWarning[];
+            /**
+             * Persisted preference for how the flow's task automations relate to the flow's `enabled` state. When `true`, task automations always mirror the flow: their enabled state is re-synced on every update and new task automations are created with the flow's current enabled state. When `false`, task automations are managed independently: updates never change their enabled state and new task automations are always created enabled, so a flow that is built or edited while disabled does not accumulate automations that stay off after the flow is re-enabled. When unset, legacy behavior applies: new task automations inherit the flow's enabled state and updates leave existing ones untouched. Safety: on updates that do NOT change `enabled`, the in-sync mode never re-enables automations that were disabled by the system (e.g. infinite-loop protection) — only a deliberate `enabled` flip on the flow re-arms those.
+             */
+            keep_task_automations_in_sync?: boolean;
         }
         /**
          * Base schema for V2 flow templates. A flow template defines the structure of a workflow
@@ -771,6 +1048,19 @@ export declare namespace Components {
              * Optional detailed description of the workflow's purpose and behavior.
              */
             description?: string;
+            /**
+             * Portal-facing overrides of the flow name. Portal surfaces (the End Customer and Installer portals, and the builder's portal views) show the matching override instead of `name`; an absent key falls back to `name`. Has no effect on execution behaviour.
+             */
+            portal_titles?: {
+                /**
+                 * Flow title shown to end customers.
+                 */
+                ecp?: string;
+                /**
+                 * Flow title shown to installers.
+                 */
+                installer?: string;
+            };
             trigger?: /**
              * example:
              * {
@@ -818,7 +1108,15 @@ export declare namespace Components {
              */
             available_in_ecp?: boolean;
             /**
-             * Additional trigger configurations that can also start this flow. Useful for flows that should be startable via multiple methods (e.g., both automation AND manual).
+             * Additional trigger configurations that can also start this flow.
+             * Useful for flows that should be startable via multiple methods
+             * (e.g., both automation AND manual). Each additional trigger may
+             * target its own entity and may carry its own entry edge (an edge
+             * whose `from_id` is the trigger's `id`); without an entry edge of
+             * its own it starts the flow at the primary entry. Triggers must be
+             * complementary — no two triggers on a flow may cover the same
+             * entity and event.
+             *
              */
             additional_triggers?: /**
              * example:
@@ -829,6 +1127,10 @@ export declare namespace Components {
              */
             Trigger[];
             phases?: Phase[];
+            /**
+             * Customer-facing progress segments layered on top of the flow graph. Stages are strictly ordered boundaries: the first is anchored at the trigger, every later one is an edge cut (or a legacy entry-node anchor whose in-edges form the cut). The array order is the boundary order and must match the graph. Per-node stage membership is always computed from the graph, never stored, and a run may end in any stage.
+             */
+            stages?: /* A customer-facing progress segment layered on top of the flow graph. Unlike phases (internal task grouping), stages exist to communicate progress to outside users (e.g. end customers) with a title and description. Stages form a strict total order; the array order is the boundary order and must match the graph. The first stage's entry node is always the trigger node. */ Stage[];
             tasks: Task[];
             edges: Edge[];
             closing_reasons?: /* One Closing reason for a workflow */ ClosingReason[];
@@ -864,10 +1166,21 @@ export declare namespace Components {
              * When true, this is a linear flow: task enablement is computed at runtime from the graph — a task is enabled only when all of its direct predecessor tasks in its branch are done. This fully overrides any explicit per-task requirements.
              */
             linear?: boolean;
+            context_settings?: /**
+             * Where a flow runs, and where people see it.
+             * A run is ALWAYS visible on the entities it runs on — the entity its trigger supplied and every context it picks up. That is not configurable: it is what running there means, and hiding a run from its own entity is what `visibility: background` is for.
+             * `displays` lists ADDITIONAL entity kinds, reached by relation. It is written once and holds for every trigger: which entry point started a run says how it began, not who the process concerns. A flow that finance must see on the Account must be seen there whether it started from a web form or an inbound email.
+             *
+             */
+            FlowContextSettings;
             /**
              * Non-blocking warnings for configuration limits the flow exceeds. Returned on read (get-flow) and on create/update responses. Size/count limits are soft: a flow exceeding them is still accepted and stored, and the violations are reported here so the UI can surface an informational banner. The flow is still fully editable and usable.
              */
             limit_warnings?: /* A configuration limit that the flow currently exceeds. Returned by the get-flow endpoint and by create/update responses so the UI can show a non-blocking banner. Size/count limit violations never cause a 400 — only structural errors do. The flow remains fully usable; users are encouraged to bring values within the limits. */ FlowLimitWarning[];
+            /**
+             * Persisted preference for how the flow's task automations relate to the flow's `enabled` state. When `true`, task automations always mirror the flow: their enabled state is re-synced on every update and new task automations are created with the flow's current enabled state. When `false`, task automations are managed independently: updates never change their enabled state and new task automations are always created enabled, so a flow that is built or edited while disabled does not accumulate automations that stay off after the flow is re-enabled. When unset, legacy behavior applies: new task automations inherit the flow's enabled state and updates leave existing ones untouched. Safety: on updates that do NOT change `enabled`, the in-sync mode never re-enables automations that were disabled by the system (e.g. infinite-loop protection) — only a deliberate `enabled` flip on the flow re-arms those.
+             */
+            keep_task_automations_in_sync?: boolean;
         }
         /**
          * Short unique id (length 8) to identify the Flow Template.
@@ -896,6 +1209,91 @@ export declare namespace Components {
              */
             entity_schema?: string;
         }
+        export interface JourneyContextParameter {
+            /**
+             * The journey context parameter key (paramKey in the journey's contextSchema)
+             */
+            key: string;
+            /**
+             * The value to pass for the parameter when launching the journey
+             */
+            value: string;
+        }
+        /**
+         * One place a flow template task presets one of the requested context parameters.
+         */
+        export interface JourneyContextUsage {
+            kind: "workflow-task";
+            resource: {
+                type: "workflow_template";
+                /**
+                 * Flow template id.
+                 */
+                id: string;
+                /**
+                 * Flow template name, when the template has one.
+                 */
+                name?: string;
+            };
+            /**
+             * Present only when the matching task carries an id and/or a name.
+             */
+            location?: {
+                task_id?: string;
+                task_name?: string;
+            };
+            matched_as: {
+                dialect: "name";
+                /**
+                 * The bare parameter key, e.g. `origin` — never a `journey_context.origin`-style prefixed token. Unlike every sibling adapter, this service stores the reference structurally in a typed field (`tasks[].journey.context_parameters[].key`), so the prefixed path string never appears in the stored record; `dialect: name` already tells the caller how to interpret `token`.
+                 */
+                token: string;
+                /**
+                 * Debugging path into the flow template where the match was found, e.g. `tasks[0].journey.context_parameters[1].key`. Not stable across edits to the template.
+                 */
+                at: string;
+            };
+            /**
+             * Omitted when the underlying flow template has no id: a link built from an empty id could not resolve, so none is included. The usage row itself is still reported.
+             */
+            link_hint?: {
+                route: "workflows-hub-flow";
+                params: {
+                    template_id: string;
+                };
+            };
+        }
+        /**
+         * Request payload for getJourneyContextUsages.
+         */
+        export interface JourneyContextUsagesReq {
+            /**
+             * Journey whose context parameters are being checked for usage.
+             */
+            journey_id: string;
+            /**
+             * Context parameter keys to look for, as plain strings.
+             */
+            param_keys: string[];
+            /**
+             * Accepted and ignored. This service stores context references by name only; the field keeps one request shape across every adapter in this feature.
+             */
+            param_ids?: string[];
+        }
+        /**
+         * Response payload for getJourneyContextUsages.
+         */
+        export interface JourneyContextUsagesResp {
+            usages: /* One place a flow template task presets one of the requested context parameters. */ JourneyContextUsage[];
+            /**
+             * `partial` means the usages list hit its cap and the scan stopped there, before every scannable flow template in the org was examined. `ok` means the scan reached the end of the scannable population and returned every match found there — it does NOT mean every flow template in the org was examined: the underlying query only returns `version = v3` records, so legacy v1/v2 templates never enter the scan, and any record that fails to normalize is silently skipped and logged rather than failing the whole lookup.
+             */
+            status: "ok" | "partial";
+            /**
+             * Count of flow templates examined. This is every scannable flow template in the org, not only templates bound to this journey: the underlying query has no server-side journey filter, so it counts the org's whole scannable flow-template population, up to wherever the scan stopped if `status` is `partial`. "Scannable" excludes legacy v1/v2 records (the query filters to `version = v3`) and any record that fails to normalize (skipped and logged rather than failing the lookup), so this can be lower than the org's true total flow-template count.
+             */
+            scanned: number;
+        }
         export interface JourneySubmissionTrigger {
             id?: string;
             type: "journey_submission";
@@ -908,6 +1306,31 @@ export declare namespace Components {
              */
             journey_name?: string;
             automation_id?: string;
+        }
+        /**
+         * The run's primary context, whatever it currently is.
+         */
+        export interface MainContextAnchor {
+            role: "main_context";
+        }
+        /**
+         * Which of a flow's contexts owns the run: the entity conditions, automations and entity sync resolve against by default.
+         * ABSENT means the historical behaviour — the primary trigger's entity. That default exists because it describes every flow built so far, not because the primary trigger is special: a flow with several complementary triggers has no natural primary, which is exactly when stating it explicitly earns its place.
+         * This decides the STARTING main context only. A task with `output_context.set_as_primary` still moves it mid-run; the setting seeds the run and the graph moves it from there.
+         *
+         */
+        export interface MainContextSetting {
+            /**
+             * Entity schema of the main context. It need not be a schema any trigger provides: a run started on another context resolves it from that entity's relations.
+             */
+            schema: string;
+            /**
+             * Optional narrowing for that resolution. A run started on a context of another schema looks through the starting entity's relations for one of `schema`; these `_tags` narrow which relations count, for when schema alone is ambiguous.
+             * Several matches: the FIRST is taken. Unlike an attaching display rule — which attaches nothing when several match, since binding an arbitrary entity as a surface has no justification — a run needs a primary to function at all, so a deterministic pick beats none.
+             * No match: the run starts with the entity it was started on as primary, and records that the configured main context did not resolve. A manual start is never blocked because a relation happens to be missing.
+             *
+             */
+            relation_labels?: string[];
         }
         export interface ManualTask {
             id: string;
@@ -924,6 +1347,14 @@ export declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            /**
+             * When true, the task is required and users cannot skip it while the flow is running. Unrelated to `requirements`, which gate when a task becomes enabled. System-driven skips are unaffected — tasks on a not-taken decision branch, and automation tasks whose automation execution itself reports a skipped verdict (e.g. unmet trigger conditions). Only a manual task, or an automation or AI task whose `trigger_mode` is `manual` or absent, can carry it: on a decision or an automatic kind it is normalised to false on create, update and load.
+             */
+            required?: boolean;
+            /**
+             * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) on every create, update and load — a client-supplied array is replaced. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins; an id occurring twice in one task is rejected. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate task completion while the flow is running.
+             */
+            subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
@@ -989,6 +1420,17 @@ export declare namespace Components {
                 attribute?: string;
             };
         }
+        /**
+         * An earlier entry in `displays`, by its id: this entry searches from whatever that one matched. Chaining ticket -> contact -> account this way keeps both hops DISPLAY-only; making the contact a real context first is a separate decision (`attach_to_contexts`), not a prerequisite for reaching the account.
+         *
+         */
+        export interface RuleAnchor {
+            role: "rule";
+            /**
+             * Id of an entry that appears earlier in `displays`.
+             */
+            rule_id: string;
+        }
         export interface SearchFlowTemplates {
             name?: string;
             definition_id?: string;
@@ -996,7 +1438,7 @@ export declare namespace Components {
             enabled?: boolean;
             from?: number;
             size?: number;
-            sort_by?: "created_at" | "updated_at";
+            sort_by?: "created_at" | "updated_at" | "name" | "enabled" | "id";
             sort_order?: "asc" | "desc";
         }
         /**
@@ -1026,6 +1468,61 @@ export declare namespace Components {
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
+        }
+        /**
+         * A customer-facing progress segment layered on top of the flow graph. Unlike phases (internal task grouping), stages exist to communicate progress to outside users (e.g. end customers) with a title and description. Stages form a strict total order; the array order is the boundary order and must match the graph. The first stage's entry node is always the trigger node.
+         */
+        export interface Stage {
+            /**
+             * Stable unique identifier for the stage.
+             */
+            id: string;
+            /**
+             * User-facing stage title.
+             */
+            name: string;
+            /**
+             * Customer-facing description of what happens in this stage.
+             */
+            description?: string;
+            /**
+             * Id of the graph node (task, phase, or the trigger sentinel) at which this stage begins; its incoming edges form the stage boundary, so no path may reach the node's successors without passing it. The first stage's entry_node_id is the trigger sentinel. Exactly one of entry_node_id / cut_edge_ids per stage; when both are present, cut_edge_ids wins.
+             */
+            entry_node_id?: string;
+            /**
+             * Edge-cut boundary, for stages that begin inside branching regions: the stage begins where these edges are crossed — one cut edge per branch that continues past the boundary, so that no path crosses it twice and none bypasses it. Branches that end before the boundary need no cut; a run may end in any stage. Cut edges may not be loop edges, end edges, or phase-internal edges. Node membership is derived by counting crossed boundaries, never stored.
+             */
+            cut_edge_ids?: string[];
+            /**
+             * Optional stage accent color, a key from a fixed palette.
+             */
+            color?: string;
+            /**
+             * Portal-facing overrides of the stage name. Portal surfaces show the matching override instead of `name`; an absent key falls back to `name`.
+             */
+            portal_names?: {
+                /**
+                 * Stage name shown to end customers.
+                 */
+                ecp?: string;
+                /**
+                 * Stage name shown to installers.
+                 */
+                installer?: string;
+            };
+            /**
+             * Portal-facing overrides of the stage description. Portal surfaces show the matching override instead of `description`; an absent key falls back to `description`.
+             */
+            portal_descriptions?: {
+                /**
+                 * Stage description shown to end customers.
+                 */
+                ecp?: string;
+                /**
+                 * Stage description shown to installers.
+                 */
+                installer?: string;
+            };
         }
         export interface Statement {
             id: string;
@@ -1099,9 +1596,22 @@ export declare namespace Components {
             journeyId?: string;
             name?: string;
             /**
+             * Portal-facing label that replaces the default "Start now" button shown for this task's linked journey in the End Customer Portal / Installer Portal. Blank or absent means the portal keeps its own translated default.
+             */
+            portal_button_label?: string;
+            /**
              * If true, the task be auto completed when the journey is completed. By default it is true.
              */
             complete_task_automatically?: boolean;
+            /**
+             * When true, the task cannot be completed while the flow is running until the linked journey was actually submitted. The execution service verifies the submission server-side via the correlation claims in the submission entity's journey_context. Manual tasks only: on any other task kind, or on a manual task with a delayed or relative schedule, the template is rejected (400); when no journey is linked the flag is dropped on create, update and load.
+             */
+            journey_submission_required?: boolean;
+            /**
+             * Values preset by the flow author for context parameters the journey declares in its contextSchema (String/Number parameters only, not entity-typed ones). Passed as journey context when the journey is launched from the task, overriding the default value of the parameter (e.g. `origin`).
+             */
+            context_parameters?: JourneyContextParameter[];
+            ai_prefill?: /* AI extraction + prefill configuration for the attached journey (Flows v2 only) */ AiPrefillConfig;
         }
         /**
          * describe the requirement for step enablement
@@ -1112,6 +1622,27 @@ export declare namespace Components {
             condition: "CLOSED";
         }
         export type StepType = "MANUAL" | "AUTOMATION";
+        /**
+         * One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup.
+         */
+        export interface Subtask {
+            /**
+             * Stable id, mirrored as data-subtask-id in the description markup
+             */
+            id: string;
+            /**
+             * Plain-text snapshot of the checklist item label
+             */
+            name?: string;
+            /**
+             * Which description field the item lives in
+             */
+            party: "description" | "ecp" | "installer" | "partner";
+            /**
+             * When true, the task cannot be completed while the flow is running until this item is checked
+             */
+            required?: boolean;
+        }
         export type Task = ManualTask | AutomationTask | DecisionTask | AiAgentTask;
         export interface TaskBase {
             id: string;
@@ -1128,6 +1659,14 @@ export declare namespace Components {
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
             requirements?: /* describe the requirement for a task to be enabled */ EnableRequirement[];
+            /**
+             * When true, the task is required and users cannot skip it while the flow is running. Unrelated to `requirements`, which gate when a task becomes enabled. System-driven skips are unaffected — tasks on a not-taken decision branch, and automation tasks whose automation execution itself reports a skipped verdict (e.g. unmet trigger conditions). Only a manual task, or an automation or AI task whose `trigger_mode` is `manual` or absent, can carry it: on a decision or an automatic kind it is normalised to false on create, update and load.
+             */
+            required?: boolean;
+            /**
+             * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) on every create, update and load — a client-supplied array is replaced. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins; an id occurring twice in one task is rejected. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate task completion while the flow is running.
+             */
+            subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
@@ -1324,6 +1863,7 @@ export declare namespace Paths {
             Components.Schemas.WorkflowDefinition;
             export type $400 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
             export type $401 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $409 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
             export type $500 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
         }
     }
@@ -1729,6 +2269,9 @@ export interface OperationMethods {
    * that define the structure of the workflow. Once created, the definition can be used
    * to start workflow executions.
    * 
+   * Deprecated: from 17 October 2026 00:00 Europe/Berlin this endpoint answers 409 —
+   * create a flow via `POST /v2/flows/templates` instead.
+   * 
    */
   'createDefinition'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1966,6 +2509,9 @@ export interface PathsDictionary {
      * that define the structure of the workflow. Once created, the definition can be used
      * to start workflow executions.
      * 
+     * Deprecated: from 17 October 2026 00:00 Europe/Berlin this endpoint answers 409 —
+     * create a flow via `POST /v2/flows/templates` instead.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -2197,8 +2743,13 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type AgentConfig = Components.Schemas.AgentConfig;
 export type AiAgentTask = Components.Schemas.AiAgentTask;
+export type AiPrefillConfig = Components.Schemas.AiPrefillConfig;
+export type AiPrefillExtractionField = Components.Schemas.AiPrefillExtractionField;
+export type AiPrefillMapping = Components.Schemas.AiPrefillMapping;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
+export type AutomationFailurePolicy = Components.Schemas.AutomationFailurePolicy;
 export type AutomationInputContext = Components.Schemas.AutomationInputContext;
+export type AutomationOutputContext = Components.Schemas.AutomationOutputContext;
 export type AutomationTask = Components.Schemas.AutomationTask;
 export type AutomationTrigger = Components.Schemas.AutomationTrigger;
 export type ChangeReasonStatusReq = Components.Schemas.ChangeReasonStatusReq;
@@ -2217,11 +2768,15 @@ export type DueDateConfig = Components.Schemas.DueDateConfig;
 export type DynamicDueDate = Components.Schemas.DynamicDueDate;
 export type ECPDetails = Components.Schemas.ECPDetails;
 export type Edge = Components.Schemas.Edge;
+export type EmailReviewConfig = Components.Schemas.EmailReviewConfig;
 export type EnableRequirement = Components.Schemas.EnableRequirement;
 export type EntitySync = Components.Schemas.EntitySync;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type EvaluationSource = Components.Schemas.EvaluationSource;
+export type FlowContextSettings = Components.Schemas.FlowContextSettings;
+export type FlowDisplayRule = Components.Schemas.FlowDisplayRule;
 export type FlowLimitWarning = Components.Schemas.FlowLimitWarning;
+export type FlowRuleAnchor = Components.Schemas.FlowRuleAnchor;
 export type FlowTemplate = Components.Schemas.FlowTemplate;
 export type FlowTemplateBase = Components.Schemas.FlowTemplateBase;
 export type FlowTemplateId = Components.Schemas.FlowTemplateId;
@@ -2229,7 +2784,13 @@ export type FlowTemplatesList = Components.Schemas.FlowTemplatesList;
 export type ImmediateSchedule = Components.Schemas.ImmediateSchedule;
 export type ItemType = Components.Schemas.ItemType;
 export type JourneyAutomationTrigger = Components.Schemas.JourneyAutomationTrigger;
+export type JourneyContextParameter = Components.Schemas.JourneyContextParameter;
+export type JourneyContextUsage = Components.Schemas.JourneyContextUsage;
+export type JourneyContextUsagesReq = Components.Schemas.JourneyContextUsagesReq;
+export type JourneyContextUsagesResp = Components.Schemas.JourneyContextUsagesResp;
 export type JourneySubmissionTrigger = Components.Schemas.JourneySubmissionTrigger;
+export type MainContextAnchor = Components.Schemas.MainContextAnchor;
+export type MainContextSetting = Components.Schemas.MainContextSetting;
 export type ManualTask = Components.Schemas.ManualTask;
 export type ManualTrigger = Components.Schemas.ManualTrigger;
 export type MaxAllowedLimit = Components.Schemas.MaxAllowedLimit;
@@ -2237,14 +2798,17 @@ export type Operator = Components.Schemas.Operator;
 export type PartnerDetails = Components.Schemas.PartnerDetails;
 export type Phase = Components.Schemas.Phase;
 export type RelativeSchedule = Components.Schemas.RelativeSchedule;
+export type RuleAnchor = Components.Schemas.RuleAnchor;
 export type SearchFlowTemplates = Components.Schemas.SearchFlowTemplates;
 export type Section = Components.Schemas.Section;
+export type Stage = Components.Schemas.Stage;
 export type Statement = Components.Schemas.Statement;
 export type Step = Components.Schemas.Step;
 export type StepDescription = Components.Schemas.StepDescription;
 export type StepJourney = Components.Schemas.StepJourney;
 export type StepRequirement = Components.Schemas.StepRequirement;
 export type StepType = Components.Schemas.StepType;
+export type Subtask = Components.Schemas.Subtask;
 export type Task = Components.Schemas.Task;
 export type TaskBase = Components.Schemas.TaskBase;
 export type TaskType = Components.Schemas.TaskType;
