@@ -138,6 +138,18 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     description: 'A direct-by-id entity reference points at an entity that does not exist or has a different schema',
   },
   ENTITY_UPDATED: { level: 'success', description: 'An existing entity was updated in epilot' },
+  ENV_VAR_REF_JSONATA_FAILED: {
+    level: 'error',
+    description: 'The JSONata expression of an env_var_ref field failed to evaluate, so the field was skipped',
+  },
+  ENV_VAR_REF_LOOKUP_FAILED: {
+    level: 'error',
+    description: 'The environment variables could not be looked up for an env_var_ref field, so the field was skipped',
+  },
+  ENV_VAR_REF_NOT_FOUND: {
+    level: 'warning',
+    description: 'The environment variable an env_var_ref field points at does not exist, so the field was left unset',
+  },
   EVENT_NOT_CONFIGURED: { level: 'error', description: 'No mapping configuration found for this event type' },
   EXTERNAL_API_ERROR: { level: 'error', description: 'An external API returned an error' },
   EXTERNAL_ERROR: {
@@ -240,6 +252,16 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
       'One or more meter readings were created or updated — emitted once per batch, not per reading (reading_count and external_ids in details)',
   },
   METERING_API_ERROR: { level: 'error', description: 'The metering API returned an error' },
+  MISSING_METER_COUNTER_UNIQUE_IDS: {
+    level: 'error',
+    description:
+      'A meter reading was skipped because the event did not contain the unique IDs configured to identify its meter counter',
+  },
+  MISSING_METER_UNIQUE_IDS: {
+    level: 'error',
+    description:
+      'A meter reading was skipped because the event did not contain the unique IDs configured to identify its meter',
+  },
   MISSING_REQUIRED_PARAM: { level: 'error', description: 'A required parameter is missing from the request' },
   MISSING_UNIQUE_IDENTIFIERS: {
     level: 'error',
@@ -274,9 +296,32 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
       'An event arrived after the poll consumer had already received later events, so it was placed at the end of the stream instead of at its event time — it is delivered, but out of event-time order',
   },
   OAUTH2_TOKEN_FAILURE: { level: 'error', description: 'Failed to obtain an OAuth2 access token' },
+  ORG_DROPPED: {
+    level: 'info',
+    description:
+      'Events from this organization are configured to be dropped, so the event was consumed without being processed',
+  },
   PAYLOAD_TOO_LARGE: {
     level: 'error',
     description: 'The payload exceeded the maximum size accepted by the receiving system',
+  },
+  PORTAL_REF_AMBIGUOUS: {
+    level: 'warning',
+    description:
+      'Several portals matched the portal_ref filter and the oldest one was used. Narrow the filter so it matches exactly one portal',
+  },
+  PORTAL_REF_JSONATA_FAILED: {
+    level: 'error',
+    description: 'The JSONata expression of a portal_ref field failed to evaluate, so the field was skipped',
+  },
+  PORTAL_REF_LOOKUP_FAILED: {
+    level: 'error',
+    description: 'The portals could not be looked up for a portal_ref field, so the field was skipped',
+  },
+  PORTAL_REF_NO_MATCH: {
+    level: 'warning',
+    description:
+      'No portal matched the portal_ref filter, so the field was left unset. Check the filter against the portals in this organization',
   },
   PROCESSING_STATE_LIMIT: {
     level: 'error',
@@ -286,6 +331,11 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   PRUNE_SCOPE_COMPLETED: { level: 'success', description: 'Scope pruning completed successfully' },
   PRUNE_SCOPE_PARTIAL_FAILURE: { level: 'error', description: 'Scope pruning completed with some failures' },
   RECURSION_DEPTH_EXCEEDED: { level: 'error', description: 'Maximum recursion depth was exceeded during processing' },
+  RELATION_MISSING_UNIQUE_IDS: {
+    level: 'warning',
+    description:
+      "A relation was skipped because the event did not contain all unique IDs of the relation's target. The entity was still written, without that relation — check that the mapping sends every unique ID the relation is configured with",
+  },
   RELATION_REF_ITEM_NOT_FOUND: {
     level: 'error',
     description:
@@ -310,7 +360,23 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   SECURE_PROXY_IP_BLOCKED: { level: 'error', description: 'The target IP address is blocked' },
   SECURE_PROXY_IP_NOT_ALLOWED: { level: 'error', description: 'The target IP address is not in the allowlist' },
   SECURE_PROXY_NOT_FOUND: { level: 'error', description: 'The secure proxy use case was not found' },
+  SECURE_PROXY_OK: { level: 'success', description: 'The secure proxy reached the target and returned its answer' },
   SECURE_PROXY_UNAVAILABLE: { level: 'error', description: 'Secure proxy service is unavailable' },
+  SHARING_FAILED: {
+    level: 'error',
+    description:
+      'Sharing the entity with its partner orgs kept failing with a temporary error and the retries were used up. The entity itself was written; the next event for it syncs its sharing again',
+  },
+  SHARING_PARTNER_NOT_CONNECTED: {
+    level: 'warning',
+    description:
+      'The entity was written but not shared with the partner orgs in partner_org_ids: this organization has no partnership with them. Set up the partnership, or fix the partner_org_id in the mapping',
+  },
+  SHARING_REJECTED: {
+    level: 'warning',
+    description:
+      'The entity was written but the sharing service rejected sharing it with its partner orgs (details.status). Check the sharing configuration of the partners in partner_org_ids',
+  },
   SIGNATURE_VERIFICATION_FAILED: { level: 'error', description: 'Request signature could not be verified' },
   SIGNATURE_VERIFICATION_UNAVAILABLE: {
     level: 'error',
@@ -337,12 +403,26 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     level: 'error',
     description: 'The unique ID attribute is not defined in the entity schema',
   },
+  UNIQUE_ID_TYPE_DERIVATION_FAILED: {
+    level: 'warning',
+    description:
+      "Direct mode could not derive a unique ID's type from the entity schema, so the value was used exactly as sent",
+  },
   UNKNOWN_ERROR: { level: 'error', description: 'An unexpected error occurred during processing' },
   USE_CASE_DISABLED: { level: 'error', description: 'The use case is currently disabled' },
   USE_CASE_INVALID_TYPE: { level: 'error', description: 'The use case type is invalid or unsupported' },
   USE_CASE_MISSING_CONFIG: { level: 'error', description: 'The use case is missing required configuration' },
   USE_CASE_NOT_FOUND: { level: 'error', description: 'The use case could not be found' },
   WEBHOOK_DELIVERED: { level: 'success', description: 'Webhook was delivered successfully' },
+  WEBHOOK_DELIVERY_FAILED: {
+    level: 'error',
+    description:
+      "The webhook could not be delivered and the target returned no HTTP status (for example a connection or timeout error). The webhook service's own error code is in the event detail",
+  },
+  WEBHOOK_SKIPPED: {
+    level: 'info',
+    description: 'The webhook was not delivered because its filters did not match the event',
+  },
 };
 
 /**
