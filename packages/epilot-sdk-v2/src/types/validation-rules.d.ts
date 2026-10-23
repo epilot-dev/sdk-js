@@ -156,19 +156,24 @@ export declare namespace Components {
          * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
          * in public journeys the dependent conditions are skipped.
          *
+         * A hook may declare value inputs (`contexts` entries `{ "type": "value", "name", "value_type" }`)
+         * besides the entities it receives. `inputs` supplies them from rule parameters, which the
+         * consumer binds like any other parameter and sends to the hook as `Context.<name>`.
+         *
          */
         ExternalValue | /**
-         * A comparison value supplied by the surface that evaluates the rule, identified by a name
-         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consuming surface
-         * binds the name to a source of its own - a journey binds it to the value of another block -
-         * and resolves it at evaluation time, so the rule never references the surface's objects
-         * and stays reusable across journeys and forms.
+         * A comparison value supplied by the consumer that evaluates the rule, identified by a name
+         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the
+         * name to a source of its own - a journey binds it to the value of another block - and
+         * resolves it at evaluation time, so the rule never references the consumer's objects and
+         * stays reusable across journeys and forms.
          *
-         * The kind a parameter is compared as follows from the field it sits in: `number`, `text`
-         * or `date` for comparison values, range bounds, adjustment amounts and relative date
-         * offsets, or a number, string or boolean as an `applies_when` value. One name is compared
-         * as one kind throughout a rule; a rule using a name as two kinds is rejected at write time.
-         * A parameter the surface leaves unbound or empty leaves the comparison unresolved.
+         * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
+         * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
+         * number, string or boolean as an `applies_when` value, or the `value_type` of the External
+         * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+         * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
+         * the consumer leaves unbound or empty leaves the comparison unresolved.
          *
          */
         ParameterValue | /* A lower and upper bound for range operators (between, dateBetween, lengthBetween). Bounds are inclusive. */ RangeValue | /* No comparison value - used by unary operators such as notInFuture / notInPast. */ NoValue;
@@ -405,6 +410,10 @@ export declare namespace Components {
          * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
          * in public journeys the dependent conditions are skipped.
          *
+         * A hook may declare value inputs (`contexts` entries `{ "type": "value", "name", "value_type" }`)
+         * besides the entities it receives. `inputs` supplies them from rule parameters, which the
+         * consumer binds like any other parameter and sends to the hook as `Context.<name>`.
+         *
          */
         export interface ExternalValue {
             source: "external";
@@ -420,6 +429,34 @@ export declare namespace Components {
              * ID of the result entry within the hook whose value is compared.
              */
             result_id: string; // ^[a-zA-Z0-9_-]+$
+            /**
+             * Values for the hook's value inputs, keyed by the input name the hook declares
+             * (`contexts` entry of type `value`), e.g. `{ "reading_date": { "source": "parameter", "name": "reading_date" } }`.
+             * Only parameters are supported. Write-time validation checks that every key is a value input the
+             * hook declares and uses the input's `value_type` (`number`, `text`, `date` or `boolean`) as the
+             * parameter's kind, so the parameter must not be compared as another kind elsewhere in the rule.
+             * An input parameter must not carry an adjustment. Declared inputs without an entry are allowed;
+             * the consumer omits an input that has no value.
+             *
+             */
+            inputs?: {
+                [name: string]: /**
+                 * A comparison value supplied by the consumer that evaluates the rule, identified by a name
+                 * the rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the
+                 * name to a source of its own - a journey binds it to the value of another block - and
+                 * resolves it at evaluation time, so the rule never references the consumer's objects and
+                 * stays reusable across journeys and forms.
+                 *
+                 * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
+                 * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
+                 * number, string or boolean as an `applies_when` value, or the `value_type` of the External
+                 * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+                 * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
+                 * the consumer leaves unbound or empty leaves the comparison unresolved.
+                 *
+                 */
+                ParameterValue;
+            };
             adjust?: /**
              * Adjusts a context-resolved numeric value before comparison, e.g. "context value plus 10 percent".
              * Used to express tolerance bands such as "at most 10% above the current instalment amount".
@@ -601,17 +638,18 @@ export declare namespace Components {
          */
         export type Operator = "equal" | "notEqual" | "greaterThan" | "greaterThanInclusive" | "lessThan" | "lessThanInclusive" | "between" | "dateBefore" | "dateOnOrBefore" | "dateAfter" | "dateOnOrAfter" | "dateBetween" | "notInFuture" | "notInPast" | "contains" | "doesNotContain" | "startsWith" | "endsWith" | "regexMatch" | "lengthBetween" | "maxDigits" | "maxDecimals";
         /**
-         * A comparison value supplied by the surface that evaluates the rule, identified by a name
-         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consuming surface
-         * binds the name to a source of its own - a journey binds it to the value of another block -
-         * and resolves it at evaluation time, so the rule never references the surface's objects
-         * and stays reusable across journeys and forms.
+         * A comparison value supplied by the consumer that evaluates the rule, identified by a name
+         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the
+         * name to a source of its own - a journey binds it to the value of another block - and
+         * resolves it at evaluation time, so the rule never references the consumer's objects and
+         * stays reusable across journeys and forms.
          *
-         * The kind a parameter is compared as follows from the field it sits in: `number`, `text`
-         * or `date` for comparison values, range bounds, adjustment amounts and relative date
-         * offsets, or a number, string or boolean as an `applies_when` value. One name is compared
-         * as one kind throughout a rule; a rule using a name as two kinds is rejected at write time.
-         * A parameter the surface leaves unbound or empty leaves the comparison unresolved.
+         * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
+         * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
+         * number, string or boolean as an `applies_when` value, or the `value_type` of the External
+         * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+         * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
+         * the consumer leaves unbound or empty leaves the comparison unresolved.
          *
          */
         export interface ParameterValue {
@@ -945,19 +983,24 @@ export declare namespace Components {
          * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
          * in public journeys the dependent conditions are skipped.
          *
+         * A hook may declare value inputs (`contexts` entries `{ "type": "value", "name", "value_type" }`)
+         * besides the entities it receives. `inputs` supplies them from rule parameters, which the
+         * consumer binds like any other parameter and sends to the hook as `Context.<name>`.
+         *
          */
         ExternalValue | /**
-         * A comparison value supplied by the surface that evaluates the rule, identified by a name
-         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consuming surface
-         * binds the name to a source of its own - a journey binds it to the value of another block -
-         * and resolves it at evaluation time, so the rule never references the surface's objects
-         * and stays reusable across journeys and forms.
+         * A comparison value supplied by the consumer that evaluates the rule, identified by a name
+         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the
+         * name to a source of its own - a journey binds it to the value of another block - and
+         * resolves it at evaluation time, so the rule never references the consumer's objects and
+         * stays reusable across journeys and forms.
          *
-         * The kind a parameter is compared as follows from the field it sits in: `number`, `text`
-         * or `date` for comparison values, range bounds, adjustment amounts and relative date
-         * offsets, or a number, string or boolean as an `applies_when` value. One name is compared
-         * as one kind throughout a rule; a rule using a name as two kinds is rejected at write time.
-         * A parameter the surface leaves unbound or empty leaves the comparison unresolved.
+         * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
+         * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
+         * number, string or boolean as an `applies_when` value, or the `value_type` of the External
+         * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+         * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
+         * the consumer leaves unbound or empty leaves the comparison unresolved.
          *
          */
         ParameterValue;
@@ -1283,19 +1326,24 @@ export declare namespace Components {
          * are resolved only for authenticated consumers (epilot 360 users and portal end customers);
          * in public journeys the dependent conditions are skipped.
          *
+         * A hook may declare value inputs (`contexts` entries `{ "type": "value", "name", "value_type" }`)
+         * besides the entities it receives. `inputs` supplies them from rule parameters, which the
+         * consumer binds like any other parameter and sends to the hook as `Context.<name>`.
+         *
          */
         ExternalValue | /**
-         * A comparison value supplied by the surface that evaluates the rule, identified by a name
-         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consuming surface
-         * binds the name to a source of its own - a journey binds it to the value of another block -
-         * and resolves it at evaluation time, so the rule never references the surface's objects
-         * and stays reusable across journeys and forms.
+         * A comparison value supplied by the consumer that evaluates the rule, identified by a name
+         * the rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the
+         * name to a source of its own - a journey binds it to the value of another block - and
+         * resolves it at evaluation time, so the rule never references the consumer's objects and
+         * stays reusable across journeys and forms.
          *
-         * The kind a parameter is compared as follows from the field it sits in: `number`, `text`
-         * or `date` for comparison values, range bounds, adjustment amounts and relative date
-         * offsets, or a number, string or boolean as an `applies_when` value. One name is compared
-         * as one kind throughout a rule; a rule using a name as two kinds is rejected at write time.
-         * A parameter the surface leaves unbound or empty leaves the comparison unresolved.
+         * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
+         * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
+         * number, string or boolean as an `applies_when` value, or the `value_type` of the External
+         * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+         * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
+         * the consumer leaves unbound or empty leaves the comparison unresolved.
          *
          */
         ParameterValue;

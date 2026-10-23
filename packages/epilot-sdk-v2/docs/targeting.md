@@ -66,6 +66,8 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`JobStatus`](#jobstatus)
 - [`Campaign`](#campaign)
 - [`Target`](#target)
+- [`TargetEntityFilters`](#targetentityfilters)
+- [`TargetSortItem`](#targetsortitem)
 - [`MatchCampaignParams`](#matchcampaignparams)
 - [`NextBestAction`](#nextbestaction)
 - [`DiscoverCampaignsParams`](#discovercampaignsparams)
@@ -305,6 +307,27 @@ const { data } = await client.setupCampaign(
       email: {
         automation_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
         template_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
+      },
+      entity_ui: {
+        category: 'string',
+        icon: {
+          name: 'string',
+          color: 'string'
+        },
+        title: 'string',
+        body: 'string',
+        priority: 'medium',
+        is_dismissable: true,
+        cta: {
+          type: 'journey',
+          target: 'string',
+          context_params: [
+            {
+              key: 'string',
+              value: 'string'
+            }
+          ]
+        }
       }
     }
   },
@@ -537,7 +560,17 @@ const { data } = await client.matchTargets(
         "name": "string",
         "description": "string",
         "entity_schema": "string",
-        "entity_filters": {}
+        "entity_filters": {
+          "filter": {},
+          "search": "string",
+          "sort": [
+            {
+              "key": "billing_address.postal_code",
+              "order": "asc"
+            }
+          ],
+          "limit": 1
+        }
       }
     }
   ]
@@ -552,6 +585,7 @@ const { data } = await client.matchTargets(
 
 Transform target filters into Lucene queries for the provided target IDs.
 Returns the transformed query string for each target along with any errors encountered.
+If the target defines a sort order or 
 
 `POST /v1/target/queries`
 
@@ -573,7 +607,9 @@ const { data } = await client.getTargetQueries(
     {
       "target_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
       "query": "string",
-      "error": "string"
+      "error": "string",
+      "sort": ["billing_date:desc", "_title.keyword:asc", "_id:desc"],
+      "limit": 1
     }
   ]
 }
@@ -1218,7 +1254,42 @@ type Target = {
   name?: string
   description?: string
   entity_schema?: string
-  entity_filters?: Record<string, unknown>
+  entity_filters?: {
+    filter?: Record<string, unknown>
+    search?: string
+    sort?: Array<{
+      key: { ... }
+      order: { ... }
+    }>
+    limit?: number
+  }
+}
+```
+
+### `TargetEntityFilters`
+
+Search state of the target. `filter` and `search` use the same shape as the search state of entity views.
+Besides the filters, it optionally defines the order and maximum number of results.
+
+
+```ts
+type TargetEntityFilters = {
+  filter?: Record<string, unknown>
+  search?: string
+  sort?: Array<{
+    key: string
+    order: "asc" | "desc"
+  }>
+  limit?: number
+}
+```
+
+### `TargetSortItem`
+
+```ts
+type TargetSortItem = {
+  key: string
+  order: "asc" | "desc"
 }
 ```
 
@@ -1327,6 +1398,8 @@ type TargetQueryResult = {
   target_id: string // uuid
   query: string
   error?: string
+  sort?: string[]
+  limit?: number
 }
 ```
 
@@ -1541,6 +1614,15 @@ type SetupCampaignRequest = {
       automation_id?: { ... }
       template_id?: { ... }
     }
+    entity_ui?: {
+      category?: { ... }
+      icon?: { ... }
+      title: { ... }
+      body?: { ... }
+      priority?: { ... }
+      is_dismissable?: { ... }
+      cta: { ... }
+    }
   }
 }
 ```
@@ -1575,6 +1657,15 @@ type SetupTariffChangeCampaignRequest = {
     email?: {
       automation_id?: { ... }
       template_id?: { ... }
+    }
+    entity_ui?: {
+      category?: { ... }
+      icon?: { ... }
+      title: { ... }
+      body?: { ... }
+      priority?: { ... }
+      is_dismissable?: { ... }
+      cta: { ... }
     }
   }
 }

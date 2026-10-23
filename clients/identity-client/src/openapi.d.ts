@@ -28,10 +28,17 @@ declare namespace Components {
         Schemas.OrgId /* ^[A-Za-z0-9_-]+$ */;
         export type PartnerKeyQuery = string;
         export type SizeQuery = number;
+        export type UserIdPath = /**
+         * epilot user id (`custom:ivy_user_id` in a 360 token). A user belongs to exactly one organization.
+         * example:
+         * 100321
+         */
+        Schemas.UserId /* ^[A-Za-z0-9_-]+$ */;
     }
     export interface PathParameters {
         ClientIdPath?: Parameters.ClientIdPath;
         OrgIdPath?: Parameters.OrgIdPath;
+        UserIdPath?: Parameters.UserIdPath;
     }
     export interface QueryParameters {
         AnyOtherQueryParameters?: Parameters.AnyOtherQueryParameters;
@@ -63,9 +70,17 @@ declare namespace Components {
              * Reference to the customer's approval evidence (ticket, signed order, contract clause)
              */
             customer_approval_ref: string;
+            /**
+             * When the customer approved. Optional: enabling an organization defaults it to the time of the
+             * request, and a policy update keeps the current value unless a new one is given.
+             *
+             */
             approved_at: string; // date-time
             version: number;
             mandatory_claims: ("org_id")[];
+            /**
+             * Email of the admin-portal operator who recorded this policy version
+             */
             recorded_by: string;
             recorded_at: string; // date-time
         }
@@ -83,7 +98,12 @@ declare namespace Components {
              * Reference to the customer's approval evidence (ticket, signed order, contract clause)
              */
             customer_approval_ref: string;
-            approved_at: string; // date-time
+            /**
+             * When the customer approved. Optional: enabling an organization defaults it to the time of the
+             * request, and a policy update keeps the current value unless a new one is given.
+             *
+             */
+            approved_at?: string; // date-time
         }
         /**
          * Partner-side environment this client belongs to
@@ -125,7 +145,7 @@ declare namespace Components {
              */
             user_id: string;
             /**
-             * When the mirrored credential, and therefore the cookie, expires
+             * When the cookie expires (the mirrored credential's expiry, capped at 15 minutes)
              */
             expires_at: string; // date-time
         }
@@ -145,10 +165,15 @@ declare namespace Components {
             status: OrgEnablementStatus;
             status_reason?: string;
             authorization_policy: AuthorizationPolicy;
-            partner_account?: /* Optional audit reference to the partner tenant this organization maps to. The partner enforces the mapping. */ PartnerAccount;
             created_at: string; // date-time
             updated_at: string; // date-time
+            /**
+             * Email of the admin-portal operator who enabled the organization
+             */
             created_by?: string;
+            /**
+             * Email of the admin-portal operator who last changed the enablement
+             */
             updated_by?: string;
         }
         export interface OrgEnablementCreate {
@@ -159,7 +184,6 @@ declare namespace Components {
              */
             OrgId /* ^[A-Za-z0-9_-]+$ */;
             authorization_policy: AuthorizationPolicyInput;
-            partner_account?: /* Optional audit reference to the partner tenant this organization maps to. The partner enforces the mapping. */ PartnerAccount;
         }
         export interface OrgEnablementList {
             results: OrgEnablement[];
@@ -171,7 +195,6 @@ declare namespace Components {
              */
             expected_policy_version: number;
             authorization_policy: AuthorizationPolicyInput;
-            partner_account?: /* Optional audit reference to the partner tenant this organization maps to. The partner enforces the mapping. */ PartnerAccount;
         }
         /**
          * epilot organization id, an opaque case-sensitive string
@@ -179,13 +202,6 @@ declare namespace Components {
          * 739224
          */
         export type OrgId = string; // ^[A-Za-z0-9_-]+$
-        /**
-         * Optional audit reference to the partner tenant this organization maps to. The partner enforces the mapping.
-         */
-        export interface PartnerAccount {
-            id: string;
-            label?: string;
-        }
         export interface PartnerClient {
             client_id: /**
              * Opaque client identifier, unique within the issuer, never reused
@@ -233,9 +249,12 @@ declare namespace Components {
             created_at: string; // date-time
             updated_at: string; // date-time
             /**
-             * Admin-portal identity of the operator who created the client
+             * Email of the admin-portal operator who created the client (their Cognito identity when the pool holds no email)
              */
             created_by?: string;
+            /**
+             * Email of the admin-portal operator who last changed the client
+             */
             updated_by?: string;
         }
         export interface PartnerClientCreate {
@@ -396,9 +415,12 @@ declare namespace Components {
             created_at: string; // date-time
             updated_at: string; // date-time
             /**
-             * Admin-portal identity of the operator who created the client
+             * Email of the admin-portal operator who created the client (their Cognito identity when the pool holds no email)
              */
             created_by?: string;
+            /**
+             * Email of the admin-portal operator who last changed the client
+             */
             updated_by?: string;
             /**
              * Returned exactly once. Store it securely; it cannot be retrieved again.
@@ -418,6 +440,50 @@ declare namespace Components {
         export type Scope = "openid" | "email" | "profile";
         export interface StatusChangeRequest {
             reason?: string;
+        }
+        /**
+         * epilot user id (`custom:ivy_user_id` in a 360 token). A user belongs to exactly one organization.
+         * example:
+         * 100321
+         */
+        export type UserId = string; // ^[A-Za-z0-9_-]+$
+        export interface UserSubject {
+            client_id: /**
+             * Opaque client identifier, unique within the issuer, never reused
+             * example:
+             * bf-prod-x7k2
+             */
+            PartnerClientId /* ^[A-Za-z0-9._~-]+$ */;
+            org_id: /**
+             * epilot organization id, an opaque case-sensitive string
+             * example:
+             * 739224
+             */
+            OrgId /* ^[A-Za-z0-9_-]+$ */;
+            user_id: /**
+             * epilot user id (`custom:ivy_user_id` in a 360 token). A user belongs to exactly one organization.
+             * example:
+             * 100321
+             */
+            UserId /* ^[A-Za-z0-9_-]+$ */;
+            /**
+             * The pairwise subject this client receives for the user, `<key_version>.<base64url digest>`
+             * example:
+             * v1.dGhpcy1pcy1hLWR1bW15LXN1YmplY3QtdmFsdWUtMDAx
+             */
+            sub: string;
+            /**
+             * Active pairwise key version the value was derived with
+             * example:
+             * v1
+             */
+            key_version: string;
+            /**
+             * Pairwise sector the value was derived for (sector_identifier_uri host, else the first redirect host)
+             * example:
+             * portal.epilot.cloud
+             */
+            sector: string;
         }
     }
 }
@@ -487,6 +553,16 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+        }
+    }
+    namespace GetUserSubject {
+        namespace Responses {
+            export type $200 = Components.Schemas.UserSubject;
+            export type $400 = Components.Schemas.Error;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Schemas.Error;
+            export type $409 = Components.Schemas.Error;
         }
     }
     namespace LaunchClient {
@@ -653,6 +729,13 @@ declare namespace Paths {
         namespace Parameters {
             export type $0 = Components.Parameters.ClientIdPath;
             export type $1 = Components.Parameters.OrgIdPath;
+        }
+    }
+    namespace V1IdentityOperatorClients$ClientIdOrganizations$OrgIdUsers$UserIdSubject {
+        namespace Parameters {
+            export type $0 = Components.Parameters.ClientIdPath;
+            export type $1 = Components.Parameters.OrgIdPath;
+            export type $2 = Components.Parameters.UserIdPath;
         }
     }
     namespace V1IdentityOperatorClients$ClientIdRotateSecret {
@@ -842,11 +925,36 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ActivateClientOrganization.Responses.$200>
   /**
+   * getUserSubject - getUserSubject
+   * 
+   * The pairwise `sub` this client receives for one epilot user, so the partner can bind the person on its
+   * side **before** the first sign-in (for example a Babelforce agent provisioned through SCIM with
+   * `externalId = sub`).
+   * 
+   * Derived exactly as the token endpoint derives it, never stored:
+   * `sub = key_version + "." + base64url(HMAC-SHA256(key[key_version], sector + "\n" + user_id))`, where the
+   * sector is the client's `sector_identifier_uri` host or, without one, the host of its first redirect URI.
+   * The same inputs always give the same value; it changes only when the client's sector or the active key
+   * version changes.
+   * 
+   * Requires an **active** client (a draft client's sector may still change and would invalidate every binding),
+   * an organization enablement that is not revoked, and the user being an active member of that organization
+   * (checked live against user-api). Every read is written to the audit trail: the value is a partner-facing
+   * identifier.
+   * 
+   */
+  'getUserSubject'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetUserSubject.Responses.$200>
+  /**
    * createIdentitySession - createIdentitySession
    * 
    * Called by the epilot portal through the portal-host proxy after every persisted 360 session.
    * Validates the 360 bearer token itself and mirrors it into the `identity_session` cookie
-   * (`HttpOnly; Secure; Path=/v1/identity`) whose lifetime equals the remaining token lifetime.
+   * (`HttpOnly; Secure; Path=/v1/identity`) whose lifetime is the remaining token lifetime, capped at 15 minutes
+   * (the portal mirrors the credential again on every token refresh and just before a partner sign-in).
    * The cookie is what proves the live 360 session during `completeInteraction`.
    * 
    */
@@ -1076,13 +1184,40 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ActivateClientOrganization.Responses.$200>
   }
+  ['/v1/identity/operator/clients/{client_id}/organizations/{org_id}/users/{user_id}:subject']: {
+    /**
+     * getUserSubject - getUserSubject
+     * 
+     * The pairwise `sub` this client receives for one epilot user, so the partner can bind the person on its
+     * side **before** the first sign-in (for example a Babelforce agent provisioned through SCIM with
+     * `externalId = sub`).
+     * 
+     * Derived exactly as the token endpoint derives it, never stored:
+     * `sub = key_version + "." + base64url(HMAC-SHA256(key[key_version], sector + "\n" + user_id))`, where the
+     * sector is the client's `sector_identifier_uri` host or, without one, the host of its first redirect URI.
+     * The same inputs always give the same value; it changes only when the client's sector or the active key
+     * version changes.
+     * 
+     * Requires an **active** client (a draft client's sector may still change and would invalidate every binding),
+     * an organization enablement that is not revoked, and the user being an active member of that organization
+     * (checked live against user-api). Every read is written to the audit trail: the value is a partner-facing
+     * identifier.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetUserSubject.Responses.$200>
+  }
   ['/v1/identity/session']: {
     /**
      * createIdentitySession - createIdentitySession
      * 
      * Called by the epilot portal through the portal-host proxy after every persisted 360 session.
      * Validates the 360 bearer token itself and mirrors it into the `identity_session` cookie
-     * (`HttpOnly; Secure; Path=/v1/identity`) whose lifetime equals the remaining token lifetime.
+     * (`HttpOnly; Secure; Path=/v1/identity`) whose lifetime is the remaining token lifetime, capped at 15 minutes
+     * (the portal mirrors the credential again on every token refresh and just before a partner sign-in).
      * The cookie is what proves the live 360 session during `completeInteraction`.
      * 
      */
@@ -1141,7 +1276,6 @@ export type OrgEnablementList = Components.Schemas.OrgEnablementList;
 export type OrgEnablementStatus = Components.Schemas.OrgEnablementStatus;
 export type OrgEnablementUpdate = Components.Schemas.OrgEnablementUpdate;
 export type OrgId = Components.Schemas.OrgId;
-export type PartnerAccount = Components.Schemas.PartnerAccount;
 export type PartnerClient = Components.Schemas.PartnerClient;
 export type PartnerClientCreate = Components.Schemas.PartnerClientCreate;
 export type PartnerClientId = Components.Schemas.PartnerClientId;
@@ -1152,3 +1286,5 @@ export type PartnerClientWithSecret = Components.Schemas.PartnerClientWithSecret
 export type RotateSecretRequest = Components.Schemas.RotateSecretRequest;
 export type Scope = Components.Schemas.Scope;
 export type StatusChangeRequest = Components.Schemas.StatusChangeRequest;
+export type UserId = Components.Schemas.UserId;
+export type UserSubject = Components.Schemas.UserSubject;

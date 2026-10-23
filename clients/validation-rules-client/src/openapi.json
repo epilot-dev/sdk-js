@@ -208,7 +208,7 @@
             }
           },
           "400": {
-            "description": "Bad Request - Invalid request body. Invalid external or environment comparison values additionally\ncarry a `code`: `external_value_not_found` when the app is not installed or the hook / result does not\nexist, `external_value_incompatible` when the result type does not match the compared kind,\n`environment_variable_not_found` when the referenced environment variable does not exist in the\norganisation, `environment_variable_incompatible` when its type cannot be compared as required\n(`Number` for numbers, `Text` for text and dates, `Number` / `Text` / `Boolean` for `applies_when`;\n`String`, `SecretString`, `Map` and `JSON` never).\n",
+            "description": "Bad Request - Invalid request body. Invalid external or environment comparison values additionally\ncarry a `code`: `external_value_not_found` when the app is not installed or the hook / result does not\nexist or an `inputs` key is not a value input the hook declares, `external_value_incompatible` when the\nresult type does not match the compared kind or an input's parameter is used as another kind in the rule,\n`environment_variable_not_found` when the referenced environment variable does not exist in the\norganisation, `environment_variable_incompatible` when its type cannot be compared as required\n(`Number` for numbers, `Text` for text and dates, `Number` / `Text` / `Boolean` for `applies_when`;\n`String`, `SecretString`, `Map` and `JSON` never).\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -493,7 +493,7 @@
             }
           },
           "400": {
-            "description": "Bad Request - Invalid request body. Invalid external or environment comparison values additionally\ncarry a `code`: `external_value_not_found` when the app is not installed or the hook / result does not\nexist, `external_value_incompatible` when the result type does not match the compared kind,\n`environment_variable_not_found` when the referenced environment variable does not exist in the\norganisation, `environment_variable_incompatible` when its type cannot be compared as required\n(`Number` for numbers, `Text` for text and dates, `Number` / `Text` / `Boolean` for `applies_when`;\n`String`, `SecretString`, `Map` and `JSON` never).\n",
+            "description": "Bad Request - Invalid request body. Invalid external or environment comparison values additionally\ncarry a `code`: `external_value_not_found` when the app is not installed or the hook / result does not\nexist or an `inputs` key is not a value input the hook declares, `external_value_incompatible` when the\nresult type does not match the compared kind or an input's parameter is used as another kind in the rule,\n`environment_variable_not_found` when the referenced environment variable does not exist in the\norganisation, `environment_variable_incompatible` when its type cannot be compared as required\n(`Number` for numbers, `Text` for text and dates, `Number` / `Text` / `Boolean` for `applies_when`;\n`String`, `SecretString`, `Map` and `JSON` never).\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -2193,7 +2193,7 @@
       },
       "ExternalValue": {
         "type": "object",
-        "description": "A comparison value produced at evaluation time by an External Values hook of an installed\napp (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is\nresolved server-side by the external-values-api, which executes the hook's HTTP call with\nthe app's credentials and returns the typed result identified by `result_id`.\n\nWrite-time validation checks that the app is installed in the organisation, that the hook\nand result exist, and that the result's type is compatible with the compared kind\n(`number` results for numeric comparisons, `text` for text, `date` for date). External values\nare resolved only for authenticated consumers (epilot 360 users and portal end customers);\nin public journeys the dependent conditions are skipped.\n",
+        "description": "A comparison value produced at evaluation time by an External Values hook of an installed\napp (component type `EXTERNAL_VALUES`). The rule stores the reference only; the value is\nresolved server-side by the external-values-api, which executes the hook's HTTP call with\nthe app's credentials and returns the typed result identified by `result_id`.\n\nWrite-time validation checks that the app is installed in the organisation, that the hook\nand result exist, and that the result's type is compatible with the compared kind\n(`number` results for numeric comparisons, `text` for text, `date` for date). External values\nare resolved only for authenticated consumers (epilot 360 users and portal end customers);\nin public journeys the dependent conditions are skipped.\n\nA hook may declare value inputs (`contexts` entries `{ \"type\": \"value\", \"name\", \"value_type\" }`)\nbesides the entities it receives. `inputs` supplies them from rule parameters, which the\nconsumer binds like any other parameter and sends to the hook as `Context.<name>`.\n",
         "required": [
           "source",
           "app_id",
@@ -2228,6 +2228,14 @@
             "pattern": "^[a-zA-Z0-9_-]+$",
             "description": "ID of the result entry within the hook whose value is compared."
           },
+          "inputs": {
+            "type": "object",
+            "maxProperties": 10,
+            "description": "Values for the hook's value inputs, keyed by the input name the hook declares\n(`contexts` entry of type `value`), e.g. `{ \"reading_date\": { \"source\": \"parameter\", \"name\": \"reading_date\" } }`.\nOnly parameters are supported. Write-time validation checks that every key is a value input the\nhook declares and uses the input's `value_type` (`number`, `text`, `date` or `boolean`) as the\nparameter's kind, so the parameter must not be compared as another kind elsewhere in the rule.\nAn input parameter must not carry an adjustment. Declared inputs without an entry are allowed;\nthe consumer omits an input that has no value.\n",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ParameterValue"
+            }
+          },
           "adjust": {
             "$ref": "#/components/schemas/ValueAdjustment"
           }
@@ -2235,7 +2243,7 @@
       },
       "ParameterValue": {
         "type": "object",
-        "description": "A comparison value supplied by the surface that evaluates the rule, identified by a name\nthe rule chooses (e.g. `start_date`). The rule stores the name only. The consuming surface\nbinds the name to a source of its own - a journey binds it to the value of another block -\nand resolves it at evaluation time, so the rule never references the surface's objects\nand stays reusable across journeys and forms.\n\nThe kind a parameter is compared as follows from the field it sits in: `number`, `text`\nor `date` for comparison values, range bounds, adjustment amounts and relative date\noffsets, or a number, string or boolean as an `applies_when` value. One name is compared\nas one kind throughout a rule; a rule using a name as two kinds is rejected at write time.\nA parameter the surface leaves unbound or empty leaves the comparison unresolved.\n",
+        "description": "A comparison value supplied by the consumer that evaluates the rule, identified by a name\nthe rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the\nname to a source of its own - a journey binds it to the value of another block - and\nresolves it at evaluation time, so the rule never references the consumer's objects and\nstays reusable across journeys and forms.\n\nA parameter's kind is determined by the field it is used in: `number`, `text` or `date`\nfor comparison values, range bounds, adjustment amounts and relative date offsets, or a\nnumber, string or boolean as an `applies_when` value, or the `value_type` of the External\nValues hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind\nthroughout a rule; a rule using a name as two kinds is rejected at write time. A parameter\nthe consumer leaves unbound or empty leaves the comparison unresolved.\n",
         "required": [
           "source",
           "name"

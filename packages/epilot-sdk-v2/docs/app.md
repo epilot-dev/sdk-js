@@ -136,6 +136,9 @@ const { data } = await appClient.getPublicFacingComponent(...)
 - [`ApiProxyConfig`](#apiproxyconfig)
 - [`ExternalValuesConfig`](#externalvaluesconfig)
 - [`ExternalValuesHook`](#externalvalueshook)
+- [`ContextRequirement`](#contextrequirement)
+- [`EntityContextRequirement`](#entitycontextrequirement)
+- [`ValueContextRequirement`](#valuecontextrequirement)
 - [`ExternalValuesResult`](#externalvaluesresult)
 - [`Grants`](#grants)
 - [`BlueprintRef`](#blueprintref)
@@ -2268,6 +2271,7 @@ type ExternalValuesComponent = {
       result: { ... }
       timeout_ms?: { ... }
       on_unavailable?: { ... }
+      contexts?: { ... }
       cache?: { ... }
       secure_proxy?: { ... }
     }>
@@ -3797,6 +3801,14 @@ type ExternalValuesConfig = {
     }>
     timeout_ms?: number
     on_unavailable?: "skip" | "block"
+    contexts?: Array<{
+      type: { ... }
+      schema: { ... }
+    } | {
+      type: { ... }
+      name: { ... }
+      value_type: { ... }
+    }>
     cache?: {
       ttl_seconds: { ... }
       key?: { ... }
@@ -3811,9 +3823,9 @@ type ExternalValuesConfig = {
 
 ### `ExternalValuesHook`
 
-One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.input }}`).
+One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.contract }}`).
 
-`Context` is the single name
+`Context` is the name → v
 
 ```ts
 type ExternalValuesHook = {
@@ -3860,6 +3872,14 @@ type ExternalValuesHook = {
   }>
   timeout_ms?: number
   on_unavailable?: "skip" | "block"
+  contexts?: Array<{
+    type: "entity"
+    schema: string
+  } | {
+    type: "value"
+    name: string
+    value_type: "number" | "text" | "date" | "boolean"
+  }>
   cache?: {
     ttl_seconds: number
     key?: string
@@ -3868,6 +3888,44 @@ type ExternalValuesHook = {
     integration_id: string // uuid
     use_case_slug: string
   }
+}
+```
+
+### `ContextRequirement`
+
+A requirement a hook reads from `Context`, discriminated by `type`. More types will be added later; consumers must ignore types they do not know.
+
+```ts
+type ContextRequirement = {
+  type: "entity"
+  schema: string
+} | {
+  type: "value"
+  name: string
+  value_type: "number" | "text" | "date" | "boolean"
+}
+```
+
+### `EntityContextRequirement`
+
+The consumer supplies the bound entities of `schema` under `Context.`<schema>``.
+
+```ts
+type EntityContextRequirement = {
+  type: "entity"
+  schema: string
+}
+```
+
+### `ValueContextRequirement`
+
+The consumer supplies one scalar value under `Context.`<name>``, e.g. a date the customer entered in a journey block. A value input is optional: the consumer sends it when it has a value and omits it otherwise, so the hook's templates must cope with its absence, e.g. `{{ Context.reading_date | default
+
+```ts
+type ValueContextRequirement = {
+  type: "value"
+  name: string
+  value_type: "number" | "text" | "date" | "boolean"
 }
 ```
 

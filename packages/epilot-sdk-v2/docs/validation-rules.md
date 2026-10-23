@@ -1736,6 +1736,7 @@ type ComparisonRuleType = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -1794,6 +1795,7 @@ type Condition = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -1814,6 +1816,7 @@ type Condition = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -1834,6 +1837,11 @@ type Condition = {
     app_id: string
     hook_id: string
     result_id: string
+    inputs?: Record<string, {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }>
     adjust?: {
       type: { ... }
       value: { ... }
@@ -1857,13 +1865,6 @@ type Condition = {
     } | {
       source: { ... }
       path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      offset: { ... }
-      unit: { ... }
-      anchor?: { ... }
-    } | {
   // ...
 }
 ```
@@ -1905,6 +1906,7 @@ type ConditionValue = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -1939,6 +1941,11 @@ type ConditionValue = {
     app_id: string
     hook_id: string
     result_id: string
+    inputs?: Record<string, {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }>
     adjust?: {
       type: { ... }
       value: { ... }
@@ -1978,12 +1985,6 @@ type ConditionValue = {
     source: "external"
     app_id: string
     hook_id: string
-    result_id: string
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
   // ...
 }
 ```
@@ -2014,6 +2015,7 @@ type ScalarValue = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2048,6 +2050,11 @@ type ScalarValue = {
     app_id: string
     hook_id: string
     result_id: string
+    inputs?: Record<string, {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }>
     adjust?: {
       type: { ... }
       value: { ... }
@@ -2087,12 +2094,6 @@ type ScalarValue = {
     source: "external"
     app_id: string
     hook_id: string
-    result_id: string
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
   // ...
 }
 ```
@@ -2123,6 +2124,7 @@ type ValueReference = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2150,6 +2152,7 @@ type ValueReference = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2164,6 +2167,16 @@ type ValueReference = {
   app_id: string
   hook_id: string
   result_id: string
+  inputs?: Record<string, {
+    source: "parameter"
+    name: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  }>
   adjust?: {
     type: "percent" | "absolute"
     value: number | {
@@ -2179,6 +2192,7 @@ type ValueReference = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2192,19 +2206,6 @@ type ValueReference = {
   source: "parameter"
   name: string
   adjust?: {
-    type: "percent" | "absolute"
-    value: number | {
-      source: { ... }
-      path: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      key: { ... }
-      adjust?: { ... }
-    } | {
-      source: { ... }
-      app_id: { ... }
-      hook_id: { ... }
   // ...
 }
 ```
@@ -2237,6 +2238,7 @@ type EnvironmentValue = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2262,6 +2264,16 @@ type ExternalValue = {
   app_id: string
   hook_id: string
   result_id: string
+  inputs?: Record<string, {
+    source: "parameter"
+    name: string
+    adjust?: {
+      type: { ... }
+      value: { ... }
+      direction: { ... }
+      rounding?: { ... }
+    }
+  }>
   adjust?: {
     type: "percent" | "absolute"
     value: number | {
@@ -2277,6 +2289,7 @@ type ExternalValue = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2291,10 +2304,10 @@ type ExternalValue = {
 
 ### `ParameterValue`
 
-A comparison value supplied by the surface that evaluates the rule, identified by a name
-the rule chooses (e.g. `start_date`). The rule stores the name only. The consuming surface
-binds the name to a source of its own - a journey binds it to the value of another block -
-and resolves it at evaluation
+A comparison value supplied by the consumer that evaluates the rule, identified by a name
+the rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the
+name to a source of its own - a journey binds it to the value of another block - and
+resolves it at evaluation time, s
 
 ```ts
 type ParameterValue = {
@@ -2315,6 +2328,7 @@ type ParameterValue = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2364,6 +2378,7 @@ type ContextValue = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2408,6 +2423,11 @@ type ValueAdjustment = {
     app_id: string
     hook_id: string
     result_id: string
+    inputs?: Record<string, {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }>
     adjust?: {
       type: { ... }
       value: { ... }
@@ -2459,6 +2479,11 @@ type RelativeDateValue = {
     app_id: string
     hook_id: string
     result_id: string
+    inputs?: Record<string, {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }>
     adjust?: {
       type: { ... }
       value: { ... }
@@ -2499,6 +2524,11 @@ type RelativeDateValue = {
     app_id: string
     hook_id: string
     result_id: string
+    inputs?: Record<string, {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }>
     adjust?: {
       type: { ... }
       value: { ... }
@@ -2552,6 +2582,7 @@ type RangeValue = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2572,6 +2603,7 @@ type RangeValue = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2592,6 +2624,11 @@ type RangeValue = {
     app_id: string
     hook_id: string
     result_id: string
+    inputs?: Record<string, {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }>
     adjust?: {
       type: { ... }
       value: { ... }
@@ -2616,13 +2653,6 @@ type RangeValue = {
     path: string
     adjust?: {
       type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
-  } | {
-    source: "relative_date"
-    offset: number | {
   // ...
 }
 ```
@@ -2719,6 +2749,7 @@ type DocumentCondition = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2746,6 +2777,7 @@ type DocumentCondition = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2815,6 +2847,7 @@ type DocumentConditionValue = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2835,6 +2868,7 @@ type DocumentConditionValue = {
       app_id: { ... }
       hook_id: { ... }
       result_id: { ... }
+      inputs?: { ... }
       adjust?: { ... }
     } | {
       source: { ... }
@@ -2855,6 +2889,11 @@ type DocumentConditionValue = {
     app_id: string
     hook_id: string
     result_id: string
+    inputs?: Record<string, {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }>
     adjust?: {
       type: { ... }
       value: { ... }
@@ -2876,13 +2915,6 @@ type DocumentConditionValue = {
     data: number | string | boolean
   } | {
     source: "context"
-    path: string
-    adjust?: {
-      type: { ... }
-      value: { ... }
-      direction: { ... }
-      rounding?: { ... }
-    }
   // ...
 }
 ```
@@ -2947,6 +2979,11 @@ type AppliesWhen = {
     app_id: string
     hook_id: string
     result_id: string
+    inputs?: Record<string, {
+      source: { ... }
+      name: { ... }
+      adjust?: { ... }
+    }>
     adjust?: {
       type: { ... }
       value: { ... }

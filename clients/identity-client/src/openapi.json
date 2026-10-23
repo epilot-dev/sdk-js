@@ -1491,8 +1491,7 @@
         "type": "object",
         "required": [
           "allowed_scopes",
-          "customer_approval_ref",
-          "approved_at"
+          "customer_approval_ref"
         ],
         "properties": {
           "mode": {
@@ -1526,7 +1525,8 @@
           },
           "approved_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the customer approved. Optional: enabling an organization defaults it to the time of the\nrequest, and a policy update keeps the current value unless a new one is given.\n"
           }
         }
       },
@@ -1538,12 +1538,17 @@
           {
             "type": "object",
             "required": [
+              "approved_at",
               "version",
               "mandatory_claims",
               "recorded_by",
               "recorded_at"
             ],
             "properties": {
+              "approved_at": {
+                "type": "string",
+                "format": "date-time"
+              },
               "version": {
                 "type": "integer",
                 "minimum": 1

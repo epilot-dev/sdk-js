@@ -203,6 +203,9 @@
           },
           "500": {
             "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "504": {
+            "$ref": "#/components/responses/ServerErrorResponse"
           }
         }
       }
@@ -319,7 +322,7 @@
       "post": {
         "operationId": "getTargetQueries",
         "summary": "getTargetQueries",
-        "description": "Transform target filters into Lucene queries for the provided target IDs.\nReturns the transformed query string for each target along with any errors encountered.\n",
+        "description": "Transform target filters into Lucene queries for the provided target IDs.\nReturns the transformed query string for each target along with any errors encountered.\nIf the target defines a sort order or a result limit, they are returned as well.\n",
         "tags": [
           "Target"
         ],
@@ -1031,11 +1034,60 @@
                 "type": "string"
               },
               "entity_filters": {
-                "type": "object",
-                "additionalProperties": true
+                "$ref": "#/components/schemas/TargetEntityFilters"
               }
             }
           }
+        ]
+      },
+      "TargetEntityFilters": {
+        "type": "object",
+        "description": "Search state of the target. `filter` and `search` use the same shape as the search state of entity views.\nBesides the filters, it optionally defines the order and maximum number of results.\n",
+        "properties": {
+          "filter": {
+            "type": "object",
+            "description": "Group of filters that define which entities match the target.",
+            "additionalProperties": true
+          },
+          "search": {
+            "type": "string",
+            "description": "Free text search entered in the target builder.\nNot applied when resolving the target, e.g. by `getTargetQueries` or `matchTargets`.\n"
+          },
+          "sort": {
+            "type": "array",
+            "description": "Optional sort order of the target results, in priority order.\nOnly changes the order of the results, never which entities match the target.\n\nUses the same key and order pairs as the sort of entity views, but as structured items:\nentity views persist their sort as a `key:order,key:order` string instead.\n",
+            "items": {
+              "$ref": "#/components/schemas/TargetSortItem"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "Optional maximum number of results returned by the target, applied after sorting.\nAt most 1000, the maximum number of results entity search returns; larger values are capped to 1000.\nOnly caps how many results are returned, never which entities match the target.\n"
+          }
+        },
+        "additionalProperties": true
+      },
+      "TargetSortItem": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Attribute to sort by. Sub-fields of addresses and relations use a dot path.",
+            "example": "billing_address.postal_code"
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "order"
         ]
       },
       "MatchCampaignParams": {
@@ -1303,6 +1355,24 @@
           "error": {
             "type": "string",
             "description": "Error message if query transformation failed."
+          },
+          "sort": {
+            "type": "array",
+            "description": "Elasticsearch sort fields for the target's sort order, ready to be passed to entity search.\nEnds with an `_id` tie-breaker so the order is stable. Omitted when the target has no sort.\n",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "billing_date:desc",
+              "_title.keyword:asc",
+              "_id:desc"
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "description": "Maximum number of results the target returns, at most 1000. Omitted when the target has no limit.\n"
           }
         },
         "required": [
@@ -1822,6 +1892,10 @@
                 },
                 "minProperties": 1,
                 "additionalProperties": false
+              },
+              "entity_ui": {
+                "$ref": "#/components/schemas/NextBestAction",
+                "description": "Entity-UI (Next Best Action) card shown to agents on contact and account pages.\nPersisted verbatim on the campaign's `entity_ui` attribute.\nOnly sent by the consumer once the channel has been enabled and configured.\n"
               }
             },
             "additionalProperties": false

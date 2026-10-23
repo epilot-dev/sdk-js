@@ -308,9 +308,10 @@ const { data } = await client.deleteEnvironmentVariable({
 ### `EnvironmentValueType`
 
 The structure a variable's value holds. `SecretString` is encrypted at rest and
-its value is never returned. `Text`, `Number`, `Boolean`, `Map`, `JSON` and `Link`
-may be served to browser-facing consumers; `String` and `SecretString` may not. A
-`List` inherits this from its element type: a `List` is
+its value is never returned. Every other type
+may be served to browser-facing consumers. A `List` inherits this from its element
+type: a `List`<SecretString>`` is never served.
+
 
 ```ts
 type EnvironmentValueType = "String" | "SecretString" | "Text" | "Number" | "Boolean" | "Map" | "JSON" | "Link" | "List"

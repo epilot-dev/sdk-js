@@ -9,6 +9,14 @@
     {
       "name": "phone-integration",
       "description": "Phone Integration"
+    },
+    {
+      "name": "manager",
+      "description": "Phone manager (epilot 360 control center): which organization members hold the phone and the\ntelephony-provider user behind each of them. Caller must hold `phone:manage` in the organization.\n"
+    },
+    {
+      "name": "operator",
+      "description": "Provider setup per organization, run by epilot CS from the admin portal. Platform operators only\n(admin-portal internal-auth token in an allowed group), never customer tokens.\n"
     }
   ],
   "servers": [
@@ -183,17 +191,1273 @@
           }
         }
       }
+    },
+    "/v1/manager/status": {
+      "get": {
+        "operationId": "getManagerStatus",
+        "summary": "getManagerStatus",
+        "description": "Whether the caller's organization is ready for phone agents: the telephony provider tenant\nexists and is configured. The control center shows a \"not set up\" state when `ready` is false.\nRequires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "200": {
+            "description": "Readiness of the organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagerStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/manager/agents": {
+      "get": {
+        "operationId": "listPhoneAgents",
+        "summary": "listPhoneAgents",
+        "description": "Organization members who hold the phone (`phone:use`), each joined with the provider user behind\nthem. Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "200": {
+            "description": "The organization's phone agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "results"
+                  ],
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/PhoneAgent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      },
+      "post": {
+        "operationId": "assignPhoneAgent",
+        "summary": "assignPhoneAgent",
+        "description": "Gives an organization member the phone. In order: the member is verified with user-api, their\npairwise subject for the provider is read from identity-api, the provider user is created (or\nfound) bound to that subject with the `agent` role, and only then the `phone_agent` role\n(`phone:use`) is assigned in epilot. Idempotent: an already assigned member answers `200`.\nRequires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignPhoneAgentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The member already held the phone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhoneAgent"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The member now holds the phone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhoneAgent"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "The user is not an active member of the organization (code `member_not_found`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The member cannot get the phone yet; `code` says why:\n- `not_set_up`: the organization is not set up for the phone (see getManagerStatus);\n- `identity_subject_unavailable`: identity-api cannot issue the member's subject (organization\n  not enabled on the identity client, or the user is not an active member there);\n- `identity_client_unavailable`: the identity client the setup points at is not active;\n- `provider_conflict`: the provider refused, e.g. this person's identity is bound to another\n  provider user.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/agents/{user_id}": {
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "description": "epilot user id (`custom:ivy_user_id`)",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      ],
+      "delete": {
+        "operationId": "removePhoneAgent",
+        "summary": "removePhoneAgent",
+        "description": "Takes the phone away from a member: the `phone_agent` role is removed first, then the provider\nuser is deactivated (never deleted: call history keeps referring to it). Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "204": {
+            "description": "The member no longer holds the phone"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "The member does not hold the phone (code `agent_not_found`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The role was removed but the provider user could not be deactivated (code `provider_error`);\nremoving again retries the deactivation.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/manager/live": {
+      "get": {
+        "operationId": "getLiveSnapshot",
+        "summary": "getLiveSnapshot",
+        "description": "One snapshot of the organization's live phone state for the control center's Overview: agent\npresence counters and per-queue health (waiting calls, longest wait, eligible vs available\nagents). Read from the provider on every call (no caching); the control center polls it about\nevery 20 seconds. Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "200": {
+            "description": "The live snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveSnapshot"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/agents/live": {
+      "get": {
+        "operationId": "listLiveAgents",
+        "summary": "listLiveAgents",
+        "description": "The organization's phone agents with their live phone status, their skills (as the phone system\nholds them) and the queues they can take calls from. Agents that are epilot phone agents carry\nthe epilot `user_id`. Queue eligibility is derived from every queue's routing steps (skills and\npeople). The control center filters and searches this list client-side and polls it about every\n20 seconds. Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "200": {
+            "description": "The organization's agents with live state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "captured_at",
+                    "results"
+                  ],
+                  "properties": {
+                    "captured_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LiveAgent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/agents/{provider_agent_id}/routing": {
+      "parameters": [
+        {
+          "name": "provider_agent_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's agent id (`LiveAgent.provider_agent_id`)",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      ],
+      "put": {
+        "operationId": "setAgentRouting",
+        "summary": "setAgentRouting",
+        "description": "Sets an agent's skills and direct queue membership (full sets, not deltas), in this order:\n1. Skills: the agent's skills in the phone system are replaced by `skills`, so the phone system\n   routes on them right away. The phone system is the source of truth for phone skills; they are\n   independent of the skills in epilot's Access Management.\n2. Direct queue membership: each listed queue gets the agent in its epilot-managed routing step\n   (created on first use, lowest precedence, never touching the organization's own routing in\n   the phone system); every other queue's epilot-managed step drops the agent. Eligibility\n   through the phone system's own routing is not changed (`locked`).\nIdempotent; a failure part-way answers `502` and repeating the call completes it. Requires\n`phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRoutingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The agent's skills and queue eligibility after the change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRouting"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Unknown agent or queue (code `agent_not_found` / `queue_not_found`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/agents/{provider_agent_id}/routing:preview": {
+      "parameters": [
+        {
+          "name": "provider_agent_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's agent id (`LiveAgent.provider_agent_id`)",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "previewAgentRouting",
+        "summary": "previewAgentRouting",
+        "description": "The routing impact of `setAgentRouting` with the same body, without changing anything: the\nqueues the agent can take calls from now (as the phone system routes today) and after the\nchange, what is added and removed, the queues that would lose their last available agent, and\nthe queues the agent stays in through the phone system's own routing. Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRoutingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The impact preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRoutingPreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Unknown agent or queue (code `agent_not_found` / `queue_not_found`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/queues": {
+      "get": {
+        "operationId": "listQueues",
+        "summary": "listQueues",
+        "description": "The organization's queues with live demand (waiting calls, longest wait), staffing (eligible\nvs available agents), derived health and who can take their calls: the routing steps in the\norder the phone system tries them, each naming skills and people. Routing is read-only in the\ncontrol center except the epilot-managed step that `setAgentRouting` maintains. Polled about\nevery 20 seconds. Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "200": {
+            "description": "The organization's queues",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "captured_at",
+                    "results"
+                  ],
+                  "properties": {
+                    "captured_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/QueueOverview"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/queues/{queue_id}": {
+      "parameters": [
+        {
+          "name": "queue_id",
+          "in": "path",
+          "required": true,
+          "description": "The provider's queue id",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getQueue",
+        "summary": "getQueue",
+        "description": "One queue for the control center's queue drawer: the overview fields plus the agents currently\neligible for it (with live status and how they are eligible) and the calls waiting in it.\nRequires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "responses": {
+          "200": {
+            "description": "The queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "Unknown queue (code `queue_not_found`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/manager/reporting/calls": {
+      "get": {
+        "operationId": "getCallReport",
+        "summary": "getCallReport",
+        "description": "Inbound call outcomes for a period, from the provider's call reporting: how many inbound calls\nthere were, how many an agent handled (bridged) and how many ended without an agent (abandoned\nor failed), plus the inbound total of the period of the same length just before, for the\ntrend. The window is at most 31 days. Requires `phone:manage`.\n",
+        "tags": [
+          "manager"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:manage"
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "description": "Start of the period (inclusive), RFC 3339 with an offset",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "description": "End of the period (exclusive), RFC 3339 with an offset",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The call outcomes of the period",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CallReport"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The organization is not set up for the phone (code `not_set_up`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          }
+        }
+      }
+    },
+    "/v1/operator/provider-setups": {
+      "get": {
+        "operationId": "listProviderSetups",
+        "summary": "listProviderSetups",
+        "description": "Every organization that has a telephony provider tenant, for the admin portal's overview: the\nprovider's sub-accounts (one per organization, keyed by the organization id) joined with this\nservice's setup record. `ready` follows getManagerStatus: an organization whose tenant was created\nby hand, outside `setupProvider`, has no record and is not ready until the setup runs once.\nSorted by organization id; not paged (one tenant per organization, a few hundred at most).\n",
+        "tags": [
+          "operator"
+        ],
+        "security": [
+          {
+            "OperatorAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "internal"
+        ],
+        "responses": {
+          "200": {
+            "description": "The provider setups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "results"
+                  ],
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProviderSetupSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/operator/organizations/{org_id}/provider": {
+      "parameters": [
+        {
+          "name": "org_id",
+          "in": "path",
+          "required": true,
+          "description": "epilot organization id",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getProviderSetup",
+        "summary": "getProviderSetup",
+        "description": "What has been set up at the telephony provider for this organization.",
+        "tags": [
+          "operator"
+        ],
+        "security": [
+          {
+            "OperatorAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "internal"
+        ],
+        "responses": {
+          "200": {
+            "description": "Provider setup state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderSetup"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/operator/organizations/{org_id}/provider:setup": {
+      "parameters": [
+        {
+          "name": "org_id",
+          "in": "path",
+          "required": true,
+          "description": "epilot organization id",
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "setupProvider",
+        "summary": "setupProvider",
+        "description": "Prepares the telephony provider for an organization, idempotently and in order: the provider\ntenant (Babelforce sub-account keyed by the organization id), its SCIM configuration with role\nmanagement on, and its SSO configuration pointing at the identity-api client given here. The\nclient secret is forwarded to the provider and never stored by this service. Re-running updates\nthe SSO configuration (new client or rotated secret) and leaves the rest untouched.\n",
+        "tags": [
+          "operator"
+        ],
+        "security": [
+          {
+            "OperatorAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "internal"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderSetupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Provider setup state after the run",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderSetup"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The provider refused, for example the account name is taken (code `provider_conflict`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
     }
   },
   "components": {
+    "responses": {
+      "BadRequest": {
+        "description": "The request is malformed or fails validation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing or invalid bearer token",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "The caller lacks the required permission",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "BadGateway": {
+        "description": "A dependency failed: the telephony provider could not be reached or answered unexpectedly (code\n`provider_error`, with the provider's request id when it sent one), or identity-api is\ntemporarily unavailable (code `identity_unavailable`). Retrying is safe.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "The operator's admin-portal groups could not be checked right now; retry",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "securitySchemes": {
       "EpilotAuth": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      },
+      "OperatorAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Internal-auth bearer token minted for an epilot admin-portal user in an allowed group (same\npolicy as identity-api's operator API). Customer organization bearers are never accepted.\n"
       }
     },
     "schemas": {
+      "ManagerStatus": {
+        "type": "object",
+        "required": [
+          "provider",
+          "ready",
+          "reasons"
+        ],
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "Telephony provider behind this organization",
+            "enum": [
+              "babelforce"
+            ]
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "Agents can be assigned"
+          },
+          "reasons": {
+            "type": "array",
+            "description": "Why the organization is not ready (empty when ready)",
+            "items": {
+              "type": "string",
+              "enum": [
+                "provider_tenant_missing",
+                "sso_not_configured",
+                "scim_not_configured",
+                "identity_enablement_missing"
+              ]
+            }
+          }
+        }
+      },
+      "PhoneAgent": {
+        "type": "object",
+        "required": [
+          "user_id",
+          "email",
+          "status"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "epilot user id"
+          },
+          "email": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "description": "`active`: holds the phone and has an enabled provider user. `pending`: assigned in epilot but\nthe provider user is not activated yet. `disabled`: provider user disabled. `missing_provider`:\nholds `phone:use` but no provider user is bound (assign again to repair). `missing_role`:\nassigned here, but the `phone_agent` role (`phone:use`) was removed elsewhere, e.g. in the\nusers and permissions settings (assign again to restore it, or remove to deactivate the\nprovider user).\n",
+            "enum": [
+              "active",
+              "pending",
+              "disabled",
+              "missing_provider",
+              "missing_role"
+            ]
+          },
+          "provider_user_id": {
+            "type": "string",
+            "description": "The provider's id of the bound user"
+          },
+          "provider_roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assigned_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "assigned_by": {
+            "type": "string",
+            "description": "epilot user id of the manager who assigned the phone"
+          }
+        }
+      },
+      "AssignPhoneAgentRequest": {
+        "type": "object",
+        "required": [
+          "user_id"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "epilot user id of an active member of the caller's organization",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+          }
+        }
+      },
+      "ProviderSetup": {
+        "type": "object",
+        "required": [
+          "provider",
+          "org_id",
+          "ready",
+          "tenant",
+          "scim",
+          "sso"
+        ],
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": [
+              "babelforce"
+            ]
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "Everything below is in place"
+          },
+          "tenant": {
+            "type": "object",
+            "description": "The provider tenant for this organization (null until created)",
+            "nullable": true,
+            "required": [
+              "id",
+              "name",
+              "org_key"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "org_key": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "scim": {
+            "type": "object",
+            "required": [
+              "configured",
+              "roles_enabled"
+            ],
+            "properties": {
+              "configured": {
+                "type": "boolean"
+              },
+              "roles_enabled": {
+                "type": "boolean"
+              }
+            }
+          },
+          "sso": {
+            "type": "object",
+            "required": [
+              "configured"
+            ],
+            "properties": {
+              "configured": {
+                "type": "boolean"
+              },
+              "identity_client_id": {
+                "type": "string",
+                "description": "The identity-api client the tenant's SSO configuration points at"
+              },
+              "configured_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "last_setup_by": {
+            "type": "string",
+            "description": "Admin-portal operator (email) who last ran the setup"
+          }
+        }
+      },
+      "ProviderSetupSummary": {
+        "type": "object",
+        "description": "One organization's provider setup, as listed in the overview (no live SCIM or SSO reads).",
+        "required": [
+          "org_id",
+          "provider",
+          "ready",
+          "setup_recorded",
+          "tenant"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "description": "epilot organization id (the provider tenant's org key)"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "babelforce"
+            ]
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "Phone agents can be assigned (same rule as getManagerStatus)"
+          },
+          "setup_recorded": {
+            "type": "boolean",
+            "description": "`setupProvider` has run for this organization at least once. `false` for a tenant created by\nhand at the provider: run the setup once to record it.\n"
+          },
+          "tenant": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "org_key"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The provider's tenant id (Babelforce sub-account id)"
+              },
+              "name": {
+                "type": "string"
+              },
+              "org_key": {
+                "type": "string"
+              }
+            }
+          },
+          "sso_identity_client_id": {
+            "type": "string",
+            "description": "The identity-api client the recorded SSO configuration points at"
+          },
+          "last_setup_by": {
+            "type": "string",
+            "description": "The operator who last ran the setup (email)"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the setup record last changed"
+          }
+        }
+      },
+      "ProviderSetupRequest": {
+        "type": "object",
+        "required": [
+          "identity_client_id",
+          "identity_client_secret"
+        ],
+        "properties": {
+          "account_name": {
+            "type": "string",
+            "description": "Provider tenant name, unique across the provider (3 to 100 characters). Required the first\ntime (`400` with code `account_name_required` without it); ignored once the tenant exists.\n",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "identity_client_id": {
+            "type": "string",
+            "description": "identity-api client registered for the provider (its partner application for this stage)",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._~-]+$"
+          },
+          "identity_client_secret": {
+            "type": "string",
+            "description": "The client's current secret, forwarded to the provider's SSO configuration and never stored",
+            "minLength": 12,
+            "maxLength": 512
+          }
+        }
+      },
       "CustomerBatchSearchResult": {
         "type": "object",
         "additionalProperties": false,
@@ -286,6 +1550,654 @@
             "type": "string",
             "description": "Omitted when the contact has none",
             "example": "4711"
+          }
+        }
+      },
+      "AgentState": {
+        "type": "string",
+        "description": "The agent's live line state as the provider reports it, plus `offline` for an agent whose\npresence is not available (not signed in or on a busy presence) and `unknown` when the\nprovider gives no state. `in_call` covers ringing-to-bridged; `wrap_up` is the post-call time.\n",
+        "enum": [
+          "available",
+          "ringing",
+          "in_call",
+          "wrap_up",
+          "busy",
+          "declined",
+          "unreachable",
+          "selected",
+          "offline",
+          "unknown"
+        ]
+      },
+      "AgentPresence": {
+        "type": "object",
+        "description": "The provider presence the agent has selected (e.g. Available, Break, Meeting)",
+        "required": [
+          "name",
+          "label",
+          "available"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "Whether this presence lets the agent take calls"
+          }
+        }
+      },
+      "Skill": {
+        "type": "string",
+        "description": "A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is\n`<skill category>:<label>` (e.g. `language:german`), which the control center shows as\n\"Category · Label\"; a skill without a colon has no category.\n",
+        "minLength": 1,
+        "maxLength": 100,
+        "pattern": "^\\S(.*\\S)?$"
+      },
+      "QueueRef": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "PersonRef": {
+        "type": "object",
+        "description": "An agent as a routing step names them",
+        "required": [
+          "provider_agent_id",
+          "name"
+        ],
+        "properties": {
+          "provider_agent_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "The epilot user id, when the agent is an epilot phone agent"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "EligibilityPath": {
+        "type": "string",
+        "description": "How an agent can take a queue's calls:\n- `skill`: the queue routes to people with a skill the agent has (changes with the agent's skills);\n- `direct`: the agent is in the queue's epilot-managed step (added from the control center);\n- `routing`: the phone system's own routing names the agent (a team or a person set up there);\n  epilot does not change it.\n",
+        "enum": [
+          "skill",
+          "direct",
+          "routing"
+        ]
+      },
+      "AgentQueueEligibility": {
+        "type": "object",
+        "description": "A queue an agent can take calls from, and why",
+        "required": [
+          "id",
+          "name",
+          "via",
+          "skills",
+          "locked"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "via": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/EligibilityPath"
+            }
+          },
+          "skills": {
+            "type": "array",
+            "description": "The agent's skills that make the queue route to them (empty unless `via` has `skill`)",
+            "items": {
+              "type": "string"
+            }
+          },
+          "locked": {
+            "type": "boolean",
+            "description": "The phone system's own routing names the agent (`via` has `routing`), so changing skills or\ndirect membership cannot remove the queue; the control center shows it checked and disabled.\n"
+          }
+        }
+      },
+      "LiveAgent": {
+        "type": "object",
+        "required": [
+          "provider_agent_id",
+          "name",
+          "enabled",
+          "state",
+          "skills",
+          "queues"
+        ],
+        "properties": {
+          "provider_agent_id": {
+            "type": "string",
+            "description": "The phone system's agent id"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "The epilot user id, when the agent is an epilot phone agent (matched by email)"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the phone system routes queue calls to this agent at all"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AgentState"
+          },
+          "presence": {
+            "$ref": "#/components/schemas/AgentPresence"
+          },
+          "display_status": {
+            "type": "string",
+            "description": "The phone system's human-readable status label"
+          },
+          "skills": {
+            "type": "array",
+            "description": "The agent's skills as the phone system holds them (the source of truth for phone routing)",
+            "items": {
+              "$ref": "#/components/schemas/Skill"
+            }
+          },
+          "queues": {
+            "type": "array",
+            "description": "Queues the agent can take calls from, derived from every queue's routing steps",
+            "items": {
+              "$ref": "#/components/schemas/AgentQueueEligibility"
+            }
+          },
+          "current_call": {
+            "type": "object",
+            "description": "The call the agent is on, when the phone system reports one",
+            "required": [
+              "started_at"
+            ],
+            "properties": {
+              "started_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "queue_name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "LiveAgentCounters": {
+        "type": "object",
+        "description": "Presence counters over the organization's agents",
+        "required": [
+          "total",
+          "online",
+          "available",
+          "on_call",
+          "wrap_up",
+          "offline"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "online": {
+            "type": "integer",
+            "description": "Agents on an available presence, i.e. everyone not offline (available + on call + wrap-up + other busy line states)"
+          },
+          "available": {
+            "type": "integer"
+          },
+          "on_call": {
+            "type": "integer",
+            "description": "Ringing or bridged"
+          },
+          "wrap_up": {
+            "type": "integer"
+          },
+          "offline": {
+            "type": "integer"
+          }
+        }
+      },
+      "QueueHealth": {
+        "type": "string",
+        "description": "`at_risk`: calls are waiting and no eligible agent is available. `healthy`: at least one\neligible agent is available. `quiet`: nothing waiting and nobody available.\n",
+        "enum": [
+          "healthy",
+          "at_risk",
+          "quiet"
+        ]
+      },
+      "QueueLive": {
+        "type": "object",
+        "description": "Live demand and staffing of one queue",
+        "required": [
+          "id",
+          "name",
+          "waiting",
+          "eligible",
+          "available",
+          "health"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "waiting": {
+            "type": "integer",
+            "description": "Calls waiting in the queue right now"
+          },
+          "longest_wait_seconds": {
+            "type": "integer",
+            "description": "How long the longest-waiting call has waited; absent when nothing waits"
+          },
+          "eligible": {
+            "type": "integer",
+            "description": "Agents the queue's routing steps resolve to"
+          },
+          "available": {
+            "type": "integer",
+            "description": "Eligible agents whose state is `available` right now"
+          },
+          "health": {
+            "$ref": "#/components/schemas/QueueHealth"
+          }
+        }
+      },
+      "LiveSnapshot": {
+        "type": "object",
+        "required": [
+          "captured_at",
+          "agents",
+          "queues",
+          "calls_waiting"
+        ],
+        "properties": {
+          "captured_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "agents": {
+            "$ref": "#/components/schemas/LiveAgentCounters"
+          },
+          "queues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueLive"
+            }
+          },
+          "calls_waiting": {
+            "type": "integer",
+            "description": "Waiting calls across all queues"
+          },
+          "longest_wait_seconds": {
+            "type": "integer",
+            "description": "The longest wait across all queues; absent when nothing waits"
+          }
+        }
+      },
+      "QueueRoutingStep": {
+        "type": "object",
+        "description": "One step of who can take a queue's calls, in the order the phone system tries them. A step\noffers calls to the people it names and to everyone with any of its skills. Teams set up in the\nphone system appear as the people they contain. The epilot-managed step holds the people added\nfrom the control center; every other step is the organization's own routing, read-only here.\n",
+        "required": [
+          "id",
+          "order",
+          "label",
+          "enabled",
+          "skills",
+          "people",
+          "managed_by_epilot"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Lower is tried first"
+          },
+          "label": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "skills": {
+            "type": "array",
+            "description": "Skills the step routes on (anyone with any of them)",
+            "items": {
+              "$ref": "#/components/schemas/Skill"
+            }
+          },
+          "people": {
+            "type": "array",
+            "description": "People the step names, directly or through a team set up in the phone system",
+            "items": {
+              "$ref": "#/components/schemas/PersonRef"
+            }
+          },
+          "managed_by_epilot": {
+            "type": "boolean",
+            "description": "The step `setAgentRouting` maintains; the only one the control center writes"
+          }
+        }
+      },
+      "QueueOverview": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/QueueLive"
+          },
+          {
+            "type": "object",
+            "required": [
+              "routing"
+            ],
+            "properties": {
+              "numbers": {
+                "type": "array",
+                "description": "Service numbers routed into this queue, when the phone system makes that derivable",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "routing": {
+                "type": "array",
+                "description": "Who can take the queue's calls, in the order the phone system tries them",
+                "items": {
+                  "$ref": "#/components/schemas/QueueRoutingStep"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "EligibleAgent": {
+        "type": "object",
+        "description": "An agent who can take the queue's calls, with live status",
+        "required": [
+          "provider_agent_id",
+          "name",
+          "state",
+          "via",
+          "skills"
+        ],
+        "properties": {
+          "provider_agent_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AgentState"
+          },
+          "presence": {
+            "$ref": "#/components/schemas/AgentPresence"
+          },
+          "via": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/EligibilityPath"
+            }
+          },
+          "skills": {
+            "type": "array",
+            "description": "The agent's skills that make the queue route to them (empty unless `via` has `skill`)",
+            "items": {
+              "$ref": "#/components/schemas/Skill"
+            }
+          }
+        }
+      },
+      "WaitingCall": {
+        "type": "object",
+        "required": [
+          "id",
+          "waited_seconds",
+          "state"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "from_masked": {
+            "type": "string",
+            "description": "The caller's number with all but the last four digits hidden"
+          },
+          "waited_seconds": {
+            "type": "integer"
+          },
+          "state": {
+            "type": "string",
+            "description": "The provider's call state (e.g. `queued`, `ringing`)"
+          }
+        }
+      },
+      "QueueDetail": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/QueueOverview"
+          },
+          {
+            "type": "object",
+            "required": [
+              "captured_at",
+              "eligible_agents",
+              "waiting_calls"
+            ],
+            "properties": {
+              "captured_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "eligible_agents": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EligibleAgent"
+                }
+              },
+              "waiting_calls": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/WaitingCall"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "AgentRoutingRequest": {
+        "type": "object",
+        "required": [
+          "skills",
+          "queue_ids"
+        ],
+        "properties": {
+          "skills": {
+            "type": "array",
+            "description": "The agent's skills in the phone system (full set, not a delta); at most 200",
+            "items": {
+              "$ref": "#/components/schemas/Skill"
+            }
+          },
+          "queue_ids": {
+            "type": "array",
+            "description": "The queues the agent is directly in, through the epilot-managed step (full set); at most 200",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            }
+          }
+        }
+      },
+      "AgentRouting": {
+        "type": "object",
+        "required": [
+          "provider_agent_id",
+          "skills",
+          "queues"
+        ],
+        "properties": {
+          "provider_agent_id": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Skill"
+            }
+          },
+          "queues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentQueueEligibility"
+            }
+          }
+        }
+      },
+      "AgentRoutingPreview": {
+        "type": "object",
+        "required": [
+          "provider_agent_id",
+          "before",
+          "after",
+          "added",
+          "removed",
+          "coverage_lost",
+          "locked"
+        ],
+        "properties": {
+          "provider_agent_id": {
+            "type": "string"
+          },
+          "before": {
+            "type": "array",
+            "description": "Queues the agent can take calls from now, as the phone system routes today",
+            "items": {
+              "$ref": "#/components/schemas/QueueRef"
+            }
+          },
+          "after": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueRef"
+            }
+          },
+          "added": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueRef"
+            }
+          },
+          "removed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueRef"
+            }
+          },
+          "coverage_lost": {
+            "type": "array",
+            "description": "Removed queues where this agent is currently the only available eligible agent",
+            "items": {
+              "$ref": "#/components/schemas/QueueRef"
+            }
+          },
+          "locked": {
+            "type": "array",
+            "description": "Queues the agent stays in through the phone system's own routing, which this call cannot remove",
+            "items": {
+              "$ref": "#/components/schemas/QueueRef"
+            }
+          }
+        }
+      },
+      "CallReport": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "inbound_total",
+          "handled_by_agent",
+          "abandoned_or_failed",
+          "previous_period"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "inbound_total": {
+            "type": "integer"
+          },
+          "handled_by_agent": {
+            "type": "integer",
+            "description": "Inbound calls bridged to an agent"
+          },
+          "abandoned_or_failed": {
+            "type": "integer",
+            "description": "Inbound calls that ended without reaching an agent"
+          },
+          "previous_period": {
+            "type": "object",
+            "description": "The same window shifted back by whole days (its length rounded up to days), for the trend: a\nrunning \"today\" compares with yesterday up to the same time, \"last 7 days\" with the 7 days before\n",
+            "required": [
+              "from",
+              "to",
+              "inbound_total"
+            ],
+            "properties": {
+              "from": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "to": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "inbound_total": {
+                "type": "integer"
+              }
+            }
           }
         }
       },

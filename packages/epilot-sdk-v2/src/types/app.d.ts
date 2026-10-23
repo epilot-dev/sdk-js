@@ -923,6 +923,10 @@ export declare namespace Components {
                 versioned_by?: string;
             };
         }
+        /**
+         * A requirement a hook reads from `Context`, discriminated by `type`. More types will be added later; consumers must ignore types they do not know.
+         */
+        export type ContextRequirement = /* A requirement a hook reads from `Context`, discriminated by `type`. More types will be added later; consumers must ignore types they do not know. */ /* The consumer supplies the bound entities of `schema` under `Context.<schema>`. */ EntityContextRequirement | /* The consumer supplies one scalar value under `Context.<name>`, e.g. a date the customer entered in a journey block. A value input is optional: the consumer sends it when it has a value and omits it otherwise, so the hook's templates must cope with its absence, e.g. `{{ Context.reading_date | default: "now" | date: "%Y-%m-%d" }}`. `date` values are ISO 8601 strings (`YYYY-MM-DD` or a date-time). */ ValueContextRequirement;
         export interface CustomCapabilityComponent {
             component_type: "CUSTOM_CAPABILITY";
             configuration: {
@@ -989,6 +993,18 @@ export declare namespace Components {
              * Optional tooltip or description for the navigation item.
              */
             nav_description?: string;
+        }
+        /**
+         * The consumer supplies the bound entities of `schema` under `Context.<schema>`.
+         */
+        export interface EntityContextRequirement {
+            type: "entity";
+            /**
+             * Entity schema slug, e.g. `contract`.
+             * example:
+             * contract
+             */
+            schema: string; // ^[a-z0-9_-]{1,100}$
         }
         export interface EnumArg {
             type?: "enum";
@@ -1285,17 +1301,17 @@ export declare namespace Components {
              * Hooks exposed by this component. Hook ids must be unique within the component.
              */
             hooks: /**
-             * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.input }}`).
+             * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.contract }}`).
              *
-             * `Context` is the single name → value map the consumer supplies. The names in it are up to the consumer — by convention the journey runtime passes the validated value of a validation rule as `context.input` and every configured context binding under its own configured name.
+             * `Context` is the name → value map the consumer supplies, one entry per context requirement it bound: `Context.<schema>` for an `entity` requirement, `Context.<name>` for a `value` requirement. Declare what a hook reads from `Context` in `contexts` so consumers can require it.
              *
              */
             ExternalValuesHook[];
         }
         /**
-         * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.input }}`).
+         * One external call that returns one or more typed results. Interpolated templates (Liquid) have access to `Context`, `Consumer`, `Options`, `Env` and — for `result` templates — `Response` and `AuthResponse` (each is also available snake_case, e.g. `{{ context.contract }}`).
          *
-         * `Context` is the single name → value map the consumer supplies. The names in it are up to the consumer — by convention the journey runtime passes the validated value of a validation rule as `context.input` and every configured context binding under its own configured name.
+         * `Context` is the name → value map the consumer supplies, one entry per context requirement it bound: `Context.<schema>` for an `entity` requirement, `Context.<name>` for a `value` requirement. Declare what a hook reads from `Context` in `contexts` so consumers can require it.
          *
          */
         export interface ExternalValuesHook {
@@ -1382,6 +1398,10 @@ export declare namespace Components {
              * Behaviour when the external system is unavailable (timeout, network or upstream error). `skip`: consumers ignore conditions depending on this hook. `block`: consumers treat the dependent action as not allowed.
              */
             on_unavailable?: "skip" | "block";
+            /**
+             * The requirements the hook reads from `Context` (at most 10). An `entity` requirement means the consumer supplies the bound entities of that schema under `Context.<schema>` (e.g. `{{ Context.contract[0].external_id }}` needs `{ type: entity, schema: contract }`). A `value` requirement means the consumer supplies one scalar value under `Context.<name>` (e.g. `{{ Context.reading_date }}` needs `{ type: value, name: reading_date, value_type: date }`); value inputs are optional at runtime, so templates must cope with their absence. Entity schemas are unique, value names are unique, and a value name must not equal an entity schema of the same hook (both land in `Context`). More requirement types will be added later; consumers must ignore types they do not know.
+             */
+            contexts?: /* A requirement a hook reads from `Context`, discriminated by `type`. More types will be added later; consumers must ignore types they do not know. */ ContextRequirement[];
             /**
              * Response caching. Off when omitted.
              */
@@ -3241,6 +3261,24 @@ export declare namespace Components {
              */
             de: string;
         }
+        /**
+         * The consumer supplies one scalar value under `Context.<name>`, e.g. a date the customer entered in a journey block. A value input is optional: the consumer sends it when it has a value and omits it otherwise, so the hook's templates must cope with its absence, e.g. `{{ Context.reading_date | default: "now" | date: "%Y-%m-%d" }}`. `date` values are ISO 8601 strings (`YYYY-MM-DD` or a date-time).
+         */
+        export interface ValueContextRequirement {
+            type: "value";
+            /**
+             * Key under which the value is sent (`Context.<name>`). Same pattern as validation rule parameter names. Unique among the hook's `value` requirements and must not equal the `schema` of an `entity` requirement of the same hook.
+             * example:
+             * reading_date
+             */
+            name: string; // ^[a-z][a-z0-9_]{0,63}$
+            /**
+             * Type of the value: `number` and `boolean` are sent as JSON numbers and booleans, `text` as a string, `date` as an ISO 8601 string (`YYYY-MM-DD` or a date-time).
+             * example:
+             * date
+             */
+            value_type: "number" | "text" | "date" | "boolean";
+        }
     }
 }
 export declare namespace Paths {
@@ -4712,11 +4750,13 @@ export type ComponentType = Components.Schemas.ComponentType;
 export type Configuration = Components.Schemas.Configuration;
 export type ConfigurationMetadata = Components.Schemas.ConfigurationMetadata;
 export type ConfigurationVersion = Components.Schemas.ConfigurationVersion;
+export type ContextRequirement = Components.Schemas.ContextRequirement;
 export type CustomCapabilityComponent = Components.Schemas.CustomCapabilityComponent;
 export type CustomFlowActionComponent = Components.Schemas.CustomFlowActionComponent;
 export type CustomFlowConfig = Components.Schemas.CustomFlowConfig;
 export type CustomPageComponent = Components.Schemas.CustomPageComponent;
 export type CustomPageConfig = Components.Schemas.CustomPageConfig;
+export type EntityContextRequirement = Components.Schemas.EntityContextRequirement;
 export type EnumArg = Components.Schemas.EnumArg;
 export type ErpInformToolkitComponent = Components.Schemas.ErpInformToolkitComponent;
 export type EventsQuery = Components.Schemas.EventsQuery;
@@ -4773,3 +4813,4 @@ export type Role = Components.Schemas.Role;
 export type S3Reference = Components.Schemas.S3Reference;
 export type TextArg = Components.Schemas.TextArg;
 export type TranslatedString = Components.Schemas.TranslatedString;
+export type ValueContextRequirement = Components.Schemas.ValueContextRequirement;
