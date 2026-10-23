@@ -589,7 +589,39 @@ declare namespace Components {
          *       ```
          *
          */
-        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | NewEmailThreadTrigger | FlowsTrigger | /**
+        EntityOperationTrigger | ActivityTrigger | EntityManualTrigger | ReceivedEmailTrigger | /**
+         * Starts the flow for every email sent from epilot: emails and replies sent from the inbox,
+         * including replies sent from a draft, and emails sent by automations or Flows, except sends
+         * that skip creating entities. The sent email is the execution's entity. The outgoing
+         * counterpart of `received_email`.
+         *
+         * Only a Flow's trigger can use it: the flow must have exactly one action, of type
+         * `trigger-workflow`. Any other flow with this trigger is rejected.
+         *
+         * An email that failed to send, or a bulk email, does not start the flow. Neither does an email
+         * whose automation chain already contains the flow, so a Flow isn't started again by emails its
+         * own run sends, also not through other Flows.
+         *
+         * Every other sent email starts the flow, so a busy mailbox can reach the hot-flow limit; raise
+         * the flow's `max_executions` if needed.
+         *
+         * example:
+         * {
+         *   "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
+         *   "type": "sent_email",
+         *   "configuration": {}
+         * }
+         */
+        SentEmailTrigger | /**
+         * Starts the flow when an email starts a new thread. The thread is the execution's entity.
+         *
+         * For outbound threads, an email that failed to send or a bulk email does not start the flow,
+         * and neither does an email whose automation chain already contains the flow. A flow that
+         * sends emails itself (a send-email, reply-email or forward-email action) is not started for
+         * outbound threads at all, because its own emails could start it again.
+         *
+         */
+        NewEmailThreadTrigger | FlowsTrigger | /**
          * Starts the flow when an Event Catalog event is published for the organization. The execution runs in the context of one entity from the event's entity graph (`entity_node_id`), and the event payload is available to conditions and actions as the `event` variable context.
          *
          * example:
@@ -863,16 +895,27 @@ declare namespace Components {
              */
             attribute?: string;
             /**
-             * Assignees to write into `attribute`, in the order given.
+             * Assignees to write into `attribute`, in the order given. Variable
+             * entries are resolved at execution time and expand to zero or more
+             * assignees.
+             *
              */
-            assignees?: /**
+            assignees?: (/**
              * A single assignee as stored in a user-relation attribute. Written through
              * verbatim by the assign-entity worker. Note this object encoding differs
              * deliberately from AssignThreadConfig, which stores bare id strings —
              * each matches what its own target accepts.
              *
              */
-            EntityAssignee[];
+            EntityAssignee | /**
+             * An assignee resolved at execution time from a user-relation attribute of an
+             * entity in the automation context, e.g. `{{submission._owners}}`. Resolves
+             * against the entity being assigned or the triggering entity, whichever has
+             * the given schema slug. The attribute may hold user ids, `{ org_id, user_id }`
+             * owners, groups or partner organizations. Direct assignment only.
+             *
+             */
+            EntityAssigneeVariable)[];
             /**
              * How `assignees` combine with the attribute's current value.
              * - replace: overwrite the attribute with `assignees` (default).
@@ -883,25 +926,45 @@ declare namespace Components {
              *   `partner_id` for partner_organization. Scoping by `org_id` keeps
              *   assignees from different organizations distinct even when their
              *   identifiers coincide.
-             * Honoured in `direct` only; `sequential` always forces `replace`.
+             * Honoured in every `assignment_type`; in `sequential` and
+             * `even_distribution` the selected user (or the fallback assignees)
+             * take the place of `assignees`.
              *
              */
             write_mode?: "replace" | "append";
             /**
              * How assignees are resolved. Omitted means `direct`.
              * - direct: assign exactly the assignees listed in `assignees`.
-             * - sequential: round-robin over the members of `candidate_group`,
-             *   selecting one user per execution. `assignees` is ignored and
-             *   `write_mode` is forced to `replace`.
-             * - even_distribution: like sequential, but the member with the fewest
-             *   matching entities wins; ties are resolved by the rotation.
+             * - sequential: round-robin over the users in `candidate_pool`,
+             *   selecting one user per execution. `assignees` is ignored.
+             * - even_distribution: the user in `candidate_pool` with the fewest
+             *   matching entities wins; ties are broken at random.
              *   `workload_filter` narrows what counts as load.
              *
              */
             assignment_type?: "direct" | "sequential" | "even_distribution";
             /**
-             * The group whose members form the rotation. Must be `type: group`;
-             * ignored in `direct`.
+             * Users and groups whose members form the candidate set for
+             * `sequential` and `even_distribution`; ignored in `direct`. Groups
+             * expand to their members and a user reached through several entries
+             * is a candidate once. Partner entries are ignored.
+             * `even_distribution` supports at most 200 distinct users once groups
+             * are expanded; beyond that the run fails.
+             * When absent or empty, `candidate_group` is used instead.
+             *
+             */
+            candidate_pool?: /**
+             * A single assignee as stored in a user-relation attribute. Written through
+             * verbatim by the assign-entity worker. Note this object encoding differs
+             * deliberately from AssignThreadConfig, which stores bare id strings —
+             * each matches what its own target accepts.
+             *
+             */
+            EntityAssignee[] | null;
+            /**
+             * Deprecated: use `candidate_pool`. The group whose members form the
+             * candidates, read only when `candidate_pool` is absent or empty. Must
+             * be `type: group`; ignored in `direct`.
              *
              */
             candidate_group?: {
@@ -965,6 +1028,8 @@ declare namespace Components {
              * only assign to users whose skills (tags) match a label on the entity
              * being assigned. Opt-in; defaults to false. An entity carrying no
              * namespaced label matches nobody, so the fallback applies.
+             * When `required_skills` is non-empty, that filter runs first and this
+             * matching narrows its result.
              *
              */
             match_user_skills?: boolean;
@@ -982,6 +1047,130 @@ declare namespace Components {
              */
             required_skill_categories?: string[];
             /**
+             * Candidate condition for `sequential` and `even_distribution`: skills a
+             * user must have, as classification ids (`family:label`, e.g.
+             * `role:project-manager`), checked against the user's skills (tags) only,
+             * case-insensitively; the entity's labels play no part, so an unlabelled
+             * entity can still be assigned. Applied whenever non-empty; independent of
+             * `match_user_skills`.
+             *
+             * example:
+             * [
+             *   "role:project-manager"
+             * ]
+             */
+            required_skills?: [
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+            /**
+             * How strictly `required_skills` is matched. Independent of
+             * `skill_match_mode`.
+             * - require_all: a user must have every required skill (default).
+             * - prefer: users with the most required skills are eligible; a user
+             *   with none of them is never eligible (the fallback then applies).
+             *
+             */
+            required_skills_match_mode?: "require_all" | "prefer";
+            /**
              * How strictly required skill categories are matched (applies with
              * match_user_skills and required skill categories set).
              * - require_all: hard match (default) — a user must match every required
@@ -994,7 +1183,7 @@ declare namespace Components {
             skill_match_mode?: "require_all" | "prefer";
             /**
              * What to do when no assignable principal resolves, e.g. an empty or
-             * fully ineligible `candidate_group`.
+             * fully ineligible `candidate_pool`.
              * - leave_unassigned: write nothing at all, leaving the attribute as it
              *   was. Not the same as writing an empty array, which would clear an
              *   existing assignment.
@@ -1186,6 +1375,20 @@ declare namespace Components {
              *
              */
             fallback_assignees?: string[];
+            /**
+             * How the resolved assignees combine with the thread's current assignees.
+             * Applies in every `assignment_type`, after routing and fallback have
+             * picked the user(s).
+             * - append: add the resolved assignees and remove those in `remove`,
+             *   keeping everyone else (default).
+             * - replace: the thread ends up assigned to exactly the resolved
+             *   assignees (`add` minus `remove` for direct; the picked user or the
+             *   fallback assignees otherwise). Existing user and group assignees
+             *   not in that list are removed.
+             * Ignored when nothing is written (e.g. `leave_unassigned` fallback).
+             *
+             */
+            write_mode?: "append" | "replace";
         }
         /**
          * example:
@@ -1735,6 +1938,22 @@ declare namespace Components {
              */
             report_file_entity_id?: string;
             /**
+             * Error that moved the job into the `failed` status. Cleared when the job is restarted.
+             * example:
+             * ThrottlingException: Throughput exceeds the current capacity of your table or index.
+             */
+            last_error?: string;
+            /**
+             * How many times the job was restarted after failing or being cancelled
+             * example:
+             * 1
+             */
+            restart_count?: number;
+            /**
+             * Time of the last restart of the job
+             */
+            restarted_at?: string; // date-time
+            /**
              * Query configuration for loading entities
              */
             entity_query?: {
@@ -1789,9 +2008,20 @@ declare namespace Components {
                 has_more?: boolean;
             };
             /**
-             * List of entities & their automation execution id & status
+             * List of entities & their automation execution id & status.
+             *
+             * In API responses the list is bounded to a few MB (see `execution_summary_truncated`); use
+             * `execution_stats` for complete counts.
+             *
              */
             execution_summary?: /* Execution item for bulk trigger automation. It maps each entity to its automation execution id & status */ ExecItem[];
+            execution_stats?: /* Number of execution items of a bulk trigger job per execution status. Always complete. */ ExecutionStats;
+            /**
+             * True when `execution_summary` does not contain all execution items of the job (the response was bounded,
+             * or the summary was not requested).
+             *
+             */
+            execution_summary_truncated?: boolean;
         }
         export type BulkTriggerRequest = {
             flow_id: /**
@@ -2398,6 +2628,22 @@ declare namespace Components {
             email?: string;
         }
         /**
+         * An assignee resolved at execution time from a user-relation attribute of an
+         * entity in the automation context, e.g. `{{submission._owners}}`. Resolves
+         * against the entity being assigned or the triggering entity, whichever has
+         * the given schema slug. The attribute may hold user ids, `{ org_id, user_id }`
+         * owners, groups or partner organizations. Direct assignment only.
+         *
+         */
+        export interface EntityAssigneeVariable {
+            /**
+             * Expression of the form `{{schema.attribute}}`.
+             * example:
+             * {{submission._owners}}
+             */
+            variable: string;
+        }
+        /**
          * example:
          * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
          */
@@ -2878,7 +3124,7 @@ declare namespace Components {
                  */
                 event_version: string;
                 /**
-                 * Id of the cardinality-one node in the event's entity graph whose entity becomes the execution's main entity (the entity actions operate on).
+                 * Id of the node in the event's entity graph whose entity becomes the execution's main entity (the entity actions operate on). A repeatable (cardinality many) node may be chosen too: the first entity in the list becomes the main entity, and an event with an empty list does not start the flow.
                  *
                  * example:
                  * ticket
@@ -2940,6 +3186,26 @@ declare namespace Components {
              * Current depth in the execution chain (0 = manual start)
              */
             depth?: number;
+        }
+        /**
+         * Number of execution items of a bulk trigger job per execution status. Always complete.
+         */
+        export interface ExecutionStats {
+            /**
+             * example:
+             * 60582
+             */
+            total: number;
+            pending?: number;
+            starting?: number;
+            in_progress?: number;
+            success?: number;
+            failed?: number;
+            cancelled?: number;
+            skipped?: number;
+            paused?: number;
+            scheduled?: number;
+            hot?: number;
         }
         export type ExecutionStatus = "pending" | "starting" | "in_progress" | "paused" | "success" | "failed" | "cancelled" | "skipped" | "scheduled" | "hot";
         export interface ExistsCondition {
@@ -3653,6 +3919,87 @@ declare namespace Components {
                 source_id: string; // uuid
             };
         }
+        export interface LabelEmailAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "label-email";
+            config?: LabelEmailConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
+        }
+        export interface LabelEmailConfig {
+            /**
+             * Message label slugs to add, exactly as stored in the message entity's `_tags`. Labels already on the message are kept.
+             *
+             */
+            add: [
+                string,
+                ...string[]
+            ];
+        }
         export interface MapEntityAction {
             id?: /**
              * example:
@@ -4082,6 +4429,15 @@ declare namespace Components {
              */
             target_inbox_id?: string;
         }
+        /**
+         * Starts the flow when an email starts a new thread. The thread is the execution's entity.
+         *
+         * For outbound threads, an email that failed to send or a bulk email does not start the flow,
+         * and neither does an email whose automation chain already contains the flow. A flow that
+         * sends emails itself (a send-email, reply-email or forward-email action) is not started for
+         * outbound threads at all, because its own emails could start it again.
+         *
+         */
         export interface NewEmailThreadTrigger {
             /**
              * example:
@@ -4137,8 +4493,20 @@ declare namespace Components {
          */
         export type OrganizationId = string;
         export interface PatchBulkJobRequest {
-            action: "APPROVE" | "CANCEL";
-            task_token: string;
+            /**
+             * * APPROVE: Start the approved bulk job. Requires the `task_token` of the job.
+             * * CANCEL: Cancel the bulk job. Executions that already started keep running.
+             * * RESTART: Restart a `failed` or `cancelled` bulk job and continue where it left off.
+             *   Entities whose executions were not started yet are triggered, executions that already
+             *   started or finished are left untouched. If the entities were not fully loaded yet, they are
+             *   loaded again from scratch. A job that was never approved goes back to `approval`.
+             *
+             */
+            action: "APPROVE" | "CANCEL" | "RESTART";
+            /**
+             * Task token of the job. Required for the APPROVE action.
+             */
+            task_token?: string;
         }
         export interface PrefixCondition {
             prefix?: string;
@@ -4715,6 +5083,43 @@ declare namespace Components {
             body?: string;
             attachment_entity_ids?: string[];
         }
+        /**
+         * Starts the flow for every email sent from epilot: emails and replies sent from the inbox,
+         * including replies sent from a draft, and emails sent by automations or Flows, except sends
+         * that skip creating entities. The sent email is the execution's entity. The outgoing
+         * counterpart of `received_email`.
+         *
+         * Only a Flow's trigger can use it: the flow must have exactly one action, of type
+         * `trigger-workflow`. Any other flow with this trigger is rejected.
+         *
+         * An email that failed to send, or a bulk email, does not start the flow. Neither does an email
+         * whose automation chain already contains the flow, so a Flow isn't started again by emails its
+         * own run sends, also not through other Flows.
+         *
+         * Every other sent email starts the flow, so a busy mailbox can reach the hot-flow limit; raise
+         * the flow's `max_executions` if needed.
+         *
+         * example:
+         * {
+         *   "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
+         *   "type": "sent_email",
+         *   "configuration": {}
+         * }
+         */
+        export interface SentEmailTrigger {
+            /**
+             * example:
+             * 12d4f45a-1883-4841-a94c-5928cb338a94
+             */
+            id?: string; // uuid
+            type: "sent_email";
+            /**
+             * The trigger has no options yet.
+             */
+            configuration: {
+                [key: string]: any;
+            };
+        }
         export interface SetValueMapper {
             mode: /**
              * - copy_if_exists - it replaces the target attribute with the source value - append_if_exists - it currently replaces target attribute with array like values. Useful when you have multiple values to be added into one attribute. - set_value - it sets a value to a predefined value. Must be used together with value property.
@@ -5088,7 +5493,13 @@ declare namespace Components {
             caller?: ApiCallerContext;
         }
         export interface TriggerEventMessaging {
-            type?: "new_email_thread";
+            /**
+             * The trigger that started the execution:
+             * - new_email_thread: the execution entity is the thread.
+             * - sent_email: the execution entity is the sent email (`message_id`).
+             *
+             */
+            type?: "new_email_thread" | "sent_email";
             /**
              * example:
              * 123
@@ -5243,6 +5654,21 @@ declare namespace Components {
             loop_id?: string;
         }
         export interface TriggerShareEntityConfig {
+            /**
+             * Whether the action shares the entity with partners or unshares it from them.
+             * Unsharing removes the entity together with all of its related resources from the partners.
+             *
+             */
+            operation?: "share" | "unshare";
+            /**
+             * Only used when `operation` is `unshare`. When true, the entity is unshared from every partner
+             * it is currently shared with and `partner_org_ids` is ignored.
+             *
+             */
+            unshare_all_partners?: boolean;
+            /**
+             * Partner organizations to share the entity with, or to unshare it from
+             */
             partner_org_ids?: string[];
         }
         export interface TriggerWebhookAction {
@@ -5625,7 +6051,7 @@ declare namespace Components {
              */
             _automation_chain?: string[];
             /**
-             * Additional entity contexts from the parent flow execution. Used when an automation is triggered from a workflow task to carry all flow contexts into the automation, not just the primary entity.
+             * The contexts of the workflow execution whose task started this automation, as they were when the task ran: every entity that run works on, the one flagged is_primary being its main context. Any action of the automation may read them, e.g. assign-entity to find an entity of a given schema. Sent only for automations started by a workflow task.
              *
              */
             entity_contexts?: {
@@ -5634,12 +6060,47 @@ declare namespace Components {
                 is_primary?: boolean;
             }[];
             /**
+             * The task's input settings, as the flow author configured them on the workflow task (input_context.with_relations and input_context.also_pass in the workflow definition), resolved to entities for this run. The automation's own entity is the task's main input and is not repeated here. Present only when the task configures these settings; when absent, every action keeps the legacy behaviour: the automation's entity comes with all of its direct relations, and a started workflow also receives every entity in entity_contexts.
+             *
+             */
+            resolved_input?: {
+                /**
+                 * Whether the automation's entity brings its direct relations along. Every action honours it: when false, the relations are not loaded, and a started workflow does not receive them as contexts.
+                 *
+                 */
+                with_relations: boolean;
+                /**
+                 * Entities a start-workflow (trigger-workflow) action passes to the workflow it starts, on top of the automation's entity and, when with_relations is true, its relations. With resolved_input present, the started workflow receives exactly these: the entities in entity_contexts are not passed on.
+                 *
+                 */
+                also_pass: {
+                    entity_id: string;
+                    entity_schema?: string;
+                }[];
+            };
+            /**
              * Id of the user on whose behalf the workflow task triggered this automation — the caller of a user-initiated run, or the user whose task completion advanced the flow to the automation task. Action workers resolve it as the acting user for template variable resolution (user.*) and email thread assignment, matching the attribution of manually triggered executions. Absent when no human action led to the trigger (scheduler fires, journey-triggered flows).
              *
              * example:
              * 10006129
              */
             trigger_user_id?: string;
+            /**
+             * [Internal] The person who ran the workflow task's automation, set by the workflows service only when a user (not the engine) runs it. org_id is that user's own organization, which differs from the flow's for partner users. Used to attribute what the automation does, e.g. who closed the flow. Not for external consumers: a start request carrying it under any token other than a platform service's is refused with 403 and nothing is stored.
+             *
+             */
+            run_by?: {
+                /**
+                 * example:
+                 * 10006129
+                 */
+                user_id: string;
+                /**
+                 * example:
+                 * 739224
+                 */
+                org_id?: string;
+            };
         }
         /**
          * Correlation stamped when the triggering submission entity carried workflow wait claims from a journey link. Consumed by svc-workflows to resume a task waiting on this journey submission.
@@ -5805,6 +6266,7 @@ declare namespace Paths {
     }
     namespace GetBulkJob {
         namespace Parameters {
+            export type IncludeExecutionSummary = boolean;
             export type JobId = /**
              * Job ID for tracking the status of bulk trigger automation executions
              * example:
@@ -5814,6 +6276,9 @@ declare namespace Paths {
         }
         export interface PathParameters {
             job_id: Parameters.JobId;
+        }
+        export interface QueryParameters {
+            include_execution_summary?: Parameters.IncludeExecutionSummary;
         }
         namespace Responses {
             export type $200 = Components.Schemas.BulkTriggerJob;
@@ -6242,17 +6707,26 @@ export interface OperationMethods {
   /**
    * getBulkJob - getBulkJob
    * 
-   * Get the status of a bulk job that triggers multiple automation executions
+   * Get the status of a bulk job that triggers multiple automation executions.
+   * 
+   * `execution_stats` always holds the complete counts per execution status. `execution_summary` is bounded
+   * to a few MB for very large jobs (`execution_summary_truncated: true`) and can be left out entirely with
+   * `include_execution_summary=false`.
+   * 
    */
   'getBulkJob'(
-    parameters?: Parameters<Paths.GetBulkJob.PathParameters> | null,
+    parameters?: Parameters<Paths.GetBulkJob.QueryParameters & Paths.GetBulkJob.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBulkJob.Responses.$200>
   /**
    * patchBulkJob - patchBulkJob
    * 
-   * Approve / Cancel bulk job that triggers multiple automation executions
+   * Approve / Cancel / Restart a bulk job that triggers multiple automation executions.
+   * 
+   * A `failed` or `cancelled` job can be restarted with the `RESTART` action: it continues where it left off,
+   * only triggering the entities whose executions were not started yet.
+   * 
    */
   'patchBulkJob'(
     parameters?: Parameters<Paths.PatchBulkJob.PathParameters> | null,
@@ -6437,17 +6911,26 @@ export interface PathsDictionary {
     /**
      * getBulkJob - getBulkJob
      * 
-     * Get the status of a bulk job that triggers multiple automation executions
+     * Get the status of a bulk job that triggers multiple automation executions.
+     * 
+     * `execution_stats` always holds the complete counts per execution status. `execution_summary` is bounded
+     * to a few MB for very large jobs (`execution_summary_truncated: true`) and can be left out entirely with
+     * `include_execution_summary=false`.
+     * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetBulkJob.PathParameters> | null,
+      parameters?: Parameters<Paths.GetBulkJob.QueryParameters & Paths.GetBulkJob.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBulkJob.Responses.$200>
     /**
      * patchBulkJob - patchBulkJob
      * 
-     * Approve / Cancel bulk job that triggers multiple automation executions
+     * Approve / Cancel / Restart a bulk job that triggers multiple automation executions.
+     * 
+     * A `failed` or `cancelled` job can be restarted with the `RESTART` action: it continues where it left off,
+     * only triggering the entities whose executions were not started yet.
+     * 
      */
     'patch'(
       parameters?: Parameters<Paths.PatchBulkJob.PathParameters> | null,
@@ -6571,6 +7054,7 @@ export type DiffAdded = Components.Schemas.DiffAdded;
 export type DiffDeleted = Components.Schemas.DiffDeleted;
 export type DiffUpdated = Components.Schemas.DiffUpdated;
 export type EntityAssignee = Components.Schemas.EntityAssignee;
+export type EntityAssigneeVariable = Components.Schemas.EntityAssigneeVariable;
 export type EntityId = Components.Schemas.EntityId;
 export type EntityItemSnapshot = Components.Schemas.EntityItemSnapshot;
 export type EntityManualTrigger = Components.Schemas.EntityManualTrigger;
@@ -6587,6 +7071,7 @@ export type ErrorOutput = Components.Schemas.ErrorOutput;
 export type EventCatalogTrigger = Components.Schemas.EventCatalogTrigger;
 export type ExecItem = Components.Schemas.ExecItem;
 export type ExecutionChain = Components.Schemas.ExecutionChain;
+export type ExecutionStats = Components.Schemas.ExecutionStats;
 export type ExecutionStatus = Components.Schemas.ExecutionStatus;
 export type ExistsCondition = Components.Schemas.ExistsCondition;
 export type FilterConditionOnEvent = Components.Schemas.FilterConditionOnEvent;
@@ -6614,6 +7099,8 @@ export type JourneyContextUsage = Components.Schemas.JourneyContextUsage;
 export type JourneyContextUsagesReq = Components.Schemas.JourneyContextUsagesReq;
 export type JourneyContextUsagesResp = Components.Schemas.JourneyContextUsagesResp;
 export type JourneySubmitTrigger = Components.Schemas.JourneySubmitTrigger;
+export type LabelEmailAction = Components.Schemas.LabelEmailAction;
+export type LabelEmailConfig = Components.Schemas.LabelEmailConfig;
 export type MapEntityAction = Components.Schemas.MapEntityAction;
 export type MapEntityActionConfig = Components.Schemas.MapEntityActionConfig;
 export type MapEntityConfig = Components.Schemas.MapEntityConfig;
@@ -6651,6 +7138,7 @@ export type SendEmailActionConfig = Components.Schemas.SendEmailActionConfig;
 export type SendEmailCondition = Components.Schemas.SendEmailCondition;
 export type SendEmailConfig = Components.Schemas.SendEmailConfig;
 export type SendEmailInputs = Components.Schemas.SendEmailInputs;
+export type SentEmailTrigger = Components.Schemas.SentEmailTrigger;
 export type SetValueMapper = Components.Schemas.SetValueMapper;
 export type StartExecutionRequest = Components.Schemas.StartExecutionRequest;
 export type SuffixCondition = Components.Schemas.SuffixCondition;

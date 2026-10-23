@@ -165,6 +165,10 @@
             "name": "job_id",
             "in": "path",
             "required": true
+          },
+          {
+            "name": "include_execution_summary",
+            "in": "query"
           }
         ],
         "responses": {}
