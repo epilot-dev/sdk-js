@@ -721,7 +721,7 @@
       "get": {
         "operationId": "getBulkJob",
         "summary": "getBulkJob",
-        "description": "Get the status of a bulk job that triggers multiple automation executions",
+        "description": "Get the status of a bulk job that triggers multiple automation executions.\n\n`execution_stats` always holds the complete counts per execution status. `execution_summary` is bounded\nto a few MB for very large jobs (`execution_summary_truncated: true`) and can be left out entirely with\n`include_execution_summary=false`.\n",
         "parameters": [
           {
             "name": "job_id",
@@ -730,6 +730,15 @@
               "$ref": "#/components/schemas/JobId"
             },
             "required": true
+          },
+          {
+            "name": "include_execution_summary",
+            "in": "query",
+            "description": "Set to `false` to only get the job with its `execution_stats`, without the execution items",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
           }
         ],
         "tags": [
@@ -757,7 +766,7 @@
       "patch": {
         "operationId": "patchBulkJob",
         "summary": "patchBulkJob",
-        "description": "Approve / Cancel bulk job that triggers multiple automation executions",
+        "description": "Approve / Cancel / Restart a bulk job that triggers multiple automation executions.\n\nA `failed` or `cancelled` job can be restarted with the `RESTART` action: it continues where it left off,\nonly triggering the entities whose executions were not started yet.\n",
         "parameters": [
           {
             "name": "job_id",
@@ -933,6 +942,9 @@
     "/v1/automation/public/executions:resume": {
       "post": {
         "operationId": "resumeExecutionWithToken",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "resumeExecutionWithToken",
         "description": "Resume a paused automation execution using a unique resume token.\n\nThis public API is normally called when a user lands on a confirmation page via email link.\n\nExample link: https://automation.epilot.io/confirm-email?token=eyJraWQiOiJrZXkifQ...\n",
         "tags": [
@@ -1399,6 +1411,9 @@
           },
           {
             "$ref": "#/components/schemas/ReceivedEmailTrigger"
+          },
+          {
+            "$ref": "#/components/schemas/SentEmailTrigger"
           },
           {
             "$ref": "#/components/schemas/NewEmailThreadTrigger"
@@ -2542,12 +2557,48 @@
           }
         ]
       },
+      "LabelEmailAction": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationAction"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "enum": [
+                  "label-email"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/schemas/LabelEmailConfig"
+              }
+            }
+          }
+        ]
+      },
       "MoveThreadConfig": {
         "type": "object",
         "properties": {
           "target_inbox_id": {
             "type": "string",
             "description": "ID of the inbox where the thread should be moved to"
+          }
+        }
+      },
+      "LabelEmailConfig": {
+        "type": "object",
+        "required": [
+          "add"
+        ],
+        "properties": {
+          "add": {
+            "type": "array",
+            "description": "Message label slugs to add, exactly as stored in the message entity's `_tags`. Labels already on the message are kept.\n",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -2624,6 +2675,15 @@
             "items": {
               "type": "string"
             }
+          },
+          "write_mode": {
+            "type": "string",
+            "description": "How the resolved assignees combine with the thread's current assignees.\nApplies in every `assignment_type`, after routing and fallback have\npicked the user(s).\n- append: add the resolved assignees and remove those in `remove`,\n  keeping everyone else (default).\n- replace: the thread ends up assigned to exactly the resolved\n  assignees (`add` minus `remove` for direct; the picked user or the\n  fallback assignees otherwise). Existing user and group assignees\n  not in that list are removed.\nIgnored when nothing is written (e.g. `leave_unassigned` fallback).\n",
+            "enum": [
+              "append",
+              "replace"
+            ],
+            "default": "append"
           }
         }
       },
@@ -2669,6 +2729,20 @@
           "type"
         ]
       },
+      "EntityAssigneeVariable": {
+        "type": "object",
+        "description": "An assignee resolved at execution time from a user-relation attribute of an\nentity in the automation context, e.g. `{{submission._owners}}`. Resolves\nagainst the entity being assigned or the triggering entity, whichever has\nthe given schema slug. The attribute may hold user ids, `{ org_id, user_id }`\nowners, groups or partner organizations. Direct assignment only.\n",
+        "properties": {
+          "variable": {
+            "type": "string",
+            "description": "Expression of the form `{{schema.attribute}}`.",
+            "example": "{{submission._owners}}"
+          }
+        },
+        "required": [
+          "variable"
+        ]
+      },
       "AssignEntityConfig": {
         "type": "object",
         "properties": {
@@ -2678,14 +2752,21 @@
           },
           "assignees": {
             "type": "array",
-            "description": "Assignees to write into `attribute`, in the order given.",
+            "description": "Assignees to write into `attribute`, in the order given. Variable\nentries are resolved at execution time and expand to zero or more\nassignees.\n",
             "items": {
-              "$ref": "#/components/schemas/EntityAssignee"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/EntityAssignee"
+                },
+                {
+                  "$ref": "#/components/schemas/EntityAssigneeVariable"
+                }
+              ]
             }
           },
           "write_mode": {
             "type": "string",
-            "description": "How `assignees` combine with the attribute's current value.\n- replace: overwrite the attribute with `assignees` (default).\n- append: union with the existing assignees, de-duplicated, existing\n  entries first. Two assignees are duplicates when their `type` and\n  `org_id` both match and the identifier for that type matches:\n  `user_id` for user and partner_user, `group_id` for group,\n  `partner_id` for partner_organization. Scoping by `org_id` keeps\n  assignees from different organizations distinct even when their\n  identifiers coincide.\nHonoured in `direct` only; `sequential` always forces `replace`.\n",
+            "description": "How `assignees` combine with the attribute's current value.\n- replace: overwrite the attribute with `assignees` (default).\n- append: union with the existing assignees, de-duplicated, existing\n  entries first. Two assignees are duplicates when their `type` and\n  `org_id` both match and the identifier for that type matches:\n  `user_id` for user and partner_user, `group_id` for group,\n  `partner_id` for partner_organization. Scoping by `org_id` keeps\n  assignees from different organizations distinct even when their\n  identifiers coincide.\nHonoured in every `assignment_type`; in `sequential` and\n`even_distribution` the selected user (or the fallback assignees)\ntake the place of `assignees`.\n",
             "enum": [
               "replace",
               "append"
@@ -2694,7 +2775,7 @@
           },
           "assignment_type": {
             "type": "string",
-            "description": "How assignees are resolved. Omitted means `direct`.\n- direct: assign exactly the assignees listed in `assignees`.\n- sequential: round-robin over the members of `candidate_group`,\n  selecting one user per execution. `assignees` is ignored and\n  `write_mode` is forced to `replace`.\n- even_distribution: like sequential, but the member with the fewest\n  matching entities wins; ties are resolved by the rotation.\n  `workload_filter` narrows what counts as load.\n",
+            "description": "How assignees are resolved. Omitted means `direct`.\n- direct: assign exactly the assignees listed in `assignees`.\n- sequential: round-robin over the users in `candidate_pool`,\n  selecting one user per execution. `assignees` is ignored.\n- even_distribution: the user in `candidate_pool` with the fewest\n  matching entities wins; ties are broken at random.\n  `workload_filter` narrows what counts as load.\n",
             "enum": [
               "direct",
               "sequential",
@@ -2702,13 +2783,22 @@
             ],
             "default": "direct"
           },
+          "candidate_pool": {
+            "type": "array",
+            "nullable": true,
+            "description": "Users and groups whose members form the candidate set for\n`sequential` and `even_distribution`; ignored in `direct`. Groups\nexpand to their members and a user reached through several entries\nis a candidate once. Partner entries are ignored.\n`even_distribution` supports at most 200 distinct users once groups\nare expanded; beyond that the run fails.\nWhen absent or empty, `candidate_group` is used instead.\n",
+            "items": {
+              "$ref": "#/components/schemas/EntityAssignee"
+            }
+          },
           "candidate_group": {
             "allOf": [
               {
                 "$ref": "#/components/schemas/EntityAssignee"
               }
             ],
-            "description": "The group whose members form the rotation. Must be `type: group`;\nignored in `direct`.\n"
+            "deprecated": true,
+            "description": "Deprecated: use `candidate_pool`. The group whose members form the\ncandidates, read only when `candidate_pool` is absent or empty. Must\nbe `type: group`; ignored in `direct`.\n"
           },
           "reset_interval": {
             "type": "string",
@@ -2740,7 +2830,7 @@
           },
           "match_user_skills": {
             "type": "boolean",
-            "description": "Candidate condition for `sequential` and `even_distribution`: when true,\nonly assign to users whose skills (tags) match a label on the entity\nbeing assigned. Opt-in; defaults to false. An entity carrying no\nnamespaced label matches nobody, so the fallback applies.\n",
+            "description": "Candidate condition for `sequential` and `even_distribution`: when true,\nonly assign to users whose skills (tags) match a label on the entity\nbeing assigned. Opt-in; defaults to false. An entity carrying no\nnamespaced label matches nobody, so the fallback applies.\nWhen `required_skills` is non-empty, that filter runs first and this\nmatching narrows its result.\n",
             "default": false
           },
           "required_skill_categories": {
@@ -2749,6 +2839,27 @@
             "items": {
               "type": "string"
             }
+          },
+          "required_skills": {
+            "type": "array",
+            "description": "Candidate condition for `sequential` and `even_distribution`: skills a\nuser must have, as classification ids (`family:label`, e.g.\n`role:project-manager`), checked against the user's skills (tags) only,\ncase-insensitively; the entity's labels play no part, so an unlabelled\nentity can still be assigned. Applied whenever non-empty; independent of\n`match_user_skills`.\n",
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "pattern": "^[^:]+:.+$"
+            },
+            "example": [
+              "role:project-manager"
+            ]
+          },
+          "required_skills_match_mode": {
+            "type": "string",
+            "description": "How strictly `required_skills` is matched. Independent of\n`skill_match_mode`.\n- require_all: a user must have every required skill (default).\n- prefer: users with the most required skills are eligible; a user\n  with none of them is never eligible (the fallback then applies).\n",
+            "enum": [
+              "require_all",
+              "prefer"
+            ],
+            "default": "require_all"
           },
           "skill_match_mode": {
             "type": "string",
@@ -2761,7 +2872,7 @@
           },
           "fallback": {
             "type": "string",
-            "description": "What to do when no assignable principal resolves, e.g. an empty or\nfully ineligible `candidate_group`.\n- leave_unassigned: write nothing at all, leaving the attribute as it\n  was. Not the same as writing an empty array, which would clear an\n  existing assignment.\n- assign_to_fallback: write `fallback_assignees` instead.\n",
+            "description": "What to do when no assignable principal resolves, e.g. an empty or\nfully ineligible `candidate_pool`.\n- leave_unassigned: write nothing at all, leaving the attribute as it\n  was. Not the same as writing an empty array, which would clear an\n  existing assignment.\n- assign_to_fallback: write `fallback_assignees` instead.\n",
             "enum": [
               "leave_unassigned",
               "assign_to_fallback"
@@ -3493,8 +3604,23 @@
       "TriggerShareEntityConfig": {
         "type": "object",
         "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "share",
+              "unshare"
+            ],
+            "default": "share",
+            "description": "Whether the action shares the entity with partners or unshares it from them.\nUnsharing removes the entity together with all of its related resources from the partners.\n"
+          },
+          "unshare_all_partners": {
+            "type": "boolean",
+            "default": false,
+            "description": "Only used when `operation` is `unshare`. When true, the entity is unshared from every partner\nit is currently shared with and `partner_org_ids` is ignored.\n"
+          },
           "partner_org_ids": {
             "type": "array",
+            "description": "Partner organizations to share the entity with, or to unshare it from",
             "items": {
               "type": "string"
             }
@@ -4304,7 +4430,7 @@
           },
           "entity_contexts": {
             "type": "array",
-            "description": "Additional entity contexts from the parent flow execution. Used when an automation is triggered from a workflow task to carry all flow contexts into the automation, not just the primary entity.\n",
+            "description": "The contexts of the workflow execution whose task started this automation, as they were when the task ran: every entity that run works on, the one flagged is_primary being its main context. Any action of the automation may read them, e.g. assign-entity to find an entity of a given schema. Sent only for automations started by a workflow task.\n",
             "items": {
               "type": "object",
               "properties": {
@@ -4320,10 +4446,59 @@
               }
             }
           },
+          "resolved_input": {
+            "type": "object",
+            "description": "The task's input settings, as the flow author configured them on the workflow task (input_context.with_relations and input_context.also_pass in the workflow definition), resolved to entities for this run. The automation's own entity is the task's main input and is not repeated here. Present only when the task configures these settings; when absent, every action keeps the legacy behaviour: the automation's entity comes with all of its direct relations, and a started workflow also receives every entity in entity_contexts.\n",
+            "required": [
+              "with_relations",
+              "also_pass"
+            ],
+            "properties": {
+              "with_relations": {
+                "type": "boolean",
+                "description": "Whether the automation's entity brings its direct relations along. Every action honours it: when false, the relations are not loaded, and a started workflow does not receive them as contexts.\n"
+              },
+              "also_pass": {
+                "type": "array",
+                "description": "Entities a start-workflow (trigger-workflow) action passes to the workflow it starts, on top of the automation's entity and, when with_relations is true, its relations. With resolved_input present, the started workflow receives exactly these: the entities in entity_contexts are not passed on.\n",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "entity_id"
+                  ],
+                  "properties": {
+                    "entity_id": {
+                      "type": "string"
+                    },
+                    "entity_schema": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "trigger_user_id": {
             "type": "string",
             "description": "Id of the user on whose behalf the workflow task triggered this automation — the caller of a user-initiated run, or the user whose task completion advanced the flow to the automation task. Action workers resolve it as the acting user for template variable resolution (user.*) and email thread assignment, matching the attribution of manually triggered executions. Absent when no human action led to the trigger (scheduler fires, journey-triggered flows).\n",
             "example": "10006129"
+          },
+          "run_by": {
+            "type": "object",
+            "description": "[Internal] The person who ran the workflow task's automation, set by the workflows service only when a user (not the engine) runs it. org_id is that user's own organization, which differs from the flow's for partner users. Used to attribute what the automation does, e.g. who closed the flow. Not for external consumers: a start request carrying it under any token other than a platform service's is refused with 403 and nothing is stored.\n",
+            "required": [
+              "user_id"
+            ],
+            "properties": {
+              "user_id": {
+                "type": "string",
+                "example": "10006129"
+              },
+              "org_id": {
+                "type": "string",
+                "example": "739224"
+              }
+            }
           }
         }
       },
@@ -4460,8 +4635,10 @@
         "properties": {
           "type": {
             "type": "string",
+            "description": "The trigger that started the execution:\n- new_email_thread: the execution entity is the thread.\n- sent_email: the execution entity is the sent email (`message_id`).\n",
             "enum": [
-              "new_email_thread"
+              "new_email_thread",
+              "sent_email"
             ]
           },
           "org_id": {
@@ -4834,18 +5011,20 @@
         "properties": {
           "action": {
             "type": "string",
+            "description": "* APPROVE: Start the approved bulk job. Requires the `task_token` of the job.\n* CANCEL: Cancel the bulk job. Executions that already started keep running.\n* RESTART: Restart a `failed` or `cancelled` bulk job and continue where it left off.\n  Entities whose executions were not started yet are triggered, executions that already\n  started or finished are left untouched. If the entities were not fully loaded yet, they are\n  loaded again from scratch. A job that was never approved goes back to `approval`.\n",
             "enum": [
               "APPROVE",
-              "CANCEL"
+              "CANCEL",
+              "RESTART"
             ]
           },
           "task_token": {
-            "type": "string"
+            "type": "string",
+            "description": "Task token of the job. Required for the APPROVE action."
           }
         },
         "required": [
-          "action",
-          "task_token"
+          "action"
         ]
       },
       "BulkTriggerRequest": {
@@ -4990,6 +5169,21 @@
             "type": "string",
             "description": "Entity ID of the report file entity"
           },
+          "last_error": {
+            "type": "string",
+            "description": "Error that moved the job into the `failed` status. Cleared when the job is restarted.",
+            "example": "ThrottlingException: Throughput exceeds the current capacity of your table or index."
+          },
+          "restart_count": {
+            "type": "integer",
+            "description": "How many times the job was restarted after failing or being cancelled",
+            "example": 1
+          },
+          "restarted_at": {
+            "type": "string",
+            "description": "Time of the last restart of the job",
+            "format": "date-time"
+          },
           "entity_query": {
             "type": "object",
             "description": "Query configuration for loading entities",
@@ -5066,10 +5260,60 @@
           },
           "execution_summary": {
             "type": "array",
-            "description": "List of entities & their automation execution id & status",
+            "description": "List of entities & their automation execution id & status.\n\nIn API responses the list is bounded to a few MB (see `execution_summary_truncated`); use\n`execution_stats` for complete counts.\n",
             "items": {
               "$ref": "#/components/schemas/ExecItem"
             }
+          },
+          "execution_stats": {
+            "$ref": "#/components/schemas/ExecutionStats"
+          },
+          "execution_summary_truncated": {
+            "type": "boolean",
+            "description": "True when `execution_summary` does not contain all execution items of the job (the response was bounded,\nor the summary was not requested).\n"
+          }
+        }
+      },
+      "ExecutionStats": {
+        "type": "object",
+        "description": "Number of execution items of a bulk trigger job per execution status. Always complete.",
+        "required": [
+          "total"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "example": 60582
+          },
+          "pending": {
+            "type": "integer"
+          },
+          "starting": {
+            "type": "integer"
+          },
+          "in_progress": {
+            "type": "integer"
+          },
+          "success": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "cancelled": {
+            "type": "integer"
+          },
+          "skipped": {
+            "type": "integer"
+          },
+          "paused": {
+            "type": "integer"
+          },
+          "scheduled": {
+            "type": "integer"
+          },
+          "hot": {
+            "type": "integer"
           }
         }
       },
@@ -5269,6 +5513,7 @@
         ]
       },
       "NewEmailThreadTrigger": {
+        "description": "Starts the flow when an email starts a new thread. The thread is the execution's entity.\n\nFor outbound threads, an email that failed to send or a bulk email does not start the flow,\nand neither does an email whose automation chain already contains the flow. A flow that\nsends emails itself (a send-email, reply-email or forward-email action) is not started for\noutbound threads at all, because its own emails could start it again.\n",
         "allOf": [
           {
             "$ref": "#/components/schemas/AutomationTrigger"
@@ -5346,6 +5591,38 @@
             ]
           }
         ]
+      },
+      "SentEmailTrigger": {
+        "description": "Starts the flow for every email sent from epilot: emails and replies sent from the inbox,\nincluding replies sent from a draft, and emails sent by automations or Flows, except sends\nthat skip creating entities. The sent email is the execution's entity. The outgoing\ncounterpart of `received_email`.\n\nOnly a Flow's trigger can use it: the flow must have exactly one action, of type\n`trigger-workflow`. Any other flow with this trigger is rejected.\n\nAn email that failed to send, or a bulk email, does not start the flow. Neither does an email\nwhose automation chain already contains the flow, so a Flow isn't started again by emails its\nown run sends, also not through other Flows.\n\nEvery other sent email starts the flow, so a busy mailbox can reach the hot-flow limit; raise\nthe flow's `max_executions` if needed.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AutomationTrigger"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "sent_email"
+                ]
+              },
+              "configuration": {
+                "type": "object",
+                "description": "The trigger has no options yet."
+              }
+            },
+            "required": [
+              "type",
+              "configuration"
+            ]
+          }
+        ],
+        "example": {
+          "id": "12d4f45a-1883-4841-a94c-5928cb338a94",
+          "type": "sent_email",
+          "configuration": {}
+        }
       },
       "EntityOperationTrigger": {
         "description": "- If provides filter_config, executes an automation based on the filtered configuration when an entity event occurs.\n- The conditions on a filter follows the event bridge patterns - `https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html`\n  | Comparison             | Example                                             | Rule syntax                                              |\n  |------------------------|-----------------------------------------------------|----------------------------------------------------------|\n  | Null                   | first_name is null                                  | `\"first_name\": [ null ]`                                 |\n  | Empty                  | last_name is empty                                  | `\"last_name\": [\"\"]`                                      |\n  | Equals                 | email is \"j.doe@email.com\"                          | `\"email\": [ \"j.doe@email.com\" ]`                         |\n  | Equals (ignore case)   | first_name is \"John\"                                | `\"first_name\": [ { \"equals-ignore-case\": \"john\" } ]`     |\n  | And                    | fist_name is \"John\" and last_name is \"Doe\"          | `\"first_name\": [ \"John\" ], \"last_name\": [\"Doe\"]`         |\n  | Or                     | PaymentType is \"Invoice\" or \"SEPA\"                  | `\"PaymentType\": [ \"invoice\", \"sepa\"]`                    |\n  | Or (multiple fields)   | first_name is \"John\", or last_name is \"Doe\".        | `\"$or\": [ { \"first_name\": [ \"John\" ] }, { \"last_name\": [ \"Doe\" ] } ]` |\n  | Not                    | status is anything but \"cancelled\"                  | `\"status\": [ { \"anything-but\": [ \"cancelled\" ] } ]`      |\n  | Numeric (equals)       | Price is 100                                        | `\"Price\": [ { \"numeric\": [ \"=\", 100 ] } ]`               |\n  | Numeric (range)        | Price is more than 10, and less than or equal to 20 | `\"Price\": [ { \"numeric\": [ \">\", 10, \"<=\", 20 ] } ]`      |\n  | Exists                 | ProductName exists                                  | `\"ProductName\": [ { \"exists\": true } ]`                  |\n  | Does not exist         | ProductName does not exist                          | `\"ProductName\": [ { \"exists\": false } ]`                 |\n  | Begins with            | OpportunityNumber starts with OPP-                  | `\"opportunity_number\": [ { \"prefix\": \"OPP-\" } ]`         |\n  | Ends with              | FileName ends with a .png extension                 | `\"filename\": [ { \"suffix\": \".png\" } ]`                   |\n  | Wildcard               | search a string using a wildcard                    | `\"email\": [ { \"wildcard\": \"*@doe.com\" } ]`               |\n  - To run the execution on all update events\n    ```\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"]\n          }\n        }\n      }\n    ```\n  - To run the execution only when the updates are from a portal user\n    ```\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"]\n          },\n          \"activity\": {\n            \"type\": \"EntityUpdatedFromPortal\"\n          }\n        }\n      }\n    ```\n  - To run the execution only when there is an update on a specific attribute\n    ```\n      Only starts the automation when the email on a contact is changed\n      {\n        \"type\": \"filter_entity_event\",\n        \"configuration\": {\n          \"operation\": {\n            \"operation\": [\"updateEntity\"],\n            \"payload\": {\n              \"_schema\": [\"contact\"]\n            },\n            \"diff\": {\n              \"updated\": {\n                \"email\": [{ \"exists\": true }]\n              }\n            }\n          }\n        }\n      }\n    ```\n    - To run the execution only when a specific attribute is altered(created/updated/deleted)\n      ```\n        Only starts the automation when a price is altered on a contract\n        {\n          \"type\": \"filter_entity_event\",\n          \"configuration\": {\n            \"operation\": {\n              \"payload\": {\n                \"_schema\": [\"contract\"]\n              },\n              \"diff\": {\n                // Whether he first_name has been added, updated, or removed\n                $or: [\n                  {\n                    'added.first_name': [{ exists: true }]\n                  },\n                  {\n                    'updated.first_name': [{ exists: true }]\n                  },\n                  {\n                    'deleted.first_name': [{ exists: true }]\n                  }\n                ]\n              }\n            }\n          }\n        }\n      ```\n    - To run the execution if an attribute is changed from one state to another\n      ```\n        Only starts the automation when the order status changes from `open_for_acceptance` to `placed`\n        {\n          \"type\": \"filter_entity_event\",\n          \"configuration\": {\n            \"operation\": {\n              \"operation\": [\"updateEntity\"],\n              \"payload\": {\n                \"_schema\": [\"order\"],\n                \"status\": [\"placed\"]\n              },\n              \"diff\": {\n                \"updated\": {\n                  \"status\": [\"open_for_acceptance\"]\n                }\n              }\n            }\n          }\n        }\n      ```\n",
@@ -5808,7 +6085,7 @@
                   },
                   "entity_node_id": {
                     "type": "string",
-                    "description": "Id of the cardinality-one node in the event's entity graph whose entity becomes the execution's main entity (the entity actions operate on).\n",
+                    "description": "Id of the node in the event's entity graph whose entity becomes the execution's main entity (the entity actions operate on). A repeatable (cardinality many) node may be chosen too: the first entity in the list becomes the main entity, and an event with an empty list does not start the flow.\n",
                     "example": "ticket"
                   },
                   "entity_schema": {

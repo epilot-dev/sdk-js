@@ -82,7 +82,6 @@ APIs
   entity               Entity API
   entity-mapping       Entity Mapping API
   environments         Environments API
-  erp-integration      ERP Integration API
   event-catalog        Event Catalog API
   file                 File API
   iban                 Iban API
@@ -339,7 +338,6 @@ Full documentation with sample calls and responses for all APIs:
 | Entity API | `epilot entity` | [docs](./docs/entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | [docs](./docs/entity-mapping.md) |
 | Environments API | `epilot environments` | [docs](./docs/environments.md) |
-| ERP Integration API | `epilot erp-integration` | [docs](./docs/erp-integration.md) |
 | Event Catalog API | `epilot event-catalog` | [docs](./docs/event-catalog.md) |
 | File API | `epilot file` | [docs](./docs/file.md) |
 | Iban API | `epilot iban` | [docs](./docs/iban.md) |

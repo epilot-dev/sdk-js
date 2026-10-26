@@ -25,7 +25,6 @@ CLIENTS=(
   "email-template-client"
   "entity-client"
   "entity-mapping-client"
-  "erp-integration-client"
   "file-client"
   "identity-client"
   "journey-client"

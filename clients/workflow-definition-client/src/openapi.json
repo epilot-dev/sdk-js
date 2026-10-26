@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows Definitions",
-    "version": "1.1.0",
+    "version": "1.3.0",
     "description": "The Workflows Definitions API enables you to create, manage, and configure reusable workflow templates\nwithin your organization. Workflow definitions serve as blueprints that define the structure and behavior\nof business processes, which can then be instantiated as workflow executions.\n\n## Core Concepts\n\n### Workflow Definition (V1)\nA workflow definition is a template that describes a business process. It consists of:\n- **Sections**: Logical groupings (phases) that organize related steps together\n- **Steps**: Individual tasks or actions that need to be completed within a section\n- **Closing Reasons**: Predefined reasons that can be selected when closing/completing a workflow\n\n### Flow Template (V2)\nThe modern workflow model that provides advanced capabilities:\n- **Phases**: Named stages that group related tasks and track progress through the workflow\n- **Tasks**: Individual units of work that can be manual, automated, AI-powered, or decision points\n- **Edges**: Connections between tasks that define the flow sequence and support conditional branching\n- **Triggers**: Define how a workflow is started (manual, automation, journey submission)\n\n### Task Types (V2)\n- **MANUAL**: Tasks assigned to users that require human action to complete\n- **AUTOMATION**: Tasks that execute automated actions when reached\n- **DECISION**: Conditional branching points that evaluate conditions to determine the next path\n- **AI_AGENT**: Tasks that invoke AI agents to perform intelligent actions\n\n## API Versions\n- **V1 endpoints** (`/v1/workflows/...`): Legacy linear workflow model with sections and steps\n- **V2 endpoints** (`/v2/flows/...`): Modern graph-based flow model with phases, tasks, and edges\n"
   },
   "servers": [
@@ -163,7 +163,7 @@
       "post": {
         "operationId": "createDefinition",
         "summary": "createDefinition",
-        "description": "Create a new V1 workflow definition. The definition consists of sections and steps\nthat define the structure of the workflow. Once created, the definition can be used\nto start workflow executions.\n",
+        "description": "Create a new V1 workflow definition. The definition consists of sections and steps\nthat define the structure of the workflow. Once created, the definition can be used\nto start workflow executions.\n\nDeprecated: from 17 October 2026 00:00 Europe/Berlin this endpoint answers 409 —\ncreate a flow via `POST /v2/flows/templates` instead.\n",
         "tags": [
           "Workflows"
         ],
@@ -313,6 +313,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Workflow creation is closed — from 17 October 2026 00:00 Europe/Berlin\n(16 October being the last day) no new V1 workflow definitions are\naccepted. Create a flow via `POST /v2/flows/templates` instead;\nexisting workflow definitions stay readable, updatable and executable.\nBlueprint installs and other internal epilot services (which reach\nthis operation through a direct Lambda invocation) are exempt, so\nblueprints captured before the cutoff keep installing.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "Workflows can no longer be created. Create a flow instead: POST /v2/flows/templates. Existing workflows stay editable."
                 }
               }
             }
@@ -1764,6 +1777,20 @@
             "description": "Optional detailed description of the workflow's purpose and behavior.",
             "maxLength": 5000
           },
+          "portal_titles": {
+            "type": "object",
+            "description": "Portal-facing overrides of the flow name. Portal surfaces (the End Customer and Installer portals, and the builder's portal views) show the matching override instead of `name`; an absent key falls back to `name`. Has no effect on execution behaviour.",
+            "properties": {
+              "ecp": {
+                "type": "string",
+                "description": "Flow title shown to end customers."
+              },
+              "installer": {
+                "type": "string",
+                "description": "Flow title shown to installers."
+              }
+            }
+          },
           "trigger": {
             "$ref": "#/components/schemas/Trigger"
           },
@@ -1811,7 +1838,7 @@
           },
           "additional_triggers": {
             "type": "array",
-            "description": "Additional trigger configurations that can also start this flow. Useful for flows that should be startable via multiple methods (e.g., both automation AND manual).",
+            "description": "Additional trigger configurations that can also start this flow.\nUseful for flows that should be startable via multiple methods\n(e.g., both automation AND manual). Each additional trigger may\ntarget its own entity and may carry its own entry edge (an edge\nwhose `from_id` is the trigger's `id`); without an entry edge of\nits own it starts the flow at the primary entry. Triggers must be\ncomplementary — no two triggers on a flow may cover the same\nentity and event.\n",
             "items": {
               "$ref": "#/components/schemas/Trigger"
             }
@@ -1820,6 +1847,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Phase"
+            }
+          },
+          "stages": {
+            "type": "array",
+            "description": "Customer-facing progress segments layered on top of the flow graph. Stages are strictly ordered boundaries: the first is anchored at the trigger, every later one is an edge cut (or a legacy entry-node anchor whose in-edges form the cut). The array order is the boundary order and must match the graph. Per-node stage membership is always computed from the graph, never stored, and a run may end in any stage.",
+            "items": {
+              "$ref": "#/components/schemas/Stage"
             }
           },
           "tasks": {
@@ -1868,12 +1902,19 @@
             "type": "boolean",
             "description": "When true, this is a linear flow: task enablement is computed at runtime from the graph — a task is enabled only when all of its direct predecessor tasks in its branch are done. This fully overrides any explicit per-task requirements."
           },
+          "context_settings": {
+            "$ref": "#/components/schemas/FlowContextSettings"
+          },
           "limit_warnings": {
             "type": "array",
             "description": "Non-blocking warnings for configuration limits the flow exceeds. Returned on read (get-flow) and on create/update responses. Size/count limits are soft: a flow exceeding them is still accepted and stored, and the violations are reported here so the UI can surface an informational banner. The flow is still fully editable and usable.",
             "items": {
               "$ref": "#/components/schemas/FlowLimitWarning"
             }
+          },
+          "keep_task_automations_in_sync": {
+            "type": "boolean",
+            "description": "Persisted preference for how the flow's task automations relate to the flow's `enabled` state. When `true`, task automations always mirror the flow: their enabled state is re-synced on every update and new task automations are created with the flow's current enabled state. When `false`, task automations are managed independently: updates never change their enabled state and new task automations are always created enabled, so a flow that is built or edited while disabled does not accumulate automations that stay off after the flow is re-enabled. When unset, legacy behavior applies: new task automations inherit the flow's enabled state and updates leave existing ones untouched. Safety: on updates that do NOT change `enabled`, the in-sync mode never re-enables automations that were disabled by the system (e.g. infinite-loop protection) — only a deliberate `enabled` flip on the flow re-arms those."
           }
         }
       },
@@ -2150,7 +2191,10 @@
             "type": "string",
             "enum": [
               "created_at",
-              "updated_at"
+              "updated_at",
+              "name",
+              "enabled",
+              "id"
             ],
             "default": "updated_at"
           },
@@ -2220,8 +2264,17 @@
               "automation_config": {
                 "$ref": "#/components/schemas/AutomationConfig"
               },
+              "on_failure": {
+                "$ref": "#/components/schemas/AutomationFailurePolicy"
+              },
               "trigger_mode": {
-                "$ref": "#/components/schemas/TriggerMode"
+                "$ref": "#/components/schemas/TriggerMode",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TriggerMode"
+                  }
+                ],
+                "description": "How the automation is started. `automatic` runs it as soon as the task becomes current; `manual` waits for a person to run it. An absent value is read as `manual` everywhere: the engine dispatches only an explicit `automatic`, the builder shows the task as manual, and the task may carry the skip gate and required subtasks."
               },
               "schedule": {
                 "$ref": "#/components/schemas/ActionSchedule"
@@ -2234,6 +2287,15 @@
             }
           }
         ]
+      },
+      "AutomationFailurePolicy": {
+        "type": "string",
+        "enum": [
+          "stop",
+          "continue"
+        ],
+        "default": "stop",
+        "description": "What the flow does when this automation ends in a failed state. `stop` waits on the failed task until it is retried or skipped. `continue` proceeds to the next task. An absent value means `stop`."
       },
       "AutomationConfig": {
         "type": "object",
@@ -2268,12 +2330,46 @@
           },
           "input_context": {
             "$ref": "#/components/schemas/AutomationInputContext"
+          },
+          "output_context": {
+            "$ref": "#/components/schemas/AutomationOutputContext"
+          },
+          "eligible_closing_reason_ids": {
+            "type": "array",
+            "description": "The closing reasons a person may choose from when running this task, making a `cancel-flow-execution` automation semi-automated: the step is configured here, the reason is picked at execution time. Every id must also appear in the flow template's `closing_reasons` — the step narrows the flow's vocabulary rather than introducing its own, which is what keeps the chosen reason a member of the execution's `configured_reasons` and what lets blueprints export the reasons a step depends on. Only a task whose `trigger_mode` is `manual` or absent can carry it; the template healer clears it from an `automatic` task, which has no assignee moment to choose in. Empty or absent means the automation runs with the reasons fixed in its own action config.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "email_review": {
+            "$ref": "#/components/schemas/EmailReviewConfig"
+          },
+          "allow_execution_note": {
+            "type": "boolean",
+            "description": "Whether the person running a semi-automated cancel step may add a free-text note alongside the reason they choose. Only meaningful with `eligible_closing_reason_ids`, since the note is written in the same prompt; the template healer clears it from a step that asks nothing."
+          }
+        }
+      },
+      "EmailReviewConfig": {
+        "type": "object",
+        "description": "Whether the person running a semi-automated send-email step may adjust the email before it goes out, and what they may adjust. Meaningful only on a task a person triggers — the engine's own dispatch has nobody to review — so the template healer clears it from an `automatic` task. With `enabled` false the email is sent exactly as configured and the person only triggers it.",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "allow_document_selection": {
+            "type": "boolean",
+            "description": "The assignee may attach documents from the task's entity at execution, in addition to whatever the configured rules match."
+          },
+          "allow_subject_and_body_edit": {
+            "type": "boolean",
+            "description": "The assignee may rewrite the rendered subject and body. They edit the rendered text, not the template, so the template is unchanged and other flows using it are unaffected."
           }
         }
       },
       "AutomationInputContext": {
         "type": "object",
-        "description": "Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.\n",
+        "description": "Optional. Source of the entity fed into this automation task. If omitted, the entity of the trigger that started the run is used.\n",
         "required": [
           "source"
         ],
@@ -2284,11 +2380,152 @@
               "trigger",
               "task"
             ],
-            "description": "`trigger` = workflow's primary (trigger) entity. `task` = entity produced by an upstream task in the graph.\n"
+            "description": "`trigger` = the entity of the trigger that started the run, or of the specific configured trigger named by `trigger_id`. `task` = entity produced by an upstream task in the graph.\n"
           },
           "task_id": {
             "type": "string",
             "description": "Required when source is `task`. The id of the upstream task whose output entity should feed this task."
+          },
+          "trigger_id": {
+            "type": "string",
+            "description": "Optional when source is `trigger`. Pins the input to one specific configured trigger (primary or additional) by its id. When absent, the trigger that started the run supplies the entity.\n"
+          }
+        }
+      },
+      "FlowContextSettings": {
+        "type": "object",
+        "description": "Where a flow runs, and where people see it.\nA run is ALWAYS visible on the entities it runs on — the entity its trigger supplied and every context it picks up. That is not configurable: it is what running there means, and hiding a run from its own entity is what `visibility: background` is for.\n`displays` lists ADDITIONAL entity kinds, reached by relation. It is written once and holds for every trigger: which entry point started a run says how it began, not who the process concerns. A flow that finance must see on the Account must be seen there whether it started from a web form or an inbound email.\n",
+        "properties": {
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "entity_views",
+              "background"
+            ],
+            "default": "entity_views",
+            "description": "`entity_views` — the flow appears on entity pages, table views and the portal, as decided by `displays`.\n`background` — the flow is hidden from every entity view. It runs and records exactly the same way; only the surfaces are suppressed.\n"
+          },
+          "main_context": {
+            "$ref": "#/components/schemas/MainContextSetting"
+          },
+          "displays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowDisplayRule"
+            },
+            "description": "Additional entity kinds this flow is visible on, beyond the entities it runs on. Empty or absent means it is seen only where it runs.\nORDERED. An entry may anchor (`from`) only on the main context or on an EARLIER entry. That ordering is what makes a cycle (contact anchored on account anchored on contact) unrepresentable rather than something to detect at runtime.\n"
+          }
+        }
+      },
+      "MainContextSetting": {
+        "type": "object",
+        "description": "Which of a flow's contexts owns the run: the entity conditions, automations and entity sync resolve against by default.\nABSENT means the historical behaviour — the primary trigger's entity. That default exists because it describes every flow built so far, not because the primary trigger is special: a flow with several complementary triggers has no natural primary, which is exactly when stating it explicitly earns its place.\nThis decides the STARTING main context only. A task with `output_context.set_as_primary` still moves it mid-run; the setting seeds the run and the graph moves it from there.\n",
+        "required": [
+          "schema"
+        ],
+        "properties": {
+          "schema": {
+            "type": "string",
+            "description": "Entity schema of the main context. It need not be a schema any trigger provides: a run started on another context resolves it from that entity's relations."
+          },
+          "relation_labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional narrowing for that resolution. A run started on a context of another schema looks through the starting entity's relations for one of `schema`; these `_tags` narrow which relations count, for when schema alone is ambiguous.\nSeveral matches: the FIRST is taken. Unlike an attaching display rule — which attaches nothing when several match, since binding an arbitrary entity as a surface has no justification — a run needs a primary to function at all, so a deterministic pick beats none.\nNo match: the run starts with the entity it was started on as primary, and records that the configured main context did not resolve. A manual start is never blocked because a relation happens to be missing.\n"
+          }
+        }
+      },
+      "FlowDisplayRule": {
+        "type": "object",
+        "description": "One additional entity kind the flow should be visible on, found by relation from the main context or from an earlier entry.\nAn entity reached this way has no context of its own: it shows the main context's run, and acting on it acts on the main context. Nothing is copied and no second run starts.\nThere is no `enabled` flag and no entry for an entity the flow already runs on. An entry exists because someone wants the flow seen there; remove it to stop. Whether an entity is a context at all is decided by the trigger, by a task's `output_context`, or by `attach_to_contexts` below — never by a display setting.\n",
+        "required": [
+          "id",
+          "entity_schema"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "The schema of the entity this rule is about."
+          },
+          "from": {
+            "$ref": "#/components/schemas/FlowRuleAnchor"
+          },
+          "relation_labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Relation `_tags` to match (`family:label` form supported). Absent or empty matches every relation of `entity_schema`.\n"
+          },
+          "attach_to_contexts": {
+            "type": "boolean",
+            "default": false,
+            "description": "Governs CONTEXT. When true the matched entity is added to the run's contexts, so later rules can anchor on it and conditions, entity sync and task automations can address it. Resolved by the ENGINE — at start and whenever the contexts change — never as a side effect of rendering, which would make a run's context set depend on who opened which page.\nA context must resolve to one entity: when several match, none is attached. Display is unaffected and still shows all of them.\n"
+          }
+        }
+      },
+      "FlowRuleAnchor": {
+        "description": "Where an entry starts looking. Absent means `main_context`.\nA ROLE, not a schema: an entry anchored on `main_context` follows the primary when a task promotes another entity, where naming a schema would freeze it on the old one.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/MainContextAnchor"
+          },
+          {
+            "$ref": "#/components/schemas/RuleAnchor"
+          }
+        ]
+      },
+      "MainContextAnchor": {
+        "type": "object",
+        "description": "The run's primary context, whatever it currently is.",
+        "required": [
+          "role"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "main_context"
+            ]
+          }
+        }
+      },
+      "RuleAnchor": {
+        "type": "object",
+        "description": "An earlier entry in `displays`, by its id: this entry searches from whatever that one matched. Chaining ticket -> contact -> account this way keeps both hops DISPLAY-only; making the contact a real context first is a separate decision (`attach_to_contexts`), not a prerequisite for reaching the account.\n",
+        "required": [
+          "role",
+          "rule_id"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "rule"
+            ]
+          },
+          "rule_id": {
+            "type": "string",
+            "description": "Id of an entry that appears earlier in `displays`."
+          }
+        }
+      },
+      "AutomationOutputContext": {
+        "type": "object",
+        "description": "Optional. What happens to the entity produced by this automation task (the last successful entity-producing action of its automation).\n",
+        "properties": {
+          "set_as_primary": {
+            "type": "boolean",
+            "description": "When true, the entity this task's automation produces becomes the run's primary context (\"main context\") when the task completes. Downstream tasks and decisions configured with the default input context then act on that entity. When the task is reverted or reset, the previous primary context is restored.\n"
+          },
+          "attach_to_contexts": {
+            "type": "boolean",
+            "description": "When true, the entity this task's automation produces is added to the run's contexts without becoming the main one. `set_as_primary` implies this: an entity cannot be the primary context without being a context. Contexts are unique by entity id, so a task that re-produces an entity already on the run adds nothing.\n"
           }
         }
       },
@@ -2302,6 +2539,14 @@
             "properties": {
               "agent_config": {
                 "$ref": "#/components/schemas/AgentConfig"
+              },
+              "trigger_mode": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TriggerMode"
+                  }
+                ],
+                "description": "How the agent run is started. `automatic` starts it as soon as the task becomes current; `manual` waits for a person to run it and to approve the result. An absent value is read as `manual` everywhere: the engine dispatches only an explicit `automatic`, the builder shows the task as manual, and the task may carry the skip gate and required subtasks."
               }
             }
           }
@@ -2453,8 +2698,7 @@
               },
               "allow_parallel_execution": {
                 "type": "boolean",
-                "description": "When true, all branches with met conditions execute in parallel. When false, only the first branch with a met condition is executed. Defaults to true for backwards compatibility.",
-                "default": true
+                "description": "When true, all branches with met conditions execute in parallel. When false, only the first branch with a met condition is executed. The default depends on the trigger mode: automatic decisions treat an absent field as true (backwards compatibility), while manual decisions require an explicit true before multiple branches can be selected at execution time (absent = single-select)."
               },
               "schedule": {
                 "anyOf": [
@@ -2525,6 +2769,18 @@
             "description": "requirements that need to be fulfilled in order to enable the task while flow instances are running",
             "items": {
               "$ref": "#/components/schemas/EnableRequirement"
+            }
+          },
+          "required": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true, the task is required and users cannot skip it while the flow is running. Unrelated to `requirements`, which gate when a task becomes enabled. System-driven skips are unaffected — tasks on a not-taken decision branch, and automation tasks whose automation execution itself reports a skipped verdict (e.g. unmet trigger conditions). Only a manual task, or an automation or AI task whose `trigger_mode` is `manual` or absent, can carry it: on a decision or an automatic kind it is normalised to false on create, update and load."
+          },
+          "subtasks": {
+            "type": "array",
+            "description": "Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype=\"check\"] > li[data-subtask-id]`, nearest list ancestor) on every create, update and load — a client-supplied array is replaced. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins; an id occurring twice in one task is rejected. An item is required only when it is marked `data-subtask-required=\"true\"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate task completion while the flow is running.",
+            "items": {
+              "$ref": "#/components/schemas/Subtask"
             }
           },
           "assigned_to": {
@@ -2612,6 +2868,71 @@
           "name"
         ]
       },
+      "Stage": {
+        "type": "object",
+        "description": "A customer-facing progress segment layered on top of the flow graph. Unlike phases (internal task grouping), stages exist to communicate progress to outside users (e.g. end customers) with a title and description. Stages form a strict total order; the array order is the boundary order and must match the graph. The first stage's entry node is always the trigger node.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable unique identifier for the stage."
+          },
+          "name": {
+            "type": "string",
+            "description": "User-facing stage title."
+          },
+          "description": {
+            "type": "string",
+            "description": "Customer-facing description of what happens in this stage."
+          },
+          "entry_node_id": {
+            "type": "string",
+            "description": "Id of the graph node (task, phase, or the trigger sentinel) at which this stage begins; its incoming edges form the stage boundary, so no path may reach the node's successors without passing it. The first stage's entry_node_id is the trigger sentinel. Exactly one of entry_node_id / cut_edge_ids per stage; when both are present, cut_edge_ids wins."
+          },
+          "cut_edge_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Edge-cut boundary, for stages that begin inside branching regions: the stage begins where these edges are crossed — one cut edge per branch that continues past the boundary, so that no path crosses it twice and none bypasses it. Branches that end before the boundary need no cut; a run may end in any stage. Cut edges may not be loop edges, end edges, or phase-internal edges. Node membership is derived by counting crossed boundaries, never stored."
+          },
+          "color": {
+            "type": "string",
+            "description": "Optional stage accent color, a key from a fixed palette."
+          },
+          "portal_names": {
+            "type": "object",
+            "description": "Portal-facing overrides of the stage name. Portal surfaces show the matching override instead of `name`; an absent key falls back to `name`.",
+            "properties": {
+              "ecp": {
+                "type": "string",
+                "description": "Stage name shown to end customers."
+              },
+              "installer": {
+                "type": "string",
+                "description": "Stage name shown to installers."
+              }
+            }
+          },
+          "portal_descriptions": {
+            "type": "object",
+            "description": "Portal-facing overrides of the stage description. Portal surfaces show the matching override instead of `description`; an absent key falls back to `description`.",
+            "properties": {
+              "ecp": {
+                "type": "string",
+                "description": "Stage description shown to end customers."
+              },
+              "installer": {
+                "type": "string",
+                "description": "Stage description shown to installers."
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
       "VariableAssignment": {
         "type": "object",
         "description": "Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution.",
@@ -2652,7 +2973,8 @@
             "type": "string"
           },
           "from_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Source node of the edge: a task id, a phase id, the literal `trigger`\n(the primary trigger's entry edge), or an additional trigger's `id`\n(that trigger's own entry edge — allowing the flow to start at a\ndifferent node depending on which trigger fired).\n"
           },
           "to_id": {
             "type": "string",
@@ -2757,8 +3079,11 @@
             "enum": [
               "entity",
               "workflow",
-              "journey_block"
-            ]
+              "journey_block",
+              "trigger_source",
+              "main_context"
+            ],
+            "description": "`trigger_source` (with origin `trigger`) marks a \"started by\" statement: the run's fired trigger is compared against the configured trigger ids in `values` — no entity attribute is involved.\n`main_context` (with origin `trigger`, no `id`) marks a statement evaluated against the run's PRIMARY context: the fired trigger's entity, re-bound by any completed task that promotes its output to main context (`output_context.set_as_primary`). `schema` carries the subject's schema for attribute selection only — resolution is by the primary flag, never by schema.\n"
           },
           "schema": {
             "type": "string"
@@ -2929,6 +3254,39 @@
         },
         "required": [
           "when"
+        ]
+      },
+      "Subtask": {
+        "description": "One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable id, mirrored as data-subtask-id in the description markup"
+          },
+          "name": {
+            "type": "string",
+            "description": "Plain-text snapshot of the checklist item label"
+          },
+          "party": {
+            "type": "string",
+            "description": "Which description field the item lives in",
+            "enum": [
+              "description",
+              "ecp",
+              "installer",
+              "partner"
+            ]
+          },
+          "required": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true, the task cannot be completed while the flow is running until this item is checked"
+          }
+        },
+        "required": [
+          "id",
+          "party"
         ]
       },
       "WorkflowDefinition": {
@@ -3208,12 +3566,168 @@
           "name": {
             "type": "string"
           },
+          "portal_button_label": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Portal-facing label that replaces the default \"Start now\" button shown for this task's linked journey in the End Customer Portal / Installer Portal. Blank or absent means the portal keeps its own translated default."
+          },
           "complete_task_automatically": {
             "type": "boolean",
             "default": true,
             "description": "If true, the task be auto completed when the journey is completed. By default it is true."
+          },
+          "journey_submission_required": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true, the task cannot be completed while the flow is running until the linked journey was actually submitted. The execution service verifies the submission server-side via the correlation claims in the submission entity's journey_context. Manual tasks only: on any other task kind, or on a manual task with a delayed or relative schedule, the template is rejected (400); when no journey is linked the flag is dropped on create, update and load."
+          },
+          "context_parameters": {
+            "type": "array",
+            "description": "Values preset by the flow author for context parameters the journey declares in its contextSchema (String/Number parameters only, not entity-typed ones). Passed as journey context when the journey is launched from the task, overriding the default value of the parameter (e.g. `origin`).",
+            "items": {
+              "$ref": "#/components/schemas/JourneyContextParameter"
+            }
+          },
+          "ai_prefill": {
+            "$ref": "#/components/schemas/AiPrefillConfig"
           }
         }
+      },
+      "AiPrefillConfig": {
+        "type": "object",
+        "description": "AI extraction + prefill configuration for the attached journey (Flows v2 only)",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "source": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "flow_context"
+                ],
+                "default": "flow_context"
+              },
+              "input_entity": {
+                "type": "string",
+                "enum": [
+                  "thread",
+                  "first_email",
+                  "last_email"
+                ],
+                "default": "last_email"
+              }
+            }
+          },
+          "extraction_fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiPrefillExtractionField"
+            }
+          },
+          "mappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiPrefillMapping"
+            }
+          },
+          "min_confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.8
+          },
+          "instructions": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Free-text, cross-field context for the extractor (e.g. \"amounts are always in euros\")"
+          }
+        }
+      },
+      "AiPrefillExtractionField": {
+        "type": "object",
+        "required": [
+          "key",
+          "type"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "date",
+              "enum"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "description_overridden": {
+            "type": "boolean",
+            "description": "Set when the author replaced the derived description with their own; the builder preserves flagged descriptions across re-derivations"
+          },
+          "enum": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AiPrefillMapping": {
+        "type": "object",
+        "required": [
+          "source",
+          "block_id",
+          "block_type"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "block_id": {
+            "type": "string"
+          },
+          "block_type": {
+            "type": "string",
+            "enum": [
+              "text-input",
+              "number-input",
+              "personal-information",
+              "meter-reading"
+            ]
+          },
+          "block_field": {
+            "type": "string"
+          }
+        }
+      },
+      "JourneyContextParameter": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "The journey context parameter key (paramKey in the journey's contextSchema)"
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "The value to pass for the parameter when launching the journey"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ]
       },
       "ECPDetails": {
         "type": "object",
@@ -3586,6 +4100,166 @@
           "type",
           "condition"
         ]
+      },
+      "JourneyContextUsagesReq": {
+        "type": "object",
+        "description": "Request payload for getJourneyContextUsages.",
+        "required": [
+          "journey_id",
+          "param_keys"
+        ],
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "description": "Journey whose context parameters are being checked for usage."
+          },
+          "param_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Context parameter keys to look for, as plain strings."
+          },
+          "param_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Accepted and ignored. This service stores context references by name only; the field keeps one request shape across every adapter in this feature."
+          }
+        }
+      },
+      "JourneyContextUsage": {
+        "type": "object",
+        "description": "One place a flow template task presets one of the requested context parameters.",
+        "required": [
+          "kind",
+          "resource",
+          "matched_as"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "workflow-task"
+            ]
+          },
+          "resource": {
+            "type": "object",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "workflow_template"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "description": "Flow template id."
+              },
+              "name": {
+                "type": "string",
+                "description": "Flow template name, when the template has one."
+              }
+            }
+          },
+          "location": {
+            "type": "object",
+            "description": "Present only when the matching task carries an id and/or a name.",
+            "properties": {
+              "task_id": {
+                "type": "string"
+              },
+              "task_name": {
+                "type": "string"
+              }
+            }
+          },
+          "matched_as": {
+            "type": "object",
+            "required": [
+              "dialect",
+              "token",
+              "at"
+            ],
+            "properties": {
+              "dialect": {
+                "type": "string",
+                "enum": [
+                  "name"
+                ]
+              },
+              "token": {
+                "type": "string",
+                "description": "The bare parameter key, e.g. `origin` — never a `journey_context.origin`-style prefixed token. Unlike every sibling adapter, this service stores the reference structurally in a typed field (`tasks[].journey.context_parameters[].key`), so the prefixed path string never appears in the stored record; `dialect: name` already tells the caller how to interpret `token`."
+              },
+              "at": {
+                "type": "string",
+                "description": "Debugging path into the flow template where the match was found, e.g. `tasks[0].journey.context_parameters[1].key`. Not stable across edits to the template."
+              }
+            }
+          },
+          "link_hint": {
+            "type": "object",
+            "description": "Omitted when the underlying flow template has no id: a link built from an empty id could not resolve, so none is included. The usage row itself is still reported.",
+            "required": [
+              "route",
+              "params"
+            ],
+            "properties": {
+              "route": {
+                "type": "string",
+                "enum": [
+                  "workflows-hub-flow"
+                ]
+              },
+              "params": {
+                "type": "object",
+                "required": [
+                  "template_id"
+                ],
+                "properties": {
+                  "template_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "JourneyContextUsagesResp": {
+        "type": "object",
+        "description": "Response payload for getJourneyContextUsages.",
+        "required": [
+          "usages",
+          "status",
+          "scanned"
+        ],
+        "properties": {
+          "usages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JourneyContextUsage"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "partial"
+            ],
+            "description": "`partial` means the usages list hit its cap and the scan stopped there, before every scannable flow template in the org was examined. `ok` means the scan reached the end of the scannable population and returned every match found there — it does NOT mean every flow template in the org was examined: the underlying query only returns `version = v3` records, so legacy v1/v2 templates never enter the scan, and any record that fails to normalize is silently skipped and logged rather than failing the whole lookup."
+          },
+          "scanned": {
+            "type": "integer",
+            "description": "Count of flow templates examined. This is every scannable flow template in the org, not only templates bound to this journey: the underlying query has no server-side journey filter, so it counts the org's whole scannable flow-template population, up to wherever the scan stopped if `status` is `partial`. \"Scannable\" excludes legacy v1/v2 records (the query filters to `version = v3`) and any record that fails to normalize (skipped and logged rather than failing the lookup), so this can be lower than the org's true total flow-template count."
+          }
+        }
       }
     }
   }

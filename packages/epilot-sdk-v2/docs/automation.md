@@ -93,9 +93,12 @@ const { data } = await automationClient.searchFlows(...)
 - [`AppendValueMapper`](#appendvaluemapper)
 - [`MoveThreadAction`](#movethreadaction)
 - [`AssignThreadAction`](#assignthreadaction)
+- [`LabelEmailAction`](#labelemailaction)
 - [`MoveThreadConfig`](#movethreadconfig)
+- [`LabelEmailConfig`](#labelemailconfig)
 - [`AssignThreadConfig`](#assignthreadconfig)
 - [`EntityAssignee`](#entityassignee)
+- [`EntityAssigneeVariable`](#entityassigneevariable)
 - [`AssignEntityConfig`](#assignentityconfig)
 - [`AssignEntityActionConfig`](#assignentityactionconfig)
 - [`AssignEntityAction`](#assignentityaction)
@@ -164,6 +167,7 @@ const { data } = await automationClient.searchFlows(...)
 - [`BulkTriggerRequest`](#bulktriggerrequest)
 - [`EntityRef`](#entityref)
 - [`BulkTriggerJob`](#bulktriggerjob)
+- [`ExecutionStats`](#executionstats)
 - [`ExecItem`](#execitem)
 - [`JobId`](#jobid)
 - [`EntityId`](#entityid)
@@ -177,6 +181,7 @@ const { data } = await automationClient.searchFlows(...)
 - [`ApiSubmissionTrigger`](#apisubmissiontrigger)
 - [`NewEmailThreadTrigger`](#newemailthreadtrigger)
 - [`ReceivedEmailTrigger`](#receivedemailtrigger)
+- [`SentEmailTrigger`](#sentemailtrigger)
 - [`EntityOperationTrigger`](#entityoperationtrigger)
 - [`ActivityTrigger`](#activitytrigger)
 - [`EntityOperation`](#entityoperation)
@@ -382,7 +387,20 @@ const { data } = await client.startExecution(
           is_primary: true
         }
       ],
-      trigger_user_id: '10006129'
+      resolved_input: {
+        with_relations: true,
+        also_pass: [
+          {
+            entity_id: 'string',
+            entity_schema: 'string'
+          }
+        ]
+      },
+      trigger_user_id: '10006129',
+      run_by: {
+        user_id: '10006129',
+        org_id: '739224'
+      }
     },
     flow_execution_id: 'string',
     flow_automation_task_id: 'string',
@@ -532,7 +550,15 @@ const { data } = await client.startExecution(
     "entity_contexts": [
       {}
     ],
-    "trigger_user_id": "10006129"
+    "resolved_input": {
+      "with_relations": true,
+      "also_pass": []
+    },
+    "trigger_user_id": "10006129",
+    "run_by": {
+      "user_id": "10006129",
+      "org_id": "739224"
+    }
   },
   "workflow_wait_context": {
     "workflow_execution_id": "string",
@@ -648,13 +674,14 @@ const { data } = await client.bulkTriggerExecutions(
 
 ### `getBulkJob`
 
-Get the status of a bulk job that triggers multiple automation executions
+Get the status of a bulk job that triggers multiple automation executions.
 
 `GET /v1/automation/executions/bulk-jobs/{job_id}`
 
 ```ts
 const { data } = await client.getBulkJob({
   job_id: 'example',
+  include_execution_summary: true,
 })
 ```
 
@@ -676,6 +703,9 @@ const { data } = await client.getBulkJob({
   },
   "task_token": "8c086140-f33e-4bb7-a993-50c0f2402c7b",
   "report_file_entity_id": "string",
+  "last_error": "ThrottlingException: Throughput exceeds the current capacity of your table or index.",
+  "restart_count": 1,
+  "restarted_at": "1970-01-01T00:00:00.000Z",
   "entity_query": {
     "type": "refs",
     "data": [
@@ -702,7 +732,21 @@ const { data } = await client.getBulkJob({
       "timestamp": "2025-10-30T15:56:47.842Z",
       "error": "string"
     }
-  ]
+  ],
+  "execution_stats": {
+    "total": 60582,
+    "pending": 0,
+    "starting": 0,
+    "in_progress": 0,
+    "success": 0,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "paused": 0,
+    "scheduled": 0,
+    "hot": 0
+  },
+  "execution_summary_truncated": true
 }
 ```
 
@@ -712,7 +756,7 @@ const { data } = await client.getBulkJob({
 
 ### `patchBulkJob`
 
-Approve / Cancel bulk job that triggers multiple automation executions
+Approve / Cancel / Restart a bulk job that triggers multiple automation executions.
 
 `PATCH /v1/automation/executions/bulk-jobs/{job_id}`
 
@@ -746,6 +790,9 @@ const { data } = await client.patchBulkJob(
   },
   "task_token": "8c086140-f33e-4bb7-a993-50c0f2402c7b",
   "report_file_entity_id": "string",
+  "last_error": "ThrottlingException: Throughput exceeds the current capacity of your table or index.",
+  "restart_count": 1,
+  "restarted_at": "1970-01-01T00:00:00.000Z",
   "entity_query": {
     "type": "refs",
     "data": [
@@ -772,7 +819,21 @@ const { data } = await client.patchBulkJob(
       "timestamp": "2025-10-30T15:56:47.842Z",
       "error": "string"
     }
-  ]
+  ],
+  "execution_stats": {
+    "total": 60582,
+    "pending": 0,
+    "starting": 0,
+    "in_progress": 0,
+    "success": 0,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "paused": 0,
+    "scheduled": 0,
+    "hot": 0
+  },
+  "execution_summary_truncated": true
 }
 ```
 
@@ -918,7 +979,15 @@ const { data } = await client.getExecution({
     "entity_contexts": [
       {}
     ],
-    "trigger_user_id": "10006129"
+    "resolved_input": {
+      "with_relations": true,
+      "also_pass": []
+    },
+    "trigger_user_id": "10006129",
+    "run_by": {
+      "user_id": "10006129",
+      "org_id": "739224"
+    }
   },
   "workflow_wait_context": {
     "workflow_execution_id": "string",
@@ -1081,7 +1150,15 @@ const { data } = await client.cancelExecution({
     "entity_contexts": [
       {}
     ],
-    "trigger_user_id": "10006129"
+    "resolved_input": {
+      "with_relations": true,
+      "also_pass": []
+    },
+    "trigger_user_id": "10006129",
+    "run_by": {
+      "user_id": "10006129",
+      "org_id": "739224"
+    }
   },
   "workflow_wait_context": {
     "workflow_execution_id": "string",
@@ -1199,7 +1276,9 @@ const { data } = await client.resumeExecutionWithToken(
       "_execution_chain": {},
       "_automation_chain": ["string"],
       "entity_contexts": [],
-      "trigger_user_id": "10006129"
+      "resolved_input": {},
+      "trigger_user_id": "10006129",
+      "run_by": {}
     },
     "workflow_wait_context": {
       "workflow_execution_id": "string",
@@ -1373,6 +1452,10 @@ type AutomationFlow = {
     }
   } | {
     id?: string // uuid
+    type: "sent_email"
+    configuration: object
+  } | {
+    id?: string // uuid
     type: "new_email_thread"
     configuration: {
       shared_inbox_ids?: { ... }
@@ -1410,10 +1493,6 @@ type AutomationFlow = {
       error_code: { ... }
       error_reason: { ... }
       error_info?: { ... }
-    }
-    allow_failure?: boolean
-    statements?: Array<{
-      id?: { ... }
   // ...
 }
 ```
@@ -1441,6 +1520,10 @@ type SearchAutomationsResp = {
       blame?: { ... }
     }
     triggers: Array<{
+      id?: { ... }
+      type: { ... }
+      configuration: { ... }
+    } | {
       id?: { ... }
       type: { ... }
       configuration: { ... }
@@ -1525,10 +1608,6 @@ type SearchAutomationsResp = {
       config?: { ... }
     } | {
       type?: { ... }
-      config?: { ... }
-    } | {
-      type?: { ... }
-      config?: { ... }
   // ...
 }
 ```
@@ -1659,6 +1738,10 @@ type AnyTrigger = {
   }
 } | {
   id?: string // uuid
+  type: "sent_email"
+  configuration: object
+} | {
+  id?: string // uuid
   type: "new_email_thread"
   configuration: {
     shared_inbox_ids?: string[]
@@ -1751,6 +1834,8 @@ type AnyAction = {
 } | {
   type?: "trigger-share-entity"
   config?: {
+    operation?: "share" | "unshare"
+    unshare_all_partners?: boolean
     partner_org_ids?: string[]
   }
 } | {
@@ -1784,8 +1869,6 @@ type AnyAction = {
   type?: "send-email"
   config?: {
     email_template_id?: string
-    language_code?: string
-    notify_portal_user_only?: boolean
   // ...
 }
 ```
@@ -1887,12 +1970,12 @@ type AnyActionConfig = {
   name?: string
   type?: "trigger-workflow"
   config?: {
+    operation?: "share" | "unshare"
+    unshare_all_partners?: boolean
     partner_org_ids?: string[]
   }
   allow_failure?: boolean
   created_automatically?: boolean
-  is_bulk_action?: boolean
-  reason?: {
   // ...
 }
 ```
@@ -2664,6 +2747,18 @@ type AssignThreadAction = {
     skill_match_mode?: "require_all" | "prefer"
     fallback?: "leave_unassigned" | "assign_to_fallback"
     fallback_assignees?: string[]
+    write_mode?: "append" | "replace"
+  }
+}
+```
+
+### `LabelEmailAction`
+
+```ts
+type LabelEmailAction = {
+  type?: "label-email"
+  config?: {
+    add: string[]
   }
 }
 ```
@@ -2673,6 +2768,14 @@ type AssignThreadAction = {
 ```ts
 type MoveThreadConfig = {
   target_inbox_id?: string
+}
+```
+
+### `LabelEmailConfig`
+
+```ts
+type LabelEmailConfig = {
+  add: string[]
 }
 ```
 
@@ -2690,6 +2793,7 @@ type AssignThreadConfig = {
   skill_match_mode?: "require_all" | "prefer"
   fallback?: "leave_unassigned" | "assign_to_fallback"
   fallback_assignees?: string[]
+  write_mode?: "append" | "replace"
 }
 ```
 
@@ -2713,6 +2817,19 @@ type EntityAssignee = {
 }
 ```
 
+### `EntityAssigneeVariable`
+
+An assignee resolved at execution time from a user-relation attribute of an
+entity in the automation context, e.g. `{{submission._owners}}`. Resolves
+against the entity being assigned or the triggering entity, whichever has
+the given schema slug. The attribute may hold user ids, `{ org_id, user_id }
+
+```ts
+type EntityAssigneeVariable = {
+  variable: string
+}
+```
+
 ### `AssignEntityConfig`
 
 ```ts
@@ -2726,9 +2843,20 @@ type AssignEntityConfig = {
     partner_id?: string
     display_name?: string
     email?: string
+  } | {
+    variable: string
   }>
   write_mode?: "replace" | "append"
   assignment_type?: "direct" | "sequential" | "even_distribution"
+  candidate_pool?: Array<{
+    type: "user" | "partner_user" | "partner_organization" | "group"
+    user_id?: string
+    group_id?: string
+    org_id?: string
+    partner_id?: string
+    display_name?: string
+    email?: string
+  }>
   candidate_group?: {
     type: "user" | "partner_user" | "partner_organization" | "group"
     user_id?: string
@@ -2745,6 +2873,8 @@ type AssignEntityConfig = {
   }
   match_user_skills?: boolean
   required_skill_categories?: string[]
+  required_skills?: string[]
+  required_skills_match_mode?: "require_all" | "prefer"
   skill_match_mode?: "require_all" | "prefer"
   fallback?: "leave_unassigned" | "assign_to_fallback"
   fallback_assignees?: Array<{
@@ -2782,9 +2912,20 @@ type AssignEntityActionConfig = {
       partner_id?: { ... }
       display_name?: { ... }
       email?: { ... }
+    } | {
+      variable: { ... }
     }>
     write_mode?: "replace" | "append"
     assignment_type?: "direct" | "sequential" | "even_distribution"
+    candidate_pool?: Array<{
+      type: { ... }
+      user_id?: { ... }
+      group_id?: { ... }
+      org_id?: { ... }
+      partner_id?: { ... }
+      display_name?: { ... }
+      email?: { ... }
+    }>
     candidate_group?: {
       type: { ... }
       user_id?: { ... }
@@ -2801,6 +2942,8 @@ type AssignEntityActionConfig = {
     }
     match_user_skills?: boolean
     required_skill_categories?: string[]
+    required_skills?: string[]
+    required_skills_match_mode?: "require_all" | "prefer"
     skill_match_mode?: "require_all" | "prefer"
     fallback?: "leave_unassigned" | "assign_to_fallback"
     fallback_assignees?: Array<{
@@ -2846,9 +2989,20 @@ type AssignEntityAction = {
       partner_id?: { ... }
       display_name?: { ... }
       email?: { ... }
+    } | {
+      variable: { ... }
     }>
     write_mode?: "replace" | "append"
     assignment_type?: "direct" | "sequential" | "even_distribution"
+    candidate_pool?: Array<{
+      type: { ... }
+      user_id?: { ... }
+      group_id?: { ... }
+      org_id?: { ... }
+      partner_id?: { ... }
+      display_name?: { ... }
+      email?: { ... }
+    }>
     candidate_group?: {
       type: { ... }
       user_id?: { ... }
@@ -2865,6 +3019,8 @@ type AssignEntityAction = {
     }
     match_user_skills?: boolean
     required_skill_categories?: string[]
+    required_skills?: string[]
+    required_skills_match_mode?: "require_all" | "prefer"
     skill_match_mode?: "require_all" | "prefer"
     fallback?: "leave_unassigned" | "assign_to_fallback"
     fallback_assignees?: Array<{
@@ -3270,6 +3426,8 @@ type TriggerShareEntityActionConfig = {
   name?: string
   type?: "trigger-workflow"
   config?: {
+    operation?: "share" | "unshare"
+    unshare_all_partners?: boolean
     partner_org_ids?: string[]
   }
   allow_failure?: boolean
@@ -3291,6 +3449,8 @@ type TriggerShareEntityActionConfig = {
 type TriggerShareEntityAction = {
   type?: "trigger-share-entity"
   config?: {
+    operation?: "share" | "unshare"
+    unshare_all_partners?: boolean
     partner_org_ids?: string[]
   }
 }
@@ -3300,6 +3460,8 @@ type TriggerShareEntityAction = {
 
 ```ts
 type TriggerShareEntityConfig = {
+  operation?: "share" | "unshare"
+  unshare_all_partners?: boolean
   partner_org_ids?: string[]
 }
 ```
@@ -3718,6 +3880,8 @@ type AutomationExecution = {
   } | {
     type?: "trigger-share-entity"
     config?: {
+      operation?: { ... }
+      unshare_all_partners?: { ... }
       partner_org_ids?: { ... }
     }
   } | {
@@ -3740,8 +3904,6 @@ type AutomationExecution = {
     config?: {
       event_name: { ... }
       event_inputs?: { ... }
-    }
-  } | {
   // ...
 }
 ```
@@ -3773,7 +3935,18 @@ type WorkflowExecutionContext = {
     entity_schema?: string
     is_primary?: boolean
   }>
+  resolved_input?: {
+    with_relations: boolean
+    also_pass: Array<{
+      entity_id: { ... }
+      entity_schema?: { ... }
+    }>
+  }
   trigger_user_id?: string
+  run_by?: {
+    user_id: string
+    org_id?: string
+  }
 }
 ```
 
@@ -3856,7 +4029,7 @@ type TriggerEventEntityActivity = {
 
 ```ts
 type TriggerEventMessaging = {
-  type?: "new_email_thread"
+  type?: "new_email_thread" | "sent_email"
   org_id: string
   thread_id: string
   message_id: string
@@ -4183,7 +4356,15 @@ type StartExecutionRequest = {
       entity_schema?: { ... }
       is_primary?: { ... }
     }>
+    resolved_input?: {
+      with_relations: { ... }
+      also_pass: { ... }
+    }
     trigger_user_id?: string
+    run_by?: {
+      user_id: { ... }
+      org_id?: { ... }
+    }
   }
   flow_execution_id?: string
   flow_automation_task_id?: string
@@ -4259,8 +4440,8 @@ type FlowExecutionCancelInputs = {
 
 ```ts
 type PatchBulkJobRequest = {
-  action: "APPROVE" | "CANCEL"
-  task_token: string
+  action: "APPROVE" | "CANCEL" | "RESTART"
+  task_token?: string
 }
 ```
 
@@ -4357,6 +4538,9 @@ type BulkTriggerJob = {
   trigger_context?: Record<string, string>
   task_token?: string
   report_file_entity_id?: string
+  last_error?: string
+  restart_count?: number
+  restarted_at?: string // date-time
   entity_query?: {
     type: "refs" | "query" | "filter"
     data: Array<{
@@ -4389,6 +4573,40 @@ type BulkTriggerJob = {
     timestamp?: string // date-time
     error?: string
   }>
+  execution_stats?: {
+    total: number
+    pending?: number
+    starting?: number
+    in_progress?: number
+    success?: number
+    failed?: number
+    cancelled?: number
+    skipped?: number
+    paused?: number
+    scheduled?: number
+    hot?: number
+  }
+  execution_summary_truncated?: boolean
+}
+```
+
+### `ExecutionStats`
+
+Number of execution items of a bulk trigger job per execution status. Always complete.
+
+```ts
+type ExecutionStats = {
+  total: number
+  pending?: number
+  starting?: number
+  in_progress?: number
+  success?: number
+  failed?: number
+  cancelled?: number
+  skipped?: number
+  paused?: number
+  scheduled?: number
+  hot?: number
 }
 ```
 
@@ -4499,6 +4717,12 @@ type ApiSubmissionTrigger = {
 
 ### `NewEmailThreadTrigger`
 
+Starts the flow when an email starts a new thread. The thread is the execution's entity.
+
+For outbound threads, an email that failed to send or a bulk email does not start the flow,
+and neither does an email whose automation chain already contains the flow. A flow that
+sends emails itself (a send-em
+
 ```ts
 type NewEmailThreadTrigger = {
   id?: string // uuid
@@ -4519,6 +4743,23 @@ type ReceivedEmailTrigger = {
   configuration: {
     message_type?: "RECEIVED"
   }
+}
+```
+
+### `SentEmailTrigger`
+
+Starts the flow for every email sent from epilot: emails and replies sent from the inbox,
+including replies sent from a draft, and emails sent by automations or Flows, except sends
+that skip creating entities. The sent email is the execution's entity. The outgoing
+counterpart of `received_email`.
+
+O
+
+```ts
+type SentEmailTrigger = {
+  id?: string // uuid
+  type: "sent_email"
+  configuration: object
 }
 ```
 
