@@ -639,6 +639,7 @@ declare namespace Components {
          * - **restrict_duplicates_within**: Uses `value` (time duration)
          * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
          * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
+         *   and `excluded_senders` (sender addresses or domains never auto-linked)
          *
          */
         export interface Setting {
@@ -687,6 +688,18 @@ declare namespace Components {
             schemas?: {
                 [name: string]: AutoLinkIdentifierAttribute[];
             };
+            /**
+             * Only for auto_link_identifier_attributes: senders whose emails are never auto-linked. Each
+             * entry is an email address (`newsletter@partner.de`) or a whole domain (`@partner.de`).
+             * Up to 100 are used.
+             *
+             * example:
+             * [
+             *   "newsletter@partner.de",
+             *   "@noreply.example.com"
+             * ]
+             */
+            excluded_senders?: string[];
             /**
              * ISO 8601 timestamp when the setting was created
              * example:
@@ -791,6 +804,7 @@ declare namespace Components {
          * - **restrict_duplicates_within**: Uses `value` (time duration)
          * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
          * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
+         *   and `excluded_senders` (sender addresses or domains never auto-linked)
          *
          */
         Setting[] | /**
@@ -802,6 +816,7 @@ declare namespace Components {
          * - **restrict_duplicates_within**: Uses `value` (time duration)
          * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
          * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
+         *   and `excluded_senders` (sender addresses or domains never auto-linked)
          *
          */
         Setting;
@@ -1097,6 +1112,7 @@ declare namespace Paths {
          * - **restrict_duplicates_within**: Uses `value` (time duration)
          * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
          * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
+         *   and `excluded_senders` (sender addresses or domains never auto-linked)
          *
          */
         Components.Schemas.Setting;
@@ -1798,6 +1814,7 @@ declare namespace Paths {
          * - **restrict_duplicates_within**: Uses `value` (time duration)
          * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
          * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
+         *   and `excluded_senders` (sender addresses or domains never auto-linked)
          *
          */
         Components.Schemas.Setting;
@@ -1811,6 +1828,7 @@ declare namespace Paths {
              * - **restrict_duplicates_within**: Uses `value` (time duration)
              * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
              * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
+         *   and `excluded_senders` (sender addresses or domains never auto-linked)
              *
              */
             Components.Schemas.Setting;

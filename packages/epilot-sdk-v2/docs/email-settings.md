@@ -2034,6 +2034,7 @@ type SettingsResponse = Array<{
     name: string
     labels?: string[]
   }>>
+  excluded_senders?: string[]
   created_at?: string
   updated_at?: string
   created_by?: string
@@ -2049,6 +2050,7 @@ type SettingsResponse = Array<{
     name: string
     labels?: string[]
   }>>
+  excluded_senders?: string[]
   created_at?: string
   updated_at?: string
   created_by?: string
@@ -2345,6 +2347,7 @@ type Setting = {
     name: string
     labels?: string[]
   }>>
+  excluded_senders?: string[]
   created_at?: string
   updated_at?: string
   created_by?: string

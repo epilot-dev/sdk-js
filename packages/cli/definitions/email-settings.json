@@ -3783,7 +3783,7 @@
       },
       "Setting": {
         "type": "object",
-        "description": "Generic setting object used for various email configuration types.\nThe applicable fields depend on the setting type:\n- **signature**: Uses `name`, `value` (plain text), and `html` (rich text)\n- **email_domain**: Uses `value` (domain name)\n- **whitelist_email_address**: Uses `value` (email address)\n- **restrict_duplicates_within**: Uses `value` (time duration)\n- **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)\n- **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)\n",
+        "description": "Generic setting object used for various email configuration types.\nThe applicable fields depend on the setting type:\n- **signature**: Uses `name`, `value` (plain text), and `html` (rich text)\n- **email_domain**: Uses `value` (domain name)\n- **whitelist_email_address**: Uses `value` (email address)\n- **restrict_duplicates_within**: Uses `value` (time duration)\n- **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)\n- **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)\n  and `excluded_senders` (sender addresses or domains never auto-linked)\n",
         "required": [
           "type"
         ],
@@ -3826,6 +3826,19 @@
                 "$ref": "#/components/schemas/AutoLinkIdentifierAttribute"
               }
             }
+          },
+          "excluded_senders": {
+            "type": "array",
+            "description": "Only for auto_link_identifier_attributes: senders whose emails are never auto-linked. Each\nentry is an email address (`newsletter@partner.de`) or a whole domain (`@partner.de`).\nUp to 100 are used.\n",
+            "items": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 254
+            },
+            "example": [
+              "newsletter@partner.de",
+              "@noreply.example.com"
+            ]
           },
           "created_at": {
             "type": "string",
