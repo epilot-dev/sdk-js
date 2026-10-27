@@ -1,0 +1,1 @@
+{"s":"https://entity-ui.sls.epilot.io","o":[["putWidgetDefinition","put","/v1/entity-ui/widget-definitions",null,1],["getWidgetDefinition","get","/v1/entity-ui/widget-definitions/{ref}",[["WidgetDefinitionRefPathParam"]]],["batchGetWidgetDefinitions","post","/v1/entity-ui/widget-definitions/batch-get",null,1]],"v":"3.0.3","cp":{"WidgetDefinitionRefPathParam":["ref","p",true]}}

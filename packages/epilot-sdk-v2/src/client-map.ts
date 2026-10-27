@@ -21,6 +21,7 @@ import type { Client as EmailSettingsClient } from './types/email-settings';
 import type { Client as EmailTemplateClient } from './types/email-template';
 import type { Client as EntityClient } from './types/entity';
 import type { Client as EntityMappingClient } from './types/entity-mapping';
+import type { Client as EntityUiClient } from './types/entity-ui';
 import type { Client as EnvironmentsClient } from './types/environments';
 import type { Client as EventCatalogClient } from './types/event-catalog';
 import type { Client as ExternalValuesClient } from './types/external-values';
@@ -78,6 +79,7 @@ export type SDKClientMap = {
   emailTemplate: EmailTemplateClient;
   entity: EntityClient;
   entityMapping: EntityMappingClient;
+  entityUi: EntityUiClient;
   environments: EnvironmentsClient;
   eventCatalog: EventCatalogClient;
   externalValues: ExternalValuesClient;

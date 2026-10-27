@@ -1,0 +1,90 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://entity-ui.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/entity-ui/widget-definitions": {
+      "put": {
+        "operationId": "putWidgetDefinition",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/entity-ui/widget-definitions/{ref}": {
+      "get": {
+        "operationId": "getWidgetDefinition",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WidgetDefinitionRefPathParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/entity-ui/widget-definitions/batch-get": {
+      "post": {
+        "operationId": "batchGetWidgetDefinitions",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "WidgetDefinitionRefPathParam": {
+        "name": "ref",
+        "in": "path",
+        "required": true
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "PayloadTooLarge": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ServiceUnavailable": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  }
+}

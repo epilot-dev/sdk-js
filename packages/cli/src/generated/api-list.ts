@@ -822,6 +822,14 @@ export const API_LIST: ApiInfo[] = [
     ],
   },
   {
+    apiName: 'entityUi',
+    kebabName: 'entity-ui',
+    title: 'Entity UI API',
+    serverUrl: 'https://entity-ui.sls.epilot.io',
+    operationCount: 3,
+    operationIds: ['putWidgetDefinition', 'getWidgetDefinition', 'batchGetWidgetDefinitions'],
+  },
+  {
     apiName: 'environments',
     kebabName: 'environments',
     title: 'Environments API',
