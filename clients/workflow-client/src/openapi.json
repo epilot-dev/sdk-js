@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Workflows Executions",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "description": "## Overview\nThe Workflows Executions API manages the runtime instances of workflow processes within an organization.\nWhile **Workflow Definitions** (managed by the Workflows Definitions API) serve as reusable templates\nthat define the structure, phases, and tasks of a process, **Workflow Executions** are the active\ninstances created from those definitions.\n\n## Key Concepts\n\n### Definitions vs Executions\n- **Definition (Template)**: A blueprint defining workflow structure, phases, tasks, conditions, and automation rules\n- **Execution (Instance)**: A running instance of a definition, tracking actual progress, assignees, and status\n\n### Execution Lifecycle\n1. **STARTED**: Execution is active and tasks can be worked on\n2. **DONE**: All required tasks are completed\n3. **CLOSED**: Execution is terminated (completed successfully or cancelled with closing reasons)\n\n### Task Types\n- **Manual Tasks**: Require human action to complete\n- **Automation Tasks**: Execute configured automations automatically\n- **Decision Tasks**: Evaluate conditions to determine the next path in the workflow\n- **AI Agent Tasks**: Execute AI-powered agents for intelligent task processing\n\n### Contexts\nExecutions are linked to entity contexts (e.g., contacts, opportunities) that provide the data\ncontext for the workflow and allow tracking which entities a workflow operates on.\n\n## API Versions\n- **V1 (`/v1/workflows/`)**: Legacy linear phase/section/step model (deprecated for new integrations)\n- **V2 (`/v2/flows/`)**: Current graph-based model with advanced features like conditional branching,\n  loops, and scheduling. **Recommended for all new integrations.**\n"
   },
   "servers": [
@@ -22,6 +22,10 @@
     {
       "name": "Closing Reasons",
       "description": "Retrieve closing reasons configured for workflow executions. When a workflow is closed/cancelled,\nusers can select from predefined closing reasons to document why the workflow ended. Closing\nreasons are snapshots from the definition at execution creation time.\n"
+    },
+    {
+      "name": "Portal Workflows",
+      "description": "Portal-facing (End Customer Portal / Installer Portal) projections of workflow executions.\nReturns executions linearized into a flat, ordered list of portal-visible steps, so portal\nclients can render a timeline without knowing about the underlying graph model (V2 flows)\nor the legacy linear model (V1 workflows).\n"
     },
     {
       "name": "Flows V2",
@@ -157,7 +161,7 @@
             }
           },
           "400": {
-            "description": "Validation error. Common causes include:\n- Missing required workflowId\n- Invalid workflowId (definition not found)\n- Invalid context entity references\n",
+            "description": "Validation error. Common causes include:\n- Missing required workflowId\n- Invalid workflowId (definition not found)\n- Invalid context entity references\n- Requested purposes match none of the definition's phases or tasks\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -896,6 +900,20 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "The datastore was temporarily saturated and the execution could not be stored.\nThe execution row is written last, so no execution exists and a retry cannot\ncreate a duplicate. Context and task rows written before the failure remain\nunder the abandoned execution id, where reads ignore them.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                "example": {
+                  "message": "Flow execution could not be stored because the datastore is temporarily saturated. Retry the request.",
+                  "error_code": "WORKFLOW_START_THROTTLED"
+                }
+              }
+            }
           }
         }
       }
@@ -1025,7 +1043,7 @@
       "post": {
         "operationId": "searchFlowExecutions",
         "summary": "searchFlowExecutions",
-        "description": "Search Flow Executions for a specific Entity.",
+        "description": "Search Flow Executions for a specific Entity.\n\nReturns runs the entity is a CONTEXT of and runs merely SHOWN on it through a display\nrule. To tell the two apart, read the requested `entity_id` out of each result's\n`visible_on`: `kind: display` also carries `anchor_entity_id`, the entity the run\nactually runs on. No separate field is returned for this — the run already carries the\nanswer.\n",
         "tags": [
           "Flows V2"
         ],
@@ -1077,6 +1095,530 @@
           },
           "500": {
             "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions:portal-search": {
+      "post": {
+        "operationId": "searchPortalWorkflows",
+        "summary": "searchPortalWorkflows",
+        "description": "Returns all portal-relevant workflow executions for a given entity, linearized into a\nflat, ordered list of portal-visible steps. Intended to be called by the Customer Portal\nAPI (ECP / Installer Portal) instead of fetching raw executions and linearizing client-side.\n\n**Resolves CONTEXTS only.** A run reached through a display rule (`visible_on` with\n`kind: display`) is deliberately not returned here: it runs on an entity the portal user\nmay have no access to, and a step anchored on something they cannot open is worse than\nan absent one. Internal surfaces use the full visible set; the portal does not.\n\n**Covers both execution models:**\n- **V1 workflow executions** (legacy linear model, `version: 2`): sections/steps are\n  flattened into the same step shape.\n- **V2 flow executions** (graph model, `version: 3`): the execution graph is traversed\n  from the trigger node along the *active path* — following edges whose conditions are met,\n  resolving decision tasks, and skipping loop edges.\n\n**Linearization semantics (V2):**\n- Only tasks enabled for the requested `audience` become steps: `ecp` / `installer`\n  filter by the matching task config, `all` includes tasks enabled for any audience.\n- When a decision task has met conditions, all winning branches are followed (parallel\n  branches supported).\n- When a decision task is still unevaluated, traversal does **not** stop: it continues from\n  the enclosing phase's exit edge to the next phase, since the phase backbone is guaranteed\n  to be on the active path regardless of which branch inside the phase eventually wins.\n  Steps inside the unresolved branches are omitted until the decision is evaluated, and\n  `is_path_complete` is `false` to signal that more steps may appear later.\n- A step is `is_active: true` when it has been *reached*: all predecessor tasks on its path\n  are completed/skipped, so a portal user can act on it. Steps after an unevaluated decision\n  are returned but not active.\n- A step whose task has a start date carries it as `start_date` (AL-3678). While that\n  instant lies in the future a step that is not done yet is upcoming: nobody may work on\n  it, whatever `is_active` says.\n\n**Ordering:** completed/skipped steps first (by completion time), then active steps, then\nupcoming steps in traversal order.\n\nWorkflows with no portal-visible step for the requested audience, and V2 flows with\n`available_in_ecp: false`, are filtered out.\n",
+        "tags": [
+          "Portal Workflows"
+        ],
+        "requestBody": {
+          "description": "Entity to load portal workflows for",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortalWorkflowsSearchReq"
+              },
+              "examples": {
+                "ecpAudience": {
+                  "summary": "Load ECP workflows for an order entity",
+                  "value": {
+                    "entity_id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
+                    "entity_schema": "order",
+                    "audience": "ecp"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Portal-relevant workflows for the entity, each with linearized steps",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalWorkflowsSearchResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions:portal-search-batch": {
+      "post": {
+        "operationId": "searchPortalWorkflowsBatch",
+        "summary": "searchPortalWorkflowsBatch",
+        "description": "Batch variant of `searchPortalWorkflows`: returns portal-relevant workflow\nexecutions for MANY entities in a single call — schemas may differ — each\nlinearized into a flat, ordered list of portal-visible tasks (same semantics\nas the single-entity endpoint).\n\nIntended for portal list views (e.g. an entity list where every card shows\nits workflow progress), where enriching per entity would fan out into one\nrequest per row. Accepts up to 50 entity ids per call.\n\nThe response contains one entry per requested entity id (in request order),\nwith an empty `workflows` array when the entity has no portal-relevant\nworkflow — absence of workflows is authoritative, not an error.\n",
+        "tags": [
+          "Portal Workflows"
+        ],
+        "requestBody": {
+          "description": "Entities to load portal workflows for",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortalWorkflowsBatchSearchReq"
+              },
+              "examples": {
+                "entityList": {
+                  "summary": "Load workflows for a page of mixed entities",
+                  "value": {
+                    "entities": [
+                      {
+                        "entity_id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
+                        "entity_schema": "order"
+                      },
+                      {
+                        "entity_id": "7bc8de90-1234-5678-90ab-cdef12345678",
+                        "entity_schema": "contract"
+                      }
+                    ],
+                    "audience": "all"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "One entry per requested entity, each with its linearized portal workflows",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalWorkflowsBatchSearchResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions:bulk-start": {
+      "post": {
+        "operationId": "bulkStartFlows",
+        "summary": "bulkStartFlows",
+        "description": "Creates a job that starts one or more flows on many entities: every flow in\n`flow_template_ids` is started on every entity in `entities` (up to 5 flows,\n200 entities, 1000 starts). Every start is manual.\n\nThe request only runs a preflight and returns `202` with the job in status\n`awaiting_approval`. Nothing is started until the job is approved with\n`PATCH /v2/flows/bulk-jobs/{job_id}` (`action: APPROVE`); a job not approved\nwithin 24 hours expires.\n\nThe preflight checks the caller may trigger flows, loads every template, and\nmatches each entity against the template's trigger. A pair whose entity type\nno trigger accepts is recorded as a `skipped` item with `error_code:\ntrigger_entity_mismatch`. `flows[]` summarises per flow how many starts the\njob will make, which is what a confirmation dialog shows.\n\nAfter approval the job runs in the background, paced to protect the\ndatastore (roughly 5–10 starts per second). Poll\n`GET /v2/flows/bulk-jobs/{job_id}` for progress; the user who created the\njob is notified in-app when it finishes.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkStartFlowsReq"
+              },
+              "examples": {
+                "twoFlowsOnOpportunities": {
+                  "summary": "Start two flows on two opportunities",
+                  "value": {
+                    "flow_template_ids": [
+                      "tpl_abc123def456",
+                      "tpl_789ghi012jkl"
+                    ],
+                    "entities": [
+                      {
+                        "entity_id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
+                        "entity_schema": "opportunity"
+                      },
+                      {
+                        "entity_id": "7bc8de90-1234-5678-90ab-cdef12345678",
+                        "entity_schema": "opportunity"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Job created and waiting for approval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkStartFlowsJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error: limits exceeded, duplicate ids, or a request carrying an\nautomation execution chain (bulk start is manual-only).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "The caller may not trigger flows in this organization"
+          },
+          "404": {
+            "description": "A flow template does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A flow template is disabled, or another bulk start of the caller is\nstill running (`error_code: BULK_START_ALREADY_RUNNING`, with\n`active_job_id`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The job could not be stored because the datastore was temporarily\nsaturated (`error_code: WORKFLOW_START_THROTTLED`). Nothing was stored;\nretry the request.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/bulk-jobs": {
+      "get": {
+        "operationId": "listBulkStartFlowsJobs",
+        "summary": "listBulkStartFlowsJobs",
+        "description": "Lists the organization's approved bulk-start jobs, newest approval first,\nwith their counts but without items. Jobs never approved (still awaiting\napproval, or expired) are not listed. Jobs are kept for 30 days.\n\nPass `next_cursor` of a page as `cursor` to read the next one.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 50
+            },
+            "required": false,
+            "description": "Jobs per page."
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "The `next_cursor` of the previous page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListBulkStartFlowsJobsResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid `size` or `cursor`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v2/flows/bulk-jobs:active": {
+      "get": {
+        "operationId": "getActiveBulkStartFlowsJob",
+        "summary": "getActiveBulkStartFlowsJob",
+        "description": "Returns the caller's bulk-start job in flight (`queued` or `running`), or\n`job: null` when there is none.\n\nA user can have one bulk start in flight at a time: creating or approving\nanother returns `409` with `error_code: BULK_START_ALREADY_RUNNING`. Clients\nread this on load to resume showing a running job, for example after a page\nrefresh.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "responses": {
+          "200": {
+            "description": "The caller's active job, or null",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActiveBulkStartFlowsJobResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v2/flows/bulk-jobs/{job_id}": {
+      "get": {
+        "operationId": "getBulkStartFlowsJob",
+        "summary": "getBulkStartFlowsJob",
+        "description": "Returns a bulk-start job with its counts and one item per (flow, entity)\npair, including the started execution id or the error.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BulkJobIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkStartFlowsJob"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchBulkStartFlowsJob",
+        "summary": "patchBulkStartFlowsJob",
+        "description": "Approves or cancels a bulk-start job.\n\n- `APPROVE`: only from `awaiting_approval`, before the job expires. Queues the\n  job; starts begin within seconds.\n- `CANCEL`: from `awaiting_approval` or `queued` the job is cancelled at once.\n  From `running` the job stops at its next checkpoint (a few seconds), or at\n  once when no worker currently holds it; flows already started are kept and\n  the remaining items become `cancelled`.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BulkJobIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchBulkStartFlowsJobReq"
+              },
+              "example": {
+                "action": "APPROVE"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkStartFlowsJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The action is not allowed in the job's current status, or (on `APPROVE`)\nanother bulk start of the caller is still running\n(`error_code: BULK_START_ALREADY_RUNNING`, with `active_job_id`), or the\njob restarts a job that another approved job already restarted\n(`error_code: BULK_START_ALREADY_RESTARTED`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/bulk-jobs/{job_id}/restart": {
+      "post": {
+        "operationId": "restartBulkStartFlowsJob",
+        "summary": "restartBulkStartFlowsJob",
+        "description": "Restarts what is left of an ended bulk-start job: creates a new job, in\n`awaiting_approval`, from the job's `failed` items and the items it never\nstarted (`cancelled`). Started and skipped items are not repeated. Like\n`bulkStartFlows`, it starts nothing: approve the new job with\n`PATCH /v2/flows/bulk-jobs/{job_id}`.\n\nOnly a job in `completed_with_errors`, `failed` or `cancelled` can be\nrestarted. Each flow is loaded again: a flow deleted since becomes\n`skipped` items (`error_code: flow_not_found`). The new job names the\nsource job in `restart_of`. A job is restarted at most once: approving\nthe new job marks the source job `restarted_by` it, and from then on\nneither another restart of the source job nor the approval of another\nrestart preflight of it is allowed.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BulkJobIdParam"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The new job, awaiting approval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkStartFlowsJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request carries an automation execution chain (bulk start is manual-only).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "The caller may not trigger flows in this organization"
+          },
+          "404": {
+            "description": "Job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The job cannot be restarted: it has not ended, it completed, it expired, or\nnothing is left to start (`error_code: BULK_START_NOT_RESTARTABLE`). Also\nwhen a flow is disabled, or another bulk start of the caller is still\nrunning (`error_code: BULK_START_ALREADY_RUNNING`, with `active_job_id`),\nor the job was already restarted (`error_code: BULK_START_ALREADY_RESTARTED`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The job could not be stored because the datastore was temporarily\nsaturated (`error_code: WORKFLOW_START_THROTTLED`). Nothing was stored;\nretry the request.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -1241,7 +1783,87 @@
       "post": {
         "operationId": "runTaskAutomation",
         "summary": "runTaskAutomation",
-        "description": "Runs configured automation for a flow task",
+        "description": "Runs configured automation for a flow task. Running a `trigger_mode: manual` automation (an absent trigger mode counts as manual) is its person action, so it is permission-checked like completing a task (`UpdateTaskStatus`, or assigned plus `UpdateAssignedTaskStatus`) and refused with 400 \"Cannot run this automation: N required subtask(s) are unfinished.\" while required subtasks the caller can see are unticked. The engine's own dispatch through executeTask is exempt.\n\nA semi-automated task carries the bounded choice its assignee makes in the request body. The body is optional: a task that configures no choice runs entirely from its automation's stored configuration, exactly as before. For an organisation without semi-automated tasks enabled, a body whose `action_inputs` carries a `cancel_flow_execution` or `send_email` input is refused with 400 rather than run without it; an empty `action_inputs` runs as before.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunTaskAutomationReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - when task automation has been successfully started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationTask"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - a person's run of a task whose schedule is still pending, which runTaskScheduleNow runs instead; or an email review of such a task whose automation has already been triggered, by its schedule, run-now or another review. A review of a task whose last run failed or was skipped runs again, even if that run had completed some of its actions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/email-preview": {
+      "get": {
+        "operationId": "previewTaskEmail",
+        "summary": "previewTaskEmail",
+        "description": "Renders the email a semi-automated send-email task would send, so the person running it can review and adjust it first.\n\nRendered here rather than in the client so that the preview and the eventual send resolve the same way: the entity is chosen by the same rule the run uses — the flow's primary entity, or an upstream task's output when the step's input context says so — and the template is rendered through the same call the sending worker makes.\n\nPermission-checked like running the task, since a preview reveals the rendered contents of an email. Refused with 400 for an organisation without semi-automated tasks enabled, since the run would refuse the edits a preview invites.",
         "tags": [
           "Flows V2"
         ],
@@ -1255,11 +1877,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Success - when task automation has been successfully started",
+            "description": "The rendered email",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AutomationTask"
+                  "$ref": "#/components/schemas/TaskEmailPreview"
                 }
               }
             }
@@ -1301,7 +1923,7 @@
       "post": {
         "operationId": "executeTask",
         "summary": "executeTask",
-        "description": "Executes any kind of flow task immediately.",
+        "description": "Executes any kind of flow task immediately. This is the scheduler's dispatch endpoint: when its timer fires on the SCHEDULED task it booked, in the scheduler's own name, the call is the engine dispatch and is the only caller exempt from the task's completion gates. Any other caller — a person, or a service token on a task no timer is waiting on — is gated like a PATCH.",
         "tags": [
           "Flows V2"
         ],
@@ -1432,7 +2054,7 @@
       "post": {
         "operationId": "addTask",
         "summary": "addTask",
-        "description": "Create a new task in current workflow execution.",
+        "description": "Create a new task in current workflow execution.\n\nThe task is assigned to the user who creates it, unless `task.assigned_to`\nis given and the caller may assign tasks.\n",
         "tags": [
           "Flows V2"
         ],
@@ -1563,7 +2185,7 @@
       "post": {
         "operationId": "reconcileAutomationTask",
         "summary": "reconcileAutomationTask",
-        "description": "Reconciles an automation task's status against its linked automation execution.\n\nLooks the task up by id (whether or not it is currently a `crt_task`),\nfetches its automation execution, and — if the automation has reached a\nterminal state (success/failed/skipped) — corrects the task's `status`,\n`automation_config` and `analytics` to match and persists them. If the\ntask is the current task and the flow is still active, the flow is\nadvanced; otherwise only the task record is corrected.\n\nUsed by the \"Refresh status\" action to recover a task left `IN_PROGRESS`\nafter a missed or clobbered completion event. No-op (returns the\nexecution unchanged) when the task is already terminal or the automation\nis still running.\n",
+        "description": "Reconciles an automation task's status against its linked automation execution.\n\nLooks the task up by id (whether or not it is currently a `crt_task`),\nfetches its automation execution, and — if the automation has reached a\nterminal state (success/failed/skipped) — corrects the task's `status`,\n`automation_config` and `analytics` to match and persists them. If the\ntask is the current task and the flow is still active, the flow is\nadvanced; otherwise only the task record is corrected.\n\nUsed by the \"Refresh status\" action to recover a task left `IN_PROGRESS`\nafter a missed or clobbered completion event. No-op (returns the\nexecution unchanged) when the task is already terminal, the automation\nis still running, or the task is in `WAITING_FOR_JOURNEY_SUBMISSION`\n(the send execution's `success` must not complete a task that is\ndeliberately waiting on the journey's submission automation).\n",
         "tags": [
           "Flows V2"
         ],
@@ -1643,7 +2265,7 @@
       "post": {
         "operationId": "runTaskScheduleNow",
         "summary": "runTaskScheduleNow",
-        "description": "Cancels the pending schedule for a task and immediately triggers its automation execution.",
+        "description": "Cancels the pending schedule for a task and immediately triggers its automation execution. Always a person's request, so a `trigger_mode: manual` automation (an absent trigger mode counts as manual) is held to the same permission rule and run gate as runTaskAutomation — the 400 for unticked required subtasks is raised before the schedule is cancelled, so a refused call leaves the timer armed.\n\nA step with an email review whose schedule is booked, in an organisation with semi-automated tasks enabled, is triggered first, under the same trigger claim as its schedule and an email review of it, and its schedule is cancelled best-effort afterwards; the schedule id stays on the task. The call is refused with 409 when the task's automation was already triggered. A task whose last run failed or was skipped runs again, even if that run had completed some of its actions, and a trigger that fails leaves the schedule armed. Other tasks, including a review step with no booked schedule, are unchanged.",
         "tags": [
           "Flows V2"
         ],
@@ -1688,6 +2310,16 @@
           },
           "404": {
             "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - for a step with an email review whose schedule is booked, the task's automation has already been triggered, by its schedule, an email review or another run-now",
             "content": {
               "application/json": {
                 "schema": {
@@ -1783,6 +2415,15 @@
       }
     },
     "parameters": {
+      "BulkJobIdParam": {
+        "in": "path",
+        "name": "job_id",
+        "schema": {
+          "type": "string"
+        },
+        "required": true,
+        "description": "Bulk-start job id, as returned by `bulkStartFlows`."
+      },
       "ExecutionIdParam": {
         "in": "path",
         "name": "execution_id",
@@ -2528,10 +3169,11 @@
           "PENDING",
           "CONDITION_PENDING",
           "WAITING_FOR_CONFIRMATION",
+          "WAITING_FOR_JOURNEY_SUBMISSION",
           "ON_HOLD",
           "FAILED"
         ],
-        "description": "**Note**: \"UNASSIGNED\" and \"ASSIGNED\" are deprecated and will be removed in a future version. Please use \"PENDING\" instead. Status values for workflow execution steps/tasks:\n- **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)\n- **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)\n- **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution\n- **IN_PROGRESS**: Step/Task is currently being worked on by a user\n- **COMPLETED**: Step/Task has been finished successfully\n- **SKIPPED**: Step/Task was intentionally bypassed and will not be executed\n- **SCHEDULED**: Task is scheduled to run at a specific time in the future\n- **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed\n- **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.\n- **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed\n- **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.\n"
+        "description": "**Note**: \"UNASSIGNED\" and \"ASSIGNED\" are deprecated and will be removed in a future version. Please use \"PENDING\" instead. Status values for workflow execution steps/tasks:\n- **UNASSIGNED**: Step has not been assigned to any user (deprecated - use PENDING instead)\n- **ASSIGNED**: Step has been assigned to one or more users (deprecated - use PENDING instead)\n- **PENDING**: Step/Task is waiting to be started by assigned users or is ready for execution\n- **IN_PROGRESS**: Step/Task is currently being worked on by a user\n- **COMPLETED**: Step/Task has been finished successfully\n- **SKIPPED**: Step/Task was intentionally bypassed and will not be executed\n- **SCHEDULED**: Task is scheduled to run at a specific time in the future\n- **CONDITION_PENDING**: Task is waiting for certain conditions to be met before it can proceed\n- **WAITING_FOR_CONFIRMATION**: Step/Task is paused and waiting for user confirmation via an external input (e.g., link in email) before proceeding.\n- **WAITING_FOR_JOURNEY_SUBMISSION**: Automation task sent its email and is paused until the journey linked in that email is submitted and the journey's submission automation completes. Unlike WAITING_FOR_CONFIRMATION, the task status is decoupled from `automation_config.execution_status`, which stays `success`.\n- **ON_HOLD**: Step/Task is temporarily paused and cannot proceed until manually resumed\n- **FAILED**: Task encountered an error and could not be completed. Mainly for automation tasks.\n"
       },
       "SectionStatus": {
         "type": "string",
@@ -2560,11 +3202,226 @@
           "name": {
             "type": "string"
           },
+          "portal_button_label": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Portal-facing label that replaces the default \"Start now\" button shown for this task's linked journey in the End Customer Portal / Installer Portal. Snapshotted from the template at flow start and relayed on the portal projection. Blank or absent means the portal keeps its own translated default."
+          },
           "complete_task_automatically": {
             "type": "boolean",
             "description": "If true, the task be auto completed when the journey is completed"
+          },
+          "journey_submission_required": {
+            "type": "boolean",
+            "description": "When true, the task cannot transition into COMPLETED until the linked journey was actually submitted (enforced on PATCH). Manual tasks only: the definition service rejects the flag on every other kind and the engine ignores it there. Snapshotted from the template at flow start. The submission is verified server-side — see `TaskBase.journey_submission`. When the journey no longer exists the gate is waived on completion, stamped as `TaskBase.journey_gate_waived_at` and recorded on the activity trail."
+          },
+          "context_parameters": {
+            "type": "array",
+            "description": "Values preset by the flow author for context parameters the journey declares in its contextSchema. A value is either a literal or an entity variable over the run's context, which the launcher resolves when the journey is opened from the task. Overrides the parameter's default value and the launcher's own entity ids.",
+            "items": {
+              "$ref": "#/components/schemas/JourneyContextParameter"
+            }
+          },
+          "ai_prefill": {
+            "$ref": "#/components/schemas/AiPrefillConfig"
           }
         }
+      },
+      "JourneyContextParameter": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "The journey context parameter key (paramKey in the journey's contextSchema)"
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "The value to pass for the parameter when launching the journey"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ]
+      },
+      "AiPrefillConfig": {
+        "type": "object",
+        "description": "AI extraction + prefill configuration for the attached journey (Flows v2 only)",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "source": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "flow_context"
+                ],
+                "default": "flow_context"
+              },
+              "input_entity": {
+                "type": "string",
+                "enum": [
+                  "thread",
+                  "first_email",
+                  "last_email"
+                ],
+                "default": "last_email"
+              }
+            }
+          },
+          "extraction_fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiPrefillExtractionField"
+            }
+          },
+          "mappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiPrefillMapping"
+            }
+          },
+          "min_confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.8
+          },
+          "instructions": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Free-text, cross-field context for the extractor (e.g. \"amounts are always in euros\")"
+          }
+        }
+      },
+      "AiPrefillExtractionField": {
+        "type": "object",
+        "required": [
+          "key",
+          "type"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "date",
+              "enum"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "description_overridden": {
+            "type": "boolean",
+            "description": "Set when the author replaced the derived description with their own; the builder preserves flagged descriptions across re-derivations"
+          },
+          "enum": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AiPrefillMapping": {
+        "type": "object",
+        "required": [
+          "source",
+          "block_id",
+          "block_type"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "block_id": {
+            "type": "string"
+          },
+          "block_type": {
+            "type": "string",
+            "enum": [
+              "text-input",
+              "number-input",
+              "personal-information",
+              "meter-reading"
+            ]
+          },
+          "block_field": {
+            "type": "string"
+          }
+        }
+      },
+      "JourneyPrefill": {
+        "type": "object",
+        "description": "Server-tracked outcome of an AI journey-prefill dispatch for this task (Flows v2 only). Absent when the task has no `journey.ai_prefill` config, or before the task becomes current.",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "READY",
+              "FAILED",
+              "SKIPPED"
+            ]
+          },
+          "agent_execution_id": {
+            "type": "string"
+          },
+          "dispatched_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Set when the prefill agent is dispatched (status PENDING). Drives stale-PENDING recovery."
+          },
+          "extracted_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "initial_state": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "field_confidence": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "dropped": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "reason"
+              ],
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "block_id": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "status"
+        ]
       },
       "AutomationConfig": {
         "type": "object",
@@ -2758,6 +3615,9 @@
           },
           "automationConfig": {
             "$ref": "#/components/schemas/AutomationConfig"
+          },
+          "journey": {
+            "$ref": "#/components/schemas/StepJourney"
           },
           "startedTime": {
             "type": "string"
@@ -2971,6 +3831,36 @@
           }
         }
       },
+      "TaskInEntity": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string"
+          },
+          "task_name": {
+            "type": "string"
+          },
+          "task_assignees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "task_duedate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "task_start_date": {
+            "type": "string"
+          },
+          "task_execution_type": {
+            "$ref": "#/components/schemas/StepType"
+          },
+          "task_status": {
+            "$ref": "#/components/schemas/StepStatus"
+          }
+        }
+      },
       "WorkflowInEntity": {
         "type": "object",
         "properties": {
@@ -3025,11 +3915,22 @@
             "type": "string",
             "format": "date-time"
           },
+          "task_start_date": {
+            "type": "string",
+            "description": "Resolved start date of the task (AL-3678); the task is upcoming while it lies in the future"
+          },
           "task_execution_type": {
             "$ref": "#/components/schemas/StepType"
           },
           "task_status": {
             "$ref": "#/components/schemas/StepStatus"
+          },
+          "current_tasks": {
+            "type": "array",
+            "description": "Every open current task of the workflow, in crt_tasks order. Omitted whenever the task_* fields are.",
+            "items": {
+              "$ref": "#/components/schemas/TaskInEntity"
+            }
           },
           "phase_id": {
             "type": "string"
@@ -3288,7 +4189,7 @@
           },
           "contexts": {
             "type": "array",
-            "description": "Entity references that this execution is linked to. At least one context\nis required. The primary context (is_primary: true) is used for condition\nevaluation and data mapping.\n",
+            "description": "Entity references that this execution is linked to. At least one context\nis required. The primary context (is_primary: true) is used for condition\nevaluation and data mapping.\n\nUnique by `entity_id`: repeated references are folded into one context,\nkeeping the first occurrence and OR-ing `is_primary`. A caller handing in\nseveral entities (a journey automation passing the sequence it created)\ntherefore never has to de-duplicate them itself.\n",
             "minItems": 1,
             "items": {
               "$ref": "#/components/schemas/FlowContext"
@@ -3311,11 +4212,762 @@
           },
           "entity_schema": {
             "type": "string"
+          },
+          "include_background": {
+            "type": "boolean",
+            "default": false,
+            "description": "Also return runs whose `visibility` is `background`.\n\nBackground runs are indexed against their contexts but never listed\nby default — that is the point of the mode. This opts them back in\nfor a surface that asks for them deliberately, such as a \"show\nbackground processes\" toggle in the entity's flows sidebar, where\nthe alternative is a process nobody can find when it stalls.\n\nIt does NOT widen access: results are still filtered by the\ncaller's view permissions, and nothing here reaches the entity's\n`workflows` projection, so entity tables and saved views stay\nclean either way.\n"
           }
         },
         "required": [
           "entity_id",
           "entity_schema"
+        ]
+      },
+      "PortalWorkflowsSearchReq": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "description": "Id of the entity the portal user is viewing"
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "Schema of the entity",
+            "example": "order"
+          },
+          "audience": {
+            "$ref": "#/components/schemas/PortalAudience"
+          }
+        },
+        "required": [
+          "entity_id",
+          "entity_schema",
+          "audience"
+        ]
+      },
+      "PortalAudience": {
+        "type": "string",
+        "enum": [
+          "ecp",
+          "installer",
+          "all"
+        ],
+        "description": "Which portal audience the workflows are loaded for. Controls which task-level\nportal config (`ecp` or `installer`) determines task visibility. `all` returns\ntasks enabled for any audience — callers must state the widest scope explicitly\nrather than falling into it by omission.\n"
+      },
+      "PortalWorkflowsSearchResp": {
+        "type": "object",
+        "properties": {
+          "workflows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortalWorkflow"
+            }
+          }
+        },
+        "required": [
+          "workflows"
+        ]
+      },
+      "BulkStartFlowsReq": {
+        "type": "object",
+        "description": "Start every flow in `flow_template_ids` on every entity in `entities`.",
+        "required": [
+          "flow_template_ids",
+          "entities"
+        ],
+        "properties": {
+          "flow_template_ids": {
+            "type": "array",
+            "description": "Flow templates to start. Unique.",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+              "type": "string"
+            }
+          },
+          "entities": {
+            "type": "array",
+            "description": "Entities to start the flows on. Unique by `entity_id`.",
+            "minItems": 1,
+            "maxItems": 200,
+            "items": {
+              "$ref": "#/components/schemas/BulkStartEntityRef"
+            }
+          },
+          "purposes": {
+            "type": "array",
+            "description": "Passed to every start, as `purposes` on `startFlowExecution`.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BulkStartEntityRef": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "entity_schema"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_schema": {
+            "type": "string",
+            "example": "opportunity"
+          }
+        }
+      },
+      "BulkStartFlowsJobStatus": {
+        "type": "string",
+        "description": "* `awaiting_approval`: preflight done, nothing started; waits for `APPROVE`\n* `queued`: approved, waiting for a worker\n* `running`: starts in progress\n* `completed`: every start that was not skipped succeeded\n* `completed_with_errors`: finished, at least one start failed\n* `failed`: the job itself failed; some starts may have happened, see items\n* `cancelled`: cancelled; flows already started are kept\n* `expired`: not approved within 24 hours\n",
+        "enum": [
+          "awaiting_approval",
+          "queued",
+          "running",
+          "completed",
+          "completed_with_errors",
+          "failed",
+          "cancelled",
+          "expired"
+        ]
+      },
+      "BulkStartFlowsItemStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "started",
+          "failed",
+          "skipped",
+          "cancelled"
+        ]
+      },
+      "BulkStartFlowsItem": {
+        "type": "object",
+        "description": "One (flow, entity) start of a bulk-start job.",
+        "required": [
+          "flow_template_id",
+          "entity_id",
+          "entity_schema",
+          "status"
+        ],
+        "properties": {
+          "flow_template_id": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_schema": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BulkStartFlowsItemStatus"
+          },
+          "execution_id": {
+            "type": "string",
+            "description": "The started flow execution, when `status` is `started`."
+          },
+          "error_code": {
+            "type": "string",
+            "description": "Why the item was skipped or failed: `trigger_entity_mismatch`,\n`flow_disabled`, `flow_not_found`, `WORKFLOW_START_THROTTLED` or\n`start_failed`.\n"
+          },
+          "error_message": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BulkStartFlowsFlowSummary": {
+        "type": "object",
+        "required": [
+          "flow_template_id",
+          "flow_name",
+          "will_start",
+          "skipped"
+        ],
+        "properties": {
+          "flow_template_id": {
+            "type": "string"
+          },
+          "flow_name": {
+            "type": "string"
+          },
+          "will_start": {
+            "type": "integer",
+            "description": "Entities this flow will be started on."
+          },
+          "skipped": {
+            "type": "integer",
+            "description": "Entities no trigger of this flow accepts."
+          }
+        }
+      },
+      "BulkStartFlowsJobCounts": {
+        "type": "object",
+        "required": [
+          "total",
+          "pending",
+          "started",
+          "failed",
+          "skipped",
+          "cancelled"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "pending": {
+            "type": "integer"
+          },
+          "started": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "skipped": {
+            "type": "integer"
+          },
+          "cancelled": {
+            "type": "integer"
+          }
+        }
+      },
+      "BulkStartFlowsJob": {
+        "type": "object",
+        "required": [
+          "job_id",
+          "org_id",
+          "status",
+          "created_by",
+          "created_at",
+          "updated_at",
+          "expires_at",
+          "flows",
+          "counts",
+          "items"
+        ],
+        "properties": {
+          "job_id": {
+            "type": "string"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BulkStartFlowsJobStatus"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "User who created the job; receives the completion notification."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The job expires if it is not approved by then."
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "approved_by": {
+            "type": "string"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancel_requested": {
+            "type": "boolean"
+          },
+          "restart_of": {
+            "type": "string",
+            "description": "The job this job restarts the failed and never-started items of."
+          },
+          "restarted_by": {
+            "type": "string",
+            "description": "The approved job that restarts this job's failed and never-started items.\nA job is restarted at most once.\n"
+          },
+          "flows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkStartFlowsFlowSummary"
+            }
+          },
+          "counts": {
+            "$ref": "#/components/schemas/BulkStartFlowsJobCounts"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkStartFlowsItem"
+            }
+          }
+        }
+      },
+      "BulkStartFlowsJobSummary": {
+        "type": "object",
+        "description": "A bulk-start job as listed in the history, without its items.",
+        "required": [
+          "job_id",
+          "org_id",
+          "status",
+          "created_by",
+          "created_at",
+          "updated_at",
+          "expires_at",
+          "flows",
+          "entity_ids",
+          "entity_count",
+          "counts"
+        ],
+        "properties": {
+          "job_id": {
+            "type": "string"
+          },
+          "org_id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BulkStartFlowsJobStatus"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "User who created the job."
+          },
+          "created_by_org_id": {
+            "type": "string",
+            "description": "Home organization of the creator; differs from `org_id` for a partner user."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "approved_by": {
+            "type": "string"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancel_requested": {
+            "type": "boolean"
+          },
+          "restart_of": {
+            "type": "string",
+            "description": "The job this job restarts the failed and never-started items of."
+          },
+          "restarted_by": {
+            "type": "string",
+            "description": "The approved job that restarts this job's failed and never-started items.\nA job is restarted at most once.\n"
+          },
+          "flows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkStartFlowsFlowSummary"
+            }
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "Schema of the job's entities, when they all share one. Omitted for a job over entities of several schemas."
+          },
+          "entity_ids": {
+            "type": "array",
+            "description": "Ids of the job's entities, in request order.",
+            "maxItems": 200,
+            "items": {
+              "type": "string"
+            }
+          },
+          "entity_count": {
+            "type": "integer",
+            "description": "Number of entities in the job (length of `entity_ids`)."
+          },
+          "counts": {
+            "$ref": "#/components/schemas/BulkStartFlowsJobCounts"
+          }
+        }
+      },
+      "ListBulkStartFlowsJobsResp": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkStartFlowsJobSummary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Cursor of the next page; absent on the last page."
+          }
+        }
+      },
+      "ActiveBulkStartFlowsJobResp": {
+        "type": "object",
+        "required": [
+          "job"
+        ],
+        "properties": {
+          "job": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BulkStartFlowsJob"
+              }
+            ]
+          }
+        }
+      },
+      "PatchBulkStartFlowsJobReq": {
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "APPROVE",
+              "CANCEL"
+            ]
+          }
+        }
+      },
+      "PortalWorkflowsBatchSearchReq": {
+        "type": "object",
+        "properties": {
+          "entities": {
+            "type": "array",
+            "description": "Entities to load portal workflows for; schemas may differ",
+            "items": {
+              "$ref": "#/components/schemas/PortalEntityRef"
+            },
+            "minItems": 1,
+            "maxItems": 50
+          },
+          "audience": {
+            "$ref": "#/components/schemas/PortalAudience"
+          }
+        },
+        "required": [
+          "entities",
+          "audience"
+        ]
+      },
+      "PortalEntityRef": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_schema": {
+            "type": "string",
+            "example": "order"
+          }
+        },
+        "required": [
+          "entity_id",
+          "entity_schema"
+        ]
+      },
+      "PortalWorkflowsBatchSearchResp": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "description": "One entry per requested entity id, in request order",
+            "items": {
+              "$ref": "#/components/schemas/EntityPortalWorkflows"
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
+      "EntityPortalWorkflows": {
+        "type": "object",
+        "description": "Linearized portal workflows of a single entity",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "workflows": {
+            "type": "array",
+            "description": "Empty when the entity has no portal-relevant workflow",
+            "items": {
+              "$ref": "#/components/schemas/PortalWorkflow"
+            }
+          }
+        },
+        "required": [
+          "entity_id",
+          "workflows"
+        ]
+      },
+      "PortalWorkflow": {
+        "type": "object",
+        "description": "A portal-facing projection of a workflow execution (V1 or V2), with the execution\ngraph already linearized into a flat, ordered list of portal-visible steps.\n",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the workflow / flow execution"
+          },
+          "definition_id": {
+            "type": "string",
+            "description": "Id of the workflow definition / flow template this execution was created from"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/WorkflowStatus"
+          },
+          "version": {
+            "type": "integer",
+            "description": "2 = legacy V1 workflow execution (linear model), 3 = V2 flow execution (graph model)",
+            "enum": [
+              2,
+              3
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Creation timestamp, doubles as started time"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Last update timestamp"
+          },
+          "completed_at": {
+            "type": "string",
+            "description": "Timestamp when the execution was completed, if it is"
+          },
+          "due_date": {
+            "type": "string"
+          },
+          "assigned_to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contexts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowContext"
+            }
+          },
+          "is_path_complete": {
+            "type": "boolean",
+            "description": "True when the linearized path reached the end of the execution graph. False when an\nunevaluated decision task was encountered, meaning additional steps may appear once\nthe decision is resolved (the returned steps are still the guaranteed active path).\nAlways true for V1 executions.\n"
+          },
+          "tasks": {
+            "type": "array",
+            "description": "Portal-visible tasks in linear (timeline) order",
+            "items": {
+              "$ref": "#/components/schemas/PortalWorkflowTask"
+            }
+          },
+          "stages": {
+            "type": "array",
+            "description": "Customer-facing stages of the execution in strict order, each with a derived progress status. Present only for V2 flow executions whose template defined stages and whose boundaries still resolve cleanly on the execution graph; omitted otherwise, so consumers must fall back to the flat task timeline.",
+            "items": {
+              "$ref": "#/components/schemas/PortalWorkflowStage"
+            }
+          },
+          "portal_titles": {
+            "type": "object",
+            "description": "Portal-facing overrides of the flow name, copied from the flow template at start. Returned unresolved so that consumers fetching with audience `all` (the portals fetch once and render per-block audiences client-side) can pick the right one; `name` already carries the resolved title for the `ecp` and `installer` audiences.",
+            "properties": {
+              "ecp": {
+                "type": "string",
+                "description": "Flow title shown to end customers."
+              },
+              "installer": {
+                "type": "string",
+                "description": "Flow title shown to installers."
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "version",
+          "is_path_complete",
+          "steps"
+        ]
+      },
+      "PortalWorkflowTask": {
+        "type": "object",
+        "description": "A single portal-visible step of a linearized workflow execution",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Id of the underlying task (V2) or step (V1)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Internal task/step name (fallback label when the portal config has none)"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "SKIPPED",
+              "IN_PROGRESS",
+              "PENDING"
+            ],
+            "description": "Normalized step status:\n- COMPLETED / SKIPPED: the step is done (skipped steps count as done for progress)\n- IN_PROGRESS: the step has been reached and work has started\n- PENDING: the step has not been completed yet\n"
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "True when the step has been reached in the execution — all predecessor tasks on its\npath are completed/skipped — so the portal user can act on it (e.g. start its journey).\nSteps that are only part of the projected future path are returned with is_active false.\nThe start date is not taken into account: an active step can still be upcoming (see start_date).\n"
+          },
+          "start_date": {
+            "type": "string",
+            "example": "2021-04-27T12:00:00.000Z",
+            "description": "The instant (ISO 8601) before which nobody may work on the task (AL-3678), as the execution stored it: a template's fixed date, or the date a relative start date resolved to when the task was reached. While it lies in the future the task is upcoming: the execution service refuses work on it while it is open, so a portal shows it as upcoming instead of offering its action. Neither `status` nor `is_active` reflects it; compare it with the current time. Absent when the task has no start date, when its kind may not carry one (an AI task, an automatic automation or decision), or when its relative start date has not been resolved yet because the task was not reached."
+          },
+          "ecp": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "installer": {
+            "$ref": "#/components/schemas/ECPDetails"
+          },
+          "journey": {
+            "$ref": "#/components/schemas/StepJourney"
+          },
+          "assigned_to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "phase_id": {
+            "type": "string",
+            "description": "Id of the phase the underlying task belongs to, if any (V2 only)"
+          },
+          "phase_name": {
+            "type": "string",
+            "description": "Name of the phase the underlying task belongs to, if any (V2 only)"
+          },
+          "stage_id": {
+            "type": "string",
+            "description": "Id of the stage the underlying task belongs to, when the execution carries stages. Derived from the stage boundaries at read time, never stored."
+          },
+          "completed_at": {
+            "type": "string",
+            "description": "Timestamp when the step was completed or skipped"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Last update timestamp of the underlying task/step"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "order",
+          "status",
+          "is_active"
+        ]
+      },
+      "PortalWorkflowStage": {
+        "type": "object",
+        "description": "A customer-facing stage of a flow execution as shown in portals, with a progress status derived from the execution's tasks. Stages form a strict total order; the array order is the stage order.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable unique identifier for the stage."
+          },
+          "name": {
+            "type": "string",
+            "description": "User-facing stage title."
+          },
+          "description": {
+            "type": "string",
+            "description": "Customer-facing description of what happens in this stage."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "COMPLETED",
+              "IN_PROGRESS",
+              "UPCOMING",
+              "NOT_REACHED"
+            ],
+            "description": "Derived progress status:\n- COMPLETED: the run moved past this stage, or finished in it\n- IN_PROGRESS: the flow's current work is inside this stage\n- UPCOMING: the flow has not reached this stage yet\n- NOT_REACHED: the flow finished (DONE or CLOSED) before reaching this stage — a run may legitimately end at any stage\n"
+          },
+          "completed_at": {
+            "type": "string",
+            "description": "Latest completion timestamp among the stage's tasks; set only when the stage is COMPLETED and at least one of its tasks recorded one."
+          },
+          "portal_names": {
+            "type": "object",
+            "description": "Portal-facing overrides of the stage name, copied from the flow template at start. Returned unresolved so that consumers fetching with audience `all` can pick the right one; `name` already carries the resolved title for the `ecp` and `installer` audiences.",
+            "properties": {
+              "ecp": {
+                "type": "string",
+                "description": "Stage name shown to end customers."
+              },
+              "installer": {
+                "type": "string",
+                "description": "Stage name shown to installers."
+              }
+            }
+          },
+          "portal_descriptions": {
+            "type": "object",
+            "description": "Portal-facing overrides of the stage description, copied from the flow template at start. Returned unresolved so that consumers fetching with audience `all` can pick the right one; `description` already carries the resolved text for the `ecp` and `installer` audiences.",
+            "properties": {
+              "ecp": {
+                "type": "string",
+                "description": "Stage description shown to end customers."
+              },
+              "installer": {
+                "type": "string",
+                "description": "Stage description shown to installers."
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status"
         ]
       },
       "PatchFlowReq": {
@@ -3341,6 +4993,22 @@
             "items": {
               "$ref": "#/components/schemas/FlowContext"
             }
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "entity_views",
+              "background"
+            ],
+            "description": "Re-states where the run may be seen. Sent together with `visible_on` by a re-resolution, so that a definition switched to `background` after the run started stops surfacing it."
+          },
+          "visible_on": {
+            "type": "array",
+            "maxItems": 50,
+            "description": "Replaces the run's visible set wholesale. The entity -> executions index is rebuilt from it, and entries no longer present are pruned, so a partial list silently hides the run from the entities it omits.",
+            "items": {
+              "$ref": "#/components/schemas/VisibleEntity"
+            }
           }
         }
       },
@@ -3364,6 +5032,15 @@
         "properties": {
           "id": {
             "$ref": "#/components/schemas/FlowExecutionId"
+          },
+          "loop_source": {
+            "type": "string",
+            "readOnly": true,
+            "enum": [
+              "loops",
+              "loop_config"
+            ],
+            "description": "Where the engine reads this execution's loops and counts. For diagnostics; `loops` on the decisions is sent either way. Set when the execution is read or advanced and has a loop: in responses and events, never stored."
           },
           "flow_template_id": {
             "$ref": "#/components/schemas/FlowTemplateId"
@@ -3414,16 +5091,42 @@
                 "type": "string",
                 "description": "User who started the flow execution."
               },
+              "started_by_org_id": {
+                "type": "string",
+                "description": "Home organisation of the user who started the flow execution. Differs from org_id when a partner starts a flow in a vendor organisation, which is what lets the execution be auto-shared back to that partner."
+              },
               "closed_by": {
                 "type": "string",
-                "description": "User who closed the flow execution"
+                "description": "User who closed the flow execution, as `{org_id}_{user_id}` for a user of another organisation. A cancel step a person ran is credited to that person; `system` when no person is behind the change."
+              },
+              "completed_by": {
+                "type": "string",
+                "description": "User who completed the flow execution, as `{org_id}_{user_id}` for a user of another organisation; `system` when no person is behind the change."
               }
             }
           },
           "contexts": {
             "type": "array",
+            "description": "Every entity this run manages — what it binds to, reads and writes.\nExactly one carries `is_primary` (the main context).\n\nUNIQUE BY `entity_id`. The list is append-only and grows as the run\nprogresses: entities handed in at start, entities an automation task\nproduces (`output_context`), and entities a display rule attaches\n(`attach_to_contexts`). Because it is keyed on entity id, re-resolving\nthose rules is idempotent — an entity already present is never added\ntwice, whichever source finds it.\n\nA context stays once attached, even if the relation that introduced it\nis later removed: it may already have been written to or referenced by\na completed condition, so dropping it would make the run's history\nunreadable. Only `is_primary` moves.\n",
             "items": {
               "$ref": "#/components/schemas/FlowContext"
+            }
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "entity_views",
+              "background"
+            ],
+            "default": "entity_views",
+            "description": "Where this run is allowed to be seen, copied from the definition's\n`context_settings.visibility` when the run starts and re-read\nwhenever its visibility is re-resolved.\n\n`entity_views` — the run surfaces on entity pages and table views,\non the entities `visible_on` lists.\n\n`background` — the run is suppressed from every entity view. It\nstill holds contexts, still reads and writes them, and is still\nindexed against them so it can be found deliberately; it simply\nhas no surfaces, and `visible_on` is empty.\n\nRead THIS to tell a background run from a visible one. An empty\n`visible_on` is a consequence, not the statement — absent on runs\nthat predate visibility, and indistinguishable from a run that\nresolved to nothing.\n"
+          },
+          "visible_on": {
+            "type": "array",
+            "maxItems": 50,
+            "description": "Every entity this run is SHOWN on — the COMPLETE set, not a delta\nagainst `contexts`. A context that is displayed appears here as\n`kind: context`; a context whose display was switched off simply is\nnot here, which is how hiding is expressed.\n\nResolved from `contexts` plus the definition's display rules: at\nstart, whenever the contexts change, and whenever a rule is edited.\nIt is the source of truth for the entity -> executions index, so an\nentity absent from this list does not surface the run at all.\n\nCallers that searched by entity read their own entry out of this\nlist to learn WHY the run is here — `kind`, `anchor_entity_id` and\n`rule_id` are what let a Contact page say \"runs on Ticket #4821\"\ninstead of implying the run belongs to the contact.\n\nCapped at 50. Contexts are never evicted by the cap — they are\nwhere the run actually runs. What is left is shared ROUND-ROBIN\nbetween the entries, so an entry with no labels, which matches\nevery related entity of its schema, cannot spend the whole budget\nand leave the entries after it with nothing.\n\nUnlike `contexts`, an entry here does NOT survive the relation that\nproduced it being removed: a surface is not a fact of the run. That\nrecomputation on entity-relation changes is not implemented yet.\n",
+            "items": {
+              "$ref": "#/components/schemas/VisibleEntity"
             }
           },
           "crt_tasks": {
@@ -3446,6 +5149,25 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Phase"
+            }
+          },
+          "stages": {
+            "type": "array",
+            "description": "Customer-facing stages copied from the flow template at start, with entry_node_id remapped to execution node ids (cut edge ids are stable across the copy). Per-node stage membership stays derived at read time, never stored.",
+            "items": {
+              "$ref": "#/components/schemas/Stage"
+            }
+          },
+          "portal_titles": {
+            "type": "object",
+            "description": "Portal-facing overrides of the flow name, copied from the flow template at start. The portal projection prefers the audience's override over `name`. Has no effect on execution behaviour.",
+            "properties": {
+              "ecp": {
+                "type": "string"
+              },
+              "installer": {
+                "type": "string"
+              }
             }
           },
           "tasks": {
@@ -3481,6 +5203,13 @@
               }
             }
           },
+          "_automation_chain": {
+            "type": "array",
+            "description": "[Internal] Ordered automation flow ids that led to this flow being started, carried over from the triggering automation so that automations this flow runs as tasks inherit the chain. Without it the chain restarts at the automation -> workflow hop and loop prevention cannot detect a cycle that runs through a workflow. This is an internal property and should not be used by external consumers.",
+            "items": {
+              "type": "string"
+            }
+          },
           "closing_reason": {
             "$ref": "#/components/schemas/FlowClosingReason"
           },
@@ -3503,6 +5232,13 @@
           },
           "trigger": {
             "$ref": "#/components/schemas/FlowTrigger"
+          },
+          "configured_triggers": {
+            "type": "array",
+            "description": "Verbatim snapshot of ALL of the flow template's configured triggers at start, in configuration order (the template's primary first, flagged `primary: true`). The runtime `trigger` record replaces the template's trigger field on the execution, so this snapshot is what keeps the execution's trigger configuration complete and reproducible after the template changes (executions are snapshots precisely because templates are not versioned). The trigger that STARTED the run is the entry whose id equals `trigger.trigger_id`; when nothing matches or that field is absent, the primary-flagged entry started it. Every other entry was configured but not picked. Absent on executions recorded before the field existed.",
+            "items": {
+              "$ref": "#/components/schemas/ConfiguredTrigger"
+            }
           },
           "singleClosingReasonSelection": {
             "type": "boolean",
@@ -3542,6 +5278,73 @@
           },
           "automation_config": {
             "$ref": "#/components/schemas/AutomationInfo"
+          },
+          "trigger_id": {
+            "type": "string",
+            "description": "Id of the template trigger (primary or additional) that started this execution — a reference to a `ConfiguredTrigger.id`. On a start request it may name the trigger explicitly; when absent the engine resolves it from the automation source or the starting entity. Absent on executions recorded before multi-trigger flows existed.\n"
+          }
+        }
+      },
+      "ConfiguredTrigger": {
+        "type": "object",
+        "description": "One configured trigger of the flow template, snapshotted VERBATIM onto the execution at start — conceptually the workflow-definition API's `Trigger` schema plus the `primary` flag. The trigger schema is owned by the definition service and copied through opaquely, so only the fields consumers key on are declared here; `additionalProperties` carries the rest of the trigger's configuration unchanged (e.g. an automation trigger's `automation_id`, a journey trigger's `journey_id`).",
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The trigger's id — matched against `trigger.trigger_id` to tell the fired entry, and used as the `from_id` of a non-primary trigger's entry edge."
+          },
+          "type": {
+            "type": "string",
+            "description": "The TEMPLATE trigger type (manual, automation, journey_automation, journey_submission, ...) — not the runtime `FlowTrigger.type` start mode."
+          },
+          "primary": {
+            "type": "boolean",
+            "description": "True on the template's primary trigger — the entry whose edge is stored with from_id 'trigger', and the fallback when `trigger.trigger_id` is absent or matches no entry."
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "The entity schema the trigger starts from, when its type carries one (manual, journey_automation)."
+          },
+          "automation_id": {
+            "type": "string",
+            "description": "The automation flow owned by an automation-type trigger."
+          },
+          "journey_id": {
+            "type": "string",
+            "description": "The journey a journey_submission trigger listens to."
+          }
+        }
+      },
+      "VisibleEntity": {
+        "type": "object",
+        "description": "One entity a run is SHOWN on. Distinct from a context: a context is what the run reads, writes and decides against, while this only decides where people see it. Every context that is displayed also appears here.",
+        "required": [
+          "entity_id",
+          "kind"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_schema": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "context",
+              "display"
+            ],
+            "description": "`context` — an entity the run is bound to, shown on itself.\n`display` — an entity with no context of its own, reached from a context by a relation label. Acting on the run from here acts on its main context; nothing is copied and no second run starts."
+          },
+          "anchor_entity_id": {
+            "type": "string",
+            "description": "`display` only. The context this entity was reached from — the entity the run actually runs on, which the UI names so a person can see they are acting on something else."
+          },
+          "rule_id": {
+            "type": "string",
+            "description": "`display` only. The `FlowDisplayRule` that put this entity here."
           }
         }
       },
@@ -3554,6 +5357,7 @@
       },
       "EntityRef": {
         "type": "object",
+        "description": "One entity a run is bound to. `entity_id` is the identity of a context: a run never holds two contexts with the same `entity_id`.",
         "properties": {
           "entity_id": {
             "type": "string"
@@ -3565,6 +5369,23 @@
             "type": "boolean",
             "description": "Flag to indicate if the entity is primary and should be used for evaluating the conditions of the tasks",
             "default": false
+          },
+          "promoted_by_task_id": {
+            "type": "string",
+            "description": "Main-context promotion bookkeeping. Set when this context became the primary because the referenced automation task (configured with `output_context.set_as_primary`) completed. The promotion stands only while that task is COMPLETED — when it is reverted or reset, the promotion is unwound and the marker cleared."
+          },
+          "promoted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the promotion was applied. Orders competing promotions: the most recent valid promotion holds the primary."
+          },
+          "demoted_by_task_id": {
+            "type": "string",
+            "description": "Main-context promotion bookkeeping. Set on the context that LOST the primary to the referenced task's promotion. Restores this context as primary when that promotion is unwound."
+          },
+          "added_by_task_id": {
+            "type": "string",
+            "description": "Set when an automation task added this context (the entity its automation produced). A later run of the same task replaces it (loops); an entity of the same schema produced by any other task moves it down the list instead of removing it from the run."
           }
         }
       },
@@ -3630,10 +5451,20 @@
               },
               "automation_execution_id": {
                 "type": "string",
-                "description": "ID of the automation execution, used for tracking status updates."
+                "description": "ID of the automation execution, used for tracking status updates.",
+                "nullable": true
+              },
+              "on_failure": {
+                "$ref": "#/components/schemas/AutomationFailurePolicy"
               },
               "trigger_mode": {
-                "$ref": "#/components/schemas/TriggerMode"
+                "$ref": "#/components/schemas/TriggerMode",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TriggerMode"
+                  }
+                ],
+                "description": "How the automation is started. `automatic` runs it as soon as the task becomes current; `manual` waits for a person to run it. An absent value is read as `manual` everywhere: the engine dispatches only an explicit `automatic`, the builder shows the task as manual, and the task may carry the skip gate and required subtasks."
               },
               "schedule": {
                 "$ref": "#/components/schemas/ActionSchedule"
@@ -3645,20 +5476,31 @@
           }
         ]
       },
+      "AutomationFailurePolicy": {
+        "type": "string",
+        "enum": [
+          "stop",
+          "continue"
+        ],
+        "default": "stop",
+        "description": "What the flow does when this automation ends in a failed state. `stop` waits on the failed task until it is retried or skipped. `continue` proceeds to the next task. An absent value means `stop`."
+      },
       "LoopInfo": {
         "type": "object",
         "description": "Information about loop iterations, when task is part of a loop branch",
         "properties": {
           "max_iterations": {
             "type": "integer",
-            "description": "Maximum number of iterations for the loop branch",
+            "description": "Derived from the loop's counter; will be removed",
+            "deprecated": true,
             "default": 3,
             "minimum": 1,
             "maximum": 10
           },
           "crt_iterations": {
             "type": "integer",
-            "description": "Current number of iterations for the loop branch",
+            "description": "Derived from the loop's counter; will be removed",
+            "deprecated": true,
             "default": 0
           }
         },
@@ -3666,8 +5508,87 @@
           "max_iterations"
         ]
       },
+      "LoopExecutionState": {
+        "type": "object",
+        "properties": {
+          "entry_branch_ids": {
+            "type": "array",
+            "description": "The decision's branches that enter the loop.",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "exit_branch_id": {
+            "type": "string",
+            "description": "The decision's branch that exits the loop."
+          },
+          "max_iterations": {
+            "type": "integer",
+            "description": "Maximum number of iterations of the loop.",
+            "minimum": 1
+          },
+          "crt_iteration": {
+            "type": "integer",
+            "description": "Current number of iterations of the loop."
+          },
+          "target_id": {
+            "type": "string",
+            "readOnly": true,
+            "description": "The task or phase each iteration starts from. Derived when the execution is read or advanced; in responses and events, never stored."
+          },
+          "outer_loop_ids": {
+            "type": "array",
+            "readOnly": true,
+            "description": "The loops this loop is directly nested in. Several when two outer loops are not nested in each other. Derived when the execution is read or advanced; in responses and events, never stored.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "depth": {
+            "type": "integer",
+            "readOnly": true,
+            "description": "The number of loops on the longest chain this loop is nested in; 0 for an outermost loop. Derived when the execution is read or advanced; in responses and events, never stored."
+          }
+        },
+        "required": [
+          "entry_branch_ids",
+          "exit_branch_id",
+          "max_iterations"
+        ]
+      },
+      "LoopMembership": {
+        "type": "object",
+        "readOnly": true,
+        "properties": {
+          "loop_id": {
+            "type": "string"
+          },
+          "runs_in_loop": {
+            "type": "boolean",
+            "description": "True when the node runs on the loop's own iteration path. False when it only reruns with the loop because it sits in a nested loop."
+          }
+        },
+        "required": [
+          "loop_id",
+          "runs_in_loop"
+        ]
+      },
+      "LoopOutcome": {
+        "type": "string",
+        "readOnly": true,
+        "enum": [
+          "closes_lap",
+          "enters_body",
+          "exits_loop",
+          "budget_spent"
+        ],
+        "description": "What taking the branch does to its decision's loop at the current count. `closes_lap` starts another iteration, `enters_body` continues inside the loop, `exits_loop` leaves it, `budget_spent` would continue it but no iterations are left, so the exit branch is taken instead."
+      },
       "LoopConfig": {
         "type": "object",
+        "deprecated": true,
+        "description": "Read `loops` instead. Kept for executions started before `loops`.",
         "properties": {
           "loop_branch_id": {
             "type": "string",
@@ -3750,7 +5671,8 @@
           },
           "schedule_id": {
             "type": "string",
-            "description": "The id of the created schedule"
+            "description": "The id of the created schedule",
+            "nullable": true
           },
           "scheduled_at": {
             "type": "string",
@@ -3815,7 +5737,8 @@
           },
           "schedule_id": {
             "type": "string",
-            "description": "The id of the created schedule"
+            "description": "The id of the created schedule",
+            "nullable": true
           },
           "scheduled_at": {
             "type": "string",
@@ -3853,8 +5776,7 @@
               },
               "allow_parallel_execution": {
                 "type": "boolean",
-                "description": "When true, all branches with met conditions execute in parallel. When false, only the first branch with a met condition is executed. Defaults to true for backwards compatibility.",
-                "default": true
+                "description": "When true, all branches with met conditions execute in parallel. When false, only the first branch with a met condition is executed. The default depends on the trigger mode: automatic decisions treat an absent field as true (backwards compatibility), while manual decisions require an explicit true before multiple branches can be selected at execution time (absent = single-select)."
               },
               "schedule": {
                 "anyOf": [
@@ -3866,8 +5788,24 @@
                   }
                 ]
               },
+              "loops": {
+                "type": "object",
+                "description": "The loops this decision owns, keyed by loop id. Sent in every execution response and event; for an execution started before `loops` existed, it is built from `loop_config` and keyed by the decision id.",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/LoopExecutionState"
+                }
+              },
               "loop_config": {
                 "$ref": "#/components/schemas/LoopConfig"
+              },
+              "heal_attempts": {
+                "type": "integer",
+                "description": "Internal — number of times flow-healing-service has driven the in-line re-evaluation for this parked decision task. Observability only; deliberately not a retry cap (see last_heal_attempted_at)."
+              },
+              "last_heal_attempted_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Internal — timestamp of the most recent heal attempt for this decision task. flow-healing-service uses this as a per-task debounce gate so the in-line re-evaluation of a parked decision (e.g. one legitimately waiting on entity data with no branch matched yet) cannot fire more than once per HEAL_RETRY_COOLDOWN_MS regardless of how often the flow execution is read."
               }
             },
             "required": [
@@ -3888,15 +5826,33 @@
               "agent_config": {
                 "$ref": "#/components/schemas/AgentConfig"
               },
+              "input_context": {
+                "$ref": "#/components/schemas/AutomationInputContext"
+              },
+              "trigger_mode": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TriggerMode"
+                  }
+                ],
+                "description": "How the agent run is started. `automatic` starts it as soon as the task becomes current; `manual` waits for a person to run it and to approve the result. An absent value is read as `manual` everywhere: the engine dispatches only an explicit `automatic`, the builder shows the task as manual, and the task may carry the skip gate and required subtasks — which then hold completion after the run (see `AgentExecutionInfo.completion_hold`)."
+              },
               "loop_config": {
                 "$ref": "#/components/schemas/LoopInfo"
               },
               "agent_execution": {
-                "$ref": "#/components/schemas/AgentExecutionInfo"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AgentExecutionInfo"
+                  }
+                ],
+                "nullable": true,
+                "description": "Result of the agent execution this task started. Null after a loop reset, a revert or a reopen out of a finished status clears it."
               },
               "agent_execution_id": {
                 "type": "string",
-                "description": "ID of the agent execution, used for tracking status updates. This is needed as a separate field to allow indexing."
+                "description": "ID of the agent execution, used for tracking status updates. This is needed as a separate field to allow indexing.",
+                "nullable": true
               }
             }
           }
@@ -3929,7 +5885,27 @@
           },
           "execution_status": {
             "type": "string",
-            "description": "Status of the agent execution, when it already ran"
+            "enum": [
+              "queued",
+              "pending",
+              "started",
+              "running",
+              "waiting_approval",
+              "approval_required",
+              "completed",
+              "failed",
+              "cancelled"
+            ],
+            "description": "Status of the agent execution, when it already ran. Two vocabularies reach this field: the execute response's stored status (`pending`, `running`, `waiting_approval`, `cancelled`), written when the task dispatches its agent, and the narrower status ai-agents-api carries on its execution events (`started`, `approval_required`), written by the status listener. `queued` means the execution is accepted by ai-agents-api and waits for model capacity; it is not terminal and may recur after `started` if the run is re-queued."
+          },
+          "queued_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the first `queued` event for the current `execution_id` arrived, so the UI can show how long the run has been waiting. Kept unchanged by every later event for the same execution, and dropped when a new `execution_id` starts (a retry)."
+          },
+          "queued_attempts": {
+            "type": "integer",
+            "description": "How many `queued` events the current `execution_id` has reported: 1 on the first, incremented on every re-queue. Dropped when a new `execution_id` starts (a retry)."
           },
           "error_reason": {
             "type": "string"
@@ -3937,14 +5913,40 @@
           "outcome": {
             "type": "string",
             "description": "Server-computed outcome read from the agent execution's structured_output (e.g. assigned, recommended, no_eligible_partner, missing_input). When the outcome means the work is not really done (no_eligible_partner, missing_input) the task is held as the current task instead of auto-completing, so the phase does not advance."
+          },
+          "completion_hold": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "required_subtasks"
+            ],
+            "description": "Why a finished agent execution has not completed its task. `required_subtasks`: the agent finished with a completing outcome while the manual AI task still had unticked required subtasks, so the task stays IN_PROGRESS and the phase does not advance. A `subtask_states` PATCH by a caller allowed to change the status completes the task (`completed_by` is that user) and removes the hold once every required subtask the caller can see is ticked — whether that PATCH ticked the last one or merely echoed states that already were; the hold is also removed when the task leaves IN_PROGRESS any other way. Only meaningful on an IN_PROGRESS task."
           }
         }
+      },
+      "TaskAudience": {
+        "type": "string",
+        "description": "A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners.",
+        "enum": [
+          "description",
+          "ecp",
+          "installer",
+          "partner"
+        ]
       },
       "TaskBase": {
         "type": "object",
         "properties": {
           "id": {
             "$ref": "#/components/schemas/TaskId"
+          },
+          "loop_membership": {
+            "type": "array",
+            "readOnly": true,
+            "description": "The loops the task belongs to, innermost first. Derived when the execution is read or advanced; in responses and events, never stored.",
+            "items": {
+              "$ref": "#/components/schemas/LoopMembership"
+            }
           },
           "template_id": {
             "type": "string"
@@ -3961,12 +5963,24 @@
           "journey": {
             "$ref": "#/components/schemas/StepJourney"
           },
+          "journey_prefill": {
+            "$ref": "#/components/schemas/JourneyPrefill"
+          },
           "due_date": {
             "type": "string",
             "example": "2021-04-27T12:00:00.000Z"
           },
           "due_date_config": {
             "$ref": "#/components/schemas/DueDateConfig"
+          },
+          "start_date": {
+            "type": "string",
+            "nullable": true,
+            "example": "2021-04-27T12:00:00.000Z",
+            "description": "The resolved instant from which the task can be worked on (AL-3678). Resolved by the engine when the task becomes current: a template's fixed date is kept, a `start_date_config` is evaluated against the most recent occurrence of its reference event and is never earlier than the moment the task was reached. The task a revert or a reopened flow lands on starts at once: its `start_date_config` resolves to that moment, while a fixed date is kept. While the start date lies in the future the task is upcoming: its status is unchanged, and while it is still open (not completed, not skipped, not failed in a way the template lets the flow move past) no person may move its status other than back to PENDING, run it, run its schedule now, cancel its schedule or choose its branch. Cleared on every reset of a task with a `start_date_config`. Server-owned, not patchable. No `format: date-time`, like `due_date`."
+          },
+          "start_date_config": {
+            "$ref": "#/components/schemas/StartDateConfig"
           },
           "requirements": {
             "type": "array",
@@ -3975,11 +5989,72 @@
               "$ref": "#/components/schemas/EnableRequirement"
             }
           },
+          "required": {
+            "type": "boolean",
+            "description": "When true, the task is required and users cannot skip it (enforced on PATCH and schedule cancellation). Snapshotted from the template at flow start. Unrelated to `requirements`, which gate when a task becomes enabled. System-driven skips are unaffected — tasks on a not-taken decision branch, and automation tasks whose automation execution itself reports a skipped verdict (e.g. unmet trigger conditions). Not patchable — ignored on client patches."
+          },
+          "subtasks": {
+            "type": "array",
+            "description": "Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype=\"check\"] > li[data-subtask-id]`, nearest list ancestor) whenever a description is written: at flow start, on add-task, on a description PATCH and on a loop reset. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins. An item is required only when it is marked `data-subtask-required=\"true\"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate the task's person action — completing a manual task or manual decision, running a manual automation, approving a manual AI task's result — and a partner user is held only to the party they can see: the partner description, or the co-worker description when no partner description is enabled. Not patchable directly — a description PATCH may add, remove, rename and reorder items, but it may neither make a required item optional nor drop it, and it may not repeat an id (400).",
+            "items": {
+              "$ref": "#/components/schemas/Subtask"
+            }
+          },
+          "subtask_states": {
+            "type": "object",
+            "nullable": true,
+            "description": "Per-subtask completion state, keyed by subtask id. Written via PATCH; ids must exist in `subtasks`, and `completed_by` / `completed_at` are server-stamped — client values are ignored. A cross-org (partner) caller may only write entries for the party they can see — the partner description, or the co-worker description when no partner description is enabled — and is refused with 403 otherwise. Cleared (null) on loop re-entry, revert, a system skip and a revival, together with the checkmarks in the description markup, so each incarnation of the task starts with unchecked boxes (see `completion_gates_reset_at`).",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SubtaskState"
+            }
+          },
+          "journey_submission": {
+            "type": "object",
+            "nullable": true,
+            "description": "Server-managed: records that the task's linked journey was submitted, stamped by the journey-submission listener via the correlation claims (wf_execution_id / wf_task_id) in the submission entity's journey_context — on manual tasks only. Gates the transition into COMPLETED when `journey.journey_submission_required` is set. Cleared (null) on loop re-entry, revert, a system skip and a revival so each incarnation needs its own submission; a submission created before the current incarnation began — the newer of the last recorded loop pass and `completion_gates_reset_at` — is not recorded. Not patchable — ignored on client patches.",
+            "properties": {
+              "submission_entity_id": {
+                "type": "string",
+                "description": "Id of the submission entity that satisfied the gate"
+              },
+              "submitted_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Time the submission entity was created"
+              }
+            }
+          },
+          "completion_gates_reset_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Server-managed, execution-only: when the completion gates of this task were last reset — the moment its current incarnation began. Stamped by every incarnation-ending path (loop re-entry, revert, a system skip, a revival) that cleared subtask stamps, a journey submission, a journey-gate waiver or checked boxes in the markup. Together with the newest recorded loop pass it is the fence that keeps a journey submission created in an earlier incarnation from satisfying the current one's gate. Not patchable — ignored on client patches."
+          },
+          "journey_gate_waived_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Server-managed, execution-only: when the journey gate of this task was waived because the linked journey no longer exists, stamped on the completion that the waiver allowed and recorded on the activity trail. Cleared (null) on loop re-entry, revert, a system skip and a revival with the other gate state. Not patchable — ignored on client patches."
+          },
           "assigned_to": {
             "$ref": "#/components/schemas/Assignees"
           },
+          "ecp_placeholder_assignees": {
+            "$ref": "#/components/schemas/EcpPlaceholderAssignees"
+          },
           "analytics": {
             "$ref": "#/components/schemas/AnalyticsInfo"
+          },
+          "loop_iterations": {
+            "type": "object",
+            "nullable": true,
+            "description": "Previous passes this task made through a loop, keyed by the loop's decision task id, then by pass number. Only the 3 most recent passes per loop are retained, and a revert above a loop drops that loop's passes (null when cleared). Server-owned — ignored on client patches. Also carried on event payloads.",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/components/schemas/TaskIteration"
+              }
+            }
           },
           "created_at": {
             "type": "string",
@@ -4009,6 +6084,15 @@
             "$ref": "#/components/schemas/PartnerDetails",
             "description": "Partner-specific task details shown to partner org users viewing shared resources"
           },
+          "audience_order": {
+            "type": "array",
+            "description": "Order of the task's audience description tabs in the builder and during execution; the first tab shown opens by default. Keys not listed follow in the default order description, ecp, installer, partner, and audiences that are not enabled are skipped.",
+            "uniqueItems": true,
+            "maxItems": 4,
+            "items": {
+              "$ref": "#/components/schemas/TaskAudience"
+            }
+          },
           "taxonomies": {
             "type": "array",
             "items": {
@@ -4031,6 +6115,71 @@
           "status",
           "analytics",
           "enabled"
+        ]
+      },
+      "Stage": {
+        "type": "object",
+        "description": "A customer-facing progress segment layered on top of the flow graph, copied from the flow template when the execution starts. Unlike phases (internal task grouping), stages exist to communicate progress to outside users (e.g. end customers) with a title and description. Stages form a strict total order. On an execution, entry_node_id references execution node ids (remapped at start); cut edge ids are stable across the copy. Per-node membership is derived at read time, never stored.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable unique identifier for the stage."
+          },
+          "name": {
+            "type": "string",
+            "description": "User-facing stage title."
+          },
+          "description": {
+            "type": "string",
+            "description": "Customer-facing description of what happens in this stage."
+          },
+          "entry_node_id": {
+            "type": "string",
+            "description": "Id of the graph node (task, phase, or the trigger sentinel) at which this stage begins. The first stage's entry_node_id is the trigger sentinel. Exactly one of entry_node_id / cut_edge_ids per stage; when both are present, cut_edge_ids wins."
+          },
+          "cut_edge_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Edge-cut boundary, for stages that begin inside branching regions: the stage begins where these edges are crossed — one cut edge per branch that continues past the boundary, so that no path crosses it twice and none bypasses it. Branches that end before the boundary need no cut; a run may end in any stage."
+          },
+          "color": {
+            "type": "string",
+            "description": "Optional stage accent color, a key from a fixed palette."
+          },
+          "portal_names": {
+            "type": "object",
+            "description": "Portal-facing overrides of the stage name. Portal surfaces show the matching override instead of `name`; an absent key falls back to `name`.",
+            "properties": {
+              "ecp": {
+                "type": "string",
+                "description": "Stage name shown to end customers."
+              },
+              "installer": {
+                "type": "string",
+                "description": "Stage name shown to installers."
+              }
+            }
+          },
+          "portal_descriptions": {
+            "type": "object",
+            "description": "Portal-facing overrides of the stage description. Portal surfaces show the matching override instead of `description`; an absent key falls back to `description`.",
+            "properties": {
+              "ecp": {
+                "type": "string",
+                "description": "Stage description shown to end customers."
+              },
+              "installer": {
+                "type": "string",
+                "description": "Stage description shown to installers."
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name"
         ]
       },
       "Phase": {
@@ -4074,6 +6223,14 @@
           },
           "loop_config": {
             "$ref": "#/components/schemas/LoopInfo"
+          },
+          "loop_membership": {
+            "type": "array",
+            "readOnly": true,
+            "description": "The loops that repeat every task of the phase, innermost first. Derived when the execution is read or advanced; in responses and events, never stored.",
+            "items": {
+              "$ref": "#/components/schemas/LoopMembership"
+            }
           }
         },
         "required": [
@@ -4100,6 +6257,10 @@
           "none_met": {
             "type": "boolean",
             "description": "Indicates a default case for a decision task. Only decision task edges can have this field and the flow advances using this edge if no conditions are met."
+          },
+          "loop_id": {
+            "type": "string",
+            "description": "The loop this edge loops back in. Set on loop back edges only."
           }
         },
         "required": [
@@ -4129,23 +6290,90 @@
           "input_context": {
             "$ref": "#/components/schemas/AutomationInputContext"
           },
+          "output_context": {
+            "$ref": "#/components/schemas/AutomationOutputContext"
+          },
           "heal_attempts": {
             "type": "integer",
             "description": "Internal — number of times flow-healing-service has attempted to re-trigger this task's lost automation dispatch. Used to cap retries and avoid an indefinite heal-on-every-read storm against a deterministically-failing automation flow."
+          },
+          "run_for_user_id": {
+            "type": "string",
+            "description": "Internal — the user this run of the automation acted for: the person who ran it, or the one the automatic dispatch carried on from. Read when this task hands on to an automatic automation, so a chain of them keeps acting for the person who ran the first. Run bookkeeping, cleared by every reset."
           },
           "last_heal_attempted_at": {
             "type": "string",
             "format": "date-time",
             "description": "Internal — timestamp of the most recent heal attempt for this task. flow-healing-service uses this as a per-task debounce gate so the heal cannot fire more than once per HEAL_RETRY_COOLDOWN_MS regardless of how often the flow execution is read."
+          },
+          "wait_for_journey_submission": {
+            "type": "boolean",
+            "description": "Server-managed snapshot of the send-email action's `wait_for_journey_submission` config, copied from the automation execution when the send succeeds. When true the task enters WAITING_FOR_JOURNEY_SUBMISSION instead of COMPLETED and waits for the linked journey's submission automation."
+          },
+          "journey_id": {
+            "type": "string",
+            "description": "Server-managed snapshot of the journey referenced by the email template's journey link, copied from the send-email action config. Display/validation only — correlation does not depend on it."
+          },
+          "journey_execution": {
+            "$ref": "#/components/schemas/JourneyExecutionInfo"
+          },
+          "eligible_closing_reason_ids": {
+            "type": "array",
+            "description": "Copied from the template task at flow start. When non-empty, this is a semi-automated `cancel-flow-execution` task: the person running it must choose one of these reasons, and the run is refused without a choice. The ids resolve against the execution's own `closing_reason.configured_reasons`, frozen at start, so a later template edit cannot change what a running execution offers.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allow_execution_note": {
+            "type": "boolean",
+            "description": "Copied from the template task at flow start. When true the person choosing a reason may add a free-text note with it, which is recorded on the cancelled flow."
+          },
+          "email_review": {
+            "$ref": "#/components/schemas/EmailReviewConfig"
           }
         },
         "required": [
           "flow_id"
         ]
       },
+      "JourneyExecutionInfo": {
+        "type": "object",
+        "description": "Server-managed. Tracks the journey automation execution a task in WAITING_FOR_JOURNEY_SUBMISSION is (or was) waiting on. Cleared whenever the task's automation state is reset (revert, loop-back, clear status).",
+        "properties": {
+          "execution_id": {
+            "type": "string",
+            "description": "Id of the automation execution triggered by the journey submission"
+          },
+          "execution_status": {
+            "type": "string",
+            "description": "Last known status of that execution"
+          },
+          "error_reason": {
+            "type": "string",
+            "description": "Why the wait cannot complete or did not complete cleanly — the journey automation's failure reason, or the send-time detection that the email contained no journey link (in which case execution_id is absent)."
+          },
+          "submission_entity_id": {
+            "type": "string",
+            "description": "Entity id of the submission that triggered the journey execution"
+          },
+          "submission_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the submission entity was created (its `_created_at`), stamped from the entity createEntity event that carried the task's correlation claims. Present independently of — and usually before — the journey automation's own execution events, so the UI can show \"journey submitted\" while the automation is still running."
+          },
+          "wait_overridden_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Set when a user completed or skipped the task while it was waiting for the journey submission."
+          },
+          "wait_overridden_by": {
+            "$ref": "#/components/schemas/UserId"
+          }
+        }
+      },
       "AutomationInputContext": {
         "type": "object",
-        "description": "Optional. Source of the entity fed into this automation task. If omitted, the workflow's primary entity is used.\n",
+        "description": "Optional. Source of the entity fed into this automation task. If omitted, the run's current main context is used.\n",
         "required": [
           "source"
         ],
@@ -4153,14 +6381,86 @@
           "source": {
             "type": "string",
             "enum": [
-              "trigger",
-              "task"
+              "main_context",
+              "task",
+              "trigger"
             ],
-            "description": "`trigger` = workflow's primary (trigger) entity. `task` = entity produced by an upstream task in the graph.\n"
+            "description": "`main_context` = the run's current main context (same as omitting `input_context`). It moves when a task promotes its output to main context. `task` = entity produced by an upstream task in the graph. `trigger` with `trigger_id` = that configured trigger's entity. The Flow Builder offers it while the task is in that one trigger's own sub-flow, before it merges with another trigger's path. Without `trigger_id` it is legacy and resolves like `main_context`.\n"
           },
           "task_id": {
             "type": "string",
             "description": "Required when source is `task`. The id of the upstream task whose output entity should feed this task."
+          },
+          "trigger_id": {
+            "type": "string",
+            "description": "Only read when source is `trigger`. Pins the input to one specific configured trigger (primary or additional) by its id. When absent, the input resolves like `main_context`.\n"
+          },
+          "with_relations": {
+            "type": "boolean",
+            "description": "Whether the input entity brings its direct relations along. Every action honours it. When neither `with_relations` nor `also_pass` is set, the automation receives the legacy payload, unchanged.\n"
+          },
+          "also_pass": {
+            "type": "array",
+            "description": "Extra entities passed to the automation alongside the input entity, combined into one list (in order, de-duplicated, without the input entity itself). When neither `with_relations` nor `also_pass` is set, the automation receives the legacy payload, unchanged. Only the start-workflow (trigger-workflow) action uses it in this version.\n",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AutomationInputExtraContextRef"
+                },
+                {
+                  "$ref": "#/components/schemas/AutomationInputExtraTaskRef"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "AutomationInputExtraContextRef": {
+        "type": "object",
+        "description": "One of the run's own entities. `main_context` = the run's current main context.\n",
+        "required": [
+          "source"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "main_context"
+            ]
+          }
+        }
+      },
+      "AutomationInputExtraTaskRef": {
+        "type": "object",
+        "description": "Every entity produced by an upstream task.",
+        "required": [
+          "source",
+          "task_id"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "task"
+            ]
+          },
+          "task_id": {
+            "type": "string",
+            "description": "The id of the upstream task whose output entities are passed along."
+          }
+        }
+      },
+      "AutomationOutputContext": {
+        "type": "object",
+        "description": "Optional. What happens to the entity produced by this automation task (the last successful entity-producing action of its automation).\n",
+        "properties": {
+          "set_as_primary": {
+            "type": "boolean",
+            "description": "When true, the entity this task's automation produces becomes the run's primary context (\"main context\") when the task completes. The previous primary is demoted (kept as a regular context) and restored again if the promoting task is later reverted or reset — see the promotion bookkeeping fields on `EntityRef`.\n"
+          },
+          "attach_to_contexts": {
+            "type": "boolean",
+            "description": "When true, the entity this task's automation produces is added to the run's contexts without becoming the main one. `set_as_primary` implies this: an entity cannot be the primary context without being a context. Contexts are unique by entity id, so a task that re-produces an entity already on the run adds nothing.\n"
           }
         }
       },
@@ -4192,6 +6492,10 @@
             "$ref": "#/components/schemas/UserId",
             "description": "The user which moved the task/phase to COMPLETED state."
           },
+          "skipped_at": {
+            "type": "string",
+            "format": "date-time"
+          },
           "skipped_by": {
             "$ref": "#/components/schemas/UserId",
             "description": "The user which moved the task/phase to SKIPPED state."
@@ -4201,6 +6505,90 @@
             "description": "The user which moved the task/phase to ON_HOLD state."
           }
         }
+      },
+      "ConditionResult": {
+        "type": "object",
+        "description": "How one of a decision task's conditions stood when a loop pass closed.\n`is_met: false` means the branch was evaluated and rejected; an absent\nentry means it was never reached.\n",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ConditionId"
+          },
+          "is_met": {
+            "type": "boolean"
+          },
+          "evaluated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "match_normalizations": {
+            "type": "array",
+            "description": "Which normalizations the comparison applied for this verdict.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "unicode",
+                "invisible",
+                "whitespace",
+                "case"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "TaskIteration": {
+        "type": "object",
+        "description": "A task's state as it stood at the close of one pass through a loop. The owning task and the loop key identify it, so neither id is repeated here.",
+        "properties": {
+          "iteration": {
+            "type": "integer",
+            "description": "Which pass this was. The first pass through a loop is 1."
+          },
+          "recorded_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StepStatus"
+          },
+          "analytics": {
+            "$ref": "#/components/schemas/AnalyticsInfo"
+          },
+          "automation_execution_id": {
+            "type": "string"
+          },
+          "agent_execution_id": {
+            "type": "string"
+          },
+          "error_reason": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "execution_status": {
+            "type": "string",
+            "description": "Status of the agent execution when the pass closed."
+          },
+          "outcome": {
+            "type": "string",
+            "description": "Outcome of the agent execution (e.g. no_eligible_partner)."
+          },
+          "condition_results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConditionResult"
+            }
+          },
+          "schedule_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "iteration",
+          "recorded_at",
+          "status"
+        ]
       },
       "ConditionId": {
         "description": "A locally unique identifier for the condition",
@@ -4240,6 +6628,22 @@
           "is_met": {
             "type": "boolean",
             "description": "The result of evaluating this condition - true / false"
+          },
+          "loop_outcome": {
+            "$ref": "#/components/schemas/LoopOutcome"
+          },
+          "match_normalizations": {
+            "type": "array",
+            "description": "Internal — which normalizations the comparison had to apply for this condition to evaluate the way it did. Empty when every statement matched its operands exactly. Only meaningful alongside `is_met`; when `is_met` is unset the condition has not been evaluated and this value is stale.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "unicode",
+                "invisible",
+                "whitespace",
+                "case"
+              ]
+            }
           }
         },
         "required": [
@@ -4288,22 +6692,28 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "The id of the action or trigger"
+            "description": "The id of the action or trigger, or of the decision owning the loop a flow trait reads"
           },
           "origin": {
             "type": "string",
             "enum": [
               "trigger",
-              "action"
-            ]
+              "action",
+              "flow_runtime"
+            ],
+            "description": "Where the subject comes from: the run's trigger, an upstream action, or the running flow itself (`flow_runtime`, flow traits).\n"
           },
           "origin_type": {
             "type": "string",
             "enum": [
               "entity",
               "workflow",
-              "journey_block"
-            ]
+              "journey_block",
+              "trigger_source",
+              "main_context",
+              "flow_trait"
+            ],
+            "description": "`trigger_source` (with origin `trigger`) marks a \"started by\" statement: the run's fired trigger is compared against the configured trigger ids in `values` — no entity attribute is involved.\n`main_context` (with origin `trigger`, no `id`) marks a statement evaluated against the run's PRIMARY context: the fired trigger's entity, re-bound by any completed task that promotes its output to main context (`output_context.set_as_primary`). `schema` carries the subject's schema for attribute selection only — resolution is by the primary flag, never by schema.\n`flow_trait` (with origin `flow_runtime`) marks a statement on a value of the running flow: `attribute` is the trait key, `id` and `attribute_sub_field` name its subject. `loop.iteration` is the lap a loop is in (1 on the first pass); `id` is the decision that owns the loop and `attribute_sub_field` the loop's id, a loop the evaluating decision is inside.\n"
           },
           "schema": {
             "type": "string"
@@ -4366,7 +6776,7 @@
           },
           "attribute_sub_field": {
             "type": "string",
-            "description": "For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type')"
+            "description": "For complex attribute types, specifies which sub-field to extract (e.g., 'address', 'name', 'email_type'); for the flow trait `loop.iteration`, the loop id"
           },
           "date_offset": {
             "type": "object",
@@ -4409,7 +6819,7 @@
         ]
       },
       "DueDateConfig": {
-        "description": "Set due date for the task based on a dynamic condition",
+        "description": "Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678). A template may set it only on a task that has a start date; sent on a task, phase or flow without one, it is stored but has no effect, and the stored due date stays.",
         "type": "object",
         "properties": {
           "duration": {
@@ -4425,7 +6835,8 @@
               "TASK_FINISHED",
               "PHASE_FINISHED",
               "A_PRECEDING_TASK_COMPLETED",
-              "ALL_PRECEDING_TASKS_COMPLETED"
+              "ALL_PRECEDING_TASKS_COMPLETED",
+              "START_DATE"
             ]
           },
           "task_id": {
@@ -4433,6 +6844,37 @@
           },
           "phase_id": {
             "type": "string"
+          }
+        },
+        "required": [
+          "duration",
+          "unit",
+          "type"
+        ]
+      },
+      "StartDateConfig": {
+        "description": "Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted.",
+        "type": "object",
+        "properties": {
+          "duration": {
+            "type": "number"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/TimeUnit"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "WORKFLOW_STARTED",
+              "TASK_FINISHED",
+              "A_PRECEDING_TASK_COMPLETED",
+              "ALL_PRECEDING_TASKS_COMPLETED",
+              "THIS_TASK_LAST_COMPLETED"
+            ]
+          },
+          "task_id": {
+            "type": "string",
+            "description": "The task whose completion `TASK_FINISHED` counts from"
           }
         },
         "required": [
@@ -4476,6 +6918,59 @@
           "when"
         ]
       },
+      "Subtask": {
+        "description": "One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable id, mirrored as data-subtask-id in the description markup"
+          },
+          "name": {
+            "type": "string",
+            "description": "Plain-text snapshot of the checklist item label"
+          },
+          "party": {
+            "type": "string",
+            "description": "Which description field the item lives in",
+            "enum": [
+              "description",
+              "ecp",
+              "installer",
+              "partner"
+            ]
+          },
+          "required": {
+            "type": "boolean",
+            "description": "When true, the task cannot be completed until this item is checked"
+          }
+        },
+        "required": [
+          "id",
+          "party"
+        ]
+      },
+      "SubtaskState": {
+        "description": "Completion state of one subtask. `completed_by` and `completed_at` are server-managed — stamped when a PATCH flips `completed` to true, cleared when it flips back to false.",
+        "type": "object",
+        "properties": {
+          "completed": {
+            "type": "boolean"
+          },
+          "completed_by": {
+            "type": "string",
+            "description": "Server-stamped id of the user who checked the item"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Server-stamped time the item was checked. On a PATCH, echo the stored value together with `completed: false` to uncheck a stamped item."
+          }
+        },
+        "required": [
+          "completed"
+        ]
+      },
       "FlowTemplateId": {
         "type": "string"
       },
@@ -4485,6 +6980,24 @@
       "UserId": {
         "type": "string",
         "description": "The user id"
+      },
+      "EcpPlaceholderAssignees": {
+        "type": "object",
+        "description": "Server-managed, execution-only: for each customer / installer portal placeholder the task is configured with (`placeholder_ecp_customers`, `placeholder_ecp_installers`), the portal user ids it put on the task and still manages. An empty list means the placeholder matches nobody yet. Written at flow start and updated while the task is open: when the task becomes current, and when a relation of the flow's primary context changes (for opportunity, order, contact, account, contract and ticket contexts) — matches are added, portal users who no longer match are removed, recorded ones missing from `assigned_to` are put back, and ids assigned by hand are never touched. A patch of `assigned_to` that leaves out one of a placeholder's portal users drops that placeholder, as does one that only matches people already assigned; it is then left to people. Absent when the task has no placeholder, empty once every placeholder was taken over. Not patchable — ignored on client patches.",
+        "properties": {
+          "placeholder_ecp_customers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "placeholder_ecp_installers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       },
       "VariableAssignment": {
         "type": "object",
@@ -4523,6 +7036,150 @@
           ]
         },
         "description": "The user ids or variable assignments"
+      },
+      "RunTaskAutomationReq": {
+        "type": "object",
+        "description": "The bounded choice a person makes when running a semi-automated task. Optional in full: a task that configures no choice runs from its automation's stored configuration.\n\nNothing here is trusted as sent. Each input is checked against the stored task — never against the request — and is rejected unless that task actually configures the choice it carries.",
+        "properties": {
+          "action_inputs": {
+            "$ref": "#/components/schemas/TaskAutomationActionInputs"
+          }
+        }
+      },
+      "TaskAutomationActionInputs": {
+        "type": "object",
+        "description": "Run-time inputs keyed by the automation action they belong to. An action whose key is absent runs entirely from its configuration.",
+        "properties": {
+          "cancel_flow_execution": {
+            "$ref": "#/components/schemas/CancelFlowExecutionInputs"
+          },
+          "send_email": {
+            "$ref": "#/components/schemas/SendEmailInputs"
+          }
+        }
+      },
+      "CancelFlowExecutionInputs": {
+        "type": "object",
+        "description": "The reason the person chose for cancelling the flow. Ids only — the titles stored on the closed execution are resolved server-side from the execution's `closing_reason.configured_reasons`, so a caller cannot record a reason under a title of its own choosing.",
+        "properties": {
+          "selected_closing_reason_ids": {
+            "type": "array",
+            "description": "Must be non-empty and a subset of the task's `automation_config.eligible_closing_reason_ids`.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "extra_description": {
+            "type": "string",
+            "description": "An optional note the person added with their choice. Accepted only when the task sets `allow_execution_note`; sent otherwise it is a 400, so a caller cannot write free text onto a flow whose step never invited one.",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "selected_closing_reason_ids"
+        ]
+      },
+      "TaskEmailPreview": {
+        "type": "object",
+        "description": "The rendered email a send-email task is about to send. `subject` is what the person edits, and `body` too while `body_edit_locked` is false; the rest is shown for context and is not editable.",
+        "properties": {
+          "subject": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string",
+            "description": "Rendered HTML."
+          },
+          "to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "has_unresolved_send_time_variables": {
+            "type": "boolean",
+            "description": "True when the template uses variables only the sending worker can resolve — a confirmation link, or portal variables built from a portal context. They render as placeholders here and are filled in on send, so the person reviewing must be told rather than left to \"correct\" them."
+          },
+          "body_edit_locked": {
+            "type": "boolean",
+            "description": "True when the action adds content to the body only at send time — a confirmation link to wait on, a journey to wait for a submission of, or portal variables for a portal user. An edited body would replace that content, so the run refuses body edits for such an action and the review must not offer them; the subject stays editable."
+          },
+          "attachable_documents": {
+            "type": "array",
+            "description": "The files related to the entity this email renders against, offered when the step lets the person choose documents to attach; absent otherwise. The ids are what a run sends back as `attachment_entity_ids`. Only the entity's direct file relations are listed, which is the set the worker accepts a chosen id from, so nothing offered here is dropped at send. Listed in full up to a ceiling of 500 files; beyond that the rest are not offered.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "filename": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "filename"
+              ]
+            }
+          },
+          "inline_images": {
+            "type": "array",
+            "description": "The images the template embeds in the body as inline attachments, referenced there as `cid:` sources that only a mail client can resolve. Each pairs the content id with a public URL of the same image, so a client can display the body; an edited body sent back must reference the images by `cid:` again, or they are not embedded. Only images the body references are listed.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cid": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cid",
+                "url"
+              ]
+            }
+          }
+        }
+      },
+      "EmailReviewConfig": {
+        "type": "object",
+        "description": "Copied from the template task at flow start. Says whether the person running this step reviews the email first, and what they may change. Anything they send that this does not permit is refused.",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "allow_document_selection": {
+            "type": "boolean"
+          },
+          "allow_subject_and_body_edit": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SendEmailInputs": {
+        "type": "object",
+        "description": "The adjustments a person made to a reviewed email. Each field is accepted only when the task's `email_review` permits it; sent otherwise it is a 400, so a caller cannot rewrite an email the configurator locked.\n\nThese are the RENDERED values, not template edits — the template is untouched and other flows using it are unaffected.",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "maxLength": 998
+          },
+          "body": {
+            "type": "string",
+            "description": "The edited HTML body. Capped well below the automation execution's own limits: it is carried through Step Functions state, which is bounded at 256KB for the whole payload.",
+            "maxLength": 50000
+          },
+          "attachment_entity_ids": {
+            "type": "array",
+            "description": "File entities the person chose. Checked against the task entity's own file relations before sending, so a caller cannot attach an arbitrary file from elsewhere in the organisation.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       },
       "PatchTaskReq": {
         "type": "object",
@@ -4567,10 +7224,29 @@
             "$ref": "#/components/schemas/PartnerDetails",
             "description": "Partner-specific task details shown to partner org users viewing shared resources"
           },
+          "subtask_states": {
+            "type": "object",
+            "description": "Per-subtask completion state changes, keyed by subtask id. Ids must exist in the task's `subtasks`, otherwise the request is rejected. The server stamps `completed_by` / `completed_at` itself and ignores client-supplied values for them. Entries omitted here keep their stored state, and so does an entry equal to the stored one — re-checking keeps the original stamps. Unchecking a stamped item is applied only when the entry carries the stored `completed_at`, which tells the server the client has seen the completion it undoes; a `completed: false` entry without it is a stale echo and is ignored. An entry that would move a box is permission-checked like a status change (`UpdateTaskStatus`, or assigned plus `UpdateAssignedTaskStatus`); echoes are not. A cross-org (partner) caller may move only the boxes of the party they can see — the partner description, or the co-worker description when no partner description is enabled; an entry that would move another party's box is refused with 403.",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SubtaskState"
+            }
+          },
           "next_condition_id": {
             "type": "string",
             "description": "For decision tasks with manual trigger mode, specifies which condition/branch\nto follow when completing the task. The condition ID must match one of the\nconditions defined on the decision task.\n",
             "example": "cond_branch_approved"
+          },
+          "next_condition_ids": {
+            "type": "array",
+            "description": "For decision tasks, specifies which conditions/branches to follow in\nparallel when completing the task. Requires parallel execution to be\nenabled on the task: manual decisions need an explicit\n`allow_parallel_execution: true`, automatic decisions allow it unless\nexplicitly disabled (a manual multi-branch override, e.g. after automatic\nevaluation yielded no winner). Every ID must match a condition defined on\nthe decision task. A loop or exit-loop branch cannot be combined with\nother branches. Takes precedence over `next_condition_id` when both are\nprovided.\n",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "example": [
+              "cond_branch_a",
+              "cond_branch_b"
+            ]
           },
           "revert_execution": {
             "type": "boolean",
@@ -4581,6 +7257,16 @@
             "type": "boolean",
             "description": "Request-only signal indicating the task is being completed as a\nresult of the user submitting the task's linked journey (journey\nauto-completion). When `true` and the task transitions to\n`COMPLETED`, the activity log records a journey-specific message\ninstead of the generic completion message. Not persisted on the task.\n",
             "default": false
+          },
+          "excluded_partner_org_ids": {
+            "type": "array",
+            "description": "Partner organization ids to exclude from the Partner Assignment\nAgent's candidate pool. Honoured only when this request re-runs an\nAI agent task (status `IN_PROGRESS` on a failed or held agent\ntask): the ids are added to the task's\n`agent_config.parameters.excluded_partner_org_ids` and the new\nagent execution runs with them. Ignored otherwise.\n",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "partner-org-1"
+            ]
           }
         }
       },

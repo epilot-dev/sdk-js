@@ -239,6 +239,103 @@
         "responses": {}
       }
     },
+    "/v2/flows/executions:portal-search": {
+      "post": {
+        "operationId": "searchPortalWorkflows",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions:portal-search-batch": {
+      "post": {
+        "operationId": "searchPortalWorkflowsBatch",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions:bulk-start": {
+      "post": {
+        "operationId": "bulkStartFlows",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/bulk-jobs": {
+      "get": {
+        "operationId": "listBulkStartFlowsJobs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/flows/bulk-jobs:active": {
+      "get": {
+        "operationId": "getActiveBulkStartFlowsJob",
+        "responses": {}
+      }
+    },
+    "/v2/flows/bulk-jobs/{job_id}": {
+      "get": {
+        "operationId": "getBulkStartFlowsJob",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BulkJobIdParam"
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "patchBulkStartFlowsJob",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BulkJobIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/bulk-jobs/{job_id}/restart": {
+      "post": {
+        "operationId": "restartBulkStartFlowsJob",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BulkJobIdParam"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/flows/executions/{execution_id}/tasks/{task_id}": {
       "patch": {
         "operationId": "patchTask",
@@ -262,6 +359,26 @@
     "/v2/flows/executions/{execution_id}/tasks/{task_id}/automation:run": {
       "post": {
         "operationId": "runTaskAutomation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/flows/executions/{execution_id}/tasks/{task_id}/email-preview": {
+      "get": {
+        "operationId": "previewTaskEmail",
         "parameters": [
           {
             "$ref": "#/components/parameters/ExecutionIdParam"
@@ -384,6 +501,11 @@
   },
   "components": {
     "parameters": {
+      "BulkJobIdParam": {
+        "in": "path",
+        "name": "job_id",
+        "required": true
+      },
       "ExecutionIdParam": {
         "in": "path",
         "name": "execution_id",
