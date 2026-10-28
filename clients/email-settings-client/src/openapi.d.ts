@@ -48,6 +48,28 @@ declare namespace Components {
          *
          */
         export type AllowedRecipientDomainsSetting = "allowed_recipient_domains";
+        export interface AutoLinkIdentifierAttribute {
+            /**
+             * Attribute name (API name) on the entity schema
+             * example:
+             * lima_customer_number
+             */
+            name: string; // ^[A-Za-z][A-Za-z0-9_]*$
+            /**
+             * Extra label texts a purely numeric value may follow in an email (e.g. "Kd.-Nr."). The
+             * attribute's own label always counts. Up to 10 are used.
+             *
+             */
+            labels?: string[];
+        }
+        /**
+         * - Extra attributes, per entity schema, that inbound email auto-linking treats as identifiers,
+         *   on top of the built-in ones (e.g. `contract_number`).
+         * - Stored in `schemas`: entity schema slug → attributes of that schema.
+         * - Only one value per organization: posting again replaces it, and listing returns a single object.
+         *
+         */
+        export type AutoLinkIdentifierAttributesSetting = "auto_link_identifier_attributes";
         export interface CalendarAdminConsentStatus {
             /**
              * True when the tenant admin has consented to epilot's Microsoft 365
@@ -616,6 +638,8 @@ declare namespace Components {
          * - **whitelist_email_address**: Uses `value` (email address)
          * - **restrict_duplicates_within**: Uses `value` (time duration)
          * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
+         * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
+         *   and `excluded_senders` (sender addresses or domains never auto-linked)
          *
          */
         export interface Setting {
@@ -656,6 +680,26 @@ declare namespace Components {
              * <p>Best regards,<br/><strong>The Team</strong></p>
              */
             html?: string;
+            /**
+             * Only for auto_link_identifier_attributes: entity schema slug → extra identifier attributes
+             * of that schema (up to 20 are used per schema).
+             *
+             */
+            schemas?: {
+                [name: string]: AutoLinkIdentifierAttribute[];
+            };
+            /**
+             * Only for auto_link_identifier_attributes: senders whose emails are never auto-linked. Each
+             * entry is an email address (`newsletter@partner.de`) or a whole domain (`@partner.de`).
+             * Up to 100 are used.
+             *
+             * example:
+             * [
+             *   "newsletter@partner.de",
+             *   "@noreply.example.com"
+             * ]
+             */
+            excluded_senders?: string[];
             /**
              * ISO 8601 timestamp when the setting was created
              * example:
@@ -743,7 +787,14 @@ declare namespace Components {
          * - One setting per domain, stored in `value` (e.g. "partner-company.de").
          *
          */
-        AllowedRecipientDomainsSetting;
+        AllowedRecipientDomainsSetting | /**
+         * - Extra attributes, per entity schema, that inbound email auto-linking treats as identifiers,
+         *   on top of the built-in ones (e.g. `contract_number`).
+         * - Stored in `schemas`: entity schema slug → attributes of that schema.
+         * - Only one value per organization: posting again replaces it, and listing returns a single object.
+         *
+         */
+        AutoLinkIdentifierAttributesSetting;
         export type SettingsResponse = /**
          * Generic setting object used for various email configuration types.
          * The applicable fields depend on the setting type:
@@ -752,6 +803,8 @@ declare namespace Components {
          * - **whitelist_email_address**: Uses `value` (email address)
          * - **restrict_duplicates_within**: Uses `value` (time duration)
          * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
+         * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
+         *   and `excluded_senders` (sender addresses or domains never auto-linked)
          *
          */
         Setting[] | /**
@@ -762,6 +815,8 @@ declare namespace Components {
          * - **whitelist_email_address**: Uses `value` (email address)
          * - **restrict_duplicates_within**: Uses `value` (time duration)
          * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
+         * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
+         *   and `excluded_senders` (sender addresses or domains never auto-linked)
          *
          */
         Setting;
@@ -1056,6 +1111,8 @@ declare namespace Paths {
          * - **whitelist_email_address**: Uses `value` (email address)
          * - **restrict_duplicates_within**: Uses `value` (time duration)
          * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
+         * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
+         *   and `excluded_senders` (sender addresses or domains never auto-linked)
          *
          */
         Components.Schemas.Setting;
@@ -1756,6 +1813,8 @@ declare namespace Paths {
          * - **whitelist_email_address**: Uses `value` (email address)
          * - **restrict_duplicates_within**: Uses `value` (time duration)
          * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
+         * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
+         *   and `excluded_senders` (sender addresses or domains never auto-linked)
          *
          */
         Components.Schemas.Setting;
@@ -1768,6 +1827,8 @@ declare namespace Paths {
              * - **whitelist_email_address**: Uses `value` (email address)
              * - **restrict_duplicates_within**: Uses `value` (time duration)
              * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
+             * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
+         *   and `excluded_senders` (sender addresses or domains never auto-linked)
              *
              */
             Components.Schemas.Setting;
@@ -2415,6 +2476,7 @@ export interface OperationMethods {
    * | `whitelist_email_address` | Addresses exempt from duplicate detection |
    * | `restrict_duplicates_within` | Time window for duplicate email detection |
    * | `allowed_recipient_domains` | Extra recipient domains allowed for sandbox org sends |
+   * | `auto_link_identifier_attributes` | Extra attributes per entity schema that inbound auto-linking treats as identifiers (one per org, returned as a single object) |
    * 
    */
   'getSettings'(
@@ -2433,6 +2495,7 @@ export interface OperationMethods {
    * - **whitelist_email_address**: Requires `value` (email address)
    * - **restrict_duplicates_within**: Requires `value` (time duration like "5m", "1d")
    * - **allowed_recipient_domains**: Requires `value` (recipient domain, e.g. "partner-company.de")
+   * - **auto_link_identifier_attributes**: Requires `schemas`. One setting per organization: posting again replaces it
    * 
    */
   'addSetting'(
@@ -3177,6 +3240,7 @@ export interface PathsDictionary {
      * | `whitelist_email_address` | Addresses exempt from duplicate detection |
      * | `restrict_duplicates_within` | Time window for duplicate email detection |
      * | `allowed_recipient_domains` | Extra recipient domains allowed for sandbox org sends |
+     * | `auto_link_identifier_attributes` | Extra attributes per entity schema that inbound auto-linking treats as identifiers (one per org, returned as a single object) |
      * 
      */
     'get'(
@@ -3195,6 +3259,7 @@ export interface PathsDictionary {
      * - **whitelist_email_address**: Requires `value` (email address)
      * - **restrict_duplicates_within**: Requires `value` (time duration like "5m", "1d")
      * - **allowed_recipient_domains**: Requires `value` (recipient domain, e.g. "partner-company.de")
+     * - **auto_link_identifier_attributes**: Requires `schemas`. One setting per organization: posting again replaces it
      * 
      */
     'post'(
@@ -3347,6 +3412,8 @@ export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
 export type AllowedRecipientDomainsSetting = Components.Schemas.AllowedRecipientDomainsSetting;
+export type AutoLinkIdentifierAttribute = Components.Schemas.AutoLinkIdentifierAttribute;
+export type AutoLinkIdentifierAttributesSetting = Components.Schemas.AutoLinkIdentifierAttributesSetting;
 export type CalendarAdminConsentStatus = Components.Schemas.CalendarAdminConsentStatus;
 export type CalendarConnectionInfo = Components.Schemas.CalendarConnectionInfo;
 export type ConnectOutlookRequest = Components.Schemas.ConnectOutlookRequest;

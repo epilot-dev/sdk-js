@@ -1891,7 +1891,7 @@
       "get": {
         "operationId": "getSettings",
         "summary": "getSettings",
-        "description": "Retrieves settings of a specific type for the organization.\n\nIf an `id` is provided, returns only that specific setting.\nOtherwise, returns all settings of the specified type.\n\n## Setting Types\n\n| Type | Description |\n|------|-------------|\n| `signature` | HTML email signatures |\n| `email_domain` | Custom email domains |\n| `email_address` | Sender email addresses |\n| `whitelist_email_address` | Addresses exempt from duplicate detection |\n| `restrict_duplicates_within` | Time window for duplicate email detection |\n| `allowed_recipient_domains` | Extra recipient domains allowed for sandbox org sends |\n",
+        "description": "Retrieves settings of a specific type for the organization.\n\nIf an `id` is provided, returns only that specific setting.\nOtherwise, returns all settings of the specified type.\n\n## Setting Types\n\n| Type | Description |\n|------|-------------|\n| `signature` | HTML email signatures |\n| `email_domain` | Custom email domains |\n| `email_address` | Sender email addresses |\n| `whitelist_email_address` | Addresses exempt from duplicate detection |\n| `restrict_duplicates_within` | Time window for duplicate email detection |\n| `allowed_recipient_domains` | Extra recipient domains allowed for sandbox org sends |\n| `auto_link_identifier_attributes` | Extra attributes per entity schema that inbound auto-linking treats as identifiers (one per org, returned as a single object) |\n",
         "tags": [
           "Settings"
         ],
@@ -1964,7 +1964,7 @@
       "post": {
         "operationId": "addSetting",
         "summary": "addSetting",
-        "description": "Creates a new setting of the specified type.\n\nThe setting type determines which fields are applicable:\n- **signature**: Requires `name`, `value` (plain text), and `html` (HTML content)\n- **email_domain**: Requires `value` (domain name)\n- **whitelist_email_address**: Requires `value` (email address)\n- **restrict_duplicates_within**: Requires `value` (time duration like \"5m\", \"1d\")\n- **allowed_recipient_domains**: Requires `value` (recipient domain, e.g. \"partner-company.de\")\n",
+        "description": "Creates a new setting of the specified type.\n\nThe setting type determines which fields are applicable:\n- **signature**: Requires `name`, `value` (plain text), and `html` (HTML content)\n- **email_domain**: Requires `value` (domain name)\n- **whitelist_email_address**: Requires `value` (email address)\n- **restrict_duplicates_within**: Requires `value` (time duration like \"5m\", \"1d\")\n- **allowed_recipient_domains**: Requires `value` (recipient domain, e.g. \"partner-company.de\")\n- **auto_link_identifier_attributes**: Requires `schemas`. One setting per organization: posting again replaces it\n",
         "tags": [
           "Settings"
         ],
@@ -1998,6 +1998,27 @@
                   "value": {
                     "type": "restrict_duplicates_within",
                     "value": "5m"
+                  }
+                },
+                "set_auto_link_identifier_attributes": {
+                  "summary": "Search custom identifier attributes when auto-linking inbound email",
+                  "value": {
+                    "type": "auto_link_identifier_attributes",
+                    "schemas": {
+                      "contact": [
+                        {
+                          "name": "lima_customer_number",
+                          "labels": [
+                            "Kd.-Nr."
+                          ]
+                        }
+                      ],
+                      "order": [
+                        {
+                          "name": "meter_number_custom"
+                        }
+                      ]
+                    }
                   }
                 }
               }
@@ -3703,6 +3724,38 @@
           "allowed_recipient_domains"
         ]
       },
+      "AutoLinkIdentifierAttributesSetting": {
+        "type": "string",
+        "description": "- Extra attributes, per entity schema, that inbound email auto-linking treats as identifiers,\n  on top of the built-in ones (e.g. `contract_number`).\n- Stored in `schemas`: entity schema slug → attributes of that schema.\n- Only one value per organization: posting again replaces it, and listing returns a single object.\n",
+        "enum": [
+          "auto_link_identifier_attributes"
+        ]
+      },
+      "AutoLinkIdentifierAttribute": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Attribute name (API name) on the entity schema",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+            "maxLength": 100,
+            "example": "lima_customer_number"
+          },
+          "labels": {
+            "type": "array",
+            "description": "Extra label texts a purely numeric value may follow in an email (e.g. \"Kd.-Nr.\"). The\nattribute's own label always counts. Up to 10 are used.\n",
+            "items": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 60
+            }
+          }
+        }
+      },
       "SettingType": {
         "oneOf": [
           {
@@ -3722,12 +3775,15 @@
           },
           {
             "$ref": "#/components/schemas/AllowedRecipientDomainsSetting"
+          },
+          {
+            "$ref": "#/components/schemas/AutoLinkIdentifierAttributesSetting"
           }
         ]
       },
       "Setting": {
         "type": "object",
-        "description": "Generic setting object used for various email configuration types.\nThe applicable fields depend on the setting type:\n- **signature**: Uses `name`, `value` (plain text), and `html` (rich text)\n- **email_domain**: Uses `value` (domain name)\n- **whitelist_email_address**: Uses `value` (email address)\n- **restrict_duplicates_within**: Uses `value` (time duration)\n- **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)\n",
+        "description": "Generic setting object used for various email configuration types.\nThe applicable fields depend on the setting type:\n- **signature**: Uses `name`, `value` (plain text), and `html` (rich text)\n- **email_domain**: Uses `value` (domain name)\n- **whitelist_email_address**: Uses `value` (email address)\n- **restrict_duplicates_within**: Uses `value` (time duration)\n- **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)\n- **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)\n  and `excluded_senders` (sender addresses or domains never auto-linked)\n",
         "required": [
           "type"
         ],
@@ -3759,6 +3815,30 @@
             "type": "string",
             "description": "HTML content (only applicable for signature type)",
             "example": "<p>Best regards,<br/><strong>The Team</strong></p>"
+          },
+          "schemas": {
+            "type": "object",
+            "description": "Only for auto_link_identifier_attributes: entity schema slug → extra identifier attributes\nof that schema (up to 20 are used per schema).\n",
+            "maxProperties": 20,
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AutoLinkIdentifierAttribute"
+              }
+            }
+          },
+          "excluded_senders": {
+            "type": "array",
+            "description": "Only for auto_link_identifier_attributes: senders whose emails are never auto-linked. Each\nentry is an email address (`newsletter@partner.de`) or a whole domain (`@partner.de`).\nUp to 100 are used.\n",
+            "items": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 254
+            },
+            "example": [
+              "newsletter@partner.de",
+              "@noreply.example.com"
+            ]
           },
           "created_at": {
             "type": "string",

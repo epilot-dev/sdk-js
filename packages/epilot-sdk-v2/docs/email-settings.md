@@ -125,6 +125,8 @@ const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 - [`WhitelistEmailAddressSetting`](#whitelistemailaddresssetting)
 - [`RestrictDuplicatesWithinSetting`](#restrictduplicateswithinsetting)
 - [`AllowedRecipientDomainsSetting`](#allowedrecipientdomainssetting)
+- [`AutoLinkIdentifierAttributesSetting`](#autolinkidentifierattributessetting)
+- [`AutoLinkIdentifierAttribute`](#autolinkidentifierattribute)
 - [`SettingType`](#settingtype)
 - [`Setting`](#setting)
 - [`Domain`](#domain)
@@ -1465,6 +1467,7 @@ const { data } = await client.getSettings({
     "type": "signature",
     "value": "Best regards, The Team",
     "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "schemas": {},
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-20T14:45:00Z",
     "created_by": "user-123",
@@ -1493,6 +1496,7 @@ const { data } = await client.addSetting(
     type: 'signature',
     value: 'Best regards, The Team',
     html: '<p>Best regards,<br/><strong>The Team</strong></p>',
+    schemas: {},
     created_at: '2024-01-15T10:30:00Z',
     updated_at: '2024-01-20T14:45:00Z',
     created_by: 'user-123',
@@ -1513,6 +1517,7 @@ const { data } = await client.addSetting(
     "type": "signature",
     "value": "Best regards, The Team",
     "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "schemas": {},
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-20T14:45:00Z",
     "created_by": "user-123",
@@ -1561,6 +1566,7 @@ const { data } = await client.updateSetting(
     type: 'signature',
     value: 'Best regards, The Team',
     html: '<p>Best regards,<br/><strong>The Team</strong></p>',
+    schemas: {},
     created_at: '2024-01-15T10:30:00Z',
     updated_at: '2024-01-20T14:45:00Z',
     created_by: 'user-123',
@@ -1580,6 +1586,7 @@ const { data } = await client.updateSetting(
   "type": "signature",
   "value": "Best regards, The Team",
   "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+  "schemas": {},
   "created_at": "2024-01-15T10:30:00Z",
   "updated_at": "2024-01-20T14:45:00Z",
   "created_by": "user-123",
@@ -1618,6 +1625,7 @@ const { data } = await client.addDomain(
     "type": "signature",
     "value": "Best regards, The Team",
     "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "schemas": {},
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-20T14:45:00Z",
     "created_by": "user-123",
@@ -1695,6 +1703,7 @@ const { data } = await client.verifyNameServers(
     "type": "signature",
     "value": "Best regards, The Team",
     "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "schemas": {},
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-20T14:45:00Z",
     "created_by": "user-123",
@@ -1735,6 +1744,7 @@ const { data } = await client.verifyDnsRecords(
     "type": "signature",
     "value": "Best regards, The Team",
     "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "schemas": {},
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-20T14:45:00Z",
     "created_by": "user-123",
@@ -1774,6 +1784,7 @@ const { data } = await client.verifyDomain(
     "type": "signature",
     "value": "Best regards, The Team",
     "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "schemas": {},
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-20T14:45:00Z",
     "created_by": "user-123",
@@ -2016,9 +2027,14 @@ type SettingsResponse = Array<{
   id?: string
   name?: string
   org_id?: string
-  type: "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within" | "allowed_recipient_domains"
+  type: "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within" | "allowed_recipient_domains" | "auto_link_identifier_attributes"
   value?: string
   html?: string
+  schemas?: Record<string, Array<{
+    name: string
+    labels?: string[]
+  }>>
+  excluded_senders?: string[]
   created_at?: string
   updated_at?: string
   created_by?: string
@@ -2027,9 +2043,14 @@ type SettingsResponse = Array<{
   id?: string
   name?: string
   org_id?: string
-  type: "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within" | "allowed_recipient_domains"
+  type: "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within" | "allowed_recipient_domains" | "auto_link_identifier_attributes"
   value?: string
   html?: string
+  schemas?: Record<string, Array<{
+    name: string
+    labels?: string[]
+  }>>
+  excluded_senders?: string[]
   created_at?: string
   updated_at?: string
   created_by?: string
@@ -2279,10 +2300,30 @@ type RestrictDuplicatesWithinSetting = "restrict_duplicates_within"
 type AllowedRecipientDomainsSetting = "allowed_recipient_domains"
 ```
 
+### `AutoLinkIdentifierAttributesSetting`
+
+- Extra attributes, per entity schema, that inbound email auto-linking treats as identifiers,
+  on top of the built-in ones (e.g. `contract_number`).
+- Stored in `schemas`: entity schema slug → attributes of that schema.
+- Only one value per organization: posting again replaces it, and listing retur
+
+```ts
+type AutoLinkIdentifierAttributesSetting = "auto_link_identifier_attributes"
+```
+
+### `AutoLinkIdentifierAttribute`
+
+```ts
+type AutoLinkIdentifierAttribute = {
+  name: string
+  labels?: string[]
+}
+```
+
 ### `SettingType`
 
 ```ts
-type SettingType = "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within" | "allowed_recipient_domains"
+type SettingType = "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within" | "allowed_recipient_domains" | "auto_link_identifier_attributes"
 ```
 
 ### `Setting`
@@ -2299,9 +2340,14 @@ type Setting = {
   id?: string
   name?: string
   org_id?: string
-  type: "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within" | "allowed_recipient_domains"
+  type: "signature" | "email_domain" | "email_address" | "whitelist_email_address" | "restrict_duplicates_within" | "allowed_recipient_domains" | "auto_link_identifier_attributes"
   value?: string
   html?: string
+  schemas?: Record<string, Array<{
+    name: string
+    labels?: string[]
+  }>>
+  excluded_senders?: string[]
   created_at?: string
   updated_at?: string
   created_by?: string
