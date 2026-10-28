@@ -457,6 +457,12 @@
         "responses": {}
       }
     },
+    "/v1/conditional-pricing/organization": {
+      "get": {
+        "operationId": "$getConditionalPricingOrganization",
+        "responses": {}
+      }
+    },
     "/v1/conditional-pricing:resolve": {
       "post": {
         "operationId": "$resolveConditionalEntity",
