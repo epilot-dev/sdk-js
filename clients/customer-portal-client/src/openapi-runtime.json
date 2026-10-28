@@ -8,6 +8,7 @@
     "/v2/portal/portal": {
       "post": {
         "operationId": "upsertPortal",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -107,6 +108,7 @@
     "/v2/portal/config": {
       "get": {
         "operationId": "getPortalConfig",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -118,6 +120,7 @@
       },
       "delete": {
         "operationId": "deletePortal",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -156,6 +159,7 @@
     "/v2/portal/extensions": {
       "get": {
         "operationId": "getPortalExtensions",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -169,6 +173,7 @@
     "/v2/portal/public/extensions": {
       "get": {
         "operationId": "getPublicPortalExtensionDetails",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -405,6 +410,7 @@
     "/v2/portal/external-links": {
       "get": {
         "operationId": "getExternalLinks",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -517,6 +523,7 @@
     "/v2/portal/public/portal/config": {
       "get": {
         "operationId": "getPublicPortalConfig",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -535,6 +542,7 @@
     "/v2/portal/org/portal/config": {
       "get": {
         "operationId": "getOrgPortalConfig",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -585,6 +593,7 @@
     "/v2/portal/email-templates": {
       "post": {
         "operationId": "upsertEmailTemplates",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -602,6 +611,7 @@
       },
       "get": {
         "operationId": "getEmailTemplates",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -881,6 +891,7 @@
     "/v2/portal/validate/caa-records": {
       "post": {
         "operationId": "validateCaaRecords",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -936,6 +947,7 @@
     "/v2/portal/public/contact/exists": {
       "post": {
         "operationId": "checkContactExists",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1030,18 +1042,15 @@
         "responses": {}
       }
     },
+    "/v2/portal/copilot/access": {
+      "get": {
+        "operationId": "getPortalCopilotAccess",
+        "responses": {}
+      }
+    },
     "/v2/portal/user": {
       "get": {
         "operationId": "getPortalUser",
-        "responses": {}
-      },
-      "patch": {
-        "operationId": "updatePortalUser",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
         "responses": {}
       },
       "delete": {
@@ -1070,6 +1079,69 @@
             "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v2/portal/user/notification-preferences": {
+      "get": {
+        "operationId": "getPortalUserNotificationPreferences",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updatePortalUserNotificationPreferences",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/user/passkeys": {
+      "get": {
+        "operationId": "listPortalUserPasskeys",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "addPortalUserPasskey",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/user/passkeys/registration-options": {
+      "post": {
+        "operationId": "createPortalUserPasskeyRegistrationOptions",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/user/passkeys/verification-code": {
+      "post": {
+        "operationId": "sendPortalUserPasskeyVerificationCode",
+        "responses": {}
+      }
+    },
+    "/v2/portal/user/passkeys/{credential_id}": {
+      "delete": {
+        "operationId": "deletePortalUserPasskey",
+        "parameters": [
+          {
+            "name": "credential_id",
+            "in": "path",
+            "required": true
+          }
+        ],
         "responses": {}
       }
     },
@@ -1148,6 +1220,7 @@
     "/v2/portal/public/user/exists": {
       "get": {
         "operationId": "userExists",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1210,6 +1283,7 @@
     "/v2/portal/configure-distribution": {
       "get": {
         "operationId": "configureDistribution",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -1281,23 +1355,6 @@
             "required": true
           }
         ],
-        "responses": {}
-      },
-      "patch": {
-        "operationId": "updateOrder",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
         "responses": {}
       }
     },
@@ -1375,24 +1432,6 @@
             "required": true
           }
         ],
-        "responses": {}
-      },
-      "patch": {
-        "operationId": "updateOpportunity",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
         "responses": {}
       }
     },
@@ -1488,13 +1527,6 @@
     "/v2/portal/contract/by-identifiers": {
       "post": {
         "operationId": "addContractByIdentifiers",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "correlation_id",
-            "required": false
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1623,21 +1655,12 @@
           }
         },
         "responses": {}
-      },
-      "delete": {
-        "operationId": "deleteEntityFile",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
       }
     },
     "/v2/portal/portal/files": {
       "post": {
         "operationId": "savePortalFiles",
+        "deprecated": true,
         "requestBody": {
           "required": true,
           "content": {
@@ -1804,6 +1827,7 @@
     "/v2/portal/entity/{schema}/access": {
       "post": {
         "operationId": "triggerEntityAccessEvent",
+        "deprecated": true,
         "parameters": [
           {
             "name": "schema",
@@ -2108,6 +2132,7 @@
     "/v2/portal/public/sso/providers/{provider_slug}": {
       "get": {
         "operationId": "getSSOProvider",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -2164,6 +2189,7 @@
     "/v2/portal/public/sso/login": {
       "post": {
         "operationId": "ssoLogin",
+        "deprecated": true,
         "parameters": [
           {
             "in": "query",
@@ -2283,6 +2309,37 @@
       },
       "delete": {
         "operationId": "deletePortalPage",
+        "responses": {}
+      }
+    },
+    "/v2/portal/pages/{id}/detach": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true
+        }
+      ],
+      "post": {
+        "operationId": "detachPortalPage",
+        "responses": {}
+      }
+    },
+    "/v2/portal/pages/{id}/blocks/{block_id}/detach": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true
+        },
+        {
+          "in": "path",
+          "name": "block_id",
+          "required": true
+        }
+      ],
+      "post": {
+        "operationId": "detachPortalPageBlock",
         "responses": {}
       }
     },
@@ -2733,6 +2790,24 @@
         "responses": {}
       }
     },
+    "/v3/portal/config/{portal_id}/revisions/{revision_id}:preview": {
+      "post": {
+        "operationId": "createPortalRevisionPreview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "revision_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v3/portal/config/{portal_id}/publish": {
       "post": {
         "operationId": "publishPortalRevision",
@@ -2947,16 +3022,6 @@
         }
       },
       "ContractAssignmentConflict": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "ContractAssignmentNotFound": {
-        "content": {
-          "application/json": {}
-        }
-      },
-      "ContactAmbiguousMatch": {
         "content": {
           "application/json": {}
         }

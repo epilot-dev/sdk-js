@@ -20,72 +20,15 @@ declare namespace Components {
             reason: "invalid_token";
         }
         export type Conflict = Schemas.ErrorResp;
-        export interface ContactAmbiguousMatch {
-            /**
-             * The HTTP status code, repeated in the body.
-             * example:
-             * 409
-             */
-            status: number;
-            /**
-             * Human-readable error message. For support, not for display to end customers.
-             */
-            error: string;
-            reason: "AMBIGUOUS_MATCH";
-            /**
-             * Correlation id of the ERP sync that was waited on.
-             */
-            correlation_id?: string; // ^[A-Za-z0-9_-]+$
-        }
         export interface ContractAssignmentConflict {
             /**
              * Error message
              */
             message?: string;
             /**
-             * Reason why the contract is not assignable.
-             * - `DRAFT`: the contract is still a draft.
-             * - `MULTIPLE`: multiple contracts were found and the business logic does not allow it.
-             * - `SELF_ASSIGNMENT_DISABLED`: the contract already has a contact assigned and
-             *   self-assignment is disabled.
-             * - `AMBIGUOUS_MATCH`: the portal waited on the Integration Toolkit and the ERP
-             *   delivered entities it cannot tell apart (several matching the selector, or
-             *   contracts naming different customers). Nothing was assigned, and retrying
-             *   will not help.
-             *
+             * Reason why the contract is not assignable. If the reason is "MULTIPLE", the contract is not assignable because multiple contracts were found and the business logic does not allow it.
              */
-            reason: "DRAFT" | "MULTIPLE" | "SELF_ASSIGNMENT_DISABLED" | "AMBIGUOUS_MATCH";
-            /**
-             * The HTTP status code, repeated in the body.
-             * example:
-             * 409
-             */
-            status?: number;
-            /**
-             * Human-readable error message. For support, not for display to end customers.
-             */
-            error?: string;
-            /**
-             * Correlation id of the ERP sync that was waited on. Present only with `AMBIGUOUS_MATCH`.
-             */
-            correlation_id?: string; // ^[A-Za-z0-9_-]+$
-        }
-        export interface ContractAssignmentNotFound {
-            /**
-             * The HTTP status code, repeated in the body.
-             * example:
-             * 404
-             */
-            status: number;
-            /**
-             * Human-readable error message. For support, not for display to end customers.
-             */
-            error: string;
-            reason?: "TIMEOUT" | "INCOMPLETE";
-            /**
-             * Correlation id of the ERP sync that was waited on. Present with `TIMEOUT` and `INCOMPLETE`.
-             */
-            correlation_id?: string; // ^[A-Za-z0-9_-]+$
+            reason: "DRAFT" | "MULTIPLE";
         }
         export type Forbidden = Schemas.ErrorResp;
         export type ForbiddenByRule = Schemas.ErrorResp | Schemas.FailedRuleErrorResp;
@@ -831,6 +774,20 @@ declare namespace Components {
              * c495fef9-eeca-4019-a989-8390dcd9825b
              */
             id?: string; // uuid
+            /**
+             * Blueprint instance ids managing this block. Non-empty means the block is blueprint-managed and read-only for users until it is detached. Server-managed: ignored (stripped) on every write from a user.
+             *
+             */
+            _manifest?: string[];
+            /**
+             * Stable id of this block in the blueprint source. Server-managed.
+             */
+            _lineage_id?: string;
+            /**
+             * Reserved for author-defined block levels (e.g. `dummy`, `strict`). Not interpreted yet. Server-managed: ignored (stripped) on every write from a user.
+             *
+             */
+            _level?: string;
         }
         /**
          * The id of the block
@@ -1145,6 +1102,16 @@ declare namespace Components {
                      */
                     enabled?: boolean;
                 };
+                /**
+                 * Opt-in, set by the configuring user. When enabled, a second factor is enforced after the password and portal users can add passkeys (fingerprint, face or device PIN) as one variant of it, next to the email code of advanced_mfa. Users with a passkey use it by default; with advanced_mfa off, the passkey is the only second factor once a user has added one. On passwordless portals a passkey can replace the email code. Passkeys are bound to the domain they were added on. Default off; turning it off again restores the previous behaviour and keeps registered passkeys.
+                 *
+                 */
+                passkeys?: {
+                    /**
+                     * Enforce a second factor and allow passkeys as one variant of it
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -1172,6 +1139,12 @@ declare namespace Components {
                  * 6bsd0jkgoie74k2i8mrhc1vest
                  */
                 cognito_user_pool_client_id?: string;
+                /**
+                 * Cognito user pool client ID used by the native portal apps (longer refresh token validity)
+                 * example:
+                 * 3k9fj2l1m0n8b7v6c5x4z3a2s1
+                 */
+                cognito_mobile_client_id?: string;
                 /**
                  * Cognito user pool ARN
                  * example:
@@ -1365,6 +1338,13 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
              * Configuration for contract selector in the portal
              */
             contract_selector_config?: {
@@ -1547,7 +1527,7 @@ declare namespace Components {
              */
             is_dummy?: boolean;
             /**
-             * Whether this is a v3 portal configuration
+             * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
              */
             is_v3_item?: boolean;
             /**
@@ -1586,6 +1566,7 @@ declare namespace Components {
              * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
              */
             engagement_center_enabled?: boolean;
+            engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ EngagementCenterTaskTemplates;
         }
         export interface CommonConfigAttributesV3 {
             /**
@@ -1685,6 +1666,16 @@ declare namespace Components {
                      */
                     enabled?: boolean;
                 };
+                /**
+                 * Opt-in, set by the configuring user. When enabled, a second factor is enforced after the password and portal users can add passkeys (fingerprint, face or device PIN) as one variant of it, next to the email code of advanced_mfa. Users with a passkey use it by default; with advanced_mfa off, the passkey is the only second factor once a user has added one. On passwordless portals a passkey can replace the email code. Passkeys are bound to the domain they were added on. Default off; turning it off again restores the previous behaviour and keeps registered passkeys.
+                 *
+                 */
+                passkeys?: {
+                    /**
+                     * Enforce a second factor and allow passkeys as one variant of it
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -1712,6 +1703,12 @@ declare namespace Components {
                  * 6bsd0jkgoie74k2i8mrhc1vest
                  */
                 cognito_user_pool_client_id?: string;
+                /**
+                 * Cognito user pool client ID used by the native portal apps (longer refresh token validity)
+                 * example:
+                 * 3k9fj2l1m0n8b7v6c5x4z3a2s1
+                 */
+                cognito_mobile_client_id?: string;
                 /**
                  * Cognito user pool ARN
                  * example:
@@ -1905,6 +1902,13 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
              * Configuration for contract selector in the portal
              */
             contract_selector_config?: {
@@ -2087,7 +2091,7 @@ declare namespace Components {
              */
             is_dummy?: boolean;
             /**
-             * Whether this is a v3 portal configuration
+             * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
              */
             is_v3_item?: boolean;
             /**
@@ -2230,19 +2234,6 @@ declare namespace Components {
              *
              */
             trigger_identifiers_check?: boolean;
-            /**
-             * Correlation id of an already triggered ERP sync, as returned by a previous call that
-             * answered `reason: TIMEOUT`. Sent together with `trigger_identifiers_check: false` on a
-             * retry so the portal keeps waiting on the same correlation instead of starting over.
-             * Only used by portals configured with
-             * `extension_hooks.registrationIdentifiersCheck.wait_for_toolkit`; ignored otherwise.
-             * At most 255 letters, digits, hyphens and underscores: the toolkit's bound for a
-             * correlation id and the charset it enforces on its identifiers.
-             *
-             * example:
-             * 0199c0d5-6f1c-7a3b-9e21-9a9ce1d1b2c3
-             */
-            correlation_id?: string; // ^[A-Za-z0-9_-]+$
         }
         /**
          * ContactExistsRequest plus the surface the token is requested for. `registration_identifiers` carries the values of the surface's effective identifiers (keyed by schema, then attribute name): the surface's own `identifiers` when it configures any, otherwise the portal's `registration_identifiers`.
@@ -2281,19 +2272,6 @@ declare namespace Components {
              *
              */
             trigger_identifiers_check?: boolean;
-            /**
-             * Correlation id of an already triggered ERP sync, as returned by a previous call that
-             * answered `reason: TIMEOUT`. Sent together with `trigger_identifiers_check: false` on a
-             * retry so the portal keeps waiting on the same correlation instead of starting over.
-             * Only used by portals configured with
-             * `extension_hooks.registrationIdentifiersCheck.wait_for_toolkit`; ignored otherwise.
-             * At most 255 letters, digits, hyphens and underscores: the toolkit's bound for a
-             * correlation id and the charset it enforces on its identifiers.
-             *
-             * example:
-             * 0199c0d5-6f1c-7a3b-9e21-9a9ce1d1b2c3
-             */
-            correlation_id?: string; // ^[A-Za-z0-9_-]+$
             /**
              * Id of the portal surface (see `surfaces` on the portal config) this token is
              * for. The surface must exist and use `authentication: registration_identifiers`;
@@ -2370,6 +2348,14 @@ declare namespace Components {
              */
             has_portal_user?: boolean;
             /**
+             * The e-mail the identified contact's portal user on this portal logs in with. It can
+             * differ from the contact's own e-mail. Present only when `has_portal_user` is true.
+             *
+             * example:
+             * john.doe@example.com
+             */
+            portal_user_email?: string;
+            /**
              * Present only when no token was issued. NOT_FOUND means the given identifiers did not
              * match any contact (definitive - the client should not retry). TIMEOUT means the contact
              * was not found within the processing window but may still be ingesting; the client may
@@ -2377,13 +2363,6 @@ declare namespace Components {
              *
              */
             reason?: "TIMEOUT" | "NOT_FOUND";
-            /**
-             * Correlation id of the triggered ERP sync. Present only with `reason: TIMEOUT`, for
-             * portals waiting on the Integration Toolkit (`wait_for_toolkit`). Send it back with
-             * `trigger_identifiers_check: false` to keep waiting on the same correlation.
-             *
-             */
-            correlation_id?: string; // ^[A-Za-z0-9_-]+$
         }
         export interface ContentWidget {
             id: string;
@@ -2774,37 +2753,6 @@ declare namespace Components {
             extension?: PublicExtensionDetails;
             hook?: PublicDataRetrievalHookDetails;
         }
-        export interface DeleteEntityFile {
-            entity_id: /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            EntityId /* uuid */;
-            /**
-             * Entity type
-             * example:
-             * order
-             */
-            entity_type: string;
-            /**
-             * Array of file entity IDs
-             */
-            file_entity_ids: [
-                /**
-                 * Entity ID
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                EntityId /* uuid */,
-                .../**
-                 * Entity ID
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                EntityId /* uuid */[]
-            ];
-        }
         export type Direction = "feed-in" | "feed-out";
         export interface DocumentWidget {
             id: string;
@@ -2978,6 +2926,23 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+        }
+        /**
+         * Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config.
+         */
+        export interface EngagementCenterTaskTemplates {
+            /**
+             * Template for the row title. Default rendering is the step name.
+             * example:
+             * {{task.name}}
+             */
+            title?: string;
+            /**
+             * Template for the row's context line. Default rendering is the workflow name and the entity title.
+             * example:
+             * {{workflow.name}} · {{entity._title}}
+             */
+            subtitle?: string;
         }
         export interface Entity {
             [name: string]: any;
@@ -3480,10 +3445,18 @@ declare namespace Components {
                 [name: string]: string | number;
             };
             /**
-             * example:
-             * _created_at:desc
+             * Sort order of the results: an `attribute:order` pair, or a list of Elasticsearch sort fields that are
+             * used as they are, e.g. the sort order of a target as returned by the Targeting API.
+             * Without a sort, the sort order of the first requested target that defines one applies.
+             *
              */
-            sort?: string;
+            sort?: /**
+             * Sort order of the results: an `attribute:order` pair, or a list of Elasticsearch sort fields that are
+             * used as they are, e.g. the sort order of a target as returned by the Targeting API.
+             * Without a sort, the sort order of the first requested target that defines one applies.
+             *
+             */
+            string | string /* ^[^\s:,]+:(asc|desc)$ */[];
             from?: number;
             /**
              * Max search size is 1000 with higher values defaulting to 1000
@@ -4240,35 +4213,12 @@ declare namespace Components {
                  * Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result?: string;
-                /**
-                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
-                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Only read when the portal is
-                 * configured to wait on the Integration Toolkit
-                 * (`extension_hooks.<hook>.wait_for_toolkit`).
-                 *
-                 * There is no default: unless a hook declares this, the portal waits on the id it
-                 * minted and handed the hook as `{{CorrelationId}}`, whatever the response carries. A
-                 * partner that pushes under that id leaves this unset; only a partner that pushes
-                 * under an id of its own declares where the response carries it. A declared id that
-                 * is absent from the response falls back to the minted one; one that is not a valid
-                 * correlation id (at most 255 letters, digits, `-` and `_`) is not waited on, and
-                 * the portal polls entity search instead.
-                 *
-                 */
-                result_correlation_id?: string;
             };
             resolved?: {
                 /**
                  * Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
                  */
                 result?: string;
-                /**
-                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
-                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Supersedes
-                 * `call.result_correlation_id`. No default; see `call.result_correlation_id`.
-                 *
-                 */
-                result_correlation_id?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
                  * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
@@ -4718,35 +4668,12 @@ declare namespace Components {
                  * Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result?: string;
-                /**
-                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
-                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Only read when the portal is
-                 * configured to wait on the Integration Toolkit
-                 * (`extension_hooks.<hook>.wait_for_toolkit`).
-                 *
-                 * There is no default: unless a hook declares this, the portal waits on the id it
-                 * minted and handed the hook as `{{CorrelationId}}`, whatever the response carries. A
-                 * partner that pushes under that id leaves this unset; only a partner that pushes
-                 * under an id of its own declares where the response carries it. A declared id that
-                 * is absent from the response falls back to the minted one; one that is not a valid
-                 * correlation id (at most 255 letters, digits, `-` and `_`) is not waited on, and
-                 * the portal polls entity search instead.
-                 *
-                 */
-                result_correlation_id?: string;
             };
             resolved?: {
                 /**
                  * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
                  */
                 result?: string;
-                /**
-                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
-                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Supersedes
-                 * `call.result_correlation_id`. No default; see `call.result_correlation_id`.
-                 *
-                 */
-                result_correlation_id?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
                  * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
@@ -4777,137 +4704,6 @@ declare namespace Components {
              * The ID of the selected hook.
              */
             hook_id: string;
-            /**
-             * Opt in to waiting on the Integration Toolkit instead of polling entity search for the
-             * data the ERP pushes after the hook returns. When true, the portal hands the hook a
-             * correlation id (`{{CorrelationId}}`) and then asks the toolkit whether the entities it
-             * needs have landed under that correlation. Off by default: a portal that does not set it
-             * keeps polling entity search exactly as before.
-             *
-             * Only effective for hooks whose partner pushes through the Integration Toolkit and
-             * echoes the correlation id. A hook that answers with an epilot contact id is fetched
-             * directly, as today, whatever this flag says.
-             *
-             */
-            wait_for_toolkit?: boolean;
-            /**
-             * The entities the portal waits for, keyed by entity slug. Configured explicitly per
-             * hook: nothing is derived from the hook type or from the portal's identifier
-             * configuration, and a hook that configures no requirement for the entity the portal
-             * links does not wait at all - it keeps polling entity search exactly as before.
-             *
-             * A selector may only name an attribute that is literally a member of that entity
-             * target's configured `unique_ids` in the inbound use case, because the toolkit reports
-             * exactly those and nothing else. A selector on any other attribute can never match. A
-             * toolkit that validates selectors rejects such a wait (400) with the slug, the key and
-             * the keys it accepts; the portal logs that at error level with the hook it came from
-             * and polls entity search for the request, so the customer is unaffected and never told.
-             *
-             * The slug the portal resolves its link target from is fixed by the hook, and a
-             * requirement for it must be configured for the wait to happen at all:
-             * `registrationIdentifiersCheck` resolves the contact, every `contractIdentification`
-             * assignment mode resolves the contract (in the contact modes the linked contact is the
-             * delivered contract's `customer`). Every other configured slug is evidence that the push
-             * carried what it promised, and is never linked.
-             *
-             * Ignored unless `wait_for_toolkit` is true.
-             *
-             * Worked examples, verified against the live integration configuration. Each block is the
-             * `wait_for_entities` of one hook selection, and each names the slug that hook links.
-             *
-             * Ratingen / Wilken add-contract hook (`contractIdentification`, `contact_to_portal_user`).
-             * No value the user types is a unique id anywhere in the org - every one is a Wilken
-             * surrogate `external_id` - so the contact cannot be selected by attribute at all. Wait on
-             * the contract and link its `customer`; the identity-keyed contact is evidence that the
-             * business partner landed, and is never linked.
-             *
-             * ```yaml
-             * contract: {}
-             * contact:
-             *   key: external_id            # the PROFILE contact's unique id is external_id
-             *   from_caller_contact: external_id
-             * ```
-             *
-             * WEMAG registration hook (`registrationIdentifiersCheck`). The contact's unique ids are
-             * `customer_pin` and `reenumber`; `meter.external_id` and `meter.meter_number` are both
-             * the `ZNR` the user types.
-             *
-             * ```yaml
-             * contact:
-             *   key: reenumber
-             *   from_identifier: contact.complete_customer_number
-             *   split_on: "-"               # "0002-<customer_pin>-<reenumber>"
-             *   part: 2
-             * meter:
-             *   key: external_id
-             *   from_identifier: meter.meter_number
-             * ```
-             *
-             * WEMAG add-contract hook (`contractIdentification`, `contact_to_portal_user`). The
-             * contract's unique ids are `billing_account_number` (the `reenumber`, the same third
-             * part of `complete_customer_number`) and `customer_number` (the PIN). Wait on the
-             * contract of the typed Rechnungseinheit and link its `customer`.
-             *
-             * ```yaml
-             * contract:
-             *   key: billing_account_number
-             *   from_identifier: contact.complete_customer_number
-             *   split_on: "-"               # "0002-<customer_pin>-<reenumber>"
-             *   part: 2
-             * meter:
-             *   key: external_id
-             *   from_identifier: meter.meter_number
-             * ```
-             *
-             * Never `complete_customer_number` or `customer_number` on a WEMAG contact - neither is a
-             * unique id there - and never `customer_pin` alone on a contact or `customer_number` alone
-             * on a contract, both of which are the PIN and ambiguous, because one person has one
-             * contact and one contract per Rechnungseinheit. Never a key-less `contract` either: WEMAG's
-             * `EKM Anlagedaten` writes contracts of its own, keyed on `contract_number`.
-             *
-             * example:
-             * {
-             *   "contract": {},
-             *   "contact": {
-             *     "key": "external_id",
-             *     "from_caller_contact": "external_id"
-             *   }
-             * }
-             */
-            wait_for_entities?: {
-                [name: string]: /**
-                 * One requirement of a hook's correlation wait, for the entity slug it is configured under.
-                 *
-                 * Without `key` the requirement is satisfied by any entity of that slug. That is safe for
-                 * evidence, and for a linked slug only where the inbound use case writes exactly one entity
-                 * of it per push - Wilken's `BusinessPartnerChanged` always writes two contacts, and WEMAG's
-                 * `DocumentChange` / `D3Metadata` write contacts under the same unique-id keys a registration
-                 * push uses - so a second match answers 409 rather than linking a guess.
-                 *
-                 * With `key`, the value comes from exactly one declared source, `from_identifier` or
-                 * `from_caller_contact`. A rule whose source has no value produces no wait at all, so the
-                 * hook keeps polling rather than waiting on a requirement that cannot be met.
-                 *
-                 */
-                WaitForEntityRule;
-            };
-            /**
-             * Inbound use case slugs the portal additionally waits for. A requirement is met once at
-             * least one event of that use case slug has finished processing, whether or not it
-             * produced an entity, so it covers pushes whose entity set varies and pushes whose
-             * outcome is a file or a relation rather than an entity.
-             *
-             * Entity requirements stay primary - the portal links by entity id, so it always waits
-             * for the entity it links. Use case slugs are an additional bar: when both are
-             * configured, both must be met. Empty by default. Ignored unless `wait_for_toolkit` is
-             * true.
-             *
-             * example:
-             * [
-             *   "wilken_contract_changed"
-             * ]
-             */
-            wait_for_use_cases?: string[];
         } | null;
         /**
          * Hook that returns runtime metadata describing how a visualization should be rendered for a given portal context. Invoked by the portal before fetching data, with the same context the data hook receives.
@@ -5318,6 +5114,23 @@ declare namespace Components {
              */
             effect?: "allow" | "deny";
         }
+        /**
+         * A blueprint-managed page or block a write tried to change; the stored version was kept.
+         */
+        export interface HeldBackNode {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            page_id: string;
+            /**
+             * Set when a single block (not the whole page) was held back
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            block_id?: string;
+            reason: "BLUEPRINT_MANAGED";
+        }
         export interface IdentifierAttribute {
             /**
              * Label attribute
@@ -5490,6 +5303,16 @@ declare namespace Components {
                     token: string;
                     at?: string;
                 };
+                /**
+                 * Tells journey-api which route to link; omitted for a portal without an id
+                 */
+                link_hint?: {
+                    route: "portal-settings";
+                    params: {
+                        portal_id: string;
+                        settings?: "journey-actions";
+                    };
+                };
             }[];
         }
         export interface JuiceSettings {
@@ -5501,10 +5324,6 @@ declare namespace Components {
              * Whether the org is in canary mode
              */
             is_canary?: boolean;
-            /**
-             * Whether the portal still runs the old design (the `new_design` feature setting is off). Legacy portals are always served the frozen legacy bundle, even when the org is in canary.
-             */
-            is_legacy_design?: boolean;
             /**
              * The URL to redirect to
              * example:
@@ -5531,6 +5350,47 @@ declare namespace Components {
              * Design of the portal, used to preload it from the served document
              */
             design_id?: string;
+            /**
+             * Portal design background and accent for the served document. `null` when the portal has no design or it could not be read.
+             *
+             */
+            design?: {
+                /**
+                 * Spark background as hex colours; `null` when the design sets neither
+                 */
+                background: {
+                    /**
+                     * example:
+                     * #f5f5f5
+                     */
+                    light: string | null; // ^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                    /**
+                     * example:
+                     * #101010
+                     */
+                    dark: string | null; // ^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                } | null;
+                /**
+                 * Spark accent as hex colours, falling back to the classic palette primary; dark falls back to light. `null` when the design sets neither
+                 *
+                 */
+                accent: {
+                    /**
+                     * example:
+                     * #005eb4
+                     */
+                    light: string | null; // ^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                    /**
+                     * example:
+                     * #4a9eff
+                     */
+                    dark: string | null; // ^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                } | null;
+                /**
+                 * When the design was last saved
+                 */
+                last_modified_at: string | null;
+            } | null;
         }
         /**
          * The meter entity
@@ -5694,6 +5554,27 @@ declare namespace Components {
             metadata?: {
                 [name: string]: string;
             };
+        }
+        /**
+         * Display details of the counter the readings belong to. Only returned when `include_counter` is true and the counter could be resolved.
+         */
+        export interface MeterReadingCounterDetails {
+            /**
+             * example:
+             * kwh
+             */
+            unit?: string | null;
+            /**
+             * example:
+             * 1-1:1.8.1
+             */
+            obis_number?: string | null;
+            /**
+             * example:
+             * feed-in
+             */
+            direction?: string | null;
+            tariff_type?: string | null;
         }
         export interface MeterReadingPhoto {
             /**
@@ -5939,34 +5820,13 @@ declare namespace Components {
              */
             client_secret?: string;
         }
-        export interface NewDesignMigrationResult {
-            org_id?: string;
-            portal_id?: string;
-            origin?: string;
-            name?: string;
-            is_v3_item?: boolean;
-            dry_run?: boolean;
-            /**
-             * True when the migration was written (false for dry_run)
-             */
-            migrated?: boolean;
-            summary?: {
-                [name: string]: any;
-            };
-            /**
-             * Stored feature_settings and pages before the migration, for rollback
-             */
-            before?: {
-                [name: string]: any;
-            };
-        }
         export interface NotificationTriggerConfig {
             /**
-             * The 360 event that fires this notification trigger.
+             * The 360 event that fires this notification trigger. `entity_added` is the unified trigger written by the Portal Builder: it fires for both the entity-created and the entity-assigned event of its `entity_schema`. `entity_created` / `entity_assigned` are the legacy per-event triggers and keep working; when a portal has both a legacy row and an `entity_added` row for the same schema, the legacy row wins for its event.
              */
-            trigger_type: "entity_created" | "entity_assigned" | "workflow_step_overdue";
+            trigger_type: "entity_added" | "entity_created" | "entity_assigned" | "workflow_step_overdue";
             /**
-             * For `entity_created` / `entity_assigned` triggers, the entity schema slug (e.g. `opportunity`, `order`) whose creation or assignment fires this trigger. Ignored for other trigger types.
+             * For `entity_added` / `entity_created` / `entity_assigned` triggers, the entity schema slug (e.g. `opportunity`, `order`) whose creation or assignment fires this trigger. Ignored for other trigger types.
              * example:
              * opportunity
              */
@@ -5979,6 +5839,10 @@ declare namespace Components {
              * Entity id of the notification_template to render for this trigger.
              */
             template_id?: string; // uuid
+            /**
+             * Targeting segment ids (targets) that narrow this trigger's recipients: the notification is only created for portal users whose contact matches at least one of the targets. Absent or empty means no narrowing — every portal user linked to the entity's contacts is notified.
+             */
+            target_ids?: string[];
         }
         /**
          * OIDC provider configuration. Values are resolved at SSO invocation time
@@ -6403,6 +6267,14 @@ declare namespace Components {
              * Whether submitting the journey from the portal should auto-complete the task. When false, an internal user completes it.
              */
             complete_task_automatically?: boolean;
+            /**
+             * Row title rendered from the portal's `engagement_center_task_templates.title`. Absent when the portal has no title template or it rendered blank for this task; the client then shows `step_name`.
+             */
+            title?: string;
+            /**
+             * Row context line rendered from the portal's `engagement_center_task_templates.subtitle`. Absent when the portal has no subtitle template or it rendered blank for this task; the client then shows the workflow name and entity title.
+             */
+            subtitle?: string;
         }
         export interface Page {
             [name: string]: any;
@@ -6554,6 +6426,21 @@ declare namespace Components {
              * ]
              */
             past_routes?: string[];
+            /**
+             * Blueprint instance ids managing this page. Non-empty means the page is blueprint-managed: its page-level fields and its blueprint-managed blocks are read-only for users (single-target writes answer 409 `BLUEPRINT_MANAGED`, bulk saves keep the stored version), while detached and customer-added blocks on it stay editable and the page keeps receiving blueprint updates. Server-managed: ignored (stripped) on every write from a user.
+             *
+             */
+            _manifest?: string[];
+            /**
+             * Stable id of this page in the blueprint source. Set once: a blueprint install or update (`page_upsert_mode=slug`, portal create, or a revision with `revision_source` `blueprint_sync`) may give a page the lineage it does not have yet, unless another page of the portal holds it. After that it never changes; every other write keeps the stored value. Locks nothing on its own.
+             *
+             */
+            _lineage_id?: string;
+            /**
+             * Lineage ids of blocks on this page that were detached from their blueprint; a blueprint sync leaves them alone. Server-managed.
+             *
+             */
+            detached_lineage_ids?: string[];
         }
         export interface PageRequest {
             [name: string]: any;
@@ -6786,6 +6673,16 @@ declare namespace Components {
                      */
                     enabled?: boolean;
                 };
+                /**
+                 * Opt-in, set by the configuring user. When enabled, a second factor is enforced after the password and portal users can add passkeys (fingerprint, face or device PIN) as one variant of it, next to the email code of advanced_mfa. Users with a passkey use it by default; with advanced_mfa off, the passkey is the only second factor once a user has added one. On passwordless portals a passkey can replace the email code. Passkeys are bound to the domain they were added on. Default off; turning it off again restores the previous behaviour and keeps registered passkeys.
+                 *
+                 */
+                passkeys?: {
+                    /**
+                     * Enforce a second factor and allow passkeys as one variant of it
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -6813,6 +6710,12 @@ declare namespace Components {
                  * 6bsd0jkgoie74k2i8mrhc1vest
                  */
                 cognito_user_pool_client_id?: string;
+                /**
+                 * Cognito user pool client ID used by the native portal apps (longer refresh token validity)
+                 * example:
+                 * 3k9fj2l1m0n8b7v6c5x4z3a2s1
+                 */
+                cognito_mobile_client_id?: string;
                 /**
                  * Cognito user pool ARN
                  * example:
@@ -7006,6 +6909,13 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
              * Configuration for contract selector in the portal
              */
             contract_selector_config?: {
@@ -7188,7 +7098,7 @@ declare namespace Components {
              */
             is_dummy?: boolean;
             /**
-             * Whether this is a v3 portal configuration
+             * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
              */
             is_v3_item?: boolean;
             /**
@@ -7227,6 +7137,7 @@ declare namespace Components {
              * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
              */
             engagement_center_enabled?: boolean;
+            engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ EngagementCenterTaskTemplates;
             /**
              * ID of the organization
              * example:
@@ -7239,6 +7150,26 @@ declare namespace Components {
              * 12345
              */
             organization_id?: string;
+            /**
+             * Blueprint instance ids managing this portal. Server-managed: ignored (stripped) on every write from a user.
+             *
+             */
+            _manifest?: string[];
+            /**
+             * Id of this portal in the blueprint source. Set once: a blueprint install or update (portal create, `page_upsert_mode=slug`, or a revision with `revision_source` `blueprint_sync`) may give a portal the lineage it does not have yet, unless another portal of the organization holds it. A portal created as a copy next to the organization's live portal of its origin (downgraded to `ADDITIONAL_PORTAL`) never takes it. After that it never changes; every other write keeps the stored value. Locks nothing on its own.
+             *
+             */
+            _lineage_id?: string;
+            /**
+             * Lineage ids of pages detached from their blueprint; a blueprint sync leaves them alone. Server-managed.
+             *
+             */
+            detached_lineage_ids?: string[];
+            /**
+             * Only present on write responses: blueprint-managed pages/blocks the request tried to change. Their stored version was kept and the rest of the save succeeded.
+             *
+             */
+            held_back?: /* A blueprint-managed page or block a write tried to change; the stored version was kept. */ HeldBackNode[];
             /**
              * Organization settings
              */
@@ -7273,6 +7204,19 @@ declare namespace Components {
              */
             grants?: Grant[];
             identity_providers?: ProviderPublicConfig[];
+            /**
+             * Present only when the request carried a valid `x-portal-preview-token`: the config is this revision's, not the live one.
+             *
+             */
+            preview_revision?: {
+                /**
+                 * example:
+                 * 2026-08-25T14:03:11.482Z-a7f3c1d9
+                 */
+                revision_id: string;
+                name?: string;
+                created_at: string; // date-time
+            };
         }
         /**
          * Lightweight view of a portal config for lists and pickers. Carries the identifying,
@@ -7536,6 +7480,16 @@ declare namespace Components {
                      */
                     enabled?: boolean;
                 };
+                /**
+                 * Opt-in, set by the configuring user. When enabled, a second factor is enforced after the password and portal users can add passkeys (fingerprint, face or device PIN) as one variant of it, next to the email code of advanced_mfa. Users with a passkey use it by default; with advanced_mfa off, the passkey is the only second factor once a user has added one. On passwordless portals a passkey can replace the email code. Passkeys are bound to the domain they were added on. Default off; turning it off again restores the previous behaviour and keeps registered passkeys.
+                 *
+                 */
+                passkeys?: {
+                    /**
+                     * Enforce a second factor and allow passkeys as one variant of it
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -7563,6 +7517,12 @@ declare namespace Components {
                  * 6bsd0jkgoie74k2i8mrhc1vest
                  */
                 cognito_user_pool_client_id?: string;
+                /**
+                 * Cognito user pool client ID used by the native portal apps (longer refresh token validity)
+                 * example:
+                 * 3k9fj2l1m0n8b7v6c5x4z3a2s1
+                 */
+                cognito_mobile_client_id?: string;
                 /**
                  * Cognito user pool ARN
                  * example:
@@ -7756,6 +7716,13 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
              * Configuration for contract selector in the portal
              */
             contract_selector_config?: {
@@ -7938,7 +7905,7 @@ declare namespace Components {
              */
             is_dummy?: boolean;
             /**
-             * Whether this is a v3 portal configuration
+             * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
              */
             is_v3_item?: boolean;
             /**
@@ -8006,6 +7973,71 @@ declare namespace Components {
              */
             grants?: Grant[];
             pages?: Page[];
+        }
+        /**
+         * Contact attributes a portal user can change. Other attributes are ignored.
+         * Value types follow the organization's contact schema.
+         *
+         */
+        export interface PortalContactUpdate {
+            [name: string]: any;
+            /**
+             * example:
+             * de
+             */
+            language?: string;
+            first_name?: any;
+            last_name?: any;
+            salutation?: any;
+            phone?: any;
+            phone_number?: any;
+            mobile?: any;
+            street?: any;
+            street_number?: any;
+            postal_code?: any;
+            city?: any;
+            country?: any;
+            preferred_language?: any;
+            communication_preferences?: any;
+        }
+        /**
+         * Contract attributes a portal user can change. Other attributes are ignored.
+         */
+        export interface PortalContractUpdate {
+            [name: string]: any;
+            /**
+             * Installment amount in cents
+             * example:
+             * 8500
+             */
+            installment_amount?: number;
+            /**
+             * Installment amount as a decimal string
+             * example:
+             * 85.00
+             */
+            installment_amount_decimal?: string;
+        }
+        /**
+         * Limits portal chat to portal users matching targets, with the same rules as page and block visibility. Without targets every signed-in portal user can use the chat.
+         */
+        export interface PortalCopilotVisibility {
+            /**
+             * Target IDs that must match for the portal user to use the chat
+             */
+            visible_for_targets?: string[];
+            /**
+             * Operator for visible_for_targets matching
+             */
+            visible_for_operator?: "and" | "or";
+            /**
+             * Target IDs that if matched deny the portal user the chat
+             */
+            hidden_for_targets?: string[];
+            /**
+             * Operator for hidden_for_targets matching
+             */
+            hidden_for_operator?: "and" | "or";
         }
         /**
          * One column of the portal data export CSV.
@@ -8103,10 +8135,6 @@ declare namespace Components {
              */
             change_due_date?: boolean;
             /**
-             * Enable or disable the new design for the portal
-             */
-            new_design?: boolean;
-            /**
              * Enable the MCP (AI agent) connector channel for this portal
              */
             mcp_enabled?: boolean;
@@ -8122,6 +8150,7 @@ declare namespace Components {
              * ID of the Agent Builder portal agent this portal's copilot chat runs, set by Agent Builder. When unset, or when the agent no longer exists in the portal's organization, the chat runs the default portal copilot.
              */
             portal_copilot_agent_id?: string;
+            portal_copilot_visibility?: /* Limits portal chat to portal users matching targets, with the same rules as page and block visibility. Without targets every signed-in portal user can use the chat. */ PortalCopilotVisibility;
         }
         /**
          * ID of the portal
@@ -8344,6 +8373,23 @@ declare namespace Components {
              */
             next_cursor?: string;
         }
+        export interface PortalRevisionPreview {
+            /**
+             * Short-lived token that makes portal reads return this revision. Send it in the `x-portal-preview-token` header.
+             *
+             */
+            preview_token: string;
+            /**
+             * When the preview token stops being honoured.
+             */
+            expires_at: string; // date-time
+            /**
+             * Link that opens the revision in the portal on its live domain.
+             * example:
+             * https://portal.example.com/?preview_token=eyJhbGciOiJIUzI1NiIs...
+             */
+            url: string;
+        }
         export interface PortalRevisionRequest {
             [name: string]: any;
             /**
@@ -8504,6 +8550,16 @@ declare namespace Components {
                      */
                     enabled?: boolean;
                 };
+                /**
+                 * Opt-in, set by the configuring user. When enabled, a second factor is enforced after the password and portal users can add passkeys (fingerprint, face or device PIN) as one variant of it, next to the email code of advanced_mfa. Users with a passkey use it by default; with advanced_mfa off, the passkey is the only second factor once a user has added one. On passwordless portals a passkey can replace the email code. Passkeys are bound to the domain they were added on. Default off; turning it off again restores the previous behaviour and keeps registered passkeys.
+                 *
+                 */
+                passkeys?: {
+                    /**
+                     * Enforce a second factor and allow passkeys as one variant of it
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -8531,6 +8587,12 @@ declare namespace Components {
                  * 6bsd0jkgoie74k2i8mrhc1vest
                  */
                 cognito_user_pool_client_id?: string;
+                /**
+                 * Cognito user pool client ID used by the native portal apps (longer refresh token validity)
+                 * example:
+                 * 3k9fj2l1m0n8b7v6c5x4z3a2s1
+                 */
+                cognito_mobile_client_id?: string;
                 /**
                  * Cognito user pool ARN
                  * example:
@@ -8724,6 +8786,13 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
              * Configuration for contract selector in the portal
              */
             contract_selector_config?: {
@@ -8906,7 +8975,7 @@ declare namespace Components {
              */
             is_dummy?: boolean;
             /**
-             * Whether this is a v3 portal configuration
+             * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
              */
             is_v3_item?: boolean;
             /**
@@ -9185,7 +9254,60 @@ declare namespace Components {
             }[];
             _schema: "portal_user";
         }
+        /**
+         * Resolved notification preferences of a portal user. Notifications are opt-out: a channel that was never stored on the portal user resolves to enabled (true).
+         */
+        export interface PortalUserNotificationPreferences {
+            /**
+             * Whether the portal user receives in-app notifications.
+             * example:
+             * true
+             */
+            in_app: boolean;
+        }
+        export interface PortalUserPasskey {
+            /**
+             * WebAuthn credential ID (base64url)
+             */
+            credential_id: string;
+            name?: string;
+            /**
+             * Domain the passkey works on
+             * example:
+             * kundenportal.example.de
+             */
+            rp_id: string;
+            device_type?: "singleDevice" | "multiDevice";
+            /**
+             * Whether the passkey is synced, e.g. via iCloud Keychain or Google Password Manager
+             */
+            backed_up?: boolean;
+            created_at: string; // date-time
+            last_used_at?: string; // date-time
+        }
         export type PortalUserRegistrationStatus = "Registration Pending" | "Confirmation Email Sent" | "Registered" | "Email Update In Progress";
+        /**
+         * A portal whose design_id is the design asked about.
+         */
+        export interface PortalUsingDesign {
+            portal_id: /**
+             * ID of the portal
+             * example:
+             * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
+             */
+            PortalId;
+            /**
+             * example:
+             * Kundenportal
+             */
+            name?: string;
+            origin?: /* Origin of the portal */ Origin;
+            /**
+             * example:
+             * 9ba94f20-b872-11ed-b30a-b3e3bf2dc8ab
+             */
+            design_id?: string;
+        }
         export type PortalWidget = EntityWidget | ContentWidget | ActionWidget | TeaserWidget | DocumentWidget | PaymentWidget | MeterReadingWidget | MeterChartWidget | CampaignWidget | ProductRecommendationsWidget;
         /**
          * A portal-facing projection of a workflow execution (V1 or V2), with the execution
@@ -9345,9 +9467,19 @@ declare namespace Components {
              * True when the task has been reached in the execution — all predecessor tasks on its
              * path are completed/skipped — so the portal user can act on it (e.g. start its journey).
              * Tasks that are only part of the projected future path are returned with is_active false.
+             * The start date is not taken into account: an active task can still be upcoming (see start_date).
              *
              */
             is_active: boolean;
+            /**
+             * Instant before which nobody may work on the task. While it lies in the future, a task
+             * that is not done yet is upcoming: the Workflows API refuses to complete it, so the
+             * portal shows it as upcoming instead of offering its journey. Neither status nor
+             * is_active reflects it; compare it with the current time. Absent when the task has no
+             * start date or its relative start date has not been resolved yet.
+             *
+             */
+            start_date?: string; // date-time
             ecp?: /* Portal-specific (ECP / installer) display config of a workflow task */ PortalTaskConfig;
             installer?: /* Portal-specific (ECP / installer) display config of a workflow task */ PortalTaskConfig;
             /**
@@ -9389,6 +9521,18 @@ declare namespace Components {
              * Last update timestamp of the underlying task/step
              */
             updated_at?: string;
+        }
+        /**
+         * The revision a config response shows instead of the live portal config.
+         */
+        export interface PreviewRevision {
+            /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            revision_id: string;
+            name?: string;
+            created_at: string; // date-time
         }
         /**
          * The product entity
@@ -9802,12 +9946,17 @@ declare namespace Components {
              * Stable, machine-readable codes for best-effort post-publish side effects that exhausted their retries. Publishing itself succeeded; these are not error messages and not meant for display as-is. Clients map each code to their own localized text.
              * Known codes: `allowed_entities_change` (portal entity grants and detail pages did not sync), `dns_records_clear` (the previous domain's DNS records were not cleared). New codes may be added without a client update, so treat an unrecognized code as a generic "a follow-up step did not finish" case rather than an error.
              *
+             */
+            post_publish_warnings: string[];
+            /**
+             * Only present when non-empty: blueprint-managed live pages/blocks this publish could not replace because the publisher is not the owning blueprint. Their live version stays as it is; the rest of the revision was published. Detach a node to make it publishable.
+             *
              * example:
              * [
              *   "allowed_entities_change"
              * ]
              */
-            post_publish_warnings: string[];
+            held_back?: /* A blueprint-managed page or block a write tried to change; the stored version was kept. */ HeldBackNode[];
         }
         export interface PublishRevisionRequest {
             /**
@@ -10122,6 +10271,21 @@ declare namespace Components {
              * ]
              */
             past_routes?: string[];
+            /**
+             * Blueprint instance ids managing this page. Non-empty means the page is blueprint-managed: its page-level fields and its blueprint-managed blocks are read-only for users (single-target writes answer 409 `BLUEPRINT_MANAGED`, bulk saves keep the stored version), while detached and customer-added blocks on it stay editable and the page keeps receiving blueprint updates. Server-managed: ignored (stripped) on every write from a user.
+             *
+             */
+            _manifest?: string[];
+            /**
+             * Stable id of this page in the blueprint source. Set once: a blueprint install or update (`page_upsert_mode=slug`, portal create, or a revision with `revision_source` `blueprint_sync`) may give a page the lineage it does not have yet, unless another page of the portal holds it. After that it never changes; every other write keeps the stored value. Locks nothing on its own.
+             *
+             */
+            _lineage_id?: string;
+            /**
+             * Lineage ids of blocks on this page that were detached from their blueprint; a blueprint sync leaves them alone. Server-managed.
+             *
+             */
+            detached_lineage_ids?: string[];
             org_id?: string;
         }
         /**
@@ -10756,6 +10920,16 @@ declare namespace Components {
                      */
                     enabled?: boolean;
                 };
+                /**
+                 * Opt-in, set by the configuring user. When enabled, a second factor is enforced after the password and portal users can add passkeys (fingerprint, face or device PIN) as one variant of it, next to the email code of advanced_mfa. Users with a passkey use it by default; with advanced_mfa off, the passkey is the only second factor once a user has added one. On passwordless portals a passkey can replace the email code. Passkeys are bound to the domain they were added on. Default off; turning it off again restores the previous behaviour and keeps registered passkeys.
+                 *
+                 */
+                passkeys?: {
+                    /**
+                     * Enforce a second factor and allow passkeys as one variant of it
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -10783,6 +10957,12 @@ declare namespace Components {
                  * 6bsd0jkgoie74k2i8mrhc1vest
                  */
                 cognito_user_pool_client_id?: string;
+                /**
+                 * Cognito user pool client ID used by the native portal apps (longer refresh token validity)
+                 * example:
+                 * 3k9fj2l1m0n8b7v6c5x4z3a2s1
+                 */
+                cognito_mobile_client_id?: string;
                 /**
                  * Cognito user pool ARN
                  * example:
@@ -10976,6 +11156,13 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
              * Configuration for contract selector in the portal
              */
             contract_selector_config?: {
@@ -11158,7 +11345,7 @@ declare namespace Components {
              */
             is_dummy?: boolean;
             /**
-             * Whether this is a v3 portal configuration
+             * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
              */
             is_v3_item?: boolean;
             /**
@@ -11197,6 +11384,7 @@ declare namespace Components {
              * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
              */
             engagement_center_enabled?: boolean;
+            engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ EngagementCenterTaskTemplates;
         }
         export interface UpsertPortalConfigV3 {
             /**
@@ -11357,6 +11545,16 @@ declare namespace Components {
                      */
                     enabled?: boolean;
                 };
+                /**
+                 * Opt-in, set by the configuring user. When enabled, a second factor is enforced after the password and portal users can add passkeys (fingerprint, face or device PIN) as one variant of it, next to the email code of advanced_mfa. Users with a passkey use it by default; with advanced_mfa off, the passkey is the only second factor once a user has added one. On passwordless portals a passkey can replace the email code. Passkeys are bound to the domain they were added on. Default off; turning it off again restores the previous behaviour and keeps registered passkeys.
+                 *
+                 */
+                passkeys?: {
+                    /**
+                     * Enforce a second factor and allow passkeys as one variant of it
+                     */
+                    enabled?: boolean;
+                };
                 entry_point?: "PASSWORD" | "SSO";
                 preferred_sso_providers?: /**
                  * URL-friendly slug to use as organization-unique identifier for Provider
@@ -11384,6 +11582,12 @@ declare namespace Components {
                  * 6bsd0jkgoie74k2i8mrhc1vest
                  */
                 cognito_user_pool_client_id?: string;
+                /**
+                 * Cognito user pool client ID used by the native portal apps (longer refresh token validity)
+                 * example:
+                 * 3k9fj2l1m0n8b7v6c5x4z3a2s1
+                 */
+                cognito_mobile_client_id?: string;
                 /**
                  * Cognito user pool ARN
                  * example:
@@ -11577,6 +11781,13 @@ declare namespace Components {
              */
             contract_identifiers?: ContractIdentifier[];
             /**
+             * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+             *   - `contracts`: the user's Contact is added as a customer of the Contract.
+             *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+             *
+             */
+            self_assignment_mode?: "contracts" | "customer_to_portal_user";
+            /**
              * Configuration for contract selector in the portal
              */
             contract_selector_config?: {
@@ -11759,7 +11970,7 @@ declare namespace Components {
              */
             is_dummy?: boolean;
             /**
-             * Whether this is a v3 portal configuration
+             * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
              */
             is_v3_item?: boolean;
             /**
@@ -11795,7 +12006,7 @@ declare namespace Components {
              */
             portal_sk_v3?: string;
             /**
-             * Indicates whether the widget configuration is stored as a V3 portal-scoped item
+             * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
              */
             is_v3_item?: boolean;
             widgets: PortalWidget[];
@@ -11898,64 +12109,6 @@ declare namespace Components {
              *
              */
             precision?: number;
-        }
-        /**
-         * One requirement of a hook's correlation wait, for the entity slug it is configured under.
-         *
-         * Without `key` the requirement is satisfied by any entity of that slug. That is safe for
-         * evidence, and for a linked slug only where the inbound use case writes exactly one entity
-         * of it per push - Wilken's `BusinessPartnerChanged` always writes two contacts, and WEMAG's
-         * `DocumentChange` / `D3Metadata` write contacts under the same unique-id keys a registration
-         * push uses - so a second match answers 409 rather than linking a guess.
-         *
-         * With `key`, the value comes from exactly one declared source, `from_identifier` or
-         * `from_caller_contact`. A rule whose source has no value produces no wait at all, so the
-         * hook keeps polling rather than waiting on a requirement that cannot be met.
-         *
-         */
-        export interface WaitForEntityRule {
-            /**
-             * Unique-id attribute the selector matches on. Must be a member of that entity target's
-             * configured `unique_ids` in the inbound use case; the toolkit reports nothing else.
-             *
-             * example:
-             * reenumber
-             */
-            key?: string;
-            /**
-             * Identifier the user submitted to take the value from, as `<schema>.<name>` - the same
-             * schema and name the portal's `registration_identifiers` / `contract_identifiers` use.
-             * Mutually exclusive with `from_caller_contact`.
-             *
-             * example:
-             * contact.complete_customer_number
-             */
-            from_identifier?: string;
-            /**
-             * Attribute of the calling portal user's own contact to take the value from. Only
-             * available to hooks called by a signed-in user. Mutually exclusive with
-             * `from_identifier`.
-             *
-             * example:
-             * external_id
-             */
-            from_caller_contact?: string;
-            /**
-             * Separator the source value is split on before `part` is taken, for identifiers that
-             * carry a unique id inside a larger value the user types. WEMAG's
-             * `complete_customer_number` is `"0002-<customer_pin>-<reenumber>"`, so splitting on `-`
-             * and taking part 2 yields the contact's `reenumber` unique id.
-             *
-             * example:
-             * -
-             */
-            split_on?: string;
-            /**
-             * Zero-based index of the part to use after splitting on `split_on`.
-             * example:
-             * 2
-             */
-            part?: number;
         }
         export interface WidgetAction {
             _id: string;
@@ -12078,12 +12231,6 @@ declare namespace Components {
 }
 declare namespace Paths {
     namespace AddContractByIdentifiers {
-        namespace Parameters {
-            export type CorrelationId = string; // ^[A-Za-z0-9_-]+$
-        }
-        export interface QueryParameters {
-            correlation_id?: Parameters.CorrelationId /* ^[A-Za-z0-9_-]+$ */;
-        }
         /**
          * Identifier-value pairs per schema to identify the contract
          * example:
@@ -12109,8 +12256,28 @@ declare namespace Paths {
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
-            export type $404 = Components.Responses.ContractAssignmentNotFound;
             export type $409 = Components.Responses.ContractAssignmentConflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace AddPortalUserPasskey {
+        export interface RequestBody {
+            /**
+             * WebAuthn RegistrationResponseJSON from the browser
+             */
+            registration_response: {
+                [name: string]: any;
+            };
+            /**
+             * Label shown to the user, e.g. "iPhone"
+             */
+            name?: string;
+        }
+        namespace Responses {
+            export type $201 = Components.Schemas.PortalUserPasskey;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -12293,25 +12460,9 @@ declare namespace Paths {
                  *
                  */
                 reason?: "TIMEOUT" | "NOT_FOUND";
-                /**
-                 * Correlation id of the triggered ERP sync. Present only for portals waiting on
-                 * the Integration Toolkit (`wait_for_toolkit`). Send it back with
-                 * `trigger_identifiers_check: false` to keep waiting on the same correlation.
-                 *
-                 */
-                correlation_id?: string; // ^[A-Za-z0-9_-]+$
-                /**
-                 * Human-readable reason the identifiers did not resolve, when the portal knows
-                 * one. Set when the ERP finished sending for this correlation without the
-                 * entities the portal needs (e.g. "account data arrived, no contract"), so
-                 * support can tell a silent timeout from an incomplete delivery.
-                 *
-                 */
-                message?: string;
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $404 = Components.Responses.NotFound;
-            export type $409 = Components.Responses.ContactAmbiguousMatch;
             export type $429 = Components.Responses.TooManyRequests;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -12646,6 +12797,40 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace CreatePortalRevisionPreview {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type PortalId = string; // uuid
+            /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            export type RevisionId = string;
+        }
+        export interface PathParameters {
+            portal_id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.PortalId /* uuid */;
+            revision_id: /**
+             * example:
+             * 2026-08-25T14:03:11.482Z-a7f3c1d9
+             */
+            Parameters.RevisionId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalRevisionPreview;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace CreatePortalUserEntity {
         namespace Parameters {
             /**
@@ -12664,6 +12849,23 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.Entity;
         namespace Responses {
             export type $201 = /* Response for entity get request */ Components.Schemas.EntityResponse;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreatePortalUserPasskeyRegistrationOptions {
+        export interface RequestBody {
+            /**
+             * The 6-digit code sent to the user's email address
+             */
+            verification_code: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                [name: string]: any;
+            }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -12722,24 +12924,6 @@ declare namespace Paths {
             export interface $204 {
             }
             export type $401 = Components.Responses.Unauthorized;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace DeleteEntityFile {
-        export type RequestBody = Components.Schemas.DeleteEntityFile;
-        namespace Responses {
-            export interface $202 {
-                deletedFiles?: /**
-                 * Entity ID
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                Components.Schemas.EntityId /* uuid */[];
-            }
-            export type $400 = Components.Responses.InvalidRequest;
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -12821,6 +13005,39 @@ declare namespace Paths {
                 Components.Schemas.EntityId /* uuid */;
             }
             export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DeletePortalUserPasskey {
+        namespace Parameters {
+            export type CredentialId = string;
+        }
+        export interface PathParameters {
+            credential_id: Parameters.CredentialId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DetachPortalPage {
+        namespace Responses {
+            export type $200 = Components.Schemas.Page;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DetachPortalPageBlock {
+        namespace Responses {
+            export type $200 = Components.Schemas.Block;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -15173,6 +15390,10 @@ declare namespace Paths {
                 [name: string]: string;
             };
             /**
+             * When true, the response includes `counter` with the counter's unit, OBIS number, direction and tariff type. Access is checked by metering-api on the counter's parent meter.
+             */
+            include_counter?: boolean;
+            /**
              * Reference to the meter reading block whose admin-configured content provides both the per-reading templates (content_top_name, main_content_name, content_bottom_name) and the counter templates (counter_title_name, counter_subtitle_name), derived server-side.
              */
             templates_ref?: /* Reference to admin-authored portal configuration (a page block or a global search configuration item) from which the API derives Handlebars templates server-side. This replaces client-supplied template strings so portal users can never submit arbitrary templates for resolution. When both a reference and raw `templates` are provided, the reference wins and the raw templates are ignored. */ Components.Schemas.TemplatesRef;
@@ -15192,6 +15413,7 @@ declare namespace Paths {
                 counter_templates_output?: {
                     [name: string]: string;
                 };
+                counter?: /* Display details of the counter the readings belong to. Only returned when `include_counter` is true and the counter could be resolved. */ Components.Schemas.MeterReadingCounterDetails;
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
@@ -15494,6 +15716,16 @@ declare namespace Paths {
                          */
                         enabled?: boolean;
                     };
+                    /**
+                     * Opt-in, set by the configuring user. When enabled, a second factor is enforced after the password and portal users can add passkeys (fingerprint, face or device PIN) as one variant of it, next to the email code of advanced_mfa. Users with a passkey use it by default; with advanced_mfa off, the passkey is the only second factor once a user has added one. On passwordless portals a passkey can replace the email code. Passkeys are bound to the domain they were added on. Default off; turning it off again restores the previous behaviour and keeps registered passkeys.
+                     *
+                     */
+                    passkeys?: {
+                        /**
+                         * Enforce a second factor and allow passkeys as one variant of it
+                         */
+                        enabled?: boolean;
+                    };
                     entry_point?: "PASSWORD" | "SSO";
                     preferred_sso_providers?: /**
                      * URL-friendly slug to use as organization-unique identifier for Provider
@@ -15521,6 +15753,12 @@ declare namespace Paths {
                      * 6bsd0jkgoie74k2i8mrhc1vest
                      */
                     cognito_user_pool_client_id?: string;
+                    /**
+                     * Cognito user pool client ID used by the native portal apps (longer refresh token validity)
+                     * example:
+                     * 3k9fj2l1m0n8b7v6c5x4z3a2s1
+                     */
+                    cognito_mobile_client_id?: string;
                     /**
                      * Cognito user pool ARN
                      * example:
@@ -15714,6 +15952,13 @@ declare namespace Paths {
                  */
                 contract_identifiers?: Components.Schemas.ContractIdentifier[];
                 /**
+                 * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+                 *   - `contracts`: the user's Contact is added as a customer of the Contract.
+                 *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+                 *
+                 */
+                self_assignment_mode?: "contracts" | "customer_to_portal_user";
+                /**
                  * Configuration for contract selector in the portal
                  */
                 contract_selector_config?: {
@@ -15896,7 +16141,7 @@ declare namespace Paths {
                  */
                 is_dummy?: boolean;
                 /**
-                 * Whether this is a v3 portal configuration
+                 * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
                  */
                 is_v3_item?: boolean;
                 /**
@@ -15935,6 +16180,7 @@ declare namespace Paths {
                  * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
                  */
                 engagement_center_enabled?: boolean;
+                engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ Components.Schemas.EngagementCenterTaskTemplates;
                 /**
                  * ID of the organization
                  * example:
@@ -15947,6 +16193,26 @@ declare namespace Paths {
                  * 12345
                  */
                 organization_id?: string;
+                /**
+                 * Blueprint instance ids managing this portal. Server-managed: ignored (stripped) on every write from a user.
+                 *
+                 */
+                _manifest?: string[];
+                /**
+                 * Id of this portal in the blueprint source. Set once: a blueprint install or update (portal create, `page_upsert_mode=slug`, or a revision with `revision_source` `blueprint_sync`) may give a portal the lineage it does not have yet, unless another portal of the organization holds it. A portal created as a copy next to the organization's live portal of its origin (downgraded to `ADDITIONAL_PORTAL`) never takes it. After that it never changes; every other write keeps the stored value. Locks nothing on its own.
+                 *
+                 */
+                _lineage_id?: string;
+                /**
+                 * Lineage ids of pages detached from their blueprint; a blueprint sync leaves them alone. Server-managed.
+                 *
+                 */
+                detached_lineage_ids?: string[];
+                /**
+                 * Only present on write responses: blueprint-managed pages/blocks the request tried to change. Their stored version was kept and the rest of the save succeeded.
+                 *
+                 */
+                held_back?: /* A blueprint-managed page or block a write tried to change; the stored version was kept. */ Components.Schemas.HeldBackNode[];
                 /**
                  * Organization settings
                  */
@@ -16002,6 +16268,19 @@ declare namespace Paths {
                  *
                  */
                 Components.Schemas.ProviderConfig[];
+                /**
+                 * Present only when the request carried a valid `x-portal-preview-token`: the config is this revision's, not the live one.
+                 *
+                 */
+                preview_revision?: {
+                    /**
+                     * example:
+                     * 2026-08-25T14:03:11.482Z-a7f3c1d9
+                     */
+                    revision_id: string;
+                    name?: string;
+                    created_at: string; // date-time
+                };
                 certificate_details?: {
                     /**
                      * Status of the certificate
@@ -16125,6 +16404,16 @@ declare namespace Paths {
                          */
                         enabled?: boolean;
                     };
+                    /**
+                     * Opt-in, set by the configuring user. When enabled, a second factor is enforced after the password and portal users can add passkeys (fingerprint, face or device PIN) as one variant of it, next to the email code of advanced_mfa. Users with a passkey use it by default; with advanced_mfa off, the passkey is the only second factor once a user has added one. On passwordless portals a passkey can replace the email code. Passkeys are bound to the domain they were added on. Default off; turning it off again restores the previous behaviour and keeps registered passkeys.
+                     *
+                     */
+                    passkeys?: {
+                        /**
+                         * Enforce a second factor and allow passkeys as one variant of it
+                         */
+                        enabled?: boolean;
+                    };
                     entry_point?: "PASSWORD" | "SSO";
                     preferred_sso_providers?: /**
                      * URL-friendly slug to use as organization-unique identifier for Provider
@@ -16152,6 +16441,12 @@ declare namespace Paths {
                      * 6bsd0jkgoie74k2i8mrhc1vest
                      */
                     cognito_user_pool_client_id?: string;
+                    /**
+                     * Cognito user pool client ID used by the native portal apps (longer refresh token validity)
+                     * example:
+                     * 3k9fj2l1m0n8b7v6c5x4z3a2s1
+                     */
+                    cognito_mobile_client_id?: string;
                     /**
                      * Cognito user pool ARN
                      * example:
@@ -16345,6 +16640,13 @@ declare namespace Paths {
                  */
                 contract_identifiers?: Components.Schemas.ContractIdentifier[];
                 /**
+                 * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+                 *   - `contracts`: the user's Contact is added as a customer of the Contract.
+                 *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+                 *
+                 */
+                self_assignment_mode?: "contracts" | "customer_to_portal_user";
+                /**
                  * Configuration for contract selector in the portal
                  */
                 contract_selector_config?: {
@@ -16527,7 +16829,7 @@ declare namespace Paths {
                  */
                 is_dummy?: boolean;
                 /**
-                 * Whether this is a v3 portal configuration
+                 * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
                  */
                 is_v3_item?: boolean;
                 /**
@@ -16566,6 +16868,7 @@ declare namespace Paths {
                  * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
                  */
                 engagement_center_enabled?: boolean;
+                engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ Components.Schemas.EngagementCenterTaskTemplates;
                 /**
                  * ID of the organization
                  * example:
@@ -16578,6 +16881,26 @@ declare namespace Paths {
                  * 12345
                  */
                 organization_id?: string;
+                /**
+                 * Blueprint instance ids managing this portal. Server-managed: ignored (stripped) on every write from a user.
+                 *
+                 */
+                _manifest?: string[];
+                /**
+                 * Id of this portal in the blueprint source. Set once: a blueprint install or update (portal create, `page_upsert_mode=slug`, or a revision with `revision_source` `blueprint_sync`) may give a portal the lineage it does not have yet, unless another portal of the organization holds it. A portal created as a copy next to the organization's live portal of its origin (downgraded to `ADDITIONAL_PORTAL`) never takes it. After that it never changes; every other write keeps the stored value. Locks nothing on its own.
+                 *
+                 */
+                _lineage_id?: string;
+                /**
+                 * Lineage ids of pages detached from their blueprint; a blueprint sync leaves them alone. Server-managed.
+                 *
+                 */
+                detached_lineage_ids?: string[];
+                /**
+                 * Only present on write responses: blueprint-managed pages/blocks the request tried to change. Their stored version was kept and the rest of the save succeeded.
+                 *
+                 */
+                held_back?: /* A blueprint-managed page or block a write tried to change; the stored version was kept. */ Components.Schemas.HeldBackNode[];
                 /**
                  * Organization settings
                  */
@@ -16633,6 +16956,19 @@ declare namespace Paths {
                  *
                  */
                 Components.Schemas.ProviderConfig[];
+                /**
+                 * Present only when the request carried a valid `x-portal-preview-token`: the config is this revision's, not the live one.
+                 *
+                 */
+                preview_revision?: {
+                    /**
+                     * example:
+                     * 2026-08-25T14:03:11.482Z-a7f3c1d9
+                     */
+                    revision_id: string;
+                    name?: string;
+                    created_at: string; // date-time
+                };
                 certificate_details?: {
                     /**
                      * Status of the certificate
@@ -16755,6 +17091,15 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPortalCopilotAccess {
+        namespace Responses {
+            export interface $200 {
+                allowed: boolean;
+            }
+            export type $401 = Components.Responses.Unauthorized;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -16931,6 +17276,15 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.EntityGetParams;
         namespace Responses {
             export type $200 = /* Response for entity get request */ Components.Schemas.EntityResponse;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetPortalUserNotificationPreferences {
+        namespace Responses {
+            export type $200 = /* Resolved notification preferences of a portal user. Notifications are opt-out: a channel that was never stored on the portal user resolves to enabled (true). */ Components.Schemas.PortalUserNotificationPreferences;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -17310,6 +17664,16 @@ declare namespace Paths {
                          */
                         enabled?: boolean;
                     };
+                    /**
+                     * Opt-in, set by the configuring user. When enabled, a second factor is enforced after the password and portal users can add passkeys (fingerprint, face or device PIN) as one variant of it, next to the email code of advanced_mfa. Users with a passkey use it by default; with advanced_mfa off, the passkey is the only second factor once a user has added one. On passwordless portals a passkey can replace the email code. Passkeys are bound to the domain they were added on. Default off; turning it off again restores the previous behaviour and keeps registered passkeys.
+                     *
+                     */
+                    passkeys?: {
+                        /**
+                         * Enforce a second factor and allow passkeys as one variant of it
+                         */
+                        enabled?: boolean;
+                    };
                     entry_point?: "PASSWORD" | "SSO";
                     preferred_sso_providers?: /**
                      * URL-friendly slug to use as organization-unique identifier for Provider
@@ -17337,6 +17701,12 @@ declare namespace Paths {
                      * 6bsd0jkgoie74k2i8mrhc1vest
                      */
                     cognito_user_pool_client_id?: string;
+                    /**
+                     * Cognito user pool client ID used by the native portal apps (longer refresh token validity)
+                     * example:
+                     * 3k9fj2l1m0n8b7v6c5x4z3a2s1
+                     */
+                    cognito_mobile_client_id?: string;
                     /**
                      * Cognito user pool ARN
                      * example:
@@ -17530,6 +17900,13 @@ declare namespace Paths {
                  */
                 contract_identifiers?: Components.Schemas.ContractIdentifier[];
                 /**
+                 * What the built-in self-assignment (without a contractIdentification hook) assigns once the `contract_identifiers` match a Contract:
+                 *   - `contracts`: the user's Contact is added as a customer of the Contract.
+                 *   - `customer_to_portal_user`: the Contract's customers (Contacts and Accounts) are added to the Portal User's `represents`. The Portal User sees all their data, including Contracts, transitively. Mirrors the `contact_to_portal_user` assignment mode of the contractIdentification hook.
+                 *
+                 */
+                self_assignment_mode?: "contracts" | "customer_to_portal_user";
+                /**
                  * Configuration for contract selector in the portal
                  */
                 contract_selector_config?: {
@@ -17712,7 +18089,7 @@ declare namespace Paths {
                  */
                 is_dummy?: boolean;
                 /**
-                 * Whether this is a v3 portal configuration
+                 * Always true. Legacy v2 storage was migrated; field kept for compatibility and will be removed.
                  */
                 is_v3_item?: boolean;
                 /**
@@ -17751,6 +18128,7 @@ declare namespace Paths {
                  * Master toggle for the portal's engagement center (in-app notifications including the notification triggers above). Off when absent — portal users only see the engagement center and receive trigger notifications after an admin enables it.
                  */
                 engagement_center_enabled?: boolean;
+                engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ Components.Schemas.EngagementCenterTaskTemplates;
                 /**
                  * ID of the organization
                  * example:
@@ -17763,6 +18141,26 @@ declare namespace Paths {
                  * 12345
                  */
                 organization_id?: string;
+                /**
+                 * Blueprint instance ids managing this portal. Server-managed: ignored (stripped) on every write from a user.
+                 *
+                 */
+                _manifest?: string[];
+                /**
+                 * Id of this portal in the blueprint source. Set once: a blueprint install or update (portal create, `page_upsert_mode=slug`, or a revision with `revision_source` `blueprint_sync`) may give a portal the lineage it does not have yet, unless another portal of the organization holds it. A portal created as a copy next to the organization's live portal of its origin (downgraded to `ADDITIONAL_PORTAL`) never takes it. After that it never changes; every other write keeps the stored value. Locks nothing on its own.
+                 *
+                 */
+                _lineage_id?: string;
+                /**
+                 * Lineage ids of pages detached from their blueprint; a blueprint sync leaves them alone. Server-managed.
+                 *
+                 */
+                detached_lineage_ids?: string[];
+                /**
+                 * Only present on write responses: blueprint-managed pages/blocks the request tried to change. Their stored version was kept and the rest of the save succeeded.
+                 *
+                 */
+                held_back?: /* A blueprint-managed page or block a write tried to change; the stored version was kept. */ Components.Schemas.HeldBackNode[];
                 /**
                  * Organization settings
                  */
@@ -17803,6 +18201,19 @@ declare namespace Paths {
                  *
                  */
                 identity_providers?: /* Minimal public identity provider info — enough to render a provider login button. */ Components.Schemas.PublicIdentityProvider[];
+                /**
+                 * Present only when the request carried a valid `x-portal-preview-token`: the config is this revision's, not the live one.
+                 *
+                 */
+                preview_revision?: {
+                    /**
+                     * example:
+                     * 2026-08-25T14:03:11.482Z-a7f3c1d9
+                     */
+                    revision_id: string;
+                    name?: string;
+                    created_at: string; // date-time
+                };
             }
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -18718,6 +19129,16 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace ListPortalUserPasskeys {
+        namespace Responses {
+            export interface $200 {
+                results?: Components.Schemas.PortalUserPasskey[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace LoginToPortalAsUser {
         export interface RequestBody {
             /**
@@ -18742,6 +19163,12 @@ declare namespace Paths {
                  * A generated login_as_token to log in to a portal impersonating a user.
                  */
                 login_as_token?: string;
+                /**
+                 * URL of the portal on its epilot domain, to open `/login-as?token=<login_as_token>` on.
+                 * example:
+                 * https://my-portal.ecp.epilot.io
+                 */
+                portal_url?: string;
             }
         }
     }
@@ -19365,6 +19792,16 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SendPortalUserPasskeyVerificationCode {
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $429 = Components.Responses.TooManyRequests;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace SsoCallback {
         namespace Parameters {
             /**
@@ -19583,6 +20020,7 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Schemas.ErrorResp;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -19751,7 +20189,12 @@ declare namespace Paths {
         }
     }
     namespace UpdateContact {
-        export type RequestBody = Components.Schemas.Entity;
+        export type RequestBody = /**
+         * Contact attributes a portal user can change. Other attributes are ignored.
+         * Value types follow the organization's contact schema.
+         *
+         */
+        Components.Schemas.PortalContactUpdate;
         namespace Responses {
             export interface $200 {
                 data?: /* The mapped contact of the portal user */ Components.Schemas.Contact;
@@ -19774,7 +20217,7 @@ declare namespace Paths {
         export interface PathParameters {
             id: Parameters.Id;
         }
-        export type RequestBody = Components.Schemas.Entity;
+        export type RequestBody = /* Contract attributes a portal user can change. Other attributes are ignored. */ Components.Schemas.PortalContractUpdate;
         namespace Responses {
             export interface $200 {
                 data?: /* The contract entity */ Components.Schemas.Contract;
@@ -19808,52 +20251,6 @@ declare namespace Paths {
                 message?: string;
             }
             export type $400 = Components.Responses.InvalidRequest;
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $404 = Components.Responses.NotFound;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace UpdateOpportunity {
-        namespace Parameters {
-            export type Id = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        export type RequestBody = Components.Schemas.Entity;
-        namespace Responses {
-            export interface $200 {
-                data?: /* The opportunity entity */ Components.Schemas.Opportunity;
-            }
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $404 = Components.Responses.NotFound;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace UpdateOrder {
-        namespace Parameters {
-            export type Id = /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            Components.Schemas.EntityId /* uuid */;
-        }
-        export interface PathParameters {
-            id: Parameters.Id;
-        }
-        export type RequestBody = Components.Schemas.Entity;
-        namespace Responses {
-            export interface $200 {
-                data?: /* The order entity */ Components.Schemas.Order;
-            }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -19915,16 +20312,6 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace UpdatePortalUser {
-        export type RequestBody = Components.Schemas.Entity;
-        namespace Responses {
-            export interface $200 {
-                data?: /* The portal user entity */ Components.Schemas.PortalUser;
-            }
-            export type $401 = Components.Responses.Unauthorized;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
     namespace UpdatePortalUserEmail {
         export interface RequestBody {
             /**
@@ -19957,6 +20344,25 @@ declare namespace Paths {
             }
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdatePortalUserNotificationPreferences {
+        /**
+         * Channels to update. Omitted channels are left unchanged.
+         */
+        export interface RequestBody {
+            /**
+             * Whether the portal user wants to receive in-app notifications.
+             */
+            in_app?: boolean;
+        }
+        namespace Responses {
+            export type $200 = /* Resolved notification preferences of a portal user. Notifications are opt-out: a channel that was never stored on the portal user resolves to enabled (true). */ Components.Schemas.PortalUserNotificationPreferences;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -20314,6 +20720,48 @@ declare namespace Paths {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             Parameters.BlockId /* uuid */;
+        }
+    }
+    namespace V2PortalPages$IdBlocks$BlockIdDetach {
+        namespace Parameters {
+            /**
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            export type BlockId = string; // uuid
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.Id /* uuid */;
+            block_id: /**
+             * example:
+             * c495fef9-eeca-4019-a989-8390dcd9825b
+             */
+            Parameters.BlockId /* uuid */;
+        }
+    }
+    namespace V2PortalPages$IdDetach {
+        namespace Parameters {
+            /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            export type Id = string; // uuid
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            Parameters.Id /* uuid */;
         }
     }
     namespace ValidateCaaRecords {
@@ -20776,8 +21224,8 @@ export interface OperationMethods {
    * at `destination_template_id`. Intended to be called from the email-template
    * migration flow when a duplicated template is refined.
    * 
-   * Only v3-shaped rows are migrated (those carrying `portal_sk_v3`). Returns
-   * the portal IDs that were rewritten and any whose update failed.
+   * Rows are keyed by portal id (`portal_sk_v3`); a row without one is skipped.
+   * Returns the portal IDs that were rewritten and any whose update failed.
    * 
    */
   'migrateEmailTemplateReferences'(
@@ -21001,7 +21449,9 @@ export interface OperationMethods {
   /**
    * updateContact - updateContact
    * 
-   * Updates the contact details.
+   * Updates the portal user's contact. Only the attributes in `PortalContactUpdate` can be changed;
+   * other attributes are ignored. Returns 403 when the body has none of them.
+   * 
    */
   'updateContact'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -21094,6 +21544,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetValidSecondaryAttributes.Responses.$200>
   /**
+   * getPortalCopilotAccess - getPortalCopilotAccess
+   * 
+   * Whether the signed-in portal user may use the portal chat. False when the chat is off for the portal, when the user does not match its target visibility, or when targets cannot be matched.
+   */
+  'getPortalCopilotAccess'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalCopilotAccess.Responses.$200>
+  /**
    * getPortalUser - getPortalUser
    * 
    * Get the portal user details
@@ -21103,16 +21563,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetPortalUser.Responses.$200>
-  /**
-   * updatePortalUser - updatePortalUser
-   * 
-   * Update the portal user details
-   */
-  'updatePortalUser'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.UpdatePortalUser.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpdatePortalUser.Responses.$200>
   /**
    * deletePortalUser - deletePortalUser
    * 
@@ -21145,6 +21595,86 @@ export interface OperationMethods {
     data?: Paths.ChangePortalUserPassword.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ChangePortalUserPassword.Responses.$200>
+  /**
+   * getPortalUserNotificationPreferences - getPortalUserNotificationPreferences
+   * 
+   * Returns the notification preferences of the authenticated portal user. Notifications follow an opt-out model: a preference that was never stored on the portal user defaults to enabled (true). Responds 404 while the engagement-center v2 feature is not enabled for the organization.
+   */
+  'getPortalUserNotificationPreferences'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPortalUserNotificationPreferences.Responses.$200>
+  /**
+   * updatePortalUserNotificationPreferences - updatePortalUserNotificationPreferences
+   * 
+   * Partially updates the notification preferences of the authenticated portal user. Only the channels present in the request body are changed; omitted channels keep their stored value (or the enabled-by-default behaviour when never set). Returns the resulting full preferences. Responds 404 while the engagement-center v2 feature is not enabled for the organization.
+   */
+  'updatePortalUserNotificationPreferences'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.UpdatePortalUserNotificationPreferences.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdatePortalUserNotificationPreferences.Responses.$200>
+  /**
+   * listPortalUserPasskeys - listPortalUserPasskeys
+   * 
+   * Lists the passkeys the logged-in portal user has added.
+   */
+  'listPortalUserPasskeys'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPortalUserPasskeys.Responses.$200>
+  /**
+   * addPortalUserPasskey - addPortalUserPasskey
+   * 
+   * Stores a new passkey for the logged-in portal user.
+   * Send the browser's `navigator.credentials.create()` result for options from `createPortalUserPasskeyRegistrationOptions`.
+   * Only available when `auth_settings.passkeys.enabled` is set for the portal.
+   * 
+   */
+  'addPortalUserPasskey'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.AddPortalUserPasskey.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AddPortalUserPasskey.Responses.$201>
+  /**
+   * createPortalUserPasskeyRegistrationOptions - createPortalUserPasskeyRegistrationOptions
+   * 
+   * Returns WebAuthn options for `navigator.credentials.create()` to add a passkey for the logged-in portal user.
+   * Needs the code from `sendPortalUserPasskeyVerificationCode`, so a session alone can't add a passkey; the code is used up here.
+   * The passkey is bound to the domain in the request's `Origin` header, which must be one of the portal's domains.
+   * Only available when `auth_settings.passkeys.enabled` is set for the portal.
+   * 
+   */
+  'createPortalUserPasskeyRegistrationOptions'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreatePortalUserPasskeyRegistrationOptions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePortalUserPasskeyRegistrationOptions.Responses.$200>
+  /**
+   * sendPortalUserPasskeyVerificationCode - sendPortalUserPasskeyVerificationCode
+   * 
+   * Emails the logged-in portal user a 6-digit code needed to add a passkey (`createPortalUserPasskeyRegistrationOptions`).
+   * The code is valid for 10 minutes and allows 5 attempts; a new code replaces the previous one and can be requested once a minute.
+   * Only available when `auth_settings.passkeys.enabled` is set for the portal.
+   * 
+   */
+  'sendPortalUserPasskeyVerificationCode'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SendPortalUserPasskeyVerificationCode.Responses.$204>
+  /**
+   * deletePortalUserPasskey - deletePortalUserPasskey
+   * 
+   * Removes one of the logged-in portal user's passkeys. Works even when passkeys are turned off for the portal.
+   */
+  'deletePortalUserPasskey'(
+    parameters?: Parameters<Paths.DeletePortalUserPasskey.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeletePortalUserPasskey.Responses.$204>
   /**
    * resendConfirmationEmail - resendConfirmationEmail
    * 
@@ -21270,16 +21800,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOrder.Responses.$200>
   /**
-   * updateOrder - updateOrder
-   * 
-   * Update an order by id. Use getPortalUserEntity instead.
-   */
-  'updateOrder'(
-    parameters?: Parameters<Paths.UpdateOrder.PathParameters> | null,
-    data?: Paths.UpdateOrder.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpdateOrder.Responses.$200>
-  /**
    * getAllOpportunities - getAllOpportunities
    * 
    * Get all opportunities of a portal user. Use searchPortalUserEntities instead.
@@ -21320,16 +21840,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOpportunity.Responses.$200>
   /**
-   * updateOpportunity - updateOpportunity
-   * 
-   * Update an opportunity by id.
-   */
-  'updateOpportunity'(
-    parameters?: Parameters<Paths.UpdateOpportunity.PathParameters> | null,
-    data?: Paths.UpdateOpportunity.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.UpdateOpportunity.Responses.$200>
-  /**
    * getAllRequests - getAllRequests
    * 
    * Get all opportunities & orders of a portal user. Use searchPortalUserEntities instead.
@@ -21362,7 +21872,9 @@ export interface OperationMethods {
   /**
    * updateContract - updateContract
    * 
-   * Update a contract by id. Use getPortalUserEntity instead.
+   * Updates a contract of the portal user. Only the attributes in `PortalContractUpdate` can be changed;
+   * other attributes are ignored. Returns 403 when the body has none of them.
+   * 
    */
   'updateContract'(
     parameters?: Parameters<Paths.UpdateContract.PathParameters> | null,
@@ -21383,16 +21895,9 @@ export interface OperationMethods {
    * addContractByIdentifiers - addContractByIdentifiers
    * 
    * Self-assign contract(s) by pre-configured identifiers.
-   * 
-   * When the portal is configured to wait on the Integration Toolkit
-   * (`extension_hooks.contractIdentification.wait_for_toolkit`) and the ERP has not finished
-   * sending within the request budget, the call fails with 404 and `reason: TIMEOUT`, carrying
-   * the `correlation_id` of the triggered sync. Repeating the call with that `correlation_id`
-   * keeps waiting on the same correlation without calling the third party again.
-   * 
    */
   'addContractByIdentifiers'(
-    parameters?: Parameters<Paths.AddContractByIdentifiers.QueryParameters> | null,
+    parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.AddContractByIdentifiers.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddContractByIdentifiers.Responses.$200>
@@ -21459,16 +21964,6 @@ export interface OperationMethods {
     data?: Paths.SaveEntityFile.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SaveEntityFile.Responses.$201>
-  /**
-   * deleteEntityFile - deleteEntityFile
-   * 
-   * Delete files from an entity
-   */
-  'deleteEntityFile'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.DeleteEntityFile.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DeleteEntityFile.Responses.$202>
   /**
    * savePortalFiles - savePortalFiles
    * 
@@ -21580,6 +22075,10 @@ export interface OperationMethods {
    * 1. Using portal_id (takes precedence)
    * 2. Using domain
    * 3. Using origin (legacy)
+   * 
+   * A partner user can log in as a portal user the vendor shared with their organization by sending
+   * `x-epilot-org-id: <vendor org id>` with a `portal_id`. This needs `portal:login_as_user` on that portal in the
+   * partner role and the portal user shared with the partner organization.
    * 
    */
   'loginToPortalAsUser'(
@@ -21696,7 +22195,7 @@ export interface OperationMethods {
   /**
    * getOutstandingTasks - Get outstanding workflow tasks for the portal user
    * 
-   * Returns all outstanding workflow journey tasks for the authenticated portal user, across their opportunity, order and contract entities. Each task is an active workflow step that exposes a journey the customer still needs to fill out.
+   * Returns all outstanding workflow journey tasks for the authenticated portal user, across their opportunity, order and contract entities. Each task is an active workflow step that exposes a journey the customer still needs to fill out. A step whose start date still lies in the future is left out until that date.
    */
   'getOutstandingTasks'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -21917,6 +22416,28 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeletePortalPage.Responses.$204>
+  /**
+   * detachPortalPage - detachPortalPage
+   * 
+   * Detach a blueprint-managed page from its blueprint. The page and all of its blocks become local (editable, no longer updated by the blueprint) and the page's lineage is tombstoned on the portal so future syncs skip it. One-way. Idempotent for pages that are not managed.
+   * 
+   */
+  'detachPortalPage'(
+    parameters?: Parameters<Paths.V2PortalPages$IdDetach.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DetachPortalPage.Responses.$200>
+  /**
+   * detachPortalPageBlock - detachPortalPageBlock
+   * 
+   * Detach a blueprint-managed block. The block becomes the customer's and its lineage is tombstoned on the page so future syncs skip it. A managed page stays managed and keeps receiving blueprint updates for everything else. One-way. Idempotent for blocks that are not managed.
+   * 
+   */
+  'detachPortalPageBlock'(
+    parameters?: Parameters<Paths.V2PortalPages$IdBlocks$BlockIdDetach.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DetachPortalPageBlock.Responses.$200>
   /**
    * getPortalPages - getPortalPages
    * 
@@ -22231,6 +22752,21 @@ export interface OperationMethods {
     data?: Paths.UpdatePortalRevision.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdatePortalRevision.Responses.$200>
+  /**
+   * createPortalRevisionPreview - createPortalRevisionPreview
+   * 
+   * Mints a short-lived preview token for one revision and returns a link that opens the revision inside the real end-customer portal, on the portal's live domain, without publishing it.
+   * 
+   * The portal sends the token back in the `x-portal-preview-token` header. Public and portal-user config, page, widget and extension reads that honour it answer with the revision's config and pages instead of the live ones and add `preview_revision` to config responses. Server-owned fields (ids, domains, Cognito pool identifiers, extension secrets) always come from the live portal. Nothing is written: the live portal, its pages and which revision is published stay as they are.
+   * 
+   * Requires view permission on the portal. Returns `404` when portal versioning or revision preview is not enabled for the organization, or when the revision does not exist.
+   * 
+   */
+  'createPortalRevisionPreview'(
+    parameters?: Parameters<Paths.CreatePortalRevisionPreview.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePortalRevisionPreview.Responses.$200>
   /**
    * publishPortalRevision - publishPortalRevision
    * 
@@ -22790,8 +23326,8 @@ export interface PathsDictionary {
      * at `destination_template_id`. Intended to be called from the email-template
      * migration flow when a duplicated template is refined.
      * 
-     * Only v3-shaped rows are migrated (those carrying `portal_sk_v3`). Returns
-     * the portal IDs that were rewritten and any whose update failed.
+     * Rows are keyed by portal id (`portal_sk_v3`); a row without one is skipped.
+     * Returns the portal IDs that were rewritten and any whose update failed.
      * 
      */
     'post'(
@@ -23049,7 +23585,9 @@ export interface PathsDictionary {
     /**
      * updateContact - updateContact
      * 
-     * Updates the contact details.
+     * Updates the portal user's contact. Only the attributes in `PortalContactUpdate` can be changed;
+     * other attributes are ignored. Returns 403 when the body has none of them.
+     * 
      */
     'patch'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -23154,6 +23692,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetValidSecondaryAttributes.Responses.$200>
   }
+  ['/v2/portal/copilot/access']: {
+    /**
+     * getPortalCopilotAccess - getPortalCopilotAccess
+     * 
+     * Whether the signed-in portal user may use the portal chat. False when the chat is off for the portal, when the user does not match its target visibility, or when targets cannot be matched.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalCopilotAccess.Responses.$200>
+  }
   ['/v2/portal/user']: {
     /**
      * getPortalUser - getPortalUser
@@ -23165,16 +23715,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetPortalUser.Responses.$200>
-    /**
-     * updatePortalUser - updatePortalUser
-     * 
-     * Update the portal user details
-     */
-    'patch'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.UpdatePortalUser.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpdatePortalUser.Responses.$200>
     /**
      * deletePortalUser - deletePortalUser
      * 
@@ -23211,6 +23751,96 @@ export interface PathsDictionary {
       data?: Paths.ChangePortalUserPassword.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ChangePortalUserPassword.Responses.$200>
+  }
+  ['/v2/portal/user/notification-preferences']: {
+    /**
+     * getPortalUserNotificationPreferences - getPortalUserNotificationPreferences
+     * 
+     * Returns the notification preferences of the authenticated portal user. Notifications follow an opt-out model: a preference that was never stored on the portal user defaults to enabled (true). Responds 404 while the engagement-center v2 feature is not enabled for the organization.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPortalUserNotificationPreferences.Responses.$200>
+    /**
+     * updatePortalUserNotificationPreferences - updatePortalUserNotificationPreferences
+     * 
+     * Partially updates the notification preferences of the authenticated portal user. Only the channels present in the request body are changed; omitted channels keep their stored value (or the enabled-by-default behaviour when never set). Returns the resulting full preferences. Responds 404 while the engagement-center v2 feature is not enabled for the organization.
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.UpdatePortalUserNotificationPreferences.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdatePortalUserNotificationPreferences.Responses.$200>
+  }
+  ['/v2/portal/user/passkeys']: {
+    /**
+     * listPortalUserPasskeys - listPortalUserPasskeys
+     * 
+     * Lists the passkeys the logged-in portal user has added.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPortalUserPasskeys.Responses.$200>
+    /**
+     * addPortalUserPasskey - addPortalUserPasskey
+     * 
+     * Stores a new passkey for the logged-in portal user.
+     * Send the browser's `navigator.credentials.create()` result for options from `createPortalUserPasskeyRegistrationOptions`.
+     * Only available when `auth_settings.passkeys.enabled` is set for the portal.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.AddPortalUserPasskey.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AddPortalUserPasskey.Responses.$201>
+  }
+  ['/v2/portal/user/passkeys/registration-options']: {
+    /**
+     * createPortalUserPasskeyRegistrationOptions - createPortalUserPasskeyRegistrationOptions
+     * 
+     * Returns WebAuthn options for `navigator.credentials.create()` to add a passkey for the logged-in portal user.
+     * Needs the code from `sendPortalUserPasskeyVerificationCode`, so a session alone can't add a passkey; the code is used up here.
+     * The passkey is bound to the domain in the request's `Origin` header, which must be one of the portal's domains.
+     * Only available when `auth_settings.passkeys.enabled` is set for the portal.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreatePortalUserPasskeyRegistrationOptions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePortalUserPasskeyRegistrationOptions.Responses.$200>
+  }
+  ['/v2/portal/user/passkeys/verification-code']: {
+    /**
+     * sendPortalUserPasskeyVerificationCode - sendPortalUserPasskeyVerificationCode
+     * 
+     * Emails the logged-in portal user a 6-digit code needed to add a passkey (`createPortalUserPasskeyRegistrationOptions`).
+     * The code is valid for 10 minutes and allows 5 attempts; a new code replaces the previous one and can be requested once a minute.
+     * Only available when `auth_settings.passkeys.enabled` is set for the portal.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SendPortalUserPasskeyVerificationCode.Responses.$204>
+  }
+  ['/v2/portal/user/passkeys/{credential_id}']: {
+    /**
+     * deletePortalUserPasskey - deletePortalUserPasskey
+     * 
+     * Removes one of the logged-in portal user's passkeys. Works even when passkeys are turned off for the portal.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeletePortalUserPasskey.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeletePortalUserPasskey.Responses.$204>
   }
   ['/v2/portal/user/resend/confirmation-email/{id}']: {
     /**
@@ -23359,16 +23989,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetOrder.Responses.$200>
-    /**
-     * updateOrder - updateOrder
-     * 
-     * Update an order by id. Use getPortalUserEntity instead.
-     */
-    'patch'(
-      parameters?: Parameters<Paths.UpdateOrder.PathParameters> | null,
-      data?: Paths.UpdateOrder.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpdateOrder.Responses.$200>
   }
   ['/v2/portal/opportunity']: {
     /**
@@ -23417,16 +24037,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetOpportunity.Responses.$200>
-    /**
-     * updateOpportunity - updateOpportunity
-     * 
-     * Update an opportunity by id.
-     */
-    'patch'(
-      parameters?: Parameters<Paths.UpdateOpportunity.PathParameters> | null,
-      data?: Paths.UpdateOpportunity.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.UpdateOpportunity.Responses.$200>
   }
   ['/v2/portal/request']: {
     /**
@@ -23466,7 +24076,9 @@ export interface PathsDictionary {
     /**
      * updateContract - updateContract
      * 
-     * Update a contract by id. Use getPortalUserEntity instead.
+     * Updates a contract of the portal user. Only the attributes in `PortalContractUpdate` can be changed;
+     * other attributes are ignored. Returns 403 when the body has none of them.
+     * 
      */
     'patch'(
       parameters?: Parameters<Paths.UpdateContract.PathParameters> | null,
@@ -23491,16 +24103,9 @@ export interface PathsDictionary {
      * addContractByIdentifiers - addContractByIdentifiers
      * 
      * Self-assign contract(s) by pre-configured identifiers.
-     * 
-     * When the portal is configured to wait on the Integration Toolkit
-     * (`extension_hooks.contractIdentification.wait_for_toolkit`) and the ERP has not finished
-     * sending within the request budget, the call fails with 404 and `reason: TIMEOUT`, carrying
-     * the `correlation_id` of the triggered sync. Repeating the call with that `correlation_id`
-     * keeps waiting on the same correlation without calling the third party again.
-     * 
      */
     'post'(
-      parameters?: Parameters<Paths.AddContractByIdentifiers.QueryParameters> | null,
+      parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.AddContractByIdentifiers.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddContractByIdentifiers.Responses.$200>
@@ -23579,16 +24184,6 @@ export interface PathsDictionary {
       data?: Paths.SaveEntityFile.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SaveEntityFile.Responses.$201>
-    /**
-     * deleteEntityFile - deleteEntityFile
-     * 
-     * Delete files from an entity
-     */
-    'delete'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.DeleteEntityFile.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DeleteEntityFile.Responses.$202>
   }
   ['/v2/portal/portal/files']: {
     /**
@@ -23722,6 +24317,10 @@ export interface PathsDictionary {
      * 1. Using portal_id (takes precedence)
      * 2. Using domain
      * 3. Using origin (legacy)
+     * 
+     * A partner user can log in as a portal user the vendor shared with their organization by sending
+     * `x-epilot-org-id: <vendor org id>` with a `portal_id`. This needs `portal:login_as_user` on that portal in the
+     * partner role and the portal user shared with the partner organization.
      * 
      */
     'post'(
@@ -23860,7 +24459,7 @@ export interface PathsDictionary {
     /**
      * getOutstandingTasks - Get outstanding workflow tasks for the portal user
      * 
-     * Returns all outstanding workflow journey tasks for the authenticated portal user, across their opportunity, order and contract entities. Each task is an active workflow step that exposes a journey the customer still needs to fill out.
+     * Returns all outstanding workflow journey tasks for the authenticated portal user, across their opportunity, order and contract entities. Each task is an active workflow step that exposes a journey the customer still needs to fill out. A step whose start date still lies in the future is left out until that date.
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -24107,6 +24706,32 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeletePortalPage.Responses.$204>
+  }
+  ['/v2/portal/pages/{id}/detach']: {
+    /**
+     * detachPortalPage - detachPortalPage
+     * 
+     * Detach a blueprint-managed page from its blueprint. The page and all of its blocks become local (editable, no longer updated by the blueprint) and the page's lineage is tombstoned on the portal so future syncs skip it. One-way. Idempotent for pages that are not managed.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.V2PortalPages$IdDetach.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DetachPortalPage.Responses.$200>
+  }
+  ['/v2/portal/pages/{id}/blocks/{block_id}/detach']: {
+    /**
+     * detachPortalPageBlock - detachPortalPageBlock
+     * 
+     * Detach a blueprint-managed block. The block becomes the customer's and its lineage is tombstoned on the page so future syncs skip it. A managed page stays managed and keeps receiving blueprint updates for everything else. One-way. Idempotent for blocks that are not managed.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.V2PortalPages$IdBlocks$BlockIdDetach.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DetachPortalPageBlock.Responses.$200>
   }
   ['/v2/portal/pages']: {
     /**
@@ -24464,6 +25089,23 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdatePortalRevision.Responses.$200>
   }
+  ['/v3/portal/config/{portal_id}/revisions/{revision_id}:preview']: {
+    /**
+     * createPortalRevisionPreview - createPortalRevisionPreview
+     * 
+     * Mints a short-lived preview token for one revision and returns a link that opens the revision inside the real end-customer portal, on the portal's live domain, without publishing it.
+     * 
+     * The portal sends the token back in the `x-portal-preview-token` header. Public and portal-user config, page, widget and extension reads that honour it answer with the revision's config and pages instead of the live ones and add `preview_revision` to config responses. Server-owned fields (ids, domains, Cognito pool identifiers, extension secrets) always come from the live portal. Nothing is written: the live portal, its pages and which revision is published stay as they are.
+     * 
+     * Requires view permission on the portal. Returns `404` when portal versioning or revision preview is not enabled for the organization, or when the revision does not exist.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreatePortalRevisionPreview.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePortalRevisionPreview.Responses.$200>
+  }
   ['/v3/portal/config/{portal_id}/publish']: {
     /**
      * publishPortalRevision - publishPortalRevision
@@ -24707,11 +25349,11 @@ export type CreateSupportRequest = Components.Schemas.CreateSupportRequest;
 export type CreateUserRequest = Components.Schemas.CreateUserRequest;
 export type Currency = Components.Schemas.Currency;
 export type DataRetrievalItem = Components.Schemas.DataRetrievalItem;
-export type DeleteEntityFile = Components.Schemas.DeleteEntityFile;
 export type Direction = Components.Schemas.Direction;
 export type DocumentWidget = Components.Schemas.DocumentWidget;
 export type DomainSettings = Components.Schemas.DomainSettings;
 export type EmailTemplates = Components.Schemas.EmailTemplates;
+export type EngagementCenterTaskTemplates = Components.Schemas.EngagementCenterTaskTemplates;
 export type Entity = Components.Schemas.Entity;
 export type EntityEditRule = Components.Schemas.EntityEditRule;
 export type EntityFileCount = Components.Schemas.EntityFileCount;
@@ -24754,6 +25396,7 @@ export type File = Components.Schemas.File;
 export type FileItem = Components.Schemas.FileItem;
 export type FilePreviewResult = Components.Schemas.FilePreviewResult;
 export type Grant = Components.Schemas.Grant;
+export type HeldBackNode = Components.Schemas.HeldBackNode;
 export type IdentifierAttribute = Components.Schemas.IdentifierAttribute;
 export type InstallmentEvent = Components.Schemas.InstallmentEvent;
 export type JourneyActions = Components.Schemas.JourneyActions;
@@ -24763,6 +25406,7 @@ export type JuiceSettings = Components.Schemas.JuiceSettings;
 export type Meter = Components.Schemas.Meter;
 export type MeterChartWidget = Components.Schemas.MeterChartWidget;
 export type MeterReading = Components.Schemas.MeterReading;
+export type MeterReadingCounterDetails = Components.Schemas.MeterReadingCounterDetails;
 export type MeterReadingPhoto = Components.Schemas.MeterReadingPhoto;
 export type MeterReadingPhotoData = Components.Schemas.MeterReadingPhotoData;
 export type MeterReadingWidget = Components.Schemas.MeterReadingWidget;
@@ -24772,7 +25416,6 @@ export type MobileConfig = Components.Schemas.MobileConfig;
 export type MobileConfigUpdate = Components.Schemas.MobileConfigUpdate;
 export type MobileOtaConfig = Components.Schemas.MobileOtaConfig;
 export type MoblieOIDCConfig = Components.Schemas.MoblieOIDCConfig;
-export type NewDesignMigrationResult = Components.Schemas.NewDesignMigrationResult;
 export type NotificationTriggerConfig = Components.Schemas.NotificationTriggerConfig;
 export type OIDCProviderConfig = Components.Schemas.OIDCProviderConfig;
 export type OIDCProviderMetadata = Components.Schemas.OIDCProviderMetadata;
@@ -24788,6 +25431,9 @@ export type PaymentWidget = Components.Schemas.PaymentWidget;
 export type PortalConfig = Components.Schemas.PortalConfig;
 export type PortalConfigSummaryV3 = Components.Schemas.PortalConfigSummaryV3;
 export type PortalConfigV3 = Components.Schemas.PortalConfigV3;
+export type PortalContactUpdate = Components.Schemas.PortalContactUpdate;
+export type PortalContractUpdate = Components.Schemas.PortalContractUpdate;
+export type PortalCopilotVisibility = Components.Schemas.PortalCopilotVisibility;
 export type PortalDataExportColumn = Components.Schemas.PortalDataExportColumn;
 export type PortalDescriptionOverrides = Components.Schemas.PortalDescriptionOverrides;
 export type PortalFeatureSettings = Components.Schemas.PortalFeatureSettings;
@@ -24797,6 +25443,7 @@ export type PortalNotification = Components.Schemas.PortalNotification;
 export type PortalRevision = Components.Schemas.PortalRevision;
 export type PortalRevisionCreated = Components.Schemas.PortalRevisionCreated;
 export type PortalRevisionList = Components.Schemas.PortalRevisionList;
+export type PortalRevisionPreview = Components.Schemas.PortalRevisionPreview;
 export type PortalRevisionRequest = Components.Schemas.PortalRevisionRequest;
 export type PortalRevisionSummary = Components.Schemas.PortalRevisionSummary;
 export type PortalSurface = Components.Schemas.PortalSurface;
@@ -24804,11 +25451,15 @@ export type PortalSurfaceDataAccess = Components.Schemas.PortalSurfaceDataAccess
 export type PortalSurfaceEntityAccess = Components.Schemas.PortalSurfaceEntityAccess;
 export type PortalTaskConfig = Components.Schemas.PortalTaskConfig;
 export type PortalUser = Components.Schemas.PortalUser;
+export type PortalUserNotificationPreferences = Components.Schemas.PortalUserNotificationPreferences;
+export type PortalUserPasskey = Components.Schemas.PortalUserPasskey;
 export type PortalUserRegistrationStatus = Components.Schemas.PortalUserRegistrationStatus;
+export type PortalUsingDesign = Components.Schemas.PortalUsingDesign;
 export type PortalWidget = Components.Schemas.PortalWidget;
 export type PortalWorkflow = Components.Schemas.PortalWorkflow;
 export type PortalWorkflowStage = Components.Schemas.PortalWorkflowStage;
 export type PortalWorkflowTask = Components.Schemas.PortalWorkflowTask;
+export type PreviewRevision = Components.Schemas.PreviewRevision;
 export type Product = Components.Schemas.Product;
 export type ProductRecommendationsWidget = Components.Schemas.ProductRecommendationsWidget;
 export type ProviderConfig = Components.Schemas.ProviderConfig;
@@ -24868,7 +25519,6 @@ export type UserRequest = Components.Schemas.UserRequest;
 export type VisualizationDataRange = Components.Schemas.VisualizationDataRange;
 export type VisualizationMetadata = Components.Schemas.VisualizationMetadata;
 export type VisualizationTypeOption = Components.Schemas.VisualizationTypeOption;
-export type WaitForEntityRule = Components.Schemas.WaitForEntityRule;
 export type WidgetAction = Components.Schemas.WidgetAction;
 export type WidgetBase = Components.Schemas.WidgetBase;
 export type WorfklowIdentifier = Components.Schemas.WorfklowIdentifier;
