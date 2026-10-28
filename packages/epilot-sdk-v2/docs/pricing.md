@@ -67,6 +67,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 
 **Conditional Pricing API**
 - [`$getConditionSets`](#$getconditionsets)
+- [`$getConditionalPricingOrganization`](#$getconditionalpricingorganization)
 - [`$resolveConditionalEntity`](#$resolveconditionalentity)
 - [`$createConditionalVariant`](#$createconditionalvariant)
 - [`$listConditionalVariants`](#$listconditionalvariants)
@@ -92,6 +93,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`ConditionSet`](#conditionset)
 - [`ConditionSetCatalog`](#conditionsetcatalog)
 - [`ConditionalPricingOptIn`](#conditionalpricingoptin)
+- [`ConditionalPricingOrganization`](#conditionalpricingorganization)
 - [`ConditionalPricingErrorCode`](#conditionalpricingerrorcode)
 - [`ResolveConditionalEntityRequest`](#resolveconditionalentityrequest)
 - [`ResolveByContextRequest`](#resolvebycontextrequest)
@@ -174,6 +176,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`ExternalPriceMetadata`](#externalpricemetadata)
 - [`ExternalFeeMappings`](#externalfeemappings)
 - [`ExternalFeeMapping`](#externalfeemapping)
+- [`PublicCatalogSearch`](#publiccatalogsearch)
 - [`CatalogSearch`](#catalogsearch)
 - [`CatalogFieldsParam`](#catalogfieldsparam)
 - [`CatalogSearchResult`](#catalogsearchresult)
@@ -183,7 +186,6 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`ResolveCatalogResult`](#resolvecatalogresult)
 - [`CatalogPair`](#catalogpair)
 - [`ResolvedPriceComponents`](#resolvedpricecomponents)
-- [`CatalogWarning`](#catalogwarning)
 - [`CatalogReference`](#catalogreference)
 - [`CatalogReferenceMember`](#catalogreferencemember)
 - [`SearchProvidersParams`](#searchprovidersparams)
@@ -1159,13 +1161,6 @@ const { data } = await client.$resolveCatalog(
       "coupons": [],
       "catalog_reference": {}
     }
-  ],
-  "warnings": [
-    {
-      "code": "CATALOG_ENTRY_NOT_FOUND",
-      "message": "string",
-      "details": {}
-    }
   ]
 }
 ```
@@ -2027,6 +2022,31 @@ const { data } = await client.$getConditionSets({
 
 ---
 
+### `$getConditionalPricingOrganization`
+
+Returns whether the calling organization has Conditional Pricing on, whether its search
+collection is ready or still being deleted, and, once it is on, whether it is in use. While it
+is in use, or whi
+
+`GET /v1/conditional-pricing/organization`
+
+```ts
+const { data } = await client.$getConditionalPricingOrganization()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status": "NOT_ENABLED"
+}
+```
+
+</details>
+
+---
+
 ### `$resolveConditionalEntity`
 
 Returns the variants of one conditional entity that apply, each composed: the base entity
@@ -2064,7 +2084,7 @@ const { data } = await client.$resolveConditionalEntity(
     {
       "_id": "price-sp26d1yo",
       "_variant_id": "var-46045",
-      "_version_valid_from": "2027-01-01T00:00:00.000Z",
+      "_version_valid_from": "2027-01-01",
       "_conditions": {
         "postal_code": "46045",
         "default": false
@@ -2101,7 +2121,7 @@ const { data } = await client.$createConditionalVariant(
       postal_code: '46045'
     },
     default: false,
-    valid_from: '2027-01-01T00:00:00Z',
+    valid_from: '2027-01-01',
     values: {
       unit_amount: 2499,
       unit_amount_decimal: '24.99'
@@ -2122,7 +2142,7 @@ const { data } = await client.$createConditionalVariant(
     "postal_code": "46045",
     "default": false
   },
-  "valid_from": "2027-01-01T00:00:00.000Z",
+  "valid_from": "2027-01-01",
   "values": {
     "unit_amount": 2499,
     "unit_amount_decimal": "24.99"
@@ -2256,7 +2276,7 @@ const { data } = await client.$getConditionalVariantTree(
           "postal_code": "46045",
           "default": false
         },
-        "valid_from": "2027-01-01T00:00:00.000Z",
+        "valid_from": "2027-01-01",
         "values": {
           "unit_amount": 2499,
           "unit_amount_decimal": "24.99"
@@ -2276,8 +2296,8 @@ const { data } = await client.$getConditionalVariantTree(
 
 ### `$getActiveConditionalVariantVersion`
 
-Returns the version of this variant in effect now — the latest `valid_from` at or before now
-— with the `_revision` a write to it must carry.
+Returns the version of this variant in effect today in the organization's timezone — the
+latest `valid_from` on or before today — with the `_revision` a write to it must carry.
 
 `GET /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}`
 
@@ -2301,7 +2321,7 @@ const { data } = await client.$getActiveConditionalVariantVersion({
     "postal_code": "46045",
     "default": false
   },
-  "valid_from": "2027-01-01T00:00:00.000Z",
+  "valid_from": "2027-01-01",
   "values": {
     "unit_amount": 2499,
     "unit_amount_decimal": "24.99"
@@ -2337,7 +2357,7 @@ const { data } = await client.$replaceActiveConditionalVariantVersion(
       unit_amount_decimal: '24.99'
     },
     _revision: 3,
-    valid_from: 'string',
+    valid_from: '1970-01-01',
     conditions: {
       postal_code: '46045'
     }
@@ -2357,7 +2377,7 @@ const { data } = await client.$replaceActiveConditionalVariantVersion(
     "postal_code": "46045",
     "default": false
   },
-  "valid_from": "2027-01-01T00:00:00.000Z",
+  "valid_from": "2027-01-01",
   "values": {
     "unit_amount": 2499,
     "unit_amount_decimal": "24.99"
@@ -2402,7 +2422,7 @@ const { data } = await client.$patchActiveConditionalVariantVersion(
       unit_amount_decimal: '24.99'
     },
     _revision: 3,
-    valid_from: 'string',
+    valid_from: '1970-01-01',
     conditions: {
       postal_code: '46045'
     }
@@ -2422,7 +2442,7 @@ const { data } = await client.$patchActiveConditionalVariantVersion(
     "postal_code": "46045",
     "default": false
   },
-  "valid_from": "2027-01-01T00:00:00.000Z",
+  "valid_from": "2027-01-01",
   "values": {
     "unit_amount": 2499,
     "unit_amount_decimal": "24.99"
@@ -2512,7 +2532,7 @@ const { data } = await client.$listConditionalVariantVersions({
         "postal_code": "46045",
         "default": false
       },
-      "valid_from": "2027-01-01T00:00:00.000Z",
+      "valid_from": "2027-01-01",
       "values": {
         "unit_amount": 2499,
         "unit_amount_decimal": "24.99"
@@ -2531,8 +2551,9 @@ const { data } = await client.$listConditionalVariantVersions({
 
 ### `$appendConditionalVariantVersion`
 
-Appends a version taking effect at its own instant. The version in effect at any instant is
-the one with the latest `valid_from` at or before it; a future one is staged until its date.
+Appends a version taking effect on its own date. A variant has at most one version per
+day. The version in effect at any `as_of` is the one with the latest `valid_from` on or
+before its date in the or
 
 `POST /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions`
 
@@ -2544,7 +2565,7 @@ const { data } = await client.$appendConditionalVariantVersion(
     variant_id: 'example',
   },
   {
-    valid_from: '2027-01-01T00:00:00Z',
+    valid_from: '2027-01-01',
     values: {
       unit_amount: 2499,
       unit_amount_decimal: '24.99'
@@ -2568,7 +2589,7 @@ const { data } = await client.$appendConditionalVariantVersion(
     "postal_code": "46045",
     "default": false
   },
-  "valid_from": "2027-01-01T00:00:00.000Z",
+  "valid_from": "2027-01-01",
   "values": {
     "unit_amount": 2499,
     "unit_amount_decimal": "24.99"
@@ -2595,7 +2616,7 @@ const { data } = await client.$appendConditionalVariantVersion(
 
 ### `$getConditionalVariantVersion`
 
-Returns one version by the instant it takes effect. Exact, never nearest.
+Returns one version by the date it takes effect. Exact, never nearest.
 
 `GET /v1/conditional-pricing/{slug}/entities/{entity_id}/variants/{variant_id}/versions/{valid_from}`
 
@@ -2620,7 +2641,7 @@ const { data } = await client.$getConditionalVariantVersion({
     "postal_code": "46045",
     "default": false
   },
-  "valid_from": "2027-01-01T00:00:00.000Z",
+  "valid_from": "2027-01-01",
   "values": {
     "unit_amount": 2499,
     "unit_amount_decimal": "24.99"
@@ -2656,7 +2677,7 @@ const { data } = await client.$replaceConditionalVariantVersion(
       unit_amount_decimal: '24.99'
     },
     _revision: 3,
-    valid_from: 'string',
+    valid_from: '1970-01-01',
     conditions: {
       postal_code: '46045'
     }
@@ -2676,7 +2697,7 @@ const { data } = await client.$replaceConditionalVariantVersion(
     "postal_code": "46045",
     "default": false
   },
-  "valid_from": "2027-01-01T00:00:00.000Z",
+  "valid_from": "2027-01-01",
   "values": {
     "unit_amount": 2499,
     "unit_amount_decimal": "24.99"
@@ -2721,7 +2742,7 @@ const { data } = await client.$patchConditionalVariantVersion(
       unit_amount_decimal: '24.99'
     },
     _revision: 3,
-    valid_from: 'string',
+    valid_from: '1970-01-01',
     conditions: {
       postal_code: '46045'
     }
@@ -2741,7 +2762,7 @@ const { data } = await client.$patchConditionalVariantVersion(
     "postal_code": "46045",
     "default": false
   },
-  "valid_from": "2027-01-01T00:00:00.000Z",
+  "valid_from": "2027-01-01",
   "values": {
     "unit_amount": 2499,
     "unit_amount_decimal": "24.99"
@@ -2791,7 +2812,7 @@ const { data } = await client.$deleteConditionalVariantVersion({
   "variant_id": "var-46045",
   "entity_id": "price-sp26d1yo",
   "schema": "product",
-  "valid_from": "2027-01-01T00:00:00.000Z",
+  "valid_from": "2027-01-01",
   "warnings": [
     {
       "code": "VARIANT_COUNT_APPROACHING_CAP",
@@ -2831,7 +2852,7 @@ const { data } = await client.$batchUpsertConditionalVariants(
           postal_code: '46045'
         },
         default: false,
-        valid_from: '2027-01-01T00:00:00Z',
+        valid_from: '2027-01-01',
         values: {
           unit_amount: 2499,
           unit_amount_decimal: '24.99'
@@ -2860,7 +2881,7 @@ const { data } = await client.$batchUpsertConditionalVariants(
       "outcome": "variant_created",
       "entity_id": "price-sp26d1yo",
       "variant_id": "var-46045",
-      "valid_from": "2027-01-01T00:00:00.000Z",
+      "valid_from": "2027-01-01",
       "warnings": [
         {
           "code": "VARIANT_COUNT_APPROACHING_CAP",
@@ -2904,7 +2925,7 @@ const { data } = await client.$batchDeleteConditionalVariants(
       {
         entity_id: 'price-sp26d1yo',
         variant_id: 'var-46045',
-        valid_from: '2027-01-01T00:00:00Z'
+        valid_from: '2027-01-01'
       }
     ]
   },
@@ -2927,7 +2948,7 @@ const { data } = await client.$batchDeleteConditionalVariants(
       "outcome": "deleted",
       "entity_id": "price-sp26d1yo",
       "variant_id": "var-46045",
-      "valid_from": "2027-01-01T00:00:00.000Z",
+      "valid_from": "2027-01-01",
       "warnings": [
         {
           "code": "VARIANT_COUNT_APPROACHING_CAP",
@@ -3052,6 +3073,17 @@ type ConditionalPricingOptIn = {
 }
 ```
 
+### `ConditionalPricingOrganization`
+
+```ts
+type ConditionalPricingOrganization = {
+  status: "NOT_ENABLED" | "DEPROVISIONING"
+} | {
+  status: "PROVISIONING" | "ACTIVE"
+  in_use: boolean
+}
+```
+
 ### `ConditionalPricingErrorCode`
 
 Machine-readable failure mode of a conditional-pricing operation, so a client can branch on
@@ -3061,7 +3093,7 @@ about what is already stored. Refusals raised by request validation carry no `co
 - `SCHEMA_NOT_FOUND` (
 
 ```ts
-type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_SOFT_DELETED" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE" | "OVERRIDE_VALUE_INVALID" | "CONDITIONAL_PRICING_NOT_ENABLED" | "CONDITIONAL_PRICING_NOT_READY"
+type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_SOFT_DELETED" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE" | "OVERRIDE_VALUE_INVALID" | "CONDITIONAL_PRICING_NOT_ENABLED" | "CONDITIONAL_PRICING_NOT_READY" | "CONDITIONAL_PRICING_IN_USE" | "CONDITIONAL_PRICING_OPT_OUT_IN_PROGRESS" | "CONDITIONAL_PRICING_OPT_IN_IN_PROGRESS"
 ```
 
 ### `ResolveConditionalEntityRequest`
@@ -3220,7 +3252,7 @@ type ResolvedVariants = {
   results: Array<{
     _id: string
     _variant_id: string
-    _version_valid_from: string
+    _version_valid_from: string // date
     _conditions: {
       default: { ... }
     }
@@ -3242,7 +3274,7 @@ applicable version's overrides applied — plus the discriminators below.
 type ResolvedVariant = {
   _id: string
   _variant_id: string
-  _version_valid_from: string
+  _version_valid_from: string // date
   _conditions: {
     default: boolean
   }
@@ -3265,7 +3297,7 @@ type CreateVariantRequest = {
     city: string
   }>
   default?: boolean
-  valid_from?: string
+  valid_from?: string // date
   values: Record<string, unknown>
 }
 ```
@@ -3332,8 +3364,9 @@ type PostalCodeFilter = {
 
 ### `ConditionDateRange`
 
-The value of a `daterange` condition. A bound that is absent, `null` or an empty string is an
-open end; stored, an open end is an empty string.
+The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and a date
+is midnight of that day in the organization's timezone. A bound that is absent, `null` or an
+empty string is an open end; stored, an open end is an empty string.
 
 
 ```ts
@@ -3408,7 +3441,9 @@ type ConditionPredicate = {
 
 ### `OrderedConditionOperand`
 
-A number, or a date as an RFC 3339 date or date-time.
+A number, or a date as an RFC 3339 date or date-time. A date is midnight of that day in the
+organization's timezone.
+
 
 ```ts
 type OrderedConditionOperand = number | string
@@ -3436,7 +3471,7 @@ type CreatedVariant = {
   conditions: {
     default: boolean
   }
-  valid_from: string
+  valid_from: string // date
   values: Record<string, unknown>
   _created_at: string
   _updated_at: string
@@ -3496,15 +3531,15 @@ type WriteWarning = {
   code: "ACTIVE_VERSION_CHANGED"
   message: string
   details: {
-    valid_from: string
-    active_valid_from?: string
+    valid_from: string // date
+    active_valid_from?: string // date
   }
 } | {
   code: "SUPERSEDED_VERSION_WRITTEN"
   message: string
   details: {
-    valid_from: string
-    active_valid_from?: string
+    valid_from: string // date
+    active_valid_from?: string // date
   }
 } | {
   code: "ATTRIBUTES_NOT_APPLIED"
@@ -3530,8 +3565,8 @@ Which version a write moved, and which one was in effect while it did.
 
 ```ts
 type VersionMoved = {
-  valid_from: string
-  active_valid_from?: string
+  valid_from: string // date
+  active_valid_from?: string // date
 }
 ```
 
@@ -3575,7 +3610,7 @@ type DeletedVariant = {
 
 ### `VariantVersion`
 
-One version of one variant: the overrides it carries, the instant it takes effect, and the
+One version of one variant: the overrides it carries, the date it takes effect, and the
 variant it belongs to. These are the version's own overrides; `:resolve` composes them onto
 the entity.
 
@@ -3588,7 +3623,7 @@ type VariantVersion = {
   conditions: {
     default: boolean
   }
-  valid_from: string
+  valid_from: string // date
   values: Record<string, unknown>
   _created_at: string
   _updated_at: string
@@ -3608,7 +3643,7 @@ type WrittenVariantVersion = {
   conditions: {
     default: boolean
   }
-  valid_from: string
+  valid_from: string // date
   values: Record<string, unknown>
   _created_at: string
   _updated_at: string
@@ -3657,7 +3692,7 @@ type DeletedVariantVersion = {
   variant_id: string
   entity_id: string
   schema: "product" | "price" | "coupon"
-  valid_from: string
+  valid_from: string // date
   warnings: Array<{
     code: "VARIANT_COUNT_APPROACHING_CAP"
     message: string
@@ -3699,7 +3734,7 @@ type DeletedVariantVersion = {
 
 ```ts
 type AppendVersionRequest = {
-  valid_from?: string
+  valid_from?: string // date
   values: Record<string, unknown>
   conditions?: Record<string, string | number | boolean | {
     from?: string
@@ -3717,7 +3752,7 @@ type AppendVersionRequest = {
 type ReplaceVersionRequest = {
   values: Record<string, unknown>
   _revision: number
-  valid_from?: string
+  valid_from?: string // date
   conditions?: Record<string, string | number | boolean | {
     from?: string
     until?: string
@@ -3734,7 +3769,7 @@ type ReplaceVersionRequest = {
 type PatchVersionRequest = {
   values: Record<string, unknown>
   _revision: number
-  valid_from?: string
+  valid_from?: string // date
   conditions?: Record<string, string | number | boolean | {
     from?: string
     until?: string
@@ -3930,7 +3965,7 @@ type VariantTreeRow = {
     conditions: {
       default: { ... }
     }
-    valid_from: string
+    valid_from: string // date
     values: Record<string, unknown>
     _created_at: string
     _updated_at: string
@@ -3942,8 +3977,9 @@ type VariantTreeRow = {
 
 Whether a tree row's version is the one in effect at `as_of`, or one still ahead of it.
 
-- `active`: the version with the latest `valid_from` at or before `as_of`
-- `scheduled`: the variant's first version, which is later than `as_of`
+- `active`: the version with the latest `valid_from` on or before `as_of`'s date in the
+  organization's timezone
+- `scheduled`: the variant's first version, which is later than that date
 
 
 ```ts
@@ -3964,7 +4000,7 @@ type VariantVersionSnapshot = {
   conditions: {
     default: boolean
   }
-  valid_from: string
+  valid_from: string // date
   values: Record<string, unknown>
   _created_at: string
   _updated_at: string
@@ -3982,7 +4018,7 @@ type VariantVersionList = {
     conditions: {
       default: { ... }
     }
-    valid_from: string
+    valid_from: string // date
     values: Record<string, unknown>
     _created_at: string
     _updated_at: string
@@ -4008,7 +4044,7 @@ type BatchUpsertVariantsRequest = {
       city: { ... }
     }>
     default?: boolean
-    valid_from?: string
+    valid_from?: string // date
     values: Record<string, unknown>
   }>
 }
@@ -4031,7 +4067,7 @@ type BatchUpsertItem = {
     city: string
   }>
   default?: boolean
-  valid_from?: string
+  valid_from?: string // date
   values: Record<string, unknown>
 }
 ```
@@ -4046,7 +4082,7 @@ type BatchDeleteVariantsRequest = {
   items: Array<{
     entity_id: string
     variant_id: string
-    valid_from?: string
+    valid_from?: string // date
   } | {
     entity_id: string
     conditions?: Record<string, string | number | boolean | {
@@ -4057,7 +4093,7 @@ type BatchDeleteVariantsRequest = {
       city: { ... }
     }>
     default?: boolean
-    valid_from?: string
+    valid_from?: string // date
   }>
 }
 ```
@@ -4073,7 +4109,7 @@ envelope `400`.
 type BatchDeleteItem = {
   entity_id: string
   variant_id: string
-  valid_from?: string
+  valid_from?: string // date
 } | {
   entity_id: string
   conditions?: Record<string, string | number | boolean | {
@@ -4084,7 +4120,7 @@ type BatchDeleteItem = {
     city: string
   }>
   default?: boolean
-  valid_from?: string
+  valid_from?: string // date
 }
 ```
 
@@ -4096,7 +4132,7 @@ A delete addressing its variant by id.
 type BatchDeleteByVariantId = {
   entity_id: string
   variant_id: string
-  valid_from?: string
+  valid_from?: string // date
 }
 ```
 
@@ -4119,7 +4155,7 @@ type BatchDeleteByConditions = {
     city: string
   }>
   default?: boolean
-  valid_from?: string
+  valid_from?: string // date
 }
 ```
 
@@ -4141,7 +4177,7 @@ type BatchUpsertResult = {
     outcome: "variant_created" | "version_created" | "updated" | "skipped" | "error"
     entity_id: string
     variant_id?: string
-    valid_from?: string
+    valid_from?: string // date
     warnings: Array<{
       code: { ... }
       message: { ... }
@@ -4189,7 +4225,7 @@ type BatchDeleteResult = {
     outcome: "deleted" | "skipped" | "error"
     entity_id: string
     variant_id?: string
-    valid_from?: string
+    valid_from?: string // date
     warnings: Array<{
       code: { ... }
       message: { ... }
@@ -4228,7 +4264,7 @@ What one upsert item did, derived from what was stored.
 - `variant_created`: the condition tuple was unknown, so a variant and its first version
   were created
 - `version_created`: the tuple was known and had no version at the item's `valid_from`
-- `updated`: a version existed at that exact instant
+- `updated`: a version existed on that exact date an
 
 ```ts
 type BatchUpsertOutcome = "variant_created" | "version_created" | "updated" | "skipped" | "error"
@@ -4286,7 +4322,7 @@ type BatchUpsertResultEntry = {
   outcome: "variant_created" | "version_created" | "updated" | "skipped" | "error"
   entity_id: string
   variant_id?: string
-  valid_from?: string
+  valid_from?: string // date
   warnings: Array<{
     code: "VARIANT_COUNT_APPROACHING_CAP"
     message: string
@@ -4339,7 +4375,7 @@ type BatchDeleteResultEntry = {
   outcome: "deleted" | "skipped" | "error"
   entity_id: string
   variant_id?: string
-  valid_from?: string
+  valid_from?: string // date
   warnings: Array<{
     code: "VARIANT_COUNT_APPROACHING_CAP"
     message: string
@@ -5192,6 +5228,30 @@ type ExternalFeeMapping = {
 }
 ```
 
+### `PublicCatalogSearch`
+
+A public catalog search payload
+
+```ts
+type PublicCatalogSearch = {
+  q: string
+  sort?: string
+  from?: number
+  size?: number
+  hydrate?: boolean
+  availability?: {
+    location: {
+      street?: { ... }
+      street_number?: { ... }
+      postal_code?: { ... }
+      city?: { ... }
+      country?: { ... }
+    }
+    available_date?: string // date
+  }
+}
+```
+
 ### `CatalogSearch`
 
 A catalog search payload
@@ -5203,7 +5263,6 @@ type CatalogSearch = {
   from?: number
   size?: number
   hydrate?: boolean
-  fields?: string[]
   availability?: {
     location: {
       street?: { ... }
@@ -5214,6 +5273,7 @@ type CatalogSearch = {
     }
     available_date?: string // date
   }
+  fields?: string[]
 }
 ```
 
@@ -5637,7 +5697,7 @@ type CatalogPair = {
     }>
     _id: string
     _variant_id: string
-    _version_valid_from: string
+    _version_valid_from: string // date
     _conditions: {
       default: { ... }
     }
@@ -5792,7 +5852,7 @@ type ResolvedPriceComponents = {
     _org_id?: string
     _tags?: string[]
     _variant_id: string
-    _version_valid_from: string
+    _version_valid_from: string // date
     _conditions: {
       default: { ... }
     }
@@ -5804,40 +5864,13 @@ type ResolvedPriceComponents = {
 }
 ```
 
-### `CatalogWarning`
-
-An entry the v2 catalog could not answer, or context conditions it ignored, and why. `details`
-is typed per `code`: narrow on `code` and the object under it declares exactly the fields that
-code sends.
-
-
-```ts
-type CatalogWarning = {
-  code: "CATALOG_ENTRY_NOT_FOUND"
-  message: string
-  details: {
-    product_id: string
-    price_id?: string
-    missing: "product" | "price"
-  }
-} | {
-  code: "CONTEXT_CONDITIONS_IGNORED"
-  message: string
-  details: {
-    entity_type: "product" | "price" | "coupon"
-    conditions: string[]
-  }
-}
-```
-
 ### `CatalogReference`
 
 Names the variant each member of a catalog pair was resolved from, and the instant `as_of`
 they were resolved at. Checkout prices each conditional member from that variant, using the
-version in effect at `as_of`.
+version in effect on `as_of`'s date in the organization's timezone.
 
-The catalog signs every reference, classic pair or not: `_meta` signs the rest of the
-
+The catalog signs every reference, classic pair 
 
 ```ts
 type CatalogReference = {

@@ -170,17 +170,15 @@ export declare namespace Components {
         }
         export interface AppendVersionRequest {
             /**
-             * When this version takes effect. Omit it to mean now; a timestamp read from the caller's
-             * own clock is already a backdate by the time the server judges it, and earns a warning.
-             *
-             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time, to at most
-             * millisecond precision. A date in the past is accepted; one the variant already has a
-             * version at is `VERSION_CONFLICT`.
+             * When this version takes effect. Omit it to mean today in the organization's timezone. A
+             * date in the past is accepted; one the variant already has a version on is `VERSION_CONFLICT`, which
+             * includes a second append without a date on the same day. Change that day's version
+             * with a replace or patch instead.
              *
              * example:
-             * 2027-01-01T00:00:00Z
+             * 2027-01-01
              */
-            valid_from?: string;
+            valid_from?: string; // date
             /**
              * The overrides this version carries. Attributes the variant may not override are seeded
              * from the version in effect at this version's own `valid_from`.
@@ -1012,7 +1010,7 @@ export declare namespace Components {
              *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
              *     }
              *   ],
-             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "as_of": "2026-12-20T11:15:00.000+01:00",
              *   "_meta": {
              *     "timestamp": 1797000000000,
              *     "signature": "c3ab8ff137"
@@ -1057,11 +1055,12 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
-                 * each conditional member's version at this instant.
+                 * The instant every member was resolved at, as an RFC 3339 date-time written in the
+                 * organization's offset. Checkout selects each conditional member's version by this
+                 * instant's date in the organization's timezone, as the catalog did.
                  *
                  * example:
-                 * 2026-12-20T10:15:00.000Z
+                 * 2026-12-20T11:15:00.000+01:00
                  */
                 as_of: string;
                 _meta?: /* Signature meta data payload */ SignatureMeta;
@@ -1441,7 +1440,7 @@ export declare namespace Components {
              *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
              *     }
              *   ],
-             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "as_of": "2026-12-20T11:15:00.000+01:00",
              *   "_meta": {
              *     "timestamp": 1797000000000,
              *     "signature": "c3ab8ff137"
@@ -1486,11 +1485,12 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
-                 * each conditional member's version at this instant.
+                 * The instant every member was resolved at, as an RFC 3339 date-time written in the
+                 * organization's offset. Checkout selects each conditional member's version by this
+                 * instant's date in the organization's timezone, as the catalog did.
                  *
                  * example:
-                 * 2026-12-20T10:15:00.000Z
+                 * 2026-12-20T11:15:00.000+01:00
                  */
                 as_of: string;
                 _meta?: /* Signature meta data payload */ SignatureMeta;
@@ -1750,7 +1750,7 @@ export declare namespace Components {
              *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
              *     }
              *   ],
-             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "as_of": "2026-12-20T11:15:00.000+01:00",
              *   "_meta": {
              *     "timestamp": 1797000000000,
              *     "signature": "c3ab8ff137"
@@ -1795,11 +1795,12 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
-                 * each conditional member's version at this instant.
+                 * The instant every member was resolved at, as an RFC 3339 date-time written in the
+                 * organization's offset. Checkout selects each conditional member's version by this
+                 * instant's date in the organization's timezone, as the catalog did.
                  *
                  * example:
-                 * 2026-12-20T10:15:00.000Z
+                 * 2026-12-20T11:15:00.000+01:00
                  */
                 as_of: string;
                 _meta?: /* Signature meta data payload */ SignatureMeta;
@@ -1987,9 +1988,12 @@ export declare namespace Components {
              *
              * Exact values only; predicates belong to reads. Values are stored canonicalized for their
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
-             * and `until` where an empty string is an open end, a `location` of format `postal_code` the
-             * postal code itself and one of format `postal_code_city` an object carrying `postal_code` and
-             * `city`.
+             * and `until` in that form where an empty string is an open end, a `location` of format
+             * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
+             * `postal_code` and `city`.
+             *
+             * A date-only `date` or `daterange` value is midnight of that day in the organization's
+             * timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.
              *
              * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
@@ -2004,13 +2008,11 @@ export declare namespace Components {
              */
             default?: boolean;
             /**
-             * The one version to remove, by the instant it takes effect. Omitted, the whole variant
-             * goes. An RFC 3339 date or date-time, canonicalized before it is matched.
-             *
+             * The one version to remove, by the date it takes effect. Omitted, the whole variant goes.
              * example:
-             * 2027-01-01T00:00:00Z
+             * 2027-01-01
              */
-            valid_from?: string;
+            valid_from?: string; // date
         }
         /**
          * A delete addressing its variant by id.
@@ -2029,13 +2031,11 @@ export declare namespace Components {
              */
             variant_id: string;
             /**
-             * The one version to remove, by the instant it takes effect. Omitted, the whole variant
-             * goes. An RFC 3339 date or date-time, canonicalized before it is matched.
-             *
+             * The one version to remove, by the date it takes effect. Omitted, the whole variant goes.
              * example:
-             * 2027-01-01T00:00:00Z
+             * 2027-01-01
              */
-            valid_from?: string;
+            valid_from?: string; // date
         }
         /**
          * How many items reached each outcome. Keyed by exactly the values of `BatchDeleteOutcome`,
@@ -2139,13 +2139,11 @@ export declare namespace Components {
              */
             variant_id?: string;
             /**
-             * The version this item removed, canonicalized to millisecond-precision UTC. Absent where
-             * the item removed the whole variant.
-             *
+             * The version this item removed. Absent where the item removed the whole variant.
              * example:
-             * 2027-01-01T00:00:00.000Z
+             * 2027-01-01
              */
-            valid_from?: string;
+            valid_from?: string; // date
             /**
              * Things worth knowing that did not stop this item's delete, chiefly which reads the
              * removal moved. Always present and possibly empty, on every outcome.
@@ -2431,11 +2429,11 @@ export declare namespace Components {
                      */
                     variant_id: string;
                     /**
-                     * The version the request addressed, by the instant it takes effect from.
+                     * The version the request addressed, by the date it takes effect from.
                      * example:
-                     * 2027-01-01T00:00:00.000Z
+                     * 2027-01-01
                      */
-                    valid_from: string;
+                    valid_from: string; // date
                 };
                 /**
                  * Error message
@@ -2513,9 +2511,11 @@ export declare namespace Components {
                      */
                     variant_id: string;
                     /**
-                     * The instant a version in effect was asked for at.
+                     * The `as_of` the version in effect was asked for, or the current time when
+                     * the request had none, written in the organization's offset.
+                     *
                      * example:
-                     * 2026-06-01T00:00:00.000Z
+                     * 2026-06-01T00:00:00.000+02:00
                      */
                     as_of: string;
                 };
@@ -2686,11 +2686,11 @@ export declare namespace Components {
                      */
                     variant_id: string;
                     /**
-                     * The instant already claimed by a version of that variant.
+                     * The date already claimed by a version of that variant.
                      * example:
-                     * 2027-01-01T00:00:00.000Z
+                     * 2027-01-01
                      */
-                    valid_from: string;
+                    valid_from: string; // date
                 };
                 /**
                  * Error message
@@ -3017,9 +3017,9 @@ export declare namespace Components {
                     /**
                      * The version the write addressed, where one was addressed.
                      * example:
-                     * 2027-01-01T00:00:00.000Z
+                     * 2027-01-01
                      */
-                    valid_from?: string;
+                    valid_from?: string; // date
                     /**
                      * The revision the write required the stored version to still be at.
                      * example:
@@ -3278,11 +3278,11 @@ export declare namespace Components {
                      */
                     variant_id: string;
                     /**
-                     * The version the delete addressed, by the instant it takes effect from.
+                     * The version the delete addressed, by the date it takes effect from.
                      * example:
-                     * 2027-01-01T00:00:00.000Z
+                     * 2027-01-01
                      */
-                    valid_from: string;
+                    valid_from: string; // date
                 };
                 /**
                  * Error message
@@ -3461,17 +3461,17 @@ export declare namespace Components {
                 code: "VALID_FROM_IMMUTABLE";
                 details: {
                     /**
-                     * The version the request addressed, by the instant it takes effect from.
+                     * The version the request addressed, by the date it takes effect from.
                      * example:
-                     * 2027-01-01T00:00:00.000Z
+                     * 2027-01-01
                      */
-                    addressed: string;
+                    addressed: string; // date
                     /**
-                     * The instant the body asked for instead, canonicalized.
+                     * The date the body asked for instead.
                      * example:
-                     * 2027-04-01T00:00:00.000Z
+                     * 2027-04-01
                      */
-                    requested: string;
+                    requested: string; // date
                 };
                 /**
                  * Error message
@@ -3578,9 +3578,9 @@ export declare namespace Components {
                 code: "VALID_FROM_INVALID";
                 details: {
                     /**
-                     * What a `valid_from` has to be, in prose.
+                     * What the value has to be, in prose.
                      * example:
-                     * an RFC 3339 date, optionally with a time to at most millisecond precision and an optional UTC offset
+                     * a calendar date, YYYY-MM-DD
                      */
                     expected: string;
                 };
@@ -3727,6 +3727,96 @@ export declare namespace Components {
                 }[];
             } | {
                 code: "CONDITIONAL_PRICING_NOT_READY";
+                details: {
+                    [key: string]: never;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITIONAL_PRICING_IN_USE";
+                details: {
+                    [key: string]: never;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITIONAL_PRICING_OPT_OUT_IN_PROGRESS";
+                details: {
+                    [key: string]: never;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITIONAL_PRICING_OPT_IN_IN_PROGRESS";
                 details: {
                     [key: string]: never;
                 };
@@ -4546,9 +4636,12 @@ export declare namespace Components {
              *
              * Exact values only; predicates belong to reads. Values are stored canonicalized for their
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
-             * and `until` where an empty string is an open end, a `location` of format `postal_code` the
-             * postal code itself and one of format `postal_code_city` an object carrying `postal_code` and
-             * `city`.
+             * and `until` in that form where an empty string is an open end, a `location` of format
+             * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
+             * `postal_code` and `city`.
+             *
+             * A date-only `date` or `daterange` value is midnight of that day in the organization's
+             * timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.
              *
              * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
@@ -4565,17 +4658,15 @@ export declare namespace Components {
              */
             default?: boolean;
             /**
-             * When the version this item writes takes effect. Omitted, it is a last-write-wins write
-             * with no `skipped` detection; a past instant is accepted and reported in this item's
-             * `warnings`.
-             *
-             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time, to at most
-             * millisecond precision.
+             * When the version this item writes takes effect. Omitted, it is today in the
+             * organization's timezone, and the item is a last-write-wins write with no `skipped` detection: it
+             * updates today's version where the variant has one. A past date is accepted and reported
+             * in this item's `warnings`.
              *
              * example:
-             * 2027-01-01T00:00:00Z
+             * 2027-01-01
              */
-            valid_from?: string;
+            valid_from?: string; // date
             values: /**
              * The values this version overrides on the base entity, keyed by entity field name.
              *
@@ -4605,7 +4696,7 @@ export declare namespace Components {
          * - `variant_created`: the condition tuple was unknown, so a variant and its first version
          *   were created
          * - `version_created`: the tuple was known and had no version at the item's `valid_from`
-         * - `updated`: a version existed at that exact instant and was written in place
+         * - `updated`: a version existed on that exact date and was written in place
          * - `skipped`: the values are identical to what is stored; not detected for an item without
          *   `valid_from`
          * - `error`: this item alone failed, and the entry's `error` says why
@@ -4643,7 +4734,7 @@ export declare namespace Components {
              * - `variant_created`: the condition tuple was unknown, so a variant and its first version
              *   were created
              * - `version_created`: the tuple was known and had no version at the item's `valid_from`
-             * - `updated`: a version existed at that exact instant and was written in place
+             * - `updated`: a version existed on that exact date and was written in place
              * - `skipped`: the values are identical to what is stored; not detected for an item without
              *   `valid_from`
              * - `error`: this item alone failed, and the entry's `error` says why
@@ -4663,13 +4754,13 @@ export declare namespace Components {
              */
             variant_id?: string;
             /**
-             * The version this item wrote, canonicalized to millisecond-precision UTC. Present on
-             * every outcome but `error`, including for an item that sent none.
+             * The version this item wrote. Present on every outcome but `error`, including for an
+             * item that sent none.
              *
              * example:
-             * 2027-01-01T00:00:00.000Z
+             * 2027-01-01
              */
-            valid_from?: string;
+            valid_from?: string; // date
             /**
              * Things worth knowing that did not stop this item's write. Always present and possibly
              * empty, on every outcome. Fires per item, with no batch-level deduplication.
@@ -4965,11 +5056,11 @@ export declare namespace Components {
                      */
                     variant_id: string;
                     /**
-                     * The version the request addressed, by the instant it takes effect from.
+                     * The version the request addressed, by the date it takes effect from.
                      * example:
-                     * 2027-01-01T00:00:00.000Z
+                     * 2027-01-01
                      */
-                    valid_from: string;
+                    valid_from: string; // date
                 };
                 /**
                  * Error message
@@ -5051,9 +5142,11 @@ export declare namespace Components {
                      */
                     variant_id: string;
                     /**
-                     * The instant a version in effect was asked for at.
+                     * The `as_of` the version in effect was asked for, or the current time when
+                     * the request had none, written in the organization's offset.
+                     *
                      * example:
-                     * 2026-06-01T00:00:00.000Z
+                     * 2026-06-01T00:00:00.000+02:00
                      */
                     as_of: string;
                 };
@@ -5230,11 +5323,11 @@ export declare namespace Components {
                      */
                     variant_id: string;
                     /**
-                     * The instant already claimed by a version of that variant.
+                     * The date already claimed by a version of that variant.
                      * example:
-                     * 2027-01-01T00:00:00.000Z
+                     * 2027-01-01
                      */
-                    valid_from: string;
+                    valid_from: string; // date
                 };
                 /**
                  * Error message
@@ -5577,9 +5670,9 @@ export declare namespace Components {
                     /**
                      * The version the write addressed, where one was addressed.
                      * example:
-                     * 2027-01-01T00:00:00.000Z
+                     * 2027-01-01
                      */
-                    valid_from?: string;
+                    valid_from?: string; // date
                     /**
                      * The revision the write required the stored version to still be at.
                      * example:
@@ -5850,11 +5943,11 @@ export declare namespace Components {
                      */
                     variant_id: string;
                     /**
-                     * The version the delete addressed, by the instant it takes effect from.
+                     * The version the delete addressed, by the date it takes effect from.
                      * example:
-                     * 2027-01-01T00:00:00.000Z
+                     * 2027-01-01
                      */
-                    valid_from: string;
+                    valid_from: string; // date
                 };
                 /**
                  * Error message
@@ -6043,17 +6136,17 @@ export declare namespace Components {
                 code: "VALID_FROM_IMMUTABLE";
                 details: {
                     /**
-                     * The version the request addressed, by the instant it takes effect from.
+                     * The version the request addressed, by the date it takes effect from.
                      * example:
-                     * 2027-01-01T00:00:00.000Z
+                     * 2027-01-01
                      */
-                    addressed: string;
+                    addressed: string; // date
                     /**
-                     * The instant the body asked for instead, canonicalized.
+                     * The date the body asked for instead.
                      * example:
-                     * 2027-04-01T00:00:00.000Z
+                     * 2027-04-01
                      */
-                    requested: string;
+                    requested: string; // date
                 };
                 /**
                  * Error message
@@ -6166,9 +6259,9 @@ export declare namespace Components {
                 code: "VALID_FROM_INVALID";
                 details: {
                     /**
-                     * What a `valid_from` has to be, in prose.
+                     * What the value has to be, in prose.
                      * example:
-                     * an RFC 3339 date, optionally with a time to at most millisecond precision and an optional UTC offset
+                     * a calendar date, YYYY-MM-DD
                      */
                     expected: string;
                 };
@@ -6323,6 +6416,102 @@ export declare namespace Components {
                 }[];
             } | {
                 code: "CONDITIONAL_PRICING_NOT_READY";
+                details: {
+                    [key: string]: never;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITIONAL_PRICING_IN_USE";
+                details: {
+                    [key: string]: never;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITIONAL_PRICING_OPT_OUT_IN_PROGRESS";
+                details: {
+                    [key: string]: never;
+                };
+                /**
+                 * Error message
+                 */
+                message: string;
+                /**
+                 * The HTTP status code
+                 */
+                status?: number;
+                /**
+                 * The cause of the error (visible for bad requests - http 400)
+                 */
+                cause?: string;
+                /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                error?: /**
+                 * What went wrong. The same string as `message`, except on a request-validation
+                 * failure, which puts the list of validation errors here instead.
+                 *
+                 */
+                string | {
+                    [name: string]: any;
+                }[] | string | {
+                    [name: string]: any;
+                }[];
+            } | {
+                code: "CONDITIONAL_PRICING_OPT_IN_IN_PROGRESS";
                 details: {
                     [key: string]: never;
                 };
@@ -7113,6 +7302,11 @@ export declare namespace Components {
              * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
              * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
              *
+             * A `date` or `daterange` value is an RFC 3339 date or date-time. A date is midnight of that day
+             * in the organization's timezone and a date-time keeps the moment it names, so
+             * `2026-03-31T23:30:00Z`, already 1 April in Berlin, falls inside a range pinned from
+             * `2026-04-01`.
+             *
              * An `in` list carries at most 50,000 values. A `string` or `select` matches exactly and
              * case-sensitively. A `location` of format
              * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
@@ -7143,6 +7337,11 @@ export declare namespace Components {
              * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
              * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
              *
+             * A `date` or `daterange` value is an RFC 3339 date or date-time. A date is midnight of that day
+             * in the organization's timezone and a date-time keeps the moment it names, so
+             * `2026-03-31T23:30:00Z`, already 1 April in Berlin, falls inside a range pinned from
+             * `2026-04-01`.
+             *
              * An `in` list carries at most 50,000 values. A `string` or `select` matches exactly and
              * case-sensitively. A `location` of format
              * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
@@ -7172,6 +7371,11 @@ export declare namespace Components {
              * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
              * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
              * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
+             *
+             * A `date` or `daterange` value is an RFC 3339 date or date-time. A date is midnight of that day
+             * in the organization's timezone and a date-time keeps the moment it names, so
+             * `2026-03-31T23:30:00Z`, already 1 April in Berlin, falls inside a range pinned from
+             * `2026-04-01`.
              *
              * An `in` list carries at most 50,000 values. A `string` or `select` matches exactly and
              * case-sensitively. A `location` of format
@@ -7545,9 +7749,9 @@ export declare namespace Components {
                 /**
                  * The `valid_from` of the version applied for the requested `as_of`.
                  * example:
-                 * 2027-01-01T00:00:00.000Z
+                 * 2027-01-01
                  */
-                _version_valid_from: string;
+                _version_valid_from: string; // date
                 /**
                  * The conditions this variant pins, plus the boolean `default` discriminator.
                  * example:
@@ -7789,9 +7993,9 @@ export declare namespace Components {
                 /**
                  * The `valid_from` of the version applied for the requested `as_of`.
                  * example:
-                 * 2027-01-01T00:00:00.000Z
+                 * 2027-01-01
                  */
-                _version_valid_from: string;
+                _version_valid_from: string; // date
                 /**
                  * The conditions this variant pins, plus the boolean `default` discriminator.
                  * example:
@@ -7980,9 +8184,9 @@ export declare namespace Components {
                 /**
                  * The `valid_from` of the version applied for the requested `as_of`.
                  * example:
-                 * 2027-01-01T00:00:00.000Z
+                 * 2027-01-01
                  */
-                _version_valid_from: string;
+                _version_valid_from: string; // date
                 /**
                  * The conditions this variant pins, plus the boolean `default` discriminator.
                  * example:
@@ -8230,7 +8434,7 @@ export declare namespace Components {
             catalog_reference: /**
              * Names the variant each member of a catalog pair was resolved from, and the instant `as_of`
              * they were resolved at. Checkout prices each conditional member from that variant, using the
-             * version in effect at `as_of`.
+             * version in effect on `as_of`'s date in the organization's timezone.
              *
              * The catalog signs every reference, classic pair or not: `_meta` signs the rest of the
              * reference. Where the caller is public, a reference must verify. An authenticated caller may
@@ -8261,7 +8465,7 @@ export declare namespace Components {
              *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
              *     }
              *   ],
-             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "as_of": "2026-12-20T11:15:00.000+01:00",
              *   "_meta": {
              *     "timestamp": 1797000000000,
              *     "signature": "c3ab8ff137"
@@ -8273,7 +8477,7 @@ export declare namespace Components {
         /**
          * Names the variant each member of a catalog pair was resolved from, and the instant `as_of`
          * they were resolved at. Checkout prices each conditional member from that variant, using the
-         * version in effect at `as_of`.
+         * version in effect on `as_of`'s date in the organization's timezone.
          *
          * The catalog signs every reference, classic pair or not: `_meta` signs the rest of the
          * reference. Where the caller is public, a reference must verify. An authenticated caller may
@@ -8304,7 +8508,7 @@ export declare namespace Components {
          *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
          *     }
          *   ],
-         *   "as_of": "2026-12-20T10:15:00.000Z",
+         *   "as_of": "2026-12-20T11:15:00.000+01:00",
          *   "_meta": {
          *     "timestamp": 1797000000000,
          *     "signature": "c3ab8ff137"
@@ -8349,11 +8553,12 @@ export declare namespace Components {
              */
             CatalogReferenceMember[];
             /**
-             * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
-             * each conditional member's version at this instant.
+             * The instant every member was resolved at, as an RFC 3339 date-time written in the
+             * organization's offset. Checkout selects each conditional member's version by this
+             * instant's date in the organization's timezone, as the catalog did.
              *
              * example:
-             * 2026-12-20T10:15:00.000Z
+             * 2026-12-20T11:15:00.000+01:00
              */
             as_of: string;
             _meta?: /* Signature meta data payload */ SignatureMeta;
@@ -8435,15 +8640,15 @@ export declare namespace Components {
                  */
                 entity_id: string;
                 /**
-                 * The variant the reference addressed.
+                 * The variant the reference addressed; absent for a classic member.
                  * example:
                  * var-46045
                  */
-                variant_id: string;
+                variant_id?: string;
                 /**
                  * The instant the reference names.
                  * example:
-                 * 2026-12-20T10:15:00.000Z
+                 * 2026-12-20T11:15:00.000+01:00
                  */
                 as_of: string;
             };
@@ -8551,6 +8756,7 @@ export declare namespace Components {
              * When true, enables entity hydration to resolve nested $relation references in-place.
              */
             hydrate?: boolean;
+            availability?: /* Availability filters dimensions */ AvailabilityFilters;
             fields?: /**
              * List of entity fields to include or exclude from the results.
              *
@@ -8561,7 +8767,6 @@ export declare namespace Components {
              * ]
              */
             CatalogFieldsParam;
-            availability?: /* Availability filters dimensions */ AvailabilityFilters;
         }
         /**
          * The query result payload
@@ -8723,53 +8928,6 @@ export declare namespace Components {
              */
             Coupon)[];
         }
-        /**
-         * An entry the v2 catalog could not answer, or context conditions it ignored, and why. `details`
-         * is typed per `code`: narrow on `code` and the object under it declares exactly the fields that
-         * code sends.
-         *
-         */
-        export type CatalogWarning = /**
-         * An entry the v2 catalog could not answer, or context conditions it ignored, and why. `details`
-         * is typed per `code`: narrow on `code` and the object under it declares exactly the fields that
-         * code sends.
-         *
-         */
-        {
-            code: "CATALOG_ENTRY_NOT_FOUND";
-            message: string;
-            details: {
-                /**
-                 * The entry's product id, as sent.
-                 * example:
-                 * product-heatpump-2027
-                 */
-                product_id: string;
-                /**
-                 * The entry's price id, as sent. Absent when the entry named none.
-                 * example:
-                 * price-retired
-                 */
-                price_id?: string;
-                /**
-                 * Which of the entry's ids found nothing.
-                 */
-                missing: "product" | "price";
-            };
-        } | {
-            code: "CONTEXT_CONDITIONS_IGNORED";
-            message: string;
-            details: {
-                entity_type: "product" | "price" | "coupon";
-                /**
-                 * example:
-                 * [
-                 *   "customer_segment"
-                 * ]
-                 */
-                conditions: string[];
-            };
-        };
         /**
          * The cart checkout request payload
          */
@@ -10095,7 +10253,7 @@ export declare namespace Components {
              *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
              *     }
              *   ],
-             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "as_of": "2026-12-20T11:15:00.000+01:00",
              *   "_meta": {
              *     "timestamp": 1797000000000,
              *     "signature": "c3ab8ff137"
@@ -10140,11 +10298,12 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
-                 * each conditional member's version at this instant.
+                 * The instant every member was resolved at, as an RFC 3339 date-time written in the
+                 * organization's offset. Checkout selects each conditional member's version by this
+                 * instant's date in the organization's timezone, as the catalog did.
                  *
                  * example:
-                 * 2026-12-20T10:15:00.000Z
+                 * 2026-12-20T11:15:00.000+01:00
                  */
                 as_of: string;
                 _meta?: /* Signature meta data payload */ SignatureMeta;
@@ -10795,7 +10954,7 @@ export declare namespace Components {
              *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
              *     }
              *   ],
-             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "as_of": "2026-12-20T11:15:00.000+01:00",
              *   "_meta": {
              *     "timestamp": 1797000000000,
              *     "signature": "c3ab8ff137"
@@ -10840,11 +10999,12 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
-                 * each conditional member's version at this instant.
+                 * The instant every member was resolved at, as an RFC 3339 date-time written in the
+                 * organization's offset. Checkout selects each conditional member's version by this
+                 * instant's date in the organization's timezone, as the catalog did.
                  *
                  * example:
-                 * 2026-12-20T10:15:00.000Z
+                 * 2026-12-20T11:15:00.000+01:00
                  */
                 as_of: string;
                 _meta?: /* Signature meta data payload */ SignatureMeta;
@@ -11268,8 +11428,9 @@ export declare namespace Components {
             [name: string]: /* The computed price */ ComputedBasePrice;
         }
         /**
-         * The value of a `daterange` condition. A bound that is absent, `null` or an empty string is an
-         * open end; stored, an open end is an empty string.
+         * The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and a date
+         * is midnight of that day in the organization's timezone. A bound that is absent, `null` or an
+         * empty string is an open end; stored, an open end is an empty string.
          *
          */
         export interface ConditionDateRange {
@@ -11355,18 +11516,40 @@ export declare namespace Components {
          * A single-operator predicate.
          */
         export type ConditionPredicate = /* A single-operator predicate. */ {
-            lt: /* A number, or a date as an RFC 3339 date or date-time. */ OrderedConditionOperand;
+            lt: /**
+             * A number, or a date as an RFC 3339 date or date-time. A date is midnight of that day in the
+             * organization's timezone.
+             *
+             */
+            OrderedConditionOperand;
         } | {
-            lte: /* A number, or a date as an RFC 3339 date or date-time. */ OrderedConditionOperand;
+            lte: /**
+             * A number, or a date as an RFC 3339 date or date-time. A date is midnight of that day in the
+             * organization's timezone.
+             *
+             */
+            OrderedConditionOperand;
         } | {
-            gt: /* A number, or a date as an RFC 3339 date or date-time. */ OrderedConditionOperand;
+            gt: /**
+             * A number, or a date as an RFC 3339 date or date-time. A date is midnight of that day in the
+             * organization's timezone.
+             *
+             */
+            OrderedConditionOperand;
         } | {
-            gte: /* A number, or a date as an RFC 3339 date or date-time. */ OrderedConditionOperand;
+            gte: /**
+             * A number, or a date as an RFC 3339 date or date-time. A date is midnight of that day in the
+             * organization's timezone.
+             *
+             */
+            OrderedConditionOperand;
         } | {
             in: (string | number)[];
         } | {
             /**
-             * The instant a `daterange` condition's range must contain.
+             * The instant a `daterange` condition's range must contain. A date is midnight of that day
+             * in the organization's timezone.
+             *
              */
             between: string;
         } | {
@@ -11721,11 +11904,11 @@ export declare namespace Components {
                  */
                 variant_id: string;
                 /**
-                 * The version the request addressed, by the instant it takes effect from.
+                 * The version the request addressed, by the date it takes effect from.
                  * example:
-                 * 2027-01-01T00:00:00.000Z
+                 * 2027-01-01
                  */
-                valid_from: string;
+                valid_from: string; // date
             };
             /**
              * Error message
@@ -11811,9 +11994,11 @@ export declare namespace Components {
                  */
                 variant_id: string;
                 /**
-                 * The instant a version in effect was asked for at.
+                 * The `as_of` the version in effect was asked for, or the current time when
+                 * the request had none, written in the organization's offset.
+                 *
                  * example:
-                 * 2026-06-01T00:00:00.000Z
+                 * 2026-06-01T00:00:00.000+02:00
                  */
                 as_of: string;
             };
@@ -11996,11 +12181,11 @@ export declare namespace Components {
                  */
                 variant_id: string;
                 /**
-                 * The instant already claimed by a version of that variant.
+                 * The date already claimed by a version of that variant.
                  * example:
-                 * 2027-01-01T00:00:00.000Z
+                 * 2027-01-01
                  */
-                valid_from: string;
+                valid_from: string; // date
             };
             /**
              * Error message
@@ -12359,9 +12544,9 @@ export declare namespace Components {
                 /**
                  * The version the write addressed, where one was addressed.
                  * example:
-                 * 2027-01-01T00:00:00.000Z
+                 * 2027-01-01
                  */
-                valid_from?: string;
+                valid_from?: string; // date
                 /**
                  * The revision the write required the stored version to still be at.
                  * example:
@@ -12644,11 +12829,11 @@ export declare namespace Components {
                  */
                 variant_id: string;
                 /**
-                 * The version the delete addressed, by the instant it takes effect from.
+                 * The version the delete addressed, by the date it takes effect from.
                  * example:
-                 * 2027-01-01T00:00:00.000Z
+                 * 2027-01-01
                  */
-                valid_from: string;
+                valid_from: string; // date
             };
             /**
              * Error message
@@ -12847,17 +13032,17 @@ export declare namespace Components {
             code: "VALID_FROM_IMMUTABLE";
             details: {
                 /**
-                 * The version the request addressed, by the instant it takes effect from.
+                 * The version the request addressed, by the date it takes effect from.
                  * example:
-                 * 2027-01-01T00:00:00.000Z
+                 * 2027-01-01
                  */
-                addressed: string;
+                addressed: string; // date
                 /**
-                 * The instant the body asked for instead, canonicalized.
+                 * The date the body asked for instead.
                  * example:
-                 * 2027-04-01T00:00:00.000Z
+                 * 2027-04-01
                  */
-                requested: string;
+                requested: string; // date
             };
             /**
              * Error message
@@ -12976,9 +13161,9 @@ export declare namespace Components {
             code: "VALID_FROM_INVALID";
             details: {
                 /**
-                 * What a `valid_from` has to be, in prose.
+                 * What the value has to be, in prose.
                  * example:
-                 * an RFC 3339 date, optionally with a time to at most millisecond precision and an optional UTC offset
+                 * a calendar date, YYYY-MM-DD
                  */
                 expected: string;
             };
@@ -13174,6 +13359,108 @@ export declare namespace Components {
                 [name: string]: any;
             }[];
         } | {
+            code: "CONDITIONAL_PRICING_IN_USE";
+            details: {
+                [key: string]: never;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CONDITIONAL_PRICING_OPT_OUT_IN_PROGRESS";
+            details: {
+                [key: string]: never;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
+            code: "CONDITIONAL_PRICING_OPT_IN_IN_PROGRESS";
+            details: {
+                [key: string]: never;
+            };
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The HTTP status code
+             */
+            status?: number;
+            /**
+             * The cause of the error (visible for bad requests - http 400)
+             */
+            cause?: string;
+            /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            error?: /**
+             * What went wrong. The same string as `message`, except on a request-validation
+             * failure, which puts the list of validation errors here instead.
+             *
+             */
+            string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[] | string | {
+                [name: string]: any;
+            }[];
+        } | {
             /**
              * Error message
              */
@@ -13231,14 +13518,17 @@ export declare namespace Components {
          * - `VALID_FROM_IMMUTABLE` (400): a version write asks for a different `valid_from` than the version its own address names
          * - `VARIANT_CONDITIONS_IMMUTABLE` (409): a version write carries a condition tuple other than the one its variant was created with
          * - `IDENTIFIER_INVALID` (400): an id in the request cannot be used as a storage key — empty, carrying an unsupported character, or longer than 128 characters
-         * - `VALID_FROM_INVALID` (400): a `valid_from` is not one of the timestamp forms a version timeline can be sorted by
+         * - `VALID_FROM_INVALID` (400): a `valid_from` is shaped like a date but is not a calendar date, or an `as_of` cannot be read
          * - `VALUE_UNSTORABLE` (400): a write carries a value the store cannot hold, such as a non-finite number or one outside the table's numeric range
          * - `OVERRIDE_VALUE_INVALID` (400): a write overrides a `currency` or `number` field, or an amount/decimal pair, with a value of the wrong type
          * - `CONDITIONAL_PRICING_NOT_ENABLED` (403): the organization has not opted in to Conditional Pricing
          * - `CONDITIONAL_PRICING_NOT_READY` (409): the organization opted in minutes ago and a variant cannot be created until its setup finishes
+         * - `CONDITIONAL_PRICING_IN_USE` (409): an opt-out was refused because an entity is flagged `is_conditional`, soft-deleted ones included, or a variant exists
+         * - `CONDITIONAL_PRICING_OPT_OUT_IN_PROGRESS` (409): an opt-in was refused because the organization's last opt-out is still deleting its search collection
+         * - `CONDITIONAL_PRICING_OPT_IN_IN_PROGRESS` (409): an opt-out was refused because the organization's opt-in is still setting up its search collection
          *
          */
-        export type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_SOFT_DELETED" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE" | "OVERRIDE_VALUE_INVALID" | "CONDITIONAL_PRICING_NOT_ENABLED" | "CONDITIONAL_PRICING_NOT_READY";
+        export type ConditionalPricingErrorCode = "SCHEMA_NOT_FOUND" | "ENTITY_NOT_FOUND" | "ENTITY_TYPE_MISMATCH" | "ENTITY_SOFT_DELETED" | "ENTITY_NOT_CONDITIONAL" | "VARIANT_NOT_FOUND" | "VERSION_NOT_FOUND" | "NO_MATCHES" | "NO_ACTIVE_VERSION" | "AMBIGUOUS_RESOLUTION" | "TUPLE_CONFLICT" | "VERSION_CONFLICT" | "CONDITION_UNDEFINED" | "VARIANT_PIN_UNDECLARED" | "OPERATOR_UNSUPPORTED" | "CONTEXT_FORMAT_INVALID" | "CONDITION_VALUE_INVALID" | "CONDITION_UNCONFIGURED" | "TOO_MANY_MATCHES" | "WRITE_CONFLICT" | "OFFSET_WINDOW_EXCEEDED" | "CURSOR_INVALID" | "VARIANT_LIMIT_REACHED" | "PIN_FORMAT_INVALID" | "VARIANT_UNPINNED" | "LAST_VERSION_UNDELETABLE" | "CONDITION_UNREADABLE" | "SORT_INVALID" | "DEFAULT_MARKER_RESERVED" | "DEFAULT_VARIANT_PINS_CONDITIONS" | "VALID_FROM_IMMUTABLE" | "VARIANT_CONDITIONS_IMMUTABLE" | "IDENTIFIER_INVALID" | "VALID_FROM_INVALID" | "VALUE_UNSTORABLE" | "OVERRIDE_VALUE_INVALID" | "CONDITIONAL_PRICING_NOT_ENABLED" | "CONDITIONAL_PRICING_NOT_READY" | "CONDITIONAL_PRICING_IN_USE" | "CONDITIONAL_PRICING_OPT_OUT_IN_PROGRESS" | "CONDITIONAL_PRICING_OPT_IN_IN_PROGRESS";
         export interface ConditionalPricingOptIn {
             /**
              * - `PROVISIONING`: the organization's search collection is still being set up, and
@@ -13248,6 +13538,31 @@ export declare namespace Components {
              */
             status: "PROVISIONING" | "ACTIVE";
         }
+        export type ConditionalPricingOrganization = {
+            /**
+             * - `NOT_ENABLED`: the organization has not turned Conditional Pricing on.
+             * - `DEPROVISIONING`: the organization's search collection is being deleted, after an
+             *   opt-out or a failed setup. The organization is already opted out, and turning
+             *   Conditional Pricing on is refused until the deletion has finished.
+             *
+             */
+            status: "NOT_ENABLED" | "DEPROVISIONING";
+        } | {
+            /**
+             * - `PROVISIONING`: the organization's search collection is still being set up, and
+             *   creating a variant is refused with `CONDITIONAL_PRICING_NOT_READY`.
+             * - `ACTIVE`: setup has finished.
+             *
+             */
+            status: "PROVISIONING" | "ACTIVE";
+            /**
+             * `true` while any of the organization's entities is flagged `is_conditional`,
+             * soft-deleted ones included, or any variant exists. Turning Conditional Pricing off is
+             * refused while it is `true`.
+             *
+             */
+            in_use: boolean;
+        };
         export type ConsumptionTypeGetAg = "household" | "heating_pump" | "night_storage_heating" | "night_storage_heating_common_meter";
         /**
          * One condition's value in a resolve context or listing filter: an exact value, or a predicate.
@@ -13618,9 +13933,12 @@ export declare namespace Components {
              *
              * Exact values only; predicates belong to reads. Values are stored canonicalized for their
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
-             * and `until` where an empty string is an open end, a `location` of format `postal_code` the
-             * postal code itself and one of format `postal_code_city` an object carrying `postal_code` and
-             * `city`.
+             * and `until` in that form where an empty string is an open end, a `location` of format
+             * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
+             * `postal_code` and `city`.
+             *
+             * A date-only `date` or `daterange` value is midnight of that day in the organization's
+             * timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.
              *
              * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
@@ -13638,13 +13956,11 @@ export declare namespace Components {
              */
             default?: boolean;
             /**
-             * When the first version takes effect. Defaults to now. An RFC 3339 date (`2026-01-01`,
-             * read as midnight UTC) or date-time, to at most millisecond precision.
-             *
+             * When the first version takes effect. Defaults to today in the organization's timezone.
              * example:
-             * 2027-01-01T00:00:00Z
+             * 2027-01-01
              */
-            valid_from?: string;
+            valid_from?: string; // date
             values: /**
              * The values this version overrides on the base entity, keyed by entity field name.
              *
@@ -13699,11 +14015,11 @@ export declare namespace Components {
                 default: boolean;
             };
             /**
-             * When the first version takes effect, canonicalized to millisecond-precision UTC.
+             * When the first version takes effect.
              * example:
-             * 2027-01-01T00:00:00.000Z
+             * 2027-01-01
              */
-            valid_from: string;
+            valid_from: string; // date
             values: /**
              * The values this version overrides on the base entity, keyed by entity field name.
              *
@@ -13813,11 +14129,11 @@ export declare namespace Components {
             entity_id: string;
             schema: /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ ConditionalEntitySlug;
             /**
-             * The version removed, canonicalized to millisecond-precision UTC.
+             * The version removed.
              * example:
-             * 2027-01-01T00:00:00.000Z
+             * 2027-01-01
              */
-            valid_from: string;
+            valid_from: string; // date
             /**
              * What the delete moved. Always present, and empty when a scheduled version was withdrawn.
              */
@@ -15088,8 +15404,9 @@ export declare namespace Components {
              */
             search?: string;
             /**
-             * `conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`
-             * or `date` pin. `variant_id:asc` is always appended, so the order is total.
+             * `conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,
+             * `date` or `location` pin. A location orders by postal code, then by city ignoring case.
+             * `variant_id:asc` is always appended, so the order is total.
              *
              * example:
              * conditions.postal_code:asc
@@ -16495,9 +16812,16 @@ export declare namespace Components {
          */
         export type OrderStatus = "draft" | "quote" | "placed" | "cancelled" | "completed";
         /**
-         * A number, or a date as an RFC 3339 date or date-time.
+         * A number, or a date as an RFC 3339 date or date-time. A date is midnight of that day in the
+         * organization's timezone.
+         *
          */
-        export type OrderedConditionOperand = /* A number, or a date as an RFC 3339 date or date-time. */ number | string;
+        export type OrderedConditionOperand = /**
+         * A number, or a date as an RFC 3339 date or date-time. A date is midnight of that day in the
+         * organization's timezone.
+         *
+         */
+        number | string;
         export interface PatchVersionRequest {
             /**
              * Only the overrides to change; everything not mentioned is left as stored. `null` sets a
@@ -16523,7 +16847,7 @@ export declare namespace Components {
             /**
              * Accepted only when it names the version being addressed.
              */
-            valid_from?: string;
+            valid_from?: string; // date
             /**
              * Accepted only unchanged. A variant's conditions are fixed when it is created.
              * example:
@@ -16567,8 +16891,9 @@ export declare namespace Components {
          *
          */
         string | number | boolean | /**
-         * The value of a `daterange` condition. A bound that is absent, `null` or an empty string is an
-         * open end; stored, an open end is an empty string.
+         * The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and a date
+         * is midnight of that day in the organization's timezone. A bound that is absent, `null` or an
+         * empty string is an open end; stored, an open end is an empty string.
          *
          */
         ConditionDateRange | /**
@@ -16584,9 +16909,12 @@ export declare namespace Components {
          *
          * Exact values only; predicates belong to reads. Values are stored canonicalized for their
          * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
-         * and `until` where an empty string is an open end, a `location` of format `postal_code` the
-         * postal code itself and one of format `postal_code_city` an object carrying `postal_code` and
-         * `city`.
+         * and `until` in that form where an empty string is an open end, a `location` of format
+         * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
+         * `postal_code` and `city`.
+         *
+         * A date-only `date` or `daterange` value is midnight of that day in the organization's
+         * timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.
          *
          * `default` and names beginning with `_` are reserved; use the request's `default` flag.
          *
@@ -16615,7 +16943,10 @@ export declare namespace Components {
              * relation this variant's version replaced is hydrated too.
              *
              * A referenced entity that is itself conditional is returned unresolved, carrying its own
-             * flag. Costs one fetch per distinct referenced entity, with no per-attribute limit.
+             * flag. At most the first 60 references of each relation attribute are fetched, as an
+             * entity read with hydration fetches them; a reference past them comes back as
+             * `{ _id, $relation }`, unless another attribute's first 60 name the same entity. Costs one
+             * fetch per distinct referenced entity.
              *
              */
             hydrate?: boolean;
@@ -17553,7 +17884,7 @@ export declare namespace Components {
              *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
              *     }
              *   ],
-             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "as_of": "2026-12-20T11:15:00.000+01:00",
              *   "_meta": {
              *     "timestamp": 1797000000000,
              *     "signature": "c3ab8ff137"
@@ -17598,11 +17929,12 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
-                 * each conditional member's version at this instant.
+                 * The instant every member was resolved at, as an RFC 3339 date-time written in the
+                 * organization's offset. Checkout selects each conditional member's version by this
+                 * instant's date in the organization's timezone, as the catalog did.
                  *
                  * example:
-                 * 2026-12-20T10:15:00.000Z
+                 * 2026-12-20T11:15:00.000+01:00
                  */
                 as_of: string;
                 _meta?: /* Signature meta data payload */ SignatureMeta;
@@ -18040,7 +18372,7 @@ export declare namespace Components {
              *       "id": "0f8c4852-23fa-4a64-a2f3-88702335f094"
              *     }
              *   ],
-             *   "as_of": "2026-12-20T10:15:00.000Z",
+             *   "as_of": "2026-12-20T11:15:00.000+01:00",
              *   "_meta": {
              *     "timestamp": 1797000000000,
              *     "signature": "c3ab8ff137"
@@ -18085,11 +18417,12 @@ export declare namespace Components {
                  */
                 CatalogReferenceMember[];
                 /**
-                 * The instant every member was resolved at, as an RFC 3339 date-time. Checkout selects
-                 * each conditional member's version at this instant.
+                 * The instant every member was resolved at, as an RFC 3339 date-time written in the
+                 * organization's offset. Checkout selects each conditional member's version by this
+                 * instant's date in the organization's timezone, as the catalog did.
                  *
                  * example:
-                 * 2026-12-20T10:15:00.000Z
+                 * 2026-12-20T11:15:00.000+01:00
                  */
                 as_of: string;
                 _meta?: /* Signature meta data payload */ SignatureMeta;
@@ -19599,6 +19932,39 @@ export declare namespace Components {
             _meta?: /* Signature meta data payload */ SignatureMeta;
         }
         /**
+         * A public catalog search payload
+         * example:
+         * {
+         *   "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
+         *   "sort": "description ASC",
+         *   "from": 0,
+         *   "size": 200
+         * }
+         */
+        export interface PublicCatalogSearch {
+            /**
+             * The query to perform using lucene query syntax.
+             */
+            q: string;
+            /**
+             * The sort expression to sort the results.
+             */
+            sort?: string;
+            /**
+             * The index from which to query, used for pagination purposes. Defaults to 0
+             */
+            from?: number;
+            /**
+             * The max size of the response, defaults to 2000.
+             */
+            size?: number;
+            /**
+             * When true, enables entity hydration to resolve nested $relation references in-place.
+             */
+            hydrate?: boolean;
+            availability?: /* Availability filters dimensions */ AvailabilityFilters;
+        }
+        /**
          * An amount associated with a specific recurrence.
          */
         export interface RecurrenceAmount {
@@ -19893,7 +20259,7 @@ export declare namespace Components {
              * and a delete.
              *
              */
-            valid_from?: string;
+            valid_from?: string; // date
             /**
              * Accepted only unchanged. A variant's conditions are fixed when it is created.
              * example:
@@ -19949,6 +20315,11 @@ export declare namespace Components {
              * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
              * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
              *
+             * A `date` or `daterange` value is an RFC 3339 date or date-time. A date is midnight of that day
+             * in the organization's timezone and a date-time keeps the moment it names, so
+             * `2026-03-31T23:30:00Z`, already 1 April in Berlin, falls inside a range pinned from
+             * `2026-04-01`.
+             *
              * An `in` list carries at most 50,000 values. A `string` or `select` matches exactly and
              * case-sensitively. A `location` of format
              * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
@@ -19967,12 +20338,13 @@ export declare namespace Components {
              */
             ResolveContext;
             /**
-             * The instant the version is selected at — the version with the latest `valid_from` at or
-             * before it. Defaults to now. A variant whose first version is later is excluded from
-             * matching; a pin naming one is answered `NO_ACTIVE_VERSION` instead.
+             * The instant the version is selected at — the version with the latest `valid_from` on or
+             * before its date in the organization's timezone. Defaults to now. A variant whose first
+             * version is later is excluded from matching; a pin naming one is answered
+             * `NO_ACTIVE_VERSION` instead.
              *
-             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time, to at most
-             * millisecond precision.
+             * An RFC 3339 date or date-time, to at most millisecond precision. A date is midnight of
+             * that day in the organization's timezone: `2026-04-01` is `2026-04-01T00:00:00.000+02:00`.
              *
              * example:
              * 2027-03-15T00:00:00Z
@@ -20001,12 +20373,13 @@ export declare namespace Components {
              */
             variant_id: string;
             /**
-             * The instant the version is selected at — the version with the latest `valid_from` at or
-             * before it. Defaults to now. A pinned variant whose first version is later is
-             * `NO_ACTIVE_VERSION`, carrying the instant in `details.as_of`.
+             * The instant the version is selected at — the version with the latest `valid_from` on or
+             * before its date in the organization's timezone. Defaults to now. A pinned variant whose
+             * first version is later is `NO_ACTIVE_VERSION`, which reports this instant in
+             * `details.as_of`, written in the organization's offset.
              *
-             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time, to at most
-             * millisecond precision.
+             * An RFC 3339 date or date-time, to at most millisecond precision. A date is midnight of
+             * that day in the organization's timezone: `2026-04-01` is `2026-04-01T00:00:00.000+02:00`.
              *
              * example:
              * 2027-03-15T00:00:00Z
@@ -20751,9 +21124,11 @@ export declare namespace Components {
              */
             CatalogContext;
             /**
-             * The instant every member is resolved at. Defaults to now. It is written into every
-             * catalog reference, and checkout prices at it. Accepts an RFC 3339 date (read as midnight
-             * UTC) or date-time, to millisecond precision.
+             * The instant every member is resolved at, each version selected by its date in the
+             * organization's timezone. Defaults to now. It is written into every catalog reference in
+             * the organization's offset, and checkout prices at it. Accepts an RFC 3339 date or
+             * date-time, to millisecond precision. A date is midnight of that day in the
+             * organization's timezone: `2026-04-01` is `2026-04-01T00:00:00.000+02:00`.
              *
              * example:
              * 2026-12-20T10:15:00Z
@@ -20773,19 +21148,6 @@ export declare namespace Components {
              *
              */
             CatalogPair[];
-            /**
-             * The entries that could not be answered because an id found nothing, and the context
-             * conditions that were ignored. Always present, and empty in the ordinary case; an entry the
-             * catalog answers "not offered" is not in it.
-             *
-             */
-            warnings: /**
-             * An entry the v2 catalog could not answer, or context conditions it ignored, and why. `details`
-             * is typed per `code`: narrow on `code` and the object under it declares exactly the fields that
-             * code sends.
-             *
-             */
-            CatalogWarning[];
         }
         /**
          * A resolve names one conditional entity and selects its variants either by `context` or by
@@ -20817,6 +21179,11 @@ export declare namespace Components {
          * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
          * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
          * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
+         *
+         * A `date` or `daterange` value is an RFC 3339 date or date-time. A date is midnight of that day
+         * in the organization's timezone and a date-time keeps the moment it names, so
+         * `2026-03-31T23:30:00Z`, already 1 April in Berlin, falls inside a range pinned from
+         * `2026-04-01`.
          *
          * An `in` list carries at most 50,000 values. A `string` or `select` matches exactly and
          * case-sensitively. A `location` of format
@@ -20860,7 +21227,10 @@ export declare namespace Components {
              * relation this variant's version replaced is hydrated too.
              *
              * A referenced entity that is itself conditional is returned unresolved, carrying its own
-             * flag. Costs one fetch per distinct referenced entity, with no per-attribute limit.
+             * flag. At most the first 60 references of each relation attribute are fetched, as an
+             * entity read with hydration fetches them; a reference past them comes back as
+             * `{ _id, $relation }`, unless another attribute's first 60 name the same entity. Costs one
+             * fetch per distinct referenced entity.
              *
              */
             hydrate?: boolean;
@@ -21064,9 +21434,9 @@ export declare namespace Components {
                 /**
                  * The `valid_from` of the version applied for the requested `as_of`.
                  * example:
-                 * 2027-01-01T00:00:00.000Z
+                 * 2027-01-01
                  */
-                _version_valid_from: string;
+                _version_valid_from: string; // date
                 /**
                  * The conditions this variant pins, plus the boolean `default` discriminator.
                  * example:
@@ -21149,9 +21519,9 @@ export declare namespace Components {
             /**
              * The `valid_from` of the version applied for the requested `as_of`.
              * example:
-             * 2027-01-01T00:00:00.000Z
+             * 2027-01-01
              */
-            _version_valid_from: string;
+            _version_valid_from: string; // date
             /**
              * The conditions this variant pins, plus the boolean `default` discriminator.
              * example:
@@ -21752,8 +22122,9 @@ export declare namespace Components {
              */
             search?: string;
             /**
-             * `conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`
-             * or `date` pin. `variant_id:asc` is always appended, so the order is total.
+             * `conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,
+             * `date` or `location` pin. A location orders by postal code, then by city ignoring case.
+             * `variant_id:asc` is always appended, so the order is total.
              *
              * example:
              * conditions.postal_code:asc
@@ -21780,11 +22151,12 @@ export declare namespace Components {
              */
             cursor?: string;
             /**
-             * The instant each row's version is selected at. Defaults to now. A variant whose first
-             * version is later is a row with `status: scheduled` carrying that upcoming version.
+             * The instant each row's version is selected at, by its date in the organization's
+             * timezone. Defaults to now. A variant whose first version is later is a row with
+             * `status: scheduled` carrying that upcoming version.
              *
-             * An RFC 3339 date (`2026-01-01`, read as midnight UTC) or date-time, to at most
-             * millisecond precision.
+             * An RFC 3339 date or date-time, to at most millisecond precision. A date is midnight of
+             * that day in the organization's timezone: `2026-04-01` is `2026-04-01T00:00:00.000+02:00`.
              *
              * example:
              * 2027-03-15T00:00:00Z
@@ -21828,8 +22200,9 @@ export declare namespace Components {
             status: /**
              * Whether a tree row's version is the one in effect at `as_of`, or one still ahead of it.
              *
-             * - `active`: the version with the latest `valid_from` at or before `as_of`
-             * - `scheduled`: the variant's first version, which is later than `as_of`
+             * - `active`: the version with the latest `valid_from` on or before `as_of`'s date in the
+             *   organization's timezone
+             * - `scheduled`: the variant's first version, which is later than that date
              *
              */
             VariantTreeRowStatus;
@@ -21870,13 +22243,11 @@ export declare namespace Components {
                     default: boolean;
                 };
                 /**
-                 * When this version takes effect, canonicalized to millisecond-precision UTC. Its identity
-                 * within the variant.
-                 *
+                 * When this version takes effect. Its identity within the variant, which has at most one version per day.
                  * example:
-                 * 2027-01-01T00:00:00.000Z
+                 * 2027-01-01
                  */
-                valid_from: string;
+                valid_from: string; // date
                 values: /**
                  * The values this version overrides on the base entity, keyed by entity field name.
                  *
@@ -21912,8 +22283,9 @@ export declare namespace Components {
         /**
          * Whether a tree row's version is the one in effect at `as_of`, or one still ahead of it.
          *
-         * - `active`: the version with the latest `valid_from` at or before `as_of`
-         * - `scheduled`: the variant's first version, which is later than `as_of`
+         * - `active`: the version with the latest `valid_from` on or before `as_of`'s date in the
+         *   organization's timezone
+         * - `scheduled`: the variant's first version, which is later than that date
          *
          */
         export type VariantTreeRowStatus = "active" | "scheduled";
@@ -21942,7 +22314,7 @@ export declare namespace Components {
             [name: string]: any;
         }
         /**
-         * One version of one variant: the overrides it carries, the instant it takes effect, and the
+         * One version of one variant: the overrides it carries, the date it takes effect, and the
          * variant it belongs to. These are the version's own overrides; `:resolve` composes them onto
          * the entity.
          *
@@ -21979,13 +22351,11 @@ export declare namespace Components {
                 default: boolean;
             };
             /**
-             * When this version takes effect, canonicalized to millisecond-precision UTC. Its identity
-             * within the variant.
-             *
+             * When this version takes effect. Its identity within the variant, which has at most one version per day.
              * example:
-             * 2027-01-01T00:00:00.000Z
+             * 2027-01-01
              */
-            valid_from: string;
+            valid_from: string; // date
             values: /**
              * The values this version overrides on the base entity, keyed by entity field name.
              *
@@ -22080,13 +22450,11 @@ export declare namespace Components {
                 default: boolean;
             };
             /**
-             * When this version takes effect, canonicalized to millisecond-precision UTC. Its identity
-             * within the variant.
-             *
+             * When this version takes effect. Its identity within the variant, which has at most one version per day.
              * example:
-             * 2027-01-01T00:00:00.000Z
+             * 2027-01-01
              */
-            valid_from: string;
+            valid_from: string; // date
             values: /**
              * The values this version overrides on the base entity, keyed by entity field name.
              *
@@ -22125,17 +22493,17 @@ export declare namespace Components {
             /**
              * The version this write created, changed or removed.
              * example:
-             * 2026-08-01T00:00:00.000Z
+             * 2026-08-01
              */
-            valid_from: string;
+            valid_from: string; // date
             /**
-             * The version in effect when the write landed, before it did. Absent when the variant had
-             * none. Advisory, and may lag the timeline by milliseconds.
+             * The version in effect today when the write landed, before it did. Absent when the
+             * variant had none. Advisory.
              *
              * example:
-             * 2026-01-01T00:00:00.000Z
+             * 2026-01-01
              */
-            active_valid_from?: string;
+            active_valid_from?: string; // date
         }
         /**
          * Something worth knowing that did not stop a write. One vocabulary for every write; `details`
@@ -22233,13 +22601,11 @@ export declare namespace Components {
                 default: boolean;
             };
             /**
-             * When this version takes effect, canonicalized to millisecond-precision UTC. Its identity
-             * within the variant.
-             *
+             * When this version takes effect. Its identity within the variant, which has at most one version per day.
              * example:
-             * 2027-01-01T00:00:00.000Z
+             * 2027-01-01
              */
-            valid_from: string;
+            valid_from: string; // date
             values: /**
              * The values this version overrides on the base entity, keyed by entity field name.
              *
@@ -22655,14 +23021,14 @@ export declare namespace Paths {
             export type EntityId = string;
             export type Revision = number;
             export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
-            export type ValidFrom = string;
+            export type ValidFrom = string; // date
             export type VariantId = string;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
             entity_id: Parameters.EntityId;
             variant_id: Parameters.VariantId;
-            valid_from: Parameters.ValidFrom;
+            valid_from: Parameters.ValidFrom /* date */;
         }
         export interface QueryParameters {
             _revision: Parameters.Revision;
@@ -22737,7 +23103,7 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /**
-             * One version of one variant: the overrides it carries, the instant it takes effect, and the
+             * One version of one variant: the overrides it carries, the date it takes effect, and the
              * variant it belongs to. These are the version's own overrides; `:resolve` composes them onto
              * the entity.
              *
@@ -22807,6 +23173,12 @@ export declare namespace Paths {
             Components.Schemas.ConditionalPricingError;
         }
     }
+    namespace $GetConditionalPricingOrganization {
+        namespace Responses {
+            export type $200 = Components.Schemas.ConditionalPricingOrganization;
+            export type $403 = Components.Schemas.Error;
+        }
+    }
     namespace $GetConditionalVariantTree {
         namespace Parameters {
             export type EntityId = string;
@@ -22870,18 +23242,18 @@ export declare namespace Paths {
         namespace Parameters {
             export type EntityId = string;
             export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
-            export type ValidFrom = string;
+            export type ValidFrom = string; // date
             export type VariantId = string;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
             entity_id: Parameters.EntityId;
             variant_id: Parameters.VariantId;
-            valid_from: Parameters.ValidFrom;
+            valid_from: Parameters.ValidFrom /* date */;
         }
         namespace Responses {
             export type $200 = /**
-             * One version of one variant: the overrides it carries, the instant it takes effect, and the
+             * One version of one variant: the overrides it carries, the date it takes effect, and the
              * variant it belongs to. These are the version's own overrides; `:resolve` composes them onto
              * the entity.
              *
@@ -23258,14 +23630,14 @@ export declare namespace Paths {
         namespace Parameters {
             export type EntityId = string;
             export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
-            export type ValidFrom = string;
+            export type ValidFrom = string; // date
             export type VariantId = string;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
             entity_id: Parameters.EntityId;
             variant_id: Parameters.VariantId;
-            valid_from: Parameters.ValidFrom;
+            valid_from: Parameters.ValidFrom /* date */;
         }
         export type RequestBody = Components.Schemas.PatchVersionRequest;
         namespace Responses {
@@ -23419,14 +23791,14 @@ export declare namespace Paths {
         namespace Parameters {
             export type EntityId = string;
             export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
-            export type ValidFrom = string;
+            export type ValidFrom = string; // date
             export type VariantId = string;
         }
         export interface PathParameters {
             slug: Parameters.Slug;
             entity_id: Parameters.EntityId;
             variant_id: Parameters.VariantId;
-            valid_from: Parameters.ValidFrom;
+            valid_from: Parameters.ValidFrom /* date */;
         }
         export type RequestBody = Components.Schemas.ReplaceVersionRequest;
         namespace Responses {
@@ -23580,7 +23952,7 @@ export declare namespace Paths {
             export type XIvyOrgID = string;
         }
         export type RequestBody = /**
-         * A catalog search payload
+         * A public catalog search payload
          * example:
          * {
          *   "q": "_id:1233432 OR _id:123432454 OR _id:23445433",
@@ -23589,7 +23961,7 @@ export declare namespace Paths {
          *   "size": 200
          * }
          */
-        Components.Schemas.CatalogSearch;
+        Components.Schemas.PublicCatalogSearch;
         namespace Responses {
             export type $200 = /**
              * The query result payload
@@ -24961,9 +25333,9 @@ export interface OperationMethods {
    * Conditional entities resolve as on `POST /v1/conditional-pricing:resolve`. An organization
    * that has not opted in gets base entities, not an error. A member matching several variants
    * yields one pair per variant, and an entry without `price_id` yields one pair per price of
-   * the product. Members that match nothing or are inactive are left out. Ids the catalog does
-   * not find are reported in `warnings`, as are context keys a schema does not declare, which
-   * are ignored.
+   * the product. An entry yields no pair when an id it names is not found, inactive or of
+   * another type, or when its members match nothing. A context key a schema does not declare is
+   * ignored.
    * 
    */
   '$resolveCatalog'(
@@ -25147,6 +25519,20 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$GetConditionSets.Responses.$200>
   /**
+   * $getConditionalPricingOrganization - $getConditionalPricingOrganization
+   * 
+   * Returns whether the calling organization has Conditional Pricing on, whether its search
+   * collection is ready or still being deleted, and, once it is on, whether it is in use. While it
+   * is in use, or while its collection is being set up or deleted, switching it is refused, so a UI
+   * can lock the switch. Answers `200` for an organization that has not turned it on.
+   * 
+   */
+  '$getConditionalPricingOrganization'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$GetConditionalPricingOrganization.Responses.$200>
+  /**
    * $resolveConditionalEntity - $resolveConditionalEntity
    * 
    * Returns the variants of one conditional entity that apply, each composed: the base entity
@@ -25226,8 +25612,8 @@ export interface OperationMethods {
   /**
    * $getActiveConditionalVariantVersion - $getActiveConditionalVariantVersion
    * 
-   * Returns the version of this variant in effect now — the latest `valid_from` at or before now
-   * — with the `_revision` a write to it must carry.
+   * Returns the version of this variant in effect today in the organization's timezone — the
+   * latest `valid_from` on or before today — with the `_revision` a write to it must carry.
    * 
    * These are the version's own overrides; `:resolve` composes them onto the entity.
    * 
@@ -25295,11 +25681,13 @@ export interface OperationMethods {
   /**
    * $appendConditionalVariantVersion - $appendConditionalVariantVersion
    * 
-   * Appends a version taking effect at its own instant. The version in effect at any instant is
-   * the one with the latest `valid_from` at or before it; a future one is staged until its date.
+   * Appends a version taking effect on its own date. A variant has at most one version per
+   * day. The version in effect at any `as_of` is the one with the latest `valid_from` on or
+   * before its date in the organization's timezone; a future one is staged until its date.
    * 
    * A past `valid_from` is accepted and reported in `warnings`. One the variant already has is
-   * refused — replace or patch that version instead.
+   * refused, as is a second append without a date on the same day — replace or patch that
+   * version instead.
    * 
    */
   '$appendConditionalVariantVersion'(
@@ -25310,7 +25698,7 @@ export interface OperationMethods {
   /**
    * $getConditionalVariantVersion - $getConditionalVariantVersion
    * 
-   * Returns one version by the instant it takes effect. Exact, never nearest.
+   * Returns one version by the date it takes effect. Exact, never nearest.
    */
   '$getConditionalVariantVersion'(
     parameters?: Parameters<Paths.$GetConditionalVariantVersion.PathParameters> | null,
@@ -25361,7 +25749,8 @@ export interface OperationMethods {
    * Each item's outcome is derived from what is stored: an unknown tuple is `variant_created`, a
    * known tuple with no version at the item's `valid_from` is `version_created`, an existing
    * version there is `updated`, and a write matching what is stored is `skipped`. An item
-   * without `valid_from` is a last-write-wins write with no `skipped` detection.
+   * without `valid_from` is dated today in the organization's timezone and is a last-write-wins
+   * write with no `skipped` detection.
    * 
    * Items addressing the same `(entity_id, conditions)` apply in array order; the rest run in
    * parallel. No cross-item rollback, and no `_revision` guard.
@@ -25490,9 +25879,9 @@ export interface PathsDictionary {
      * Conditional entities resolve as on `POST /v1/conditional-pricing:resolve`. An organization
      * that has not opted in gets base entities, not an error. A member matching several variants
      * yields one pair per variant, and an entry without `price_id` yields one pair per price of
-     * the product. Members that match nothing or are inactive are left out. Ids the catalog does
-     * not find are reported in `warnings`, as are context keys a schema does not declare, which
-     * are ignored.
+     * the product. An entry yields no pair when an id it names is not found, inactive or of
+     * another type, or when its members match nothing. A context key a schema does not declare is
+     * ignored.
      * 
      */
     'post'(
@@ -25710,6 +26099,22 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$GetConditionSets.Responses.$200>
   }
+  ['/v1/conditional-pricing/organization']: {
+    /**
+     * $getConditionalPricingOrganization - $getConditionalPricingOrganization
+     * 
+     * Returns whether the calling organization has Conditional Pricing on, whether its search
+     * collection is ready or still being deleted, and, once it is on, whether it is in use. While it
+     * is in use, or while its collection is being set up or deleted, switching it is refused, so a UI
+     * can lock the switch. Answers `200` for an organization that has not turned it on.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$GetConditionalPricingOrganization.Responses.$200>
+  }
   ['/v1/conditional-pricing:resolve']: {
     /**
      * $resolveConditionalEntity - $resolveConditionalEntity
@@ -25799,8 +26204,8 @@ export interface PathsDictionary {
     /**
      * $getActiveConditionalVariantVersion - $getActiveConditionalVariantVersion
      * 
-     * Returns the version of this variant in effect now — the latest `valid_from` at or before now
-     * — with the `_revision` a write to it must carry.
+     * Returns the version of this variant in effect today in the organization's timezone — the
+     * latest `valid_from` on or before today — with the `_revision` a write to it must carry.
      * 
      * These are the version's own overrides; `:resolve` composes them onto the entity.
      * 
@@ -25870,11 +26275,13 @@ export interface PathsDictionary {
     /**
      * $appendConditionalVariantVersion - $appendConditionalVariantVersion
      * 
-     * Appends a version taking effect at its own instant. The version in effect at any instant is
-     * the one with the latest `valid_from` at or before it; a future one is staged until its date.
+     * Appends a version taking effect on its own date. A variant has at most one version per
+     * day. The version in effect at any `as_of` is the one with the latest `valid_from` on or
+     * before its date in the organization's timezone; a future one is staged until its date.
      * 
      * A past `valid_from` is accepted and reported in `warnings`. One the variant already has is
-     * refused — replace or patch that version instead.
+     * refused, as is a second append without a date on the same day — replace or patch that
+     * version instead.
      * 
      */
     'post'(
@@ -25887,7 +26294,7 @@ export interface PathsDictionary {
     /**
      * $getConditionalVariantVersion - $getConditionalVariantVersion
      * 
-     * Returns one version by the instant it takes effect. Exact, never nearest.
+     * Returns one version by the date it takes effect. Exact, never nearest.
      */
     'get'(
       parameters?: Parameters<Paths.$GetConditionalVariantVersion.PathParameters> | null,
@@ -25940,7 +26347,8 @@ export interface PathsDictionary {
      * Each item's outcome is derived from what is stored: an unknown tuple is `variant_created`, a
      * known tuple with no version at the item's `valid_from` is `version_created`, an existing
      * version there is `updated`, and a write matching what is stored is `skipped`. An item
-     * without `valid_from` is a last-write-wins write with no `skipped` detection.
+     * without `valid_from` is dated today in the organization's timezone and is a last-write-wins
+     * write with no `skipped` detection.
      * 
      * Items addressing the same `(entity_id, conditions)` apply in array order; the rest run in
      * parallel. No cross-item rollback, and no `_revision` guard.
@@ -26027,7 +26435,6 @@ export type CatalogReferenceErrorCode = Components.Schemas.CatalogReferenceError
 export type CatalogReferenceMember = Components.Schemas.CatalogReferenceMember;
 export type CatalogSearch = Components.Schemas.CatalogSearch;
 export type CatalogSearchResult = Components.Schemas.CatalogSearchResult;
-export type CatalogWarning = Components.Schemas.CatalogWarning;
 export type CheckoutCart = Components.Schemas.CheckoutCart;
 export type CheckoutCartResult = Components.Schemas.CheckoutCartResult;
 export type CheckoutMode = Components.Schemas.CheckoutMode;
@@ -26053,6 +26460,7 @@ export type ConditionalEntitySlug = Components.Schemas.ConditionalEntitySlug;
 export type ConditionalPricingError = Components.Schemas.ConditionalPricingError;
 export type ConditionalPricingErrorCode = Components.Schemas.ConditionalPricingErrorCode;
 export type ConditionalPricingOptIn = Components.Schemas.ConditionalPricingOptIn;
+export type ConditionalPricingOrganization = Components.Schemas.ConditionalPricingOrganization;
 export type ConsumptionTypeGetAg = Components.Schemas.ConsumptionTypeGetAg;
 export type ContextConditionValue = Components.Schemas.ContextConditionValue;
 export type Coupon = Components.Schemas.Coupon;
@@ -26149,6 +26557,7 @@ export type ProductRecommendationSearch = Components.Schemas.ProductRecommendati
 export type PromoCode = Components.Schemas.PromoCode;
 export type PromoCodeValidationResponse = Components.Schemas.PromoCodeValidationResponse;
 export type Provider = Components.Schemas.Provider;
+export type PublicCatalogSearch = Components.Schemas.PublicCatalogSearch;
 export type RecurrenceAmount = Components.Schemas.RecurrenceAmount;
 export type RecurrenceAmountDto = Components.Schemas.RecurrenceAmountDto;
 export type RecurrenceAmountWithTax = Components.Schemas.RecurrenceAmountWithTax;
