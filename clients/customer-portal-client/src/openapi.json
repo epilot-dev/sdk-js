@@ -4811,6 +4811,76 @@
       }
     },
     "/v2/portal/user/passkeys/{credential_id}": {
+      "patch": {
+        "operationId": "renamePortalUserPasskey",
+        "summary": "renamePortalUserPasskey",
+        "description": "Renames one of the logged-in portal user's passkeys. An empty name removes the label.\nWorks even when passkeys are turned off for the portal.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "credential_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "description": "Label shown to the user, e.g. \"iPhone\"; empty removes it"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The renamed passkey",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalUserPasskey"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
       "delete": {
         "operationId": "deletePortalUserPasskey",
         "summary": "deletePortalUserPasskey",
@@ -11523,7 +11593,7 @@
       "post": {
         "operationId": "createPortalRevisionPreview",
         "summary": "createPortalRevisionPreview",
-        "description": "Mints a short-lived preview token for one revision and returns a link that opens the revision inside the real end-customer portal, on the portal's live domain, without publishing it.\n\nThe portal sends the token back in the `x-portal-preview-token` header. Public and portal-user config, page, widget and extension reads that honour it answer with the revision's config and pages instead of the live ones and add `preview_revision` to config responses. Server-owned fields (ids, domains, Cognito pool identifiers, extension secrets) always come from the live portal. Nothing is written: the live portal, its pages and which revision is published stay as they are.\n\nRequires view permission on the portal. Returns `404` when portal versioning or revision preview is not enabled for the organization, or when the revision does not exist.\n",
+        "description": "Mints a short-lived preview token for one revision and returns a link that opens the revision inside the real end-customer portal, on the portal's live domain, without publishing it.\n\nThe portal sends the token back in the `x-portal-preview-token` header. Public and portal-user config, page, widget and extension reads that honour it answer with the revision's config and pages instead of the live ones and add `preview_revision` to config responses. Server-owned fields (ids, domains, Cognito pool identifiers, extension secrets) always come from the live portal. SSO reads it too: the bundled provider list, the provider lookup, the callback and the SSO login use the revision's identity providers, so a revision that adds or changes SSO can be signed into. Nothing is written: the live portal, its pages and which revision is published stay as they are.\n\nRequires view permission on the portal. Returns `404` when portal versioning or revision preview is not enabled for the organization, or when the revision does not exist.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -12845,6 +12915,7 @@
         "required": [
           "credential_id",
           "rp_id",
+          "is_usable",
           "created_at"
         ],
         "properties": {
@@ -12859,6 +12930,10 @@
             "type": "string",
             "description": "Domain the passkey works on",
             "example": "kundenportal.example.de"
+          },
+          "is_usable": {
+            "type": "boolean",
+            "description": "Whether the passkey works on the portal as it is served now. Passkeys are bound to the domain they\nwere added on, so after a domain change older ones can no longer be used to sign in.\n"
           },
           "device_type": {
             "type": "string",
@@ -13470,6 +13545,11 @@
             "$ref": "#/components/schemas/EntityId",
             "nullable": true,
             "description": "ID of the email template for OTP to sign in from Journeys"
+          },
+          "passkeyVerificationCode": {
+            "$ref": "#/components/schemas/EntityId",
+            "nullable": true,
+            "description": "ID of the email template with the code a portal user needs to add a passkey (code only, no login link).\nWhen it is not set, the code is sent with the advancedAuth template.\n"
           },
           "journeyLoginOTP": {
             "$ref": "#/components/schemas/EntityId",

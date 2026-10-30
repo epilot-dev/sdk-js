@@ -2837,6 +2837,17 @@ declare namespace Components {
              */
             EntityId /* uuid */;
             /**
+             * ID of the email template with the code a portal user needs to add a passkey (code only, no login link).
+             * When it is not set, the code is sent with the advancedAuth template.
+             *
+             */
+            passkeyVerificationCode?: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
              * ID of the email template for OTP to sign in from Journeys
              */
             journeyLoginOTP?: /**
@@ -9306,6 +9317,12 @@ declare namespace Components {
              * kundenportal.example.de
              */
             rp_id: string;
+            /**
+             * Whether the passkey works on the portal as it is served now. Passkeys are bound to the domain they
+             * were added on, so after a domain change older ones can no longer be used to sign in.
+             *
+             */
+            is_usable: boolean;
             device_type?: "singleDevice" | "multiDevice";
             /**
              * Whether the passkey is synced, e.g. via iCloud Keychain or Google Password Manager
@@ -19660,6 +19677,28 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace RenamePortalUserPasskey {
+        namespace Parameters {
+            export type CredentialId = string;
+        }
+        export interface PathParameters {
+            credential_id: Parameters.CredentialId;
+        }
+        export interface RequestBody {
+            /**
+             * Label shown to the user, e.g. "iPhone"; empty removes it
+             */
+            name: string;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.PortalUserPasskey;
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ReplaceECPTemplateVariables {
         export interface RequestBody {
             /**
@@ -21849,6 +21888,18 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SendPortalUserPasskeyVerificationCode.Responses.$204>
   /**
+   * renamePortalUserPasskey - renamePortalUserPasskey
+   * 
+   * Renames one of the logged-in portal user's passkeys. An empty name removes the label.
+   * Works even when passkeys are turned off for the portal.
+   * 
+   */
+  'renamePortalUserPasskey'(
+    parameters?: Parameters<Paths.RenamePortalUserPasskey.PathParameters> | null,
+    data?: Paths.RenamePortalUserPasskey.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RenamePortalUserPasskey.Responses.$200>
+  /**
    * deletePortalUserPasskey - deletePortalUserPasskey
    * 
    * Removes one of the logged-in portal user's passkeys. Works even when passkeys are turned off for the portal.
@@ -22940,7 +22991,7 @@ export interface OperationMethods {
    * 
    * Mints a short-lived preview token for one revision and returns a link that opens the revision inside the real end-customer portal, on the portal's live domain, without publishing it.
    * 
-   * The portal sends the token back in the `x-portal-preview-token` header. Public and portal-user config, page, widget and extension reads that honour it answer with the revision's config and pages instead of the live ones and add `preview_revision` to config responses. Server-owned fields (ids, domains, Cognito pool identifiers, extension secrets) always come from the live portal. Nothing is written: the live portal, its pages and which revision is published stay as they are.
+   * The portal sends the token back in the `x-portal-preview-token` header. Public and portal-user config, page, widget and extension reads that honour it answer with the revision's config and pages instead of the live ones and add `preview_revision` to config responses. Server-owned fields (ids, domains, Cognito pool identifiers, extension secrets) always come from the live portal. SSO reads it too: the bundled provider list, the provider lookup, the callback and the SSO login use the revision's identity providers, so a revision that adds or changes SSO can be signed into. Nothing is written: the live portal, its pages and which revision is published stay as they are.
    * 
    * Requires view permission on the portal. Returns `404` when portal versioning or revision preview is not enabled for the organization, or when the revision does not exist.
    * 
@@ -24014,6 +24065,18 @@ export interface PathsDictionary {
     ): OperationResponse<Paths.SendPortalUserPasskeyVerificationCode.Responses.$204>
   }
   ['/v2/portal/user/passkeys/{credential_id}']: {
+    /**
+     * renamePortalUserPasskey - renamePortalUserPasskey
+     * 
+     * Renames one of the logged-in portal user's passkeys. An empty name removes the label.
+     * Works even when passkeys are turned off for the portal.
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.RenamePortalUserPasskey.PathParameters> | null,
+      data?: Paths.RenamePortalUserPasskey.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RenamePortalUserPasskey.Responses.$200>
     /**
      * deletePortalUserPasskey - deletePortalUserPasskey
      * 
@@ -25278,7 +25341,7 @@ export interface PathsDictionary {
      * 
      * Mints a short-lived preview token for one revision and returns a link that opens the revision inside the real end-customer portal, on the portal's live domain, without publishing it.
      * 
-     * The portal sends the token back in the `x-portal-preview-token` header. Public and portal-user config, page, widget and extension reads that honour it answer with the revision's config and pages instead of the live ones and add `preview_revision` to config responses. Server-owned fields (ids, domains, Cognito pool identifiers, extension secrets) always come from the live portal. Nothing is written: the live portal, its pages and which revision is published stay as they are.
+     * The portal sends the token back in the `x-portal-preview-token` header. Public and portal-user config, page, widget and extension reads that honour it answer with the revision's config and pages instead of the live ones and add `preview_revision` to config responses. Server-owned fields (ids, domains, Cognito pool identifiers, extension secrets) always come from the live portal. SSO reads it too: the bundled provider list, the provider lookup, the callback and the SSO login use the revision's identity providers, so a revision that adds or changes SSO can be signed into. Nothing is written: the live portal, its pages and which revision is published stay as they are.
      * 
      * Requires view permission on the portal. Returns `404` when portal versioning or revision preview is not enabled for the organization, or when the revision does not exist.
      * 

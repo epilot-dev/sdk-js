@@ -1133,6 +1133,23 @@
       }
     },
     "/v2/portal/user/passkeys/{credential_id}": {
+      "patch": {
+        "operationId": "renamePortalUserPasskey",
+        "parameters": [
+          {
+            "name": "credential_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
       "delete": {
         "operationId": "deletePortalUserPasskey",
         "parameters": [
