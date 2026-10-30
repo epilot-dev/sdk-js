@@ -14,8 +14,10 @@ declare namespace Components {
          * 4854bb2a-94f9-424d-a968-3fb17fb0bf89
          */
         Schemas.JobID;
+        export type MergePlanID = string;
     }
     export interface PathParameters {
+        MergePlanID?: Parameters.MergePlanID;
         JobID?: Parameters.JobID;
     }
     namespace Schemas {
@@ -111,6 +113,37 @@ declare namespace Components {
                  * Outcome of this deployment
                  */
                 status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+                /**
+                 * The merge plan this deployment applied. Such a deployment reverts through the plan;
+                 * only a failed or partially applied plan also offers the whole-deployment restore
+                 * (`snapshot_restore_available`).
+                 *
+                 */
+                merge_plan_id?: string;
+                /**
+                 * The fail-closed pre-apply snapshot of a merge deployment. Set instead of `snapshot_id`;
+                 * the whole-deployment restore of a merge deployment restores it.
+                 *
+                 */
+                merge_snapshot_id?: string;
+                /**
+                 * Merge deployments only (absent otherwise). True when the whole-deployment restore
+                 * (`POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore`) may run for it: its plan ended `failed` or
+                 * `partially_applied`, the merge snapshot exists, the revert window is open and no
+                 * restore ran or runs for it. That restore applies every resource the snapshot captured
+                 * (edits made after the update are overwritten), invalidates the update's merge evidence
+                 * (the next update plans those resources two-way) and leaves the plan `reverted` or
+                 * `revert_partial`, after which "Revert this update" is no longer offered. The endpoint
+                 * answers 409 `merge_snapshot_restore_unavailable` otherwise, and
+                 * `revert_newer_update_first` when a later deployment changed the destination.
+                 *
+                 */
+                snapshot_restore_available?: boolean;
+                merge_plan_state?: /* Lifecycle state of an update merge plan. */ MergePlanState;
+                /**
+                 * Last moment the merge update of this deployment can be reverted.
+                 */
+                revert_until?: string; // date-time
                 /**
                  * Restore lifecycle metadata for this deployment.
                  */
@@ -363,6 +396,22 @@ declare namespace Components {
              */
             resource_progress?: V3ResourceProgressEntry[];
             options?: BlueprintInstallationJobOptions;
+            /**
+             * The update merge plan of this job, when it updates journeys by merging.
+             */
+            merge_plan_id?: string;
+            /**
+             * What a WAITING_USER_ACTION or REAUTH_REQUIRED job waits for.
+             */
+            wait_kind?: "plan" | "reauth" | "merge_review";
+            /**
+             * The earlier merge plan whose choices prefill this job's plan (Refresh or retry).
+             */
+            prefill_from_merge_plan_id?: string;
+            /**
+             * The id Refresh reserved for this job's merge plan.
+             */
+            assigned_merge_plan_id?: string;
             status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
         }
         export interface BlueprintInstallationJobOptions {
@@ -377,8 +426,16 @@ declare namespace Components {
              *
              */
             sync_notes?: boolean;
+            /**
+             * When `true`, the plan records both sides' values for every changed
+             * field of an `update` resource (`impact_on_install_changes`). Read at
+             * plan time, so it must be set on `:install`. Defaults to `false`; the
+             * values make the plan considerably larger.
+             *
+             */
+            include_field_diffs?: boolean;
         }
-        export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob | BlueprintRestoreJob | BlueprintDependenciesSyncJob | BlueprintValidateJob | BlueprintVerificationJob;
+        export type BlueprintJob = BlueprintExportJob | BlueprintInstallationJob | BlueprintRestoreJob | BlueprintDependenciesSyncJob | BlueprintVerificationJob;
         export interface BlueprintJobEvent {
             timestamp?: string; // date-time
             message?: string;
@@ -428,47 +485,6 @@ declare namespace Components {
              */
             updated_at?: string; // date-time
             created_by?: CallerIdentity;
-        }
-        export interface BlueprintPatch {
-            patch_id?: string;
-            version?: number;
-            blueprint_id?: /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            BlueprintID;
-            rollout_id?: string;
-            source_org_id?: string;
-            name?: string;
-            description?: string;
-            status?: "draft" | "ready" | "applying" | "applied" | "partial";
-            resources?: PatchResourceDiff[];
-            changelog?: string;
-            created_by?: string;
-            created_at?: string; // date-time
-            applied_at?: string; // date-time
-        }
-        export interface BlueprintPatchWithResults {
-            patch_id?: string;
-            version?: number;
-            blueprint_id?: /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            BlueprintID;
-            rollout_id?: string;
-            source_org_id?: string;
-            name?: string;
-            description?: string;
-            status?: "draft" | "ready" | "applying" | "applied" | "partial";
-            resources?: PatchResourceDiff[];
-            changelog?: string;
-            created_by?: string;
-            created_at?: string; // date-time
-            applied_at?: string; // date-time
-            org_results?: OrgPatchExecution[];
         }
         /**
          * Preview data for a blueprint before installation. Stored temporarily with TTL.
@@ -557,6 +573,48 @@ declare namespace Components {
              * Fields causing the updates / internal updates on a resource install
              */
             impact_on_install_reason?: string[];
+            /**
+             * Both sides' values per `impact_on_install_reason` entry. Present only
+             * when the install was started with `options.include_field_diffs`.
+             *
+             */
+            impact_on_install_changes?: {
+                /**
+                 * The matching `impact_on_install_reason` entry.
+                 */
+                path: string;
+                /**
+                 * The destination organization's current value. Absent when the
+                 * destination has no value there. A value above 4KB is replaced
+                 * by the string `__epilot_value_too_large__`.
+                 *
+                 */
+                destination?: any;
+                /**
+                 * The value the sync would write. Absent when the source drops the field.
+                 */
+                source?: any;
+                /**
+                 * True when the destination has no value at this path.
+                 */
+                added: boolean;
+            }[];
+            /**
+             * Human-readable label per `impact_on_install_reason` entry, keyed by that
+             * entry, from the resource type's adapter (config-engine `diff.describe`).
+             * Only entries whose label differs from the raw path; absent when the
+             * adapter provides none.
+             *
+             */
+            impact_on_install_labels?: {
+                [name: string]: string;
+            };
+            /**
+             * One or two lines summarizing the change set, from the resource type's
+             * adapter (config-engine `diff.summarize`). Absent when the adapter provides none.
+             *
+             */
+            impact_on_install_summary?: string[];
         }
         /**
          * ID of a blueprint resource
@@ -589,6 +647,10 @@ declare namespace Components {
              */
             install_job_id?: string | null;
             /**
+             * Set on the revert of a merge update; the plan's state follows the revert.
+             */
+            merge_plan_id?: string;
+            /**
              * The snapshot driving Phase 1 of the restore. Null for sweep-only
              * restores (pure-create deployments with no captured manifest).
              *
@@ -618,33 +680,6 @@ declare namespace Components {
                  */
                 has_effective_changes?: boolean;
             } | null;
-        }
-        export interface BlueprintValidateJob {
-            id?: /**
-             * ID of a job
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            BlueprintJobID;
-            events?: BlueprintJobEvent[];
-            triggered_at?: string; // date-time
-            created_by?: CallerIdentity;
-            job_type?: "validate";
-            blueprint_id?: /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            BlueprintID;
-            status?: "IN_PROGRESS" | "SUCCESS" | "FAILED";
-            /**
-             * Present when status is SUCCESS or FAILED.
-             */
-            valid?: boolean;
-            /**
-             * Present when valid is false.
-             */
-            errors?: FormattedError[];
         }
         export interface BlueprintVerificationJob {
             id?: /**
@@ -708,6 +743,8 @@ declare namespace Components {
              * - `SUCCESS`: all targets succeeded
              * - `PARTIAL_SUCCESS`: all targets terminal with a mix of success/partial/failure
              * - `FAILED`: all targets terminal and none succeeded or partially succeeded
+             * - `REVIEW_REQUIRED` (targets only): the update merges journeys and waits for review in the
+             *   update wizard (`merge_plan_id`). Terminal for the bulk install, which never applies it.
              *
              */
             BulkInstallStatus;
@@ -728,6 +765,7 @@ declare namespace Components {
             success?: number;
             partial_success?: number;
             failed?: number;
+            review_required?: number;
         }
         export interface BulkInstallCreateRequest {
             /**
@@ -859,9 +897,11 @@ declare namespace Components {
          * - `SUCCESS`: all targets succeeded
          * - `PARTIAL_SUCCESS`: all targets terminal with a mix of success/partial/failure
          * - `FAILED`: all targets terminal and none succeeded or partially succeeded
+         * - `REVIEW_REQUIRED` (targets only): the update merges journeys and waits for review in the
+         *   update wizard (`merge_plan_id`). Terminal for the bulk install, which never applies it.
          *
          */
-        export type BulkInstallStatus = "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+        export type BulkInstallStatus = "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED" | "REVIEW_REQUIRED";
         /**
          * A single destination of a bulk install. `job` is the hydrated latest child
          * install job derived from `job_ids.at(-1)`. Auth tokens are never stored or returned.
@@ -883,6 +923,8 @@ declare namespace Components {
              * - `SUCCESS`: all targets succeeded
              * - `PARTIAL_SUCCESS`: all targets terminal with a mix of success/partial/failure
              * - `FAILED`: all targets terminal and none succeeded or partially succeeded
+             * - `REVIEW_REQUIRED` (targets only): the update merges journeys and waits for review in the
+             *   update wizard (`merge_plan_id`). Terminal for the bulk install, which never applies it.
              *
              */
             BulkInstallStatus;
@@ -892,6 +934,10 @@ declare namespace Components {
              * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
              */
             BlueprintJobID[];
+            /**
+             * The merge plan to review when `status` is `REVIEW_REQUIRED`.
+             */
+            merge_plan_id?: string;
             created_at?: string; // date-time
             updated_at?: string; // date-time
             /**
@@ -937,6 +983,22 @@ declare namespace Components {
                  */
                 resource_progress?: V3ResourceProgressEntry[];
                 options?: BlueprintInstallationJobOptions;
+                /**
+                 * The update merge plan of this job, when it updates journeys by merging.
+                 */
+                merge_plan_id?: string;
+                /**
+                 * What a WAITING_USER_ACTION or REAUTH_REQUIRED job waits for.
+                 */
+                wait_kind?: "plan" | "reauth" | "merge_review";
+                /**
+                 * The earlier merge plan whose choices prefill this job's plan (Refresh or retry).
+                 */
+                prefill_from_merge_plan_id?: string;
+                /**
+                 * The id Refresh reserved for this job's merge plan.
+                 */
+                assigned_merge_plan_id?: string;
                 status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
             } | null;
         }
@@ -1083,6 +1145,37 @@ declare namespace Components {
                  * Outcome of this deployment
                  */
                 status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+                /**
+                 * The merge plan this deployment applied. Such a deployment reverts through the plan;
+                 * only a failed or partially applied plan also offers the whole-deployment restore
+                 * (`snapshot_restore_available`).
+                 *
+                 */
+                merge_plan_id?: string;
+                /**
+                 * The fail-closed pre-apply snapshot of a merge deployment. Set instead of `snapshot_id`;
+                 * the whole-deployment restore of a merge deployment restores it.
+                 *
+                 */
+                merge_snapshot_id?: string;
+                /**
+                 * Merge deployments only (absent otherwise). True when the whole-deployment restore
+                 * (`POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore`) may run for it: its plan ended `failed` or
+                 * `partially_applied`, the merge snapshot exists, the revert window is open and no
+                 * restore ran or runs for it. That restore applies every resource the snapshot captured
+                 * (edits made after the update are overwritten), invalidates the update's merge evidence
+                 * (the next update plans those resources two-way) and leaves the plan `reverted` or
+                 * `revert_partial`, after which "Revert this update" is no longer offered. The endpoint
+                 * answers 409 `merge_snapshot_restore_unavailable` otherwise, and
+                 * `revert_newer_update_first` when a later deployment changed the destination.
+                 *
+                 */
+                snapshot_restore_available?: boolean;
+                merge_plan_state?: /* Lifecycle state of an update merge plan. */ MergePlanState;
+                /**
+                 * Last moment the merge update of this deployment can be reverted.
+                 */
+                revert_until?: string; // date-time
                 /**
                  * Restore lifecycle metadata for this deployment.
                  */
@@ -1445,6 +1538,14 @@ declare namespace Components {
              */
             sync_notes?: boolean;
             /**
+             * When `true`, the plan records both sides' values for every changed
+             * field of an `update` resource (`impact_on_install_changes`). Read at
+             * plan time, so it must be set on `:install`. Defaults to `false`; the
+             * values make the plan considerably larger.
+             *
+             */
+            include_field_diffs?: boolean;
+            /**
              * A freshly issued bearer for the SOURCE organization, used only when resuming a
              * job paused at `REAUTH_REQUIRED` whose source credential also expired. Applies to
              * cross-org installs: apply-time reads such as the authenticated File API fallback
@@ -1546,6 +1647,37 @@ declare namespace Components {
                  * Outcome of this deployment
                  */
                 status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+                /**
+                 * The merge plan this deployment applied. Such a deployment reverts through the plan;
+                 * only a failed or partially applied plan also offers the whole-deployment restore
+                 * (`snapshot_restore_available`).
+                 *
+                 */
+                merge_plan_id?: string;
+                /**
+                 * The fail-closed pre-apply snapshot of a merge deployment. Set instead of `snapshot_id`;
+                 * the whole-deployment restore of a merge deployment restores it.
+                 *
+                 */
+                merge_snapshot_id?: string;
+                /**
+                 * Merge deployments only (absent otherwise). True when the whole-deployment restore
+                 * (`POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore`) may run for it: its plan ended `failed` or
+                 * `partially_applied`, the merge snapshot exists, the revert window is open and no
+                 * restore ran or runs for it. That restore applies every resource the snapshot captured
+                 * (edits made after the update are overwritten), invalidates the update's merge evidence
+                 * (the next update plans those resources two-way) and leaves the plan `reverted` or
+                 * `revert_partial`, after which "Revert this update" is no longer offered. The endpoint
+                 * answers 409 `merge_snapshot_restore_unavailable` otherwise, and
+                 * `revert_newer_update_first` when a later deployment changed the destination.
+                 *
+                 */
+                snapshot_restore_available?: boolean;
+                merge_plan_state?: /* Lifecycle state of an update merge plan. */ MergePlanState;
+                /**
+                 * Last moment the merge update of this deployment can be reverted.
+                 */
+                revert_until?: string; // date-time
                 /**
                  * Restore lifecycle metadata for this deployment.
                  */
@@ -1804,6 +1936,37 @@ declare namespace Components {
                  */
                 status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
                 /**
+                 * The merge plan this deployment applied. Such a deployment reverts through the plan;
+                 * only a failed or partially applied plan also offers the whole-deployment restore
+                 * (`snapshot_restore_available`).
+                 *
+                 */
+                merge_plan_id?: string;
+                /**
+                 * The fail-closed pre-apply snapshot of a merge deployment. Set instead of `snapshot_id`;
+                 * the whole-deployment restore of a merge deployment restores it.
+                 *
+                 */
+                merge_snapshot_id?: string;
+                /**
+                 * Merge deployments only (absent otherwise). True when the whole-deployment restore
+                 * (`POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore`) may run for it: its plan ended `failed` or
+                 * `partially_applied`, the merge snapshot exists, the revert window is open and no
+                 * restore ran or runs for it. That restore applies every resource the snapshot captured
+                 * (edits made after the update are overwritten), invalidates the update's merge evidence
+                 * (the next update plans those resources two-way) and leaves the plan `reverted` or
+                 * `revert_partial`, after which "Revert this update" is no longer offered. The endpoint
+                 * answers 409 `merge_snapshot_restore_unavailable` otherwise, and
+                 * `revert_newer_update_first` when a later deployment changed the destination.
+                 *
+                 */
+                snapshot_restore_available?: boolean;
+                merge_plan_state?: /* Lifecycle state of an update merge plan. */ MergePlanState;
+                /**
+                 * Last moment the merge update of this deployment can be reverted.
+                 */
+                revert_until?: string; // date-time
+                /**
                  * Restore lifecycle metadata for this deployment.
                  */
                 restore_details?: {
@@ -2002,9 +2165,6 @@ declare namespace Components {
              */
             error?: string;
         }
-        export interface DetectChangesResult {
-            resources?: PatchResourceDiff[];
-        }
         export interface FieldDiff {
             /**
              * JSON path to the differing field (e.g. "steps[2].name")
@@ -2106,6 +2266,37 @@ declare namespace Components {
                  * Outcome of this deployment
                  */
                 status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
+                /**
+                 * The merge plan this deployment applied. Such a deployment reverts through the plan;
+                 * only a failed or partially applied plan also offers the whole-deployment restore
+                 * (`snapshot_restore_available`).
+                 *
+                 */
+                merge_plan_id?: string;
+                /**
+                 * The fail-closed pre-apply snapshot of a merge deployment. Set instead of `snapshot_id`;
+                 * the whole-deployment restore of a merge deployment restores it.
+                 *
+                 */
+                merge_snapshot_id?: string;
+                /**
+                 * Merge deployments only (absent otherwise). True when the whole-deployment restore
+                 * (`POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore`) may run for it: its plan ended `failed` or
+                 * `partially_applied`, the merge snapshot exists, the revert window is open and no
+                 * restore ran or runs for it. That restore applies every resource the snapshot captured
+                 * (edits made after the update are overwritten), invalidates the update's merge evidence
+                 * (the next update plans those resources two-way) and leaves the plan `reverted` or
+                 * `revert_partial`, after which "Revert this update" is no longer offered. The endpoint
+                 * answers 409 `merge_snapshot_restore_unavailable` otherwise, and
+                 * `revert_newer_update_first` when a later deployment changed the destination.
+                 *
+                 */
+                snapshot_restore_available?: boolean;
+                merge_plan_state?: /* Lifecycle state of an update merge plan. */ MergePlanState;
+                /**
+                 * Last moment the merge update of this deployment can be reverted.
+                 */
+                revert_until?: string; // date-time
                 /**
                  * Restore lifecycle metadata for this deployment.
                  */
@@ -2283,9 +2474,21 @@ declare namespace Components {
                 resources?: string[];
                 addresses?: string[];
                 originalError?: string;
+                /**
+                 * Existing count behind a quota error, e.g. workflows in the destination organization
+                 */
+                current?: number;
+                /**
+                 * Limit behind a quota error
+                 */
+                max_allowed?: number;
+                /**
+                 * Resources the plan would add on top of the existing count
+                 */
+                planned?: number;
             };
         }
-        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint";
+        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference";
         export interface FormattedErrorData {
             id?: string;
             name?: string;
@@ -3048,6 +3251,37 @@ declare namespace Components {
                  */
                 status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED";
                 /**
+                 * The merge plan this deployment applied. Such a deployment reverts through the plan;
+                 * only a failed or partially applied plan also offers the whole-deployment restore
+                 * (`snapshot_restore_available`).
+                 *
+                 */
+                merge_plan_id?: string;
+                /**
+                 * The fail-closed pre-apply snapshot of a merge deployment. Set instead of `snapshot_id`;
+                 * the whole-deployment restore of a merge deployment restores it.
+                 *
+                 */
+                merge_snapshot_id?: string;
+                /**
+                 * Merge deployments only (absent otherwise). True when the whole-deployment restore
+                 * (`POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore`) may run for it: its plan ended `failed` or
+                 * `partially_applied`, the merge snapshot exists, the revert window is open and no
+                 * restore ran or runs for it. That restore applies every resource the snapshot captured
+                 * (edits made after the update are overwritten), invalidates the update's merge evidence
+                 * (the next update plans those resources two-way) and leaves the plan `reverted` or
+                 * `revert_partial`, after which "Revert this update" is no longer offered. The endpoint
+                 * answers 409 `merge_snapshot_restore_unavailable` otherwise, and
+                 * `revert_newer_update_first` when a later deployment changed the destination.
+                 *
+                 */
+                snapshot_restore_available?: boolean;
+                merge_plan_state?: /* Lifecycle state of an update merge plan. */ MergePlanState;
+                /**
+                 * Last moment the merge update of this deployment can be reverted.
+                 */
+                revert_until?: string; // date-time
+                /**
                  * Restore lifecycle metadata for this deployment.
                  */
                 restore_details?: {
@@ -3318,30 +3552,329 @@ declare namespace Components {
             created_at: string; // date-time
             published_at?: string | null; // date-time
         }
-        export interface OrgPatchExecution {
-            patch_id?: string;
-            version?: number;
-            org_id?: string;
-            org_name?: string;
-            dest_blueprint_id?: string;
-            status?: "pending" | "in_progress" | "success" | "failed";
-            error?: string;
-            applied_at?: string; // date-time
-            retries?: number;
-            changes_applied?: PatchFieldDiff[];
+        export interface MergeBaseProvenance {
+            rung: "apply_evidence" | "none";
+            job_id?: string;
+            manifest_version?: string;
+            reason?: "no_evidence" | "unreconciled" | "no_manifest" | "not_in_manifest" | "translation_gap";
         }
-        export interface PatchFieldDiff {
-            path?: string;
-            op?: "changed" | "added" | "removed";
-            baseline_value?: any;
-            current_value?: any;
+        /**
+         * The reviewer's choice for one decision group. Valid only while `group_signature` matches.
+         */
+        export interface MergeChoice {
+            group_id: string;
+            group_signature: string;
+            option_id: MergeOptionId;
         }
-        export interface PatchResourceDiff {
-            type?: string;
-            source_id?: string;
-            address?: string;
-            name?: string;
-            changes?: PatchFieldDiff[];
+        /**
+         * A submitted choice. `option_id` is not an enum here, so an option the group does not offer is answered with 422 `merge_plan_choice_invalid` and its `group_ids`, like every other invalid choice.
+         */
+        export interface MergeChoiceInput {
+            group_id: string;
+            group_signature: string;
+            option_id: string;
+        }
+        export interface MergeDecisionGroup {
+            group_id: string;
+            group_signature: string;
+            /**
+             * `confirm` is a whole-resource group with a single valid option the reviewer confirms.
+             */
+            kind: "conflict" | "mandatory" | "confirm";
+            scope: "units" | "order" | "resource";
+            section_refs: MergeSectionRef[];
+            ui_concept: string;
+            label_key: string;
+            values: {
+                section_ref: MergeSectionRef;
+                label: string;
+                base: /* A unit value in builder terms. `present` false means the unit does not exist on that side. */ MergeSectionValue;
+                current: /* A unit value in builder terms. `present` false means the unit does not exist on that side. */ MergeSectionValue;
+                incoming: /* A unit value in builder terms. `present` false means the unit does not exist on that side. */ MergeSectionValue;
+            }[];
+            options: {
+                option_id: MergeOptionId;
+                label_key: string;
+                description_key: string;
+            }[];
+            selection_required: boolean;
+            selected_option_id?: MergeOptionId;
+            mandatory_declaration_ids: string[];
+            batch_key?: string;
+            /**
+             * For an order group, the builder labels (step titles, block labels, logic names) of each side's sequence.
+             */
+            sequence_labels?: {
+                base?: string[];
+                current: string[];
+                incoming: string[];
+            };
+        }
+        export type MergeOptionId = "keep_current" | "take_incoming" | "keep_absent" | "restore_incoming";
+        /**
+         * Journeys by what apply does with the current choices: `updated` (written), `kept` (blocked, left as they are), `removed` (stay removed), `restored` (created again).
+         */
+        export interface MergePlanApplyCounts {
+            updated: number;
+            kept: number;
+            removed: number;
+            restored: number;
+        }
+        export interface MergePlanApplyRequest {
+            expected_plan_revision: number;
+            idempotency_key: string;
+        }
+        export interface MergePlanError {
+            status: number;
+            /**
+             * Stable code, e.g. `merge_plan_revision_conflict`, `merge_plan_signature_stale`, `merge_plan_choice_invalid`.
+             */
+            error: string;
+            /**
+             * The decision groups the error is about.
+             */
+            group_ids?: string[];
+            /**
+             * The plan can no longer be applied as it is; Refresh plans the update again.
+             */
+            action?: "replan";
+            /**
+             * The merge plan to review, when a job endpoint refuses a job that waits for one.
+             */
+            merge_plan_id?: string;
+            /**
+             * Seconds after which a `blueprint_update_in_progress` conflict is worth retrying.
+             */
+            retry_after?: number;
+            /**
+             * The revert preview entries the error is about.
+             */
+            resource_keys?: string[];
+        }
+        export interface MergePlanReplanResult {
+            /**
+             * Id the successor plan is stored under once its job has planned.
+             */
+            merge_plan_id: string;
+            job_id: string;
+        }
+        export interface MergePlanResolutionsUpdate {
+            expected_plan_revision: number;
+            resolutions: /* A submitted choice. `option_id` is not an enum here, so an option the group does not offer is answered with 422 `merge_plan_choice_invalid` and its `group_ids`, like every other invalid choice. */ MergeChoiceInput[];
+        }
+        export interface MergePlanResourceDetail {
+            resource_key: string;
+            resource_type: "journey";
+            lineage_id: string;
+            target_id: string | null;
+            label: string;
+            model_version: string;
+            base_provenance: MergeBaseProvenance;
+            eligibility: MergeResourceEligibility;
+            fast_path: boolean;
+            auto_counts: MergeResourceAutoCounts;
+            decision_groups: MergeDecisionGroup[];
+            warnings: /* A finding of the merged result that does not block the update. */ MergePlanWarning[];
+            status: MergeResourceStatus;
+            blocking_reasons: string[];
+            outcome?: /* Result of one journey after apply. */ MergeResourceOutcome;
+        }
+        export interface MergePlanResourcePage {
+            merge_plan_id: string;
+            plan_revision: number;
+            resources: MergePlanResourceSummary[];
+            /**
+             * Valid only for this `plan_revision`.
+             */
+            next_cursor?: string;
+        }
+        export interface MergePlanResourceReview {
+            merge_plan_id: string;
+            plan_revision: number;
+            resource: MergePlanResourceDetail;
+        }
+        export interface MergePlanResourceSummary {
+            resource_key: string;
+            label: string;
+            status: MergeResourceStatus;
+            eligibility: MergeResourceEligibility;
+            blocking_reasons: string[];
+            auto_counts: MergeResourceAutoCounts;
+            unresolved: number;
+            warning_count: number;
+            outcome?: /* Result of one journey after apply. */ MergeResourceOutcome;
+        }
+        /**
+         * Summary of an update merge plan.
+         */
+        export interface MergePlanReview {
+            merge_plan_id: string;
+            /**
+             * Send back as `expected_plan_revision` when saving choices or applying.
+             */
+            plan_revision: number;
+            /**
+             * Equal to `plan_revision`; the value the next write sends back.
+             */
+            expected_plan_revision: number;
+            /**
+             * Non-blocking findings of every journey of the plan.
+             */
+            warnings: {
+                code: string;
+                resource_key: string;
+                target: string;
+                message: string;
+            }[];
+            /**
+             * Reasons that block the whole plan. Blocked journeys carry their own `blocking_reasons`.
+             */
+            blocked_reasons: string[];
+            apply_counts: /* Journeys by what apply does with the current choices: `updated` (written), `kept` (blocked, left as they are), `removed` (stay removed), `restored` (created again). */ MergePlanApplyCounts;
+            /**
+             * True when the apply ended without a readable journal. `apply_counts` are then zeros, not real counts.
+             *
+             */
+            apply_counts_unknown?: boolean;
+            state: /* Lifecycle state of an update merge plan. */ MergePlanState;
+            job_id: string;
+            destination_blueprint_id: string;
+            source: {
+                blueprint_id?: string;
+                version?: string;
+            };
+            resource_counts: {
+                automatic: number;
+                decisions_required: number;
+                ready: number;
+                blocked: number;
+            };
+            group_counts: {
+                conflict: number;
+                confirm: number;
+                mandatory: number;
+                unresolved: number;
+            };
+            warning_count: number;
+            auto_counts: {
+                kept_customizations: number;
+                applied_updates: number;
+            };
+            /**
+             * Resources other than journeys, updated as in an ordinary install.
+             */
+            other_resource_count: number;
+            created_at: string; // date-time
+            /**
+             * End of the review wait.
+             */
+            expires_at: string; // date-time
+            /**
+             * Last moment the applied update can be reverted.
+             */
+            revert_until: string; // date-time
+            supersedes?: string;
+            superseded_by?: string;
+            /**
+             * Refresh produced no plan and this plan could not be restored (its review wait had ended). Refresh the Blueprint to plan the update again.
+             */
+            successor_failed?: boolean;
+        }
+        /**
+         * Body of discard and refresh requests.
+         */
+        export interface MergePlanRevisionRequest {
+            expected_plan_revision: number;
+        }
+        /**
+         * Lifecycle state of an update merge plan.
+         */
+        export type MergePlanState = "review_required" | "ready" | "approved" | "applying" | "applied" | "partially_applied" | "failed" | "discarded" | "expired" | "superseded" | "reverting" | "reverted" | "revert_partial";
+        /**
+         * A finding of the merged result that does not block the update.
+         */
+        export interface MergePlanWarning {
+            code: string;
+            target: string;
+            unit_key?: string;
+            level?: "warning";
+            message: string;
+        }
+        export interface MergeResourceAutoCounts {
+            from_current: number;
+            from_incoming: number;
+        }
+        export type MergeResourceEligibility = "merge" | "two_way" | "blocked" | "automatic_keep_absent" | "absence_decision";
+        /**
+         * Result of one journey after apply.
+         */
+        export type MergeResourceOutcome = "applied" | "kept_removed" | "restored" | "merge_stale" | "failed";
+        export type MergeResourceStatus = "automatic" | "decisions_required" | "ready" | "blocked";
+        export interface MergeRevertEntry {
+            resource_key: string;
+            lineage_id: string;
+            label: string;
+            resource_type: string;
+            /**
+             * Display grouping. `unchanged`: as the update left it. `changed_since_update`: edited since (restoring overwrites that edit). `created_by_update`: created by the update (restore removes it). `metadata_only`: a journey the update kept removed (restore resets only its update history). `not_restorable`: keep-only (no captured content, deleted since, or an unsupported type).
+             */
+            category: "unchanged" | "changed_since_update" | "created_by_update" | "metadata_only" | "not_restorable";
+            default_action: "restore" | "keep";
+            /**
+             * The revert must name this entry's action explicitly.
+             */
+            requires_choice: boolean;
+        }
+        export interface MergeRevertPreview {
+            revert_preview_id: string;
+            preview_revision: number;
+            merge_plan_id: string;
+            entries: MergeRevertEntry[];
+        }
+        export interface MergeRevertRequest {
+            revert_preview_id: string;
+            expected_preview_revision: number;
+            idempotency_key: string; // ^[A-Za-z0-9_.-]+$
+            /**
+             * One action for every entry of the preview.
+             */
+            selections: MergeRevertSelection[];
+            /**
+             * Lets the revert refresh the caller's session on its own, as on install. Held server-side for the job's lifetime and deleted when it finishes.
+             */
+            session_credentials?: {
+                refresh_token: string; // password
+                client_id: string;
+                pipeline_id?: string;
+            };
+        }
+        export interface MergeRevertResult {
+            /**
+             * The `restore` job running the revert.
+             */
+            job_id: string;
+        }
+        export interface MergeRevertSelection {
+            resource_key: string;
+            action: "restore" | "keep";
+        }
+        export interface MergeSectionRef {
+            resource_lineage_id: string;
+            section_id: string;
+            item_path?: {
+                section_id: string;
+                item_key: string;
+            }[];
+        }
+        /**
+         * A unit value in builder terms. `present` false means the unit does not exist on that side.
+         */
+        export interface MergeSectionValue {
+            present: boolean;
+            /**
+             * The unit value, when present.
+             */
+            value?: any;
         }
         export type PlanChanges = ("create" | "update" | "internal-update" | "no-op" | "delete" | "ignored")[];
         /**
@@ -3419,7 +3952,7 @@ declare namespace Components {
         /**
          * Type of the resource
          */
-        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission";
+        export type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox";
         export interface ResourceReplacement {
             /**
              * Original resource ID to be replaced
@@ -3484,9 +4017,23 @@ declare namespace Components {
              */
             action: "restore" | "delete" | "skip" | "failed";
             /**
-             * Only set when `action == skip`.
+             * Only set when `action == skip`. `not_created_by_install` means the
+             * resource was neither captured for overwrite nor created by this install,
+             * so the revert leaves the pre-existing resource unchanged.
+             * `non_revertible` means the snapshot holds no restorable copy, so the revert
+             * neither restores nor deletes the resource: a secret type (`access_token`,
+             * `environment_variable`), which is never captured; a `file` or
+             * `document_template` that existed before the install but that the snapshot
+             * skipped (e.g. `content_identity_missing`, or content archiving not enabled
+             * for the org); or a `file` or `document_template` this install created while
+             * the org's new content adapter flag is off.
+             * `unconfirmed` means the snapshot restore was partial and no per-resource
+             * outcome is available. It does not assert that the resource was left unchanged.
+             * `unknown_provenance` means the install result is unavailable, so creation
+             * by this specific install cannot be proved and the resource is not deleted.
+             *
              */
-            reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned" | "dependency_protected" | "already_deleted" | "non_revertible";
+            reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned" | "dependency_protected" | "already_deleted" | "non_revertible" | "not_created_by_install" | "unconfirmed" | "unknown_provenance";
             /**
              * Only set when `reason == modified`. From the lineage row's last install write.
              */
@@ -3528,6 +4075,21 @@ declare namespace Components {
                 type: string;
                 target_id?: string | null;
             }[];
+        }
+        export interface RestorePreviewReport {
+            preview_id: string;
+            /**
+             * The install job whose deployment is being previewed.
+             */
+            job_id: string;
+            status: "running" | "completed" | "failed";
+            requested_at: string; // date-time
+            completed_at?: string; // date-time
+            outcome?: RestoreOutcome;
+            /**
+             * Why the preview failed. Present only when `status` is `failed`.
+             */
+            error?: string;
         }
         export interface RootResourceNode {
             /**
@@ -3791,32 +4353,33 @@ declare namespace Paths {
             }
         }
     }
-    namespace ApplyPatch {
+    namespace ApplyBlueprintMergePlan {
         namespace Parameters {
-            export type BlueprintId = /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
-            export type PatchId = string;
+            export type MergePlanId = string;
         }
         export interface PathParameters {
-            blueprint_id: Parameters.BlueprintId;
-            patch_id: Parameters.PatchId;
+            merge_plan_id: Parameters.MergePlanId;
         }
-        export interface RequestBody {
-            org_id: string;
-            org_name: string;
-            dest_blueprint_id: string;
-            dest_org_id?: string;
-            /**
-             * Auth token with access to the destination org (e.g. pipeline token)
-             */
-            destination_auth_token?: string;
-        }
+        export type RequestBody = Components.Schemas.MergePlanApplyRequest;
         namespace Responses {
-            export type $200 = Components.Schemas.OrgPatchExecution;
+            export type $202 = /* Summary of an update merge plan. */ Components.Schemas.MergePlanReview;
+            export type $404 = Components.Schemas.MergePlanError;
+            export type $409 = Components.Schemas.MergePlanError;
+        }
+    }
+    namespace ApplyBlueprintMergeRevert {
+        namespace Parameters {
+            export type MergePlanId = string;
+        }
+        export interface PathParameters {
+            merge_plan_id: Parameters.MergePlanId;
+        }
+        export type RequestBody = Components.Schemas.MergeRevertRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.MergeRevertResult;
+            export type $404 = Components.Schemas.MergePlanError;
+            export type $409 = Components.Schemas.MergePlanError;
+            export type $422 = Components.Schemas.MergePlanError;
         }
     }
     namespace ApplyPlan {
@@ -3988,6 +4551,9 @@ declare namespace Paths {
             export interface $400 {
                 message?: string;
             }
+            export interface $403 {
+                message?: string;
+            }
         }
     }
     namespace CreateExport {
@@ -4060,36 +4626,6 @@ declare namespace Paths {
             export type $201 = Components.Schemas.MarketplaceListingVersion;
             export interface $404 {
             }
-        }
-    }
-    namespace CreatePatch {
-        namespace Parameters {
-            export type BlueprintId = /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
-        }
-        export interface PathParameters {
-            blueprint_id: Parameters.BlueprintId;
-        }
-        export interface RequestBody {
-            blueprint_id: /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
-            rollout_id: string;
-            source_org_id: string;
-            name: string;
-            description?: string;
-            resources: Components.Schemas.PatchResourceDiff[];
-            changelog?: string;
-        }
-        namespace Responses {
-            export type $201 = Components.Schemas.BlueprintPatch;
         }
     }
     namespace CreatePlan {
@@ -4283,69 +4819,18 @@ declare namespace Paths {
             }
         }
     }
-    namespace DetectPatchChanges {
+    namespace DiscardBlueprintMergePlan {
         namespace Parameters {
-            export type BlueprintId = /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
+            export type MergePlanId = string;
         }
         export interface PathParameters {
-            blueprint_id: Parameters.BlueprintId;
+            merge_plan_id: Parameters.MergePlanId;
         }
-        export interface RequestBody {
-            /**
-             * Organization ID of the source org where changes were made
-             */
-            source_org_id?: string;
-            /**
-             * Organization ID of a destination org (used to load tfstate baseline)
-             */
-            dest_org_id?: string;
-            /**
-             * Blueprint ID in the destination org (used to locate tfstate in S3)
-             */
-            dest_blueprint_id?: string;
-            /**
-             * ID of the mass rollout
-             */
-            rollout_id?: string;
-        }
+        export type RequestBody = /* Body of discard and refresh requests. */ Components.Schemas.MergePlanRevisionRequest;
         namespace Responses {
-            export type $200 = Components.Schemas.DetectChangesResult;
-        }
-    }
-    namespace ExportBlueprint {
-        namespace Parameters {
-            export type BlueprintId = /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
-        }
-        export interface PathParameters {
-            blueprint_id: Parameters.BlueprintId;
-        }
-        export interface RequestBody {
-            destination_org_id?: string;
-            destination_blueprint_id?: string;
-            /**
-             * When true, run terraform validate before creating the export zip. If validation fails, the job will be marked as FAILED with errors.
-             */
-            validate?: boolean;
-        }
-        namespace Responses {
-            export interface $202 {
-                job_id?: /**
-                 * ID of a job
-                 * example:
-                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-                 */
-                Components.Schemas.BlueprintJobID;
-            }
+            export type $200 = /* Summary of an update merge plan. */ Components.Schemas.MergePlanReview;
+            export type $404 = Components.Schemas.MergePlanError;
+            export type $409 = Components.Schemas.MergePlanError;
         }
     }
     namespace ExportManifest {
@@ -4386,7 +4871,11 @@ declare namespace Paths {
              */
             isExportingMultipleResources?: boolean;
             generateAISummary?: boolean;
-            language?: "en" | "de";
+            /**
+             * example:
+             * de
+             */
+            language?: string;
         }
         namespace Responses {
             export interface $200 {
@@ -4475,6 +4964,32 @@ declare namespace Paths {
                 total?: number;
                 entries?: Components.Schemas.LineageEntry[];
             }
+        }
+    }
+    namespace GetBlueprintMergePlan {
+        namespace Parameters {
+            export type MergePlanId = string;
+        }
+        export interface PathParameters {
+            merge_plan_id: Parameters.MergePlanId;
+        }
+        namespace Responses {
+            export type $200 = /* Summary of an update merge plan. */ Components.Schemas.MergePlanReview;
+            export type $404 = Components.Schemas.MergePlanError;
+        }
+    }
+    namespace GetBlueprintMergePlanResource {
+        namespace Parameters {
+            export type MergePlanId = string;
+            export type ResourceKey = string;
+        }
+        export interface PathParameters {
+            merge_plan_id: Parameters.MergePlanId;
+            resource_key: Parameters.ResourceKey;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MergePlanResourceReview;
+            export type $404 = Components.Schemas.MergePlanError;
         }
     }
     namespace GetBlueprintPreview {
@@ -4670,26 +5185,6 @@ declare namespace Paths {
             }
         }
     }
-    namespace GetPatch {
-        namespace Parameters {
-            export type BlueprintId = /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
-            export type PatchId = string;
-        }
-        export interface PathParameters {
-            blueprint_id: Parameters.BlueprintId;
-            patch_id: Parameters.PatchId;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.BlueprintPatchWithResults;
-            export interface $404 {
-            }
-        }
-    }
     namespace GetRestorePreview {
         namespace Parameters {
             export type BlueprintId = /**
@@ -4715,70 +5210,37 @@ declare namespace Paths {
             }
         }
     }
-    namespace GetUniquenessCriteria {
+    namespace GetRestorePreviewReport {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type JobId = /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintJobID;
+            export type PreviewId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            job_id: Parameters.JobId;
+            preview_id: Parameters.PreviewId;
+        }
         namespace Responses {
-            export type $200 = Components.Schemas.UniquenessCriteria;
+            export type $200 = Components.Schemas.RestorePreviewReport;
             export interface $404 {
             }
         }
     }
-    namespace InstallBlueprint {
-        export interface RequestBody {
-            source_org_id?: string;
-            source_blueprint_id?: /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
-            /**
-             * URL to the blueprint zip file
-             */
-            source_blueprint_file?: string;
-            destination_org_id?: string;
-            destination_blueprint_id?: /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
-            /**
-             * Auth token with access to the source org. Required for cross-org auto-verification when the caller's bearer token belongs to the destination org.
-             */
-            source_auth_token?: string;
-            /**
-             * Auth token with access to the destination org. Defaults to the caller's bearer token.
-             */
-            destination_auth_token?: string;
-            options?: Components.Schemas.BlueprintInstallationJobOptions;
-            /**
-             * Installation mode
-             */
-            mode: "simple" | "advanced";
-            source_blueprint_type?: "marketplace";
-            /**
-             * Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow.
-             */
-            slug?: string;
-            /**
-             * If true, automatically enable required features in the destination org before installing
-             */
-            auto_enable_features?: boolean;
-        }
+    namespace GetUniquenessCriteria {
         namespace Responses {
-            export interface $202 {
-                job_id?: /**
-                 * ID of a job
-                 * example:
-                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-                 */
-                Components.Schemas.BlueprintJobID;
-                destination_blueprint_id?: /**
-                 * ID of a blueprint
-                 * example:
-                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-                 */
-                Components.Schemas.BlueprintID;
+            export type $200 = Components.Schemas.UniquenessCriteria;
+            export interface $404 {
             }
         }
     }
@@ -4816,6 +5278,8 @@ declare namespace Paths {
              * When `true`, the install skips the manual plan-approval step and applies
              * straight after plan + snapshot succeed (no `:continue` call needed).
              * Defaults to `false`. Used internally by the bulk-install worker.
+             * Rejected with 403 for AI-agent callers, whose installs must be approved
+             * by the user at the plan step.
              *
              */
             auto_apply?: boolean;
@@ -4885,6 +5349,8 @@ declare namespace Paths {
              * When `true`, the install skips the manual plan-approval step and applies
              * straight after plan + snapshot succeed (no `:continue` call needed).
              * Defaults to `false`. Used internally by the bulk-install worker.
+             * Rejected with 403 for AI-agent callers, whose installs must be approved
+             * by the user at the plan step.
              *
              */
             auto_apply?: boolean;
@@ -4940,6 +5406,9 @@ declare namespace Paths {
             export interface $400 {
                 message?: string;
             }
+            export interface $403 {
+                message?: string;
+            }
         }
     }
     namespace ListBlueprintJobs {
@@ -4952,6 +5421,26 @@ declare namespace Paths {
                 total?: number;
                 results?: Components.Schemas.BlueprintJob[];
             }
+        }
+    }
+    namespace ListBlueprintMergePlanResources {
+        namespace Parameters {
+            export type Cursor = string;
+            export type Limit = number;
+            export type MergePlanId = string;
+        }
+        export interface PathParameters {
+            merge_plan_id: Parameters.MergePlanId;
+        }
+        export interface QueryParameters {
+            cursor?: Parameters.Cursor;
+            limit?: Parameters.Limit;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MergePlanResourcePage;
+            export type $400 = Components.Schemas.MergePlanError;
+            export type $404 = Components.Schemas.MergePlanError;
+            export type $409 = Components.Schemas.MergePlanError;
         }
     }
     namespace ListBlueprints {
@@ -5070,25 +5559,6 @@ declare namespace Paths {
             }
         }
     }
-    namespace ListPatches {
-        namespace Parameters {
-            export type BlueprintId = /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
-        }
-        export interface PathParameters {
-            blueprint_id: Parameters.BlueprintId;
-        }
-        namespace Responses {
-            export interface $200 {
-                total?: number;
-                results?: Components.Schemas.BlueprintPatch[];
-            }
-        }
-    }
     namespace ListUniquenessCriteria {
         namespace Responses {
             export interface $200 {
@@ -5148,36 +5618,19 @@ declare namespace Paths {
             }
         }
     }
-    namespace PublishBlueprint {
+    namespace PreviewBlueprintMergeRevert {
+        namespace Parameters {
+            export type MergePlanId = string;
+        }
+        export interface PathParameters {
+            merge_plan_id: Parameters.MergePlanId;
+        }
         export interface RequestBody {
-            blueprint_id: /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
-            /**
-             * The marketplace installation slug for the Webflow CMS item
-             */
-            slug: string;
-            /**
-             * The version string to set on the marketplace CMS item (e.g. "1.0.0")
-             */
-            version?: string;
-            /**
-             * The display name for the blueprint on the marketplace CMS item
-             */
-            name?: string;
         }
         namespace Responses {
-            export interface $202 {
-                job_id?: /**
-                 * ID of a job
-                 * example:
-                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-                 */
-                Components.Schemas.BlueprintJobID;
-            }
+            export type $200 = Components.Schemas.MergeRevertPreview;
+            export type $404 = Components.Schemas.MergePlanError;
+            export type $409 = Components.Schemas.MergePlanError;
         }
     }
     namespace PublishBlueprintV3 {
@@ -5199,6 +5652,21 @@ declare namespace Paths {
              *
              */
             publish_to_marketplace?: boolean;
+            /**
+             * Marketplace slug to publish under. Overrides the blueprint's stored slug, which
+             * is used when this is omitted. Required (here or on the blueprint) when
+             * `publish_to_marketplace` is true.
+             *
+             */
+            slug?: string;
+            /**
+             * Version for the marketplace listing. Defaults to the blueprint's stored version.
+             */
+            version?: string;
+            /**
+             * Display name for the marketplace listing. Defaults to the blueprint's title.
+             */
+            name?: string;
         }
         namespace Responses {
             export interface $202 {
@@ -5250,6 +5718,20 @@ declare namespace Paths {
             export type $200 = Components.Schemas.UniquenessCriteria;
             export interface $400 {
             }
+        }
+    }
+    namespace ReplanBlueprintMergePlan {
+        namespace Parameters {
+            export type MergePlanId = string;
+        }
+        export interface PathParameters {
+            merge_plan_id: Parameters.MergePlanId;
+        }
+        export type RequestBody = /* Body of discard and refresh requests. */ Components.Schemas.MergePlanRevisionRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.MergePlanReplanResult;
+            export type $404 = Components.Schemas.MergePlanError;
+            export type $409 = Components.Schemas.MergePlanError;
         }
     }
     namespace RestoreBlueprintDeploymentV3 {
@@ -5358,31 +5840,6 @@ declare namespace Paths {
             }
         }
     }
-    namespace RetryPatchOrg {
-        namespace Parameters {
-            export type BlueprintId = /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
-            export type OrgId = string;
-            export type PatchId = string;
-        }
-        export interface PathParameters {
-            blueprint_id: Parameters.BlueprintId;
-            patch_id: Parameters.PatchId;
-            org_id: Parameters.OrgId;
-        }
-        export interface RequestBody {
-            org_name?: string;
-            dest_blueprint_id?: string;
-            destination_auth_token?: string;
-        }
-        namespace Responses {
-            export type $200 = Components.Schemas.OrgPatchExecution;
-        }
-    }
     namespace SuggestBlueprintResources {
         export type RequestBody = Components.Schemas.SuggestBlueprintResourcesRequest;
         namespace Responses {
@@ -5413,6 +5870,8 @@ declare namespace Paths {
                  * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
                  */
                 Components.Schemas.BlueprintJobID;
+            }
+            export interface $404 {
             }
         }
     }
@@ -5451,6 +5910,31 @@ declare namespace Paths {
             }
         }
     }
+    namespace TriggerRestorePreview {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type JobId = /**
+             * ID of a job
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintJobID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            job_id: Parameters.JobId;
+        }
+        namespace Responses {
+            export type $202 = Components.Schemas.RestorePreviewReport;
+            export interface $404 {
+            }
+        }
+    }
     namespace UpdateBlueprint {
         namespace Parameters {
             export type BlueprintId = /**
@@ -5466,6 +5950,21 @@ declare namespace Paths {
         export type RequestBody = Components.Schemas.Blueprint;
         namespace Responses {
             export type $200 = Components.Schemas.Blueprint;
+        }
+    }
+    namespace UpdateBlueprintMergePlanResolutions {
+        namespace Parameters {
+            export type MergePlanId = string;
+        }
+        export interface PathParameters {
+            merge_plan_id: Parameters.MergePlanId;
+        }
+        export type RequestBody = Components.Schemas.MergePlanResolutionsUpdate;
+        namespace Responses {
+            export type $200 = /* Summary of an update merge plan. */ Components.Schemas.MergePlanReview;
+            export type $404 = Components.Schemas.MergePlanError;
+            export type $409 = Components.Schemas.MergePlanError;
+            export type $422 = Components.Schemas.MergePlanError;
         }
     }
     namespace UpdateBlueprintNote {
@@ -5596,31 +6095,6 @@ declare namespace Paths {
         }
         export interface PathParameters {
             resource_type: Parameters.ResourceType;
-        }
-    }
-    namespace ValidateBlueprint {
-        namespace Parameters {
-            export type BlueprintId = /**
-             * ID of a blueprint
-             * example:
-             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-             */
-            Components.Schemas.BlueprintID;
-        }
-        export interface PathParameters {
-            blueprint_id: Parameters.BlueprintId;
-        }
-        namespace Responses {
-            export interface $202 {
-                job_id?: /**
-                 * ID of a job
-                 * example:
-                 * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
-                 */
-                Components.Schemas.BlueprintJobID;
-            }
-            export interface $404 {
-            }
         }
     }
     namespace VerifyBlueprint {
@@ -5856,17 +6330,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintPreview.Responses.$200>
   /**
-   * installBlueprint - installBlueprint
-   * 
-   * Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource
-   * 
-   */
-  'installBlueprint'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.InstallBlueprint.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.InstallBlueprint.Responses.$202>
-  /**
    * getBlueprint - getBlueprint
    * 
    * Get Blueprint by ID
@@ -5933,18 +6396,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBlueprintNote.Responses.$200>
   /**
-   * validateBlueprint - validateBlueprint
-   * 
-   * Start a blueprint validation job. Validates Terraform for the blueprint (all types).
-   * Returns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.
-   * 
-   */
-  'validateBlueprint'(
-    parameters?: Parameters<Paths.ValidateBlueprint.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ValidateBlueprint.Responses.$202>
-  /**
    * verifyBlueprint - verifyBlueprint
    * 
    * Start a blueprint verification job. Compares resource configurations between a source org
@@ -5958,79 +6409,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.VerifyBlueprint.Responses.$202>
   /**
-   * detectPatchChanges - detectPatchChanges
-   * 
-   * Detect changes between the current state of a blueprint's resources and its tfstate baseline.
-   * Returns field-level diffs for resources that have been modified since the blueprint was last installed/exported.
-   * 
-   */
-  'detectPatchChanges'(
-    parameters?: Parameters<Paths.DetectPatchChanges.PathParameters> | null,
-    data?: Paths.DetectPatchChanges.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.DetectPatchChanges.Responses.$200>
-  /**
-   * listPatches - listPatches
-   * 
-   * List all patches for a blueprint.
-   */
-  'listPatches'(
-    parameters?: Parameters<Paths.ListPatches.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ListPatches.Responses.$200>
-  /**
-   * createPatch - createPatch
-   * 
-   * Create a new patch for a blueprint.
-   */
-  'createPatch'(
-    parameters?: Parameters<Paths.CreatePatch.PathParameters> | null,
-    data?: Paths.CreatePatch.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.CreatePatch.Responses.$201>
-  /**
-   * getPatch - getPatch
-   * 
-   * Get a patch by ID, including per-org execution results.
-   */
-  'getPatch'(
-    parameters?: Parameters<Paths.GetPatch.PathParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetPatch.Responses.$200>
-  /**
-   * applyPatch - applyPatch
-   * 
-   * Apply a patch to a single destination org.
-   */
-  'applyPatch'(
-    parameters?: Parameters<Paths.ApplyPatch.PathParameters> | null,
-    data?: Paths.ApplyPatch.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ApplyPatch.Responses.$200>
-  /**
-   * retryPatchOrg - retryPatchOrg
-   * 
-   * Retry a failed patch execution for a specific org.
-   */
-  'retryPatchOrg'(
-    parameters?: Parameters<Paths.RetryPatchOrg.PathParameters> | null,
-    data?: Paths.RetryPatchOrg.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.RetryPatchOrg.Responses.$200>
-  /**
-   * exportBlueprint - exportBlueprint
-   * 
-   * Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.
-   * 
-   */
-  'exportBlueprint'(
-    parameters?: Parameters<Paths.ExportBlueprint.PathParameters> | null,
-    data?: Paths.ExportBlueprint.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.ExportBlueprint.Responses.$202>
-  /**
    * listMarketplaceSlugs - listMarketplaceSlugs
    * 
    * List all available marketplace blueprint slugs from Webflow CMS.
@@ -6042,17 +6420,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListMarketplaceSlugs.Responses.$200>
-  /**
-   * publishBlueprint - publishBlueprint
-   * 
-   * Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates the Webflow CMS listing.
-   * 
-   */
-  'publishBlueprint'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.PublishBlueprint.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.PublishBlueprint.Responses.$202>
   /**
    * formatBlueprintDescription - formatBlueprintDescription
    * 
@@ -6188,6 +6555,10 @@ export interface OperationMethods {
    * with `auto_apply: true` (including all bulk-install child jobs), which apply
    * without pausing.
    * 
+   * This call applies the plan. Callers acting for a user — AI agents in particular —
+   * must show the user the job's `resource_progress[]` (`impact_on_install` and
+   * `impact_on_install_reason`) and call it only once the user has approved.
+   * 
    * Also resumes a V3 install paused at `status: "REAUTH_REQUIRED"`, where the
    * caller's credentials could not safely cover another run. The job keeps its
    * `job_id`, so resuming continues from the operation-log checkpoint rather than
@@ -6208,6 +6579,8 @@ export interface OperationMethods {
    * Retry a finished V3 installation job whose status is `FAILED` or
    * `PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same
    * source/destination and `auto_apply: true` — no `:continue` call is needed.
+   * For an AI-agent caller the new job instead pauses at the plan
+   * (`WAITING_USER_ACTION`) for the user to approve via `:continue`.
    * The plan phase re-resolves every resource: already-synced resources no-op,
    * so effectively only the failed resources are re-applied.
    * 
@@ -6359,6 +6732,96 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PreInstallBlueprintV3.Responses.$200>
   /**
+   * getBlueprintMergePlan - getBlueprintMergePlan
+   * 
+   * Summary of an update merge plan, with counts, warnings and the revision to send back.
+   */
+  'getBlueprintMergePlan'(
+    parameters?: Parameters<Paths.GetBlueprintMergePlan.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintMergePlan.Responses.$200>
+  /**
+   * listBlueprintMergePlanResources - listBlueprintMergePlanResources
+   * 
+   * Journeys of the plan, one page at a time. A cursor is valid only for the revision it was issued for.
+   */
+  'listBlueprintMergePlanResources'(
+    parameters?: Parameters<Paths.ListBlueprintMergePlanResources.QueryParameters & Paths.ListBlueprintMergePlanResources.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListBlueprintMergePlanResources.Responses.$200>
+  /**
+   * getBlueprintMergePlanResource - getBlueprintMergePlanResource
+   * 
+   * One journey of the plan with its decision groups and warnings.
+   */
+  'getBlueprintMergePlanResource'(
+    parameters?: Parameters<Paths.GetBlueprintMergePlanResource.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintMergePlanResource.Responses.$200>
+  /**
+   * updateBlueprintMergePlanResolutions - updateBlueprintMergePlanResolutions
+   * 
+   * Saves choices for decision groups. Each submitted choice replaces the saved choice of the same group. Allowed while the plan waits for review.
+   */
+  'updateBlueprintMergePlanResolutions'(
+    parameters?: Parameters<Paths.UpdateBlueprintMergePlanResolutions.PathParameters> | null,
+    data?: Paths.UpdateBlueprintMergePlanResolutions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateBlueprintMergePlanResolutions.Responses.$200>
+  /**
+   * discardBlueprintMergePlan - discardBlueprintMergePlan
+   * 
+   * Discards a plan waiting for review and ends its job. Nothing is written.
+   */
+  'discardBlueprintMergePlan'(
+    parameters?: Parameters<Paths.DiscardBlueprintMergePlan.PathParameters> | null,
+    data?: Paths.DiscardBlueprintMergePlan.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DiscardBlueprintMergePlan.Responses.$200>
+  /**
+   * replanBlueprintMergePlan - replanBlueprintMergePlan
+   * 
+   * Starts a new update job whose plan is prefilled with this plan's saved choices. A plan still waiting for review, or expired, becomes `superseded`.
+   */
+  'replanBlueprintMergePlan'(
+    parameters?: Parameters<Paths.ReplanBlueprintMergePlan.PathParameters> | null,
+    data?: Paths.ReplanBlueprintMergePlan.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReplanBlueprintMergePlan.Responses.$202>
+  /**
+   * applyBlueprintMergePlan - applyBlueprintMergePlan
+   * 
+   * Approves the plan at `expected_plan_revision` with its current choices and resumes the parked update job with the caller's token. Only a `ready` plan whose job waits for this review can be applied. Replaying the same `idempotency_key` returns the approved plan without applying it twice.
+   */
+  'applyBlueprintMergePlan'(
+    parameters?: Parameters<Paths.ApplyBlueprintMergePlan.PathParameters> | null,
+    data?: Paths.ApplyBlueprintMergePlan.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ApplyBlueprintMergePlan.Responses.$202>
+  /**
+   * previewBlueprintMergeRevert - previewBlueprintMergeRevert
+   * 
+   * Lists what the update wrote, from its own journal, and what reverting each resource would do. Resources changed since the update need an explicit choice (`requires_choice`); `not_restorable` ones can only be kept. The preview is immutable: a new call returns a new `revert_preview_id`. Only an `applied` or `partially_applied` plan inside its revert window has a preview, and only while no later update owns any of its resources.
+   */
+  'previewBlueprintMergeRevert'(
+    parameters?: Parameters<Paths.PreviewBlueprintMergeRevert.PathParameters> | null,
+    data?: Paths.PreviewBlueprintMergeRevert.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PreviewBlueprintMergeRevert.Responses.$200>
+  /**
+   * applyBlueprintMergeRevert - applyBlueprintMergeRevert
+   * 
+   * Reverts the update as the preview describes it, with an explicit `action` for every preview entry. Starts a `restore` job and moves the plan to `reverting`; the job ends it `reverted`, or `revert_partial` when a resource changed meanwhile or failed. Replaying the same `idempotency_key` returns the same job.
+   */
+  'applyBlueprintMergeRevert'(
+    parameters?: Parameters<Paths.ApplyBlueprintMergeRevert.PathParameters> | null,
+    data?: Paths.ApplyBlueprintMergeRevert.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ApplyBlueprintMergeRevert.Responses.$202>
+  /**
    * installBlueprintV3 - installBlueprintV3
    * 
    * Install a blueprint into a single destination org using the V3 engine (direct API
@@ -6371,11 +6834,29 @@ export interface OperationMethods {
    *    served by the same v2 jobs endpoints as Terraform jobs and are identified by
    *    `sync_engine: "v3"`. Watch `status` and `resource_progress[]`.
    * 3. If `auto_apply` is `false` (default), the job pauses at
-   *    `status: "WAITING_USER_ACTION"` after planning. Resume it with
-   *    `POST /v2/blueprint-manifest/jobs/{job_id}:continue`.
+   *    `status: "WAITING_USER_ACTION"` after planning. Review the plan before resuming:
+   *    each `resource_progress[]` entry carries `impact_on_install` (`create`, `update`,
+   *    `no-op`, `error`) and, where relevant, `impact_on_install_reason`. Resume it with
+   *    `POST /v2/blueprint-manifest/jobs/{job_id}:continue` once the plan is approved.
    * 4. If `auto_apply` is `true`, the engine applies automatically after plan +
    *    snapshot — no `:continue` call is needed. This is what the bulk-install worker
    *    uses; to install into many orgs at once prefer `POST .../bulk-installs`.
+   * 
+   * **AI agents** (tokens such as "Connect ChatGPT to epilot") cannot use
+   * `auto_apply` (403). Install without it, show the user the plan, and call
+   * `:continue` only after the user approves it.
+   * 
+   * **The plan fails instead of pausing** (`status: "FAILED"`, error code
+   * `missing_required_reference`) when a resource references something that is
+   * neither in the blueprint nor in the destination org and the destination API
+   * would reject it — for example a workflow whose automation tasks point at
+   * automations the package does not contain. Fix it in the source blueprint: add
+   * the missing resources (refreshing the blueprint picks up dependencies) and
+   * publish again. Keep resources in the blueprint even when they already exist in
+   * the destination; an existing resource is matched and updated, not duplicated,
+   * and removing it leaves everything that references it pointing at an id the
+   * destination does not have. Alternatively pass the blocked addresses in
+   * `options.resources_to_ignore` to install the rest.
    * 
    * For cross-org installs, pass `destination_auth_token` (the destination org's
    * token); reads use the caller's bearer token, writes use that token.
@@ -6442,6 +6923,36 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRestorePreview.Responses.$200>
   /**
+   * triggerRestorePreview - triggerRestorePreview
+   * 
+   * Starts computing the same forecast as `getRestorePreview` in the
+   * background. Large deployments take longer than the API Gateway
+   * timeout to forecast inline, so clients should prefer this endpoint.
+   * 
+   * Async: returns 202 immediately with a `running` report. Poll the
+   * `Location` URL until `status` is `completed` or `failed`. Never
+   * mutates any resource.
+   * 
+   */
+  'triggerRestorePreview'(
+    parameters?: Parameters<Paths.TriggerRestorePreview.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.TriggerRestorePreview.Responses.$202>
+  /**
+   * getRestorePreviewReport - getRestorePreviewReport
+   * 
+   * Returns a restore preview started by `triggerRestorePreview`. The
+   * `outcome` is present once `status` is `completed`. A preview whose
+   * worker stopped without reporting is returned as `failed`.
+   * 
+   */
+  'getRestorePreviewReport'(
+    parameters?: Parameters<Paths.GetRestorePreviewReport.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetRestorePreviewReport.Responses.$200>
+  /**
    * triggerDeploymentHealthCheckV3 - triggerDeploymentHealthCheckV3
    * 
    * Starts a read-only health scan of the resources this deployment's
@@ -6495,7 +7006,8 @@ export interface OperationMethods {
    * 
    * Install one source blueprint into many destination organizations in a single
    * request. The server schedules child V3 installs with `auto_apply=true` and caps
-   * active installs at `max_concurrency`. Per-target failures are isolated and
+   * active installs at `max_concurrency`. Not available to AI-agent callers (403),
+   * since no child install pauses for the user to approve its plan. Per-target failures are isolated and
    * retryable; they do not stop the remaining targets.
    * 
    * Each target carries its own write-only `destination_auth_token` (org-scoped).
@@ -6541,6 +7053,7 @@ export interface OperationMethods {
    * targets. Starts a new child install with `auto_apply=true`, appends its job id to
    * `job_ids`, and reuses the same target row. Only the destination auth token may be
    * supplied for the new attempt; source/destination identifiers are immutable.
+   * Not available to AI-agent callers (403).
    * 
    */
   'retryBulkInstallTargetV3'(
@@ -6785,19 +7298,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintPreview.Responses.$200>
   }
-  ['/v2/blueprint-manifest/blueprint:install']: {
-    /**
-     * installBlueprint - installBlueprint
-     * 
-     * Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource
-     * 
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.InstallBlueprint.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.InstallBlueprint.Responses.$202>
-  }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}']: {
     /**
      * getBlueprint - getBlueprint
@@ -6870,20 +7370,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBlueprintNote.Responses.$200>
   }
-  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/validate']: {
-    /**
-     * validateBlueprint - validateBlueprint
-     * 
-     * Start a blueprint validation job. Validates Terraform for the blueprint (all types).
-     * Returns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<Paths.ValidateBlueprint.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ValidateBlueprint.Responses.$202>
-  }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}:verify']: {
     /**
      * verifyBlueprint - verifyBlueprint
@@ -6899,91 +7385,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.VerifyBlueprint.Responses.$202>
   }
-  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/patches:detect']: {
-    /**
-     * detectPatchChanges - detectPatchChanges
-     * 
-     * Detect changes between the current state of a blueprint's resources and its tfstate baseline.
-     * Returns field-level diffs for resources that have been modified since the blueprint was last installed/exported.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<Paths.DetectPatchChanges.PathParameters> | null,
-      data?: Paths.DetectPatchChanges.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.DetectPatchChanges.Responses.$200>
-  }
-  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/patches']: {
-    /**
-     * createPatch - createPatch
-     * 
-     * Create a new patch for a blueprint.
-     */
-    'post'(
-      parameters?: Parameters<Paths.CreatePatch.PathParameters> | null,
-      data?: Paths.CreatePatch.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.CreatePatch.Responses.$201>
-    /**
-     * listPatches - listPatches
-     * 
-     * List all patches for a blueprint.
-     */
-    'get'(
-      parameters?: Parameters<Paths.ListPatches.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ListPatches.Responses.$200>
-  }
-  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}']: {
-    /**
-     * getPatch - getPatch
-     * 
-     * Get a patch by ID, including per-org execution results.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetPatch.PathParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetPatch.Responses.$200>
-  }
-  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}:apply']: {
-    /**
-     * applyPatch - applyPatch
-     * 
-     * Apply a patch to a single destination org.
-     */
-    'post'(
-      parameters?: Parameters<Paths.ApplyPatch.PathParameters> | null,
-      data?: Paths.ApplyPatch.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ApplyPatch.Responses.$200>
-  }
-  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}/orgs/{org_id}:retry']: {
-    /**
-     * retryPatchOrg - retryPatchOrg
-     * 
-     * Retry a failed patch execution for a specific org.
-     */
-    'post'(
-      parameters?: Parameters<Paths.RetryPatchOrg.PathParameters> | null,
-      data?: Paths.RetryPatchOrg.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.RetryPatchOrg.Responses.$200>
-  }
-  ['/v2/blueprint-manifest/blueprints/{blueprint_id}:export']: {
-    /**
-     * exportBlueprint - exportBlueprint
-     * 
-     * Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<Paths.ExportBlueprint.PathParameters> | null,
-      data?: Paths.ExportBlueprint.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.ExportBlueprint.Responses.$202>
-  }
   ['/v2/blueprint-manifest/marketplace/slugs']: {
     /**
      * listMarketplaceSlugs - listMarketplaceSlugs
@@ -6997,19 +7398,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListMarketplaceSlugs.Responses.$200>
-  }
-  ['/v2/blueprint-manifest/blueprints:publish']: {
-    /**
-     * publishBlueprint - publishBlueprint
-     * 
-     * Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates the Webflow CMS listing.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.PublishBlueprint.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.PublishBlueprint.Responses.$202>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}:format-description']: {
     /**
@@ -7163,6 +7551,10 @@ export interface PathsDictionary {
      * with `auto_apply: true` (including all bulk-install child jobs), which apply
      * without pausing.
      * 
+     * This call applies the plan. Callers acting for a user — AI agents in particular —
+     * must show the user the job's `resource_progress[]` (`impact_on_install` and
+     * `impact_on_install_reason`) and call it only once the user has approved.
+     * 
      * Also resumes a V3 install paused at `status: "REAUTH_REQUIRED"`, where the
      * caller's credentials could not safely cover another run. The job keeps its
      * `job_id`, so resuming continues from the operation-log checkpoint rather than
@@ -7185,6 +7577,8 @@ export interface PathsDictionary {
      * Retry a finished V3 installation job whose status is `FAILED` or
      * `PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same
      * source/destination and `auto_apply: true` — no `:continue` call is needed.
+     * For an AI-agent caller the new job instead pauses at the plan
+     * (`WAITING_USER_ACTION`) for the user to approve via `:continue`.
      * The plan phase re-resolves every resource: already-synced resources no-op,
      * so effectively only the failed resources are re-applied.
      * 
@@ -7354,6 +7748,114 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PreInstallBlueprintV3.Responses.$200>
   }
+  ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}']: {
+    /**
+     * getBlueprintMergePlan - getBlueprintMergePlan
+     * 
+     * Summary of an update merge plan, with counts, warnings and the revision to send back.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintMergePlan.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintMergePlan.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}/resources']: {
+    /**
+     * listBlueprintMergePlanResources - listBlueprintMergePlanResources
+     * 
+     * Journeys of the plan, one page at a time. A cursor is valid only for the revision it was issued for.
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListBlueprintMergePlanResources.QueryParameters & Paths.ListBlueprintMergePlanResources.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListBlueprintMergePlanResources.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}/resources/{resource_key}']: {
+    /**
+     * getBlueprintMergePlanResource - getBlueprintMergePlanResource
+     * 
+     * One journey of the plan with its decision groups and warnings.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintMergePlanResource.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintMergePlanResource.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}/resolutions']: {
+    /**
+     * updateBlueprintMergePlanResolutions - updateBlueprintMergePlanResolutions
+     * 
+     * Saves choices for decision groups. Each submitted choice replaces the saved choice of the same group. Allowed while the plan waits for review.
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateBlueprintMergePlanResolutions.PathParameters> | null,
+      data?: Paths.UpdateBlueprintMergePlanResolutions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateBlueprintMergePlanResolutions.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}:discard']: {
+    /**
+     * discardBlueprintMergePlan - discardBlueprintMergePlan
+     * 
+     * Discards a plan waiting for review and ends its job. Nothing is written.
+     */
+    'post'(
+      parameters?: Parameters<Paths.DiscardBlueprintMergePlan.PathParameters> | null,
+      data?: Paths.DiscardBlueprintMergePlan.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DiscardBlueprintMergePlan.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}:replan']: {
+    /**
+     * replanBlueprintMergePlan - replanBlueprintMergePlan
+     * 
+     * Starts a new update job whose plan is prefilled with this plan's saved choices. A plan still waiting for review, or expired, becomes `superseded`.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ReplanBlueprintMergePlan.PathParameters> | null,
+      data?: Paths.ReplanBlueprintMergePlan.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReplanBlueprintMergePlan.Responses.$202>
+  }
+  ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}:apply']: {
+    /**
+     * applyBlueprintMergePlan - applyBlueprintMergePlan
+     * 
+     * Approves the plan at `expected_plan_revision` with its current choices and resumes the parked update job with the caller's token. Only a `ready` plan whose job waits for this review can be applied. Replaying the same `idempotency_key` returns the approved plan without applying it twice.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ApplyBlueprintMergePlan.PathParameters> | null,
+      data?: Paths.ApplyBlueprintMergePlan.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ApplyBlueprintMergePlan.Responses.$202>
+  }
+  ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}:preview-revert']: {
+    /**
+     * previewBlueprintMergeRevert - previewBlueprintMergeRevert
+     * 
+     * Lists what the update wrote, from its own journal, and what reverting each resource would do. Resources changed since the update need an explicit choice (`requires_choice`); `not_restorable` ones can only be kept. The preview is immutable: a new call returns a new `revert_preview_id`. Only an `applied` or `partially_applied` plan inside its revert window has a preview, and only while no later update owns any of its resources.
+     */
+    'post'(
+      parameters?: Parameters<Paths.PreviewBlueprintMergeRevert.PathParameters> | null,
+      data?: Paths.PreviewBlueprintMergeRevert.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PreviewBlueprintMergeRevert.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}:revert']: {
+    /**
+     * applyBlueprintMergeRevert - applyBlueprintMergeRevert
+     * 
+     * Reverts the update as the preview describes it, with an explicit `action` for every preview entry. Starts a `restore` job and moves the plan to `reverting`; the job ends it `reverted`, or `revert_partial` when a resource changed meanwhile or failed. Replaying the same `idempotency_key` returns the same job.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ApplyBlueprintMergeRevert.PathParameters> | null,
+      data?: Paths.ApplyBlueprintMergeRevert.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ApplyBlueprintMergeRevert.Responses.$202>
+  }
   ['/v3/blueprint-manifest/blueprint:install']: {
     /**
      * installBlueprintV3 - installBlueprintV3
@@ -7368,11 +7870,29 @@ export interface PathsDictionary {
      *    served by the same v2 jobs endpoints as Terraform jobs and are identified by
      *    `sync_engine: "v3"`. Watch `status` and `resource_progress[]`.
      * 3. If `auto_apply` is `false` (default), the job pauses at
-     *    `status: "WAITING_USER_ACTION"` after planning. Resume it with
-     *    `POST /v2/blueprint-manifest/jobs/{job_id}:continue`.
+     *    `status: "WAITING_USER_ACTION"` after planning. Review the plan before resuming:
+     *    each `resource_progress[]` entry carries `impact_on_install` (`create`, `update`,
+     *    `no-op`, `error`) and, where relevant, `impact_on_install_reason`. Resume it with
+     *    `POST /v2/blueprint-manifest/jobs/{job_id}:continue` once the plan is approved.
      * 4. If `auto_apply` is `true`, the engine applies automatically after plan +
      *    snapshot — no `:continue` call is needed. This is what the bulk-install worker
      *    uses; to install into many orgs at once prefer `POST .../bulk-installs`.
+     * 
+     * **AI agents** (tokens such as "Connect ChatGPT to epilot") cannot use
+     * `auto_apply` (403). Install without it, show the user the plan, and call
+     * `:continue` only after the user approves it.
+     * 
+     * **The plan fails instead of pausing** (`status: "FAILED"`, error code
+     * `missing_required_reference`) when a resource references something that is
+     * neither in the blueprint nor in the destination org and the destination API
+     * would reject it — for example a workflow whose automation tasks point at
+     * automations the package does not contain. Fix it in the source blueprint: add
+     * the missing resources (refreshing the blueprint picks up dependencies) and
+     * publish again. Keep resources in the blueprint even when they already exist in
+     * the destination; an existing resource is matched and updated, not duplicated,
+     * and removing it leaves everything that references it pointing at an id the
+     * destination does not have. Alternatively pass the blocked addresses in
+     * `options.resources_to_ignore` to install the rest.
      * 
      * For cross-org installs, pass `destination_auth_token` (the destination org's
      * token); reads use the caller's bearer token, writes use that token.
@@ -7443,6 +7963,40 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRestorePreview.Responses.$200>
   }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore-preview']: {
+    /**
+     * triggerRestorePreview - triggerRestorePreview
+     * 
+     * Starts computing the same forecast as `getRestorePreview` in the
+     * background. Large deployments take longer than the API Gateway
+     * timeout to forecast inline, so clients should prefer this endpoint.
+     * 
+     * Async: returns 202 immediately with a `running` report. Poll the
+     * `Location` URL until `status` is `completed` or `failed`. Never
+     * mutates any resource.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.TriggerRestorePreview.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.TriggerRestorePreview.Responses.$202>
+  }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview/{preview_id}']: {
+    /**
+     * getRestorePreviewReport - getRestorePreviewReport
+     * 
+     * Returns a restore preview started by `triggerRestorePreview`. The
+     * `outcome` is present once `status` is `completed`. A preview whose
+     * worker stopped without reporting is returned as `failed`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetRestorePreviewReport.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetRestorePreviewReport.Responses.$200>
+  }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:health-check']: {
     /**
      * triggerDeploymentHealthCheckV3 - triggerDeploymentHealthCheckV3
@@ -7504,7 +8058,8 @@ export interface PathsDictionary {
      * 
      * Install one source blueprint into many destination organizations in a single
      * request. The server schedules child V3 installs with `auto_apply=true` and caps
-     * active installs at `max_concurrency`. Per-target failures are isolated and
+     * active installs at `max_concurrency`. Not available to AI-agent callers (403),
+     * since no child install pauses for the user to approve its plan. Per-target failures are isolated and
      * retryable; they do not stop the remaining targets.
      * 
      * Each target carries its own write-only `destination_auth_token` (org-scoped).
@@ -7556,6 +8111,7 @@ export interface PathsDictionary {
      * targets. Starts a new child install with `auto_apply=true`, appends its job id to
      * `job_ids`, and reuses the same target row. Only the destination auth token may be
      * supplied for the new attempt; source/destination identifiers are immutable.
+     * Not available to AI-agent callers (403).
      * 
      */
     'post'(
@@ -7632,13 +8188,10 @@ export type BlueprintJob = Components.Schemas.BlueprintJob;
 export type BlueprintJobEvent = Components.Schemas.BlueprintJobEvent;
 export type BlueprintJobID = Components.Schemas.BlueprintJobID;
 export type BlueprintNote = Components.Schemas.BlueprintNote;
-export type BlueprintPatch = Components.Schemas.BlueprintPatch;
-export type BlueprintPatchWithResults = Components.Schemas.BlueprintPatchWithResults;
 export type BlueprintPreview = Components.Schemas.BlueprintPreview;
 export type BlueprintResource = Components.Schemas.BlueprintResource;
 export type BlueprintResourceID = Components.Schemas.BlueprintResourceID;
 export type BlueprintRestoreJob = Components.Schemas.BlueprintRestoreJob;
-export type BlueprintValidateJob = Components.Schemas.BlueprintValidateJob;
 export type BlueprintVerificationJob = Components.Schemas.BlueprintVerificationJob;
 export type BulkInstall = Components.Schemas.BulkInstall;
 export type BulkInstallCounts = Components.Schemas.BulkInstallCounts;
@@ -7658,7 +8211,6 @@ export type ContinueInstallationJobRequest = Components.Schemas.ContinueInstalla
 export type CustomBlueprint = Components.Schemas.CustomBlueprint;
 export type DeployedBlueprint = Components.Schemas.DeployedBlueprint;
 export type DeploymentHealthReport = Components.Schemas.DeploymentHealthReport;
-export type DetectChangesResult = Components.Schemas.DetectChangesResult;
 export type FieldDiff = Components.Schemas.FieldDiff;
 export type FileBlueprint = Components.Schemas.FileBlueprint;
 export type FormattedError = Components.Schemas.FormattedError;
@@ -7683,9 +8235,35 @@ export type MarketplaceBlueprint = Components.Schemas.MarketplaceBlueprint;
 export type MarketplaceListing = Components.Schemas.MarketplaceListing;
 export type MarketplaceListingUpdate = Components.Schemas.MarketplaceListingUpdate;
 export type MarketplaceListingVersion = Components.Schemas.MarketplaceListingVersion;
-export type OrgPatchExecution = Components.Schemas.OrgPatchExecution;
-export type PatchFieldDiff = Components.Schemas.PatchFieldDiff;
-export type PatchResourceDiff = Components.Schemas.PatchResourceDiff;
+export type MergeBaseProvenance = Components.Schemas.MergeBaseProvenance;
+export type MergeChoice = Components.Schemas.MergeChoice;
+export type MergeChoiceInput = Components.Schemas.MergeChoiceInput;
+export type MergeDecisionGroup = Components.Schemas.MergeDecisionGroup;
+export type MergeOptionId = Components.Schemas.MergeOptionId;
+export type MergePlanApplyCounts = Components.Schemas.MergePlanApplyCounts;
+export type MergePlanApplyRequest = Components.Schemas.MergePlanApplyRequest;
+export type MergePlanError = Components.Schemas.MergePlanError;
+export type MergePlanReplanResult = Components.Schemas.MergePlanReplanResult;
+export type MergePlanResolutionsUpdate = Components.Schemas.MergePlanResolutionsUpdate;
+export type MergePlanResourceDetail = Components.Schemas.MergePlanResourceDetail;
+export type MergePlanResourcePage = Components.Schemas.MergePlanResourcePage;
+export type MergePlanResourceReview = Components.Schemas.MergePlanResourceReview;
+export type MergePlanResourceSummary = Components.Schemas.MergePlanResourceSummary;
+export type MergePlanReview = Components.Schemas.MergePlanReview;
+export type MergePlanRevisionRequest = Components.Schemas.MergePlanRevisionRequest;
+export type MergePlanState = Components.Schemas.MergePlanState;
+export type MergePlanWarning = Components.Schemas.MergePlanWarning;
+export type MergeResourceAutoCounts = Components.Schemas.MergeResourceAutoCounts;
+export type MergeResourceEligibility = Components.Schemas.MergeResourceEligibility;
+export type MergeResourceOutcome = Components.Schemas.MergeResourceOutcome;
+export type MergeResourceStatus = Components.Schemas.MergeResourceStatus;
+export type MergeRevertEntry = Components.Schemas.MergeRevertEntry;
+export type MergeRevertPreview = Components.Schemas.MergeRevertPreview;
+export type MergeRevertRequest = Components.Schemas.MergeRevertRequest;
+export type MergeRevertResult = Components.Schemas.MergeRevertResult;
+export type MergeRevertSelection = Components.Schemas.MergeRevertSelection;
+export type MergeSectionRef = Components.Schemas.MergeSectionRef;
+export type MergeSectionValue = Components.Schemas.MergeSectionValue;
 export type PlanChanges = Components.Schemas.PlanChanges;
 export type PreInstallRequirements = Components.Schemas.PreInstallRequirements;
 export type PutManifestPayload = Components.Schemas.PutManifestPayload;
@@ -7695,6 +8273,7 @@ export type ResourceReplacement = Components.Schemas.ResourceReplacement;
 export type ResourceVerificationResult = Components.Schemas.ResourceVerificationResult;
 export type RestoreOutcome = Components.Schemas.RestoreOutcome;
 export type RestoreOutcomeItem = Components.Schemas.RestoreOutcomeItem;
+export type RestorePreviewReport = Components.Schemas.RestorePreviewReport;
 export type RootResourceNode = Components.Schemas.RootResourceNode;
 export type S3Reference = Components.Schemas.S3Reference;
 export type SelectedResources = Components.Schemas.SelectedResources;
