@@ -193,19 +193,6 @@
         "responses": {}
       }
     },
-    "/v2/blueprint-manifest/blueprint:install": {
-      "post": {
-        "operationId": "installBlueprint",
-        "deprecated": true,
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}": {
       "get": {
         "operationId": "getBlueprint",
@@ -305,20 +292,6 @@
         "responses": {}
       }
     },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/validate": {
-      "post": {
-        "operationId": "validateBlueprint",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id"
-          }
-        ],
-        "responses": {}
-      }
-    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}:verify": {
       "post": {
         "operationId": "verifyBlueprint",
@@ -338,165 +311,9 @@
         "responses": {}
       }
     },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches:detect": {
-      "post": {
-        "operationId": "detectPatchChanges",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches": {
-      "post": {
-        "operationId": "createPatch",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      },
-      "get": {
-        "operationId": "listPatches",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id"
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}": {
-      "get": {
-        "operationId": "getPatch",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id"
-          },
-          {
-            "in": "path",
-            "required": true,
-            "name": "patch_id"
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}:apply": {
-      "post": {
-        "operationId": "applyPatch",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id"
-          },
-          {
-            "in": "path",
-            "required": true,
-            "name": "patch_id"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}/orgs/{org_id}:retry": {
-      "post": {
-        "operationId": "retryPatchOrg",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id"
-          },
-          {
-            "in": "path",
-            "required": true,
-            "name": "patch_id"
-          },
-          {
-            "in": "path",
-            "required": true,
-            "name": "org_id"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
-      "post": {
-        "operationId": "exportBlueprint",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id"
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
     "/v2/blueprint-manifest/marketplace/slugs": {
       "get": {
         "operationId": "listMarketplaceSlugs",
-        "responses": {}
-      }
-    },
-    "/v2/blueprint-manifest/blueprints:publish": {
-      "post": {
-        "operationId": "publishBlueprint",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
         "responses": {}
       }
     },
@@ -908,6 +725,156 @@
         "responses": {}
       }
     },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}": {
+      "get": {
+        "operationId": "getBlueprintMergePlan",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}/resources": {
+      "get": {
+        "operationId": "listBlueprintMergePlanResources",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}/resources/{resource_key}": {
+      "get": {
+        "operationId": "getBlueprintMergePlanResource",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          },
+          {
+            "in": "path",
+            "name": "resource_key",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}/resolutions": {
+      "put": {
+        "operationId": "updateBlueprintMergePlanResolutions",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}:discard": {
+      "post": {
+        "operationId": "discardBlueprintMergePlan",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}:replan": {
+      "post": {
+        "operationId": "replanBlueprintMergePlan",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}:apply": {
+      "post": {
+        "operationId": "applyBlueprintMergePlan",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}:preview-revert": {
+      "post": {
+        "operationId": "previewBlueprintMergeRevert",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}:revert": {
+      "post": {
+        "operationId": "applyBlueprintMergeRevert",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v3/blueprint-manifest/blueprint:install": {
       "post": {
         "operationId": "installBlueprintV3",
@@ -950,6 +917,47 @@
           {
             "in": "path",
             "name": "job_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore-preview": {
+      "post": {
+        "operationId": "triggerRestorePreview",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview/{preview_id}": {
+      "get": {
+        "operationId": "getRestorePreviewReport",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "preview_id",
             "required": true
           }
         ],
@@ -1119,6 +1127,11 @@
   },
   "components": {
     "parameters": {
+      "MergePlanID": {
+        "name": "merge_plan_id",
+        "in": "path",
+        "required": true
+      },
       "JobID": {
         "name": "job_id",
         "in": "path",

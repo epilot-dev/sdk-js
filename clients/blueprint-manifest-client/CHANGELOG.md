@@ -1,5 +1,24 @@
 # @epilot/blueprint-manifest-client
 
+## 6.0.0
+
+### Major Changes
+
+- Remove the operations of the retired Terraform (V2) engine, which the API no longer serves:
+  `installBlueprint`, `exportBlueprint`, `validateBlueprint`, `publishBlueprint`, and the patch
+  operations (`createPatch`, `getPatch`, `listPatches`, `applyPatch`, `detectPatchChanges`,
+  `retryPatchOrg`).
+
+### Minor Changes
+
+- Add the async restore preview: `triggerRestorePreview` (`POST …/deployments/{job_id}:restore-preview`)
+  and `getRestorePreviewReport` (`GET …/deployments/{job_id}/restore-preview/{preview_id}`), with the
+  `RestorePreviewReport` schema.
+- Add the blueprint update merge-plan operations (`getBlueprintMergePlan`,
+  `listBlueprintMergePlanResources`, `getBlueprintMergePlanResource`,
+  `updateBlueprintMergePlanResolutions`, `discardBlueprintMergePlan`, `replanBlueprintMergePlan`,
+  `applyBlueprintMergePlan`, `previewBlueprintMergeRevert`, `applyBlueprintMergeRevert`).
+
 ## 5.6.0
 
 ### Minor Changes

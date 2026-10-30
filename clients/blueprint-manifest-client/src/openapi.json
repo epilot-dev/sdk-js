@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "4.8.0",
+    "version": "4.9.0",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -39,12 +39,12 @@
       "description": "Manage versions for marketplace listings"
     },
     {
-      "name": "Patches",
-      "description": "Manage blueprint patches for mass rollouts"
-    },
-    {
       "name": "Uniqueness Criteria",
       "description": "Configure per-org field sets used to match existing resources during install"
+    },
+    {
+      "name": "merge-plans",
+      "description": "Review and decide the update merge plan of a journey update"
     }
   ],
   "security": [
@@ -61,6 +61,11 @@
     "/v1/blueprint-manifest/jobs/{job_id}": {
       "get": {
         "operationId": "getJob",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getJob",
         "description": "Get the current status of a blueprint (export or import)",
         "deprecated": true,
@@ -89,6 +94,11 @@
     "/v1/blueprint-manifest/jobs:createExport": {
       "post": {
         "operationId": "createExport",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "createExport",
         "description": "Creates a new Export Job with a list of available resources to export from the passed root resource.\n\nMultiple root resources can be added by calling this multiple times with the same jobId\n",
         "deprecated": true,
@@ -165,6 +175,11 @@
     "/v1/blueprint-manifest/jobs/{job_id}:exportManifest": {
       "post": {
         "operationId": "exportManifest",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "exportManifest",
         "description": "Triggers exporting a manifest file using selected resoruce ids for a job created with `createExportJob`",
         "deprecated": true,
@@ -234,10 +249,7 @@
                   },
                   "language": {
                     "type": "string",
-                    "enum": [
-                      "en",
-                      "de"
-                    ]
+                    "example": "de"
                   }
                 },
                 "required": [
@@ -270,6 +282,11 @@
     "/v1/blueprint-manifest:uploadManifest": {
       "post": {
         "operationId": "uploadManifest",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "uploadManifest",
         "description": "Create pre-signed S3 URL to upload a manifest file.\n",
         "tags": [
@@ -311,6 +328,11 @@
     "/v1/blueprint-manifest/jobs:createPlan": {
       "post": {
         "operationId": "createPlan",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "createPlan",
         "description": "Creates a new import job from an uploaded manifest file and returns the plan.\n\nCreates an updated plan for an installed manifest when `manifest_id` is passed\n",
         "deprecated": true,
@@ -516,6 +538,11 @@
     "/v1/blueprint-manifest/jobs/{job_id}:applyPlan": {
       "post": {
         "operationId": "applyPlan",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "applyPlan",
         "description": "Apply a plan returned by `createPlan`.",
         "deprecated": true,
@@ -574,6 +601,11 @@
     "/v1/blueprint-manifest/manifests": {
       "get": {
         "operationId": "listInstalledManifests",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listInstalledManifests",
         "description": "List Blueprint Manifests installed to the organization",
         "deprecated": true,
@@ -609,6 +641,11 @@
     "/v1/blueprint-manifest/manifests/{manifest_id}": {
       "get": {
         "operationId": "getManifest",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getManifest",
         "description": "Get installed Manifest by ID",
         "deprecated": true,
@@ -640,6 +677,11 @@
       },
       "put": {
         "operationId": "updateManifest",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "updateManifest",
         "description": "Update an installed manifest\n",
         "deprecated": true,
@@ -680,6 +722,11 @@
       },
       "delete": {
         "operationId": "deleteManifest",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "deleteManifest",
         "description": "Remove installed manifest from the org\n\nNote that this does not delete the installed resources of the Manifest!\n",
         "deprecated": true,
@@ -713,6 +760,11 @@
     "/v2/blueprint-manifest/blueprints": {
       "get": {
         "operationId": "listBlueprints",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listBlueprints",
         "description": "List Custom and Installed Blueprints",
         "tags": [
@@ -757,6 +809,11 @@
       },
       "post": {
         "operationId": "createBlueprint",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "createBlueprint",
         "description": "Create a Blueprint",
         "tags": [
@@ -788,6 +845,11 @@
     "/v2/blueprint-manifest/blueprints:marketplace": {
       "get": {
         "operationId": "listInstalledMarketplaceBlueprints",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listInstalledMarketplaceBlueprints",
         "description": "List installed Marketplace Blueprints for the organization.\nWhen multiple blueprints have the same slug, returns only the most recently created one.\n",
         "tags": [
@@ -822,6 +884,11 @@
     "/v2/blueprint-manifest/blueprints:pre-install": {
       "post": {
         "operationId": "preInstallBlueprint",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "preInstallBlueprint",
         "description": "Pre-install a Blueprint based on a blueprint file. Format-agnostic: the engine is detected from the uploaded archive, so this endpoint accepts both Terraform exports and signed V3 packages. The returned preview's `sync_engine` says which install endpoint to call next. An archive that is neither a Terraform export nor a validly signed V3 package is rejected with 400.",
         "tags": [
@@ -872,6 +939,11 @@
     "/v2/blueprint-manifest/blueprints:preview/{preview_id}": {
       "get": {
         "operationId": "getBlueprintPreview",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getBlueprintPreview",
         "description": "Get Blueprint Preview by ID",
         "tags": [
@@ -904,112 +976,14 @@
         }
       }
     },
-    "/v2/blueprint-manifest/blueprint:install": {
-      "post": {
-        "operationId": "installBlueprint",
-        "deprecated": true,
-        "summary": "installBlueprint",
-        "description": "Kick off a new blueprint installation job. Returns 202 Accepted with Location header pointing to the job resource\n",
-        "tags": [
-          "Blueprints"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "source_org_id": {
-                    "type": "string"
-                  },
-                  "source_blueprint_id": {
-                    "$ref": "#/components/schemas/BlueprintID"
-                  },
-                  "source_blueprint_file": {
-                    "type": "string",
-                    "description": "URL to the blueprint zip file"
-                  },
-                  "destination_org_id": {
-                    "type": "string"
-                  },
-                  "destination_blueprint_id": {
-                    "$ref": "#/components/schemas/BlueprintID"
-                  },
-                  "source_auth_token": {
-                    "type": "string",
-                    "description": "Auth token with access to the source org. Required for cross-org auto-verification when the caller's bearer token belongs to the destination org."
-                  },
-                  "destination_auth_token": {
-                    "type": "string",
-                    "description": "Auth token with access to the destination org. Defaults to the caller's bearer token."
-                  },
-                  "options": {
-                    "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
-                  },
-                  "mode": {
-                    "type": "string",
-                    "enum": [
-                      "simple",
-                      "advanced"
-                    ],
-                    "description": "Installation mode"
-                  },
-                  "source_blueprint_type": {
-                    "type": "string",
-                    "enum": [
-                      "marketplace"
-                    ]
-                  },
-                  "slug": {
-                    "type": "string",
-                    "description": "Slug to enforce in this blueprint. Used in marketplace blueprints to keep it consistent with webflow."
-                  },
-                  "auto_enable_features": {
-                    "type": "boolean",
-                    "description": "If true, automatically enable required features in the destination org before installing"
-                  }
-                },
-                "required": [
-                  "mode"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Blueprint installation job started",
-            "headers": {
-              "Location": {
-                "description": "URL to poll the job",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "job_id": {
-                      "$ref": "#/components/schemas/BlueprintJobID"
-                    },
-                    "destination_blueprint_id": {
-                      "$ref": "#/components/schemas/BlueprintID"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}": {
       "get": {
         "operationId": "getBlueprint",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getBlueprint",
         "description": "Get Blueprint by ID",
         "tags": [
@@ -1040,6 +1014,11 @@
       },
       "put": {
         "operationId": "updateBlueprint",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "updateBlueprint",
         "description": "Update a Blueprint",
         "tags": [
@@ -1079,6 +1058,11 @@
       },
       "delete": {
         "operationId": "deleteBlueprint",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "deleteBlueprint",
         "description": "Delete a Blueprint",
         "tags": [
@@ -1111,6 +1095,11 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/notes": {
       "post": {
         "operationId": "addBlueprintNote",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "addBlueprintNote",
         "description": "Append an internal note to a blueprint. `id`, `created_at` and `created_by`\nare stamped server-side from the caller, so notes cannot be backdated or\nattributed to someone else. Existing notes are never modified.\n",
         "tags": [
@@ -1178,6 +1167,11 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/notes/{note_id}": {
       "patch": {
         "operationId": "updateBlueprintNote",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "updateBlueprintNote",
         "description": "Rewrite the text of an existing internal note. The note keeps its position in\nthe list along with `created_at` and `created_by`, so an edit cannot reassign\nauthorship; `updated_at` is stamped server-side.\n",
         "tags": [
@@ -1266,6 +1260,11 @@
       },
       "delete": {
         "operationId": "deleteBlueprintNote",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "deleteBlueprintNote",
         "description": "Remove a single internal note from a blueprint.",
         "tags": [
@@ -1326,58 +1325,14 @@
         }
       }
     },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/validate": {
-      "post": {
-        "operationId": "validateBlueprint",
-        "deprecated": true,
-        "summary": "validateBlueprint",
-        "description": "Start a blueprint validation job. Validates Terraform for the blueprint (all types).\nReturns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, valid, and errors.\n",
-        "tags": [
-          "Blueprints"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id",
-            "schema": {
-              "$ref": "#/components/schemas/BlueprintID"
-            }
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "Validation job started",
-            "headers": {
-              "Location": {
-                "description": "URL to poll the job",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "job_id": {
-                      "$ref": "#/components/schemas/BlueprintJobID"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Blueprint not found"
-          }
-        }
-      }
-    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}:verify": {
       "post": {
         "operationId": "verifyBlueprint",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "verifyBlueprint",
         "description": "Start a blueprint verification job. Compares resource configurations between a source org\nand a destination org to verify that a sync/install was successful.\nReturns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, summary, and resource_results.\n",
         "tags": [
@@ -1479,442 +1434,14 @@
         }
       }
     },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches:detect": {
-      "post": {
-        "operationId": "detectPatchChanges",
-        "deprecated": true,
-        "summary": "detectPatchChanges",
-        "description": "Detect changes between the current state of a blueprint's resources and its tfstate baseline.\nReturns field-level diffs for resources that have been modified since the blueprint was last installed/exported.\n",
-        "tags": [
-          "Patches"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id",
-            "schema": {
-              "$ref": "#/components/schemas/BlueprintID"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "source_org_id": {
-                    "type": "string",
-                    "description": "Organization ID of the source org where changes were made"
-                  },
-                  "dest_org_id": {
-                    "type": "string",
-                    "description": "Organization ID of a destination org (used to load tfstate baseline)"
-                  },
-                  "dest_blueprint_id": {
-                    "type": "string",
-                    "description": "Blueprint ID in the destination org (used to locate tfstate in S3)"
-                  },
-                  "rollout_id": {
-                    "type": "string",
-                    "description": "ID of the mass rollout"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Detected changes",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DetectChangesResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches": {
-      "post": {
-        "operationId": "createPatch",
-        "deprecated": true,
-        "summary": "createPatch",
-        "description": "Create a new patch for a blueprint.",
-        "tags": [
-          "Patches"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id",
-            "schema": {
-              "$ref": "#/components/schemas/BlueprintID"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "blueprint_id",
-                  "rollout_id",
-                  "source_org_id",
-                  "name",
-                  "resources"
-                ],
-                "properties": {
-                  "blueprint_id": {
-                    "$ref": "#/components/schemas/BlueprintID"
-                  },
-                  "rollout_id": {
-                    "type": "string"
-                  },
-                  "source_org_id": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  },
-                  "resources": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/PatchResourceDiff"
-                    }
-                  },
-                  "changelog": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Patch created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BlueprintPatch"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "operationId": "listPatches",
-        "deprecated": true,
-        "summary": "listPatches",
-        "description": "List all patches for a blueprint.",
-        "tags": [
-          "Patches"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id",
-            "schema": {
-              "$ref": "#/components/schemas/BlueprintID"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of patches",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "total": {
-                      "type": "integer"
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/BlueprintPatch"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}": {
-      "get": {
-        "operationId": "getPatch",
-        "deprecated": true,
-        "summary": "getPatch",
-        "description": "Get a patch by ID, including per-org execution results.",
-        "tags": [
-          "Patches"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id",
-            "schema": {
-              "$ref": "#/components/schemas/BlueprintID"
-            }
-          },
-          {
-            "in": "path",
-            "required": true,
-            "name": "patch_id",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Patch details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BlueprintPatchWithResults"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Patch not found"
-          }
-        }
-      }
-    },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}:apply": {
-      "post": {
-        "operationId": "applyPatch",
-        "deprecated": true,
-        "summary": "applyPatch",
-        "description": "Apply a patch to a single destination org.",
-        "tags": [
-          "Patches"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id",
-            "schema": {
-              "$ref": "#/components/schemas/BlueprintID"
-            }
-          },
-          {
-            "in": "path",
-            "required": true,
-            "name": "patch_id",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "org_id",
-                  "org_name",
-                  "dest_blueprint_id"
-                ],
-                "properties": {
-                  "org_id": {
-                    "type": "string"
-                  },
-                  "org_name": {
-                    "type": "string"
-                  },
-                  "dest_blueprint_id": {
-                    "type": "string"
-                  },
-                  "dest_org_id": {
-                    "type": "string"
-                  },
-                  "destination_auth_token": {
-                    "type": "string",
-                    "description": "Auth token with access to the destination org (e.g. pipeline token)"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Patch execution result",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrgPatchExecution"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}/patches/{patch_id}/orgs/{org_id}:retry": {
-      "post": {
-        "operationId": "retryPatchOrg",
-        "deprecated": true,
-        "summary": "retryPatchOrg",
-        "description": "Retry a failed patch execution for a specific org.",
-        "tags": [
-          "Patches"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id",
-            "schema": {
-              "$ref": "#/components/schemas/BlueprintID"
-            }
-          },
-          {
-            "in": "path",
-            "required": true,
-            "name": "patch_id",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "required": true,
-            "name": "org_id",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "org_name": {
-                    "type": "string"
-                  },
-                  "dest_blueprint_id": {
-                    "type": "string"
-                  },
-                  "destination_auth_token": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Retry execution result",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrgPatchExecution"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/blueprint-manifest/blueprints/{blueprint_id}:export": {
-      "post": {
-        "operationId": "exportBlueprint",
-        "deprecated": true,
-        "summary": "exportBlueprint",
-        "description": "Kick off a new blueprint export job. Returns 202 Accepted with Location header pointing to the job resource.\n",
-        "tags": [
-          "Blueprints"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "required": true,
-            "name": "blueprint_id",
-            "schema": {
-              "$ref": "#/components/schemas/BlueprintID"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "destination_org_id": {
-                    "type": "string"
-                  },
-                  "destination_blueprint_id": {
-                    "type": "string"
-                  },
-                  "validate": {
-                    "type": "boolean",
-                    "description": "When true, run terraform validate before creating the export zip. If validation fails, the job will be marked as FAILED with errors."
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Blueprint export job started",
-            "headers": {
-              "Location": {
-                "description": "URL to poll the job",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "job_id": {
-                      "$ref": "#/components/schemas/BlueprintJobID"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v2/blueprint-manifest/marketplace/slugs": {
       "get": {
         "operationId": "listMarketplaceSlugs",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listMarketplaceSlugs",
         "description": "List all available marketplace blueprint slugs from Webflow CMS.\nReturns cached results when available.\n",
         "tags": [
@@ -1966,75 +1493,14 @@
         }
       }
     },
-    "/v2/blueprint-manifest/blueprints:publish": {
-      "post": {
-        "operationId": "publishBlueprint",
-        "summary": "publishBlueprint",
-        "description": "Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates the Webflow CMS listing.\n",
-        "tags": [
-          "Blueprints"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "blueprint_id",
-                  "slug"
-                ],
-                "properties": {
-                  "blueprint_id": {
-                    "$ref": "#/components/schemas/BlueprintID"
-                  },
-                  "slug": {
-                    "type": "string",
-                    "description": "The marketplace installation slug for the Webflow CMS item"
-                  },
-                  "version": {
-                    "type": "string",
-                    "description": "The version string to set on the marketplace CMS item (e.g. \"1.0.0\")"
-                  },
-                  "name": {
-                    "type": "string",
-                    "description": "The display name for the blueprint on the marketplace CMS item"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Blueprint publish job started",
-            "headers": {
-              "Location": {
-                "description": "URL to poll the job",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "job_id": {
-                      "$ref": "#/components/schemas/BlueprintJobID"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}:format-description": {
       "post": {
         "operationId": "formatBlueprintDescription",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "formatBlueprintDescription",
         "description": "Format a blueprint description as markdown using AI.\n",
         "tags": [
@@ -2092,6 +1558,11 @@
     "/v2/blueprint-manifest/blueprints:suggest-resources": {
       "post": {
         "operationId": "suggestBlueprintResources",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "suggestBlueprintResources",
         "description": "Suggest resources to add to a blueprint based on a natural-language prompt.\n\nWalks anchor resource types in priority order (journey > workflow_definition >\nautomation_flow > schema > entity-backed types) and returns matches per\nanchor using each upstream API's text search. Suggestions are marked\n`is_root: true` so callers can pass `add_dependencies=true` to\nbulkAddBlueprintResources and have transitive dependencies resolved\nserver-side — which means a single matched journey can stand in for its\nfull product/schema/template bundle.\n\nNo side effects on the blueprint — the caller persists the chosen resources\nvia the existing create/bulk-add endpoints.\n",
         "tags": [
@@ -2124,6 +1595,11 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources": {
       "post": {
         "operationId": "addBlueprintResource",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "addBlueprintResource",
         "description": "Add a resource to a Blueprint",
         "tags": [
@@ -2204,6 +1680,11 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources:syncDependencies": {
       "post": {
         "operationId": "syncDependencies",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "syncDependencies",
         "description": "Sync dependencies of all root resources in a Blueprint",
         "tags": [
@@ -2257,6 +1738,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Blueprint not found in the caller's organization"
           }
         }
       }
@@ -2264,6 +1748,11 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/bulk": {
       "post": {
         "operationId": "bulkAddBlueprintResources",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "bulkAddBlueprintResources",
         "description": "Bulk Add resources in a Blueprint",
         "tags": [
@@ -2345,6 +1834,11 @@
       },
       "put": {
         "operationId": "bulkUpdateBlueprintResources",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "bulkUpdateBlueprintResources",
         "description": "Bulk update resources in a Blueprint",
         "tags": [
@@ -2395,6 +1889,11 @@
       },
       "delete": {
         "operationId": "bulkDeleteBlueprintResources",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "bulkDeleteBlueprintResources",
         "description": "Bulk delete resources in a Blueprint",
         "tags": [
@@ -2447,6 +1946,11 @@
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/{resource_id}": {
       "put": {
         "operationId": "updateBlueprintResource",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "updateBlueprintResource",
         "description": "Update a resource in a Blueprint",
         "tags": [
@@ -2502,6 +2006,11 @@
       },
       "delete": {
         "operationId": "deleteBlueprintResource",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "deleteBlueprintResource",
         "description": "Delete a resource from a Blueprint",
         "tags": [
@@ -2550,6 +2059,11 @@
     "/v2/blueprint-manifest/jobs": {
       "get": {
         "operationId": "listBlueprintJobs",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listBlueprintJobs",
         "description": "List all blueprint jobs",
         "tags": [
@@ -2584,6 +2098,11 @@
     "/v2/blueprint-manifest/jobs/{job_id}": {
       "get": {
         "operationId": "getBlueprintJob",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getBlueprintJob",
         "description": "Poll the current state of a job. Serves both Terraform (v2) and V3-engine jobs —\ncheck `sync_engine` (`terraform` | `v3`) to tell them apart. V3 jobs additionally\nexpose live `resource_progress[]`. V3 single-install and bulk-install child jobs\nare polled here.\n",
         "tags": [
@@ -2616,8 +2135,13 @@
     "/v2/blueprint-manifest/jobs/{job_id}:continue": {
       "post": {
         "operationId": "continueInstallationJob",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "continueInstallationJob",
-        "description": "Resume an installation job that is paused at `status: \"WAITING_USER_ACTION\"` after\nplanning. Works for both Terraform and V3 jobs. Not needed for V3 installs created\nwith `auto_apply: true` (including all bulk-install child jobs), which apply\nwithout pausing.\n\nAlso resumes a V3 install paused at `status: \"REAUTH_REQUIRED\"`, where the\ncaller's credentials could not safely cover another run. The job keeps its\n`job_id`, so resuming continues from the operation-log checkpoint rather than\nre-applying completed work. The request's bearer token becomes the destination\ncredential; for a cross-org install whose SOURCE credential also expired, send a\nfreshly scoped source token as `source_auth_token` — the destination bearer is not\na valid substitute for it.\n",
+        "description": "Resume an installation job that is paused at `status: \"WAITING_USER_ACTION\"` after\nplanning. Works for both Terraform and V3 jobs. Not needed for V3 installs created\nwith `auto_apply: true` (including all bulk-install child jobs), which apply\nwithout pausing.\n\nThis call applies the plan. Callers acting for a user — AI agents in particular —\nmust show the user the job's `resource_progress[]` (`impact_on_install` and\n`impact_on_install_reason`) and call it only once the user has approved.\n\nAlso resumes a V3 install paused at `status: \"REAUTH_REQUIRED\"`, where the\ncaller's credentials could not safely cover another run. The job keeps its\n`job_id`, so resuming continues from the operation-log checkpoint rather than\nre-applying completed work. The request's bearer token becomes the destination\ncredential; for a cross-org install whose SOURCE credential also expired, send a\nfreshly scoped source token as `source_auth_token` — the destination bearer is not\na valid substitute for it.\n",
         "tags": [
           "Jobs"
         ],
@@ -2658,8 +2182,13 @@
     "/v2/blueprint-manifest/jobs/{job_id}:retry": {
       "post": {
         "operationId": "retryInstallationJob",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "retryInstallationJob",
-        "description": "Retry a finished V3 installation job whose status is `FAILED` or\n`PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same\nsource/destination and `auto_apply: true` — no `:continue` call is needed.\nThe plan phase re-resolves every resource: already-synced resources no-op,\nso effectively only the failed resources are re-applied.\n\nMust be called by a user of the destination org (where the job lives); the\ncaller's bearer token is used as the destination token. The plan reuses the\nmanifest persisted by the original install, so no source-org access is\nrequired. The original job's `options` (ignored resources, sync_notes) are\nreused when present; older jobs without persisted options fall back to the\ndestination blueprint's `ignored_resource_addresses`.\n",
+        "description": "Retry a finished V3 installation job whose status is `FAILED` or\n`PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same\nsource/destination and `auto_apply: true` — no `:continue` call is needed.\nFor an AI-agent caller the new job instead pauses at the plan\n(`WAITING_USER_ACTION`) for the user to approve via `:continue`.\nThe plan phase re-resolves every resource: already-synced resources no-op,\nso effectively only the failed resources are re-applied.\n\nMust be called by a user of the destination org (where the job lives); the\ncaller's bearer token is used as the destination token. The plan reuses the\nmanifest persisted by the original install, so no source-org access is\nrequired. The original job's `options` (ignored resources, sync_notes) are\nreused when present; older jobs without persisted options fall back to the\ndestination blueprint's `ignored_resource_addresses`.\n",
         "tags": [
           "Jobs"
         ],
@@ -2712,6 +2241,11 @@
     "/v2/blueprint-manifest/jobs/{job_id}:cancel": {
       "post": {
         "operationId": "cancelBlueprintJob",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "cancelBlueprintJob",
         "description": "Cancel a blueprint job if it is still running.",
         "tags": [
@@ -2744,6 +2278,11 @@
     "/v1/blueprints/{blueprint_id}/marketplace-listing": {
       "post": {
         "operationId": "createMarketplaceListing",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "createMarketplaceListing",
         "description": "Create a marketplace listing for a blueprint. Returns 409 if one already exists.",
         "tags": [
@@ -2798,6 +2337,11 @@
       },
       "get": {
         "operationId": "getMarketplaceListing",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getMarketplaceListing",
         "description": "Get marketplace listing for a blueprint including all versions",
         "tags": [
@@ -2851,6 +2395,11 @@
     "/v1/marketplace-listings": {
       "get": {
         "operationId": "listMarketplaceListings",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listMarketplaceListings",
         "description": "List all marketplace listings for the authenticated organization",
         "tags": [
@@ -2886,6 +2435,11 @@
     "/v1/marketplace-listings/{listing_id}": {
       "get": {
         "operationId": "getMarketplaceListingById",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getMarketplaceListingById",
         "description": "Get marketplace listing by listing ID including all versions",
         "tags": [
@@ -2937,6 +2491,11 @@
       },
       "patch": {
         "operationId": "updateMarketplaceListing",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "updateMarketplaceListing",
         "description": "Update listing-level fields",
         "tags": [
@@ -2980,6 +2539,11 @@
       },
       "delete": {
         "operationId": "deleteMarketplaceListing",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "deleteMarketplaceListing",
         "description": "Delete listing and all versions",
         "tags": [
@@ -3008,6 +2572,11 @@
     "/v1/marketplace-listings/{listing_id}/versions": {
       "post": {
         "operationId": "createMarketplaceListingVersion",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "createMarketplaceListingVersion",
         "description": "Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint",
         "tags": [
@@ -3041,6 +2610,11 @@
       },
       "get": {
         "operationId": "listMarketplaceListingVersions",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listMarketplaceListingVersions",
         "description": "List all versions for a listing, newest first",
         "tags": [
@@ -3081,6 +2655,11 @@
     "/v1/marketplace-listings/{listing_id}/versions/{version_id}": {
       "patch": {
         "operationId": "updateMarketplaceListingVersion",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "updateMarketplaceListingVersion",
         "description": "Update updateNote, requiredFeatures, or recommendedApps on a draft version",
         "tags": [
@@ -3155,6 +2734,11 @@
     "/v1/marketplace-listings/{listing_id}/versions/{version_id}/publish": {
       "post": {
         "operationId": "publishMarketplaceListingVersion",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "publishMarketplaceListingVersion",
         "description": "Publish a draft version; archives the previous live version",
         "tags": [
@@ -3223,6 +2807,11 @@
     "/v3/blueprint-manifest/blueprints/{blueprint_id}:publish": {
       "post": {
         "operationId": "publishBlueprintV3",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "publishBlueprintV3",
         "description": "Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.\n\nBy default this only builds the package and stores it privately for download. Creating or\noverwriting the public marketplace listing is opt-in via `publish_to_marketplace`.\n",
         "tags": [
@@ -3249,6 +2838,18 @@
                     "type": "boolean",
                     "default": false,
                     "description": "When true, upload the package with public access and create or overwrite the\nblueprint's Webflow CMS listing. Leave unset for a download-only package build.\n"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Marketplace slug to publish under. Overrides the blueprint's stored slug, which\nis used when this is omitted. Required (here or on the blueprint) when\n`publish_to_marketplace` is true.\n"
+                  },
+                  "version": {
+                    "type": "string",
+                    "description": "Version for the marketplace listing. Defaults to the blueprint's stored version."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Display name for the marketplace listing. Defaults to the blueprint's title."
                   }
                 }
               }
@@ -3287,6 +2888,11 @@
     "/v3/blueprint-manifest/blueprints:pre-install": {
       "post": {
         "operationId": "preInstallBlueprintV3",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "preInstallBlueprintV3",
         "description": "Validates a signed V3 package and returns the destination-specific resource plan used by the install UI.",
         "tags": [
@@ -3341,11 +2947,581 @@
         }
       }
     },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}": {
+      "get": {
+        "operationId": "getBlueprintMergePlan",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "getBlueprintMergePlan",
+        "description": "Summary of an update merge plan, with counts, warnings and the revision to send back.",
+        "tags": [
+          "merge-plans"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The merge plan review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanReview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Merge plan not found in this organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}/resources": {
+      "get": {
+        "operationId": "listBlueprintMergePlanResources",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "listBlueprintMergePlanResources",
+        "description": "Journeys of the plan, one page at a time. A cursor is valid only for the revision it was issued for.",
+        "tags": [
+          "merge-plans"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of journeys",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanResourcePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Merge plan not found in this organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale `expected_plan_revision`, a changed group signature or a state that does not allow this action",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}/resources/{resource_key}": {
+      "get": {
+        "operationId": "getBlueprintMergePlanResource",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "getBlueprintMergePlanResource",
+        "description": "One journey of the plan with its decision groups and warnings.",
+        "tags": [
+          "merge-plans"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          },
+          {
+            "in": "path",
+            "name": "resource_key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The journey review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanResourceReview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Merge plan not found in this organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}/resolutions": {
+      "put": {
+        "operationId": "updateBlueprintMergePlanResolutions",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "updateBlueprintMergePlanResolutions",
+        "description": "Saves choices for decision groups. Each submitted choice replaces the saved choice of the same group. Allowed while the plan waits for review.",
+        "tags": [
+          "merge-plans"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergePlanResolutionsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The merge plan review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanReview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Merge plan not found in this organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale `expected_plan_revision`, a changed group signature or a state that does not allow this action",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid choice (unknown group, unknown or not offered option, mandatory override or duplicate)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}:discard": {
+      "post": {
+        "operationId": "discardBlueprintMergePlan",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "discardBlueprintMergePlan",
+        "description": "Discards a plan waiting for review and ends its job. Nothing is written.",
+        "tags": [
+          "merge-plans"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergePlanRevisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The merge plan review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanReview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Merge plan not found in this organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale `expected_plan_revision`, a changed group signature or a state that does not allow this action",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}:replan": {
+      "post": {
+        "operationId": "replanBlueprintMergePlan",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "replanBlueprintMergePlan",
+        "description": "Starts a new update job whose plan is prefilled with this plan's saved choices. A plan still waiting for review, or expired, becomes `superseded`.",
+        "tags": [
+          "merge-plans"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergePlanRevisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The successor plan and its job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanReplanResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Merge plan not found in this organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale `expected_plan_revision`, a changed group signature or a state that does not allow this action",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}:apply": {
+      "post": {
+        "operationId": "applyBlueprintMergePlan",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "applyBlueprintMergePlan",
+        "description": "Approves the plan at `expected_plan_revision` with its current choices and resumes the parked update job with the caller's token. Only a `ready` plan whose job waits for this review can be applied. Replaying the same `idempotency_key` returns the approved plan without applying it twice.",
+        "tags": [
+          "merge-plans"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergePlanApplyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The approved plan; the update continues in its job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanReview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Merge plan not found in this organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale `expected_plan_revision`, open decisions (`group_ids`), another update of this Blueprint in progress, or a plan that can no longer be applied (`action: replan`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}:preview-revert": {
+      "post": {
+        "operationId": "previewBlueprintMergeRevert",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "previewBlueprintMergeRevert",
+        "description": "Lists what the update wrote, from its own journal, and what reverting each resource would do. Resources changed since the update need an explicit choice (`requires_choice`); `not_restorable` ones can only be kept. The preview is immutable: a new call returns a new `revert_preview_id`. Only an `applied` or `partially_applied` plan inside its revert window has a preview, and only while no later update owns any of its resources.",
+        "tags": [
+          "merge-plans"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The revert preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergeRevertPreview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Merge plan not found in this organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A later update owns resources of this one (`revert_newer_update_first`: revert that one first), the plan is not applied (`merge_plan_state_conflict`) or its revert window closed (`merge_revert_window_closed`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/merge-plans/{merge_plan_id}:revert": {
+      "post": {
+        "operationId": "applyBlueprintMergeRevert",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "applyBlueprintMergeRevert",
+        "description": "Reverts the update as the preview describes it, with an explicit `action` for every preview entry. Starts a `restore` job and moves the plan to `reverting`; the job ends it `reverted`, or `revert_partial` when a resource changed meanwhile or failed. Replaying the same `idempotency_key` returns the same job.",
+        "tags": [
+          "merge-plans"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/MergePlanID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeRevertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The restore job running the revert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergeRevertResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Merge plan or revert preview not found in this organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The preview is stale (`merge_revert_preview_stale`: take a new one), a later update owns resources (`revert_newer_update_first`), another update of this Blueprint is in progress (`blueprint_update_in_progress`), the `idempotency_key` belongs to a revert that could not start (`merge_revert_idempotency_reused`: send a new key), or the plan cannot be reverted (`merge_plan_state_conflict`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "An entry has no action (`merge_revert_selection_incomplete`, with `resource_keys`), an unknown or duplicate entry (`merge_revert_selection_invalid`), a restore of a `not_restorable` entry (`merge_revert_not_restorable`), or nothing to restore (`merge_revert_nothing_selected`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergePlanError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v3/blueprint-manifest/blueprint:install": {
       "post": {
         "operationId": "installBlueprintV3",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "installBlueprintV3",
-        "description": "Install a blueprint into a single destination org using the V3 engine (direct API\ncalls, no Terraform). Creates resources in topological order with global ID\nreplacement and supports checkpoint-based resume on failure.\n\n**Lifecycle (how to drive an install to completion):**\n1. `POST /v3/blueprint-manifest/blueprint:install` returns `{ job_id }` (202).\n2. Poll the job with `GET /v2/blueprint-manifest/jobs/{job_id}` — V3 jobs are\n   served by the same v2 jobs endpoints as Terraform jobs and are identified by\n   `sync_engine: \"v3\"`. Watch `status` and `resource_progress[]`.\n3. If `auto_apply` is `false` (default), the job pauses at\n   `status: \"WAITING_USER_ACTION\"` after planning. Resume it with\n   `POST /v2/blueprint-manifest/jobs/{job_id}:continue`.\n4. If `auto_apply` is `true`, the engine applies automatically after plan +\n   snapshot — no `:continue` call is needed. This is what the bulk-install worker\n   uses; to install into many orgs at once prefer `POST .../bulk-installs`.\n\nFor cross-org installs, pass `destination_auth_token` (the destination org's\ntoken); reads use the caller's bearer token, writes use that token.\n",
+        "description": "Install a blueprint into a single destination org using the V3 engine (direct API\ncalls, no Terraform). Creates resources in topological order with global ID\nreplacement and supports checkpoint-based resume on failure.\n\n**Lifecycle (how to drive an install to completion):**\n1. `POST /v3/blueprint-manifest/blueprint:install` returns `{ job_id }` (202).\n2. Poll the job with `GET /v2/blueprint-manifest/jobs/{job_id}` — V3 jobs are\n   served by the same v2 jobs endpoints as Terraform jobs and are identified by\n   `sync_engine: \"v3\"`. Watch `status` and `resource_progress[]`.\n3. If `auto_apply` is `false` (default), the job pauses at\n   `status: \"WAITING_USER_ACTION\"` after planning. Review the plan before resuming:\n   each `resource_progress[]` entry carries `impact_on_install` (`create`, `update`,\n   `no-op`, `error`) and, where relevant, `impact_on_install_reason`. Resume it with\n   `POST /v2/blueprint-manifest/jobs/{job_id}:continue` once the plan is approved.\n4. If `auto_apply` is `true`, the engine applies automatically after plan +\n   snapshot — no `:continue` call is needed. This is what the bulk-install worker\n   uses; to install into many orgs at once prefer `POST .../bulk-installs`.\n\n**AI agents** (tokens such as \"Connect ChatGPT to epilot\") cannot use\n`auto_apply` (403). Install without it, show the user the plan, and call\n`:continue` only after the user approves it.\n\n**The plan fails instead of pausing** (`status: \"FAILED\"`, error code\n`missing_required_reference`) when a resource references something that is\nneither in the blueprint nor in the destination org and the destination API\nwould reject it — for example a workflow whose automation tasks point at\nautomations the package does not contain. Fix it in the source blueprint: add\nthe missing resources (refreshing the blueprint picks up dependencies) and\npublish again. Keep resources in the blueprint even when they already exist in\nthe destination; an existing resource is matched and updated, not duplicated,\nand removing it leaves everything that references it pointing at an id the\ndestination does not have. Alternatively pass the blocked addresses in\n`options.resources_to_ignore` to install the rest.\n\nFor cross-org installs, pass `destination_auth_token` (the destination org's\ntoken); reads use the caller's bearer token, writes use that token.\n",
         "tags": [
           "Blueprints"
         ],
@@ -3406,7 +3582,7 @@
                   },
                   "auto_apply": {
                     "type": "boolean",
-                    "description": "When `true`, the install skips the manual plan-approval step and applies\nstraight after plan + snapshot succeed (no `:continue` call needed).\nDefaults to `false`. Used internally by the bulk-install worker.\n",
+                    "description": "When `true`, the install skips the manual plan-approval step and applies\nstraight after plan + snapshot succeed (no `:continue` call needed).\nDefaults to `false`. Used internally by the bulk-install worker.\nRejected with 403 for AI-agent callers, whose installs must be approved\nby the user at the plan step.\n",
                     "default": false
                   },
                   "session_credentials": {
@@ -3498,6 +3674,21 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "`auto_apply` requested by an AI-agent caller",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -3505,6 +3696,11 @@
     "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore": {
       "post": {
         "operationId": "restoreBlueprintDeploymentV3",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "restoreBlueprintDeploymentV3",
         "description": "Roll a deployment back to its pre-install state. Two phases:\n\n  1. Upsert — re-applies the captured payloads via snapshot-api's\n     `:restore` (server-side; runs config-engine.apply with captured\n     target ids pre-seeded). Skipped for pure-create deployments\n     whose snapshot was empty.\n  2. Delete sweep — for lineage rows of this blueprint instance not\n     present in the snapshot's captured set, deletes the live\n     resource via the type's adapter. Co-ownership / drift /\n     no-delete-capability skip the entry with the corresponding\n     reason.\n\nResolves `(blueprint_id, job_id)` to the entry in\n`Blueprint.deployments[]` and reads its `snapshot_id` and\n`destination_blueprint_id` — the caller never needs to handle\nsnapshot ids directly.\n\nAsync — returns 202 with a job id. Poll the job to track progress.\nThe restore holds its own per-instance lock (`active_restore_job_id`),\nseparate from `installation_status`. Starting a restore is rejected with\n409 when another restore already holds that lock, or when an install is\nrunning (`installation_status === 'IN_PROGRESS'`). Keeping the two locks\ndistinct keeps installs and reverts decoupled: an in-flight or failed\nrestore never overwrites `installation_status`, which keeps reflecting\nthe actual install outcome (and drives the install badge in the\nBlueprints overview) throughout the revert.\n",
         "tags": [
@@ -3565,7 +3761,7 @@
             "description": "Blueprint not found, or no deployment with the given job_id on this blueprint."
           },
           "409": {
-            "description": "Another install or restore is in flight for this blueprint instance."
+            "description": "Another install or restore is in flight for this blueprint instance. For a merge\ndeployment also: `merge_snapshot_restore_unavailable` (its plan is not `failed` /\n`partially_applied`, or the snapshot or revert window is gone),\n`revert_newer_update_first`, `merge_plan_state_conflict` (a merge revert holds the plan) or\n`blueprint_update_in_progress` (another writer holds the Blueprint).\n"
           }
         }
       }
@@ -3573,6 +3769,11 @@
     "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview": {
       "get": {
         "operationId": "getRestorePreview",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getRestorePreview",
         "description": "Computes what would happen if the user triggered a restore on this\ndeployment, without performing any writes. The forecast uses the\nsnapshot's captured resources (when present) plus the current lineage\nstate plus per-adapter gates (co-ownership, no-delete-capability,\nheuristic-match, drift when wired).\n\nIdempotent and side-effect free. Safe to call repeatedly. The result\nmay shift between calls if operators edit destination resources or\nanother blueprint adopts a shared resource in the meantime.\n",
         "tags": [
@@ -3614,9 +3815,127 @@
         }
       }
     },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore-preview": {
+      "post": {
+        "operationId": "triggerRestorePreview",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "triggerRestorePreview",
+        "description": "Starts computing the same forecast as `getRestorePreview` in the\nbackground. Large deployments take longer than the API Gateway\ntimeout to forecast inline, so clients should prefer this endpoint.\n\nAsync: returns 202 immediately with a `running` report. Poll the\n`Location` URL until `status` is `completed` or `failed`. Never\nmutates any resource.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "description": "The install job whose deployment is being previewed.",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintJobID"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Restore preview started",
+            "headers": {
+              "Location": {
+                "description": "URL to poll the restore preview report",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestorePreviewReport"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint or deployment not found."
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview/{preview_id}": {
+      "get": {
+        "operationId": "getRestorePreviewReport",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "getRestorePreviewReport",
+        "description": "Returns a restore preview started by `triggerRestorePreview`. The\n`outcome` is present once `status` is `completed`. A preview whose\nworker stopped without reporting is returned as `failed`.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintJobID"
+            }
+          },
+          {
+            "in": "path",
+            "name": "preview_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restore preview report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestorePreviewReport"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No restore preview with this id exists for the deployment."
+          }
+        }
+      }
+    },
     "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:health-check": {
       "post": {
         "operationId": "triggerDeploymentHealthCheckV3",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "triggerDeploymentHealthCheckV3",
         "description": "Starts a read-only health scan of the resources this deployment's\nblueprint instance tracks in the destination org (see\ndocs/rfcs/RFC-org-health-check.md, Phase 0). Checks:\n\n  - live readability — every lineage-tracked resource is read back\n    via its adapter; tracked-but-unreadable resources are flagged.\n  - referential integrity — destination payloads containing\n    unreplaced source-org ids, or references to tracked resources\n    that are not readable.\n  - install completeness — install operations whose final attempt\n    ended `failed` or `skipped`, with their rejection reasons.\n\nAsync — returns 202 immediately with a `running` report stub. Poll\nthe health-report endpoint until `status` is `completed` or\n`failed`. Never mutates any resource.\n",
         "tags": [
@@ -3689,6 +4008,11 @@
     "/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/health-report": {
       "get": {
         "operationId": "getDeploymentHealthReportV3",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getDeploymentHealthReportV3",
         "description": "Returns the most recent health report produced for this deployment\nby the `:health-check` endpoint. Idempotent and side-effect free.\n",
         "tags": [
@@ -3732,6 +4056,11 @@
     "/v3/blueprint-manifest/blueprints/{blueprint_id}/lineage": {
       "get": {
         "operationId": "getBlueprintLineageV3",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getBlueprintLineageV3",
         "description": "Returns the lineage registry entries for a blueprint's resources in the current org.\nShows the mapping between source lineage IDs and target resource IDs.\n",
         "tags": [
@@ -3775,8 +4104,13 @@
     "/v3/blueprint-manifest/bulk-installs": {
       "post": {
         "operationId": "createBulkInstallV3",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "createBulkInstallV3",
-        "description": "Install one source blueprint into many destination organizations in a single\nrequest. The server schedules child V3 installs with `auto_apply=true` and caps\nactive installs at `max_concurrency`. Per-target failures are isolated and\nretryable; they do not stop the remaining targets.\n\nEach target carries its own write-only `destination_auth_token` (org-scoped).\nTokens are passed to the worker via Step Functions input only — they are never\npersisted in DynamoDB nor returned by any endpoint.\n",
+        "description": "Install one source blueprint into many destination organizations in a single\nrequest. The server schedules child V3 installs with `auto_apply=true` and caps\nactive installs at `max_concurrency`. Not available to AI-agent callers (403),\nsince no child install pauses for the user to approve its plan. Per-target failures are isolated and\nretryable; they do not stop the remaining targets.\n\nEach target carries its own write-only `destination_auth_token` (org-scoped).\nTokens are passed to the worker via Step Functions input only — they are never\npersisted in DynamoDB nor returned by any endpoint.\n",
         "tags": [
           "Blueprints"
         ],
@@ -3849,6 +4183,21 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "The caller is an AI agent; bulk installs apply without a plan review",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -3856,6 +4205,11 @@
     "/v3/blueprint-manifest/bulk-installs/{bulk_job_id}": {
       "get": {
         "operationId": "getBulkInstallV3",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getBulkInstallV3",
         "description": "Returns the bulk install parent with aggregate status and counts. Scoped by the\ncaller org as `source_org_id`. Target rows are not included — use the targets\nendpoint to page through them.\n",
         "tags": [
@@ -3891,6 +4245,11 @@
     "/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets": {
       "get": {
         "operationId": "listBulkInstallTargetsV3",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listBulkInstallTargetsV3",
         "description": "Pages through the bulk install's target rows. Each row hydrates its latest child\ninstall job (`job_ids.at(-1)`) with the standard V3 job shape (`events[]`,\n`resource_progress[]`) so callers can inspect per-resource progress and errors.\n",
         "tags": [
@@ -3945,8 +4304,13 @@
     "/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets/{destination_org_id}:retry": {
       "post": {
         "operationId": "retryBulkInstallTargetV3",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "retryBulkInstallTargetV3",
-        "description": "Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`\ntargets. Starts a new child install with `auto_apply=true`, appends its job id to\n`job_ids`, and reuses the same target row. Only the destination auth token may be\nsupplied for the new attempt; source/destination identifiers are immutable.\n",
+        "description": "Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`\ntargets. Starts a new child install with `auto_apply=true`, appends its job id to\n`job_ids`, and reuses the same target row. Only the destination auth token may be\nsupplied for the new attempt; source/destination identifiers are immutable.\nNot available to AI-agent callers (403).\n",
         "tags": [
           "Blueprints"
         ],
@@ -4013,6 +4377,11 @@
     "/v1/blueprint-manifest/uniqueness-criteria": {
       "get": {
         "operationId": "listUniquenessCriteria",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listUniquenessCriteria",
         "description": "List all custom uniqueness criteria configured for the caller's organization.\nThese overrides are applied during install (V2 and V3) when matching incoming\nresources against existing ones in the destination org, replacing the default\nper-resource-type field set with the caller's chosen fields (AND-combined).\n",
         "tags": [
@@ -4070,6 +4439,11 @@
       ],
       "get": {
         "operationId": "getUniquenessCriteria",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getUniquenessCriteria",
         "description": "Get the configured uniqueness criteria for a specific resource type, if any.",
         "tags": [
@@ -4093,6 +4467,11 @@
       },
       "put": {
         "operationId": "putUniquenessCriteria",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "putUniquenessCriteria",
         "description": "Set or replace the uniqueness criteria for a resource type. The provided fields\nmust be valid attributes on the resource's schema (the UI typically loads the\nschema to populate options). All listed fields are AND-combined during matching.\n",
         "tags": [
@@ -4145,6 +4524,11 @@
       },
       "delete": {
         "operationId": "deleteUniquenessCriteria",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "deleteUniquenessCriteria",
         "description": "Remove the custom criteria for a resource type, reverting to the default fields.",
         "tags": [
@@ -4245,177 +4629,6 @@
             "format": "date-time"
           }
         }
-      },
-      "PatchFieldDiff": {
-        "type": "object",
-        "properties": {
-          "path": {
-            "type": "string"
-          },
-          "op": {
-            "type": "string",
-            "enum": [
-              "changed",
-              "added",
-              "removed"
-            ]
-          },
-          "baseline_value": {},
-          "current_value": {}
-        }
-      },
-      "PatchResourceDiff": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "source_id": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "changes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PatchFieldDiff"
-            }
-          }
-        }
-      },
-      "DetectChangesResult": {
-        "type": "object",
-        "properties": {
-          "resources": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PatchResourceDiff"
-            }
-          }
-        }
-      },
-      "BlueprintPatch": {
-        "type": "object",
-        "properties": {
-          "patch_id": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer"
-          },
-          "blueprint_id": {
-            "$ref": "#/components/schemas/BlueprintID"
-          },
-          "rollout_id": {
-            "type": "string"
-          },
-          "source_org_id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "draft",
-              "ready",
-              "applying",
-              "applied",
-              "partial"
-            ]
-          },
-          "resources": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PatchResourceDiff"
-            }
-          },
-          "changelog": {
-            "type": "string"
-          },
-          "created_by": {
-            "type": "string"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "applied_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "OrgPatchExecution": {
-        "type": "object",
-        "properties": {
-          "patch_id": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer"
-          },
-          "org_id": {
-            "type": "string"
-          },
-          "org_name": {
-            "type": "string"
-          },
-          "dest_blueprint_id": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "pending",
-              "in_progress",
-              "success",
-              "failed"
-            ]
-          },
-          "error": {
-            "type": "string"
-          },
-          "applied_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "retries": {
-            "type": "integer"
-          },
-          "changes_applied": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PatchFieldDiff"
-            }
-          }
-        }
-      },
-      "BlueprintPatchWithResults": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BlueprintPatch"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "org_results": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/OrgPatchExecution"
-                }
-              }
-            }
-          }
-        ]
       },
       "BlueprintNote": {
         "type": "object",
@@ -4543,6 +4756,26 @@
                     "PARTIAL_SUCCESS",
                     "FAILED"
                   ]
+                },
+                "merge_plan_id": {
+                  "type": "string",
+                  "description": "The merge plan this deployment applied. Such a deployment reverts through the plan;\nonly a failed or partially applied plan also offers the whole-deployment restore\n(`snapshot_restore_available`).\n"
+                },
+                "merge_snapshot_id": {
+                  "type": "string",
+                  "description": "The fail-closed pre-apply snapshot of a merge deployment. Set instead of `snapshot_id`;\nthe whole-deployment restore of a merge deployment restores it.\n"
+                },
+                "snapshot_restore_available": {
+                  "type": "boolean",
+                  "description": "Merge deployments only (absent otherwise). True when the whole-deployment restore\n(`POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore`) may run for it: its plan ended `failed` or\n`partially_applied`, the merge snapshot exists, the revert window is open and no\nrestore ran or runs for it. That restore applies every resource the snapshot captured\n(edits made after the update are overwritten), invalidates the update's merge evidence\n(the next update plans those resources two-way) and leaves the plan `reverted` or\n`revert_partial`, after which \"Revert this update\" is no longer offered. The endpoint\nanswers 409 `merge_snapshot_restore_unavailable` otherwise, and\n`revert_newer_update_first` when a later deployment changed the destination.\n"
+                },
+                "merge_plan_state": {
+                  "$ref": "#/components/schemas/MergePlanState"
+                },
+                "revert_until": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Last moment the merge update of this deployment can be reverted."
                 },
                 "restore_details": {
                   "type": "object",
@@ -4897,6 +5130,47 @@
           "impact_on_install_reason": {
             "type": "array",
             "description": "Fields causing the updates / internal updates on a resource install",
+            "items": {
+              "type": "string"
+            }
+          },
+          "impact_on_install_changes": {
+            "type": "array",
+            "description": "Both sides' values per `impact_on_install_reason` entry. Present only\nwhen the install was started with `options.include_field_diffs`.\n",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "description": "The matching `impact_on_install_reason` entry.",
+                  "type": "string"
+                },
+                "destination": {
+                  "description": "The destination organization's current value. Absent when the\ndestination has no value there. A value above 4KB is replaced\nby the string `__epilot_value_too_large__`.\n"
+                },
+                "source": {
+                  "description": "The value the sync would write. Absent when the source drops the field."
+                },
+                "added": {
+                  "description": "True when the destination has no value at this path.",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "path",
+                "added"
+              ]
+            }
+          },
+          "impact_on_install_labels": {
+            "type": "object",
+            "description": "Human-readable label per `impact_on_install_reason` entry, keyed by that\nentry, from the resource type's adapter (config-engine `diff.describe`).\nOnly entries whose label differs from the raw path; absent when the\nadapter provides none.\n",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "impact_on_install_summary": {
+            "type": "array",
+            "description": "One or two lines summarizing the change set, from the resource type's\nadapter (config-engine `diff.summarize`). Absent when the adapter provides none.\n",
             "items": {
               "type": "string"
             }
@@ -5364,6 +5638,27 @@
               "options": {
                 "$ref": "#/components/schemas/BlueprintInstallationJobOptions"
               },
+              "merge_plan_id": {
+                "type": "string",
+                "description": "The update merge plan of this job, when it updates journeys by merging."
+              },
+              "wait_kind": {
+                "type": "string",
+                "enum": [
+                  "plan",
+                  "reauth",
+                  "merge_review"
+                ],
+                "description": "What a WAITING_USER_ACTION or REAUTH_REQUIRED job waits for."
+              },
+              "prefill_from_merge_plan_id": {
+                "type": "string",
+                "description": "The earlier merge plan whose choices prefill this job's plan (Refresh or retry)."
+              },
+              "assigned_merge_plan_id": {
+                "type": "string",
+                "description": "The id Refresh reserved for this job's merge plan."
+              },
               "status": {
                 "type": "string",
                 "enum": [
@@ -5382,13 +5677,14 @@
       },
       "BulkInstallStatus": {
         "type": "string",
-        "description": "Aggregate status for a bulk install or one of its targets.\n- `QUEUED`: not started yet\n- `IN_PROGRESS`: at least one target queued/in-progress, not all done\n- `SUCCESS`: all targets succeeded\n- `PARTIAL_SUCCESS`: all targets terminal with a mix of success/partial/failure\n- `FAILED`: all targets terminal and none succeeded or partially succeeded\n",
+        "description": "Aggregate status for a bulk install or one of its targets.\n- `QUEUED`: not started yet\n- `IN_PROGRESS`: at least one target queued/in-progress, not all done\n- `SUCCESS`: all targets succeeded\n- `PARTIAL_SUCCESS`: all targets terminal with a mix of success/partial/failure\n- `FAILED`: all targets terminal and none succeeded or partially succeeded\n- `REVIEW_REQUIRED` (targets only): the update merges journeys and waits for review in the\n  update wizard (`merge_plan_id`). Terminal for the bulk install, which never applies it.\n",
         "enum": [
           "QUEUED",
           "IN_PROGRESS",
           "SUCCESS",
           "PARTIAL_SUCCESS",
-          "FAILED"
+          "FAILED",
+          "REVIEW_REQUIRED"
         ]
       },
       "BulkInstallCounts": {
@@ -5408,6 +5704,9 @@
             "type": "integer"
           },
           "failed": {
+            "type": "integer"
+          },
+          "review_required": {
             "type": "integer"
           }
         }
@@ -5474,6 +5773,10 @@
             "items": {
               "$ref": "#/components/schemas/BlueprintJobID"
             }
+          },
+          "merge_plan_id": {
+            "type": "string",
+            "description": "The merge plan to review when `status` is `REVIEW_REQUIRED`."
           },
           "created_at": {
             "type": "string",
@@ -5589,6 +5892,10 @@
                 "type": "string",
                 "nullable": true,
                 "description": "The install job whose deployment is being reverted. Maps back\nto the entry in `Blueprint.deployments[]`.\n"
+              },
+              "merge_plan_id": {
+                "type": "string",
+                "description": "Set on the revert of a merge update; the plan's state follows the revert."
               },
               "snapshot_id": {
                 "type": "string",
@@ -5706,7 +6013,7 @@
           "reason": {
             "type": "string",
             "nullable": true,
-            "description": "Only set when `action == skip`.",
+            "description": "Only set when `action == skip`. `not_created_by_install` means the\nresource was neither captured for overwrite nor created by this install,\nso the revert leaves the pre-existing resource unchanged.\n`non_revertible` means the snapshot holds no restorable copy, so the revert\nneither restores nor deletes the resource: a secret type (`access_token`,\n`environment_variable`), which is never captured; a `file` or\n`document_template` that existed before the install but that the snapshot\nskipped (e.g. `content_identity_missing`, or content archiving not enabled\nfor the org); or a `file` or `document_template` this install created while\nthe org's new content adapter flag is off.\n`unconfirmed` means the snapshot restore was partial and no per-resource\noutcome is available. It does not assert that the resource was left unchanged.\n`unknown_provenance` means the install result is unavailable, so creation\nby this specific install cannot be proved and the resource is not deleted.\n",
             "enum": [
               "modified",
               "delete_unsupported",
@@ -5714,7 +6021,10 @@
               "co_owned",
               "dependency_protected",
               "already_deleted",
-              "non_revertible"
+              "non_revertible",
+              "not_created_by_install",
+              "unconfirmed",
+              "unknown_provenance"
             ]
           },
           "last_synced_at": {
@@ -6140,6 +6450,47 @@
           }
         }
       },
+      "RestorePreviewReport": {
+        "type": "object",
+        "required": [
+          "preview_id",
+          "job_id",
+          "status",
+          "requested_at"
+        ],
+        "properties": {
+          "preview_id": {
+            "type": "string"
+          },
+          "job_id": {
+            "type": "string",
+            "description": "The install job whose deployment is being previewed."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "running",
+              "completed",
+              "failed"
+            ]
+          },
+          "requested_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/RestoreOutcome"
+          },
+          "error": {
+            "type": "string",
+            "description": "Why the preview failed. Present only when `status` is `failed`."
+          }
+        }
+      },
       "BlueprintJob": {
         "oneOf": [
           {
@@ -6155,9 +6506,6 @@
             "$ref": "#/components/schemas/BlueprintDependenciesSyncJob"
           },
           {
-            "$ref": "#/components/schemas/BlueprintValidateJob"
-          },
-          {
             "$ref": "#/components/schemas/BlueprintVerificationJob"
           }
         ],
@@ -6168,7 +6516,6 @@
             "install": "#/components/schemas/BlueprintInstallationJob",
             "restore": "#/components/schemas/BlueprintRestoreJob",
             "dependencies_sync": "#/components/schemas/BlueprintDependenciesSyncJob",
-            "validate": "#/components/schemas/BlueprintValidateJob",
             "verification": "#/components/schemas/BlueprintVerificationJob"
           }
         }
@@ -6198,46 +6545,6 @@
                   "FAILED",
                   "CANCELED"
                 ]
-              }
-            }
-          }
-        ]
-      },
-      "BlueprintValidateJob": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/CommonBlueprintJobFields"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "job_type": {
-                "type": "string",
-                "enum": [
-                  "validate"
-                ]
-              },
-              "blueprint_id": {
-                "$ref": "#/components/schemas/BlueprintID"
-              },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "IN_PROGRESS",
-                  "SUCCESS",
-                  "FAILED"
-                ]
-              },
-              "valid": {
-                "type": "boolean",
-                "description": "Present when status is SUCCESS or FAILED."
-              },
-              "errors": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/FormattedError"
-                },
-                "description": "Present when valid is false."
               }
             }
           }
@@ -6518,6 +6825,11 @@
             "description": "When `true`, the source blueprint's `notes` overwrite the destination\nblueprint's `notes`. Defaults to `false`, which leaves the\ndestination's notes untouched.\n",
             "type": "boolean",
             "default": false
+          },
+          "include_field_diffs": {
+            "description": "When `true`, the plan records both sides' values for every changed\nfield of an `update` resource (`impact_on_install_changes`). Read at\nplan time, so it must be set on `:install`. Defaults to `false`; the\nvalues make the plan considerably larger.\n",
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -6660,7 +6972,9 @@
           "environment_variable",
           "datasource",
           "family",
-          "permission"
+          "permission",
+          "email_signature",
+          "shared_inbox"
         ]
       },
       "PlanChanges": {
@@ -7182,7 +7496,10 @@
           "state_mismatch",
           "import_nonexistent_object",
           "provider_install_error",
-          "stale_blueprint"
+          "stale_blueprint",
+          "workflow_quota_reached",
+          "entity_mapping_journey_not_in_blueprint",
+          "missing_required_reference"
         ]
       },
       "FormattedErrorData": {
@@ -7241,6 +7558,18 @@
               },
               "originalError": {
                 "type": "string"
+              },
+              "current": {
+                "type": "number",
+                "description": "Existing count behind a quota error, e.g. workflows in the destination organization"
+              },
+              "max_allowed": {
+                "type": "number",
+                "description": "Limit behind a quota error"
+              },
+              "planned": {
+                "type": "number",
+                "description": "Resources the plan would add on top of the existing count"
               }
             }
           }
@@ -7792,9 +8121,1033 @@
             "nullable": true
           }
         }
+      },
+      "MergePlanState": {
+        "type": "string",
+        "description": "Lifecycle state of an update merge plan.",
+        "enum": [
+          "review_required",
+          "ready",
+          "approved",
+          "applying",
+          "applied",
+          "partially_applied",
+          "failed",
+          "discarded",
+          "expired",
+          "superseded",
+          "reverting",
+          "reverted",
+          "revert_partial"
+        ]
+      },
+      "MergeOptionId": {
+        "type": "string",
+        "enum": [
+          "keep_current",
+          "take_incoming",
+          "keep_absent",
+          "restore_incoming"
+        ]
+      },
+      "MergeChoice": {
+        "type": "object",
+        "description": "The reviewer's choice for one decision group. Valid only while `group_signature` matches.",
+        "required": [
+          "group_id",
+          "group_signature",
+          "option_id"
+        ],
+        "properties": {
+          "group_id": {
+            "type": "string"
+          },
+          "group_signature": {
+            "type": "string"
+          },
+          "option_id": {
+            "$ref": "#/components/schemas/MergeOptionId"
+          }
+        }
+      },
+      "MergeChoiceInput": {
+        "type": "object",
+        "description": "A submitted choice. `option_id` is not an enum here, so an option the group does not offer is answered with 422 `merge_plan_choice_invalid` and its `group_ids`, like every other invalid choice.",
+        "required": [
+          "group_id",
+          "group_signature",
+          "option_id"
+        ],
+        "properties": {
+          "group_id": {
+            "type": "string"
+          },
+          "group_signature": {
+            "type": "string"
+          },
+          "option_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "MergeSectionRef": {
+        "type": "object",
+        "required": [
+          "resource_lineage_id",
+          "section_id"
+        ],
+        "properties": {
+          "resource_lineage_id": {
+            "type": "string"
+          },
+          "section_id": {
+            "type": "string"
+          },
+          "item_path": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "section_id",
+                "item_key"
+              ],
+              "properties": {
+                "section_id": {
+                  "type": "string"
+                },
+                "item_key": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MergeSectionValue": {
+        "type": "object",
+        "description": "A unit value in builder terms. `present` false means the unit does not exist on that side.",
+        "required": [
+          "present"
+        ],
+        "properties": {
+          "present": {
+            "type": "boolean"
+          },
+          "value": {
+            "description": "The unit value, when present."
+          }
+        }
+      },
+      "MergeDecisionGroup": {
+        "type": "object",
+        "required": [
+          "group_id",
+          "group_signature",
+          "kind",
+          "scope",
+          "section_refs",
+          "ui_concept",
+          "label_key",
+          "values",
+          "options",
+          "selection_required",
+          "mandatory_declaration_ids"
+        ],
+        "properties": {
+          "group_id": {
+            "type": "string"
+          },
+          "group_signature": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "description": "`confirm` is a whole-resource group with a single valid option the reviewer confirms.",
+            "enum": [
+              "conflict",
+              "mandatory",
+              "confirm"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "units",
+              "order",
+              "resource"
+            ]
+          },
+          "section_refs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeSectionRef"
+            }
+          },
+          "ui_concept": {
+            "type": "string"
+          },
+          "label_key": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "section_ref",
+                "label",
+                "base",
+                "current",
+                "incoming"
+              ],
+              "properties": {
+                "section_ref": {
+                  "$ref": "#/components/schemas/MergeSectionRef"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "base": {
+                  "$ref": "#/components/schemas/MergeSectionValue"
+                },
+                "current": {
+                  "$ref": "#/components/schemas/MergeSectionValue"
+                },
+                "incoming": {
+                  "$ref": "#/components/schemas/MergeSectionValue"
+                }
+              }
+            }
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "option_id",
+                "label_key",
+                "description_key"
+              ],
+              "properties": {
+                "option_id": {
+                  "$ref": "#/components/schemas/MergeOptionId"
+                },
+                "label_key": {
+                  "type": "string"
+                },
+                "description_key": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "selection_required": {
+            "type": "boolean"
+          },
+          "selected_option_id": {
+            "$ref": "#/components/schemas/MergeOptionId"
+          },
+          "mandatory_declaration_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "batch_key": {
+            "type": "string"
+          },
+          "sequence_labels": {
+            "type": "object",
+            "description": "For an order group, the builder labels (step titles, block labels, logic names) of each side's sequence.",
+            "required": [
+              "current",
+              "incoming"
+            ],
+            "properties": {
+              "base": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "current": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "incoming": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MergePlanWarning": {
+        "type": "object",
+        "description": "A finding of the merged result that does not block the update.",
+        "required": [
+          "code",
+          "target",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "unit_key": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "warning"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "MergeBaseProvenance": {
+        "type": "object",
+        "required": [
+          "rung"
+        ],
+        "properties": {
+          "rung": {
+            "type": "string",
+            "enum": [
+              "apply_evidence",
+              "none"
+            ]
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "manifest_version": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "no_evidence",
+              "unreconciled",
+              "no_manifest",
+              "not_in_manifest",
+              "translation_gap"
+            ]
+          }
+        }
+      },
+      "MergeResourceStatus": {
+        "type": "string",
+        "enum": [
+          "automatic",
+          "decisions_required",
+          "ready",
+          "blocked"
+        ]
+      },
+      "MergeResourceEligibility": {
+        "type": "string",
+        "enum": [
+          "merge",
+          "two_way",
+          "blocked",
+          "automatic_keep_absent",
+          "absence_decision"
+        ]
+      },
+      "MergeResourceAutoCounts": {
+        "type": "object",
+        "required": [
+          "from_current",
+          "from_incoming"
+        ],
+        "properties": {
+          "from_current": {
+            "type": "integer"
+          },
+          "from_incoming": {
+            "type": "integer"
+          }
+        }
+      },
+      "MergePlanReview": {
+        "type": "object",
+        "description": "Summary of an update merge plan.",
+        "required": [
+          "merge_plan_id",
+          "plan_revision",
+          "state",
+          "job_id",
+          "destination_blueprint_id",
+          "source",
+          "resource_counts",
+          "group_counts",
+          "warning_count",
+          "auto_counts",
+          "other_resource_count",
+          "created_at",
+          "expires_at",
+          "revert_until",
+          "expected_plan_revision",
+          "warnings",
+          "blocked_reasons",
+          "apply_counts"
+        ],
+        "properties": {
+          "merge_plan_id": {
+            "type": "string"
+          },
+          "plan_revision": {
+            "type": "integer",
+            "description": "Send back as `expected_plan_revision` when saving choices or applying."
+          },
+          "expected_plan_revision": {
+            "type": "integer",
+            "description": "Equal to `plan_revision`; the value the next write sends back."
+          },
+          "warnings": {
+            "type": "array",
+            "description": "Non-blocking findings of every journey of the plan.",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "resource_key",
+                "target",
+                "message"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "resource_key": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "blocked_reasons": {
+            "type": "array",
+            "description": "Reasons that block the whole plan. Blocked journeys carry their own `blocking_reasons`.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "apply_counts": {
+            "$ref": "#/components/schemas/MergePlanApplyCounts"
+          },
+          "apply_counts_unknown": {
+            "type": "boolean",
+            "description": "True when the apply ended without a readable journal. `apply_counts` are then zeros, not real counts.\n"
+          },
+          "state": {
+            "$ref": "#/components/schemas/MergePlanState"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "destination_blueprint_id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "object",
+            "properties": {
+              "blueprint_id": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              }
+            }
+          },
+          "resource_counts": {
+            "type": "object",
+            "required": [
+              "automatic",
+              "decisions_required",
+              "ready",
+              "blocked"
+            ],
+            "properties": {
+              "automatic": {
+                "type": "integer"
+              },
+              "decisions_required": {
+                "type": "integer"
+              },
+              "ready": {
+                "type": "integer"
+              },
+              "blocked": {
+                "type": "integer"
+              }
+            }
+          },
+          "group_counts": {
+            "type": "object",
+            "required": [
+              "conflict",
+              "confirm",
+              "mandatory",
+              "unresolved"
+            ],
+            "properties": {
+              "conflict": {
+                "type": "integer"
+              },
+              "confirm": {
+                "type": "integer"
+              },
+              "mandatory": {
+                "type": "integer"
+              },
+              "unresolved": {
+                "type": "integer"
+              }
+            }
+          },
+          "warning_count": {
+            "type": "integer"
+          },
+          "auto_counts": {
+            "type": "object",
+            "required": [
+              "kept_customizations",
+              "applied_updates"
+            ],
+            "properties": {
+              "kept_customizations": {
+                "type": "integer"
+              },
+              "applied_updates": {
+                "type": "integer"
+              }
+            }
+          },
+          "other_resource_count": {
+            "type": "integer",
+            "description": "Resources other than journeys, updated as in an ordinary install."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End of the review wait."
+          },
+          "revert_until": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last moment the applied update can be reverted."
+          },
+          "supersedes": {
+            "type": "string"
+          },
+          "superseded_by": {
+            "type": "string"
+          },
+          "successor_failed": {
+            "type": "boolean",
+            "description": "Refresh produced no plan and this plan could not be restored (its review wait had ended). Refresh the Blueprint to plan the update again."
+          }
+        }
+      },
+      "MergePlanApplyCounts": {
+        "type": "object",
+        "description": "Journeys by what apply does with the current choices: `updated` (written), `kept` (blocked, left as they are), `removed` (stay removed), `restored` (created again).",
+        "required": [
+          "updated",
+          "kept",
+          "removed",
+          "restored"
+        ],
+        "properties": {
+          "updated": {
+            "type": "integer"
+          },
+          "kept": {
+            "type": "integer"
+          },
+          "removed": {
+            "type": "integer"
+          },
+          "restored": {
+            "type": "integer"
+          }
+        }
+      },
+      "MergeResourceOutcome": {
+        "type": "string",
+        "description": "Result of one journey after apply.",
+        "enum": [
+          "applied",
+          "kept_removed",
+          "restored",
+          "merge_stale",
+          "failed"
+        ]
+      },
+      "MergePlanResourceSummary": {
+        "type": "object",
+        "required": [
+          "resource_key",
+          "label",
+          "status",
+          "eligibility",
+          "blocking_reasons",
+          "auto_counts",
+          "unresolved",
+          "warning_count"
+        ],
+        "properties": {
+          "resource_key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MergeResourceStatus"
+          },
+          "eligibility": {
+            "$ref": "#/components/schemas/MergeResourceEligibility"
+          },
+          "blocking_reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "auto_counts": {
+            "$ref": "#/components/schemas/MergeResourceAutoCounts"
+          },
+          "unresolved": {
+            "type": "integer"
+          },
+          "warning_count": {
+            "type": "integer"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/MergeResourceOutcome"
+          }
+        }
+      },
+      "MergePlanResourcePage": {
+        "type": "object",
+        "required": [
+          "merge_plan_id",
+          "plan_revision",
+          "resources"
+        ],
+        "properties": {
+          "merge_plan_id": {
+            "type": "string"
+          },
+          "plan_revision": {
+            "type": "integer"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergePlanResourceSummary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Valid only for this `plan_revision`."
+          }
+        }
+      },
+      "MergePlanResourceDetail": {
+        "type": "object",
+        "required": [
+          "resource_key",
+          "resource_type",
+          "lineage_id",
+          "target_id",
+          "label",
+          "model_version",
+          "base_provenance",
+          "eligibility",
+          "fast_path",
+          "auto_counts",
+          "decision_groups",
+          "warnings",
+          "status",
+          "blocking_reasons"
+        ],
+        "properties": {
+          "resource_key": {
+            "type": "string"
+          },
+          "resource_type": {
+            "type": "string",
+            "enum": [
+              "journey"
+            ]
+          },
+          "lineage_id": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "label": {
+            "type": "string"
+          },
+          "model_version": {
+            "type": "string"
+          },
+          "base_provenance": {
+            "$ref": "#/components/schemas/MergeBaseProvenance"
+          },
+          "eligibility": {
+            "$ref": "#/components/schemas/MergeResourceEligibility"
+          },
+          "fast_path": {
+            "type": "boolean"
+          },
+          "auto_counts": {
+            "$ref": "#/components/schemas/MergeResourceAutoCounts"
+          },
+          "decision_groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeDecisionGroup"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergePlanWarning"
+            }
+          },
+          "status": {
+            "$ref": "#/components/schemas/MergeResourceStatus"
+          },
+          "blocking_reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/MergeResourceOutcome"
+          }
+        }
+      },
+      "MergePlanResourceReview": {
+        "type": "object",
+        "required": [
+          "merge_plan_id",
+          "plan_revision",
+          "resource"
+        ],
+        "properties": {
+          "merge_plan_id": {
+            "type": "string"
+          },
+          "plan_revision": {
+            "type": "integer"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/MergePlanResourceDetail"
+          }
+        }
+      },
+      "MergePlanResolutionsUpdate": {
+        "type": "object",
+        "required": [
+          "expected_plan_revision",
+          "resolutions"
+        ],
+        "properties": {
+          "expected_plan_revision": {
+            "type": "integer"
+          },
+          "resolutions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeChoiceInput"
+            }
+          }
+        }
+      },
+      "MergePlanApplyRequest": {
+        "type": "object",
+        "required": [
+          "expected_plan_revision",
+          "idempotency_key"
+        ],
+        "properties": {
+          "expected_plan_revision": {
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        }
+      },
+      "MergePlanRevisionRequest": {
+        "type": "object",
+        "description": "Body of discard and refresh requests.",
+        "required": [
+          "expected_plan_revision"
+        ],
+        "properties": {
+          "expected_plan_revision": {
+            "type": "integer"
+          }
+        }
+      },
+      "MergePlanReplanResult": {
+        "type": "object",
+        "required": [
+          "merge_plan_id",
+          "job_id"
+        ],
+        "properties": {
+          "merge_plan_id": {
+            "type": "string",
+            "description": "Id the successor plan is stored under once its job has planned."
+          },
+          "job_id": {
+            "type": "string"
+          }
+        }
+      },
+      "MergeRevertEntry": {
+        "type": "object",
+        "required": [
+          "resource_key",
+          "lineage_id",
+          "label",
+          "resource_type",
+          "category",
+          "default_action",
+          "requires_choice"
+        ],
+        "properties": {
+          "resource_key": {
+            "type": "string"
+          },
+          "lineage_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "resource_type": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "description": "Display grouping. `unchanged`: as the update left it. `changed_since_update`: edited since (restoring overwrites that edit). `created_by_update`: created by the update (restore removes it). `metadata_only`: a journey the update kept removed (restore resets only its update history). `not_restorable`: keep-only (no captured content, deleted since, or an unsupported type).",
+            "enum": [
+              "unchanged",
+              "changed_since_update",
+              "created_by_update",
+              "metadata_only",
+              "not_restorable"
+            ]
+          },
+          "default_action": {
+            "type": "string",
+            "enum": [
+              "restore",
+              "keep"
+            ]
+          },
+          "requires_choice": {
+            "type": "boolean",
+            "description": "The revert must name this entry's action explicitly."
+          }
+        }
+      },
+      "MergeRevertPreview": {
+        "type": "object",
+        "required": [
+          "revert_preview_id",
+          "preview_revision",
+          "merge_plan_id",
+          "entries"
+        ],
+        "properties": {
+          "revert_preview_id": {
+            "type": "string"
+          },
+          "preview_revision": {
+            "type": "integer"
+          },
+          "merge_plan_id": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeRevertEntry"
+            }
+          }
+        }
+      },
+      "MergeRevertSelection": {
+        "type": "object",
+        "required": [
+          "resource_key",
+          "action"
+        ],
+        "properties": {
+          "resource_key": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "restore",
+              "keep"
+            ]
+          }
+        }
+      },
+      "MergeRevertRequest": {
+        "type": "object",
+        "required": [
+          "revert_preview_id",
+          "expected_preview_revision",
+          "idempotency_key",
+          "selections"
+        ],
+        "properties": {
+          "revert_preview_id": {
+            "type": "string"
+          },
+          "expected_preview_revision": {
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_.-]+$"
+          },
+          "selections": {
+            "type": "array",
+            "description": "One action for every entry of the preview.",
+            "items": {
+              "$ref": "#/components/schemas/MergeRevertSelection"
+            }
+          },
+          "session_credentials": {
+            "type": "object",
+            "description": "Lets the revert refresh the caller's session on its own, as on install. Held server-side for the job's lifetime and deleted when it finishes.",
+            "required": [
+              "refresh_token",
+              "client_id"
+            ],
+            "properties": {
+              "refresh_token": {
+                "type": "string",
+                "format": "password"
+              },
+              "client_id": {
+                "type": "string"
+              },
+              "pipeline_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "MergeRevertResult": {
+        "type": "object",
+        "required": [
+          "job_id"
+        ],
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "description": "The `restore` job running the revert."
+          }
+        }
+      },
+      "MergePlanError": {
+        "type": "object",
+        "required": [
+          "status",
+          "error"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string",
+            "description": "Stable code, e.g. `merge_plan_revision_conflict`, `merge_plan_signature_stale`, `merge_plan_choice_invalid`."
+          },
+          "group_ids": {
+            "type": "array",
+            "description": "The decision groups the error is about.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "replan"
+            ],
+            "description": "The plan can no longer be applied as it is; Refresh plans the update again."
+          },
+          "merge_plan_id": {
+            "type": "string",
+            "description": "The merge plan to review, when a job endpoint refuses a job that waits for one."
+          },
+          "retry_after": {
+            "type": "integer",
+            "description": "Seconds after which a `blueprint_update_in_progress` conflict is worth retrying."
+          },
+          "resource_keys": {
+            "type": "array",
+            "description": "The revert preview entries the error is about.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       }
     },
     "parameters": {
+      "MergePlanID": {
+        "name": "merge_plan_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
       "JobID": {
         "name": "job_id",
         "in": "path",
