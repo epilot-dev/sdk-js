@@ -45,6 +45,10 @@
     {
       "name": "Knowledge",
       "description": "Manage knowledge sources used by custom agents"
+    },
+    {
+      "name": "Sessions",
+      "description": "Agents API v2 durable agent sessions, used by the Luna panel and the epilot MCP; currently deployed on dev only"
     }
   ],
   "paths": {
@@ -300,6 +304,206 @@
           },
           "400": {
             "description": "Error while deleting the agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/agent-auth": {
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/AgentId"
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "Agents Configuration"
+        ],
+        "summary": "Get the agent's identity for Flows runs",
+        "description": "The agent's own identity for runs started by Flows (internal auth): an autonomous Agent Auth agent at the\nAccess Token API, owned by the admin who activated it. `inactive` when none was activated; `expired` once\nits lifetime (90 days) is over. Runs of an agent with an activation (behind the `agent-flows-identity`\norganization flag) mint their tokens from it instead of using the platform service token, and fail with\n`AGENT_IDENTITY_EXPIRED` when it has expired or was revoked.\n",
+        "operationId": "getAgentAuth",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The agent's identity status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentAuthStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Not a custom agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Agents Configuration"
+        ],
+        "summary": "Activate the agent's identity for Flows runs",
+        "description": "Registers a new autonomous agent for this custom agent at the Access Token API (90 days) and stores the\nactivation on the agent. The caller must be a 360 user calling with their login token in their login\norganization, allowed `token:create`; they become the agent's owner, and the agent acts with the owner's\ncurrent roles under `access_profile`. Activating again replaces (and revokes) the previous activation.\nAvailable only while the PostHog flag `agent-flows-identity` is on for the organization; otherwise `403`\nwith `code: FEATURE_DISABLED` (`GET` and `DELETE` stay available).\n",
+        "operationId": "activateAgentAuth",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentAuthActivationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The activated identity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentAuthStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, or not a custom agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`code: FEATURE_DISABLED`: `agent-flows-identity` is off for the organization. Otherwise not a 360 user's\nlogin token, another organization, or not allowed `token:create`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The agent's identity was activated or deactivated by someone else meanwhile; the agent registered by\nthis request was revoked. Reload the status and try again.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The Access Token API did not register the agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Agents Configuration"
+        ],
+        "summary": "Deactivate the agent's identity for Flows runs",
+        "description": "Revokes the agent's autonomous agent at the Access Token API (with every token it issued) and removes the\nactivation. Needs `token:create`. Later Flows runs use the platform service token again.\n",
+        "operationId": "deactivateAgentAuth",
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deactivated (or there was nothing to deactivate)"
+          },
+          "400": {
+            "description": "Not a custom agent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed `token:create`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The Access Token API did not revoke the agent; the activation is kept",
             "content": {
               "application/json": {
                 "schema": {
@@ -673,110 +877,96 @@
         }
       }
     },
-    "/v1/knowledge/sources": {
+    "/v1/customer-chat/{agent_id}/conversations": {
       "get": {
         "tags": [
-          "Knowledge"
+          "Customer Chat"
         ],
-        "summary": "List knowledge sources",
-        "operationId": "listKnowledgeSources",
+        "summary": "List a portal agent's conversations",
+        "description": "Lists the conversations portal customers had with this agent, most recent first.\nRequires `entity:view` on contacts. With `has_ticket=true` a page can hold fewer\nthan `limit` conversations; keep following `next_cursor`. `from` and `to` narrow the\nlist to conversations last active in that period; keep them unchanged while following\n`next_cursor`.\n",
+        "operationId": "listCustomerChatConversations",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "contact:*"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          },
+          {
+            "name": "has_ticket",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Only conversations in which the agent created a ticket"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Only conversations last active at or after this time"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Only conversations last active at or before this time"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Knowledge sources available to the organization",
+            "description": "The agent's conversations",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListKnowledgeSourcesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/knowledge/file-uploads": {
-      "post": {
-        "tags": [
-          "Knowledge"
-        ],
-        "summary": "Create a knowledge file upload",
-        "description": "Returns a direct S3 upload. The source becomes available after S3 confirms the completed object.",
-        "operationId": "createKnowledgeFileUpload",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateKnowledgeFileUploadRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Upload created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateKnowledgeFileUploadResponse"
+                  "$ref": "#/components/schemas/ListCustomerChatConversationsResponse"
                 }
               }
             }
           },
-          "400": {
-            "description": "Invalid file metadata",
+          "403": {
+            "description": "Not permitted to read customer conversations",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Organization knowledge source limit reached",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/knowledge/sources/{source_id}": {
-      "parameters": [
-        {
-          "name": "source_id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      ],
-      "get": {
-        "tags": [
-          "Knowledge"
-        ],
-        "summary": "Get a knowledge source",
-        "operationId": "getKnowledgeSource",
-        "responses": {
-          "200": {
-            "description": "Knowledge source",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/KnowledgeSource"
                 }
               }
             }
           },
           "404": {
-            "description": "Knowledge source not found",
+            "description": "Portal agent not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -786,19 +976,63 @@
             }
           }
         }
-      },
-      "delete": {
+      }
+    },
+    "/v1/customer-chat/{agent_id}/conversations/{conversation_id}": {
+      "get": {
         "tags": [
-          "Knowledge"
+          "Customer Chat"
         ],
-        "summary": "Delete a knowledge source",
-        "operationId": "deleteKnowledgeSource",
-        "responses": {
-          "204": {
-            "description": "Knowledge source deleted"
+        "summary": "Get a portal agent conversation transcript",
+        "description": "Customer and agent messages of one conversation, oldest first. Requires `entity:view` on contacts.",
+        "operationId": "getCustomerChatConversation",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "contact:*"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
           },
-          "409": {
-            "description": "Knowledge source is referenced by an agent",
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The conversation and its transcript",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerChatConversationTranscript"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not permitted to read customer conversations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversation not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -895,7 +1129,7 @@
             }
           },
           "504": {
-            "description": "`mode: sync`: the model did not answer within the request deadline (`error: TIMEOUT`)",
+            "description": "`mode: sync`: the model did not answer within the request timeout (`error: TIMEOUT`)",
             "content": {
               "application/json": {
                 "schema": {
@@ -935,7 +1169,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ExecuteAgentRequest"
+                "$ref": "#/components/schemas/ExecuteAgentStreamRequest"
               }
             }
           }
@@ -980,7 +1214,7 @@
           "Agent Execution"
         ],
         "summary": "List executions",
-        "description": "List executions",
+        "description": "Lists the executions of the caller's organization, optionally filtered by agent and status.\nWith a filter, a page can hold fewer than `limit` executions, or none, while more follow:\nkeep following `next_cursor` until it is null, with the same filters.\n",
         "operationId": "listExecutions",
         "security": [
           {
@@ -1011,7 +1245,15 @@
               "type": "integer",
               "default": 50
             },
-            "description": "Maximum number of executions to return"
+            "description": "Maximum number of executions to return. Values above 100 are capped at 100."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "`next_cursor` of the previous page"
           }
         ],
         "responses": {
@@ -1368,8 +1610,28 @@
               }
             }
           },
+          "403": {
+            "description": "The caller may not approve this execution (code APPROVER_NOT_ALLOWED). Only with the PostHog flag agents-strict-approvals on for the organization: then only the user who started it, or internal auth, can decide; an agent token never can.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Execution not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The paused run cannot take this decision: code APPROVAL_EXPIRED when the approval wait already expired or was decided, code APPROVAL_NOT_SUPPORTED when the execution was paused by a streaming run, which cannot be resumed (cancel it instead).",
             "content": {
               "application/json": {
                 "schema": {
@@ -1436,8 +1698,28 @@
               }
             }
           },
+          "403": {
+            "description": "The caller may not reject this execution (code APPROVER_NOT_ALLOWED). Only with the PostHog flag agents-strict-approvals on for the organization: then only the user who started it, or internal auth, can decide; an agent token never can.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Execution not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The paused run cannot take this decision: code APPROVAL_EXPIRED when the approval wait already expired or was decided, code APPROVAL_NOT_SUPPORTED when the execution was paused by a streaming run, which cannot be resumed (cancel it instead).",
             "content": {
               "application/json": {
                 "schema": {
@@ -1794,6 +2076,814 @@
           }
         }
       }
+    },
+    "/v2/sessions/uploads": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Upload a file for a session",
+        "description": "Registers a file the caller attaches to a message and returns a short-lived URL to `PUT` its bytes to,\nwith the headers to send. Attach it by its `fileId` in `createSession` or `sendSessionEvent` (`user.message`).\nOnly the listed media types, up to 10 MB.\n",
+        "operationId": "createSessionUpload",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The file, and where to upload its bytes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionUpload"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SessionsBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SessionsNotEnabled"
+          },
+          "413": {
+            "$ref": "#/components/responses/SessionsPayloadTooLarge"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          }
+        }
+      }
+    },
+    "/v2/sessions": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Start a session",
+        "description": "Starts a session with an agent, optionally with the user's first message (`input`), which wakes the agent.\nWith a `requestId`, a retried request gets the session its first attempt created.\n",
+        "operationId": "createSession",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The session, and its events so far",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedSession"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SessionsBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SessionsNotEnabled"
+          },
+          "404": {
+            "$ref": "#/components/responses/SessionsNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/SessionsConflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/SessionsPayloadTooLarge"
+          },
+          "429": {
+            "$ref": "#/components/responses/SessionsQuotaExceeded"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "List the caller's sessions",
+        "description": "The caller's own sessions, most recently updated first.",
+        "operationId": "listSessions",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false,
+            "description": "Only sessions with this agent",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "How many sessions, at most 200",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 30
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "description": "Only sessions updated before this time (the last listed session's `updatedAt`)",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The caller's sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SessionsBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          }
+        }
+      }
+    },
+    "/v2/sessions/{sessionId}": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Get a session",
+        "description": "One of the caller's sessions, with its current status. Another user's session is not found.",
+        "operationId": "getSession",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/SessionsNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Rename a session",
+        "description": "Sets the session's title (trimmed).",
+        "operationId": "renameSession",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The renamed session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SessionsBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/SessionsNotFound"
+          },
+          "413": {
+            "$ref": "#/components/responses/SessionsPayloadTooLarge"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Delete a session",
+        "description": "Deletes the session and everything it keeps (events, files, workspace).",
+        "operationId": "deleteSession",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/SessionsNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          }
+        }
+      }
+    },
+    "/v2/sessions/{sessionId}/events": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "List a session's events",
+        "description": "The session's history as client events, in pages: while `hasMore`, ask again with `after` set to `lastSeq`.\nEvery event carries the `seq` it comes from, so history and live messages can overlap.\n",
+        "operationId": "listSessionEvents",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "description": "Only events after this `seq`",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "How many stored events to read, at most 10000",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 10000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of the session's events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionEventsPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SessionsBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/SessionsNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Send to a session",
+        "description": "The user's input to the session: a message, an approval decision, answers to the agent's questions,\nor an interrupt (stop the turn). Accepted inputs are handled asynchronously; follow the session's events.\n",
+        "operationId": "sendSessionEvent",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClientInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInputAccepted"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SessionsBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SessionsNotEnabled"
+          },
+          "404": {
+            "$ref": "#/components/responses/SessionsNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/SessionsConflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/SessionsPayloadTooLarge"
+          },
+          "429": {
+            "$ref": "#/components/responses/SessionsQuotaExceeded"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          },
+          "502": {
+            "description": "The agent couldn't get access to make the approved change; nothing was decided, try again",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionsError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/sessions/{sessionId}/files/{fileId}": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Get a link to a session file",
+        "description": "A short-lived link to a file of the session: one the user attached, or one the agent created.\nImages open in the browser unless `download=1`; anything else is downloaded under its name.\n",
+        "operationId": "getSessionFileUrl",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f-]{36}$"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "description": "`1`: always as a download",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The link",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionFileUrl"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SessionsBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/SessionsNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          }
+        }
+      }
+    },
+    "/v2/sessions/scripts": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Run a script",
+        "description": "Runs a script in the caller's script session, without a model (the epilot MCP's `execute`). Its reads run\nwith the caller's token; the changes it records are not applied until `applyScriptRun`. Waits up to `waitMs`\nfor the result: `200` when it finished, `202` while it still runs (ask `getScriptRun`).\n",
+        "operationId": "runScript",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunScriptRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The run finished",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScriptRunView"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "The run is still running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScriptRunView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SessionsBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SessionsNotEnabled"
+          },
+          "404": {
+            "$ref": "#/components/responses/SessionsNotFound"
+          },
+          "413": {
+            "$ref": "#/components/responses/SessionsPayloadTooLarge"
+          },
+          "429": {
+            "$ref": "#/components/responses/SessionsQuotaExceeded"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          }
+        }
+      }
+    },
+    "/v2/sessions/scripts/{runId}": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Get a script run",
+        "description": "Where a script run stands, waiting up to `waitMs` (at most 20000) for it to finish: `200` when it finished, `202` while it runs.",
+        "operationId": "getScriptRun",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScriptRunIdPath"
+          },
+          {
+            "name": "waitMs",
+            "in": "query",
+            "required": false,
+            "description": "How long to wait for the run to finish, in milliseconds; at most 20000",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The run finished",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScriptRunView"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "The run is still running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScriptRunView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SessionsBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/SessionsNotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          }
+        }
+      }
+    },
+    "/v2/sessions/scripts/{runId}/apply": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Apply a script run's changes",
+        "description": "Applies the changes a finished script run recorded, after the caller's client confirmed them, with the\ncaller's token. Each request runs for a while; call again until `done`. Refused (`409`, nothing runs) when\nthe script failed, recorded nothing, or asks for something the caller's roles don't allow.\n",
+        "operationId": "applyScriptRun",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScriptRunIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyScriptRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The changes applied so far",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScriptApplyResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SessionsBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SessionsNotEnabled"
+          },
+          "404": {
+            "$ref": "#/components/responses/SessionsNotFound"
+          },
+          "409": {
+            "description": "Refused (`code: refused`): nothing runs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Refusal"
+                }
+              }
+            }
+          },
+          "413": {
+            "$ref": "#/components/responses/SessionsPayloadTooLarge"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          }
+        }
+      }
+    },
+    "/v2/agents/revoke": {
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Revoke the caller's session agents",
+        "description": "Logout. Every agent the caller's sessions act with ends now.",
+        "operationId": "revokeSessionAgents",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Revoked"
+          },
+          "401": {
+            "$ref": "#/components/responses/SessionsUnauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/SessionsInternalError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1822,6 +2912,117 @@
         "description": "Compare-and-swap token. The agent's current `updated_at`; may be sent as `updated_at` in the body instead.",
         "schema": {
           "type": "string"
+        }
+      },
+      "SessionIdPath": {
+        "name": "sessionId",
+        "in": "path",
+        "required": true,
+        "description": "The session's id",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f-]{36}$"
+        }
+      },
+      "ScriptRunIdPath": {
+        "name": "runId",
+        "in": "path",
+        "required": true,
+        "description": "The script run's id: `<sessionId>.<inputEventId>`",
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9a-f-]{36}\\.[0-9a-f-]{36}$"
+        }
+      }
+    },
+    "responses": {
+      "SessionsBadRequest": {
+        "description": "Invalid request: it doesn't match this spec (`issues` says where), or it can't be done as asked",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SessionsError"
+            }
+          }
+        }
+      },
+      "SessionsUnauthorized": {
+        "description": "Not signed in",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SessionsError"
+            }
+          }
+        }
+      },
+      "SessionsNotEnabled": {
+        "description": "Refused (`code: not_enabled`): Luna is not enabled for the caller's organization",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Refusal"
+            }
+          }
+        }
+      },
+      "SessionsNotFound": {
+        "description": "Not found, or not the caller's",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SessionsError"
+            }
+          }
+        }
+      },
+      "SessionsConflict": {
+        "description": "Conflicts with the session's state (e.g. an approval that expired, questions answered already)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SessionsError"
+            }
+          }
+        }
+      },
+      "SessionsPayloadTooLarge": {
+        "description": "The request body is larger than 256 KB",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SessionsError"
+            }
+          }
+        }
+      },
+      "SessionsQuotaExceeded": {
+        "description": "Refused (`code: quota_exceeded`): the caller or the organization has as many sessions running as allowed, or the organization's daily budget is used up",
+        "headers": {
+          "retry-after": {
+            "description": "Seconds until it may work again",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Refusal"
+            }
+          }
+        }
+      },
+      "SessionsInternalError": {
+        "description": "Internal error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SessionsError"
+            }
+          }
         }
       }
     },
@@ -1908,6 +3109,19 @@
               "type": "string"
             }
           },
+          "starterKeys": {
+            "type": "array",
+            "description": "One key per starter, in the order of `starters` and the same for a starter in every language; websites ask a starter by it with `startStarter(key)`. Absent for starters saved before keys, which readers key `starter-<position>`.",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$"
+            }
+          },
+          "launcherLabel": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Text on the Website Chat's epilot button, in the default language. Website place only; without it the Website Chat shows its own label."
+          },
           "language": {
             "type": "string",
             "description": "Default language. The top-level texts are written in it.",
@@ -1923,9 +3137,13 @@
               "du"
             ]
           },
+          "followUps": {
+            "type": "boolean",
+            "description": "Suggest follow-ups after a reply. Defaults to on for website agents, off for portal agents."
+          },
           "languages": {
             "type": "array",
-            "description": "Languages customers can chat in. Only present with two or more; always includes `language`.",
+            "description": "Configured content languages for widget chrome (name, greeting, starters) and per-language instructions. Only present with two or more; always includes `language`.",
             "items": {
               "type": "string",
               "enum": [
@@ -1979,6 +3197,18 @@
             "items": {
               "type": "string"
             }
+          },
+          "starterKeys": {
+            "type": "array",
+            "description": "One key per starter, in the order of `starters` and the same for a starter in every language; websites ask a starter by it with `startStarter(key)`. Absent for starters saved before keys, which readers key `starter-<position>`.",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{1,64}$"
+            }
+          },
+          "launcherLabel": {
+            "type": "string",
+            "maxLength": 40
           }
         }
       },
@@ -1989,7 +3219,8 @@
           "enum": [
             "displayName",
             "greeting",
-            "starters"
+            "starters",
+            "launcherLabel"
           ]
         }
       },
@@ -2003,7 +3234,25 @@
           "view_contracts",
           "search_web",
           "open_quick_actions",
-          "view_hems_energy"
+          "view_hems_energy",
+          "open_journey",
+          "open_link",
+          "submit_meter_reading"
+        ]
+      },
+      "AccessLevel": {
+        "type": "string",
+        "description": "Who may use a capability. `anonymous` = every visitor, `authenticated` =\nonly a customer authenticated by email code or portal login; others are\nasked to sign in first. Each capability type has a default and a\nminimum; values below the minimum are raised. Used today by\n`open_journey`, `open_link` and `submit_meter_reading` (always\n`authenticated`); other capability types ignore it.\n",
+        "enum": [
+          "anonymous",
+          "authenticated"
+        ]
+      },
+      "SelfServiceIntent": {
+        "type": "string",
+        "description": "What a journey, link or in-chat capability is for; names the action in the chat and in analytics.",
+        "enum": [
+          "submit_meter_reading"
         ]
       },
       "ActionAutonomy": {
@@ -2065,6 +3314,28 @@
             "type": "string",
             "format": "uuid",
             "description": "`view_hems_energy` only. Hub integration installation id used by\nHEMS portal tools (`portal.hems.snapshot` via list_devices, and\nwhen searchDeviceDocs is on also get_vendors /\nget_connection_options). Chosen in Agent Builder via the\nintegration picker.\n"
+          },
+          "accessLevel": {
+            "$ref": "#/components/schemas/AccessLevel"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/SelfServiceIntent"
+          },
+          "journeyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "`open_journey` only. The journey the Website Chat embeds; the action is offered only once set."
+          },
+          "journeyName": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "`open_journey` only. The journey's name, kept for display."
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2048,
+            "pattern": "^https://",
+            "description": "`open_link` only. The page the Website Chat opens; the action is offered only once set."
           },
           "searchDeviceDocs": {
             "type": "boolean",
@@ -2197,6 +3468,27 @@
         "properties": {
           "websiteHandover": {
             "$ref": "#/components/schemas/WebsiteHandover"
+          },
+          "ticketPurpose": {
+            "$ref": "#/components/schemas/TicketPurpose"
+          }
+        }
+      },
+      "TicketPurpose": {
+        "type": "object",
+        "nullable": true,
+        "description": "Portal places only: purpose set on tickets the portal chat creates when\nit hands over to the service team. Omit (or send `null`) for a plain ticket.\n",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Purpose taxonomy classification id, stored in the ticket's `_purpose`."
+          },
+          "name": {
+            "type": "string",
+            "description": "The purpose's name, kept for display."
           }
         }
       },
@@ -2334,17 +3626,22 @@
               "phone",
               "email",
               "journey",
+              "ticket",
               "unset"
-            ]
+            ],
+            "description": "Where the website agent hands over when it cannot help.\n- `phone`: the agent gives the customer the phone number in `value`.\n- `email`: the agent gives the customer the email address in `value`.\n- `journey`: the agent points the customer to the journey in `journeyId`.\n- `ticket`: an authenticated visitor can confirm a support ticket for the\n  service team, with the chat transcript as a note. Anonymous\n  visitors are asked to sign in first.\n- `unset`: nothing chosen yet; the agent offers no hand-over channel.\n"
           },
           "value": {
-            "type": "string"
+            "type": "string",
+            "description": "Phone number or email address for `phone` / `email`; empty otherwise."
           },
           "journeyId": {
-            "type": "string"
+            "type": "string",
+            "description": "The hand-over journey, for `journey`."
           },
           "journeyName": {
-            "type": "string"
+            "type": "string",
+            "description": "The journey's name, kept for display, for `journey`."
           }
         }
       },
@@ -2360,137 +3657,6 @@
         "items": {
           "type": "string",
           "format": "uuid"
-        }
-      },
-      "KnowledgeSource": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/KnowledgeFileSource"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "file": "#/components/schemas/KnowledgeFileSource"
-          }
-        }
-      },
-      "KnowledgeFileSource": {
-        "type": "object",
-        "required": [
-          "type",
-          "source_id",
-          "filename",
-          "mime_type",
-          "size_bytes",
-          "ready",
-          "created_at",
-          "updated_at"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "file"
-            ]
-          },
-          "source_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "filename": {
-            "type": "string"
-          },
-          "mime_type": {
-            "type": "string"
-          },
-          "size_bytes": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "ready": {
-            "type": "boolean",
-            "description": "Whether the source is available for agent retrieval."
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "CreateKnowledgeFileUploadRequest": {
-        "type": "object",
-        "required": [
-          "filename",
-          "mime_type",
-          "size_bytes"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "filename": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 255
-          },
-          "mime_type": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 255
-          },
-          "size_bytes": {
-            "type": "integer",
-            "format": "int64",
-            "minimum": 1,
-            "maximum": 1000000000
-          }
-        }
-      },
-      "CreateKnowledgeFileUploadResponse": {
-        "type": "object",
-        "required": [
-          "source_id",
-          "upload_url",
-          "upload_fields",
-          "expires_at"
-        ],
-        "properties": {
-          "source_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "upload_url": {
-            "type": "string",
-            "format": "uri"
-          },
-          "upload_fields": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "expires_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ListKnowledgeSourcesResponse": {
-        "type": "object",
-        "required": [
-          "sources"
-        ],
-        "properties": {
-          "sources": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/KnowledgeSource"
-            }
-          }
         }
       },
       "AgentDomain": {
@@ -2768,7 +3934,8 @@
           },
           "next_cursor": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "description": "Pass as `cursor` for the next page. Null after the last page."
           }
         }
       },
@@ -2920,11 +4087,25 @@
           },
           "timeout_ms": {
             "type": "integer",
-            "default": 30000,
-            "maximum": 300000,
-            "description": "Execution timeout in milliseconds"
+            "maximum": 600000,
+            "description": "Deadline for the execution, counted from its creation. A direct skill still running when\nit passes is cut off and the execution fails with `error: TIMEOUT`; a ReAct agent is cut off\nat its next model call. Without it an execution is bounded only by the service's own limit.\nIgnored by `mode: sync`, which has a fixed cutoff.\n"
           }
         }
+      },
+      "ExecuteAgentStreamRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ExecuteAgentRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "agent_override": {
+                "$ref": "#/components/schemas/AgentPreviewOverride"
+              }
+            }
+          }
+        ]
       },
       "ExecutionResponse": {
         "type": "object",
@@ -2961,7 +4142,7 @@
           "result": {
             "type": "object",
             "nullable": true,
-            "description": "Execution result (when status=completed)",
+            "description": "Execution result (when status=completed). `GET /v1/executions/{execution_id}` always returns\nthe full result. The list endpoint and the completion event may instead carry\n`{ result_ref, preview }` for a result too large to store inline.\n",
             "properties": {
               "response": {
                 "type": "string",
@@ -2971,6 +4152,10 @@
                 "type": "object",
                 "nullable": true,
                 "description": "Parsed structured output (only for direct mode with output_schema)"
+              },
+              "stop_reason": {
+                "type": "string",
+                "description": "Why the model stopped (`end_turn`, `max_tokens`, ...). Present for skills that run through the native InvokeModel path, so a caller can treat a truncated answer itself."
               }
             }
           },
@@ -3162,6 +4347,10 @@
           },
           "preview": {
             "$ref": "#/components/schemas/ToolPreview"
+          },
+          "approval_note": {
+            "type": "string",
+            "description": "Set when the usual approvers cannot decide this action. With agents-strict-approvals, a run started with internal auth and no user can only be approved or rejected by internal auth (the automation that started it); without its decision the approval expires and the run continues without the action."
           }
         }
       },
@@ -3261,7 +4450,7 @@
           "output": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Present on `completed` — the execution result"
+            "description": "Present on `completed` — the execution result. A result too large for the event\n(above ~200 KB) is replaced by `{ result_ref: { bucket, key, bytes }, preview: { response } }`;\nread the full result with `GET /v1/executions/{execution_id}`.\n"
           },
           "error": {
             "type": "object",
@@ -3310,93 +4499,6 @@
           "timestamp": {
             "type": "string",
             "format": "date-time"
-          }
-        }
-      },
-      "KnowledgeSourceRegisteredEvent": {
-        "description": "Detail payload of the `knowledge-source-registered` event, published on\nthe AI Agents event bus with source `ai-agents` after the source record\nexists in DynamoDB. Consumers must process `sourceId` idempotently.\n",
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/KnowledgeFileSourceRegisteredEvent"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "file": "#/components/schemas/KnowledgeFileSourceRegisteredEvent"
-          }
-        }
-      },
-      "KnowledgeFileSourceRegisteredEvent": {
-        "type": "object",
-        "required": [
-          "orgId",
-          "sourceId",
-          "type",
-          "bucket",
-          "key"
-        ],
-        "properties": {
-          "orgId": {
-            "type": "string"
-          },
-          "sourceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "file"
-            ]
-          },
-          "bucket": {
-            "type": "string"
-          },
-          "key": {
-            "type": "string"
-          }
-        }
-      },
-      "KnowledgeSourceDeletedEvent": {
-        "type": "object",
-        "description": "Published when a knowledge source is deleted.",
-        "required": [
-          "orgId",
-          "sourceId",
-          "type"
-        ],
-        "properties": {
-          "orgId": {
-            "type": "string"
-          },
-          "sourceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "file"
-            ]
-          }
-        }
-      },
-      "KnowledgeSourceProcessingCompletedEvent": {
-        "type": "object",
-        "description": "Published by a knowledge processing pipeline after all derived data for\nthe source has been stored and is available for agent retrieval. The\nevent uses source `knowledge-processing` and detail type\n`knowledge-source-processing-completed` on the AI Agents event bus.\n",
-        "required": [
-          "orgId",
-          "sourceId"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "orgId": {
-            "type": "string"
-          },
-          "sourceId": {
-            "type": "string",
-            "format": "uuid"
           }
         }
       },
@@ -3893,6 +4995,10 @@
           "error": {
             "type": "string"
           },
+          "code": {
+            "type": "string",
+            "description": "Machine-readable error code, where an operation documents one (e.g. `FEATURE_DISABLED`)"
+          },
           "message": {
             "type": "string"
           },
@@ -3901,11 +5007,79 @@
           }
         }
       },
+      "AgentAuthAccessProfile": {
+        "type": "string",
+        "description": "Access profile of the agent's grant at the Access Token API (its ceiling)",
+        "enum": [
+          "read",
+          "config:read",
+          "config:write",
+          "data:read",
+          "data:write",
+          "full"
+        ]
+      },
+      "AgentAuthActivationRequest": {
+        "type": "object",
+        "required": [
+          "access_profile"
+        ],
+        "properties": {
+          "access_profile": {
+            "$ref": "#/components/schemas/AgentAuthAccessProfile"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 200,
+            "description": "Purpose shown in the agent's token names and the admin view; required for any profile but `read`",
+            "example": "Labels inbound emails and updates their tickets"
+          }
+        }
+      },
+      "AgentAuthStatus": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "inactive",
+              "active",
+              "expired"
+            ]
+          },
+          "agent_auth_agent_id": {
+            "type": "string",
+            "description": "The agent's id at the Access Token API"
+          },
+          "activation_id": {
+            "type": "string"
+          },
+          "access_profile": {
+            "$ref": "#/components/schemas/AgentAuthAccessProfile"
+          },
+          "owner_user_id": {
+            "type": "string",
+            "description": "The admin who activated it; the agent acts with their current roles"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End of the activation's lifetime (90 days); it is not renewed automatically"
+          },
+          "expiring_soon": {
+            "type": "boolean",
+            "description": "`active` and expiring within 14 days: an admin should activate the agent again, or its Flows runs fail\nwith `AGENT_IDENTITY_EXPIRED` once it has expired.\n"
+          }
+        }
+      },
       "ChatRequest": {
         "type": "object",
         "required": [
-          "agentId",
-          "message"
+          "agentId"
         ],
         "properties": {
           "agentId": {
@@ -3914,7 +5088,10 @@
           },
           "message": {
             "type": "string",
-            "description": "User message"
+            "description": "User message. Required unless `tool_approval` is set."
+          },
+          "tool_approval": {
+            "$ref": "#/components/schemas/ToolApprovalAnswer"
           },
           "conversationId": {
             "type": "string",
@@ -3926,7 +5103,7 @@
             "items": {
               "$ref": "#/components/schemas/ChatMessage"
             },
-            "description": "Client-provided message history (overrides server-side memory)"
+            "description": "Client-provided message history. A non-empty array overrides\nserver-side memory. Each item is a ChatMessage. Only the latest\n100 messages are used; any other shape is rejected.\n"
           },
           "context": {
             "type": "object",
@@ -3946,8 +5123,97 @@
           "preview_demo": {
             "type": "boolean",
             "description": "Agent Builder place-agent preview: when true, portal tools return\nsynthetic demo fixtures instead of calling customer-portal-api,\nand execution mode is forced to draft.\n"
+          },
+          "agent_override": {
+            "$ref": "#/components/schemas/AgentPreviewOverride"
+          },
+          "portal_config_override": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Agent Builder preview of a portal Customer Chat agent: the unsaved\nplace configuration (same shape as the customer chat config\nupdate). It is validated and compiled like a save and used for\nthis request only; nothing is persisted. Requires preview_demo.\nNot supported for Website Chat agents.\n"
           }
         }
+      },
+      "ToolApprovalAnswer": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "token",
+          "approved"
+        ],
+        "description": "The user's answer to an `approval_required` event (Luna behind the\n`luna-tool-approvals` flag). Requires the asking turn's `conversationId` and `agentId`; `message` may\nbe omitted. On approve the server runs exactly the pending tool call\nstored in the conversation, streams its `tool_call` / `tool_result`\nand continues the turn. Errors: `APPROVAL_INVALID`,\n`APPROVAL_EXPIRED`, `APPROVAL_USED`, `APPROVAL_UNAVAILABLE`.\n",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "`approval.token` from the `approval_required` event"
+          },
+          "approved": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Optional reason, passed to the agent on decline"
+          }
+        }
+      },
+      "ToolApprovalRequest": {
+        "type": "object",
+        "required": [
+          "id",
+          "tool_id",
+          "tool_call_id",
+          "input",
+          "expires_at",
+          "token"
+        ],
+        "description": "A tool call waiting for the user's approval; the turn has ended.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tool_id": {
+            "type": "string",
+            "example": "entity.update"
+          },
+          "tool_call_id": {
+            "type": "string",
+            "description": "`callId` of this call's `tool_call` / `tool_result` events"
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable tool name"
+          },
+          "input": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "The exact arguments that run on approve"
+          },
+          "impact": {
+            "type": "string"
+          },
+          "preview": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "10 minutes after the request"
+          },
+          "token": {
+            "type": "string",
+            "description": "Signed, single-use; send back as `tool_approval.token`"
+          }
+        }
+      },
+      "AgentPreviewOverride": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UpdateAgentRequest"
+          }
+        ],
+        "description": "Agent Builder preview: unsaved editor settings applied to the saved\ncustom agent for this request only. Nothing is persisted. Requires\npreview_demo on /v1/chat and forces draft execution mode on\n/v1/agents/{agent_id}/execute/stream. Not supported for system skills\nor Website Chat agents.\n"
       },
       "ChatMessage": {
         "type": "object",
@@ -4028,12 +5294,16 @@
               "complete",
               "error",
               "metadata",
-              "needs_approval"
+              "needs_approval",
+              "approval_required"
             ]
           },
           "content": {
             "type": "string",
             "description": "Token content (for token events)"
+          },
+          "approval": {
+            "$ref": "#/components/schemas/ToolApprovalRequest"
           },
           "index": {
             "type": "integer",
@@ -4255,6 +5525,113 @@
           }
         }
       },
+      "CustomerChatConversation": {
+        "type": "object",
+        "required": [
+          "conversation_id",
+          "user_id",
+          "message_count",
+          "last_message_at",
+          "created_at",
+          "ticket_ids"
+        ],
+        "properties": {
+          "conversation_id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "Portal user who chatted"
+          },
+          "contact_id": {
+            "type": "string",
+            "description": "The customer's contact, known once the agent created a ticket"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message_count": {
+            "type": "integer"
+          },
+          "last_message": {
+            "type": "string"
+          },
+          "last_message_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ticket_ids": {
+            "type": "array",
+            "description": "Tickets the agent created in this conversation, oldest first",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CustomerChatConversationMessage": {
+        "type": "object",
+        "required": [
+          "role",
+          "content",
+          "timestamp"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ListCustomerChatConversationsResponse": {
+        "type": "object",
+        "required": [
+          "conversations"
+        ],
+        "properties": {
+          "conversations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerChatConversation"
+            }
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomerChatConversationTranscript": {
+        "type": "object",
+        "required": [
+          "conversation",
+          "messages"
+        ],
+        "properties": {
+          "conversation": {
+            "$ref": "#/components/schemas/CustomerChatConversation"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerChatConversationMessage"
+            }
+          }
+        }
+      },
       "ListConversationsResponse": {
         "type": "object",
         "properties": {
@@ -4283,6 +5660,1891 @@
             }
           }
         }
+      },
+      "SessionsError": {
+        "type": "object",
+        "description": "An error of the Sessions API",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "message"
+            ],
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "issues": {
+                "type": "array",
+                "description": "`Invalid request`: what doesn't match",
+                "items": {
+                  "$ref": "#/components/schemas/ValidationIssue"
+                }
+              },
+              "requestId": {
+                "type": "string",
+                "description": "The request's id, for support (internal errors)"
+              }
+            }
+          }
+        }
+      },
+      "ValidationIssue": {
+        "type": "object",
+        "required": [
+          "code",
+          "path",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "path": {
+            "type": "array",
+            "description": "Where in the request",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "RefusalDetails": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "not_enabled",
+              "quota_exceeded",
+              "refused"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "For the user"
+          },
+          "limit": {
+            "type": "string",
+            "description": "`quota_exceeded`: which limit",
+            "enum": [
+              "concurrent_sessions",
+              "active_vms",
+              "daily_budget"
+            ]
+          },
+          "retryAfterSeconds": {
+            "type": "integer",
+            "description": "`quota_exceeded`: seconds until it may work again (also the `retry-after` header)"
+          }
+        }
+      },
+      "Refusal": {
+        "description": "A refusal the client tells the user about; `error` repeats it, like every other error",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RefusalDetails"
+          },
+          {
+            "type": "object",
+            "required": [
+              "error"
+            ],
+            "properties": {
+              "error": {
+                "$ref": "#/components/schemas/RefusalDetails"
+              }
+            }
+          }
+        ]
+      },
+      "RequestId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "The client's id for the request: sent again on a retry, it is taken once"
+      },
+      "SessionStatus": {
+        "type": "string",
+        "description": "`starting`: its VM starts or the agent catches up; `failed`: its last turn couldn't run",
+        "enum": [
+          "idle",
+          "starting",
+          "running",
+          "failed"
+        ]
+      },
+      "SessionLiveInfo": {
+        "type": "object",
+        "description": "How to subscribe to the session's live messages on AppSync Events",
+        "required": [
+          "transport",
+          "httpHost",
+          "realtimeUrl",
+          "channel"
+        ],
+        "properties": {
+          "transport": {
+            "type": "string",
+            "enum": [
+              "appsync"
+            ]
+          },
+          "httpHost": {
+            "type": "string",
+            "description": "Host of the Event API's HTTP endpoint (the `host` in the subscribe auth header)"
+          },
+          "realtimeUrl": {
+            "type": "string",
+            "description": "WebSocket URL of the Event API"
+          },
+          "channel": {
+            "type": "string"
+          }
+        }
+      },
+      "SessionView": {
+        "type": "object",
+        "required": [
+          "id",
+          "agentId",
+          "mode",
+          "title",
+          "createdAt",
+          "updatedAt",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agentId": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string",
+            "description": "`read`: the user signed in read-only (or anonymized), so the agent only reads in this session",
+            "enum": [
+              "read",
+              "write"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SessionStatus"
+          },
+          "live": {
+            "$ref": "#/components/schemas/SessionLiveInfo"
+          }
+        }
+      },
+      "SessionResponse": {
+        "type": "object",
+        "required": [
+          "session"
+        ],
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/SessionView"
+          }
+        }
+      },
+      "SessionList": {
+        "type": "object",
+        "required": [
+          "sessions"
+        ],
+        "properties": {
+          "sessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionView"
+            }
+          }
+        }
+      },
+      "CreatedSession": {
+        "type": "object",
+        "required": [
+          "session",
+          "events"
+        ],
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/SessionView"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClientEvent"
+            }
+          }
+        }
+      },
+      "SessionEventsPage": {
+        "type": "object",
+        "required": [
+          "events",
+          "lastSeq",
+          "hasMore",
+          "status"
+        ],
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClientEvent"
+            }
+          },
+          "lastSeq": {
+            "type": "integer",
+            "description": "The `seq` this page ends at; ask again `after` it while `hasMore`"
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SessionStatus"
+          }
+        }
+      },
+      "MessageInput": {
+        "type": "object",
+        "description": "The user's message, its text (trimmed), its files, or both",
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 20000,
+            "default": ""
+          },
+          "context": {
+            "type": "object",
+            "description": "Where the user is (page, record); given to the agent, not shown as the user's words",
+            "additionalProperties": true
+          },
+          "files": {
+            "type": "array",
+            "description": "Uploads (`createSessionUpload`) to attach, by `fileId`",
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "CreateSessionRequest": {
+        "type": "object",
+        "required": [
+          "agentId"
+        ],
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/RequestId"
+          },
+          "input": {
+            "$ref": "#/components/schemas/MessageInput"
+          }
+        }
+      },
+      "RenameSessionRequest": {
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Trimmed",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "\\S"
+          }
+        }
+      },
+      "ClientInput": {
+        "description": "The user's input to a session",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/UserMessageInput"
+          },
+          {
+            "$ref": "#/components/schemas/UserApprovalInput"
+          },
+          {
+            "$ref": "#/components/schemas/UserAnswerInput"
+          },
+          {
+            "$ref": "#/components/schemas/UserInterruptInput"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "user.message": "#/components/schemas/UserMessageInput",
+            "user.approval": "#/components/schemas/UserApprovalInput",
+            "user.answer": "#/components/schemas/UserAnswerInput",
+            "user.interrupt": "#/components/schemas/UserInterruptInput"
+          }
+        }
+      },
+      "UserMessageInput": {
+        "description": "A message. It closes open questions and expires pending approvals.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MessageInput"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "user.message"
+                ]
+              },
+              "requestId": {
+                "$ref": "#/components/schemas/RequestId"
+              }
+            }
+          }
+        ]
+      },
+      "UserApprovalInput": {
+        "type": "object",
+        "description": "Approves or rejects what the agent asked to do (`approval.required`)",
+        "required": [
+          "type",
+          "approvalId",
+          "approved"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "user.approval"
+            ]
+          },
+          "approvalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "approved": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        }
+      },
+      "UserAnswerInput": {
+        "type": "object",
+        "description": "The user's answers to the agent's questions (`question.asked`), one per question",
+        "required": [
+          "type",
+          "questionId",
+          "answers"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "user.answer"
+            ]
+          },
+          "questionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "answers": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+              "$ref": "#/components/schemas/Answer"
+            }
+          }
+        }
+      },
+      "UserInterruptInput": {
+        "type": "object",
+        "description": "Stops the agent's turn",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "user.interrupt"
+            ]
+          },
+          "requestId": {
+            "$ref": "#/components/schemas/RequestId"
+          }
+        }
+      },
+      "SessionInputAccepted": {
+        "description": "What was accepted: a message or an interrupt, an approval decision, or answers",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "accepted"
+            ],
+            "properties": {
+              "accepted": {
+                "type": "boolean",
+                "enum": [
+                  true
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "approval"
+            ],
+            "properties": {
+              "approval": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "status"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pending",
+                      "approved",
+                      "rejected",
+                      "executed",
+                      "expired"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "question"
+            ],
+            "properties": {
+              "question": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "status"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "pending",
+                      "answered",
+                      "dismissed"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "UploadRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "mediaType",
+          "size"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Trimmed, and made safe as a file name",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "\\S"
+          },
+          "mediaType": {
+            "type": "string",
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp",
+              "image/gif",
+              "application/pdf",
+              "text/csv",
+              "text/plain",
+              "text/markdown",
+              "application/json",
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            ]
+          },
+          "size": {
+            "type": "integer",
+            "description": "In bytes; the upload URL takes exactly this many",
+            "minimum": 1,
+            "maximum": 10485760
+          }
+        }
+      },
+      "SessionUpload": {
+        "type": "object",
+        "required": [
+          "file",
+          "upload"
+        ],
+        "properties": {
+          "file": {
+            "$ref": "#/components/schemas/FileRef"
+          },
+          "upload": {
+            "type": "object",
+            "description": "`PUT` the file's bytes to `url` with `headers`, before the link expires",
+            "required": [
+              "method",
+              "url",
+              "headers"
+            ],
+            "properties": {
+              "method": {
+                "type": "string",
+                "enum": [
+                  "PUT"
+                ]
+              },
+              "url": {
+                "type": "string"
+              },
+              "headers": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "FileRef": {
+        "type": "object",
+        "description": "A file in a session",
+        "required": [
+          "fileId",
+          "name",
+          "mediaType",
+          "size"
+        ],
+        "properties": {
+          "fileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "SessionFileUrl": {
+        "type": "object",
+        "required": [
+          "url",
+          "expiresAt"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RunScriptRequest": {
+        "type": "object",
+        "required": [
+          "language",
+          "script",
+          "description"
+        ],
+        "properties": {
+          "language": {
+            "type": "string",
+            "enum": [
+              "javascript",
+              "python"
+            ]
+          },
+          "script": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100000
+          },
+          "description": {
+            "type": "string",
+            "description": "What the script does, for the user (trimmed)",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "\\S"
+          },
+          "waitMs": {
+            "type": "integer",
+            "description": "How long to wait for the result, in milliseconds",
+            "minimum": 0,
+            "maximum": 20000
+          }
+        }
+      },
+      "ScriptRunView": {
+        "type": "object",
+        "required": [
+          "runId",
+          "status"
+        ],
+        "properties": {
+          "runId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "running",
+              "done",
+              "failed"
+            ]
+          },
+          "output": {
+            "type": "string",
+            "description": "How the run ended: what the script printed, its result, its exit"
+          },
+          "changes": {
+            "type": "integer",
+            "description": "Changes the script recorded, not applied; `applyScriptRun` applies them",
+            "minimum": 0
+          }
+        }
+      },
+      "ApplyScriptRunRequest": {
+        "type": "object",
+        "required": [
+          "approvalSummary"
+        ],
+        "properties": {
+          "approvalSummary": {
+            "type": "string",
+            "description": "What the user confirmed (trimmed)",
+            "minLength": 1,
+            "maxLength": 300,
+            "pattern": "\\S"
+          }
+        }
+      },
+      "ScriptApplyResult": {
+        "type": "object",
+        "required": [
+          "done",
+          "applied",
+          "total"
+        ],
+        "properties": {
+          "done": {
+            "type": "boolean",
+            "description": "False while changes are left; call again"
+          },
+          "applied": {
+            "type": "integer",
+            "description": "Changes that ran so far"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "result": {
+            "type": "object",
+            "description": "When done: what the batch did",
+            "required": [
+              "content",
+              "isError"
+            ],
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ContentPart"
+                }
+              },
+              "isError": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "ContentPart": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/TextContentPart"
+          },
+          {
+            "$ref": "#/components/schemas/ImageContentPart"
+          },
+          {
+            "$ref": "#/components/schemas/ThinkingContentPart"
+          },
+          {
+            "$ref": "#/components/schemas/ToolCallContentPart"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "text": "#/components/schemas/TextContentPart",
+            "image": "#/components/schemas/ImageContentPart",
+            "thinking": "#/components/schemas/ThinkingContentPart",
+            "tool_call": "#/components/schemas/ToolCallContentPart"
+          }
+        }
+      },
+      "TextContentPart": {
+        "type": "object",
+        "required": [
+          "type",
+          "text"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "text"
+            ]
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "ImageContentPart": {
+        "type": "object",
+        "required": [
+          "type",
+          "mimeType"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "image"
+            ]
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string",
+            "description": "Base64 data of a small image"
+          },
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "ThinkingContentPart": {
+        "type": "object",
+        "required": [
+          "type",
+          "thinking"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "thinking"
+            ]
+          },
+          "thinking": {
+            "type": "string"
+          },
+          "redacted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ToolCallContentPart": {
+        "type": "object",
+        "required": [
+          "type",
+          "id",
+          "name",
+          "arguments"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "tool_call"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "arguments": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "SessionErrorCode": {
+        "type": "string",
+        "description": "Why a turn or an input failed, for the user's copy",
+        "enum": [
+          "model_unavailable",
+          "tool_timeout",
+          "turn_timeout",
+          "wake_failed",
+          "boot_failed",
+          "workspace_lost",
+          "budget_exceeded",
+          "internal"
+        ]
+      },
+      "ContextBreakdown": {
+        "type": "object",
+        "description": "What filled the model's context on one call, in tokens",
+        "required": [
+          "window",
+          "parts"
+        ],
+        "properties": {
+          "window": {
+            "type": "integer",
+            "description": "The model's context window"
+          },
+          "parts": {
+            "type": "object",
+            "properties": {
+              "instructions": {
+                "type": "integer"
+              },
+              "user": {
+                "type": "integer"
+              },
+              "replies": {
+                "type": "integer"
+              },
+              "thinking": {
+                "type": "integer"
+              },
+              "toolCalls": {
+                "type": "integer"
+              },
+              "toolResults": {
+                "type": "integer"
+              },
+              "files": {
+                "type": "integer"
+              },
+              "summary": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "BatchChange": {
+        "type": "object",
+        "description": "A change the agent asks to make, exactly as it will run",
+        "required": [
+          "operationId",
+          "method",
+          "path",
+          "effect"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "effect": {
+            "type": "string",
+            "enum": [
+              "read",
+              "write",
+              "config",
+              "destructive"
+            ]
+          },
+          "pathParameters": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "queryParameters": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "body": {
+            "description": "The request body"
+          },
+          "title": {
+            "type": "string",
+            "description": "The name of the record it changes"
+          }
+        }
+      },
+      "ChangeOutcome": {
+        "type": "object",
+        "description": "What happened to one change of an approved batch",
+        "required": [
+          "change",
+          "status",
+          "operationId"
+        ],
+        "properties": {
+          "change": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "failed",
+              "skipped"
+            ]
+          },
+          "operationId": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "mayHaveRun": {
+            "type": "boolean",
+            "description": "A failed change whose result was lost; it may have taken effect"
+          },
+          "record": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string"
+              },
+              "_title": {
+                "type": "string"
+              },
+              "_schema": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "Question": {
+        "type": "object",
+        "required": [
+          "header",
+          "question",
+          "options"
+        ],
+        "properties": {
+          "header": {
+            "type": "string",
+            "description": "A short label for the question"
+          },
+          "question": {
+            "type": "string"
+          },
+          "multiSelect": {
+            "type": "boolean",
+            "description": "Several options may be picked"
+          },
+          "options": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "required": [
+                "label"
+              ],
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Answer": {
+        "type": "object",
+        "description": "One answer per question, in order: the labels picked, and/or the user's own words",
+        "required": [
+          "selected"
+        ],
+        "properties": {
+          "selected": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "string",
+              "maxLength": 60
+            }
+          },
+          "other": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        }
+      },
+      "ClientEvent": {
+        "description": "What a client sees of a session's history. Every event carries the `seq` of the stored event it comes\nfrom, so history, live messages and reconnects can overlap and a client applies each event once.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventInput"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventInputTaken"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventInputCancelled"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventInputFailed"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventTurnStarted"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventModelUsage"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventContextCompacted"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventTurnEnded"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventMessage"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventStepStarted"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventStepFinished"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventSkillLoaded"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventApprovalRequired"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventApprovalResolved"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventApprovalExecuted"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventQuestionAsked"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventFilesCreated"
+          },
+          {
+            "$ref": "#/components/schemas/ClientEventQuestionAnswered"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "input": "#/components/schemas/ClientEventInput",
+            "input.taken": "#/components/schemas/ClientEventInputTaken",
+            "input.cancelled": "#/components/schemas/ClientEventInputCancelled",
+            "input.failed": "#/components/schemas/ClientEventInputFailed",
+            "turn.started": "#/components/schemas/ClientEventTurnStarted",
+            "model.usage": "#/components/schemas/ClientEventModelUsage",
+            "context.compacted": "#/components/schemas/ClientEventContextCompacted",
+            "turn.ended": "#/components/schemas/ClientEventTurnEnded",
+            "message": "#/components/schemas/ClientEventMessage",
+            "step.started": "#/components/schemas/ClientEventStepStarted",
+            "step.finished": "#/components/schemas/ClientEventStepFinished",
+            "skill.loaded": "#/components/schemas/ClientEventSkillLoaded",
+            "approval.required": "#/components/schemas/ClientEventApprovalRequired",
+            "approval.resolved": "#/components/schemas/ClientEventApprovalResolved",
+            "approval.executed": "#/components/schemas/ClientEventApprovalExecuted",
+            "question.asked": "#/components/schemas/ClientEventQuestionAsked",
+            "files.created": "#/components/schemas/ClientEventFilesCreated",
+            "question.answered": "#/components/schemas/ClientEventQuestionAnswered"
+          }
+        }
+      },
+      "ClientEventBase": {
+        "type": "object",
+        "required": [
+          "seq",
+          "eventId",
+          "occurredAt"
+        ],
+        "properties": {
+          "seq": {
+            "type": "integer"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ClientEventInput": {
+        "description": "The user's message, or their interrupt",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "input"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "input"
+                ]
+              },
+              "input": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "kind",
+                      "text"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "message"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "files": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/FileRef"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "kind"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "interrupt"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventInputTaken": {
+        "description": "The agent took the user's message `inputEventId`, where it reads it",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "inputEventId"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "input.taken"
+                ]
+              },
+              "inputEventId": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventInputCancelled": {
+        "description": "The message will not be answered: the user stopped the turn, or the session was deleted",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "inputEventId",
+              "reason"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "input.cancelled"
+                ]
+              },
+              "inputEventId": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "stopped",
+                  "deleted"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventInputFailed": {
+        "description": "The message failed again and again and was skipped, so the session goes on",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "inputEventId",
+              "errorCode",
+              "error"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "input.failed"
+                ]
+              },
+              "inputEventId": {
+                "type": "string"
+              },
+              "errorCode": {
+                "$ref": "#/components/schemas/SessionErrorCode"
+              },
+              "error": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventTurnStarted": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "turn.started"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventModelUsage": {
+        "description": "One model call: what it read and wrote, and what filled its context",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "usage"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "model.usage"
+                ]
+              },
+              "usage": {
+                "type": "object",
+                "required": [
+                  "input",
+                  "output",
+                  "cacheRead",
+                  "cacheWrite"
+                ],
+                "properties": {
+                  "input": {
+                    "type": "number"
+                  },
+                  "output": {
+                    "type": "number"
+                  },
+                  "cacheRead": {
+                    "type": "number"
+                  },
+                  "cacheWrite": {
+                    "type": "number"
+                  }
+                }
+              },
+              "context": {
+                "$ref": "#/components/schemas/ContextBreakdown"
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventContextCompacted": {
+        "description": "Older messages were summarized to make room; the context held `tokensBefore` until then",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "tokensBefore"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "context.compacted"
+                ]
+              },
+              "tokensBefore": {
+                "type": "number"
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventTurnEnded": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "reason"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "turn.ended"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "done",
+                  "stopped",
+                  "failed"
+                ]
+              },
+              "error": {
+                "type": "string",
+                "description": "Details only; `errorCode` is for the user's copy"
+              },
+              "errorCode": {
+                "$ref": "#/components/schemas/SessionErrorCode"
+              },
+              "cutOff": {
+                "type": "boolean",
+                "description": "The answer stopped at the model's output limit; the user can ask it to continue"
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventMessage": {
+        "description": "The agent's answer",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "text"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "message"
+                ]
+              },
+              "text": {
+                "type": "string"
+              },
+              "reasoning": {
+                "type": "string"
+              },
+              "reasoningMs": {
+                "type": "number",
+                "description": "How long the model thought before it answered"
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventStepStarted": {
+        "description": "The agent calls a tool",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "stepId",
+              "tool",
+              "input"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "step.started"
+                ]
+              },
+              "stepId": {
+                "type": "string"
+              },
+              "tool": {
+                "type": "string"
+              },
+              "input": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventStepFinished": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "stepId",
+              "tool",
+              "ok",
+              "output"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "step.finished"
+                ]
+              },
+              "stepId": {
+                "type": "string"
+              },
+              "tool": {
+                "type": "string"
+              },
+              "ok": {
+                "type": "boolean"
+              },
+              "output": {
+                "type": "string"
+              },
+              "marker": {
+                "type": "string",
+                "description": "Why the runtime wrote the result instead of the tool",
+                "enum": [
+                  "interrupted",
+                  "may_have_run"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventSkillLoaded": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "skill"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "skill.loaded"
+                ]
+              },
+              "skill": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "stepId": {
+                "type": "string",
+                "description": "The read that loaded it; a client shows the skill instead of that step"
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventApprovalRequired": {
+        "description": "The agent asks to make changes: approve or reject with `user.approval`",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "approvalId",
+              "stepId",
+              "tool",
+              "summary"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "approval.required"
+                ]
+              },
+              "approvalId": {
+                "type": "string"
+              },
+              "stepId": {
+                "type": "string"
+              },
+              "tool": {
+                "type": "string"
+              },
+              "summary": {
+                "type": "string"
+              },
+              "changes": {
+                "type": "array",
+                "description": "A batch: every change, exactly as it will run",
+                "items": {
+                  "$ref": "#/components/schemas/BatchChange"
+                }
+              },
+              "executionId": {
+                "type": "string",
+                "description": "The script that recorded the batch"
+              },
+              "call": {
+                "$ref": "#/components/schemas/BatchChange"
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventApprovalResolved": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "approvalId",
+              "approved"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "approval.resolved"
+                ]
+              },
+              "approvalId": {
+                "type": "string"
+              },
+              "approved": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventApprovalExecuted": {
+        "description": "An approved batch ran: every change ran, or it stopped at the first failure",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "approvalId",
+              "stepId",
+              "applied",
+              "total",
+              "complete",
+              "changes"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "approval.executed"
+                ]
+              },
+              "approvalId": {
+                "type": "string"
+              },
+              "stepId": {
+                "type": "string"
+              },
+              "applied": {
+                "type": "integer"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "complete": {
+                "type": "boolean"
+              },
+              "stopped": {
+                "type": "boolean"
+              },
+              "changes": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ChangeOutcome"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventQuestionAsked": {
+        "description": "The agent asks the user: answer with `user.answer`",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "questionId",
+              "stepId",
+              "questions"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "question.asked"
+                ]
+              },
+              "questionId": {
+                "type": "string"
+              },
+              "stepId": {
+                "type": "string"
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Question"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventFilesCreated": {
+        "description": "Files the agent wrote for the user in this turn",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "files"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "files.created"
+                ]
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FileRef"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ClientEventQuestionAnswered": {
+        "description": "Answered, or `dismissed`: the user wrote a message instead",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientEventBase"
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "questionId"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "question.answered"
+                ]
+              },
+              "questionId": {
+                "type": "string"
+              },
+              "answers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Answer"
+                }
+              },
+              "dismissed": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
       }
     }
   }
