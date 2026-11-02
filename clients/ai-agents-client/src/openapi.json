@@ -2085,6 +2085,9 @@
         "summary": "Upload a file for a session",
         "description": "Registers a file the caller attaches to a message and returns a short-lived URL to `PUT` its bytes to,\nwith the headers to send. Attach it by its `fileId` in `createSession` or `sendSessionEvent` (`user.message`).\nOnly the listed media types, up to 10 MB.\n",
         "operationId": "createSessionUpload",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
@@ -2142,6 +2145,9 @@
         "summary": "Start a session",
         "description": "Starts a session with an agent, optionally with the user's first message (`input`), which wakes the agent.\nWith a `requestId`, a retried request gets the session its first attempt created.\n",
         "operationId": "createSession",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
@@ -2206,6 +2212,9 @@
         "summary": "List the caller's sessions",
         "description": "The caller's own sessions, most recently updated first.",
         "operationId": "listSessions",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
@@ -2280,6 +2289,9 @@
         "summary": "Get a session",
         "description": "One of the caller's sessions, with its current status. Another user's session is not found.",
         "operationId": "getSession",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
@@ -2324,6 +2336,9 @@
         "summary": "Rename a session",
         "description": "Sets the session's title (trimmed).",
         "operationId": "renameSession",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
@@ -2384,6 +2399,9 @@
         "summary": "Delete a session",
         "description": "Deletes the session and everything it keeps (events, files, workspace).",
         "operationId": "deleteSession",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
@@ -2423,6 +2441,9 @@
         "summary": "List a session's events",
         "description": "The session's history as client events, in pages: while `hasMore`, ask again with `after` set to `lastSeq`.\nEvery event carries the `seq` it comes from, so history and live messages can overlap.\n",
         "operationId": "listSessionEvents",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
@@ -2492,6 +2513,9 @@
         "summary": "Send to a session",
         "description": "The user's input to the session: a message, an approval decision, answers to the agent's questions,\nor an interrupt (stop the turn). Accepted inputs are handled asynchronously; follow the session's events.\n",
         "operationId": "sendSessionEvent",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
@@ -2573,6 +2597,9 @@
         "summary": "Get a link to a session file",
         "description": "A short-lived link to a file of the session: one the user attached, or one the agent created.\nImages open in the browser unless `download=1`; anything else is downloaded under its name.\n",
         "operationId": "getSessionFileUrl",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
@@ -2644,6 +2671,9 @@
         "summary": "Run a script",
         "description": "Runs a script in the caller's script session, without a model (the epilot MCP's `execute`). Its reads run\nwith the caller's token; the changes it records are not applied until `applyScriptRun`. Waits up to `waitMs`\nfor the result: `200` when it finished, `202` while it still runs (ask `getScriptRun`).\n",
         "operationId": "runScript",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
@@ -2717,6 +2747,9 @@
         "summary": "Get a script run",
         "description": "Where a script run stands, waiting up to `waitMs` (at most 20000) for it to finish: `200` when it finished, `202` while it runs.",
         "operationId": "getScriptRun",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
@@ -2787,6 +2820,9 @@
         "summary": "Apply a script run's changes",
         "description": "Applies the changes a finished script run recorded, after the caller's client confirmed them, with the\ncaller's token. Each request runs for a while; call again until `done`. Refused (`409`, nothing runs) when\nthe script failed, recorded nothing, or asks for something the caller's roles don't allow.\n",
         "operationId": "applyScriptRun",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
@@ -2862,6 +2898,9 @@
         "summary": "Revoke the caller's session agents",
         "description": "Logout. Every agent the caller's sessions act with ends now.",
         "operationId": "revokeSessionAgents",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "x-epilot-permissions": [
           {
             "access": "self"
