@@ -42,6 +42,23 @@ export interface ManifestOption {
   fields?: { key: string; label?: string; description?: string; required?: boolean; type: string }[];
 }
 
+/**
+ * App-level options that can be set on the version BEFORE components are synced.
+ *
+ * Components validate against the version's current app-level options (an API_PROXY
+ * with `basic` auth needs `username`/`password` to exist), so options must be in place
+ * before the component upsert. The API rejects a key declared both at app level and on
+ * a component, so keys a remote component still declares are held back until the
+ * component sync has cleared them.
+ */
+export function appOptionsSafeBeforeComponentSync(
+  appOptions: ManifestOption[],
+  remoteComponents: { options?: { key: string }[] | null }[],
+): ManifestOption[] {
+  const remoteKeys = new Set(remoteComponents.flatMap((c) => (c.options ?? []).map((o) => o.key)));
+  return appOptions.filter((option) => !remoteKeys.has(option.key));
+}
+
 export interface ManifestFunction {
   /** Unique function name within the app (kebab-case) */
   name: string;

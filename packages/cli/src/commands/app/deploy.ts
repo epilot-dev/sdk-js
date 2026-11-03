@@ -2,6 +2,7 @@ import { defineCommand } from 'citty';
 import { resolve, dirname, extname } from 'node:path';
 import { existsSync, statSync, readFileSync } from 'node:fs';
 import {
+  appOptionsSafeBeforeComponentSync,
   readManifest,
   writeManifest,
   log,
@@ -203,6 +204,29 @@ export default defineCommand({
           log.success(
             `Updated version ${targetVersion} (permissions/blueprint${functionsPayload ? `, ${functionsPayload.length} function(s)` : ''})`,
           );
+        }
+      }
+    }
+
+    // Step 4b: Set app-level options before the component sync. Components are
+    // validated against the version's current app-level options (an API_PROXY with
+    // basic auth needs username/password to exist), so a fresh app would otherwise be
+    // rejected. Keys a remote component still declares wait for Step 6b.
+    if (manifest.options?.length) {
+      const remoteComponents = isNew
+        ? []
+        : (((await client.getVersion(appId!, targetVersion)).components ?? []) as {
+            options?: { key: string }[] | null;
+          }[]);
+      const early = appOptionsSafeBeforeComponentSync(manifest.options, remoteComponents);
+      if (early.length > 0) {
+        if (dryRun) {
+          log.info(`[dry-run] Would set ${early.length} app-level option(s) before syncing components`);
+        } else {
+          await client.patchVersion(appId!, targetVersion, {
+            options: early,
+            ...(manifest.blueprint?.manifest_id ? { manifest_id: manifest.blueprint.manifest_id } : {}),
+          });
         }
       }
     }

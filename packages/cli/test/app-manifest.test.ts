@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateManifest, toManifest } from '../src/commands/app/manifest.js';
+import { appOptionsSafeBeforeComponentSync, validateManifest, toManifest } from '../src/commands/app/manifest.js';
 
 const base = {
   manifest_version: 1,
@@ -108,5 +108,22 @@ describe('toManifest: app-level options', () => {
       { key: 'legacy', type: 'object', repeatable: true, fields: [{ key: 'n', type: 'text' }] },
     ]);
     expect(manifest.components[0].uses_options).toEqual(['sender_name']);
+  });
+});
+
+describe('appOptionsSafeBeforeComponentSync', () => {
+  const options = [
+    { key: 'username', type: 'text' as const },
+    { key: 'password', type: 'secret' as const },
+    { key: 'base_url', type: 'text' as const },
+  ];
+
+  it('returns every option for a new app without remote components', () => {
+    expect(appOptionsSafeBeforeComponentSync(options, [])).toEqual(options);
+  });
+
+  it('holds back keys a remote component still declares', () => {
+    const remote = [{ options: [{ key: 'username' }, { key: 'password' }] }, { options: null }, {}];
+    expect(appOptionsSafeBeforeComponentSync(options, remote).map((o) => o.key)).toEqual(['base_url']);
   });
 });

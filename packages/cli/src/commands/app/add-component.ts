@@ -2,7 +2,7 @@ import { defineCommand } from 'citty';
 import { randomUUID } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import { log, readManifest, writeManifest, type ManifestComponent } from './manifest.js';
+import { log, readManifest, writeManifest, type ManifestComponent, type ManifestOption } from './manifest.js';
 
 // ─── Template registry ───────────────────────────────────────────────────────
 
@@ -353,11 +353,17 @@ export default defineCommand({
     if (tmpl.assets) component.assets = tmpl.assets(componentName);
     if (tmpl.options) component.options = tmpl.options;
     if (proxyConfig?.auth_type === 'basic') {
-      // The proxy reads these exact option keys to build the Basic Authorization header
-      component.options = [
+      // The proxy reads these exact app-level option keys to build the Basic Authorization header.
+      // Options live at the manifest top level; components do not declare their own.
+      const appOptions = manifest.options ?? [];
+      const basicAuthOptions: ManifestOption[] = [
         { key: 'username', label: 'Username', type: 'text', required: true },
         { key: 'password', label: 'Password', type: 'secret', required: true },
       ];
+      for (const option of basicAuthOptions) {
+        if (!appOptions.some((o) => o.key === option.key)) appOptions.push(option);
+      }
+      manifest.options = appOptions;
     }
 
     manifest.components.push(component);
@@ -372,7 +378,7 @@ export default defineCommand({
       const expectedKeys: Record<string, string> = {
         header: '"secret" (and set "auth_header" in the configuration)',
         bearer: '"secret"',
-        basic: '"username" and "password" (added to the component)',
+        basic: '"username" and "password" (added to the app-level options)',
         oauth2: '"client_id", "client_secret", optional "scope" (and set "token_url" in the configuration)',
       };
       const keys = expectedKeys[proxyConfig!.auth_type];

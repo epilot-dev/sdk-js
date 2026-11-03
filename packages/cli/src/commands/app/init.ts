@@ -501,7 +501,7 @@ What the proxy supports — still probe your target with curl through the proxy 
   (\`proxy('wms', '/wms', { appId, token, params: { SERVICE: 'WMS', REQUEST: 'GetCapabilities' } })\`).
 - Methods **GET, POST, PUT, PATCH and DELETE** are proxied.
 - \`auth_type\` is \`none | header | bearer | basic | oauth2\`. Each type reads fixed option keys
-  (component options first, then app-level options):
+  (declared as app-level \`options\` at the manifest top level):
 
   | \`auth_type\` | Option keys | Injected header |
   | --- | --- | --- |
