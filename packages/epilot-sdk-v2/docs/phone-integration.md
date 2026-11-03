@@ -36,9 +36,26 @@ const { data } = await phoneIntegrationClient.batchSearchCustomers(...)
 - [`listLiveAgents`](#listliveagents)
 - [`setAgentRouting`](#setagentrouting)
 - [`previewAgentRouting`](#previewagentrouting)
+- [`setAgentPresence`](#setagentpresence)
+- [`listAgentPresences`](#listagentpresences)
 - [`listQueues`](#listqueues)
 - [`getQueue`](#getqueue)
 - [`getCallReport`](#getcallreport)
+- [`getLiveKpis`](#getlivekpis)
+- [`getAgentPerformance`](#getagentperformance)
+- [`listMissedCalls`](#listmissedcalls)
+- [`requestMissedCallCallback`](#requestmissedcallcallback)
+- [`getAgentActivity`](#getagentactivity)
+- [`getQueueSettings`](#getqueuesettings)
+- [`setQueueSettings`](#setqueuesettings)
+- [`getCallHandlingSettings`](#getcallhandlingsettings)
+- [`setCallHandlingSettings`](#setcallhandlingsettings)
+- [`getQueuePerformance`](#getqueueperformance)
+- [`listSkills`](#listskills)
+- [`createSkill`](#createskill)
+- [`deleteSkill`](#deleteskill)
+- [`setQueueSkill`](#setqueueskill)
+- [`removeQueueSkill`](#removequeueskill)
 
 **operator**
 - [`listProviderSetups`](#listprovidersetups)
@@ -58,6 +75,8 @@ const { data } = await phoneIntegrationClient.batchSearchCustomers(...)
 - [`CustomerSummary`](#customersummary)
 - [`AgentState`](#agentstate)
 - [`AgentPresence`](#agentpresence)
+- [`AgentPresenceRequest`](#agentpresencerequest)
+- [`AgentPresenceChange`](#agentpresencechange)
 - [`Skill`](#skill)
 - [`QueueRef`](#queueref)
 - [`PersonRef`](#personref)
@@ -77,7 +96,30 @@ const { data } = await phoneIntegrationClient.batchSearchCustomers(...)
 - [`AgentRouting`](#agentrouting)
 - [`AgentRoutingPreview`](#agentroutingpreview)
 - [`CallReport`](#callreport)
+- [`QueuePerformance`](#queueperformance)
+- [`QueuePerformanceReport`](#queueperformancereport)
+- [`SkillCatalogueEntry`](#skillcatalogueentry)
+- [`SkillCatalogue`](#skillcatalogue)
+- [`CreateSkillRequest`](#createskillrequest)
+- [`SkillDeletion`](#skilldeletion)
+- [`QueueSkillChange`](#queueskillchange)
 - [`ErrorResponse`](#errorresponse)
+- [`KpiPeriod`](#kpiperiod)
+- [`LiveKpis`](#livekpis)
+- [`AgentPerformance`](#agentperformance)
+- [`AgentPerformanceReport`](#agentperformancereport)
+- [`MissedCallCaller`](#missedcallcaller)
+- [`MissedCallCallback`](#missedcallcallback)
+- [`MissedCallCallbackRequest`](#missedcallcallbackrequest)
+- [`MissedCall`](#missedcall)
+- [`MissedCallList`](#missedcalllist)
+- [`AgentActivityEvent`](#agentactivityevent)
+- [`AgentPresenceTotal`](#agentpresencetotal)
+- [`AgentActivity`](#agentactivity)
+- [`QueueSettingsUpdate`](#queuesettingsupdate)
+- [`QueueSettings`](#queuesettings)
+- [`WrapUpTimes`](#wrapuptimes)
+- [`CallHandlingSettings`](#callhandlingsettings)
 
 ### `batchSearchCustomers`
 
@@ -241,7 +283,7 @@ const { data } = await client.removePhoneAgent({
 
 One snapshot of the organization's live phone state for the control center's Overview: agent
 presence counters and per-queue health (waiting calls, longest wait, eligible vs available
-agents). Read fr
+agents). The pro
 
 `GET /v1/manager/live`
 
@@ -269,13 +311,15 @@ const { data } = await client.getLiveSnapshot()
       "name": "string",
       "waiting": 0,
       "longest_wait_seconds": 0,
+      "expected_wait_seconds": 0,
       "eligible": 0,
       "available": 0,
       "health": "healthy"
     }
   ],
   "calls_waiting": 0,
-  "longest_wait_seconds": 0
+  "longest_wait_seconds": 0,
+  "expected_wait_seconds": 0
 }
 ```
 
@@ -353,7 +397,8 @@ const { data } = await client.setAgentRouting(
   },
   {
     skills: ['string'],
-    queue_ids: ['string']
+    queue_ids: ['string'],
+    include_own_steps: false
   },
 )
 ```
@@ -396,7 +441,8 @@ const { data } = await client.previewAgentRouting(
   },
   {
     skills: ['string'],
-    queue_ids: ['string']
+    queue_ids: ['string'],
+    include_own_steps: false
   },
 )
 ```
@@ -450,6 +496,73 @@ const { data } = await client.previewAgentRouting(
 
 ---
 
+### `setAgentPresence`
+
+Puts the agent on one of the phone system's presences (`listAgentPresences`), as the agent could
+in the phone app. A presence that is not `available` stops queue calls to the agent until it
+changes ag
+
+`PUT /v1/manager/agents/{provider_agent_id}/presence`
+
+```ts
+const { data } = await client.setAgentPresence(
+  {
+    provider_agent_id: 'example',
+  },
+  {
+    presence: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "provider_agent_id": "string",
+  "presence": {
+    "name": "string",
+    "label": "string",
+    "available": true
+  }
+}
+```
+
+</details>
+
+---
+
+### `listAgentPresences`
+
+The presences the organization's agents can be on (e.g. Available, Break, Meeting), as the phone
+system defines them. `available` presences let agents take queue calls. Requires `phone:manage`.
+
+`GET /v1/manager/presences`
+
+```ts
+const { data } = await client.listAgentPresences()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "name": "string",
+      "label": "string",
+      "available": true
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `listQueues`
 
 The organization's queues with live demand (waiting calls, longest wait), staffing (eligible
@@ -474,6 +587,7 @@ const { data } = await client.listQueues()
       "name": "string",
       "waiting": 0,
       "longest_wait_seconds": 0,
+      "expected_wait_seconds": 0,
       "eligible": 0,
       "available": 0,
       "health": "healthy",
@@ -492,6 +606,7 @@ const { data } = await client.listQueues()
               "name": "string"
             }
           ],
+          "team_members": ["string"],
           "managed_by_epilot": true
         }
       ]
@@ -527,6 +642,7 @@ const { data } = await client.getQueue({
   "name": "string",
   "waiting": 0,
   "longest_wait_seconds": 0,
+  "expected_wait_seconds": 0,
   "eligible": 0,
   "available": 0,
   "health": "healthy",
@@ -545,6 +661,7 @@ const { data } = await client.getQueue({
           "name": "string"
         }
       ],
+      "team_members": ["string"],
       "managed_by_epilot": true
     }
   ],
@@ -569,6 +686,10 @@ const { data } = await client.getQueue({
     {
       "id": "string",
       "from_masked": "string",
+      "contact": {
+        "id": "string",
+        "name": "string"
+      },
       "waited_seconds": 0,
       "state": "string"
     }
@@ -609,6 +730,640 @@ const { data } = await client.getCallReport({
     "from": "1970-01-01T00:00:00.000Z",
     "to": "1970-01-01T00:00:00.000Z",
     "inbound_total": 0
+  }
+}
+```
+
+</details>
+
+---
+
+### `getLiveKpis`
+
+Service KPIs of the organization's phone team for a period: call counts, abandon rate, waits
+and handling times, from the provider's metrics or, where it has none, its call reporting. A KPI
+the provid
+
+`GET /v1/manager/live/kpis`
+
+```ts
+const { data } = await client.getLiveKpis({
+  period: 'example',
+  from: 'example',
+  to: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "captured_at": "1970-01-01T00:00:00.000Z",
+  "period": "today",
+  "calls_total": 0,
+  "answered_total": 0,
+  "abandoned_total": 0,
+  "abandon_rate_percent": 0,
+  "average_wait_seconds": 0,
+  "longest_wait_seconds": 0,
+  "average_talk_seconds": 0,
+  "average_handle_seconds": 0,
+  "average_hold_seconds": 0
+}
+```
+
+</details>
+
+---
+
+### `getAgentPerformance`
+
+Per-agent performance for a period from the provider's call reporting: calls handled and talk,
+hold, wrap-up and handle times, one row per agent who handled at least one call. Agents that are
+epilot p
+
+`GET /v1/manager/reporting/agents`
+
+```ts
+const { data } = await client.getAgentPerformance({
+  from: 'example',
+  to: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "from": "1970-01-01T00:00:00.000Z",
+  "to": "1970-01-01T00:00:00.000Z",
+  "results": [
+    {
+      "provider_agent_id": "string",
+      "user_id": "string",
+      "name": "string",
+      "calls_handled": 0,
+      "outbound_calls": 0,
+      "talk_seconds_total": 0,
+      "talk_seconds_average": 0,
+      "hold_seconds_total": 0,
+      "wrap_up_seconds_average": 0,
+      "handle_seconds_average": 0
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `listMissedCalls`
+
+Callers who did not reach an agent in a period, newest first, one row per caller: an inbound
+call (grouped by the provider's session, so transfer legs count once) that ended without being
+bridged to a
+
+`GET /v1/manager/missed-calls`
+
+```ts
+const { data } = await client.listMissedCalls({
+  from: 'example',
+  to: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "from": "1970-01-01T00:00:00.000Z",
+  "to": "1970-01-01T00:00:00.000Z",
+  "results": [
+    {
+      "call_id": "string",
+      "last_missed_at": "1970-01-01T00:00:00.000Z",
+      "first_missed_at": "1970-01-01T00:00:00.000Z",
+      "attempts": 1,
+      "queue": {
+        "id": "string",
+        "name": "string"
+      },
+      "longest_wait_seconds": 0,
+      "caller": {
+        "anonymous": true,
+        "number_masked": "string",
+        "contact": {
+          "id": "string",
+          "name": "string"
+        }
+      },
+      "resolved": true,
+      "can_call_back": true,
+      "callback": {
+        "state": "queued",
+        "requested_at": "1970-01-01T00:00:00.000Z",
+        "requested_by": "string",
+        "queue": {
+          "id": "string",
+          "name": "string"
+        },
+        "callback_call_id": "string"
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `requestMissedCallCallback`
+
+Asks the phone system to call the caller of a missed call back: the provider queues an outbound
+callback on a queue (the missed call's queue unless `queue_id` names another), so the next
+eligible agen
+
+`POST /v1/manager/missed-calls/{call_id}/callback`
+
+```ts
+const { data } = await client.requestMissedCallCallback(
+  {
+    call_id: 'example',
+  },
+  {
+    queue_id: 'string'
+  },
+)
+```
+
+---
+
+### `getAgentActivity`
+
+An agent's activity in a period from the provider's agent logs: presence changes and calls in
+time order, the time spent on each presence and the number of calls handled. The window is at
+most 31 days
+
+`GET /v1/manager/agents/{provider_agent_id}/activity`
+
+```ts
+const { data } = await client.getAgentActivity({
+  provider_agent_id: 'example',
+  from: 'example',
+  to: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "provider_agent_id": "string",
+  "from": "1970-01-01T00:00:00.000Z",
+  "to": "1970-01-01T00:00:00.000Z",
+  "events": [
+    {
+      "at": "1970-01-01T00:00:00.000Z",
+      "kind": "presence",
+      "presence": {
+        "name": "string",
+        "label": "string",
+        "available": true
+      },
+      "call": {
+        "call_id": "string",
+        "direction": "inbound",
+        "queue_name": "string",
+        "duration_seconds": 0
+      },
+      "description": "string"
+    }
+  ],
+  "presence_totals": [
+    {
+      "presence": {
+        "name": "string",
+        "label": "string",
+        "available": true
+      },
+      "seconds": 0
+    }
+  ],
+  "calls_handled": 0
+}
+```
+
+</details>
+
+---
+
+### `getQueueSettings`
+
+A queue's call handling settings as the phone system holds them: how many callers may wait,
+how long an agent's phone rings, the wrap-up time after a call and how many agents are tried
+per call.
+Requi
+
+`GET /v1/manager/queues/{queue_id}/settings`
+
+```ts
+const { data } = await client.getQueueSettings({
+  queue_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "queue_id": "string",
+  "name": "string",
+  "max_size": 0,
+  "ring_timeout_seconds": 5,
+  "wrap_up_seconds": 0,
+  "max_dial_count": 1
+}
+```
+
+</details>
+
+---
+
+### `setQueueSettings`
+
+Replaces a queue's call handling settings (all fields, not a delta); the phone system applies
+them to the next call. The queue's name and routing are not changed.
+Requires `phone:manage`.
+
+`PUT /v1/manager/queues/{queue_id}/settings`
+
+```ts
+const { data } = await client.setQueueSettings(
+  {
+    queue_id: 'example',
+  },
+  {
+    max_size: 0,
+    ring_timeout_seconds: 5,
+    wrap_up_seconds: 0,
+    max_dial_count: 1
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "queue_id": "string",
+  "name": "string",
+  "max_size": 0,
+  "ring_timeout_seconds": 5,
+  "wrap_up_seconds": 0,
+  "max_dial_count": 1
+}
+```
+
+</details>
+
+---
+
+### `getCallHandlingSettings`
+
+The organization's call handling settings for all agents: wrap-up rules (including whether
+agents may call out during wrap-up), wrap-up times after unsuccessful calls, and recording
+defaults.
+Requires
+
+`GET /v1/manager/settings/call-handling`
+
+```ts
+const { data } = await client.getCallHandlingSettings()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "wrap_up": {
+    "inbound_cancel_allowed": true,
+    "inbound_extend_allowed": true,
+    "inbound_max_extension_seconds": 0,
+    "outbound_enabled": true,
+    "outbound_cancel_allowed": true,
+    "outbound_extend_allowed": true,
+    "outbound_max_extension_seconds": 0,
+    "outbound_calls_allowed": true
+  },
+  "after_unsuccessful_inbound": {
+    "busy_seconds": 0,
+    "unreachable_seconds": 0,
+    "declined_seconds": 0
+  },
+  "after_unsuccessful_outbound": {
+    "busy_seconds": 0,
+    "unreachable_seconds": 0,
+    "declined_seconds": 0
+  },
+  "recording": {
+    "always_record_outbound": true,
+    "agents_may_delete": true,
+    "hide_recording_controls": true
+  }
+}
+```
+
+</details>
+
+---
+
+### `setCallHandlingSettings`
+
+Replaces the organization's call handling settings (the full object, not a delta).
+Requires `phone:manage`.
+
+`PUT /v1/manager/settings/call-handling`
+
+```ts
+const { data } = await client.setCallHandlingSettings(
+  null,
+  {
+    wrap_up: {
+      inbound_cancel_allowed: true,
+      inbound_extend_allowed: true,
+      inbound_max_extension_seconds: 0,
+      outbound_enabled: true,
+      outbound_cancel_allowed: true,
+      outbound_extend_allowed: true,
+      outbound_max_extension_seconds: 0,
+      outbound_calls_allowed: true
+    },
+    after_unsuccessful_inbound: {
+      busy_seconds: 0,
+      unreachable_seconds: 0,
+      declined_seconds: 0
+    },
+    after_unsuccessful_outbound: {
+      busy_seconds: 0,
+      unreachable_seconds: 0,
+      declined_seconds: 0
+    },
+    recording: {
+      always_record_outbound: true,
+      agents_may_delete: true,
+      hide_recording_controls: true
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "wrap_up": {
+    "inbound_cancel_allowed": true,
+    "inbound_extend_allowed": true,
+    "inbound_max_extension_seconds": 0,
+    "outbound_enabled": true,
+    "outbound_cancel_allowed": true,
+    "outbound_extend_allowed": true,
+    "outbound_max_extension_seconds": 0,
+    "outbound_calls_allowed": true
+  },
+  "after_unsuccessful_inbound": {
+    "busy_seconds": 0,
+    "unreachable_seconds": 0,
+    "declined_seconds": 0
+  },
+  "after_unsuccessful_outbound": {
+    "busy_seconds": 0,
+    "unreachable_seconds": 0,
+    "declined_seconds": 0
+  },
+  "recording": {
+    "always_record_outbound": true,
+    "agents_may_delete": true,
+    "hide_recording_controls": true
+  }
+}
+```
+
+</details>
+
+---
+
+### `getQueuePerformance`
+
+Inbound call outcomes per queue for a period, derived from the provider's call reporting (the
+phone system has no per-queue report): every inbound call that started in [from, to) is counted
+for the qu
+
+`GET /v1/manager/reporting/queues`
+
+```ts
+const { data } = await client.getQueuePerformance({
+  from: 'example',
+  to: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "from": "1970-01-01T00:00:00.000Z",
+  "to": "1970-01-01T00:00:00.000Z",
+  "results": [
+    {
+      "queue": {
+        "id": "string",
+        "name": "string"
+      },
+      "inbound_total": 0,
+      "handled_by_agent": 0,
+      "abandoned_or_failed": 0,
+      "abandon_rate_percent": 0,
+      "average_wait_seconds": 0
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `listSkills`
+
+The organization's skill catalogue: the skills epilot keeps for it (created in the control
+center, `source: epilot`) together with every skill the phone system already uses on an agent or
+in a queue's
+
+`GET /v1/manager/skills`
+
+```ts
+const { data } = await client.listSkills()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "tag": "string",
+      "source": "epilot",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createSkill`
+
+Adds a skill to the organization's catalogue (epilot only: nothing is written to the phone
+system until an agent gets the skill or a queue accepts it). The skill is trimmed and must then
+be 1 to 100 c
+
+`POST /v1/manager/skills`
+
+```ts
+const { data } = await client.createSkill(
+  null,
+  {
+    tag: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "tag": "string",
+  "source": "epilot",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string"
+}
+```
+
+</details>
+
+---
+
+### `deleteSkill`
+
+Deletes a skill everywhere: it is taken from every agent that has it and from every routing step
+of every queue that accepts it in the phone system, then removed from the catalogue.
+Idempotent: a skil
+
+`DELETE /v1/manager/skills/{tag}`
+
+```ts
+const { data } = await client.deleteSkill({
+  tag: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "tag": "string",
+  "agents_updated": 0,
+  "queues_updated": 0
+}
+```
+
+</details>
+
+---
+
+### `setQueueSkill`
+
+The queue accepts the skill: every agent with it can take the queue's calls. epilot adds the
+skill to the queue's FIRST enabled routing step of the organization's own in the phone system
+(lowest order
+
+`PUT /v1/manager/queues/{queue_id}/skills/{tag}`
+
+```ts
+const { data } = await client.setQueueSkill({
+  queue_id: 'example',
+  tag: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "queue": {
+    "id": "string",
+    "name": "string"
+  },
+  "tag": "string",
+  "accepted": true,
+  "step": {
+    "id": "string",
+    "label": "string"
+  }
+}
+```
+
+</details>
+
+---
+
+### `removeQueueSkill`
+
+The queue no longer accepts the skill: it is removed from every routing step of the queue that
+lists it (enabled or not). Idempotent. Requires `phone:manage`.
+
+`DELETE /v1/manager/queues/{queue_id}/skills/{tag}`
+
+```ts
+const { data } = await client.removeQueueSkill({
+  queue_id: 'example',
+  tag: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "queue": {
+    "id": "string",
+    "name": "string"
+  },
+  "tag": "string",
+  "accepted": true,
+  "step": {
+    "id": "string",
+    "label": "string"
   }
 }
 ```
@@ -903,10 +1658,10 @@ type CustomerSummary = {
 
 ### `AgentState`
 
-The agent's live line state as the provider reports it, plus `offline` for an agent whose
-presence is not available (not signed in or on a busy presence) and `unknown` when the
-provider gives no state. `in_call` covers ringing-to-bridged; `wrap_up` is the post-call time.
-
+The agent's live line state as the provider reports it, plus `busy` for anyone who cannot take a
+queue call for a reason other than a call: on a presence that takes no calls (e.g. Busy, Break),
+without a presence, or disabled at the provider; `busy` also covers the provider's busy line
+state. `unkno
 
 ```ts
 type AgentState = "available" | "ringing" | "in_call" | "wrap_up" | "busy" | "declined" | "unreachable" | "selected" | "offline" | "unknown"
@@ -921,6 +1676,27 @@ type AgentPresence = {
   name: string
   label: string
   available: boolean
+}
+```
+
+### `AgentPresenceRequest`
+
+```ts
+type AgentPresenceRequest = {
+  presence: string
+}
+```
+
+### `AgentPresenceChange`
+
+```ts
+type AgentPresenceChange = {
+  provider_agent_id: string
+  presence: {
+    name: string
+    label: string
+    available: boolean
+  }
 }
 ```
 
@@ -960,8 +1736,9 @@ type PersonRef = {
 
 How an agent can take a queue's calls:
 - `skill`: the queue routes to people with a skill the agent has (changes with the agent's skills);
-- `direct`: the agent is in the queue's epilot-managed step (added from the control center);
-- `routing`: the phone system's own routing names the agent (a team 
+- `direct`: a step of the queue names the agent, the epilot-managed one or one set up in the phone
+  system; the control center can take them off the queue;
+- `r
 
 ```ts
 type EligibilityPath = "skill" | "direct" | "routing"
@@ -1029,9 +1806,10 @@ type LiveAgentCounters = {
 
 ### `QueueHealth`
 
-`at_risk`: calls are waiting and no eligible agent is available. `healthy`: at least one
-eligible agent is available. `quiet`: nothing waiting and nobody available.
-
+`at_risk`: a waiting caller has no agent to take them: every caller not yet with an agent needs
+their own eligible agent who is available or being rung, one agent counting once across the
+queues of the same answer (so three callers and one free agent, or two queues sharing one free
+agent, are at ris
 
 ```ts
 type QueueHealth = "healthy" | "at_risk" | "quiet"
@@ -1047,6 +1825,7 @@ type QueueLive = {
   name: string
   waiting: number
   longest_wait_seconds?: number
+  expected_wait_seconds?: number
   eligible: number
   available: number
   health: "healthy" | "at_risk" | "quiet"
@@ -1071,12 +1850,14 @@ type LiveSnapshot = {
     name: string
     waiting: number
     longest_wait_seconds?: number
+    expected_wait_seconds?: number
     eligible: number
     available: number
     health: "healthy" | "at_risk" | "quiet"
   }>
   calls_waiting: number
   longest_wait_seconds?: number
+  expected_wait_seconds?: number
 }
 ```
 
@@ -1084,8 +1865,8 @@ type LiveSnapshot = {
 
 One step of who can take a queue's calls, in the order the phone system tries them. A step
 offers calls to the people it names and to everyone with any of its skills. Teams set up in the
-phone system appear as the people they contain. The epilot-managed step holds the people added
-from the control c
+phone system appear as the people they contain (`team_members`). The epilot-managed step holds
+the people added f
 
 ```ts
 type QueueRoutingStep = {
@@ -1099,6 +1880,7 @@ type QueueRoutingStep = {
     user_id?: string
     name: string
   }>
+  team_members: string[]
   managed_by_epilot: boolean
 }
 ```
@@ -1111,6 +1893,7 @@ type QueueOverview = {
   name: string
   waiting: number
   longest_wait_seconds?: number
+  expected_wait_seconds?: number
   eligible: number
   available: number
   health: "healthy" | "at_risk" | "quiet"
@@ -1126,6 +1909,7 @@ type QueueOverview = {
       user_id?: { ... }
       name: { ... }
     }>
+    team_members: string[]
     managed_by_epilot: boolean
   }>
 }
@@ -1158,6 +1942,10 @@ type EligibleAgent = {
 type WaitingCall = {
   id: string
   from_masked?: string
+  contact?: {
+    id: string
+    name: string
+  }
   waited_seconds: number
   state: string
 }
@@ -1185,6 +1973,10 @@ type QueueDetail = {
   waiting_calls: Array<{
     id: string
     from_masked?: string
+    contact?: {
+      id: { ... }
+      name: { ... }
+    }
     waited_seconds: number
     state: string
   }>
@@ -1197,6 +1989,7 @@ type QueueDetail = {
 type AgentRoutingRequest = {
   skills: string[]
   queue_ids: string[]
+  include_own_steps?: boolean
 }
 ```
 
@@ -1265,6 +2058,101 @@ type CallReport = {
 }
 ```
 
+### `QueuePerformance`
+
+```ts
+type QueuePerformance = {
+  queue: {
+    id: string
+    name: string
+  }
+  inbound_total: number
+  handled_by_agent: number
+  abandoned_or_failed: number
+  abandon_rate_percent: number
+  average_wait_seconds?: number
+}
+```
+
+### `QueuePerformanceReport`
+
+```ts
+type QueuePerformanceReport = {
+  from: string // date-time
+  to: string // date-time
+  results: Array<{
+    queue: {
+      id: { ... }
+      name: { ... }
+    }
+    inbound_total: number
+    handled_by_agent: number
+    abandoned_or_failed: number
+    abandon_rate_percent: number
+    average_wait_seconds?: number
+  }>
+}
+```
+
+### `SkillCatalogueEntry`
+
+```ts
+type SkillCatalogueEntry = {
+  tag: string
+  source: "epilot" | "provider"
+  created_at?: string // date-time
+  created_by?: string
+}
+```
+
+### `SkillCatalogue`
+
+```ts
+type SkillCatalogue = {
+  results: Array<{
+    tag: string
+    source: "epilot" | "provider"
+    created_at?: string // date-time
+    created_by?: string
+  }>
+}
+```
+
+### `CreateSkillRequest`
+
+```ts
+type CreateSkillRequest = {
+  tag: string
+}
+```
+
+### `SkillDeletion`
+
+```ts
+type SkillDeletion = {
+  tag: string
+  agents_updated: number
+  queues_updated: number
+}
+```
+
+### `QueueSkillChange`
+
+```ts
+type QueueSkillChange = {
+  queue: {
+    id: string
+    name: string
+  }
+  tag: string
+  accepted: boolean
+  step?: {
+    id: string
+    label: string
+  }
+}
+```
+
 ### `ErrorResponse`
 
 ```ts
@@ -1272,5 +2160,315 @@ type ErrorResponse = {
   status: number
   error: string
   code?: string
+}
+```
+
+### `KpiPeriod`
+
+The KPI window, in the organization's phone system time zone: today, yesterday, this week
+(since Monday), last week (Monday to Monday), last 7 / 30 days (seven / thirty calendar days
+including today), this month, last month; `custom` is the window `from`/`to` of the request.
+
+
+```ts
+type KpiPeriod = "today" | "yesterday" | "this_week" | "last_week" | "last_7_days" | "last_30_days" | "this_month" | "last_month" | "custom"
+```
+
+### `LiveKpis`
+
+Every KPI is absent when the phone system cannot tell it.
+
+```ts
+type LiveKpis = {
+  captured_at: string // date-time
+  period: "today" | "yesterday" | "this_week" | "last_week" | "last_7_days" | "last_30_days" | "this_month" | "last_month" | "custom"
+  calls_total?: number
+  answered_total?: number
+  abandoned_total?: number
+  abandon_rate_percent?: number
+  average_wait_seconds?: number
+  longest_wait_seconds?: number
+  average_talk_seconds?: number
+  average_handle_seconds?: number
+  average_hold_seconds?: number
+}
+```
+
+### `AgentPerformance`
+
+```ts
+type AgentPerformance = {
+  provider_agent_id?: string
+  user_id?: string
+  name: string
+  calls_handled: number
+  outbound_calls?: number
+  talk_seconds_total: number
+  talk_seconds_average: number
+  hold_seconds_total?: number
+  wrap_up_seconds_average?: number
+  handle_seconds_average: number
+}
+```
+
+### `AgentPerformanceReport`
+
+```ts
+type AgentPerformanceReport = {
+  from: string // date-time
+  to: string // date-time
+  results: Array<{
+    provider_agent_id?: string
+    user_id?: string
+    name: string
+    calls_handled: number
+    outbound_calls?: number
+    talk_seconds_total: number
+    talk_seconds_average: number
+    hold_seconds_total?: number
+    wrap_up_seconds_average?: number
+    handle_seconds_average: number
+  }>
+}
+```
+
+### `MissedCallCaller`
+
+```ts
+type MissedCallCaller = {
+  anonymous: boolean
+  number_masked?: string
+  contact?: {
+    id: string
+    name: string
+  }
+}
+```
+
+### `MissedCallCallback`
+
+```ts
+type MissedCallCallback = {
+  state: "queued" | "ringing" | "in_progress" | "completed" | "failed" | "canceled" | "unknown"
+  requested_at: string // date-time
+  requested_by?: string
+  queue?: {
+    id: string
+    name: string
+  }
+  callback_call_id?: string
+}
+```
+
+### `MissedCallCallbackRequest`
+
+```ts
+type MissedCallCallbackRequest = {
+  queue_id?: string
+}
+```
+
+### `MissedCall`
+
+```ts
+type MissedCall = {
+  call_id: string
+  last_missed_at: string // date-time
+  first_missed_at?: string // date-time
+  attempts: number
+  queue?: {
+    id: string
+    name: string
+  }
+  longest_wait_seconds?: number
+  caller: {
+    anonymous: boolean
+    number_masked?: string
+    contact?: {
+      id: { ... }
+      name: { ... }
+    }
+  }
+  resolved: boolean
+  can_call_back: boolean
+  callback?: {
+    state: "queued" | "ringing" | "in_progress" | "completed" | "failed" | "canceled" | "unknown"
+    requested_at: string // date-time
+    requested_by?: string
+    queue?: {
+      id: { ... }
+      name: { ... }
+    }
+    callback_call_id?: string
+  }
+}
+```
+
+### `MissedCallList`
+
+```ts
+type MissedCallList = {
+  from: string // date-time
+  to: string // date-time
+  results: Array<{
+    call_id: string
+    last_missed_at: string // date-time
+    first_missed_at?: string // date-time
+    attempts: number
+    queue?: {
+      id: { ... }
+      name: { ... }
+    }
+    longest_wait_seconds?: number
+    caller: {
+      anonymous: { ... }
+      number_masked?: { ... }
+      contact?: { ... }
+    }
+    resolved: boolean
+    can_call_back: boolean
+    callback?: {
+      state: { ... }
+      requested_at: { ... }
+      requested_by?: { ... }
+      queue?: { ... }
+      callback_call_id?: { ... }
+    }
+  }>
+}
+```
+
+### `AgentActivityEvent`
+
+```ts
+type AgentActivityEvent = {
+  at: string // date-time
+  kind: "presence" | "call" | "state" | "other"
+  presence?: {
+    name: string
+    label: string
+    available: boolean
+  }
+  call?: {
+    call_id?: string
+    direction?: "inbound" | "outbound"
+    queue_name?: string
+    duration_seconds?: number
+  }
+  description?: string
+}
+```
+
+### `AgentPresenceTotal`
+
+```ts
+type AgentPresenceTotal = {
+  presence: {
+    name: string
+    label: string
+    available: boolean
+  }
+  seconds: number
+}
+```
+
+### `AgentActivity`
+
+```ts
+type AgentActivity = {
+  provider_agent_id: string
+  from: string // date-time
+  to: string // date-time
+  events: Array<{
+    at: string // date-time
+    kind: "presence" | "call" | "state" | "other"
+    presence?: {
+      name: { ... }
+      label: { ... }
+      available: { ... }
+    }
+    call?: {
+      call_id?: { ... }
+      direction?: { ... }
+      queue_name?: { ... }
+      duration_seconds?: { ... }
+    }
+    description?: string
+  }>
+  presence_totals: Array<{
+    presence: {
+      name: { ... }
+      label: { ... }
+      available: { ... }
+    }
+    seconds: number
+  }>
+  calls_handled: number
+}
+```
+
+### `QueueSettingsUpdate`
+
+```ts
+type QueueSettingsUpdate = {
+  max_size: number
+  ring_timeout_seconds: number
+  wrap_up_seconds: number
+  max_dial_count: number
+}
+```
+
+### `QueueSettings`
+
+```ts
+type QueueSettings = {
+  queue_id: string
+  name: string
+  max_size: number
+  ring_timeout_seconds: number
+  wrap_up_seconds: number
+  max_dial_count: number
+}
+```
+
+### `WrapUpTimes`
+
+```ts
+type WrapUpTimes = {
+  busy_seconds: number
+  unreachable_seconds: number
+  declined_seconds: number
+}
+```
+
+### `CallHandlingSettings`
+
+```ts
+type CallHandlingSettings = {
+  wrap_up: {
+    inbound_cancel_allowed: boolean
+    inbound_extend_allowed: boolean
+    inbound_max_extension_seconds: number
+    outbound_enabled: boolean
+    outbound_cancel_allowed: boolean
+    outbound_extend_allowed: boolean
+    outbound_max_extension_seconds: number
+    outbound_calls_allowed: boolean
+  }
+  after_unsuccessful_inbound: {
+    busy_seconds: number
+    unreachable_seconds: number
+    declined_seconds: number
+  }
+  after_unsuccessful_outbound: {
+    busy_seconds: number
+    unreachable_seconds: number
+    declined_seconds: number
+  }
+  recording: {
+    always_record_outbound: boolean
+    agents_may_delete: boolean
+    hide_recording_controls: boolean
+  }
 }
 ```

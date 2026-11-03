@@ -15,6 +15,49 @@ declare namespace Components {
         export type Unauthorized = Schemas.ErrorResponse;
     }
     namespace Schemas {
+        export interface AgentActivity {
+            provider_agent_id: string;
+            from: string; // date-time
+            to: string; // date-time
+            events: AgentActivityEvent[];
+            presence_totals: AgentPresenceTotal[];
+            calls_handled: number;
+        }
+        export interface AgentActivityEvent {
+            at: string; // date-time
+            kind: "presence" | "call" | "state" | "other";
+            presence?: /* The provider presence the agent has selected (e.g. Available, Break, Meeting) */ AgentPresence;
+            call?: {
+                call_id?: string;
+                direction?: "inbound" | "outbound";
+                queue_name?: string;
+                duration_seconds?: number;
+            };
+            /**
+             * The phone system's own wording for an event of kind `state` or `other`
+             */
+            description?: string;
+        }
+        export interface AgentPerformance {
+            provider_agent_id?: string;
+            /**
+             * The epilot user id, when the agent is an epilot phone agent
+             */
+            user_id?: string;
+            name: string;
+            calls_handled: number;
+            outbound_calls?: number;
+            talk_seconds_total: number;
+            talk_seconds_average: number;
+            hold_seconds_total?: number;
+            wrap_up_seconds_average?: number;
+            handle_seconds_average: number;
+        }
+        export interface AgentPerformanceReport {
+            from: string; // date-time
+            to: string; // date-time
+            results: AgentPerformance[];
+        }
         /**
          * The provider presence the agent has selected (e.g. Available, Break, Meeting)
          */
@@ -26,6 +69,20 @@ declare namespace Components {
              */
             available: boolean;
         }
+        export interface AgentPresenceChange {
+            provider_agent_id: string;
+            presence: /* The provider presence the agent has selected (e.g. Available, Break, Meeting) */ AgentPresence;
+        }
+        export interface AgentPresenceRequest {
+            /**
+             * The `name` of one of the phone system's presences (`listAgentPresences`)
+             */
+            presence: string;
+        }
+        export interface AgentPresenceTotal {
+            presence: /* The provider presence the agent has selected (e.g. Available, Break, Meeting) */ AgentPresence;
+            seconds: number;
+        }
         /**
          * A queue an agent can take calls from, and why
          */
@@ -36,18 +93,20 @@ declare namespace Components {
                 /**
                  * How an agent can take a queue's calls:
                  * - `skill`: the queue routes to people with a skill the agent has (changes with the agent's skills);
-                 * - `direct`: the agent is in the queue's epilot-managed step (added from the control center);
-                 * - `routing`: the phone system's own routing names the agent (a team or a person set up there);
-                 *   epilot does not change it.
+                 * - `direct`: a step of the queue names the agent, the epilot-managed one or one set up in the phone
+                 *   system; the control center can take them off the queue;
+                 * - `routing`: a step reaches the agent through a team set up in the phone system; epilot does not
+                 *   change teams.
                  *
                  */
                 EligibilityPath,
                 .../**
                  * How an agent can take a queue's calls:
                  * - `skill`: the queue routes to people with a skill the agent has (changes with the agent's skills);
-                 * - `direct`: the agent is in the queue's epilot-managed step (added from the control center);
-                 * - `routing`: the phone system's own routing names the agent (a team or a person set up there);
-                 *   epilot does not change it.
+                 * - `direct`: a step of the queue names the agent, the epilot-managed one or one set up in the phone
+                 *   system; the control center can take them off the queue;
+                 * - `routing`: a step reaches the agent through a team set up in the phone system; epilot does not
+                 *   change teams.
                  *
                  */
                 EligibilityPath[]
@@ -57,8 +116,8 @@ declare namespace Components {
              */
             skills: string[];
             /**
-             * The phone system's own routing names the agent (`via` has `routing`), so changing skills or
-             * direct membership cannot remove the queue; the control center shows it checked and disabled.
+             * The agent reaches the queue through a team set up in the phone system (`via` has `routing`),
+             * so changing skills or direct membership cannot remove the queue.
              *
              */
             locked: boolean;
@@ -88,7 +147,9 @@ declare namespace Components {
              */
             coverage_lost: QueueRef[];
             /**
-             * Queues the agent stays in through the phone system's own routing, which this call cannot remove
+             * Queues the agent stays in through a team set up in the phone system (or, without
+             * `include_own_steps`, through the organization's own steps), which this call cannot remove
+             *
              */
             locked: QueueRef[];
         }
@@ -104,14 +165,27 @@ declare namespace Components {
              */
             Skill /* ^\S(.*\S)?$ */[];
             /**
-             * The queues the agent is directly in, through the epilot-managed step (full set); at most 200
+             * The queues the agent is named in directly (full set); at most 200. Without
+             * `include_own_steps` only the epilot-managed step counts.
+             *
              */
             queue_ids: string /* ^[A-Za-z0-9_-]+$ */[];
+            /**
+             * `queue_ids` covers the organization's own enabled routing steps too: a queue left out loses
+             * the agent's direct entries there as well. Without it, a queue whose own steps name the agent
+             * is not written (`locked` in the preview).
+             *
+             */
+            include_own_steps?: boolean;
         }
         /**
-         * The agent's live line state as the provider reports it, plus `offline` for an agent whose
-         * presence is not available (not signed in or on a busy presence) and `unknown` when the
-         * provider gives no state. `in_call` covers ringing-to-bridged; `wrap_up` is the post-call time.
+         * The agent's live line state as the provider reports it, plus `busy` for anyone who cannot take a
+         * queue call for a reason other than a call: on a presence that takes no calls (e.g. Busy, Break),
+         * without a presence, or disabled at the provider; `busy` also covers the provider's busy line
+         * state. `unknown` when the provider gives no state. `offline` is not reported for now: Babelforce
+         * parks a signed-out agent on its Busy presence and reports both alike, so signed-out agents show
+         * as `busy` until the phone system offers a sign-in signal. `in_call` covers ringing-to-bridged;
+         * `wrap_up` is the post-call time.
          *
          */
         export type AgentState = "available" | "ringing" | "in_call" | "wrap_up" | "busy" | "declined" | "unreachable" | "selected" | "offline" | "unknown";
@@ -120,6 +194,31 @@ declare namespace Components {
              * epilot user id of an active member of the caller's organization
              */
             user_id: string; // ^[A-Za-z0-9_-]+$
+        }
+        export interface CallHandlingSettings {
+            wrap_up: {
+                inbound_cancel_allowed: boolean;
+                inbound_extend_allowed: boolean;
+                inbound_max_extension_seconds: number;
+                /**
+                 * Wrap-up after outbound calls
+                 */
+                outbound_enabled: boolean;
+                outbound_cancel_allowed: boolean;
+                outbound_extend_allowed: boolean;
+                outbound_max_extension_seconds: number;
+                /**
+                 * Agents may place outbound calls during wrap-up
+                 */
+                outbound_calls_allowed: boolean;
+            };
+            after_unsuccessful_inbound: WrapUpTimes;
+            after_unsuccessful_outbound: WrapUpTimes;
+            recording: {
+                always_record_outbound: boolean;
+                agents_may_delete: boolean;
+                hide_recording_controls: boolean;
+            };
         }
         export interface CallReport {
             from: string; // date-time
@@ -143,6 +242,12 @@ declare namespace Components {
                 to: string; // date-time
                 inbound_total: number;
             };
+        }
+        export interface CreateSkillRequest {
+            /**
+             * The skill; trimmed, then 1 to 100 characters
+             */
+            tag: string;
         }
         export interface CustomerBatchSearchResult {
             /**
@@ -199,9 +304,10 @@ declare namespace Components {
         /**
          * How an agent can take a queue's calls:
          * - `skill`: the queue routes to people with a skill the agent has (changes with the agent's skills);
-         * - `direct`: the agent is in the queue's epilot-managed step (added from the control center);
-         * - `routing`: the phone system's own routing names the agent (a team or a person set up there);
-         *   epilot does not change it.
+         * - `direct`: a step of the queue names the agent, the epilot-managed one or one set up in the phone
+         *   system; the control center can take them off the queue;
+         * - `routing`: a step reaches the agent through a team set up in the phone system; epilot does not
+         *   change teams.
          *
          */
         export type EligibilityPath = "skill" | "direct" | "routing";
@@ -214,9 +320,13 @@ declare namespace Components {
             name: string;
             email?: string;
             state: /**
-             * The agent's live line state as the provider reports it, plus `offline` for an agent whose
-             * presence is not available (not signed in or on a busy presence) and `unknown` when the
-             * provider gives no state. `in_call` covers ringing-to-bridged; `wrap_up` is the post-call time.
+             * The agent's live line state as the provider reports it, plus `busy` for anyone who cannot take a
+             * queue call for a reason other than a call: on a presence that takes no calls (e.g. Busy, Break),
+             * without a presence, or disabled at the provider; `busy` also covers the provider's busy line
+             * state. `unknown` when the provider gives no state. `offline` is not reported for now: Babelforce
+             * parks a signed-out agent on its Busy presence and reports both alike, so signed-out agents show
+             * as `busy` until the phone system offers a sign-in signal. `in_call` covers ringing-to-bridged;
+             * `wrap_up` is the post-call time.
              *
              */
             AgentState;
@@ -225,18 +335,20 @@ declare namespace Components {
                 /**
                  * How an agent can take a queue's calls:
                  * - `skill`: the queue routes to people with a skill the agent has (changes with the agent's skills);
-                 * - `direct`: the agent is in the queue's epilot-managed step (added from the control center);
-                 * - `routing`: the phone system's own routing names the agent (a team or a person set up there);
-                 *   epilot does not change it.
+                 * - `direct`: a step of the queue names the agent, the epilot-managed one or one set up in the phone
+                 *   system; the control center can take them off the queue;
+                 * - `routing`: a step reaches the agent through a team set up in the phone system; epilot does not
+                 *   change teams.
                  *
                  */
                 EligibilityPath,
                 .../**
                  * How an agent can take a queue's calls:
                  * - `skill`: the queue routes to people with a skill the agent has (changes with the agent's skills);
-                 * - `direct`: the agent is in the queue's epilot-managed step (added from the control center);
-                 * - `routing`: the phone system's own routing names the agent (a team or a person set up there);
-                 *   epilot does not change it.
+                 * - `direct`: a step of the queue names the agent, the epilot-managed one or one set up in the phone
+                 *   system; the control center can take them off the queue;
+                 * - `routing`: a step reaches the agent through a team set up in the phone system; epilot does not
+                 *   change teams.
                  *
                  */
                 EligibilityPath[]
@@ -266,6 +378,13 @@ declare namespace Components {
              */
             code?: string;
         }
+        /**
+         * The KPI window, in the organization's phone system time zone: today, yesterday, this week
+         * (since Monday), last week (Monday to Monday), last 7 / 30 days (seven / thirty calendar days
+         * including today), this month, last month; `custom` is the window `from`/`to` of the request.
+         *
+         */
+        export type KpiPeriod = "today" | "yesterday" | "this_week" | "last_week" | "last_7_days" | "last_30_days" | "this_month" | "last_month" | "custom";
         export interface LiveAgent {
             /**
              * The phone system's agent id
@@ -282,9 +401,13 @@ declare namespace Components {
              */
             enabled: boolean;
             state: /**
-             * The agent's live line state as the provider reports it, plus `offline` for an agent whose
-             * presence is not available (not signed in or on a busy presence) and `unknown` when the
-             * provider gives no state. `in_call` covers ringing-to-bridged; `wrap_up` is the post-call time.
+             * The agent's live line state as the provider reports it, plus `busy` for anyone who cannot take a
+             * queue call for a reason other than a call: on a presence that takes no calls (e.g. Busy, Break),
+             * without a presence, or disabled at the provider; `busy` also covers the provider's busy line
+             * state. `unknown` when the provider gives no state. `offline` is not reported for now: Babelforce
+             * parks a signed-out agent on its Busy presence and reports both alike, so signed-out agents show
+             * as `busy` until the phone system offers a sign-in signal. `in_call` covers ringing-to-bridged;
+             * `wrap_up` is the post-call time.
              *
              */
             AgentState;
@@ -321,7 +444,7 @@ declare namespace Components {
         export interface LiveAgentCounters {
             total: number;
             /**
-             * Agents on an available presence, i.e. everyone not offline (available + on call + wrap-up + other busy line states)
+             * Everyone not offline (today everyone; see `offline`)
              */
             online: number;
             available: number;
@@ -330,7 +453,49 @@ declare namespace Components {
              */
             on_call: number;
             wrap_up: number;
+            /**
+             * Agents the phone system reports as signed out. Always 0 for now: Babelforce gives no sign-in
+             * signal, so signed-out agents are counted as busy (in `online`)
+             *
+             */
             offline: number;
+        }
+        /**
+         * Every KPI is absent when the phone system cannot tell it.
+         */
+        export interface LiveKpis {
+            captured_at: string; // date-time
+            period: /**
+             * The KPI window, in the organization's phone system time zone: today, yesterday, this week
+             * (since Monday), last week (Monday to Monday), last 7 / 30 days (seven / thirty calendar days
+             * including today), this month, last month; `custom` is the window `from`/`to` of the request.
+             *
+             */
+            KpiPeriod;
+            /**
+             * Inbound calls in the period
+             */
+            calls_total?: number;
+            /**
+             * Inbound calls an agent took
+             */
+            answered_total?: number;
+            /**
+             * Inbound calls that ended before an agent took them
+             */
+            abandoned_total?: number;
+            abandon_rate_percent?: number;
+            average_wait_seconds?: number;
+            longest_wait_seconds?: number;
+            average_talk_seconds?: number;
+            /**
+             * Talk plus hold plus wrap-up, per handled call
+             */
+            average_handle_seconds?: number;
+            /**
+             * Time callers spent on hold, per handled call
+             */
+            average_hold_seconds?: number;
         }
         export interface LiveSnapshot {
             captured_at: string; // date-time
@@ -344,6 +509,10 @@ declare namespace Components {
              * The longest wait across all queues; absent when nothing waits
              */
             longest_wait_seconds?: number;
+            /**
+             * The phone system's forecast of the wait for a caller joining now, across queues; absent when it has none
+             */
+            expected_wait_seconds?: number;
         }
         export interface ManagerStatus {
             /**
@@ -355,9 +524,77 @@ declare namespace Components {
              */
             ready: boolean;
             /**
-             * Why the organization is not ready (empty when ready)
+             * Why the organization is not ready (empty when ready). `identity_enablement_missing` is
+             * reserved and not produced: the organization's enablement on the identity client is not
+             * recorded here.
+             *
              */
             reasons: ("provider_tenant_missing" | "sso_not_configured" | "scim_not_configured" | "identity_enablement_missing")[];
+        }
+        export interface MissedCall {
+            /**
+             * The caller's latest missed call; the id to request a callback with
+             */
+            call_id: string;
+            last_missed_at: string; // date-time
+            first_missed_at?: string; // date-time
+            /**
+             * The caller's missed calls in the period
+             */
+            attempts: number;
+            queue?: QueueRef;
+            longest_wait_seconds?: number;
+            caller: MissedCallCaller;
+            /**
+             * The caller was reached later in the period
+             */
+            resolved: boolean;
+            /**
+             * Not anonymous, not resolved and no callback pending
+             */
+            can_call_back: boolean;
+            callback?: MissedCallCallback;
+        }
+        export interface MissedCallCallback {
+            /**
+             * The callback call's state in the phone system
+             */
+            state: "queued" | "ringing" | "in_progress" | "completed" | "failed" | "canceled" | "unknown";
+            requested_at: string; // date-time
+            /**
+             * The epilot user id of the manager who asked for it
+             */
+            requested_by?: string;
+            queue?: QueueRef;
+            callback_call_id?: string;
+        }
+        export interface MissedCallCallbackRequest {
+            /**
+             * The queue whose agents take the callback; the missed call's queue when absent
+             */
+            queue_id?: string; // ^[A-Za-z0-9_-]+$
+        }
+        export interface MissedCallCaller {
+            /**
+             * The caller withheld the number; such a caller cannot be called back
+             */
+            anonymous: boolean;
+            /**
+             * The caller's number with all but the last four digits masked
+             */
+            number_masked?: string;
+            /**
+             * The epilot contact whose phone number matches, when exactly one does
+             */
+            contact?: {
+                id: string;
+                name: string;
+            };
+        }
+        export interface MissedCallList {
+            from: string; // date-time
+            to: string; // date-time
+            results: MissedCall[];
         }
         /**
          * An agent as a routing step names them
@@ -427,7 +664,7 @@ declare namespace Components {
                 configured_at?: string; // date-time
             };
             /**
-             * Admin-portal operator (email) who last ran the setup
+             * The admin-portal operator who last ran the setup (email, else the operator id)
              */
             last_setup_by?: string;
         }
@@ -479,7 +716,7 @@ declare namespace Components {
              */
             sso_identity_client_id?: string;
             /**
-             * The operator who last ran the setup (email)
+             * The admin-portal operator who last ran the setup (email, else the operator id)
              */
             last_setup_by?: string;
             /**
@@ -502,6 +739,10 @@ declare namespace Components {
              */
             longest_wait_seconds?: number;
             /**
+             * The phone system's forecast of the wait for a caller joining this queue now; absent when it has none
+             */
+            expected_wait_seconds?: number;
+            /**
              * Agents the queue's routing steps resolve to
              */
             eligible: number;
@@ -510,8 +751,10 @@ declare namespace Components {
              */
             available: number;
             health: /**
-             * `at_risk`: calls are waiting and no eligible agent is available. `healthy`: at least one
-             * eligible agent is available. `quiet`: nothing waiting and nobody available.
+             * `at_risk`: a waiting caller has no agent to take them: every caller not yet with an agent needs
+             * their own eligible agent who is available or being rung, one agent counting once across the
+             * queues of the same answer (so three callers and one free agent, or two queues sharing one free
+             * agent, are at risk). `quiet`: nothing waiting and nobody available. `healthy`: otherwise.
              *
              */
             QueueHealth;
@@ -525,8 +768,11 @@ declare namespace Components {
             routing: /**
              * One step of who can take a queue's calls, in the order the phone system tries them. A step
              * offers calls to the people it names and to everyone with any of its skills. Teams set up in the
-             * phone system appear as the people they contain. The epilot-managed step holds the people added
-             * from the control center; every other step is the organization's own routing, read-only here.
+             * phone system appear as the people they contain (`team_members`). The epilot-managed step holds
+             * the people added from the control center; every other step is the organization's own routing:
+             * its teams are never changed, its named people are removed only by `setAgentRouting` with
+             * `include_own_steps`, and its skills are changed only by `setQueueSkill`, `removeQueueSkill`
+             * and `deleteSkill`.
              *
              */
             QueueRoutingStep[];
@@ -535,8 +781,10 @@ declare namespace Components {
             waiting_calls: WaitingCall[];
         }
         /**
-         * `at_risk`: calls are waiting and no eligible agent is available. `healthy`: at least one
-         * eligible agent is available. `quiet`: nothing waiting and nobody available.
+         * `at_risk`: a waiting caller has no agent to take them: every caller not yet with an agent needs
+         * their own eligible agent who is available or being rung, one agent counting once across the
+         * queues of the same answer (so three callers and one free agent, or two queues sharing one free
+         * agent, are at risk). `quiet`: nothing waiting and nobody available. `healthy`: otherwise.
          *
          */
         export type QueueHealth = "healthy" | "at_risk" | "quiet";
@@ -555,6 +803,10 @@ declare namespace Components {
              */
             longest_wait_seconds?: number;
             /**
+             * The phone system's forecast of the wait for a caller joining this queue now; absent when it has none
+             */
+            expected_wait_seconds?: number;
+            /**
              * Agents the queue's routing steps resolve to
              */
             eligible: number;
@@ -563,8 +815,10 @@ declare namespace Components {
              */
             available: number;
             health: /**
-             * `at_risk`: calls are waiting and no eligible agent is available. `healthy`: at least one
-             * eligible agent is available. `quiet`: nothing waiting and nobody available.
+             * `at_risk`: a waiting caller has no agent to take them: every caller not yet with an agent needs
+             * their own eligible agent who is available or being rung, one agent counting once across the
+             * queues of the same answer (so three callers and one free agent, or two queues sharing one free
+             * agent, are at risk). `quiet`: nothing waiting and nobody available. `healthy`: otherwise.
              *
              */
             QueueHealth;
@@ -584,6 +838,10 @@ declare namespace Components {
              */
             longest_wait_seconds?: number;
             /**
+             * The phone system's forecast of the wait for a caller joining this queue now; absent when it has none
+             */
+            expected_wait_seconds?: number;
+            /**
              * Agents the queue's routing steps resolve to
              */
             eligible: number;
@@ -592,8 +850,10 @@ declare namespace Components {
              */
             available: number;
             health: /**
-             * `at_risk`: calls are waiting and no eligible agent is available. `healthy`: at least one
-             * eligible agent is available. `quiet`: nothing waiting and nobody available.
+             * `at_risk`: a waiting caller has no agent to take them: every caller not yet with an agent needs
+             * their own eligible agent who is available or being rung, one agent counting once across the
+             * queues of the same answer (so three callers and one free agent, or two queues sharing one free
+             * agent, are at risk). `quiet`: nothing waiting and nobody available. `healthy`: otherwise.
              *
              */
             QueueHealth;
@@ -607,11 +867,42 @@ declare namespace Components {
             routing: /**
              * One step of who can take a queue's calls, in the order the phone system tries them. A step
              * offers calls to the people it names and to everyone with any of its skills. Teams set up in the
-             * phone system appear as the people they contain. The epilot-managed step holds the people added
-             * from the control center; every other step is the organization's own routing, read-only here.
+             * phone system appear as the people they contain (`team_members`). The epilot-managed step holds
+             * the people added from the control center; every other step is the organization's own routing:
+             * its teams are never changed, its named people are removed only by `setAgentRouting` with
+             * `include_own_steps`, and its skills are changed only by `setQueueSkill`, `removeQueueSkill`
+             * and `deleteSkill`.
              *
              */
             QueueRoutingStep[];
+        }
+        export interface QueuePerformance {
+            queue: QueueRef;
+            inbound_total: number;
+            /**
+             * Inbound calls bridged to an agent
+             */
+            handled_by_agent: number;
+            /**
+             * Inbound calls that ended without reaching an agent
+             */
+            abandoned_or_failed: number;
+            /**
+             * abandoned_or_failed / inbound_total, one decimal; 0 without calls
+             */
+            abandon_rate_percent: number;
+            /**
+             * Average time callers waited in the queue (whole seconds); absent when no record says
+             */
+            average_wait_seconds?: number;
+        }
+        export interface QueuePerformanceReport {
+            from: string; // date-time
+            to: string; // date-time
+            /**
+             * One entry per current queue, sorted by queue name
+             */
+            results: QueuePerformance[];
         }
         export interface QueueRef {
             id: string;
@@ -620,8 +911,11 @@ declare namespace Components {
         /**
          * One step of who can take a queue's calls, in the order the phone system tries them. A step
          * offers calls to the people it names and to everyone with any of its skills. Teams set up in the
-         * phone system appear as the people they contain. The epilot-managed step holds the people added
-         * from the control center; every other step is the organization's own routing, read-only here.
+         * phone system appear as the people they contain (`team_members`). The epilot-managed step holds
+         * the people added from the control center; every other step is the organization's own routing:
+         * its teams are never changed, its named people are removed only by `setAgentRouting` with
+         * `include_own_steps`, and its skills are changed only by `setQueueSkill`, `removeQueueSkill`
+         * and `deleteSkill`.
          *
          */
         export interface QueueRoutingStep {
@@ -647,9 +941,70 @@ declare namespace Components {
              */
             people: /* An agent as a routing step names them */ PersonRef[];
             /**
-             * The step `setAgentRouting` maintains; the only one the control center writes
+             * The `provider_agent_id`s of the people in `people` the step reaches only through a team
+             * (not named in the step itself). The control center cannot take them off the queue.
+             *
+             */
+            team_members: string[];
+            /**
+             * The step `setAgentRouting` adds people to; with `include_own_steps` it removes people from
+             * the organization's own enabled steps too
+             *
              */
             managed_by_epilot: boolean;
+        }
+        export interface QueueSettings {
+            queue_id: string;
+            name: string;
+            /**
+             * How many callers may wait in the queue (0 = no limit)
+             */
+            max_size: number;
+            /**
+             * How long an agent's phone rings before the next agent is tried
+             */
+            ring_timeout_seconds: number;
+            /**
+             * Wrap-up time after a call from this queue
+             */
+            wrap_up_seconds: number;
+            /**
+             * How many agents are tried per call
+             */
+            max_dial_count: number;
+        }
+        export interface QueueSettingsUpdate {
+            /**
+             * How many callers may wait in the queue (0 = no limit)
+             */
+            max_size: number;
+            /**
+             * How long an agent's phone rings before the next agent is tried
+             */
+            ring_timeout_seconds: number;
+            /**
+             * Wrap-up time after a call from this queue
+             */
+            wrap_up_seconds: number;
+            /**
+             * How many agents are tried per call
+             */
+            max_dial_count: number;
+        }
+        export interface QueueSkillChange {
+            queue: QueueRef;
+            tag: string;
+            /**
+             * Whether the queue accepts the skill after the change
+             */
+            accepted: boolean;
+            /**
+             * `accepted: true` only: the routing step that lists the skill
+             */
+            step?: {
+                id: string;
+                label: string;
+            };
         }
         /**
          * A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is
@@ -658,17 +1013,66 @@ declare namespace Components {
          *
          */
         export type Skill = string; // ^\S(.*\S)?$
+        export interface SkillCatalogue {
+            results: SkillCatalogueEntry[];
+        }
+        export interface SkillCatalogueEntry {
+            /**
+             * The skill as the phone system stores it (see `Skill`)
+             */
+            tag: string;
+            /**
+             * `epilot`: in epilot's catalogue (created in the control center); `provider`: only seen in the phone
+             * system (on an agent or in a queue's routing step)
+             *
+             */
+            source: "epilot" | "provider";
+            /**
+             * `source: epilot` only
+             */
+            created_at?: string; // date-time
+            /**
+             * `source: epilot` only: the epilot user id of the manager who created it
+             */
+            created_by?: string;
+        }
+        export interface SkillDeletion {
+            tag: string;
+            /**
+             * Agents the skill was taken from
+             */
+            agents_updated: number;
+            /**
+             * Queues whose routing steps listed the skill
+             */
+            queues_updated: number;
+        }
         export interface WaitingCall {
             id: string;
             /**
              * The caller's number with all but the last four digits hidden
              */
             from_masked?: string;
+            /**
+             * The epilot contact whose phone number matches, when exactly one does (the same customer
+             * search as Missed calls and the phone app, under the calling manager's permissions;
+             * answers are remembered for up to 60 s per manager)
+             *
+             */
+            contact?: {
+                id: string;
+                name: string;
+            };
             waited_seconds: number;
             /**
              * The provider's call state (e.g. `queued`, `ringing`)
              */
             state: string;
+        }
+        export interface WrapUpTimes {
+            busy_seconds: number;
+            unreachable_seconds: number;
+            declined_seconds: number;
         }
     }
 }
@@ -712,17 +1116,110 @@ declare namespace Paths {
             export type $403 = Components.Schemas.ErrorResponse;
         }
     }
-    namespace GetCallReport {
+    namespace CreateSkill {
+        export type RequestBody = Components.Schemas.CreateSkillRequest;
+        namespace Responses {
+            export type $201 = Components.Schemas.SkillCatalogueEntry;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace DeleteSkill {
+        namespace Responses {
+            export type $200 = Components.Schemas.SkillDeletion;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace GetAgentActivity {
         namespace Parameters {
-            export type From = string;
-            export type To = string;
+            export type From = string; // date-time
+            export type To = string; // date-time
         }
         export interface QueryParameters {
-            from: Parameters.From;
-            to: Parameters.To;
+            from: Parameters.From /* date-time */;
+            to: Parameters.To /* date-time */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.AgentActivity;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace GetAgentPerformance {
+        namespace Parameters {
+            export type From = string; // date-time
+            export type To = string; // date-time
+        }
+        export interface QueryParameters {
+            from: Parameters.From /* date-time */;
+            to: Parameters.To /* date-time */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.AgentPerformanceReport;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace GetCallHandlingSettings {
+        namespace Responses {
+            export type $200 = Components.Schemas.CallHandlingSettings;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace GetCallReport {
+        namespace Parameters {
+            export type From = string; // date-time
+            export type To = string; // date-time
+        }
+        export interface QueryParameters {
+            from: Parameters.From /* date-time */;
+            to: Parameters.To /* date-time */;
         }
         namespace Responses {
             export type $200 = Components.Schemas.CallReport;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace GetLiveKpis {
+        namespace Parameters {
+            export type From = string; // date-time
+            export type Period = /**
+             * The KPI window, in the organization's phone system time zone: today, yesterday, this week
+             * (since Monday), last week (Monday to Monday), last 7 / 30 days (seven / thirty calendar days
+             * including today), this month, last month; `custom` is the window `from`/`to` of the request.
+             *
+             */
+            Components.Schemas.KpiPeriod;
+            export type To = string; // date-time
+        }
+        export interface QueryParameters {
+            period?: Parameters.Period;
+            from?: Parameters.From /* date-time */;
+            to?: Parameters.To /* date-time */;
+        }
+        namespace Responses {
+            export type $200 = /* Every KPI is absent when the phone system cannot tell it. */ Components.Schemas.LiveKpis;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -759,9 +1256,50 @@ declare namespace Paths {
     namespace GetQueue {
         namespace Responses {
             export type $200 = /* Live demand and staffing of one queue */ Components.Schemas.QueueDetail;
+            export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace GetQueuePerformance {
+        namespace Parameters {
+            export type From = string; // date-time
+            export type To = string; // date-time
+        }
+        export interface QueryParameters {
+            from: Parameters.From /* date-time */;
+            to: Parameters.To /* date-time */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.QueuePerformanceReport;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace GetQueueSettings {
+        namespace Responses {
+            export type $200 = Components.Schemas.QueueSettings;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace ListAgentPresences {
+        namespace Responses {
+            export interface $200 {
+                results: /* The provider presence the agent has selected (e.g. Available, Break, Meeting) */ Components.Schemas.AgentPresence[];
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $409 = Components.Schemas.ErrorResponse;
             export type $502 = Components.Responses.BadGateway;
         }
@@ -772,6 +1310,24 @@ declare namespace Paths {
                 captured_at: string; // date-time
                 results: Components.Schemas.LiveAgent[];
             }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace ListMissedCalls {
+        namespace Parameters {
+            export type From = string; // date-time
+            export type To = string; // date-time
+        }
+        export interface QueryParameters {
+            from: Parameters.From /* date-time */;
+            to: Parameters.To /* date-time */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MissedCallList;
+            export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $409 = Components.Schemas.ErrorResponse;
@@ -811,6 +1367,15 @@ declare namespace Paths {
             export type $502 = Components.Responses.BadGateway;
         }
     }
+    namespace ListSkills {
+        namespace Responses {
+            export type $200 = Components.Schemas.SkillCatalogue;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
     namespace PreviewAgentRouting {
         export type RequestBody = Components.Schemas.AgentRoutingRequest;
         namespace Responses {
@@ -831,13 +1396,83 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
             export type $502 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace RemoveQueueSkill {
+        namespace Responses {
+            export type $200 = Components.Schemas.QueueSkillChange;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace RequestMissedCallCallback {
+        export type RequestBody = Components.Schemas.MissedCallCallbackRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.MissedCallCallback;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace SetAgentPresence {
+        export type RequestBody = Components.Schemas.AgentPresenceRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.AgentPresenceChange;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
         }
     }
     namespace SetAgentRouting {
         export type RequestBody = Components.Schemas.AgentRoutingRequest;
         namespace Responses {
             export type $200 = Components.Schemas.AgentRouting;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace SetCallHandlingSettings {
+        export type RequestBody = Components.Schemas.CallHandlingSettings;
+        namespace Responses {
+            export type $200 = Components.Schemas.CallHandlingSettings;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace SetQueueSettings {
+        export type RequestBody = Components.Schemas.QueueSettingsUpdate;
+        namespace Responses {
+            export type $200 = Components.Schemas.QueueSettings;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
+            export type $502 = Components.Responses.BadGateway;
+        }
+    }
+    namespace SetQueueSkill {
+        namespace Responses {
+            export type $200 = Components.Schemas.QueueSkillChange;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
@@ -856,6 +1491,22 @@ declare namespace Paths {
             export type $409 = Components.Schemas.ErrorResponse;
             export type $502 = Components.Responses.BadGateway;
             export type $503 = Components.Responses.ServiceUnavailable;
+        }
+    }
+    namespace V1ManagerAgents$ProviderAgentIdActivity {
+        namespace Parameters {
+            export type ProviderAgentId = string; // ^[A-Za-z0-9_-]+$
+        }
+        export interface PathParameters {
+            provider_agent_id: Parameters.ProviderAgentId /* ^[A-Za-z0-9_-]+$ */;
+        }
+    }
+    namespace V1ManagerAgents$ProviderAgentIdPresence {
+        namespace Parameters {
+            export type ProviderAgentId = string; // ^[A-Za-z0-9_-]+$
+        }
+        export interface PathParameters {
+            provider_agent_id: Parameters.ProviderAgentId /* ^[A-Za-z0-9_-]+$ */;
         }
     }
     namespace V1ManagerAgents$ProviderAgentIdRouting {
@@ -882,12 +1533,46 @@ declare namespace Paths {
             user_id: Parameters.UserId /* ^[A-Za-z0-9_-]+$ */;
         }
     }
+    namespace V1ManagerMissedCalls$CallIdCallback {
+        namespace Parameters {
+            export type CallId = string; // ^[A-Za-z0-9_-]+$
+        }
+        export interface PathParameters {
+            call_id: Parameters.CallId /* ^[A-Za-z0-9_-]+$ */;
+        }
+    }
     namespace V1ManagerQueues$QueueId {
         namespace Parameters {
             export type QueueId = string; // ^[A-Za-z0-9_-]+$
         }
         export interface PathParameters {
             queue_id: Parameters.QueueId /* ^[A-Za-z0-9_-]+$ */;
+        }
+    }
+    namespace V1ManagerQueues$QueueIdSettings {
+        namespace Parameters {
+            export type QueueId = string; // ^[A-Za-z0-9_-]+$
+        }
+        export interface PathParameters {
+            queue_id: Parameters.QueueId /* ^[A-Za-z0-9_-]+$ */;
+        }
+    }
+    namespace V1ManagerQueues$QueueIdSkills$Tag {
+        namespace Parameters {
+            export type QueueId = string; // ^[A-Za-z0-9_-]+$
+            export type Tag = string;
+        }
+        export interface PathParameters {
+            queue_id: Parameters.QueueId /* ^[A-Za-z0-9_-]+$ */;
+            tag: Parameters.Tag;
+        }
+    }
+    namespace V1ManagerSkills$Tag {
+        namespace Parameters {
+            export type Tag = string;
+        }
+        export interface PathParameters {
+            tag: Parameters.Tag;
         }
     }
     namespace V1OperatorOrganizations$OrgIdProvider {
@@ -995,8 +1680,8 @@ export interface OperationMethods {
    * 
    * One snapshot of the organization's live phone state for the control center's Overview: agent
    * presence counters and per-queue health (waiting calls, longest wait, eligible vs available
-   * agents). Read from the provider on every call (no caching); the control center polls it about
-   * every 20 seconds. Requires `phone:manage`.
+   * agents). The provider's live reads are shared per organization for 2 seconds, so
+   * `captured_at` is the time of the oldest read behind the answer. Requires `phone:manage`.
    * 
    */
   'getLiveSnapshot'(
@@ -1010,8 +1695,8 @@ export interface OperationMethods {
    * The organization's phone agents with their live phone status, their skills (as the phone system
    * holds them) and the queues they can take calls from. Agents that are epilot phone agents carry
    * the epilot `user_id`. Queue eligibility is derived from every queue's routing steps (skills and
-   * people). The control center filters and searches this list client-side and polls it about every
-   * 20 seconds. Requires `phone:manage`.
+   * people). Live reads are shared per organization for 2 seconds (see getLiveSnapshot). Requires
+   * `phone:manage`.
    * 
    */
   'listLiveAgents'(
@@ -1026,10 +1711,12 @@ export interface OperationMethods {
    * 1. Skills: the agent's skills in the phone system are replaced by `skills`, so the phone system
    *    routes on them right away. The phone system is the source of truth for phone skills; they are
    *    independent of the skills in epilot's Access Management.
-   * 2. Direct queue membership: each listed queue gets the agent in its epilot-managed routing step
-   *    (created on first use, lowest precedence, never touching the organization's own routing in
-   *    the phone system); every other queue's epilot-managed step drops the agent. Eligibility
-   *    through the phone system's own routing is not changed (`locked`).
+   * 2. Direct queue membership: each listed queue the agent is not yet named in gets the agent in its
+   *    epilot-managed routing step (created on first use, lowest precedence). Every other queue drops
+   *    the agent's direct entries from its epilot-managed step and, with `include_own_steps`, from
+   *    the organization's own enabled steps as well. Teams set up in the phone system are never
+   *    changed: a queue that reaches the agent through one keeps them (`locked`). Without
+   *    `include_own_steps` a queue whose own steps name the agent is not written either.
    * Idempotent; a failure part-way answers `502` and repeating the call completes it. Requires
    * `phone:manage`.
    * 
@@ -1045,7 +1732,8 @@ export interface OperationMethods {
    * The routing impact of `setAgentRouting` with the same body, without changing anything: the
    * queues the agent can take calls from now (as the phone system routes today) and after the
    * change, what is added and removed, the queues that would lose their last available agent, and
-   * the queues the agent stays in through the phone system's own routing. Requires `phone:manage`.
+   * the queues the agent stays in through a team set up in the phone system (or, without
+   * `include_own_steps`, through the organization's own steps). Requires `phone:manage`.
    * 
    */
   'previewAgentRouting'(
@@ -1054,13 +1742,37 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PreviewAgentRouting.Responses.$200>
   /**
+   * setAgentPresence - setAgentPresence
+   * 
+   * Puts the agent on one of the phone system's presences (`listAgentPresences`), as the agent could
+   * in the phone app. A presence that is not `available` stops queue calls to the agent until it
+   * changes again. Idempotent. Requires `phone:manage`.
+   * 
+   */
+  'setAgentPresence'(
+    parameters?: Parameters<Paths.V1ManagerAgents$ProviderAgentIdPresence.PathParameters> | null,
+    data?: Paths.SetAgentPresence.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SetAgentPresence.Responses.$200>
+  /**
+   * listAgentPresences - listAgentPresences
+   * 
+   * The presences the organization's agents can be on (e.g. Available, Break, Meeting), as the phone
+   * system defines them. `available` presences let agents take queue calls. Requires `phone:manage`.
+   * 
+   */
+  'listAgentPresences'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListAgentPresences.Responses.$200>
+  /**
    * listQueues - listQueues
    * 
    * The organization's queues with live demand (waiting calls, longest wait), staffing (eligible
    * vs available agents), derived health and who can take their calls: the routing steps in the
-   * order the phone system tries them, each naming skills and people. Routing is read-only in the
-   * control center except the epilot-managed step that `setAgentRouting` maintains. Polled about
-   * every 20 seconds. Requires `phone:manage`.
+   * order the phone system tries them, each naming skills and people. Live reads are shared per
+   * organization for 2 seconds (see getLiveSnapshot). Requires `phone:manage`.
    * 
    */
   'listQueues'(
@@ -1096,6 +1808,222 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCallReport.Responses.$200>
   /**
+   * getLiveKpis - getLiveKpis
+   * 
+   * Service KPIs of the organization's phone team for a period: call counts, abandon rate, waits
+   * and handling times, from the provider's metrics or, where it has none, its call reporting. A KPI
+   * the provider cannot tell is absent rather than zero. The period is either a named one
+   * (`period`, a window in the phone system's time zone) or a custom window: `from` and `to`
+   * (at most 31 days, `period` absent or `custom`), whose KPIs come from the call reporting alone
+   * (the provider's metrics know named ranges only). The provider's reads are shared per
+   * organization for 2 seconds. Requires `phone:manage`.
+   * 
+   */
+  'getLiveKpis'(
+    parameters?: Parameters<Paths.GetLiveKpis.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetLiveKpis.Responses.$200>
+  /**
+   * getAgentPerformance - getAgentPerformance
+   * 
+   * Per-agent performance for a period from the provider's call reporting: calls handled and talk,
+   * hold, wrap-up and handle times, one row per agent who handled at least one call. Agents that are
+   * epilot phone agents carry the epilot `user_id`. The window is at most 31 days.
+   * Requires `phone:manage`.
+   * 
+   */
+  'getAgentPerformance'(
+    parameters?: Parameters<Paths.GetAgentPerformance.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAgentPerformance.Responses.$200>
+  /**
+   * listMissedCalls - listMissedCalls
+   * 
+   * Callers who did not reach an agent in a period, newest first, one row per caller: an inbound
+   * call (grouped by the provider's session, so transfer legs count once) that ended without being
+   * bridged to an agent. `attempts` counts the caller's missed calls in the period; `resolved` is
+   * true when the caller was reached later in the period (a later inbound call bridged to an agent,
+   * or an answered outbound call to the number). Numbers are masked; the epilot contact is joined
+   * by phone number when one matches. A callback requested through `requestMissedCallCallback` is
+   * shown with its live state. The window is at most 31 days.
+   * Requires `phone:manage`.
+   * 
+   */
+  'listMissedCalls'(
+    parameters?: Parameters<Paths.ListMissedCalls.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListMissedCalls.Responses.$200>
+  /**
+   * requestMissedCallCallback - requestMissedCallCallback
+   * 
+   * Asks the phone system to call the caller of a missed call back: the provider queues an outbound
+   * callback on a queue (the missed call's queue unless `queue_id` names another), so the next
+   * eligible agent of that queue gets the call. The caller's number never leaves the API. Refused
+   * for an anonymous caller and while an earlier callback for the same caller is still pending.
+   * Recorded with who requested it, so every manager sees it.
+   * Requires `phone:manage`.
+   * 
+   */
+  'requestMissedCallCallback'(
+    parameters?: Parameters<Paths.V1ManagerMissedCalls$CallIdCallback.PathParameters> | null,
+    data?: Paths.RequestMissedCallCallback.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RequestMissedCallCallback.Responses.$202>
+  /**
+   * getAgentActivity - getAgentActivity
+   * 
+   * An agent's activity in a period from the provider's agent logs: presence changes and calls in
+   * time order, the time spent on each presence and the number of calls handled. The window is at
+   * most 31 days.
+   * Requires `phone:manage`.
+   * 
+   */
+  'getAgentActivity'(
+    parameters?: Parameters<Paths.GetAgentActivity.QueryParameters & Paths.V1ManagerAgents$ProviderAgentIdActivity.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAgentActivity.Responses.$200>
+  /**
+   * getQueueSettings - getQueueSettings
+   * 
+   * A queue's call handling settings as the phone system holds them: how many callers may wait,
+   * how long an agent's phone rings, the wrap-up time after a call and how many agents are tried
+   * per call.
+   * Requires `phone:manage`.
+   * 
+   */
+  'getQueueSettings'(
+    parameters?: Parameters<Paths.V1ManagerQueues$QueueIdSettings.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetQueueSettings.Responses.$200>
+  /**
+   * setQueueSettings - setQueueSettings
+   * 
+   * Replaces a queue's call handling settings (all fields, not a delta); the phone system applies
+   * them to the next call. The queue's name and routing are not changed.
+   * Requires `phone:manage`.
+   * 
+   */
+  'setQueueSettings'(
+    parameters?: Parameters<Paths.V1ManagerQueues$QueueIdSettings.PathParameters> | null,
+    data?: Paths.SetQueueSettings.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SetQueueSettings.Responses.$200>
+  /**
+   * getCallHandlingSettings - getCallHandlingSettings
+   * 
+   * The organization's call handling settings for all agents: wrap-up rules (including whether
+   * agents may call out during wrap-up), wrap-up times after unsuccessful calls, and recording
+   * defaults.
+   * Requires `phone:manage`.
+   * 
+   */
+  'getCallHandlingSettings'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCallHandlingSettings.Responses.$200>
+  /**
+   * setCallHandlingSettings - setCallHandlingSettings
+   * 
+   * Replaces the organization's call handling settings (the full object, not a delta).
+   * Requires `phone:manage`.
+   * 
+   */
+  'setCallHandlingSettings'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SetCallHandlingSettings.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SetCallHandlingSettings.Responses.$200>
+  /**
+   * getQueuePerformance - getQueuePerformance
+   * 
+   * Inbound call outcomes per queue for a period, derived from the provider's call reporting (the
+   * phone system has no per-queue report): every inbound call that started in [from, to) is counted
+   * for the queue its record names. Calls whose record names no queue, or a queue name the phone
+   * system no longer has, are not counted for any queue. Every current queue is listed, sorted by
+   * name, also with zero calls. Same window rules as `getCallReport` (at most 31 days). Requires
+   * `phone:manage`.
+   * 
+   */
+  'getQueuePerformance'(
+    parameters?: Parameters<Paths.GetQueuePerformance.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetQueuePerformance.Responses.$200>
+  /**
+   * listSkills - listSkills
+   * 
+   * The organization's skill catalogue: the skills epilot keeps for it (created in the control
+   * center, `source: epilot`) together with every skill the phone system already uses on an agent or
+   * in a queue's routing step (`source: provider`), each once, sorted by skill. The phone system has
+   * no skill list of its own, so a skill nobody has yet exists only here. Requires `phone:manage`.
+   * 
+   */
+  'listSkills'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSkills.Responses.$200>
+  /**
+   * createSkill - createSkill
+   * 
+   * Adds a skill to the organization's catalogue (epilot only: nothing is written to the phone
+   * system until an agent gets the skill or a queue accepts it). The skill is trimmed and must then
+   * be 1 to 100 characters. Requires `phone:manage`.
+   * 
+   */
+  'createSkill'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateSkill.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateSkill.Responses.$201>
+  /**
+   * deleteSkill - deleteSkill
+   * 
+   * Deletes a skill everywhere: it is taken from every agent that has it and from every routing step
+   * of every queue that accepts it in the phone system, then removed from the catalogue.
+   * Idempotent: a skill nobody has answers zero counts. On a phone-system failure the answer is 502
+   * and its message says how many agents and queues were already updated; deleting again completes
+   * it. Requires `phone:manage`.
+   * 
+   */
+  'deleteSkill'(
+    parameters?: Parameters<Paths.V1ManagerSkills$Tag.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteSkill.Responses.$200>
+  /**
+   * setQueueSkill - setQueueSkill
+   * 
+   * The queue accepts the skill: every agent with it can take the queue's calls. epilot adds the
+   * skill to the queue's FIRST enabled routing step of the organization's own in the phone system
+   * (lowest order, never the epilot-managed step); nothing is written when an enabled step of its own
+   * already lists it. Requires `phone:manage`.
+   * 
+   */
+  'setQueueSkill'(
+    parameters?: Parameters<Paths.V1ManagerQueues$QueueIdSkills$Tag.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SetQueueSkill.Responses.$200>
+  /**
+   * removeQueueSkill - removeQueueSkill
+   * 
+   * The queue no longer accepts the skill: it is removed from every routing step of the queue that
+   * lists it (enabled or not). Idempotent. Requires `phone:manage`.
+   * 
+   */
+  'removeQueueSkill'(
+    parameters?: Parameters<Paths.V1ManagerQueues$QueueIdSkills$Tag.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RemoveQueueSkill.Responses.$200>
+  /**
    * listProviderSetups - listProviderSetups
    * 
    * Every organization that has a telephony provider tenant, for the admin portal's overview: the
@@ -1127,7 +2055,9 @@ export interface OperationMethods {
    * tenant (Babelforce sub-account keyed by the organization id), its SCIM configuration with role
    * management on, and its SSO configuration pointing at the identity-api client given here. The
    * client secret is forwarded to the provider and never stored by this service. Re-running updates
-   * the SSO configuration (new client or rotated secret) and leaves the rest untouched.
+   * the SSO configuration (new client or rotated secret) and leaves the rest untouched: of the SSO
+   * configuration's named redirect entries only epilot's own is written, every other entry is kept,
+   * and no entry is ever duplicated.
    * 
    */
   'setupProvider'(
@@ -1232,8 +2162,8 @@ export interface PathsDictionary {
      * 
      * One snapshot of the organization's live phone state for the control center's Overview: agent
      * presence counters and per-queue health (waiting calls, longest wait, eligible vs available
-     * agents). Read from the provider on every call (no caching); the control center polls it about
-     * every 20 seconds. Requires `phone:manage`.
+     * agents). The provider's live reads are shared per organization for 2 seconds, so
+     * `captured_at` is the time of the oldest read behind the answer. Requires `phone:manage`.
      * 
      */
     'get'(
@@ -1249,8 +2179,8 @@ export interface PathsDictionary {
      * The organization's phone agents with their live phone status, their skills (as the phone system
      * holds them) and the queues they can take calls from. Agents that are epilot phone agents carry
      * the epilot `user_id`. Queue eligibility is derived from every queue's routing steps (skills and
-     * people). The control center filters and searches this list client-side and polls it about every
-     * 20 seconds. Requires `phone:manage`.
+     * people). Live reads are shared per organization for 2 seconds (see getLiveSnapshot). Requires
+     * `phone:manage`.
      * 
      */
     'get'(
@@ -1267,10 +2197,12 @@ export interface PathsDictionary {
      * 1. Skills: the agent's skills in the phone system are replaced by `skills`, so the phone system
      *    routes on them right away. The phone system is the source of truth for phone skills; they are
      *    independent of the skills in epilot's Access Management.
-     * 2. Direct queue membership: each listed queue gets the agent in its epilot-managed routing step
-     *    (created on first use, lowest precedence, never touching the organization's own routing in
-     *    the phone system); every other queue's epilot-managed step drops the agent. Eligibility
-     *    through the phone system's own routing is not changed (`locked`).
+     * 2. Direct queue membership: each listed queue the agent is not yet named in gets the agent in its
+     *    epilot-managed routing step (created on first use, lowest precedence). Every other queue drops
+     *    the agent's direct entries from its epilot-managed step and, with `include_own_steps`, from
+     *    the organization's own enabled steps as well. Teams set up in the phone system are never
+     *    changed: a queue that reaches the agent through one keeps them (`locked`). Without
+     *    `include_own_steps` a queue whose own steps name the agent is not written either.
      * Idempotent; a failure part-way answers `502` and repeating the call completes it. Requires
      * `phone:manage`.
      * 
@@ -1288,7 +2220,8 @@ export interface PathsDictionary {
      * The routing impact of `setAgentRouting` with the same body, without changing anything: the
      * queues the agent can take calls from now (as the phone system routes today) and after the
      * change, what is added and removed, the queues that would lose their last available agent, and
-     * the queues the agent stays in through the phone system's own routing. Requires `phone:manage`.
+     * the queues the agent stays in through a team set up in the phone system (or, without
+     * `include_own_steps`, through the organization's own steps). Requires `phone:manage`.
      * 
      */
     'post'(
@@ -1297,15 +2230,43 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PreviewAgentRouting.Responses.$200>
   }
+  ['/v1/manager/agents/{provider_agent_id}/presence']: {
+    /**
+     * setAgentPresence - setAgentPresence
+     * 
+     * Puts the agent on one of the phone system's presences (`listAgentPresences`), as the agent could
+     * in the phone app. A presence that is not `available` stops queue calls to the agent until it
+     * changes again. Idempotent. Requires `phone:manage`.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.V1ManagerAgents$ProviderAgentIdPresence.PathParameters> | null,
+      data?: Paths.SetAgentPresence.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SetAgentPresence.Responses.$200>
+  }
+  ['/v1/manager/presences']: {
+    /**
+     * listAgentPresences - listAgentPresences
+     * 
+     * The presences the organization's agents can be on (e.g. Available, Break, Meeting), as the phone
+     * system defines them. `available` presences let agents take queue calls. Requires `phone:manage`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListAgentPresences.Responses.$200>
+  }
   ['/v1/manager/queues']: {
     /**
      * listQueues - listQueues
      * 
      * The organization's queues with live demand (waiting calls, longest wait), staffing (eligible
      * vs available agents), derived health and who can take their calls: the routing steps in the
-     * order the phone system tries them, each naming skills and people. Routing is read-only in the
-     * control center except the epilot-managed step that `setAgentRouting` maintains. Polled about
-     * every 20 seconds. Requires `phone:manage`.
+     * order the phone system tries them, each naming skills and people. Live reads are shared per
+     * organization for 2 seconds (see getLiveSnapshot). Requires `phone:manage`.
      * 
      */
     'get'(
@@ -1345,6 +2306,244 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCallReport.Responses.$200>
   }
+  ['/v1/manager/live/kpis']: {
+    /**
+     * getLiveKpis - getLiveKpis
+     * 
+     * Service KPIs of the organization's phone team for a period: call counts, abandon rate, waits
+     * and handling times, from the provider's metrics or, where it has none, its call reporting. A KPI
+     * the provider cannot tell is absent rather than zero. The period is either a named one
+     * (`period`, a window in the phone system's time zone) or a custom window: `from` and `to`
+     * (at most 31 days, `period` absent or `custom`), whose KPIs come from the call reporting alone
+     * (the provider's metrics know named ranges only). The provider's reads are shared per
+     * organization for 2 seconds. Requires `phone:manage`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetLiveKpis.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetLiveKpis.Responses.$200>
+  }
+  ['/v1/manager/reporting/agents']: {
+    /**
+     * getAgentPerformance - getAgentPerformance
+     * 
+     * Per-agent performance for a period from the provider's call reporting: calls handled and talk,
+     * hold, wrap-up and handle times, one row per agent who handled at least one call. Agents that are
+     * epilot phone agents carry the epilot `user_id`. The window is at most 31 days.
+     * Requires `phone:manage`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetAgentPerformance.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAgentPerformance.Responses.$200>
+  }
+  ['/v1/manager/missed-calls']: {
+    /**
+     * listMissedCalls - listMissedCalls
+     * 
+     * Callers who did not reach an agent in a period, newest first, one row per caller: an inbound
+     * call (grouped by the provider's session, so transfer legs count once) that ended without being
+     * bridged to an agent. `attempts` counts the caller's missed calls in the period; `resolved` is
+     * true when the caller was reached later in the period (a later inbound call bridged to an agent,
+     * or an answered outbound call to the number). Numbers are masked; the epilot contact is joined
+     * by phone number when one matches. A callback requested through `requestMissedCallCallback` is
+     * shown with its live state. The window is at most 31 days.
+     * Requires `phone:manage`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListMissedCalls.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListMissedCalls.Responses.$200>
+  }
+  ['/v1/manager/missed-calls/{call_id}/callback']: {
+    /**
+     * requestMissedCallCallback - requestMissedCallCallback
+     * 
+     * Asks the phone system to call the caller of a missed call back: the provider queues an outbound
+     * callback on a queue (the missed call's queue unless `queue_id` names another), so the next
+     * eligible agent of that queue gets the call. The caller's number never leaves the API. Refused
+     * for an anonymous caller and while an earlier callback for the same caller is still pending.
+     * Recorded with who requested it, so every manager sees it.
+     * Requires `phone:manage`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.V1ManagerMissedCalls$CallIdCallback.PathParameters> | null,
+      data?: Paths.RequestMissedCallCallback.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RequestMissedCallCallback.Responses.$202>
+  }
+  ['/v1/manager/agents/{provider_agent_id}/activity']: {
+    /**
+     * getAgentActivity - getAgentActivity
+     * 
+     * An agent's activity in a period from the provider's agent logs: presence changes and calls in
+     * time order, the time spent on each presence and the number of calls handled. The window is at
+     * most 31 days.
+     * Requires `phone:manage`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetAgentActivity.QueryParameters & Paths.V1ManagerAgents$ProviderAgentIdActivity.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAgentActivity.Responses.$200>
+  }
+  ['/v1/manager/queues/{queue_id}/settings']: {
+    /**
+     * getQueueSettings - getQueueSettings
+     * 
+     * A queue's call handling settings as the phone system holds them: how many callers may wait,
+     * how long an agent's phone rings, the wrap-up time after a call and how many agents are tried
+     * per call.
+     * Requires `phone:manage`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.V1ManagerQueues$QueueIdSettings.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetQueueSettings.Responses.$200>
+    /**
+     * setQueueSettings - setQueueSettings
+     * 
+     * Replaces a queue's call handling settings (all fields, not a delta); the phone system applies
+     * them to the next call. The queue's name and routing are not changed.
+     * Requires `phone:manage`.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.V1ManagerQueues$QueueIdSettings.PathParameters> | null,
+      data?: Paths.SetQueueSettings.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SetQueueSettings.Responses.$200>
+  }
+  ['/v1/manager/settings/call-handling']: {
+    /**
+     * getCallHandlingSettings - getCallHandlingSettings
+     * 
+     * The organization's call handling settings for all agents: wrap-up rules (including whether
+     * agents may call out during wrap-up), wrap-up times after unsuccessful calls, and recording
+     * defaults.
+     * Requires `phone:manage`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCallHandlingSettings.Responses.$200>
+    /**
+     * setCallHandlingSettings - setCallHandlingSettings
+     * 
+     * Replaces the organization's call handling settings (the full object, not a delta).
+     * Requires `phone:manage`.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SetCallHandlingSettings.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SetCallHandlingSettings.Responses.$200>
+  }
+  ['/v1/manager/reporting/queues']: {
+    /**
+     * getQueuePerformance - getQueuePerformance
+     * 
+     * Inbound call outcomes per queue for a period, derived from the provider's call reporting (the
+     * phone system has no per-queue report): every inbound call that started in [from, to) is counted
+     * for the queue its record names. Calls whose record names no queue, or a queue name the phone
+     * system no longer has, are not counted for any queue. Every current queue is listed, sorted by
+     * name, also with zero calls. Same window rules as `getCallReport` (at most 31 days). Requires
+     * `phone:manage`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetQueuePerformance.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetQueuePerformance.Responses.$200>
+  }
+  ['/v1/manager/skills']: {
+    /**
+     * listSkills - listSkills
+     * 
+     * The organization's skill catalogue: the skills epilot keeps for it (created in the control
+     * center, `source: epilot`) together with every skill the phone system already uses on an agent or
+     * in a queue's routing step (`source: provider`), each once, sorted by skill. The phone system has
+     * no skill list of its own, so a skill nobody has yet exists only here. Requires `phone:manage`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSkills.Responses.$200>
+    /**
+     * createSkill - createSkill
+     * 
+     * Adds a skill to the organization's catalogue (epilot only: nothing is written to the phone
+     * system until an agent gets the skill or a queue accepts it). The skill is trimmed and must then
+     * be 1 to 100 characters. Requires `phone:manage`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateSkill.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateSkill.Responses.$201>
+  }
+  ['/v1/manager/skills/{tag}']: {
+    /**
+     * deleteSkill - deleteSkill
+     * 
+     * Deletes a skill everywhere: it is taken from every agent that has it and from every routing step
+     * of every queue that accepts it in the phone system, then removed from the catalogue.
+     * Idempotent: a skill nobody has answers zero counts. On a phone-system failure the answer is 502
+     * and its message says how many agents and queues were already updated; deleting again completes
+     * it. Requires `phone:manage`.
+     * 
+     */
+    'delete'(
+      parameters?: Parameters<Paths.V1ManagerSkills$Tag.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteSkill.Responses.$200>
+  }
+  ['/v1/manager/queues/{queue_id}/skills/{tag}']: {
+    /**
+     * setQueueSkill - setQueueSkill
+     * 
+     * The queue accepts the skill: every agent with it can take the queue's calls. epilot adds the
+     * skill to the queue's FIRST enabled routing step of the organization's own in the phone system
+     * (lowest order, never the epilot-managed step); nothing is written when an enabled step of its own
+     * already lists it. Requires `phone:manage`.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.V1ManagerQueues$QueueIdSkills$Tag.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SetQueueSkill.Responses.$200>
+    /**
+     * removeQueueSkill - removeQueueSkill
+     * 
+     * The queue no longer accepts the skill: it is removed from every routing step of the queue that
+     * lists it (enabled or not). Idempotent. Requires `phone:manage`.
+     * 
+     */
+    'delete'(
+      parameters?: Parameters<Paths.V1ManagerQueues$QueueIdSkills$Tag.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RemoveQueueSkill.Responses.$200>
+  }
   ['/v1/operator/provider-setups']: {
     /**
      * listProviderSetups - listProviderSetups
@@ -1382,7 +2581,9 @@ export interface PathsDictionary {
      * tenant (Babelforce sub-account keyed by the organization id), its SCIM configuration with role
      * management on, and its SSO configuration pointing at the identity-api client given here. The
      * client secret is forwarded to the provider and never stored by this service. Re-running updates
-     * the SSO configuration (new client or rotated secret) and leaves the rest untouched.
+     * the SSO configuration (new client or rotated secret) and leaves the rest untouched: of the SSO
+     * configuration's named redirect entries only epilot's own is written, every other entry is kept,
+     * and no entry is ever duplicated.
      * 
      */
     'post'(
@@ -1396,14 +2597,23 @@ export interface PathsDictionary {
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
+export type AgentActivity = Components.Schemas.AgentActivity;
+export type AgentActivityEvent = Components.Schemas.AgentActivityEvent;
+export type AgentPerformance = Components.Schemas.AgentPerformance;
+export type AgentPerformanceReport = Components.Schemas.AgentPerformanceReport;
 export type AgentPresence = Components.Schemas.AgentPresence;
+export type AgentPresenceChange = Components.Schemas.AgentPresenceChange;
+export type AgentPresenceRequest = Components.Schemas.AgentPresenceRequest;
+export type AgentPresenceTotal = Components.Schemas.AgentPresenceTotal;
 export type AgentQueueEligibility = Components.Schemas.AgentQueueEligibility;
 export type AgentRouting = Components.Schemas.AgentRouting;
 export type AgentRoutingPreview = Components.Schemas.AgentRoutingPreview;
 export type AgentRoutingRequest = Components.Schemas.AgentRoutingRequest;
 export type AgentState = Components.Schemas.AgentState;
 export type AssignPhoneAgentRequest = Components.Schemas.AssignPhoneAgentRequest;
+export type CallHandlingSettings = Components.Schemas.CallHandlingSettings;
 export type CallReport = Components.Schemas.CallReport;
+export type CreateSkillRequest = Components.Schemas.CreateSkillRequest;
 export type CustomerBatchSearchResult = Components.Schemas.CustomerBatchSearchResult;
 export type CustomerIdentifier = Components.Schemas.CustomerIdentifier;
 export type CustomerSearchResult = Components.Schemas.CustomerSearchResult;
@@ -1411,10 +2621,17 @@ export type CustomerSummary = Components.Schemas.CustomerSummary;
 export type EligibilityPath = Components.Schemas.EligibilityPath;
 export type EligibleAgent = Components.Schemas.EligibleAgent;
 export type ErrorResponse = Components.Schemas.ErrorResponse;
+export type KpiPeriod = Components.Schemas.KpiPeriod;
 export type LiveAgent = Components.Schemas.LiveAgent;
 export type LiveAgentCounters = Components.Schemas.LiveAgentCounters;
+export type LiveKpis = Components.Schemas.LiveKpis;
 export type LiveSnapshot = Components.Schemas.LiveSnapshot;
 export type ManagerStatus = Components.Schemas.ManagerStatus;
+export type MissedCall = Components.Schemas.MissedCall;
+export type MissedCallCallback = Components.Schemas.MissedCallCallback;
+export type MissedCallCallbackRequest = Components.Schemas.MissedCallCallbackRequest;
+export type MissedCallCaller = Components.Schemas.MissedCallCaller;
+export type MissedCallList = Components.Schemas.MissedCallList;
 export type PersonRef = Components.Schemas.PersonRef;
 export type PhoneAgent = Components.Schemas.PhoneAgent;
 export type ProviderSetup = Components.Schemas.ProviderSetup;
@@ -1424,7 +2641,16 @@ export type QueueDetail = Components.Schemas.QueueDetail;
 export type QueueHealth = Components.Schemas.QueueHealth;
 export type QueueLive = Components.Schemas.QueueLive;
 export type QueueOverview = Components.Schemas.QueueOverview;
+export type QueuePerformance = Components.Schemas.QueuePerformance;
+export type QueuePerformanceReport = Components.Schemas.QueuePerformanceReport;
 export type QueueRef = Components.Schemas.QueueRef;
 export type QueueRoutingStep = Components.Schemas.QueueRoutingStep;
+export type QueueSettings = Components.Schemas.QueueSettings;
+export type QueueSettingsUpdate = Components.Schemas.QueueSettingsUpdate;
+export type QueueSkillChange = Components.Schemas.QueueSkillChange;
 export type Skill = Components.Schemas.Skill;
+export type SkillCatalogue = Components.Schemas.SkillCatalogue;
+export type SkillCatalogueEntry = Components.Schemas.SkillCatalogueEntry;
+export type SkillDeletion = Components.Schemas.SkillDeletion;
 export type WaitingCall = Components.Schemas.WaitingCall;
+export type WrapUpTimes = Components.Schemas.WrapUpTimes;

@@ -31,6 +31,7 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`createJourneyRevision`](#createjourneyrevision)
 - [`listJourneyRevisions`](#listjourneyrevisions)
 - [`getJourneyRevision`](#getjourneyrevision)
+- [`updateJourneyRevisionMetadata`](#updatejourneyrevisionmetadata)
 - [`publishJourneyRevision`](#publishjourneyrevision)
 - [`getJourneyPublishState`](#getjourneypublishstate)
 - [`getJourneyEnvironment`](#getjourneyenvironment)
@@ -84,6 +85,7 @@ const { data } = await journeyClient.getJourneysByOrgId(...)
 - [`JourneyAuditInfo`](#journeyauditinfo)
 - [`JourneyRevisionRequest`](#journeyrevisionrequest)
 - [`PublishRevisionRequest`](#publishrevisionrequest)
+- [`RevisionMetadataUpdate`](#revisionmetadataupdate)
 - [`JourneyRevisionSummary`](#journeyrevisionsummary)
 - [`JourneyRevisionList`](#journeyrevisionlist)
 - [`JourneyRevision`](#journeyrevision)
@@ -454,6 +456,8 @@ const { data } = await client.createJourneyRevision(
   "description": "string",
   "published_at": "1970-01-01T00:00:00.000Z",
   "is_published": true,
+  "metadata_updated_at": "1970-01-01T00:00:00.000Z",
+  "metadata_updated_by": "string",
   "mapping_config_version": 12
 }
 ```
@@ -490,6 +494,8 @@ const { data } = await client.listJourneyRevisions({
       "description": "string",
       "published_at": "1970-01-01T00:00:00.000Z",
       "is_published": true,
+      "metadata_updated_at": "1970-01-01T00:00:00.000Z",
+      "metadata_updated_by": "string",
       "mapping_config_version": 12
     }
   ],
@@ -526,6 +532,8 @@ const { data } = await client.getJourneyRevision({
   "description": "string",
   "published_at": "1970-01-01T00:00:00.000Z",
   "is_published": true,
+  "metadata_updated_at": "1970-01-01T00:00:00.000Z",
+  "metadata_updated_by": "string",
   "mapping_config_version": 12,
   "configuration": {
     "journeyId": "string",
@@ -608,6 +616,47 @@ const { data } = await client.getJourneyRevision({
       "env": {}
     }
   }
+}
+```
+
+</details>
+
+---
+
+### `updateJourneyRevisionMetadata`
+
+Corrects the name and description of a revision that has been published, e.g. to fix a typo or add context after the fact. Metadata only: the revision's configuration, the journey record customers rec
+
+`PATCH /v1/journey/configuration/{id}/revisions/{revision_id}`
+
+```ts
+const { data } = await client.updateJourneyRevisionMetadata(
+  {
+    id: '123e4567-e89b-12d3-a456-426614174000',
+    revision_id: 'example',
+  },
+  {
+    name: 'Summer campaign',
+    description: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "revision_id": "42",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "name": "Summer campaign",
+  "description": "string",
+  "published_at": "1970-01-01T00:00:00.000Z",
+  "is_published": true,
+  "metadata_updated_at": "1970-01-01T00:00:00.000Z",
+  "metadata_updated_by": "string",
+  "mapping_config_version": 12
 }
 ```
 
@@ -3321,6 +3370,15 @@ type PublishRevisionRequest = {
 }
 ```
 
+### `RevisionMetadataUpdate`
+
+```ts
+type RevisionMetadataUpdate = {
+  name?: string
+  description?: string
+}
+```
+
 ### `JourneyRevisionSummary`
 
 ```ts
@@ -3332,6 +3390,8 @@ type JourneyRevisionSummary = {
   description?: string
   published_at?: string // date-time
   is_published: boolean
+  metadata_updated_at?: string // date-time
+  metadata_updated_by?: string
   mapping_config_version?: number
 }
 ```
@@ -3348,6 +3408,8 @@ type JourneyRevisionList = {
     description?: string
     published_at?: string // date-time
     is_published: boolean
+    metadata_updated_at?: string // date-time
+    metadata_updated_by?: string
     mapping_config_version?: number
   }>
   next_cursor?: string
@@ -3365,6 +3427,8 @@ type JourneyRevision = {
   description?: string
   published_at?: string // date-time
   is_published: boolean
+  metadata_updated_at?: string // date-time
+  metadata_updated_by?: string
   mapping_config_version?: number
   configuration: {
     journeyId?: string
@@ -3455,8 +3519,6 @@ type JourneyRevision = {
       savingProgress?: { ... }
       thirdPartyCookies?: { ... }
       betaFeatures?: { ... }
-      offline?: { ... }
-    }
   // ...
 }
 ```
@@ -3474,6 +3536,8 @@ type JourneyRevisionConflict = {
     description?: string
     published_at?: string // date-time
     is_published: boolean
+    metadata_updated_at?: string // date-time
+    metadata_updated_by?: string
     mapping_config_version?: number
   }
 }

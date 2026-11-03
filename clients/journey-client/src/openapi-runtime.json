@@ -123,6 +123,28 @@
           }
         ],
         "responses": {}
+      },
+      "patch": {
+        "operationId": "updateJourneyRevisionMetadata",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "revision_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
       }
     },
     "/v1/journey/configuration/{id}/publish": {
