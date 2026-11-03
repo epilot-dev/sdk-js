@@ -46,7 +46,11 @@ export default defineCommand({
       }
     }
 
-    const secretOptions = manifest.components.flatMap((c) => (c.options ?? []).filter((o) => o.type === 'secret'));
+    if (manifest.options?.length) log.info(`${manifest.options.length} app-level option(s)`);
+
+    const secretOptions = [...(manifest.options ?? []), ...manifest.components.flatMap((c) => c.options ?? [])].filter(
+      (o) => o.type === 'secret',
+    );
     if (secretOptions.length > 0) log.info(`${secretOptions.length} secret option(s) (set per-installation)`);
 
     if (manifest.assets?.logo) log.info(`Logo: ${manifest.assets.logo}`);

@@ -622,7 +622,9 @@ What permissions do and do not cover:
   admin re-save the app configuration in epilot (the patch resets \`enabled\` to false).
 
 ### Options
-Components can declare \`options\` — configuration values set by the installing organization. Types: \`text\`, \`number\`, \`boolean\`, \`secret\`. Use \`{{option_key}}\` in configuration URLs/headers for interpolation.
+Declare \`options\` at the top level of manifest.json — configuration values the installing organization sets once for the whole app. Types: \`text\`, \`number\`, \`boolean\`, \`secret\`, \`object\` (with \`fields\`); \`repeatable: true\` makes a list. \`sensitive: true\` keeps a value server-side only (always on for secrets). Functions receive all option values in \`input.app_options\`. Use \`{{option_key}}\` in configuration URLs/headers for interpolation.
+
+Components can still declare their own \`options\` (legacy), but a key must not be declared at both levels. When top-level \`options\` exist, deploy sends \`"options": []\` for components without options, so declarations moved to the app level are removed from the component.
 
 Two caveats:
 - **Options merge on upsert.** Deploying a component without an \`options\` key leaves the old
