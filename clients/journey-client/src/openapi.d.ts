@@ -1402,6 +1402,15 @@ declare namespace Components {
              */
             is_published: boolean;
             /**
+             * The last time the name or description was corrected after publishing. Absent when they are as the publish stamped them.
+             *
+             */
+            metadata_updated_at?: string; // date-time
+            /**
+             * User id of whoever last corrected the name or description.
+             */
+            metadata_updated_by?: string;
+            /**
              * Version of the entity-mapping config stored alongside this revision.
              * example:
              * 12
@@ -2116,6 +2125,15 @@ declare namespace Components {
              */
             is_published: boolean;
             /**
+             * The last time the name or description was corrected after publishing. Absent when they are as the publish stamped them.
+             *
+             */
+            metadata_updated_at?: string; // date-time
+            /**
+             * User id of whoever last corrected the name or description.
+             */
+            metadata_updated_by?: string;
+            /**
              * Version of the entity-mapping config stored alongside this revision.
              * example:
              * 12
@@ -2303,6 +2321,18 @@ declare namespace Components {
             name?: string;
             /**
              * Optional description stamped onto the revision at publish time
+             */
+            description?: string;
+        }
+        export interface RevisionMetadataUpdate {
+            /**
+             * New version name. Cannot be emptied, every published revision carries one.
+             * example:
+             * Summer campaign
+             */
+            name?: string;
+            /**
+             * New description; an empty string removes it.
              */
             description?: string;
         }
@@ -3747,6 +3777,44 @@ declare namespace Paths {
             }
         }
     }
+    namespace UpdateJourneyRevisionMetadata {
+        namespace Parameters {
+            /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            export type Id = string; // uuid
+            /**
+             * example:
+             * 42
+             */
+            export type RevisionId = string;
+        }
+        export interface PathParameters {
+            id: /**
+             * example:
+             * 509cdffe-424f-457a-95c2-9708c304ce77
+             */
+            Parameters.Id /* uuid */;
+            revision_id: /**
+             * example:
+             * 42
+             */
+            Parameters.RevisionId;
+        }
+        export type RequestBody = Components.Schemas.RevisionMetadataUpdate;
+        namespace Responses {
+            export type $200 = Components.Schemas.JourneyRevisionSummary;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+        }
+    }
     namespace UpdateJourneyV2 {
         export type RequestBody = Components.Schemas.JourneyCreationRequestV2;
         namespace Responses {
@@ -3834,6 +3902,21 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJourneyRevision.Responses.$200>
+  /**
+   * updateJourneyRevisionMetadata - updateJourneyRevisionMetadata
+   * 
+   * Corrects the name and description of a revision that has been published, e.g. to fix a typo or add context after the fact. Metadata only: the revision's configuration, the journey record customers receive, the published version pointer and `published_at` / `published_by` never change, and nothing is republished.
+   * 
+   * Only revisions that have been published at least once carry a name and description, so any other revision answers `409`. An omitted field is left as it is; an empty `description` clears it.
+   * 
+   * Only available for organizations with journey versioning enabled; returns `404` otherwise.
+   * 
+   */
+  'updateJourneyRevisionMetadata'(
+    parameters?: Parameters<Paths.UpdateJourneyRevisionMetadata.PathParameters> | null,
+    data?: Paths.UpdateJourneyRevisionMetadata.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateJourneyRevisionMetadata.Responses.$200>
   /**
    * publishJourneyRevision - publishJourneyRevision
    * 
@@ -4133,6 +4216,21 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetJourneyRevision.Responses.$200>
+    /**
+     * updateJourneyRevisionMetadata - updateJourneyRevisionMetadata
+     * 
+     * Corrects the name and description of a revision that has been published, e.g. to fix a typo or add context after the fact. Metadata only: the revision's configuration, the journey record customers receive, the published version pointer and `published_at` / `published_by` never change, and nothing is republished.
+     * 
+     * Only revisions that have been published at least once carry a name and description, so any other revision answers `409`. An omitted field is left as it is; an empty `description` clears it.
+     * 
+     * Only available for organizations with journey versioning enabled; returns `404` otherwise.
+     * 
+     */
+    'patch'(
+      parameters?: Parameters<Paths.UpdateJourneyRevisionMetadata.PathParameters> | null,
+      data?: Paths.UpdateJourneyRevisionMetadata.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateJourneyRevisionMetadata.Responses.$200>
   }
   ['/v1/journey/configuration/{id}/publish']: {
     /**
@@ -4427,6 +4525,7 @@ export type JourneyValidationResponse = Components.Schemas.JourneyValidationResp
 export type PatchUpdateJourneyRequest = Components.Schemas.PatchUpdateJourneyRequest;
 export type PublishResult = Components.Schemas.PublishResult;
 export type PublishRevisionRequest = Components.Schemas.PublishRevisionRequest;
+export type RevisionMetadataUpdate = Components.Schemas.RevisionMetadataUpdate;
 export type RuleRef = Components.Schemas.RuleRef;
 export type S3Reference = Components.Schemas.S3Reference;
 export type SearchJourneysQueryRequest = Components.Schemas.SearchJourneysQueryRequest;

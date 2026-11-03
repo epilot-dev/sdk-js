@@ -455,6 +455,83 @@
             "description": "Journey versioning not enabled for the organization, or journey or revision not found"
           }
         }
+      },
+      "patch": {
+        "operationId": "updateJourneyRevisionMetadata",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "journey:*"
+          }
+        ],
+        "summary": "updateJourneyRevisionMetadata",
+        "description": "Corrects the name and description of a revision that has been published, e.g. to fix a typo or add context after the fact. Metadata only: the revision's configuration, the journey record customers receive, the published version pointer and `published_at` / `published_by` never change, and nothing is republished.\n\nOnly revisions that have been published at least once carry a name and description, so any other revision answers `409`. An omitted field is left as it is; an empty `description` clears it.\n\nOnly available for organizations with journey versioning enabled; returns `404` otherwise.\n",
+        "tags": [
+          "Journeys"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Journey ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "509cdffe-424f-457a-95c2-9708c304ce77"
+            }
+          },
+          {
+            "name": "revision_id",
+            "in": "path",
+            "description": "Revision ID, as returned in a revision summary",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "42"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The metadata to correct",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevisionMetadataUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The revision with its corrected metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyRevisionSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload, e.g. an empty name"
+          },
+          "403": {
+            "description": "No permission to edit the journey"
+          },
+          "404": {
+            "description": "Journey versioning not enabled for the organization, or journey or revision not found"
+          },
+          "409": {
+            "description": "The revision has never been published, so it has no name or description to edit"
+          }
+        }
       }
     },
     "/v1/journey/configuration/{id}/publish": {
@@ -3756,6 +3833,24 @@
           }
         }
       },
+      "RevisionMetadataUpdate": {
+        "type": "object",
+        "minProperties": 1,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "New version name. Cannot be emptied, every published revision carries one.",
+            "example": "Summer campaign"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000,
+            "description": "New description; an empty string removes it."
+          }
+        }
+      },
       "JourneyRevisionSummary": {
         "type": "object",
         "required": [
@@ -3793,6 +3888,15 @@
           "is_published": {
             "type": "boolean",
             "description": "Whether this revision is the published version right now."
+          },
+          "metadata_updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The last time the name or description was corrected after publishing. Absent when they are as the publish stamped them.\n"
+          },
+          "metadata_updated_by": {
+            "type": "string",
+            "description": "User id of whoever last corrected the name or description."
           },
           "mapping_config_version": {
             "type": "number",
