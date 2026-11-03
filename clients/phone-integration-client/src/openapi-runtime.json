@@ -146,6 +146,32 @@
         "responses": {}
       }
     },
+    "/v1/manager/agents/{provider_agent_id}/presence": {
+      "parameters": [
+        {
+          "name": "provider_agent_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's agent id (`LiveAgent.provider_agent_id`)"
+        }
+      ],
+      "put": {
+        "operationId": "setAgentPresence",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/manager/presences": {
+      "get": {
+        "operationId": "listAgentPresences",
+        "responses": {}
+      }
+    },
     "/v1/manager/queues": {
       "get": {
         "operationId": "listQueues",
@@ -181,6 +207,223 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/manager/live/kpis": {
+      "get": {
+        "operationId": "getLiveKpis",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/manager/reporting/agents": {
+      "get": {
+        "operationId": "getAgentPerformance",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/manager/missed-calls": {
+      "get": {
+        "operationId": "listMissedCalls",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/manager/missed-calls/{call_id}/callback": {
+      "parameters": [
+        {
+          "name": "call_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's id of the missed call (`MissedCall.call_id`)"
+        }
+      ],
+      "post": {
+        "operationId": "requestMissedCallCallback",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/manager/agents/{provider_agent_id}/activity": {
+      "parameters": [
+        {
+          "name": "provider_agent_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's agent id (`LiveAgent.provider_agent_id`)"
+        }
+      ],
+      "get": {
+        "operationId": "getAgentActivity",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/manager/queues/{queue_id}/settings": {
+      "parameters": [
+        {
+          "name": "queue_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's queue id"
+        }
+      ],
+      "get": {
+        "operationId": "getQueueSettings",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "setQueueSettings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/manager/settings/call-handling": {
+      "get": {
+        "operationId": "getCallHandlingSettings",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "setCallHandlingSettings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/manager/reporting/queues": {
+      "get": {
+        "operationId": "getQueuePerformance",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/manager/skills": {
+      "get": {
+        "operationId": "listSkills",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createSkill",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/manager/skills/{tag}": {
+      "parameters": [
+        {
+          "name": "tag",
+          "in": "path",
+          "required": true,
+          "description": "The skill, URL-encoded (e.g. `language%3Agerman`)"
+        }
+      ],
+      "delete": {
+        "operationId": "deleteSkill",
+        "responses": {}
+      }
+    },
+    "/v1/manager/queues/{queue_id}/skills/{tag}": {
+      "parameters": [
+        {
+          "name": "queue_id",
+          "in": "path",
+          "required": true,
+          "description": "The phone system's queue id"
+        },
+        {
+          "name": "tag",
+          "in": "path",
+          "required": true,
+          "description": "The skill, URL-encoded (e.g. `language%3Agerman`)"
+        }
+      ],
+      "put": {
+        "operationId": "setQueueSkill",
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "removeQueueSkill",
         "responses": {}
       }
     },
