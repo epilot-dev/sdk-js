@@ -317,6 +317,7 @@ export default defineCommand({
           { value: 'none', name: 'none' },
           { value: 'header', name: 'header' },
           { value: 'bearer', name: 'bearer' },
+          { value: 'basic', name: 'basic (username + password)' },
           { value: 'oauth2', name: 'oauth2' },
         ],
       });
@@ -351,6 +352,13 @@ export default defineCommand({
     if (tmpl.surfaces) component.surfaces = tmpl.surfaces(componentName);
     if (tmpl.assets) component.assets = tmpl.assets(componentName);
     if (tmpl.options) component.options = tmpl.options;
+    if (proxyConfig?.auth_type === 'basic') {
+      // The proxy reads these exact option keys to build the Basic Authorization header
+      component.options = [
+        { key: 'username', label: 'Username', type: 'text', required: true },
+        { key: 'password', label: 'Password', type: 'secret', required: true },
+      ];
+    }
 
     manifest.components.push(component);
     writeManifest(manifestPath, manifest);
@@ -361,7 +369,14 @@ export default defineCommand({
 
     if (isApiProxy) {
       log.info(`  Proxy: ${proxyConfig!.name} -> ${proxyConfig!.target} (auth: ${proxyConfig!.auth_type})`);
-      log.dim('Add secret options to the component manually if needed.');
+      const expectedKeys: Record<string, string> = {
+        header: '"secret" (and set "auth_header" in the configuration)',
+        bearer: '"secret"',
+        basic: '"username" and "password" (added to the component)',
+        oauth2: '"client_id", "client_secret", optional "scope" (and set "token_url" in the configuration)',
+      };
+      const keys = expectedKeys[proxyConfig!.auth_type];
+      if (keys) log.dim(`Auth options read by the proxy: ${keys}.`);
     } else if (tmpl.configOnly) {
       log.info(`  components/${componentName}/`);
       log.dim('This is a config-only component. Edit configuration.json to configure it.');

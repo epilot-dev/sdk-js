@@ -23,7 +23,23 @@ export interface AppManifest {
   blueprint?: { manifest_id?: string };
   assets?: { logo?: string };
   functions?: ManifestFunction[];
+  /** App-level options: settings the installing org fills in once for the whole app */
+  options?: ManifestOption[];
   components: ManifestComponent[];
+}
+
+export interface ManifestOption {
+  key: string;
+  label?: string;
+  type: 'text' | 'number' | 'boolean' | 'secret' | 'object';
+  required?: boolean;
+  description?: string;
+  /** Value is a list of entries instead of a single value */
+  repeatable?: boolean;
+  /** Write-only, server-side only value (app-level options only). Always true for secrets. */
+  sensitive?: boolean;
+  /** Sub-fields of a `type: object` option (primitives only, no nesting) */
+  fields?: { key: string; label?: string; description?: string; required?: boolean; type: string }[];
 }
 
 export interface ManifestFunction {
@@ -52,7 +68,9 @@ export interface ManifestComponent {
   component_type: string;
   name?: { en?: string | null; de: string };
   description?: { en?: string | null; de: string };
-  options?: { key: string; label?: string; type: string; required?: boolean; description?: string }[];
+  options?: Omit<ManifestOption, 'sensitive'>[];
+  /** Keys of app-level options this component uses (scoping hint for client-side components) */
+  uses_options?: string[];
   configuration: Record<string, unknown>;
   surfaces?: Record<string, unknown>;
   assets?: { bundle?: string; zip?: string };
@@ -133,6 +151,14 @@ export function validateManifest(data: unknown): { valid: boolean; errors: Valid
     }
   }
 
+  if (obj.options !== undefined) {
+    if (!Array.isArray(obj.options)) {
+      errors.push({ path: '/options', message: 'Must be an array' });
+    } else {
+      validateAppOptions(obj.options, Array.isArray(obj.components) ? obj.components : [], errors);
+    }
+  }
+
   if (errors.length > 0) return { valid: false, errors };
   return { valid: true, errors: [], manifest: data as AppManifest };
 }
@@ -197,6 +223,74 @@ function validateFunctions(functions: unknown[], errors: ValidationError[]): voi
       message: `At most ${MAX_SCHEDULED_FUNCTIONS} scheduled functions per app (schedules run once per installation)`,
     });
   }
+}
+
+const OPTION_TYPES = ['text', 'number', 'boolean', 'secret', 'object'];
+const OPTION_FIELD_TYPES = ['text', 'number', 'boolean', 'secret'];
+
+/** Mirrors the App API's deploy-time rules for app-level options. */
+function validateAppOptions(options: unknown[], components: unknown[], errors: ValidationError[]): void {
+  const seen = new Set<string>();
+
+  for (let i = 0; i < options.length; i++) {
+    const opt = options[i] as Record<string, unknown>;
+    const path = `/options/${i}`;
+
+    if (typeof opt.key !== 'string' || opt.key.length === 0) {
+      errors.push({ path: `${path}/key`, message: 'Required string' });
+    } else if (seen.has(opt.key)) {
+      errors.push({ path: `${path}/key`, message: `Duplicate option key "${opt.key}"` });
+    } else {
+      seen.add(opt.key);
+    }
+
+    if (!OPTION_TYPES.includes(opt.type as string)) {
+      errors.push({ path: `${path}/type`, message: `Must be one of: ${OPTION_TYPES.join(', ')}` });
+    }
+
+    const fields = opt.fields as Record<string, unknown>[] | undefined;
+    if (opt.type === 'object') {
+      if (!Array.isArray(fields) || fields.length === 0) {
+        errors.push({ path: `${path}/fields`, message: 'Required for type "object"' });
+      } else {
+        fields.forEach((field, fi) => {
+          if (typeof field.key !== 'string' || field.key.length === 0) {
+            errors.push({ path: `${path}/fields/${fi}/key`, message: 'Required string' });
+          }
+          if (!OPTION_FIELD_TYPES.includes(field.type as string)) {
+            errors.push({
+              path: `${path}/fields/${fi}/type`,
+              message: `Must be one of: ${OPTION_FIELD_TYPES.join(', ')} (objects cannot nest)`,
+            });
+          }
+        });
+      }
+    } else if (fields !== undefined) {
+      errors.push({ path: `${path}/fields`, message: 'Only options of type "object" may declare fields' });
+    }
+
+    const touchesSecret = opt.type === 'secret' || (Array.isArray(fields) && fields.some((f) => f.type === 'secret'));
+    if (touchesSecret && opt.sensitive === false) {
+      errors.push({
+        path: `${path}/sensitive`,
+        message: `Option "${opt.key}" contains a secret and is always sensitive — remove "sensitive: false"`,
+      });
+    }
+  }
+
+  // The app level is the single source of truth once it is used
+  components.forEach((comp, ci) => {
+    const compOptions = (comp as Record<string, unknown>).options;
+    if (!Array.isArray(compOptions)) return;
+    compOptions.forEach((opt: Record<string, unknown>, oi) => {
+      if (seen.has(opt.key as string)) {
+        errors.push({
+          path: `/components/${ci}/options/${oi}`,
+          message: `Option key "${opt.key}" is already declared at app level — remove the component-level declaration`,
+        });
+      }
+    });
+  });
 }
 
 // ─── Manifest I/O ──────────────────────────────────────────────────────────────
@@ -558,6 +652,18 @@ export function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+/** Keep the declaration only — drops configured values and read-only API fields. */
+function toOptionDeclaration(opt: Record<string, unknown>): ManifestOption {
+  const option: ManifestOption = { key: opt.key as string, type: opt.type as ManifestOption['type'] };
+  if (opt.label) option.label = opt.label as string;
+  if (opt.required) option.required = true;
+  if (opt.description) option.description = opt.description as string;
+  if (opt.repeatable) option.repeatable = true;
+  if (opt.sensitive) option.sensitive = true;
+  if (Array.isArray(opt.fields) && opt.fields.length > 0) option.fields = opt.fields as ManifestOption['fields'];
+  return option;
+}
+
 export function toManifest(config: Record<string, unknown>, version: Record<string, unknown>): AppManifest {
   const manifest: AppManifest = {
     $schema: 'https://cdn.app.sls.epilot.io/v1/schema.json',
@@ -592,6 +698,10 @@ export function toManifest(config: Record<string, unknown>, version: Record<stri
     manifest.assets = { logo: './assets/logo.png' };
   }
 
+  if (Array.isArray(version.options) && version.options.length > 0) {
+    manifest.options = version.options.map((opt: Record<string, unknown>) => toOptionDeclaration(opt));
+  }
+
   const components = (version.components ?? []) as Record<string, unknown>[];
   manifest.components = components.map((comp): ManifestComponent => {
     const component: ManifestComponent = {
@@ -603,14 +713,18 @@ export function toManifest(config: Record<string, unknown>, version: Record<stri
     if (comp.name) component.name = comp.name as ManifestComponent['name'];
     if (comp.description) component.description = comp.description as ManifestComponent['description'];
 
-    if (Array.isArray(comp.options) && comp.options.length > 0) {
-      component.options = comp.options.map((opt: Record<string, unknown>) => {
-        const option: Record<string, unknown> = { key: opt.key, type: opt.type };
-        if (opt.label) option.label = opt.label;
-        if (opt.required) option.required = opt.required;
-        if (opt.description) option.description = opt.description;
-        return option as ManifestComponent['options'] extends (infer T)[] | undefined ? T : never;
+    // Lifted options are app-level declarations folded back for legacy consumers
+    const componentOptions = Array.isArray(comp.options)
+      ? comp.options.filter((opt: Record<string, unknown>) => !opt.lifted)
+      : [];
+    if (componentOptions.length > 0) {
+      component.options = componentOptions.map((opt: Record<string, unknown>) => {
+        const { sensitive, ...option } = toOptionDeclaration(opt);
+        return option;
       });
+    }
+    if (Array.isArray(comp.uses_options) && comp.uses_options.length > 0) {
+      component.uses_options = comp.uses_options as string[];
     }
 
     if (comp.surfaces && typeof comp.surfaces === 'object' && Object.keys(comp.surfaces as object).length > 0) {

@@ -215,6 +215,12 @@ export default defineCommand({
         if (key.startsWith('_')) delete (componentPayload as Record<string, unknown>)[key];
       }
 
+      // Options merge on upsert: with app-level options, clear component-level
+      // declarations that moved up, or the version patch below rejects them
+      if (manifest.options && !componentPayload.options) {
+        componentPayload.options = [];
+      }
+
       // Read configuration.json override from component directory
       if (_dir) {
         const configJsonPath = resolve(manifestDir, 'components', _dir, 'configuration.json');
@@ -305,6 +311,22 @@ export default defineCommand({
             log.success(`Deleted remote component ${remote.id}`);
           }
         }
+      }
+    }
+
+    // Step 6b: Patch app-level options. Runs after the component sync because
+    // the API rejects app-level keys that a remote component still declares.
+    // Like functions, the declared set replaces the remote one (empty clears it).
+    if (manifest.options) {
+      if (dryRun) {
+        log.info(`[dry-run] Would set ${manifest.options.length} app-level option(s)`);
+      } else {
+        await client.patchVersion(appId!, targetVersion, {
+          options: manifest.options,
+          // The API resets the blueprint reference on every version patch
+          ...(manifest.blueprint?.manifest_id ? { manifest_id: manifest.blueprint.manifest_id } : {}),
+        });
+        log.success(`Updated ${manifest.options.length} app-level option(s)`);
       }
     }
 

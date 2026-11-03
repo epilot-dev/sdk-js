@@ -5,6 +5,13 @@ export interface ProxyRequestOptions {
   params?: Record<string, string>;
   body?: unknown;
   headers?: Record<string, string>;
+  /**
+   * How to read the response body.
+   * - `auto` (default): parse JSON when the content type is JSON, otherwise return text
+   * - `json` / `text`: always parse as JSON / return text
+   * - `blob` / `arrayBuffer`: return the raw bytes, e.g. for images
+   */
+  responseType?: 'auto' | 'json' | 'text' | 'blob' | 'arrayBuffer';
 }
 
 export interface ProxyClientConfig {
@@ -90,7 +97,7 @@ async function proxyRequest<T>(params: {
   options?: ProxyRequestOptions;
 }): Promise<T> {
   const { appId, token, baseUrl, proxyName, path, options = {} } = params;
-  const { method = 'GET', params: queryParams, body, headers = {} } = options;
+  const { method = 'GET', params: queryParams, body, headers = {}, responseType = 'auto' } = options;
 
   const normalizedPath = path.startsWith('/') ? path.slice(1) : path;
   let url = `${baseUrl}/v1/public/app/${appId}/proxy/${proxyName}/${normalizedPath}`;
@@ -120,6 +127,17 @@ async function proxyRequest<T>(params: {
   if (!response.ok) {
     const errorBody = await response.text().catch(() => '');
     throw new ProxyRequestError(response.status, response.statusText, errorBody);
+  }
+
+  switch (responseType) {
+    case 'json':
+      return (await response.json()) as T;
+    case 'text':
+      return (await response.text()) as unknown as T;
+    case 'blob':
+      return (await response.blob()) as unknown as T;
+    case 'arrayBuffer':
+      return (await response.arrayBuffer()) as unknown as T;
   }
 
   const contentType = response.headers.get('content-type') ?? '';

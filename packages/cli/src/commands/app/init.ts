@@ -495,15 +495,27 @@ const data = await proxy('sap', '/API_BUSINESS_PARTNER/A_BusinessPartner', {
 });
 \`\`\`
 
-Current limits — probe your target with curl through the proxy before building on it:
+What the proxy supports — still probe your target with curl through the proxy before building on it:
 
-- **Query parameters are rejected** (400) by the proxy route's own request validation.
-  Workaround until fixed: percent-encode the \`?\` into the path
-  (\`/path%3F$expand=to_Customer\`) — fragile, leave a comment where you do it.
-- Only **GET and POST** are proxied — no PUT/PATCH/DELETE.
-- \`auth_type\` is \`none | header | bearer | oauth2\` — there is **no \`basic\`**. For HTTP Basic
-  targets, add one secret option holding a pre-computed Base64 \`user:pass\` and configure
-  \`"headers": { "Authorization": "Basic {{my_basic_secret}}" }\`.
+- **Query parameters** are forwarded unchanged. Pass them with the \`params\` option
+  (\`proxy('wms', '/wms', { appId, token, params: { SERVICE: 'WMS', REQUEST: 'GetCapabilities' } })\`).
+- Methods **GET, POST, PUT, PATCH and DELETE** are proxied.
+- \`auth_type\` is \`none | header | bearer | basic | oauth2\`. Each type reads fixed option keys
+  (component options first, then app-level options):
+
+  | \`auth_type\` | Option keys | Injected header |
+  | --- | --- | --- |
+  | \`header\` | \`secret\` (+ \`"auth_header": "X-Api-Key"\` in the configuration) | \`<auth_header>: <secret>\` |
+  | \`bearer\` | \`secret\` | \`Authorization: Bearer <secret>\` |
+  | \`basic\` | \`username\`, \`password\` | \`Authorization: Basic base64(username:password)\` |
+  | \`oauth2\` | \`client_id\`, \`client_secret\`, optional \`scope\` (+ \`token_url\` in the configuration) | \`Authorization: Bearer <token>\` |
+
+- Extra headers: \`"headers": { "X-Tenant": "{{tenant_id}}" }\` in the configuration, with
+  \`{{option_key}}\` interpolated server-side.
+- **Responses are read as text.** JSON, XML, HTML and SVG pass through fine, but binary
+  responses (PNG/JPEG images, PDFs, ZIPs) get corrupted. For map services, prefer text formats
+  (WFS GeoJSON, WMS GetFeatureInfo, SVG) over binary WMS images.
+- Upstream timeout is 25 seconds.
 
 ## Local Development (Dev Mode)
 
@@ -622,7 +634,9 @@ What permissions do and do not cover:
   admin re-save the app configuration in epilot (the patch resets \`enabled\` to false).
 
 ### Options
-Components can declare \`options\` — configuration values set by the installing organization. Types: \`text\`, \`number\`, \`boolean\`, \`secret\`. Use \`{{option_key}}\` in configuration URLs/headers for interpolation.
+Declare \`options\` at the top level of manifest.json — configuration values the installing organization sets once for the whole app. Types: \`text\`, \`number\`, \`boolean\`, \`secret\`, \`object\` (with \`fields\`); \`repeatable: true\` makes a list. \`sensitive: true\` keeps a value server-side only (always on for secrets). Functions receive all option values in \`input.app_options\`. Use \`{{option_key}}\` in configuration URLs/headers for interpolation.
+
+Components can still declare their own \`options\` (legacy), but a key must not be declared at both levels. When top-level \`options\` exist, deploy sends \`"options": []\` for components without options, so declarations moved to the app level are removed from the component.
 
 Two caveats:
 - **Options merge on upsert.** Deploying a component without an \`options\` key leaves the old
