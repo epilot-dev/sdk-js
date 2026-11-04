@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Configuration Hub API",
-    "description": "Lightweight index API for exploring epilot organization configurations.\n\nProvides a unified tree view across all config types. Returns summary metadata only —\nthe frontend calls individual epilot APIs directly (via @epilot/sdk) for full config payloads.\n\n## Source APIs per resource type\n\nEach resource type maps to a specific epilot API. The frontend should use the corresponding\n@epilot/sdk client to fetch full config details (e.g., for the side panel JSON view).\n\n| Resource Type | Source API | SDK Client |\n|---|---|---|\n| `journey` | journey.sls.epilot.io | `@epilot/sdk/journey` |\n| `automation_flow` | automation.sls.epilot.io | `@epilot/sdk/automation` |\n| `workflow_definition` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `closing_reason` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `flow_template` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `schema` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy_classification` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `emailtemplate` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `price` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `tax` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `coupon` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `file` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `document_template` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `webhook` | webhooks.sls.epilot.io | `@epilot/sdk/webhooks` |\n| `saved_view` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `dashboard` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `kanban` | kanban.sls.epilot.io | `@epilot/sdk/kanban` |\n| `role` | permissions.sls.epilot.io | `@epilot/sdk/permissions` |\n| `usergroup` | user.sls.epilot.io | `@epilot/sdk/user` |\n| `validation_rule` | entity.sls.epilot.io | `@epilot/sdk/validation-rules` |\n| `integration` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `app` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `designbuilder` | design-builder-api.sls.epilot.io | `@epilot/sdk/design` |\n| `notification_template` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `custom_variable` | entity.sls.epilot.io | `@epilot/sdk/template-variables` |\n| `environment_variable` | environments.sls.epilot.io | `@epilot/sdk/environments` |\n| `entity_mapping` | entity-mapping.sls.epilot.io | `@epilot/sdk/entity-mapping` |\n| `portal_config` | customer-portal.sls.epilot.io | `@epilot/sdk/customer-portal` |\n| `target` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product_recommendation` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `access_token` | access-token.sls.epilot.io | `@epilot/sdk/access-token` |\n",
+    "description": "Lightweight index API for exploring epilot organization configurations.\n\nProvides a unified tree view across all config types. Returns summary metadata only —\nthe frontend calls individual epilot APIs directly (via @epilot/sdk) for full config payloads.\n\n## Source APIs per resource type\n\nEach resource type maps to a specific epilot API. The frontend should use the corresponding\n@epilot/sdk client to fetch full config details (e.g., for the side panel JSON view).\n\n| Resource Type | Source API | SDK Client |\n|---|---|---|\n| `journey` | journey.sls.epilot.io | `@epilot/sdk/journey` |\n| `datasource` | epilot360-native-journeys.sls.epilot.io | – (plain HTTP client) |\n| `automation_flow` | automation.sls.epilot.io | `@epilot/sdk/automation` |\n| `workflow_definition` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `closing_reason` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `flow_template` | workflow-definition.sls.epilot.io | `@epilot/sdk/workflow-definition` |\n| `schema` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `taxonomy_classification` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `emailtemplate` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `price` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `tax` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `coupon` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `file` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `document_template` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `webhook` | webhooks.sls.epilot.io | `@epilot/sdk/webhooks` |\n| `saved_view` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `dashboard` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `kanban` | kanban.sls.epilot.io | `@epilot/sdk/kanban` |\n| `role` | permissions.sls.epilot.io | `@epilot/sdk/permissions` |\n| `usergroup` | user.sls.epilot.io | `@epilot/sdk/user` |\n| `validation_rule` | entity.sls.epilot.io | `@epilot/sdk/validation-rules` |\n| `integration` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `app` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `designbuilder` | design-builder-api.sls.epilot.io | `@epilot/sdk/design` |\n| `notification_template` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `custom_variable` | entity.sls.epilot.io | `@epilot/sdk/template-variables` |\n| `environment_variable` | environments.sls.epilot.io | `@epilot/sdk/environments` |\n| `entity_mapping` | entity-mapping.sls.epilot.io | `@epilot/sdk/entity-mapping` |\n| `portal_config` | customer-portal.sls.epilot.io | `@epilot/sdk/customer-portal` |\n| `target` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `product_recommendation` | entity.sls.epilot.io | `@epilot/sdk/entity` |\n| `access_token` | access-token.sls.epilot.io | `@epilot/sdk/access-token` |\n| `email_signature` | email-settings.sls.epilot.io | `@epilot/sdk/email-settings` |\n| `shared_inbox` | email-settings.sls.epilot.io | `@epilot/sdk/email-settings` |\n| `org_setting` | organization-v2.sls.epilot.io | `@epilot/sdk/organization` |\n",
     "version": "0.2.0"
   },
   "servers": [
@@ -35,12 +35,21 @@
     {
       "name": "Compare",
       "description": "Cross-org configuration comparison, match suggestions, and lineage operations"
+    },
+    {
+      "name": "Health",
+      "description": "Configuration health scans, reports, coverage requests, cleanup and ignored findings"
     }
   ],
   "paths": {
     "/v1/configs/types": {
       "get": {
         "operationId": "listConfigTypes",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "listConfigTypes",
         "description": "Returns the static list of available configuration types with display metadata.\nThis is a cheap call — no fan-out to downstream APIs. Returns all known types\nwith labels and icons. The frontend should then call `listConfigs` separately\nfor each type it wants to load.\n",
         "tags": [
@@ -74,6 +83,11 @@
     "/v1/configs/{type}": {
       "get": {
         "operationId": "listConfigs",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "listConfigs",
         "description": "List configs of a given type with pagination. Returns summary metadata only\n(not full payloads). The frontend calls this per type folder when expanding.\n\nSupports offset-based pagination via `from` and `size` parameters.\n",
         "tags": [
@@ -181,6 +195,11 @@
     "/v1/configs/{type}/{id}/dependencies": {
       "get": {
         "operationId": "getConfigDependencies",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "getConfigDependencies",
         "description": "Get configs that are referenced by the given config.\nUsed to render children when expanding a config node in the tree.\n\nResolves dependencies by fetching the config payload server-side and scanning\nfor references (UUIDs, source IDs, slug-based references).\n",
         "tags": [
@@ -227,6 +246,11 @@
     "/v1/configs/{type}/{id}/used_by": {
       "get": {
         "operationId": "getConfigUsedBy",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "getConfigUsedBy",
         "description": "Get configs that reference the given config (reverse dependencies).\nScans the indexed config items for references to this config's ID or aliases.\n",
         "tags": [
@@ -257,6 +281,11 @@
     "/v1/configs/index": {
       "get": {
         "operationId": "getIndex",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "getIndex",
         "description": "Return the current index build state for the caller's organization.\nClients poll this to decide whether to show a \"building\" indicator\nand when to refetch data.\n",
         "tags": [
@@ -276,9 +305,335 @@
         }
       }
     },
+    "/v1/configs/health:scan": {
+      "post": {
+        "operationId": "startHealthScan",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "startHealthScan",
+        "description": "Start an asynchronous org health scan — fire-and-forget, mirrors\n`rebuildIndex`. The scan walks the indexed configs, fetches each\npayload, extracts field-path-known references (journey→mapping,\nautomation→template/webhook/workflow, workflow→automation, …) and\nrecords a finding for every reference that resolves to a missing or\ninactive config, plus configs that are listed but unreadable.\n\nRequires a built config index (422 otherwise). Poll `getHealthReport`\nfor status and results.\n",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "202": {
+            "description": "Scan started (or already running)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthScanStartResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Config index not built yet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthScanStartResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/health": {
+      "get": {
+        "operationId": "getHealthReport",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "getHealthReport",
+        "description": "Return the caller org's current health report: scan status, summary\ncounts by severity, new/resolved deltas vs the previous scan, and the\nfull finding list (errors first, then most recently appeared).\nFindings carry `first_seen`/`last_seen` so the UI can correlate new\nfindings with recent imports and installs.\n",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Current health report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/health:coverage-request": {
+      "post": {
+        "operationId": "requestHealthCoverage",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "requestHealthCoverage",
+        "description": "Send a request for configuration the health check does not cover yet.\nPosted to the #epilot-org-health Slack channel together with the calling\norg and user. Returns 503 when no webhook is configured for the stage.\n",
+        "tags": [
+          "Health"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "message"
+                ],
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Request sent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "sent",
+                        "failed"
+                      ]
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Empty message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "No Slack webhook configured for this stage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/health:cleanup": {
+      "post": {
+        "operationId": "startHealthCleanup",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:delete"
+          }
+        ],
+        "summary": "startHealthCleanup",
+        "description": "Remove references that are already inert: dangling `$relation` entries\non products and prices (a price selling with a deleted tax, a product\nlinking a deleted price, …), automation triggers pointed at a deleted\njourney (they can never fire), and the journey attached to a workflow\ntask when that journey is deleted (the task itself stays). Only\nfindings flagged `cleanable` are touched; live wiring — an action's\nemail template, a task's automation, a webhook target — is never\nmodified, because removing it would change what runs. Without\na body every cleanable finding is cleaned; `finding_ids` narrows the\nset (e.g. one row's Clean up button). Fire-and-forget: poll\n`getHealthReport` — status `cleaning` until done.\n",
+        "tags": [
+          "Health"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "finding_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Cleanup started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "cleaning",
+                        "failed"
+                      ]
+                    },
+                    "cleanable": {
+                      "type": "integer"
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "No cleanable findings matched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthScanStartResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/health:ignore": {
+      "post": {
+        "operationId": "setHealthFindingsIgnored",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "setHealthFindingsIgnored",
+        "description": "Acknowledge findings as intentional (or undo that). An ignored\nfinding is excluded from the headline score and the default\nbreakdown, but stays visible under the Ignored filter and can be\nun-ignored at any time — it never disappears for good. Synchronous:\nonly flips a flag on already-computed rows, no rescan needed.\n`ignored` defaults to `true`.\n",
+        "tags": [
+          "Health"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "finding_ids"
+                ],
+                "properties": {
+                  "finding_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "ignored": {
+                    "type": "boolean",
+                    "default": true
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ignore state updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status"
+                  ],
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    },
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "finding_ids missing or empty",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/configs/compare": {
       "post": {
         "operationId": "compareConfigs",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "compareConfigs",
         "description": "Compare the caller org's configs of a single type against another\n(source) org, side by side. Rows are paired via the lineage registry in\nboth sync directions (caller imported from source, or source imported\nfrom caller); configs without a counterpart come back as `only_current`\nor `only_source`.\n\n`source_auth_token` must be a valid token for `source_org_id` — the\nfrontend mints one via the pipeline pairing, mirroring `createSyncJob`'s\n`target_auth_token`. The token is verified against `source_org_id`\nbefore any source-org data is read.\n\nPOST because the request carries a token; the operation reads only.\n",
         "tags": [
@@ -331,6 +686,11 @@
     "/v1/configs/compare/suggestions": {
       "post": {
         "operationId": "suggestMatches",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "suggestMatches",
         "description": "Run the sync-grade heuristic match (`lookupByHeuristic` — name / slug /\nunique key) for a batch of source-org configs that have no lineage\nentry, and return candidate counterparts in the caller's org.\n\nSuggestions are ephemeral — nothing is persisted. The client offers\neach candidate to the user, and a confirmed pair is written via\n`confirmLineage`. Batches are capped at 25 ids; the client pages\nthrough unmatched rows across successive calls.\n",
         "tags": [
@@ -373,6 +733,11 @@
     "/v1/configs/lineage": {
       "post": {
         "operationId": "confirmLineage",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
         "summary": "confirmLineage",
         "description": "Persist a lineage entry pairing a source-org config with a config in\nthe caller's org — used to confirm a heuristic suggestion from the\nCompare view. Writes to the caller org's lineage partition (caller as\nsync target), so subsequent syncs PATCH the confirmed target instead of\ncreating a duplicate. Conflicts (an existing entry pointing at a\ndifferent target) return 409 so the client can refresh.\n",
         "tags": [
@@ -423,6 +788,11 @@
       },
       "delete": {
         "operationId": "breakLineage",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
         "summary": "breakLineage",
         "description": "Delete a lineage entry from the caller org's partition (caller as sync\ntarget), identified by `type` + `source_id`. Used to break a wrong or\nstale match from the Compare view. Note: a future sync can re-match the\nsame pair heuristically — the entry is deleted, not blocklisted. To\nbreak a match recorded in the OTHER direction, call this operation\nauthenticated as the other org (pipeline token).\n",
         "tags": [
@@ -475,6 +845,11 @@
     "/v1/configs/sync-jobs": {
       "post": {
         "operationId": "createSyncJob",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
         "summary": "createSyncJob",
         "description": "Create a new cross-org sync job. The job is enqueued for asynchronous execution\nby the worker Lambda; the response returns the persisted job header with status\n`pending`.\n\nSee `docs/sync/INTERFACES.md` for the locked request/response contract.\n",
         "tags": [
@@ -515,6 +890,11 @@
       },
       "get": {
         "operationId": "listSyncJobs",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "listSyncJobs",
         "description": "List sync jobs scoped to the caller's organization, paginated with an opaque\ncursor. Defaults to most-recent first.\n",
         "tags": [
@@ -553,6 +933,11 @@
     "/v1/configs/sync-jobs/{id}": {
       "get": {
         "operationId": "getSyncJob",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "getSyncJob",
         "description": "Fetch a single sync job by ID. Returns the job header, counts summary,\ncurrent phase pointer, and the latest activity events. Frontend polls this\nendpoint with a ramping interval.\n",
         "tags": [
@@ -590,8 +975,13 @@
     "/v1/configs/sync-jobs/{id}/retry": {
       "post": {
         "operationId": "retrySyncJob",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
         "summary": "retrySyncJob",
-        "description": "Retry the unresolved resources from a prior sync job: `failed` rows, plus\nrows the original run left at `pending`/`in_progress` because it stopped\nearly. Creates a new job whose scope is that `(type, source_id)` set and\nenqueues it for execution. Optionally accepts inline payload overrides.\n",
+        "description": "Retry the unresolved resources from a prior sync job: `failed` rows, plus\nrows the original run left at `pending`/`in_progress` because it stopped\nearly. Creates a new job whose scope is that `(type, source_id)` set and\nenqueues it for execution. Optionally accepts inline payload overrides.\n\nWith `resources`, only those rows are retried, plus the unresolved rows\nof the original job they depend on (transitively). The new job carries\n`retry_of`; the original job's `retried_by` gains the new job's id.\n",
         "tags": [
           "Sync"
         ],
@@ -621,6 +1011,78 @@
               }
             }
           },
+          "400": {
+            "description": "Missing `target_auth_token`, or `resources` lists rows that are not\nunresolved rows of the job (listed in `invalid_resources`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJobRetryErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/retry-plan": {
+      "post": {
+        "operationId": "planSyncJobRetry",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "planSyncJobRetry",
+        "description": "Preview what `retrySyncJob` would re-run for the same `resources`,\nwithout creating a job: the selected rows and the unresolved rows they\ndepend on. Read-only; needs no target token.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncJobRetryPlanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Retry plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJobRetryPlan"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`resources` lists rows that are not unresolved rows of the job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJobRetryErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Sync job not found",
             "content": {
@@ -637,6 +1099,11 @@
     "/v1/configs/sync-jobs/{id}/cancel": {
       "post": {
         "operationId": "cancelSyncJob",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
         "summary": "cancelSyncJob",
         "description": "Cancel a running sync job. Marks the job `cancelled` with a `finished_at`\nso it stops being reported as in-flight, and the worker stops at its next\nbatch boundary — phases re-read the job status and abort rather than\noverwrite a cancellation with their own outcome.\n\nResources already written to the target are NOT rolled back; cancelling\nstops further work. Jobs already in a terminal state are rejected with\n409.\n",
         "tags": [
@@ -681,11 +1148,16 @@
         }
       }
     },
-    "/v1/configs/sync-jobs/{id}/resources": {
+    "/v1/configs/sync-jobs/{id}/events": {
       "get": {
-        "operationId": "listSyncJobResources",
-        "summary": "listSyncJobResources",
-        "description": "List the per-resource rows for a sync job. Supports filtering by status\n(e.g. `failed`) and cursor pagination. Used by the failures table and the\ndry-run plan view in the frontend.\n",
+        "operationId": "listSyncJobEvents",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "listSyncJobEvents",
+        "description": "Full activity log of a sync job, latest first: one event per resource\nstatus change. Paginate older events with `next_cursor`, or poll for\nnew ones with `after` (the newest event id the client holds).\n\nJobs that predate the event log are served from the op-log instead\n(`source: op_log`): one event per resource holding its last state.\n`after` is ignored there and the first page is returned.\n",
         "tags": [
           "Sync"
         ],
@@ -697,7 +1169,88 @@
             "$ref": "#/components/parameters/CursorParam"
           },
           {
-            "$ref": "#/components/parameters/SizeParam"
+            "name": "size",
+            "in": "query",
+            "description": "Number of events per page",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "description": "Only return events strictly newer than this event id (max 500,\nlatest first). `truncated: true` means more new events existed than\nwere returned — reload from the first page.\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "description": "Comma-separated event kinds to return (`resource`, `dependency`,\n`step`), e.g. `dependency,step`. Omit for every kind. Applies to\npages, `after` polling and `total`.\n",
+            "schema": {
+              "type": "string",
+              "example": "dependency,step"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of sync job events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJobEventListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/resources": {
+      "get": {
+        "operationId": "listSyncJobResources",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "listSyncJobResources",
+        "description": "List the per-resource rows for a sync job. Supports filtering by status\n(e.g. `failed`) and type, and cursor pagination. Used by the job detail\npage, the failures table and the dry-run plan view in the frontend.\n\nRows without a stored `title` get one from the config index (the target\norg's copy, else the source org's) when it can be resolved. Rows carry\n`source_link` / `target_link` portal editor URLs where they can be built.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 1000
+            }
           },
           {
             "name": "status",
@@ -705,6 +1258,22 @@
             "description": "Filter resources by status",
             "schema": {
               "$ref": "#/components/schemas/SyncJobResourceStatus"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filter resources by resource type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "plan_action",
+            "in": "query",
+            "description": "Filter resources by plan action (`plan.action`). Only rows of plan\njobs and of jobs applying a plan carry one.\n",
+            "schema": {
+              "$ref": "#/components/schemas/SyncPlanAction"
             }
           }
         ],
@@ -732,9 +1301,382 @@
         }
       }
     },
+    "/v1/configs/sync-jobs/{id}/plan": {
+      "get": {
+        "operationId": "getSyncPlan",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "getSyncPlan",
+        "description": "Summary of a plan: a dry-run sync job (`createSyncJob` with\n`dry_run: true`). Says how many resources a real run would create,\nupdate or leave unchanged, overall and per type.\n\nEvery resource row of the plan also carries a `plan` object (see\n`listSyncJobResources`, which can filter by `plan_action`). The field\ndiffs behind each update are served by `listSyncPlanDiffs` and\n`getSyncPlanDiff`.\n\nA plan describes the target org at planning time. Apply it with\n`applySyncPlan`, which can leave out resources first.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncPlan"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The job is not a plan (it was not created with `dry_run`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/plan/diffs": {
+      "get": {
+        "operationId": "listSyncPlanDiffs",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "listSyncPlanDiffs",
+        "description": "Field-level diffs of a plan, one per planned resource: what the target\norg has now (`before`) and what a real run would write (`after`). Use\nit to review a plan in bulk, e.g. from an AI agent.\n\nOnly resources whose plan action is `create`, `update` or `no_change`\nhave a diff. Pages are ordered by type, then source id.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Number of diffs per page",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Only diffs of this resource type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "description": "Only diffs with this plan action",
+            "schema": {
+              "$ref": "#/components/schemas/SyncPlanAction"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of plan diffs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncPlanDiffListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The job is not a plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/plan/diffs/{type}/{source_id}": {
+      "get": {
+        "operationId": "getSyncPlanDiff",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "getSyncPlanDiff",
+        "description": "Field-level diff of one planned resource. See `listSyncPlanDiffs`.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "description": "Resource type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "source_id",
+            "in": "path",
+            "required": true,
+            "description": "Source-org resource id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan diff",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncPlanDiff"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found, or the resource has no diff (it is not part of\nthe plan, its plan action is `skip`, planning failed for it, or the\ndiff expired — diffs are kept for 30 days)\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The job is not a plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/plan/apply": {
+      "post": {
+        "operationId": "applySyncPlan",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "applySyncPlan",
+        "description": "Run a finished plan for real. Creates a new sync job (it carries\n`applied_from_plan`; the plan's `applied_by` gets the new job's id)\nand enqueues it.\n\nBy default the job applies every resource the plan would `create` or\n`update`. `no_change` and `skip` resources are not written. Change\nthe selection with:\n- `resources`: apply exactly these rows of the plan. Can include\n  `no_change` rows to write them anyway.\n- `exclude`: leave these rows out (applied after `resources`).\n\nRows that are not applied are still listed on the new job, as\n`skipped` with `excluded_from_apply`. Their existing targets keep\nresolving references from the applied resources.\n\nLeaving out a resource the plan would create, while an applied\nresource references it, would leave that reference pointing at a\nresource that does not exist in the target. The request is then\nrejected with 409 and `missing_dependencies`, unless\n`allow_missing_dependencies` is set.\n\nApplied resources go through the normal sync phases, so a change in\nthe target since planning is handled like in any sync. A plan can be\napplied up to 24 hours after it finished (`expires_at`); plan again\nafter that. A plan can be applied more than once; each apply job is\nadded to the plan's `applied_by`.\n\nErrors carry a machine-readable `code`.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncPlanApplyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Apply job accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing `target_auth_token`, an empty selection, or `resources` /\n`exclude` lists rows that are not part of the plan (listed in\n`invalid_resources`)\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncPlanApplyErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller is not the plan's source org",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The job is not a finished plan, it finished more than 24 hours ago,\nthe selection applies nothing, or it leaves out resources that\napplied ones depend on (listed in `missing_dependencies`)\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncPlanApplyErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/plan/replan": {
+      "post": {
+        "operationId": "replanSyncPlan",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "replanSyncPlan",
+        "description": "Plan some rows of a plan again, in place, e.g. after fixing a\nresource in the source org because its plan showed an unexpected\nchange. The listed resources are fetched from the source again,\ntheir dependencies are expanded again (a newly referenced resource\nis added to the plan), and their targets are read and diffed again.\nAll other rows keep their plan and diff.\n\nWithout `resources` every row is planned again; that also renews the\nplan's 24-hour window (`expires_at`). A partial replan does not,\nbecause the other rows were planned earlier.\n\nThe plan job goes back to `pending` / `in_progress` and is `ready`\nagain when it finishes (`replanned_at` / `planned_at` updated). Poll\n`getSyncPlan`.\n",
+        "tags": [
+          "Sync"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncPlanReplanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Replan started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing `target_auth_token`, empty `resources`, or `resources`\nlists rows that are not part of the plan (`invalid_resources`)\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncPlanApplyErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller is not the plan's source org",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The job is not a plan, or it is still running (`plan_not_ready`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncPlanApplyErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/configs/delete-jobs": {
       "post": {
         "operationId": "createDeleteJob",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:delete"
+          }
+        ],
         "summary": "createDeleteJob",
         "description": "Create a bulk-delete job for the caller's organization. The selected\nresources are deleted asynchronously by a worker Lambda; the response\nreturns the persisted job header with status `pending`.\n\nRaw delete — no dependency checks are performed. On completion the\nworker auto-triggers an index rebuild so the config list reflects the\ndeletions.\n",
         "tags": [
@@ -775,6 +1717,11 @@
       },
       "get": {
         "operationId": "listDeleteJobs",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "listDeleteJobs",
         "description": "List bulk-delete jobs scoped to the caller's organization, paginated\nwith an opaque cursor. Most-recent first.\n",
         "tags": [
@@ -805,6 +1752,11 @@
     "/v1/configs/delete-jobs/{id}": {
       "get": {
         "operationId": "getDeleteJob",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "getDeleteJob",
         "description": "Fetch a single bulk-delete job by ID. Returns the job header and counts\nsummary. Frontend polls this endpoint while the job runs.\n",
         "tags": [
@@ -842,6 +1794,11 @@
     "/v1/configs/delete-jobs/{id}/resources": {
       "get": {
         "operationId": "listDeleteJobResources",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "listDeleteJobResources",
         "description": "List the per-resource rows for a delete job, cursor-paginated. Used by\nthe failures view in the frontend.\n",
         "tags": [
@@ -885,6 +1842,11 @@
     "/v1/configs/index:rebuild": {
       "post": {
         "operationId": "rebuildIndex",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
         "summary": "rebuildIndex",
         "description": "Rebuild the configuration index for the caller's organization.\nFire-and-forget: invokes the async worker and returns immediately.\nA new rebuild will cancel any in-flight build (see `build_token`).\n",
         "tags": [
@@ -907,6 +1869,11 @@
     "/v1/configs/inventory": {
       "get": {
         "operationId": "getConfigInventory",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
         "summary": "getConfigInventory",
         "description": "Returns a fresh inventory of an org's configuration resources — `{ type, id }` identities only,\nno full payloads. Calls every adapter's `list()` live (bypasses the 7-day DynamoDB index).\nIntended for snapshot-api to consume when taking a full-org snapshot.\n",
         "tags": [
@@ -1009,6 +1976,7 @@
         "description": "Configuration resource type identifier.\nMatches blueprint-manifest-api V3 naming conventions.\n",
         "enum": [
           "journey",
+          "datasource",
           "automation_flow",
           "workflow_definition",
           "closing_reason",
@@ -1040,7 +2008,10 @@
           "portal_config",
           "target",
           "product_recommendation",
-          "access_token"
+          "access_token",
+          "email_signature",
+          "shared_inbox",
+          "org_setting"
         ]
       },
       "ConfigTypeInfo": {
@@ -1261,6 +2232,253 @@
         "required": [
           "status"
         ]
+      },
+      "HealthScanStartResponse": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "scanning",
+              "failed"
+            ]
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "HealthFinding": {
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "severity",
+          "source_type",
+          "source_id",
+          "source_title",
+          "message",
+          "first_seen",
+          "last_seen"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable finding identity — unchanged across rescans."
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "broken_reference",
+              "inactive_reference",
+              "unreadable_config",
+              "orphaned_group_reference",
+              "uuid_group_label",
+              "duplicate_attribute_name",
+              "duplicate_headline",
+              "unreachable_attribute_purpose",
+              "orphaned_price",
+              "duplicate_price",
+              "inactive_price_in_use",
+              "incomplete_configuration"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "source_type": {
+            "type": "string",
+            "description": "Config type carrying the problem."
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "source_title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "description": "English prose. Use message_key when rendering to a user."
+          },
+          "message_key": {
+            "type": "string",
+            "description": "Translation key for the same sentence, with message_params as interpolation values. Absent for findings whose text comes from @epilot/config-engine.\n"
+          },
+          "message_params": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "ref_type": {
+            "type": "string",
+            "description": "Type of the referenced config (reference findings only)."
+          },
+          "ref_id": {
+            "type": "string"
+          },
+          "ref_title": {
+            "type": "string"
+          },
+          "source_link": {
+            "type": "string",
+            "description": "Portal deep link to the source config."
+          },
+          "ref_link": {
+            "type": "string",
+            "description": "Portal deep link to the referenced config (when it exists)."
+          },
+          "owner_type": {
+            "type": "string",
+            "description": "Config that owns the affected one, when the affected config has no\neditor of its own (an entity mapping is edited inside its journey).\n"
+          },
+          "owner_id": {
+            "type": "string"
+          },
+          "owner_title": {
+            "type": "string"
+          },
+          "owner_link": {
+            "type": "string",
+            "description": "Portal deep link to the owning config — where the fix happens."
+          },
+          "path": {
+            "type": "string",
+            "description": "Field path of the referencing field in the source payload."
+          },
+          "cleanable": {
+            "type": "boolean",
+            "description": "True when the cleanup endpoint can remove this orphan reference."
+          },
+          "ignored": {
+            "type": "boolean",
+            "description": "Acknowledged as intentional by a person — excluded from the headline score and default breakdown until un-ignored.\n"
+          },
+          "ignored_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ignored_by": {
+            "type": "string"
+          },
+          "ignored_reason": {
+            "type": "string"
+          },
+          "first_seen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Scan timestamp when this finding first appeared."
+          },
+          "last_seen": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "HealthReportResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "findings"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "missing",
+              "idle",
+              "scanning",
+              "cleaning",
+              "ready",
+              "failed"
+            ]
+          },
+          "last_scanned_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scan_duration_ms": {
+            "type": "integer"
+          },
+          "scanned_configs": {
+            "type": "integer"
+          },
+          "scanned_by_type": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Configs fetched per resource type in the latest scan."
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "integer"
+              },
+              "warning": {
+                "type": "integer"
+              },
+              "info": {
+                "type": "integer"
+              }
+            }
+          },
+          "new_since_previous": {
+            "type": "integer",
+            "description": "Findings whose first_seen is the latest scan."
+          },
+          "resolved_since_previous": {
+            "type": "integer",
+            "description": "Findings present in the previous scan but gone now."
+          },
+          "last_cleanup_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cleaned_count": {
+            "type": "integer"
+          },
+          "history": {
+            "type": "array",
+            "description": "One entry per completed scan, oldest first — powers the trend.",
+            "items": {
+              "type": "object",
+              "required": [
+                "scanned_at",
+                "clean",
+                "total"
+              ],
+              "properties": {
+                "scanned_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "clean": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "error": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HealthFinding"
+            }
+          }
+        }
       },
       "IndexStatusResponse": {
         "type": "object",
@@ -1606,9 +2824,10 @@
       },
       "SyncPhase": {
         "type": "string",
-        "description": "Three-phase orchestrator phase. `phase_0` fetches source payloads,\n`phase_a` creates/matches with topological batches, `phase_a5` resolves\nderived references, `phase_b` patches with the full ID map, `finalize`\nruns cycle-breaking finalizers.\n",
+        "description": "Three-phase orchestrator phase. `phase_0` fetches source payloads,\n`dependencies` expands the selection with its dependencies (only when\n`include_dependencies` is on), `phase_a` creates/matches with\ntopological batches, `phase_a5` resolves derived references, `phase_b`\npatches with the full ID map, `finalize` runs cycle-breaking\nfinalizers. Clients should tolerate phase values they don't know.\n",
         "enum": [
           "phase_0",
+          "dependencies",
           "phase_a",
           "phase_a5",
           "phase_b",
@@ -1661,12 +2880,17 @@
           "dry_run": {
             "type": "boolean",
             "default": false,
-            "description": "If true, the orchestrator runs Phase 0 + a planning pass and writes\n`would_*` resource rows but performs no destination writes.\n"
+            "description": "If true, the job is a plan: the orchestrator runs Phase 0 + a\nplanning pass, reads the target's copies, writes `would_*`\nresource rows with a `plan` (create / update / no change) and\nfield diffs, and performs no destination writes. See\n`getSyncPlan`, `listSyncPlanDiffs` and `applySyncPlan`.\n"
           },
           "include_dependencies": {
             "type": "boolean",
             "default": true,
             "description": "If true, the orchestrator expands the resource set by following\ndependency edges discovered during Phase 0.\n"
+          },
+          "sync_portal_widgets": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true (default), a synced `portal_config` also pushes the source\nportal's widgets to the target portal (a full replace of the target's\nwidget set). Set false to leave the target portal's widgets alone.\n"
           },
           "resources": {
             "type": "array",
@@ -1691,10 +2915,97 @@
           }
         }
       },
+      "SyncJobResourceRef": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "source_id"
+        ]
+      },
+      "SyncJobRetryPlanRequest": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "array",
+            "description": "Rows of the original job to retry. Each must be `failed`, `pending`\nor `in_progress`. Omit to retry every unresolved row.\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResourceRef"
+            }
+          }
+        }
+      },
+      "SyncJobRetryPlan": {
+        "type": "object",
+        "properties": {
+          "selected": {
+            "type": "array",
+            "description": "The selected rows of the original job.",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResource"
+            }
+          },
+          "added_dependencies": {
+            "type": "array",
+            "description": "Unresolved rows the selection depends on, added to the retry.",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResource"
+            }
+          },
+          "dependency_resolution": {
+            "type": "string",
+            "description": "`best_effort` when some source payloads could not be fetched, so\ndependencies may be missing from `added_dependencies`.\n",
+            "enum": [
+              "exact",
+              "best_effort"
+            ]
+          }
+        },
+        "required": [
+          "selected",
+          "added_dependencies",
+          "dependency_resolution"
+        ]
+      },
+      "SyncJobRetryErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          },
+          "invalid_resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResourceRef"
+            }
+          }
+        }
+      },
       "SyncJobRetryRequest": {
         "type": "object",
         "description": "Optional body for `retrySyncJob`. Defaults to retrying every unresolved\nresource of the original job (failed, pending or in_progress).\n",
         "properties": {
+          "target_auth_token": {
+            "type": "string",
+            "description": "Target org token used by the worker for writes. Required."
+          },
+          "resources": {
+            "type": "array",
+            "description": "Retry only these rows (each must be `failed`, `pending` or\n`in_progress`) plus the unresolved rows they depend on.\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResourceRef"
+            }
+          },
           "payload_overrides": {
             "type": "object",
             "description": "Map of `<type>:<source_id>` → partial payload patch. Applied on top of\nthe originally fetched payload before re-running Phase A.\n",
@@ -1736,11 +3047,24 @@
       },
       "SyncJobEvent": {
         "type": "object",
-        "description": "Activity-log entry surfaced to the frontend. Backed by the op-log rows in\nthe index table (`SYNC#<jobId>#OP#<seq>`).\n",
+        "description": "Activity-log entry surfaced to the frontend. Backed by the append-only\njob event log, or by the op-log rows (`SYNC#<jobId>#OP#<seq>`) for jobs\nthat predate it. Key events by `id` when present.\n",
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Event id. A ULID (time-sortable) for event-log events, `op-<seq>`\nfor op-log events. Absent on `getSyncJob.events`.\n"
+          },
+          "kind": {
+            "type": "string",
+            "description": "What the event describes. `resource`: a status change of a resource\nrow. `dependency`: dependency expansion resolved a referenced\nresource (see `dependency`). `step`: a phase milestone such as the\nsource-index check or the dependency summary; has no `type` or\n`source_id`. Absent means `resource`.\n",
+            "enum": [
+              "resource",
+              "dependency",
+              "step"
+            ]
+          },
           "seq": {
             "type": "integer",
-            "description": "Monotonic sequence number assigned at write time."
+            "description": "Resource sequence number of the op-log write (the resource's index\nin the job). Not unique per event. 0 for `dependency` and `step`\nevents.\n"
           },
           "ts": {
             "type": "string",
@@ -1759,20 +3083,127 @@
           "target_id": {
             "type": "string"
           },
+          "title": {
+            "type": "string",
+            "description": "Resource title, when known at write time."
+          },
           "status": {
             "$ref": "#/components/schemas/SyncJobResourceStatus"
+          },
+          "attempt": {
+            "type": "integer"
           },
           "message": {
             "type": "string"
           },
           "error": {
             "type": "string"
+          },
+          "dependency": {
+            "$ref": "#/components/schemas/SyncJobEventDependency"
           }
         },
         "required": [
           "seq",
           "ts",
           "status"
+        ]
+      },
+      "SyncJobEventDependency": {
+        "type": "object",
+        "description": "Only on `kind: dependency` events. The event's `type`, `source_id` and\n`title` describe the dependency itself.\n",
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "description": "`added`: not yet in the target, fetched and added to the sync set.\n`linked`: already synced to the target (`target_id`), mapped but not\nsynced again. `skipped`: not syncable (unsupported type, archived or\nbuilt-in). `not_found`: couldn't be loaded from the source org.\n",
+            "enum": [
+              "added",
+              "linked",
+              "skipped",
+              "not_found"
+            ]
+          },
+          "reason": {
+            "$ref": "#/components/schemas/SyncDependencyReason"
+          },
+          "required_by": {
+            "$ref": "#/components/schemas/SyncRequiredBy"
+          },
+          "depth": {
+            "type": "integer",
+            "description": "Expansion depth. 0 = referenced directly by a selected resource.\n"
+          }
+        },
+        "required": [
+          "outcome",
+          "reason",
+          "required_by",
+          "depth"
+        ]
+      },
+      "SyncDependencyReason": {
+        "type": "string",
+        "description": "How the dependency was found. `typed_reference`: a structural reference\nin the payload (e.g. a workflow step's automation). `id_reference`: an\nid in the payload resolved through the source index.\n`automation_trigger`: an automation triggered by the resource (e.g. a\njourney submission). `journey_datasource`: a datasource owned by the\njourney. `file_reference`: a file used by the resource.\n",
+        "enum": [
+          "typed_reference",
+          "id_reference",
+          "automation_trigger",
+          "journey_datasource",
+          "file_reference"
+        ]
+      },
+      "SyncRequiredBy": {
+        "type": "object",
+        "description": "The resource that referenced the dependency.",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "source_id"
+        ]
+      },
+      "SyncJobEventListResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "description": "Events, latest first.",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobEvent"
+            }
+          },
+          "next_cursor": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of events matching the `kind` filter. Only on the first page\n(no `cursor`, no `after`).\n"
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "Only with `after`: more new events existed than were returned.\nReload from the first page.\n"
+          },
+          "source": {
+            "type": "string",
+            "description": "Which store served the events.",
+            "enum": [
+              "events",
+              "op_log"
+            ]
+          }
+        },
+        "required": [
+          "results",
+          "source"
         ]
       },
       "SyncJobBatch": {
@@ -1842,9 +3273,85 @@
           },
           "events": {
             "type": "array",
-            "description": "Most recent events (capped server-side, typically last 10).",
+            "description": "Deprecated — use `listSyncJobEvents`. Up to 10 op-log events,\nordered by resource index rather than recency.\n",
+            "deprecated": true,
             "items": {
               "$ref": "#/components/schemas/SyncJobEvent"
+            }
+          },
+          "created_by": {
+            "type": "string",
+            "description": "Id of the user who started the job."
+          },
+          "retry_of": {
+            "type": "string",
+            "description": "Id of the job this job retries."
+          },
+          "retried_by": {
+            "type": "array",
+            "description": "Ids of the retry jobs created from this job, oldest first.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "plan_only": {
+            "type": "boolean",
+            "description": "True on a finished plan (`dry_run`) job."
+          },
+          "plan_summary": {
+            "$ref": "#/components/schemas/SyncPlanCounts"
+          },
+          "planned_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "On a plan, when every row was last planned (first run or full replan)."
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "On a finished plan, when it stops being applicable (24 hours after\n`planned_at`). Same value as `getSyncPlan`'s `expires_at`.\n"
+          },
+          "applied_from_plan": {
+            "type": "string",
+            "description": "Id of the plan this job applies (see `applySyncPlan`)."
+          },
+          "applied_by": {
+            "type": "array",
+            "description": "Ids of the jobs that applied this plan, oldest first.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "approved_by": {
+            "type": "string",
+            "description": "On a job applying a plan, the user who approved the plan."
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "On a job applying a plan, when the plan was approved."
+          },
+          "approvals": {
+            "type": "array",
+            "description": "On a plan, every approval (one per `applySyncPlan` call), oldest\nfirst: the apply job, who approved and when.\n",
+            "items": {
+              "type": "object",
+              "properties": {
+                "job_id": {
+                  "type": "string"
+                },
+                "approved_by": {
+                  "type": "string"
+                },
+                "approved_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "job_id",
+                "approved_at"
+              ]
             }
           },
           "errors_sample": {
@@ -1918,6 +3425,29 @@
             "type": "string",
             "description": "Human-readable resource title captured from the source payload\nduring Phase 0. Lets clients identify rows without resolving\nraw UUIDs. Absent on rows written before this field existed.\n"
           },
+          "required_by": {
+            "type": "object",
+            "description": "Set when dependency expansion added the row to the sync set: the\nresource that referenced it and why. Absent on rows the user\nselected and on rows written before this field existed.\n",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "source_id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "reason": {
+                "$ref": "#/components/schemas/SyncDependencyReason"
+              }
+            },
+            "required": [
+              "type",
+              "source_id",
+              "reason"
+            ]
+          },
           "status": {
             "$ref": "#/components/schemas/SyncJobResourceStatus"
           },
@@ -1933,6 +3463,26 @@
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "source_link": {
+            "type": "string",
+            "description": "Portal editor URL of the resource in the source org. Absent when it\ncan't be built reliably (e.g. entity-scoped types without schema\ncontext).\n"
+          },
+          "target_link": {
+            "type": "string",
+            "description": "Portal editor URL of the resource in the target org. Only present\nwhen the row has a `target_id`; absent when it can't be built\nreliably.\n"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/SyncResourcePlan"
+          },
+          "excluded_from_apply": {
+            "type": "string",
+            "description": "Only on jobs that apply a plan: why the row was not applied.\n`unchanged` (the plan found no change), `excluded` (left out by\nthe request) or `not_syncable` (the plan would skip it). Such rows\nare `skipped`.\n",
+            "enum": [
+              "unchanged",
+              "excluded",
+              "not_syncable"
+            ]
           }
         },
         "required": [
@@ -1961,6 +3511,438 @@
         "required": [
           "results"
         ]
+      },
+      "SyncPlanAction": {
+        "type": "string",
+        "description": "What a real run would do with a planned resource:\n- `create`: no counterpart in the target; a new resource is created.\n- `update`: the target's copy differs from the source and is\n  overwritten. Also used when the copies could not be compared\n  (`diff_status: not_compared`): such resources are re-applied to be\n  safe.\n- `no_change`: the target's copy already matches the source.\n- `skip`: the resource is never synced (e.g. built-in taxonomies,\n  credentials).\n",
+        "enum": [
+          "create",
+          "update",
+          "no_change",
+          "skip"
+        ]
+      },
+      "SyncPlanMatch": {
+        "type": "string",
+        "description": "How the target counterpart was found: `lineage` (synced before),\n`heuristic` (first sync, matched by name / slug / unique key) or\n`none` (no counterpart: the resource is created).\n",
+        "enum": [
+          "lineage",
+          "heuristic",
+          "none"
+        ]
+      },
+      "SyncPlanDiffStatus": {
+        "type": "string",
+        "description": "`computed` when both copies were read and compared. `not_compared`\nwhen the target could not be read or compared (see `note`).\n",
+        "enum": [
+          "computed",
+          "not_compared"
+        ]
+      },
+      "SyncResourcePlan": {
+        "type": "object",
+        "description": "The plan for one resource. Set on rows of plan jobs (`dry_run`), and\ncopied onto the rows of the job that applies the plan. Absent on rows\nplanning failed for and on jobs created before plans existed.\n",
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/SyncPlanAction"
+          },
+          "match": {
+            "$ref": "#/components/schemas/SyncPlanMatch"
+          },
+          "diff_status": {
+            "$ref": "#/components/schemas/SyncPlanDiffStatus"
+          },
+          "change_count": {
+            "type": "integer",
+            "description": "Number of changed fields (`update` only)."
+          },
+          "changed_paths": {
+            "type": "array",
+            "description": "The first 20 changed field paths (`update` only).",
+            "maxItems": 20,
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string",
+            "description": "Why the plan chose this action, when it is not obvious."
+          },
+          "depends_on": {
+            "type": "array",
+            "description": "Other resources of the plan this resource references.",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResourceRef"
+            }
+          }
+        },
+        "required": [
+          "action",
+          "match"
+        ]
+      },
+      "SyncPlanCounts": {
+        "type": "object",
+        "description": "Planned resources by action. `not_compared` counts the `update`\nresources whose copies could not be compared (it is part of\n`update`, not in addition to it). `failed` counts resources planning\nfailed for.\n",
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "create": {
+            "type": "integer"
+          },
+          "update": {
+            "type": "integer"
+          },
+          "no_change": {
+            "type": "integer"
+          },
+          "skip": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "not_compared": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "create",
+          "update",
+          "no_change",
+          "skip",
+          "failed",
+          "not_compared"
+        ]
+      },
+      "SyncPlan": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SyncJobStatus"
+          },
+          "ready": {
+            "type": "boolean",
+            "description": "True once planning has finished and produced a plan (the job\nended `succeeded` or `partial`). Stays false for a plan job that\nended `failed` or `cancelled`; its counts cover only the rows\nplanned before it stopped.\n"
+          },
+          "applicable": {
+            "type": "boolean",
+            "description": "True while `applySyncPlan` accepts the plan: it is `ready` and\n`expires_at` has not passed. A plan can be applied more than once\n(e.g. one part now, another later); each apply is listed in\n`applied_by`.\n"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the plan stops being applicable: 24 hours after every row was\nlast planned (`planned_at`). A partial replan does not move it.\n"
+          },
+          "planned_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When every row was last planned (first run or full replan)."
+          },
+          "replanned_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When a partial replan (`replanSyncPlan` with `resources`) last finished."
+          },
+          "source_org_id": {
+            "type": "string"
+          },
+          "target_org_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/SyncPlanCounts"
+          },
+          "by_type": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SyncPlanCounts"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                }
+              ]
+            }
+          },
+          "applied_by": {
+            "type": "array",
+            "description": "Ids of the jobs that applied this plan, oldest first.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "job_id",
+          "status",
+          "ready",
+          "applicable",
+          "source_org_id",
+          "target_org_id",
+          "summary",
+          "by_type"
+        ]
+      },
+      "SyncPlanChange": {
+        "type": "object",
+        "description": "One changed field. `path` uses dots for object keys and\n`[key=value]` for array items that have an identity (`name`, `slug`,\n`key`, `id`, …), e.g. `steps[name=Contact].blocks[name=Email].label`.\n`$` is the whole resource.\n\nValues are compared after removing fields that differ between orgs\nby design: ids of the resource itself, org ids, timestamps and audit\nfields (`created_at`, `updated_by`, `_manifest`, …). References to\nother resources are shown as target-org ids. A reference to a\nresource the plan would create is shown as `new:<type>:<source_id>`,\nsince its target id does not exist yet.\n\nA value whose JSON is larger than 4 KB is replaced by\n`{ \"__truncated\": true, \"json_bytes\": <size> }`.\n",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "description": "`added`: only the source has a value here. `removed`: only the\ntarget has one (a real run does not necessarily delete it; that\ndepends on the resource's API). `changed`: both have different\nvalues. `reordered`: the same array items in a different order.\n",
+            "enum": [
+              "added",
+              "removed",
+              "changed",
+              "reordered"
+            ]
+          },
+          "before": {
+            "description": "The target org's current value. Absent for `added`."
+          },
+          "after": {
+            "description": "The value a real run would write. Absent for `removed`."
+          }
+        },
+        "required": [
+          "path",
+          "kind"
+        ]
+      },
+      "SyncPlanDiff": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "target_id": {
+            "type": "string",
+            "description": "The target counterpart. Absent for `create`."
+          },
+          "title": {
+            "type": "string"
+          },
+          "action": {
+            "$ref": "#/components/schemas/SyncPlanAction"
+          },
+          "match": {
+            "$ref": "#/components/schemas/SyncPlanMatch"
+          },
+          "diff_status": {
+            "$ref": "#/components/schemas/SyncPlanDiffStatus"
+          },
+          "change_count": {
+            "type": "integer",
+            "description": "Number of changed fields, including any left out of `changes`."
+          },
+          "changes": {
+            "type": "array",
+            "description": "The changed fields (at most 200). Empty for `no_change`. For\n`create` a single `added` change at `$` holds the whole resource.\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncPlanChange"
+            }
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "True when changes or values were left out to keep the diff small.\n`change_count` is still exact.\n"
+          },
+          "note": {
+            "type": "string"
+          },
+          "planned_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "type",
+          "source_id",
+          "action",
+          "match",
+          "diff_status",
+          "change_count",
+          "changes",
+          "truncated"
+        ]
+      },
+      "SyncPlanDiffListResponse": {
+        "type": "object",
+        "properties": {
+          "next_cursor": {
+            "type": "string"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncPlanDiff"
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
+      "SyncPlanApplyRequest": {
+        "type": "object",
+        "required": [
+          "target_auth_token"
+        ],
+        "properties": {
+          "target_auth_token": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "Destination-org auth token, as on `createSyncJob`. Never returned\nin responses and never logged.\n"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the apply job. Defaults to the plan's name."
+          },
+          "resources": {
+            "type": "array",
+            "description": "Apply exactly these rows of the plan. Omit to apply every\n`create` and `update` row.\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResourceRef"
+            }
+          },
+          "exclude": {
+            "type": "array",
+            "description": "Rows of the plan to leave out.",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResourceRef"
+            }
+          },
+          "allow_missing_dependencies": {
+            "type": "boolean",
+            "default": false,
+            "description": "Apply even when left-out resources that would be created are\nreferenced by applied ones. Those references then keep pointing\nat the source org's ids.\n"
+          }
+        }
+      },
+      "SyncPlanReplanRequest": {
+        "type": "object",
+        "required": [
+          "target_auth_token"
+        ],
+        "properties": {
+          "target_auth_token": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "Destination-org auth token (planning reads the target). Never returned or logged."
+          },
+          "resources": {
+            "type": "array",
+            "description": "Rows of the plan to plan again. Omit to plan every row again.",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResourceRef"
+            }
+          }
+        }
+      },
+      "SyncPlanMissingDependency": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "required_by": {
+            "type": "array",
+            "description": "Applied resources that reference it.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "source_id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "source_id"
+              ]
+            }
+          }
+        },
+        "required": [
+          "type",
+          "source_id",
+          "required_by"
+        ]
+      },
+      "SyncPlanApplyErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "description": "Machine-readable reason, for clients that show their own message.",
+            "enum": [
+              "target_auth_token_missing",
+              "empty_selection",
+              "invalid_resources",
+              "plan_not_ready",
+              "plan_expired",
+              "nothing_to_apply",
+              "missing_dependencies"
+            ]
+          },
+          "invalid_resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResourceRef"
+            }
+          },
+          "missing_dependencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncPlanMissingDependency"
+            }
+          }
+        }
       },
       "DeleteJobStatus": {
         "type": "string",
