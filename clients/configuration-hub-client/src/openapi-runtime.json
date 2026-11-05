@@ -101,6 +101,54 @@
         "responses": {}
       }
     },
+    "/v1/configs/health:scan": {
+      "post": {
+        "operationId": "startHealthScan",
+        "responses": {}
+      }
+    },
+    "/v1/configs/health": {
+      "get": {
+        "operationId": "getHealthReport",
+        "responses": {}
+      }
+    },
+    "/v1/configs/health:coverage-request": {
+      "post": {
+        "operationId": "requestHealthCoverage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/configs/health:cleanup": {
+      "post": {
+        "operationId": "startHealthCleanup",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/configs/health:ignore": {
+      "post": {
+        "operationId": "setHealthFindingsIgnored",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/configs/compare": {
       "post": {
         "operationId": "compareConfigs",
@@ -209,12 +257,55 @@
         "responses": {}
       }
     },
+    "/v1/configs/sync-jobs/{id}/retry-plan": {
+      "post": {
+        "operationId": "planSyncJobRetry",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/configs/sync-jobs/{id}/cancel": {
       "post": {
         "operationId": "cancelSyncJob",
         "parameters": [
           {
             "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/events": {
+      "get": {
+        "operationId": "listSyncJobEvents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "name": "size",
+            "in": "query"
+          },
+          {
+            "name": "after",
+            "in": "query"
+          },
+          {
+            "name": "kind",
+            "in": "query"
           }
         ],
         "responses": {}
@@ -231,13 +322,114 @@
             "$ref": "#/components/parameters/CursorParam"
           },
           {
-            "$ref": "#/components/parameters/SizeParam"
+            "name": "size",
+            "in": "query"
           },
           {
             "name": "status",
             "in": "query"
+          },
+          {
+            "name": "type",
+            "in": "query"
+          },
+          {
+            "name": "plan_action",
+            "in": "query"
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/plan": {
+      "get": {
+        "operationId": "getSyncPlan",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/plan/diffs": {
+      "get": {
+        "operationId": "listSyncPlanDiffs",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          },
+          {
+            "$ref": "#/components/parameters/CursorParam"
+          },
+          {
+            "name": "size",
+            "in": "query"
+          },
+          {
+            "name": "type",
+            "in": "query"
+          },
+          {
+            "name": "action",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/plan/diffs/{type}/{source_id}": {
+      "get": {
+        "operationId": "getSyncPlanDiff",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "source_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/plan/apply": {
+      "post": {
+        "operationId": "applySyncPlan",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/plan/replan": {
+      "post": {
+        "operationId": "replanSyncPlan",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },

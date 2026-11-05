@@ -420,6 +420,120 @@ declare namespace Components {
             status: number;
             error: string;
         }
+        export interface HealthFinding {
+            /**
+             * Stable finding identity — unchanged across rescans.
+             */
+            id: string;
+            code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration";
+            severity: "error" | "warning" | "info";
+            /**
+             * Config type carrying the problem.
+             */
+            source_type: string;
+            source_id: string;
+            source_title: string;
+            /**
+             * English prose. Use message_key when rendering to a user.
+             */
+            message: string;
+            /**
+             * Translation key for the same sentence, with message_params as interpolation values. Absent for findings whose text comes from @epilot/config-engine.
+             *
+             */
+            message_key?: string;
+            message_params?: {
+                [name: string]: any;
+            };
+            /**
+             * Type of the referenced config (reference findings only).
+             */
+            ref_type?: string;
+            ref_id?: string;
+            ref_title?: string;
+            /**
+             * Portal deep link to the source config.
+             */
+            source_link?: string;
+            /**
+             * Portal deep link to the referenced config (when it exists).
+             */
+            ref_link?: string;
+            /**
+             * Config that owns the affected one, when the affected config has no
+             * editor of its own (an entity mapping is edited inside its journey).
+             *
+             */
+            owner_type?: string;
+            owner_id?: string;
+            owner_title?: string;
+            /**
+             * Portal deep link to the owning config — where the fix happens.
+             */
+            owner_link?: string;
+            /**
+             * Field path of the referencing field in the source payload.
+             */
+            path?: string;
+            /**
+             * True when the cleanup endpoint can remove this orphan reference.
+             */
+            cleanable?: boolean;
+            /**
+             * Acknowledged as intentional by a person — excluded from the headline score and default breakdown until un-ignored.
+             *
+             */
+            ignored?: boolean;
+            ignored_at?: string; // date-time
+            ignored_by?: string;
+            ignored_reason?: string;
+            /**
+             * Scan timestamp when this finding first appeared.
+             */
+            first_seen: string; // date-time
+            last_seen: string; // date-time
+        }
+        export interface HealthReportResponse {
+            status: "missing" | "idle" | "scanning" | "cleaning" | "ready" | "failed";
+            last_scanned_at?: string; // date-time
+            scan_duration_ms?: number;
+            scanned_configs?: number;
+            /**
+             * Configs fetched per resource type in the latest scan.
+             */
+            scanned_by_type?: {
+                [name: string]: number;
+            };
+            counts?: {
+                error?: number;
+                warning?: number;
+                info?: number;
+            };
+            /**
+             * Findings whose first_seen is the latest scan.
+             */
+            new_since_previous?: number;
+            /**
+             * Findings present in the previous scan but gone now.
+             */
+            resolved_since_previous?: number;
+            last_cleanup_at?: string; // date-time
+            cleaned_count?: number;
+            /**
+             * One entry per completed scan, oldest first — powers the trend.
+             */
+            history?: {
+                scanned_at: string; // date-time
+                clean: number;
+                total: number;
+            }[];
+            error?: string;
+            findings: HealthFinding[];
+        }
+        export interface HealthScanStartResponse {
+            status: "scanning" | "failed";
+            error?: string;
+        }
         /**
          * Result of an index rebuild operation
          */
@@ -478,7 +592,7 @@ declare namespace Components {
          * Matches blueprint-manifest-api V3 naming conventions.
          *
          */
-        export type ResourceType = "journey" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token";
+        export type ResourceType = "journey" | "datasource" | "automation_flow" | "workflow_definition" | "closing_reason" | "flow_template" | "schema" | "emailtemplate" | "product" | "price" | "tax" | "coupon" | "file" | "document_template" | "webhook" | "saved_view" | "dashboard" | "kanban" | "role" | "usergroup" | "validation_rule" | "integration" | "app" | "designbuilder" | "notification_template" | "custom_variable" | "environment_variable" | "taxonomy" | "taxonomy_classification" | "entity_mapping" | "portal_config" | "target" | "product_recommendation" | "access_token" | "email_signature" | "shared_inbox" | "org_setting";
         /**
          * Minimal identity of a single configuration resource.
          */
@@ -557,6 +671,16 @@ declare namespace Components {
             suggestions: /* Heuristic candidate for one source config (null candidate = no match) */ MatchSuggestion[];
         }
         /**
+         * How the dependency was found. `typed_reference`: a structural reference
+         * in the payload (e.g. a workflow step's automation). `id_reference`: an
+         * id in the payload resolved through the source index.
+         * `automation_trigger`: an automation triggered by the resource (e.g. a
+         * journey submission). `journey_datasource`: a datasource owned by the
+         * journey. `file_reference`: a file used by the resource.
+         *
+         */
+        export type SyncDependencyReason = "typed_reference" | "id_reference" | "automation_trigger" | "journey_datasource" | "file_reference";
+        /**
          * Direction of the sync, derived from the source/target pane selection in the
          * configuration hub UI.
          *
@@ -588,9 +712,11 @@ declare namespace Components {
             counts: /* Aggregate counters by resource status. */ SyncJobCounts;
             current_phase?: /**
              * Three-phase orchestrator phase. `phase_0` fetches source payloads,
-             * `phase_a` creates/matches with topological batches, `phase_a5` resolves
-             * derived references, `phase_b` patches with the full ID map, `finalize`
-             * runs cycle-breaking finalizers.
+             * `dependencies` expands the selection with its dependencies (only when
+             * `include_dependencies` is on), `phase_a` creates/matches with
+             * topological batches, `phase_a5` resolves derived references, `phase_b`
+             * patches with the full ID map, `finalize` runs cycle-breaking
+             * finalizers. Clients should tolerate phase values they don't know.
              *
              */
             SyncPhase;
@@ -598,14 +724,77 @@ declare namespace Components {
             started_at: string; // date-time
             finished_at?: string; // date-time
             /**
-             * Most recent events (capped server-side, typically last 10).
+             * Deprecated — use `listSyncJobEvents`. Up to 10 op-log events,
+             * ordered by resource index rather than recency.
+             *
              */
             events?: /**
-             * Activity-log entry surfaced to the frontend. Backed by the op-log rows in
-             * the index table (`SYNC#<jobId>#OP#<seq>`).
+             * Activity-log entry surfaced to the frontend. Backed by the append-only
+             * job event log, or by the op-log rows (`SYNC#<jobId>#OP#<seq>`) for jobs
+             * that predate it. Key events by `id` when present.
              *
              */
             SyncJobEvent[];
+            /**
+             * Id of the user who started the job.
+             */
+            created_by?: string;
+            /**
+             * Id of the job this job retries.
+             */
+            retry_of?: string;
+            /**
+             * Ids of the retry jobs created from this job, oldest first.
+             */
+            retried_by?: string[];
+            /**
+             * True on a finished plan (`dry_run`) job.
+             */
+            plan_only?: boolean;
+            plan_summary?: /**
+             * Planned resources by action. `not_compared` counts the `update`
+             * resources whose copies could not be compared (it is part of
+             * `update`, not in addition to it). `failed` counts resources planning
+             * failed for.
+             *
+             */
+            SyncPlanCounts;
+            /**
+             * On a plan, when every row was last planned (first run or full replan).
+             */
+            planned_at?: string; // date-time
+            /**
+             * On a finished plan, when it stops being applicable (24 hours after
+             * `planned_at`). Same value as `getSyncPlan`'s `expires_at`.
+             *
+             */
+            expires_at?: string; // date-time
+            /**
+             * Id of the plan this job applies (see `applySyncPlan`).
+             */
+            applied_from_plan?: string;
+            /**
+             * Ids of the jobs that applied this plan, oldest first.
+             */
+            applied_by?: string[];
+            /**
+             * On a job applying a plan, the user who approved the plan.
+             */
+            approved_by?: string;
+            /**
+             * On a job applying a plan, when the plan was approved.
+             */
+            approved_at?: string; // date-time
+            /**
+             * On a plan, every approval (one per `applySyncPlan` call), oldest
+             * first: the apply job, who approved and when.
+             *
+             */
+            approvals?: {
+                job_id: string;
+                approved_by?: string;
+                approved_at: string; // date-time
+            }[];
             /**
              * Up to 20 sample error messages from failed resources.
              */
@@ -741,21 +930,42 @@ declare namespace Components {
             skipped_unchanged: number;
         }
         /**
-         * Activity-log entry surfaced to the frontend. Backed by the op-log rows in
-         * the index table (`SYNC#<jobId>#OP#<seq>`).
+         * Activity-log entry surfaced to the frontend. Backed by the append-only
+         * job event log, or by the op-log rows (`SYNC#<jobId>#OP#<seq>`) for jobs
+         * that predate it. Key events by `id` when present.
          *
          */
         export interface SyncJobEvent {
             /**
-             * Monotonic sequence number assigned at write time.
+             * Event id. A ULID (time-sortable) for event-log events, `op-<seq>`
+             * for op-log events. Absent on `getSyncJob.events`.
+             *
+             */
+            id?: string;
+            /**
+             * What the event describes. `resource`: a status change of a resource
+             * row. `dependency`: dependency expansion resolved a referenced
+             * resource (see `dependency`). `step`: a phase milestone such as the
+             * source-index check or the dependency summary; has no `type` or
+             * `source_id`. Absent means `resource`.
+             *
+             */
+            kind?: "resource" | "dependency" | "step";
+            /**
+             * Resource sequence number of the op-log write (the resource's index
+             * in the job). Not unique per event. 0 for `dependency` and `step`
+             * events.
+             *
              */
             seq: number;
             ts: string; // date-time
             phase?: /**
              * Three-phase orchestrator phase. `phase_0` fetches source payloads,
-             * `phase_a` creates/matches with topological batches, `phase_a5` resolves
-             * derived references, `phase_b` patches with the full ID map, `finalize`
-             * runs cycle-breaking finalizers.
+             * `dependencies` expands the selection with its dependencies (only when
+             * `include_dependencies` is on), `phase_a` creates/matches with
+             * topological batches, `phase_a5` resolves derived references, `phase_b`
+             * patches with the full ID map, `finalize` runs cycle-breaking
+             * finalizers. Clients should tolerate phase values they don't know.
              *
              */
             SyncPhase;
@@ -765,13 +975,84 @@ declare namespace Components {
             type?: string;
             source_id?: string;
             target_id?: string;
+            /**
+             * Resource title, when known at write time.
+             */
+            title?: string;
             status: /**
              * Per-resource status. `would_*` values are produced by dry-run jobs.
              *
              */
             SyncJobResourceStatus;
+            attempt?: number;
             message?: string;
             error?: string;
+            dependency?: /**
+             * Only on `kind: dependency` events. The event's `type`, `source_id` and
+             * `title` describe the dependency itself.
+             *
+             */
+            SyncJobEventDependency;
+        }
+        /**
+         * Only on `kind: dependency` events. The event's `type`, `source_id` and
+         * `title` describe the dependency itself.
+         *
+         */
+        export interface SyncJobEventDependency {
+            /**
+             * `added`: not yet in the target, fetched and added to the sync set.
+             * `linked`: already synced to the target (`target_id`), mapped but not
+             * synced again. `skipped`: not syncable (unsupported type, archived or
+             * built-in). `not_found`: couldn't be loaded from the source org.
+             *
+             */
+            outcome: "added" | "linked" | "skipped" | "not_found";
+            reason: /**
+             * How the dependency was found. `typed_reference`: a structural reference
+             * in the payload (e.g. a workflow step's automation). `id_reference`: an
+             * id in the payload resolved through the source index.
+             * `automation_trigger`: an automation triggered by the resource (e.g. a
+             * journey submission). `journey_datasource`: a datasource owned by the
+             * journey. `file_reference`: a file used by the resource.
+             *
+             */
+            SyncDependencyReason;
+            required_by: /* The resource that referenced the dependency. */ SyncRequiredBy;
+            /**
+             * Expansion depth. 0 = referenced directly by a selected resource.
+             *
+             */
+            depth: number;
+        }
+        export interface SyncJobEventListResponse {
+            /**
+             * Events, latest first.
+             */
+            results: /**
+             * Activity-log entry surfaced to the frontend. Backed by the append-only
+             * job event log, or by the op-log rows (`SYNC#<jobId>#OP#<seq>`) for jobs
+             * that predate it. Key events by `id` when present.
+             *
+             */
+            SyncJobEvent[];
+            next_cursor?: string;
+            /**
+             * Number of events matching the `kind` filter. Only on the first page
+             * (no `cursor`, no `after`).
+             *
+             */
+            total?: number;
+            /**
+             * Only with `after`: more new events existed than were returned.
+             * Reload from the first page.
+             *
+             */
+            truncated?: boolean;
+            /**
+             * Which store served the events.
+             */
+            source: "events" | "op_log";
         }
         /**
          * Cursor-paginated list of sync jobs.
@@ -810,8 +1091,11 @@ declare namespace Components {
              */
             name?: string;
             /**
-             * If true, the orchestrator runs Phase 0 + a planning pass and writes
-             * `would_*` resource rows but performs no destination writes.
+             * If true, the job is a plan: the orchestrator runs Phase 0 + a
+             * planning pass, reads the target's copies, writes `would_*`
+             * resource rows with a `plan` (create / update / no change) and
+             * field diffs, and performs no destination writes. See
+             * `getSyncPlan`, `listSyncPlanDiffs` and `applySyncPlan`.
              *
              */
             dry_run?: boolean;
@@ -821,6 +1105,13 @@ declare namespace Components {
              *
              */
             include_dependencies?: boolean;
+            /**
+             * If true (default), a synced `portal_config` also pushes the source
+             * portal's widgets to the target portal (a full replace of the target's
+             * widget set). Set false to leave the target portal's widgets alone.
+             *
+             */
+            sync_portal_widgets?: boolean;
             /**
              * Initial resource selection. Dependencies may be added.
              */
@@ -851,6 +1142,27 @@ declare namespace Components {
              *
              */
             title?: string;
+            /**
+             * Set when dependency expansion added the row to the sync set: the
+             * resource that referenced it and why. Absent on rows the user
+             * selected and on rows written before this field existed.
+             *
+             */
+            required_by?: {
+                type: string;
+                source_id: string;
+                title?: string;
+                reason: /**
+                 * How the dependency was found. `typed_reference`: a structural reference
+                 * in the payload (e.g. a workflow step's automation). `id_reference`: an
+                 * id in the payload resolved through the source index.
+                 * `automation_trigger`: an automation triggered by the resource (e.g. a
+                 * journey submission). `journey_datasource`: a datasource owned by the
+                 * journey. `file_reference`: a file used by the resource.
+                 *
+                 */
+                SyncDependencyReason;
+            };
             status: /**
              * Per-resource status. `would_*` values are produced by dry-run jobs.
              *
@@ -858,15 +1170,46 @@ declare namespace Components {
             SyncJobResourceStatus;
             phase: /**
              * Three-phase orchestrator phase. `phase_0` fetches source payloads,
-             * `phase_a` creates/matches with topological batches, `phase_a5` resolves
-             * derived references, `phase_b` patches with the full ID map, `finalize`
-             * runs cycle-breaking finalizers.
+             * `dependencies` expands the selection with its dependencies (only when
+             * `include_dependencies` is on), `phase_a` creates/matches with
+             * topological batches, `phase_a5` resolves derived references, `phase_b`
+             * patches with the full ID map, `finalize` runs cycle-breaking
+             * finalizers. Clients should tolerate phase values they don't know.
              *
              */
             SyncPhase;
             attempt: number;
             error?: string;
             updated_at: string; // date-time
+            /**
+             * Portal editor URL of the resource in the source org. Absent when it
+             * can't be built reliably (e.g. entity-scoped types without schema
+             * context).
+             *
+             */
+            source_link?: string;
+            /**
+             * Portal editor URL of the resource in the target org. Only present
+             * when the row has a `target_id`; absent when it can't be built
+             * reliably.
+             *
+             */
+            target_link?: string;
+            plan?: /**
+             * The plan for one resource. Set on rows of plan jobs (`dry_run`), and
+             * copied onto the rows of the job that applies the plan. Absent on rows
+             * planning failed for and on jobs created before plans existed.
+             *
+             */
+            SyncResourcePlan;
+            /**
+             * Only on jobs that apply a plan: why the row was not applied.
+             * `unchanged` (the plan found no change), `excluded` (left out by
+             * the request) or `not_syncable` (the plan would skip it). Such rows
+             * are `skipped`.
+             *
+             */
+            excluded_from_apply?: "unchanged" | "excluded" | "not_syncable";
         }
         /**
          * Cursor-paginated list of sync job resources.
@@ -880,17 +1223,70 @@ declare namespace Components {
              */
             SyncJobResource[];
         }
+        export interface SyncJobResourceRef {
+            type: string;
+            source_id: string;
+        }
         /**
          * Per-resource status. `would_*` values are produced by dry-run jobs.
          *
          */
         export type SyncJobResourceStatus = "pending" | "in_progress" | "created" | "patched" | "skipped" | "would_create" | "would_patch" | "would_skip_unchanged" | "would_match_heuristic" | "failed";
+        export interface SyncJobRetryErrorResponse {
+            status?: number;
+            error?: string;
+            invalid_resources?: SyncJobResourceRef[];
+        }
+        export interface SyncJobRetryPlan {
+            /**
+             * The selected rows of the original job.
+             */
+            selected: /**
+             * Per-resource row backed by `SyncResourcesTable`. See
+             * `docs/sync/INTERFACES.md` for the DDB shape.
+             *
+             */
+            SyncJobResource[];
+            /**
+             * Unresolved rows the selection depends on, added to the retry.
+             */
+            added_dependencies: /**
+             * Per-resource row backed by `SyncResourcesTable`. See
+             * `docs/sync/INTERFACES.md` for the DDB shape.
+             *
+             */
+            SyncJobResource[];
+            /**
+             * `best_effort` when some source payloads could not be fetched, so
+             * dependencies may be missing from `added_dependencies`.
+             *
+             */
+            dependency_resolution: "exact" | "best_effort";
+        }
+        export interface SyncJobRetryPlanRequest {
+            /**
+             * Rows of the original job to retry. Each must be `failed`, `pending`
+             * or `in_progress`. Omit to retry every unresolved row.
+             *
+             */
+            resources?: SyncJobResourceRef[];
+        }
         /**
          * Optional body for `retrySyncJob`. Defaults to retrying every unresolved
          * resource of the original job (failed, pending or in_progress).
          *
          */
         export interface SyncJobRetryRequest {
+            /**
+             * Target org token used by the worker for writes. Required.
+             */
+            target_auth_token?: string;
+            /**
+             * Retry only these rows (each must be `failed`, `pending` or
+             * `in_progress`) plus the unresolved rows they depend on.
+             *
+             */
+            resources?: SyncJobResourceRef[];
             /**
              * Map of `<type>:<source_id>` → partial payload patch. Applied on top of
              * the originally fetched payload before re-running Phase A.
@@ -908,15 +1304,396 @@ declare namespace Components {
         export type SyncJobStatus = "pending" | "in_progress" | "succeeded" | "partial" | "failed" | "cancelled";
         /**
          * Three-phase orchestrator phase. `phase_0` fetches source payloads,
-         * `phase_a` creates/matches with topological batches, `phase_a5` resolves
-         * derived references, `phase_b` patches with the full ID map, `finalize`
-         * runs cycle-breaking finalizers.
+         * `dependencies` expands the selection with its dependencies (only when
+         * `include_dependencies` is on), `phase_a` creates/matches with
+         * topological batches, `phase_a5` resolves derived references, `phase_b`
+         * patches with the full ID map, `finalize` runs cycle-breaking
+         * finalizers. Clients should tolerate phase values they don't know.
          *
          */
-        export type SyncPhase = "phase_0" | "phase_a" | "phase_a5" | "phase_b" | "finalize";
+        export type SyncPhase = "phase_0" | "dependencies" | "phase_a" | "phase_a5" | "phase_b" | "finalize";
+        export interface SyncPlan {
+            job_id: string;
+            status: /**
+             * Lifecycle status of a sync job. See `docs/sync/INTERFACES.md` for state
+             * transitions.
+             *
+             */
+            SyncJobStatus;
+            /**
+             * True once planning has finished and produced a plan (the job
+             * ended `succeeded` or `partial`). Stays false for a plan job that
+             * ended `failed` or `cancelled`; its counts cover only the rows
+             * planned before it stopped.
+             *
+             */
+            ready: boolean;
+            /**
+             * True while `applySyncPlan` accepts the plan: it is `ready` and
+             * `expires_at` has not passed. A plan can be applied more than once
+             * (e.g. one part now, another later); each apply is listed in
+             * `applied_by`.
+             *
+             */
+            applicable: boolean;
+            /**
+             * When the plan stops being applicable: 24 hours after every row was
+             * last planned (`planned_at`). A partial replan does not move it.
+             *
+             */
+            expires_at?: string; // date-time
+            /**
+             * When every row was last planned (first run or full replan).
+             */
+            planned_at?: string; // date-time
+            /**
+             * When a partial replan (`replanSyncPlan` with `resources`) last finished.
+             */
+            replanned_at?: string; // date-time
+            source_org_id: string;
+            target_org_id: string;
+            started_at?: string; // date-time
+            finished_at?: string; // date-time
+            summary: /**
+             * Planned resources by action. `not_compared` counts the `update`
+             * resources whose copies could not be compared (it is part of
+             * `update`, not in addition to it). `failed` counts resources planning
+             * failed for.
+             *
+             */
+            SyncPlanCounts;
+            by_type: {
+                total: number;
+                create: number;
+                update: number;
+                no_change: number;
+                skip: number;
+                failed: number;
+                not_compared: number;
+                type: string;
+            }[];
+            /**
+             * Ids of the jobs that applied this plan, oldest first.
+             */
+            applied_by?: string[];
+        }
+        /**
+         * What a real run would do with a planned resource:
+         * - `create`: no counterpart in the target; a new resource is created.
+         * - `update`: the target's copy differs from the source and is
+         *   overwritten. Also used when the copies could not be compared
+         *   (`diff_status: not_compared`): such resources are re-applied to be
+         *   safe.
+         * - `no_change`: the target's copy already matches the source.
+         * - `skip`: the resource is never synced (e.g. built-in taxonomies,
+         *   credentials).
+         *
+         */
+        export type SyncPlanAction = "create" | "update" | "no_change" | "skip";
+        export interface SyncPlanApplyErrorResponse {
+            status?: number;
+            error?: string;
+            /**
+             * Machine-readable reason, for clients that show their own message.
+             */
+            code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies";
+            invalid_resources?: SyncJobResourceRef[];
+            missing_dependencies?: SyncPlanMissingDependency[];
+        }
+        export interface SyncPlanApplyRequest {
+            /**
+             * Destination-org auth token, as on `createSyncJob`. Never returned
+             * in responses and never logged.
+             *
+             */
+            target_auth_token: string;
+            /**
+             * Name of the apply job. Defaults to the plan's name.
+             */
+            name?: string;
+            /**
+             * Apply exactly these rows of the plan. Omit to apply every
+             * `create` and `update` row.
+             *
+             */
+            resources?: SyncJobResourceRef[];
+            /**
+             * Rows of the plan to leave out.
+             */
+            exclude?: SyncJobResourceRef[];
+            /**
+             * Apply even when left-out resources that would be created are
+             * referenced by applied ones. Those references then keep pointing
+             * at the source org's ids.
+             *
+             */
+            allow_missing_dependencies?: boolean;
+        }
+        /**
+         * One changed field. `path` uses dots for object keys and
+         * `[key=value]` for array items that have an identity (`name`, `slug`,
+         * `key`, `id`, …), e.g. `steps[name=Contact].blocks[name=Email].label`.
+         * `$` is the whole resource.
+         *
+         * Values are compared after removing fields that differ between orgs
+         * by design: ids of the resource itself, org ids, timestamps and audit
+         * fields (`created_at`, `updated_by`, `_manifest`, …). References to
+         * other resources are shown as target-org ids. A reference to a
+         * resource the plan would create is shown as `new:<type>:<source_id>`,
+         * since its target id does not exist yet.
+         *
+         * A value whose JSON is larger than 4 KB is replaced by
+         * `{ "__truncated": true, "json_bytes": <size> }`.
+         *
+         */
+        export interface SyncPlanChange {
+            path: string;
+            /**
+             * `added`: only the source has a value here. `removed`: only the
+             * target has one (a real run does not necessarily delete it; that
+             * depends on the resource's API). `changed`: both have different
+             * values. `reordered`: the same array items in a different order.
+             *
+             */
+            kind: "added" | "removed" | "changed" | "reordered";
+            /**
+             * The target org's current value. Absent for `added`.
+             */
+            before?: any;
+            /**
+             * The value a real run would write. Absent for `removed`.
+             */
+            after?: any;
+        }
+        /**
+         * Planned resources by action. `not_compared` counts the `update`
+         * resources whose copies could not be compared (it is part of
+         * `update`, not in addition to it). `failed` counts resources planning
+         * failed for.
+         *
+         */
+        export interface SyncPlanCounts {
+            total: number;
+            create: number;
+            update: number;
+            no_change: number;
+            skip: number;
+            failed: number;
+            not_compared: number;
+        }
+        export interface SyncPlanDiff {
+            type: string;
+            source_id: string;
+            /**
+             * The target counterpart. Absent for `create`.
+             */
+            target_id?: string;
+            title?: string;
+            action: /**
+             * What a real run would do with a planned resource:
+             * - `create`: no counterpart in the target; a new resource is created.
+             * - `update`: the target's copy differs from the source and is
+             *   overwritten. Also used when the copies could not be compared
+             *   (`diff_status: not_compared`): such resources are re-applied to be
+             *   safe.
+             * - `no_change`: the target's copy already matches the source.
+             * - `skip`: the resource is never synced (e.g. built-in taxonomies,
+             *   credentials).
+             *
+             */
+            SyncPlanAction;
+            match: /**
+             * How the target counterpart was found: `lineage` (synced before),
+             * `heuristic` (first sync, matched by name / slug / unique key) or
+             * `none` (no counterpart: the resource is created).
+             *
+             */
+            SyncPlanMatch;
+            diff_status: /**
+             * `computed` when both copies were read and compared. `not_compared`
+             * when the target could not be read or compared (see `note`).
+             *
+             */
+            SyncPlanDiffStatus;
+            /**
+             * Number of changed fields, including any left out of `changes`.
+             */
+            change_count: number;
+            /**
+             * The changed fields (at most 200). Empty for `no_change`. For
+             * `create` a single `added` change at `$` holds the whole resource.
+             *
+             */
+            changes: /**
+             * One changed field. `path` uses dots for object keys and
+             * `[key=value]` for array items that have an identity (`name`, `slug`,
+             * `key`, `id`, …), e.g. `steps[name=Contact].blocks[name=Email].label`.
+             * `$` is the whole resource.
+             *
+             * Values are compared after removing fields that differ between orgs
+             * by design: ids of the resource itself, org ids, timestamps and audit
+             * fields (`created_at`, `updated_by`, `_manifest`, …). References to
+             * other resources are shown as target-org ids. A reference to a
+             * resource the plan would create is shown as `new:<type>:<source_id>`,
+             * since its target id does not exist yet.
+             *
+             * A value whose JSON is larger than 4 KB is replaced by
+             * `{ "__truncated": true, "json_bytes": <size> }`.
+             *
+             */
+            SyncPlanChange[];
+            /**
+             * True when changes or values were left out to keep the diff small.
+             * `change_count` is still exact.
+             *
+             */
+            truncated: boolean;
+            note?: string;
+            planned_at?: string; // date-time
+        }
+        export interface SyncPlanDiffListResponse {
+            next_cursor?: string;
+            results: SyncPlanDiff[];
+        }
+        /**
+         * `computed` when both copies were read and compared. `not_compared`
+         * when the target could not be read or compared (see `note`).
+         *
+         */
+        export type SyncPlanDiffStatus = "computed" | "not_compared";
+        /**
+         * How the target counterpart was found: `lineage` (synced before),
+         * `heuristic` (first sync, matched by name / slug / unique key) or
+         * `none` (no counterpart: the resource is created).
+         *
+         */
+        export type SyncPlanMatch = "lineage" | "heuristic" | "none";
+        export interface SyncPlanMissingDependency {
+            type: string;
+            source_id: string;
+            title?: string;
+            /**
+             * Applied resources that reference it.
+             */
+            required_by: {
+                type: string;
+                source_id: string;
+                title?: string;
+            }[];
+        }
+        export interface SyncPlanReplanRequest {
+            /**
+             * Destination-org auth token (planning reads the target). Never returned or logged.
+             */
+            target_auth_token: string;
+            /**
+             * Rows of the plan to plan again. Omit to plan every row again.
+             */
+            resources?: SyncJobResourceRef[];
+        }
+        /**
+         * The resource that referenced the dependency.
+         */
+        export interface SyncRequiredBy {
+            type: string;
+            source_id: string;
+            title?: string;
+        }
+        /**
+         * The plan for one resource. Set on rows of plan jobs (`dry_run`), and
+         * copied onto the rows of the job that applies the plan. Absent on rows
+         * planning failed for and on jobs created before plans existed.
+         *
+         */
+        export interface SyncResourcePlan {
+            action: /**
+             * What a real run would do with a planned resource:
+             * - `create`: no counterpart in the target; a new resource is created.
+             * - `update`: the target's copy differs from the source and is
+             *   overwritten. Also used when the copies could not be compared
+             *   (`diff_status: not_compared`): such resources are re-applied to be
+             *   safe.
+             * - `no_change`: the target's copy already matches the source.
+             * - `skip`: the resource is never synced (e.g. built-in taxonomies,
+             *   credentials).
+             *
+             */
+            SyncPlanAction;
+            match: /**
+             * How the target counterpart was found: `lineage` (synced before),
+             * `heuristic` (first sync, matched by name / slug / unique key) or
+             * `none` (no counterpart: the resource is created).
+             *
+             */
+            SyncPlanMatch;
+            diff_status?: /**
+             * `computed` when both copies were read and compared. `not_compared`
+             * when the target could not be read or compared (see `note`).
+             *
+             */
+            SyncPlanDiffStatus;
+            /**
+             * Number of changed fields (`update` only).
+             */
+            change_count?: number;
+            /**
+             * The first 20 changed field paths (`update` only).
+             */
+            changed_paths?: [
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+            /**
+             * Why the plan chose this action, when it is not obvious.
+             */
+            note?: string;
+            /**
+             * Other resources of the plan this resource references.
+             */
+            depends_on?: SyncJobResourceRef[];
+        }
     }
 }
 declare namespace Paths {
+    namespace ApplySyncPlan {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.SyncPlanApplyRequest;
+        namespace Responses {
+            export type $201 = /**
+             * Sync job header as surfaced by `getSyncJob` and the create response. The
+             * canonical persistence shape is described in `docs/sync/INTERFACES.md`.
+             *
+             */
+            Components.Schemas.SyncJob;
+            export type $400 = Components.Schemas.SyncPlanApplyErrorResponse;
+            export type $403 = Components.Schemas.ErrorResponse;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.SyncPlanApplyErrorResponse;
+        }
+    }
     namespace BreakLineage {
         namespace Parameters {
             export type SourceId = string;
@@ -1060,6 +1837,11 @@ declare namespace Paths {
             export type $404 = Components.Schemas.ErrorResponse;
         }
     }
+    namespace GetHealthReport {
+        namespace Responses {
+            export type $200 = Components.Schemas.HealthReportResponse;
+        }
+    }
     namespace GetIndex {
         namespace Responses {
             export type $200 = /* Current index build state */ Components.Schemas.IndexStatusResponse;
@@ -1080,6 +1862,36 @@ declare namespace Paths {
              */
             Components.Schemas.SyncJob;
             export type $404 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace GetSyncPlan {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.SyncPlan;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace GetSyncPlanDiff {
+        namespace Parameters {
+            export type Id = string;
+            export type SourceId = string;
+            export type Type = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+            type: Parameters.Type;
+            source_id: Parameters.SourceId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.SyncPlanDiff;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
         }
     }
     namespace ListConfigTypes {
@@ -1162,16 +1974,60 @@ declare namespace Paths {
             export type $200 = /* Cursor-paginated list of delete jobs. */ Components.Schemas.DeleteJobListResponse;
         }
     }
+    namespace ListSyncJobEvents {
+        namespace Parameters {
+            export type After = string;
+            export type Cursor = string;
+            export type Id = string;
+            /**
+             * example:
+             * dependency,step
+             */
+            export type Kind = string;
+            export type Size = number;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            cursor?: Parameters.Cursor;
+            size?: Parameters.Size;
+            after?: Parameters.After;
+            kind?: /**
+             * example:
+             * dependency,step
+             */
+            Parameters.Kind;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.SyncJobEventListResponse;
+            export type $404 = Components.Schemas.ErrorResponse;
+        }
+    }
     namespace ListSyncJobResources {
         namespace Parameters {
             export type Cursor = string;
             export type Id = string;
+            export type PlanAction = /**
+             * What a real run would do with a planned resource:
+             * - `create`: no counterpart in the target; a new resource is created.
+             * - `update`: the target's copy differs from the source and is
+             *   overwritten. Also used when the copies could not be compared
+             *   (`diff_status: not_compared`): such resources are re-applied to be
+             *   safe.
+             * - `no_change`: the target's copy already matches the source.
+             * - `skip`: the resource is never synced (e.g. built-in taxonomies,
+             *   credentials).
+             *
+             */
+            Components.Schemas.SyncPlanAction;
             export type Size = number;
             export type Status = /**
              * Per-resource status. `would_*` values are produced by dry-run jobs.
              *
              */
             Components.Schemas.SyncJobResourceStatus;
+            export type Type = string;
         }
         export interface PathParameters {
             id: Parameters.Id;
@@ -1180,6 +2036,8 @@ declare namespace Paths {
             cursor?: Parameters.Cursor;
             size?: Parameters.Size;
             status?: Parameters.Status;
+            type?: Parameters.Type;
+            plan_action?: Parameters.PlanAction;
         }
         namespace Responses {
             export type $200 = /* Cursor-paginated list of sync job resources. */ Components.Schemas.SyncJobResourceListResponse;
@@ -1206,9 +2064,98 @@ declare namespace Paths {
             export type $200 = /* Cursor-paginated list of sync jobs. */ Components.Schemas.SyncJobListResponse;
         }
     }
+    namespace ListSyncPlanDiffs {
+        namespace Parameters {
+            export type Action = /**
+             * What a real run would do with a planned resource:
+             * - `create`: no counterpart in the target; a new resource is created.
+             * - `update`: the target's copy differs from the source and is
+             *   overwritten. Also used when the copies could not be compared
+             *   (`diff_status: not_compared`): such resources are re-applied to be
+             *   safe.
+             * - `no_change`: the target's copy already matches the source.
+             * - `skip`: the resource is never synced (e.g. built-in taxonomies,
+             *   credentials).
+             *
+             */
+            Components.Schemas.SyncPlanAction;
+            export type Cursor = string;
+            export type Id = string;
+            export type Size = number;
+            export type Type = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            cursor?: Parameters.Cursor;
+            size?: Parameters.Size;
+            type?: Parameters.Type;
+            action?: Parameters.Action;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.SyncPlanDiffListResponse;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace PlanSyncJobRetry {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.SyncJobRetryPlanRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.SyncJobRetryPlan;
+            export type $400 = Components.Schemas.SyncJobRetryErrorResponse;
+            export type $404 = Components.Schemas.ErrorResponse;
+        }
+    }
     namespace RebuildIndex {
         namespace Responses {
             export type $200 = /* Result of an index rebuild operation */ Components.Schemas.IndexRebuildResponse;
+        }
+    }
+    namespace ReplanSyncPlan {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export type RequestBody = Components.Schemas.SyncPlanReplanRequest;
+        namespace Responses {
+            export type $202 = /**
+             * Sync job header as surfaced by `getSyncJob` and the create response. The
+             * canonical persistence shape is described in `docs/sync/INTERFACES.md`.
+             *
+             */
+            Components.Schemas.SyncJob;
+            export type $400 = Components.Schemas.SyncPlanApplyErrorResponse;
+            export type $403 = Components.Schemas.ErrorResponse;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.SyncPlanApplyErrorResponse;
+        }
+    }
+    namespace RequestHealthCoverage {
+        export interface RequestBody {
+            message: string;
+        }
+        namespace Responses {
+            export interface $202 {
+                status: "sent" | "failed";
+                error?: string;
+            }
+            export interface $400 {
+                status?: string;
+                error?: string;
+            }
+            export interface $503 {
+                status?: string;
+                error?: string;
+            }
         }
     }
     namespace RetrySyncJob {
@@ -1231,7 +2178,44 @@ declare namespace Paths {
              *
              */
             Components.Schemas.SyncJob;
+            export type $400 = Components.Schemas.SyncJobRetryErrorResponse;
             export type $404 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace SetHealthFindingsIgnored {
+        export interface RequestBody {
+            finding_ids: string[];
+            ignored?: boolean;
+            reason?: string;
+        }
+        namespace Responses {
+            export interface $200 {
+                status: "ok";
+                count?: number;
+            }
+            export interface $400 {
+                status?: string;
+                error?: string;
+            }
+        }
+    }
+    namespace StartHealthCleanup {
+        export interface RequestBody {
+            finding_ids?: string[];
+        }
+        namespace Responses {
+            export interface $202 {
+                status: "cleaning" | "failed";
+                cleanable?: number;
+                error?: string;
+            }
+            export type $422 = Components.Schemas.HealthScanStartResponse;
+        }
+    }
+    namespace StartHealthScan {
+        namespace Responses {
+            export type $202 = Components.Schemas.HealthScanStartResponse;
+            export type $422 = Components.Schemas.HealthScanStartResponse;
         }
     }
     namespace SuggestMatches {
@@ -1313,6 +2297,90 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetIndex.Responses.$200>
+  /**
+   * startHealthScan - startHealthScan
+   * 
+   * Start an asynchronous org health scan — fire-and-forget, mirrors
+   * `rebuildIndex`. The scan walks the indexed configs, fetches each
+   * payload, extracts field-path-known references (journey→mapping,
+   * automation→template/webhook/workflow, workflow→automation, …) and
+   * records a finding for every reference that resolves to a missing or
+   * inactive config, plus configs that are listed but unreadable.
+   * 
+   * Requires a built config index (422 otherwise). Poll `getHealthReport`
+   * for status and results.
+   * 
+   */
+  'startHealthScan'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.StartHealthScan.Responses.$202>
+  /**
+   * getHealthReport - getHealthReport
+   * 
+   * Return the caller org's current health report: scan status, summary
+   * counts by severity, new/resolved deltas vs the previous scan, and the
+   * full finding list (errors first, then most recently appeared).
+   * Findings carry `first_seen`/`last_seen` so the UI can correlate new
+   * findings with recent imports and installs.
+   * 
+   */
+  'getHealthReport'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetHealthReport.Responses.$200>
+  /**
+   * requestHealthCoverage - requestHealthCoverage
+   * 
+   * Send a request for configuration the health check does not cover yet.
+   * Posted to the #epilot-org-health Slack channel together with the calling
+   * org and user. Returns 503 when no webhook is configured for the stage.
+   * 
+   */
+  'requestHealthCoverage'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.RequestHealthCoverage.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RequestHealthCoverage.Responses.$202>
+  /**
+   * startHealthCleanup - startHealthCleanup
+   * 
+   * Remove references that are already inert: dangling `$relation` entries
+   * on products and prices (a price selling with a deleted tax, a product
+   * linking a deleted price, …), automation triggers pointed at a deleted
+   * journey (they can never fire), and the journey attached to a workflow
+   * task when that journey is deleted (the task itself stays). Only
+   * findings flagged `cleanable` are touched; live wiring — an action's
+   * email template, a task's automation, a webhook target — is never
+   * modified, because removing it would change what runs. Without
+   * a body every cleanable finding is cleaned; `finding_ids` narrows the
+   * set (e.g. one row's Clean up button). Fire-and-forget: poll
+   * `getHealthReport` — status `cleaning` until done.
+   * 
+   */
+  'startHealthCleanup'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.StartHealthCleanup.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.StartHealthCleanup.Responses.$202>
+  /**
+   * setHealthFindingsIgnored - setHealthFindingsIgnored
+   * 
+   * Acknowledge findings as intentional (or undo that). An ignored
+   * finding is excluded from the headline score and the default
+   * breakdown, but stays visible under the Ignored filter and can be
+   * un-ignored at any time — it never disappears for good. Synchronous:
+   * only flips a flag on already-computed rows, no rescan needed.
+   * `ignored` defaults to `true`.
+   * 
+   */
+  'setHealthFindingsIgnored'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SetHealthFindingsIgnored.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SetHealthFindingsIgnored.Responses.$200>
   /**
    * compareConfigs - compareConfigs
    * 
@@ -1433,12 +2501,29 @@ export interface OperationMethods {
    * early. Creates a new job whose scope is that `(type, source_id)` set and
    * enqueues it for execution. Optionally accepts inline payload overrides.
    * 
+   * With `resources`, only those rows are retried, plus the unresolved rows
+   * of the original job they depend on (transitively). The new job carries
+   * `retry_of`; the original job's `retried_by` gains the new job's id.
+   * 
    */
   'retrySyncJob'(
     parameters?: Parameters<Paths.RetrySyncJob.PathParameters> | null,
     data?: Paths.RetrySyncJob.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RetrySyncJob.Responses.$201>
+  /**
+   * planSyncJobRetry - planSyncJobRetry
+   * 
+   * Preview what `retrySyncJob` would re-run for the same `resources`,
+   * without creating a job: the selected rows and the unresolved rows they
+   * depend on. Read-only; needs no target token.
+   * 
+   */
+  'planSyncJobRetry'(
+    parameters?: Parameters<Paths.PlanSyncJobRetry.PathParameters> | null,
+    data?: Paths.PlanSyncJobRetry.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PlanSyncJobRetry.Responses.$200>
   /**
    * cancelSyncJob - cancelSyncJob
    * 
@@ -1458,11 +2543,32 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CancelSyncJob.Responses.$200>
   /**
+   * listSyncJobEvents - listSyncJobEvents
+   * 
+   * Full activity log of a sync job, latest first: one event per resource
+   * status change. Paginate older events with `next_cursor`, or poll for
+   * new ones with `after` (the newest event id the client holds).
+   * 
+   * Jobs that predate the event log are served from the op-log instead
+   * (`source: op_log`): one event per resource holding its last state.
+   * `after` is ignored there and the first page is returned.
+   * 
+   */
+  'listSyncJobEvents'(
+    parameters?: Parameters<Paths.ListSyncJobEvents.QueryParameters & Paths.ListSyncJobEvents.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSyncJobEvents.Responses.$200>
+  /**
    * listSyncJobResources - listSyncJobResources
    * 
    * List the per-resource rows for a sync job. Supports filtering by status
-   * (e.g. `failed`) and cursor pagination. Used by the failures table and the
-   * dry-run plan view in the frontend.
+   * (e.g. `failed`) and type, and cursor pagination. Used by the job detail
+   * page, the failures table and the dry-run plan view in the frontend.
+   * 
+   * Rows without a stored `title` get one from the config index (the target
+   * org's copy, else the source org's) when it can be resolved. Rows carry
+   * `source_link` / `target_link` portal editor URLs where they can be built.
    * 
    */
   'listSyncJobResources'(
@@ -1470,6 +2576,116 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListSyncJobResources.Responses.$200>
+  /**
+   * getSyncPlan - getSyncPlan
+   * 
+   * Summary of a plan: a dry-run sync job (`createSyncJob` with
+   * `dry_run: true`). Says how many resources a real run would create,
+   * update or leave unchanged, overall and per type.
+   * 
+   * Every resource row of the plan also carries a `plan` object (see
+   * `listSyncJobResources`, which can filter by `plan_action`). The field
+   * diffs behind each update are served by `listSyncPlanDiffs` and
+   * `getSyncPlanDiff`.
+   * 
+   * A plan describes the target org at planning time. Apply it with
+   * `applySyncPlan`, which can leave out resources first.
+   * 
+   */
+  'getSyncPlan'(
+    parameters?: Parameters<Paths.GetSyncPlan.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSyncPlan.Responses.$200>
+  /**
+   * listSyncPlanDiffs - listSyncPlanDiffs
+   * 
+   * Field-level diffs of a plan, one per planned resource: what the target
+   * org has now (`before`) and what a real run would write (`after`). Use
+   * it to review a plan in bulk, e.g. from an AI agent.
+   * 
+   * Only resources whose plan action is `create`, `update` or `no_change`
+   * have a diff. Pages are ordered by type, then source id.
+   * 
+   */
+  'listSyncPlanDiffs'(
+    parameters?: Parameters<Paths.ListSyncPlanDiffs.QueryParameters & Paths.ListSyncPlanDiffs.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListSyncPlanDiffs.Responses.$200>
+  /**
+   * getSyncPlanDiff - getSyncPlanDiff
+   * 
+   * Field-level diff of one planned resource. See `listSyncPlanDiffs`.
+   * 
+   */
+  'getSyncPlanDiff'(
+    parameters?: Parameters<Paths.GetSyncPlanDiff.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSyncPlanDiff.Responses.$200>
+  /**
+   * applySyncPlan - applySyncPlan
+   * 
+   * Run a finished plan for real. Creates a new sync job (it carries
+   * `applied_from_plan`; the plan's `applied_by` gets the new job's id)
+   * and enqueues it.
+   * 
+   * By default the job applies every resource the plan would `create` or
+   * `update`. `no_change` and `skip` resources are not written. Change
+   * the selection with:
+   * - `resources`: apply exactly these rows of the plan. Can include
+   *   `no_change` rows to write them anyway.
+   * - `exclude`: leave these rows out (applied after `resources`).
+   * 
+   * Rows that are not applied are still listed on the new job, as
+   * `skipped` with `excluded_from_apply`. Their existing targets keep
+   * resolving references from the applied resources.
+   * 
+   * Leaving out a resource the plan would create, while an applied
+   * resource references it, would leave that reference pointing at a
+   * resource that does not exist in the target. The request is then
+   * rejected with 409 and `missing_dependencies`, unless
+   * `allow_missing_dependencies` is set.
+   * 
+   * Applied resources go through the normal sync phases, so a change in
+   * the target since planning is handled like in any sync. A plan can be
+   * applied up to 24 hours after it finished (`expires_at`); plan again
+   * after that. A plan can be applied more than once; each apply job is
+   * added to the plan's `applied_by`.
+   * 
+   * Errors carry a machine-readable `code`.
+   * 
+   */
+  'applySyncPlan'(
+    parameters?: Parameters<Paths.ApplySyncPlan.PathParameters> | null,
+    data?: Paths.ApplySyncPlan.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ApplySyncPlan.Responses.$201>
+  /**
+   * replanSyncPlan - replanSyncPlan
+   * 
+   * Plan some rows of a plan again, in place, e.g. after fixing a
+   * resource in the source org because its plan showed an unexpected
+   * change. The listed resources are fetched from the source again,
+   * their dependencies are expanded again (a newly referenced resource
+   * is added to the plan), and their targets are read and diffed again.
+   * All other rows keep their plan and diff.
+   * 
+   * Without `resources` every row is planned again; that also renews the
+   * plan's 24-hour window (`expires_at`). A partial replan does not,
+   * because the other rows were planned earlier.
+   * 
+   * The plan job goes back to `pending` / `in_progress` and is `ready`
+   * again when it finishes (`replanned_at` / `planned_at` updated). Poll
+   * `getSyncPlan`.
+   * 
+   */
+  'replanSyncPlan'(
+    parameters?: Parameters<Paths.ReplanSyncPlan.PathParameters> | null,
+    data?: Paths.ReplanSyncPlan.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ReplanSyncPlan.Responses.$202>
   /**
    * listDeleteJobs - listDeleteJobs
    * 
@@ -1630,6 +2846,100 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetIndex.Responses.$200>
   }
+  ['/v1/configs/health:scan']: {
+    /**
+     * startHealthScan - startHealthScan
+     * 
+     * Start an asynchronous org health scan — fire-and-forget, mirrors
+     * `rebuildIndex`. The scan walks the indexed configs, fetches each
+     * payload, extracts field-path-known references (journey→mapping,
+     * automation→template/webhook/workflow, workflow→automation, …) and
+     * records a finding for every reference that resolves to a missing or
+     * inactive config, plus configs that are listed but unreadable.
+     * 
+     * Requires a built config index (422 otherwise). Poll `getHealthReport`
+     * for status and results.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.StartHealthScan.Responses.$202>
+  }
+  ['/v1/configs/health']: {
+    /**
+     * getHealthReport - getHealthReport
+     * 
+     * Return the caller org's current health report: scan status, summary
+     * counts by severity, new/resolved deltas vs the previous scan, and the
+     * full finding list (errors first, then most recently appeared).
+     * Findings carry `first_seen`/`last_seen` so the UI can correlate new
+     * findings with recent imports and installs.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetHealthReport.Responses.$200>
+  }
+  ['/v1/configs/health:coverage-request']: {
+    /**
+     * requestHealthCoverage - requestHealthCoverage
+     * 
+     * Send a request for configuration the health check does not cover yet.
+     * Posted to the #epilot-org-health Slack channel together with the calling
+     * org and user. Returns 503 when no webhook is configured for the stage.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.RequestHealthCoverage.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RequestHealthCoverage.Responses.$202>
+  }
+  ['/v1/configs/health:cleanup']: {
+    /**
+     * startHealthCleanup - startHealthCleanup
+     * 
+     * Remove references that are already inert: dangling `$relation` entries
+     * on products and prices (a price selling with a deleted tax, a product
+     * linking a deleted price, …), automation triggers pointed at a deleted
+     * journey (they can never fire), and the journey attached to a workflow
+     * task when that journey is deleted (the task itself stays). Only
+     * findings flagged `cleanable` are touched; live wiring — an action's
+     * email template, a task's automation, a webhook target — is never
+     * modified, because removing it would change what runs. Without
+     * a body every cleanable finding is cleaned; `finding_ids` narrows the
+     * set (e.g. one row's Clean up button). Fire-and-forget: poll
+     * `getHealthReport` — status `cleaning` until done.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.StartHealthCleanup.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.StartHealthCleanup.Responses.$202>
+  }
+  ['/v1/configs/health:ignore']: {
+    /**
+     * setHealthFindingsIgnored - setHealthFindingsIgnored
+     * 
+     * Acknowledge findings as intentional (or undo that). An ignored
+     * finding is excluded from the headline score and the default
+     * breakdown, but stays visible under the Ignored filter and can be
+     * un-ignored at any time — it never disappears for good. Synchronous:
+     * only flips a flag on already-computed rows, no rescan needed.
+     * `ignored` defaults to `true`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SetHealthFindingsIgnored.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SetHealthFindingsIgnored.Responses.$200>
+  }
   ['/v1/configs/compare']: {
     /**
      * compareConfigs - compareConfigs
@@ -1761,12 +3071,31 @@ export interface PathsDictionary {
      * early. Creates a new job whose scope is that `(type, source_id)` set and
      * enqueues it for execution. Optionally accepts inline payload overrides.
      * 
+     * With `resources`, only those rows are retried, plus the unresolved rows
+     * of the original job they depend on (transitively). The new job carries
+     * `retry_of`; the original job's `retried_by` gains the new job's id.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.RetrySyncJob.PathParameters> | null,
       data?: Paths.RetrySyncJob.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RetrySyncJob.Responses.$201>
+  }
+  ['/v1/configs/sync-jobs/{id}/retry-plan']: {
+    /**
+     * planSyncJobRetry - planSyncJobRetry
+     * 
+     * Preview what `retrySyncJob` would re-run for the same `resources`,
+     * without creating a job: the selected rows and the unresolved rows they
+     * depend on. Read-only; needs no target token.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.PlanSyncJobRetry.PathParameters> | null,
+      data?: Paths.PlanSyncJobRetry.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PlanSyncJobRetry.Responses.$200>
   }
   ['/v1/configs/sync-jobs/{id}/cancel']: {
     /**
@@ -1788,13 +3117,36 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CancelSyncJob.Responses.$200>
   }
+  ['/v1/configs/sync-jobs/{id}/events']: {
+    /**
+     * listSyncJobEvents - listSyncJobEvents
+     * 
+     * Full activity log of a sync job, latest first: one event per resource
+     * status change. Paginate older events with `next_cursor`, or poll for
+     * new ones with `after` (the newest event id the client holds).
+     * 
+     * Jobs that predate the event log are served from the op-log instead
+     * (`source: op_log`): one event per resource holding its last state.
+     * `after` is ignored there and the first page is returned.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListSyncJobEvents.QueryParameters & Paths.ListSyncJobEvents.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSyncJobEvents.Responses.$200>
+  }
   ['/v1/configs/sync-jobs/{id}/resources']: {
     /**
      * listSyncJobResources - listSyncJobResources
      * 
      * List the per-resource rows for a sync job. Supports filtering by status
-     * (e.g. `failed`) and cursor pagination. Used by the failures table and the
-     * dry-run plan view in the frontend.
+     * (e.g. `failed`) and type, and cursor pagination. Used by the job detail
+     * page, the failures table and the dry-run plan view in the frontend.
+     * 
+     * Rows without a stored `title` get one from the config index (the target
+     * org's copy, else the source org's) when it can be resolved. Rows carry
+     * `source_link` / `target_link` portal editor URLs where they can be built.
      * 
      */
     'get'(
@@ -1802,6 +3154,126 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListSyncJobResources.Responses.$200>
+  }
+  ['/v1/configs/sync-jobs/{id}/plan']: {
+    /**
+     * getSyncPlan - getSyncPlan
+     * 
+     * Summary of a plan: a dry-run sync job (`createSyncJob` with
+     * `dry_run: true`). Says how many resources a real run would create,
+     * update or leave unchanged, overall and per type.
+     * 
+     * Every resource row of the plan also carries a `plan` object (see
+     * `listSyncJobResources`, which can filter by `plan_action`). The field
+     * diffs behind each update are served by `listSyncPlanDiffs` and
+     * `getSyncPlanDiff`.
+     * 
+     * A plan describes the target org at planning time. Apply it with
+     * `applySyncPlan`, which can leave out resources first.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSyncPlan.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSyncPlan.Responses.$200>
+  }
+  ['/v1/configs/sync-jobs/{id}/plan/diffs']: {
+    /**
+     * listSyncPlanDiffs - listSyncPlanDiffs
+     * 
+     * Field-level diffs of a plan, one per planned resource: what the target
+     * org has now (`before`) and what a real run would write (`after`). Use
+     * it to review a plan in bulk, e.g. from an AI agent.
+     * 
+     * Only resources whose plan action is `create`, `update` or `no_change`
+     * have a diff. Pages are ordered by type, then source id.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListSyncPlanDiffs.QueryParameters & Paths.ListSyncPlanDiffs.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListSyncPlanDiffs.Responses.$200>
+  }
+  ['/v1/configs/sync-jobs/{id}/plan/diffs/{type}/{source_id}']: {
+    /**
+     * getSyncPlanDiff - getSyncPlanDiff
+     * 
+     * Field-level diff of one planned resource. See `listSyncPlanDiffs`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSyncPlanDiff.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSyncPlanDiff.Responses.$200>
+  }
+  ['/v1/configs/sync-jobs/{id}/plan/apply']: {
+    /**
+     * applySyncPlan - applySyncPlan
+     * 
+     * Run a finished plan for real. Creates a new sync job (it carries
+     * `applied_from_plan`; the plan's `applied_by` gets the new job's id)
+     * and enqueues it.
+     * 
+     * By default the job applies every resource the plan would `create` or
+     * `update`. `no_change` and `skip` resources are not written. Change
+     * the selection with:
+     * - `resources`: apply exactly these rows of the plan. Can include
+     *   `no_change` rows to write them anyway.
+     * - `exclude`: leave these rows out (applied after `resources`).
+     * 
+     * Rows that are not applied are still listed on the new job, as
+     * `skipped` with `excluded_from_apply`. Their existing targets keep
+     * resolving references from the applied resources.
+     * 
+     * Leaving out a resource the plan would create, while an applied
+     * resource references it, would leave that reference pointing at a
+     * resource that does not exist in the target. The request is then
+     * rejected with 409 and `missing_dependencies`, unless
+     * `allow_missing_dependencies` is set.
+     * 
+     * Applied resources go through the normal sync phases, so a change in
+     * the target since planning is handled like in any sync. A plan can be
+     * applied up to 24 hours after it finished (`expires_at`); plan again
+     * after that. A plan can be applied more than once; each apply job is
+     * added to the plan's `applied_by`.
+     * 
+     * Errors carry a machine-readable `code`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ApplySyncPlan.PathParameters> | null,
+      data?: Paths.ApplySyncPlan.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ApplySyncPlan.Responses.$201>
+  }
+  ['/v1/configs/sync-jobs/{id}/plan/replan']: {
+    /**
+     * replanSyncPlan - replanSyncPlan
+     * 
+     * Plan some rows of a plan again, in place, e.g. after fixing a
+     * resource in the source org because its plan showed an unexpected
+     * change. The listed resources are fetched from the source again,
+     * their dependencies are expanded again (a newly referenced resource
+     * is added to the plan), and their targets are read and diffed again.
+     * All other rows keep their plan and diff.
+     * 
+     * Without `resources` every row is planned again; that also renews the
+     * plan's 24-hour window (`expires_at`). A partial replan does not,
+     * because the other rows were planned earlier.
+     * 
+     * The plan job goes back to `pending` / `in_progress` and is `ready`
+     * again when it finishes (`replanned_at` / `planned_at` updated). Poll
+     * `getSyncPlan`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ReplanSyncPlan.PathParameters> | null,
+      data?: Paths.ReplanSyncPlan.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ReplanSyncPlan.Responses.$202>
   }
   ['/v1/configs/delete-jobs']: {
     /**
@@ -1918,6 +3390,9 @@ export type DeleteJobResourceListResponse = Components.Schemas.DeleteJobResource
 export type DeleteJobResourceStatus = Components.Schemas.DeleteJobResourceStatus;
 export type DeleteJobStatus = Components.Schemas.DeleteJobStatus;
 export type ErrorResponse = Components.Schemas.ErrorResponse;
+export type HealthFinding = Components.Schemas.HealthFinding;
+export type HealthReportResponse = Components.Schemas.HealthReportResponse;
+export type HealthScanStartResponse = Components.Schemas.HealthScanStartResponse;
 export type IndexRebuildResponse = Components.Schemas.IndexRebuildResponse;
 export type IndexStatusResponse = Components.Schemas.IndexStatusResponse;
 export type LineageEntryResponse = Components.Schemas.LineageEntryResponse;
@@ -1927,16 +3402,37 @@ export type SnapshotInventoryItem = Components.Schemas.SnapshotInventoryItem;
 export type SnapshotInventorySkippedType = Components.Schemas.SnapshotInventorySkippedType;
 export type SuggestMatchesRequest = Components.Schemas.SuggestMatchesRequest;
 export type SuggestMatchesResponse = Components.Schemas.SuggestMatchesResponse;
+export type SyncDependencyReason = Components.Schemas.SyncDependencyReason;
 export type SyncDirection = Components.Schemas.SyncDirection;
 export type SyncJob = Components.Schemas.SyncJob;
 export type SyncJobBatch = Components.Schemas.SyncJobBatch;
 export type SyncJobCounts = Components.Schemas.SyncJobCounts;
 export type SyncJobEvent = Components.Schemas.SyncJobEvent;
+export type SyncJobEventDependency = Components.Schemas.SyncJobEventDependency;
+export type SyncJobEventListResponse = Components.Schemas.SyncJobEventListResponse;
 export type SyncJobListResponse = Components.Schemas.SyncJobListResponse;
 export type SyncJobRequest = Components.Schemas.SyncJobRequest;
 export type SyncJobResource = Components.Schemas.SyncJobResource;
 export type SyncJobResourceListResponse = Components.Schemas.SyncJobResourceListResponse;
+export type SyncJobResourceRef = Components.Schemas.SyncJobResourceRef;
 export type SyncJobResourceStatus = Components.Schemas.SyncJobResourceStatus;
+export type SyncJobRetryErrorResponse = Components.Schemas.SyncJobRetryErrorResponse;
+export type SyncJobRetryPlan = Components.Schemas.SyncJobRetryPlan;
+export type SyncJobRetryPlanRequest = Components.Schemas.SyncJobRetryPlanRequest;
 export type SyncJobRetryRequest = Components.Schemas.SyncJobRetryRequest;
 export type SyncJobStatus = Components.Schemas.SyncJobStatus;
 export type SyncPhase = Components.Schemas.SyncPhase;
+export type SyncPlan = Components.Schemas.SyncPlan;
+export type SyncPlanAction = Components.Schemas.SyncPlanAction;
+export type SyncPlanApplyErrorResponse = Components.Schemas.SyncPlanApplyErrorResponse;
+export type SyncPlanApplyRequest = Components.Schemas.SyncPlanApplyRequest;
+export type SyncPlanChange = Components.Schemas.SyncPlanChange;
+export type SyncPlanCounts = Components.Schemas.SyncPlanCounts;
+export type SyncPlanDiff = Components.Schemas.SyncPlanDiff;
+export type SyncPlanDiffListResponse = Components.Schemas.SyncPlanDiffListResponse;
+export type SyncPlanDiffStatus = Components.Schemas.SyncPlanDiffStatus;
+export type SyncPlanMatch = Components.Schemas.SyncPlanMatch;
+export type SyncPlanMissingDependency = Components.Schemas.SyncPlanMissingDependency;
+export type SyncPlanReplanRequest = Components.Schemas.SyncPlanReplanRequest;
+export type SyncRequiredBy = Components.Schemas.SyncRequiredBy;
+export type SyncResourcePlan = Components.Schemas.SyncResourcePlan;
