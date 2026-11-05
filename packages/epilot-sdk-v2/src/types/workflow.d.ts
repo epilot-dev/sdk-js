@@ -33,14 +33,16 @@ export declare namespace Components {
                 job_id: string;
                 org_id: string;
                 status: /**
+                 * * `preparing`: the entities are being resolved; nothing started
                  * * `awaiting_approval`: preflight done, nothing started; waits for `APPROVE`
                  * * `queued`: approved, waiting for a worker
                  * * `running`: starts in progress
                  * * `completed`: every start that was not skipped succeeded
                  * * `completed_with_errors`: finished, at least one start failed
-                 * * `failed`: the job itself failed; some starts may have happened, see items
+                 * * `failed`: the job itself failed; some starts may have happened, see items.
+                 *   A job that failed while `preparing` started nothing and carries `failure`
                  * * `cancelled`: cancelled; flows already started are kept
-                 * * `expired`: not approved within 24 hours
+                 * * `expired`: not approved within 24 hours, or not prepared within 24 hours of its creation
                  *
                  */
                 BulkStartFlowsJobStatus;
@@ -68,9 +70,48 @@ export declare namespace Components {
                  *
                  */
                 restarted_by?: string;
-                flows: BulkStartFlowsFlowSummary[];
+                flow: BulkStartFlowsFlowSummary;
+                /**
+                 * Deprecated, use `flow`. Holds `flow` alone.
+                 */
+                flows?: BulkStartFlowsFlowSummary[];
+                /**
+                 * Number of entities in the job (0 while `preparing`).
+                 */
+                entity_count: number;
+                /**
+                 * Schema of the job's entities, when they all share one.
+                 */
+                entity_schema?: string;
+                /**
+                 * The query `q` the entities were selected by, for a job created from `entities_query`.
+                 */
+                entities_query?: string;
+                /**
+                 * For a job created from `entities_query`: how many entities the search
+                 * reported when the job was prepared. It counts an entity indexed twice
+                 * twice, so it can exceed `entity_count` by a few; a larger gap fails
+                 * preparation with `entities_incomplete`.
+                 *
+                 */
+                entities_matched?: number;
+                failure?: /* Why a job failed while it was being prepared. */ BulkStartFlowsJobFailure;
+                preparation?: /**
+                 * Progress of a `preparing` job: finding its entities (`resolving`), then
+                 * writing one item per entity (`writing`). Updated after every page and
+                 * every chunk, so an `updated_at` that stops moving means the server is
+                 * waiting to retry.
+                 *
+                 */
+                BulkStartFlowsJobPreparation;
                 counts: BulkStartFlowsJobCounts;
-                items: /* One (flow, entity) start of a bulk-start job. */ BulkStartFlowsItem[];
+                /**
+                 * Present for jobs of at most 200 items only, and never while the
+                 * job is `preparing`. Read `counts` (and `preparation`) for progress
+                 * and page items through `GET /v2/flows/bulk-jobs/{job_id}/items`.
+                 *
+                 */
+                items?: /* One entity's start of a bulk-start job's flow. */ BulkStartFlowsItem[];
             } | null;
         }
         export interface AddTaskReq {
@@ -365,8 +406,12 @@ export declare namespace Components {
         export interface AiPrefillMapping {
             source: string;
             block_id: string;
-            block_type: "text-input" | "number-input" | "personal-information" | "meter-reading";
+            block_type: "text-input" | "number-input" | "personal-information" | "meter-reading" | "contact" | "single-choice" | "date-input" | "binary-input" | "address" | "payment-method" | "multiple-choice" | "availability-check";
             block_field?: string;
+            /**
+             * The country an address or availability-check block is configured for, used when the extraction names none
+             */
+            country_code?: string;
         }
         export interface AnalyticsInfo {
             started_at?: string; // date-time
@@ -676,6 +721,24 @@ export declare namespace Components {
             schedule?: ActionSchedule;
             loop_config?: /* Information about loop iterations, when task is part of a loop branch */ LoopInfo;
         }
+        /**
+         * The entities an entity search matches, as the entity table's "select all
+         * matching" selects them. Resolved once, in the background, when the job is prepared: the
+         * job holds the entities matching at that time (at most 10,000).
+         *
+         */
+        export interface BulkStartEntitiesQuery {
+            /**
+             * Schema of the entities; the search is limited to it.
+             * example:
+             * opportunity
+             */
+            entity_schema: string;
+            /**
+             * Lucene query of the entity search (the table's search).
+             */
+            q: string;
+        }
         export interface BulkStartEntityRef {
             entity_id: string;
             /**
@@ -684,22 +747,37 @@ export declare namespace Components {
              */
             entity_schema: string;
         }
+        export interface BulkStartFlowsAutomaticTask {
+            task_id: string;
+            task_name: string;
+            task_type: "AUTOMATION" | "AI_AGENT";
+        }
         export interface BulkStartFlowsFlowSummary {
             flow_template_id: string;
             flow_name: string;
             /**
-             * Entities this flow will be started on.
+             * Entities the flow will be started on.
              */
             will_start: number;
             /**
-             * Entities no trigger of this flow accepts.
+             * Entities no trigger of the flow accepts.
              */
             skipped: number;
+            /**
+             * Tasks of the flow that run on their own (automations and AI agents
+             * with `trigger_mode: automatic`): side effects that happen on every
+             * entity the flow starts on.
+             *
+             */
+            automatic_tasks?: BulkStartFlowsAutomaticTask[];
         }
         /**
-         * One (flow, entity) start of a bulk-start job.
+         * One entity's start of a bulk-start job's flow.
          */
         export interface BulkStartFlowsItem {
+            /**
+             * The job's flow template (the same on every item).
+             */
             flow_template_id: string;
             entity_id: string;
             entity_schema: string;
@@ -723,14 +801,16 @@ export declare namespace Components {
             job_id: string;
             org_id: string;
             status: /**
+             * * `preparing`: the entities are being resolved; nothing started
              * * `awaiting_approval`: preflight done, nothing started; waits for `APPROVE`
              * * `queued`: approved, waiting for a worker
              * * `running`: starts in progress
              * * `completed`: every start that was not skipped succeeded
              * * `completed_with_errors`: finished, at least one start failed
-             * * `failed`: the job itself failed; some starts may have happened, see items
+             * * `failed`: the job itself failed; some starts may have happened, see items.
+             *   A job that failed while `preparing` started nothing and carries `failure`
              * * `cancelled`: cancelled; flows already started are kept
-             * * `expired`: not approved within 24 hours
+             * * `expired`: not approved within 24 hours, or not prepared within 24 hours of its creation
              *
              */
             BulkStartFlowsJobStatus;
@@ -758,9 +838,48 @@ export declare namespace Components {
              *
              */
             restarted_by?: string;
-            flows: BulkStartFlowsFlowSummary[];
+            flow: BulkStartFlowsFlowSummary;
+            /**
+             * Deprecated, use `flow`. Holds `flow` alone.
+             */
+            flows?: BulkStartFlowsFlowSummary[];
+            /**
+             * Number of entities in the job (0 while `preparing`).
+             */
+            entity_count: number;
+            /**
+             * Schema of the job's entities, when they all share one.
+             */
+            entity_schema?: string;
+            /**
+             * The query `q` the entities were selected by, for a job created from `entities_query`.
+             */
+            entities_query?: string;
+            /**
+             * For a job created from `entities_query`: how many entities the search
+             * reported when the job was prepared. It counts an entity indexed twice
+             * twice, so it can exceed `entity_count` by a few; a larger gap fails
+             * preparation with `entities_incomplete`.
+             *
+             */
+            entities_matched?: number;
+            failure?: /* Why a job failed while it was being prepared. */ BulkStartFlowsJobFailure;
+            preparation?: /**
+             * Progress of a `preparing` job: finding its entities (`resolving`), then
+             * writing one item per entity (`writing`). Updated after every page and
+             * every chunk, so an `updated_at` that stops moving means the server is
+             * waiting to retry.
+             *
+             */
+            BulkStartFlowsJobPreparation;
             counts: BulkStartFlowsJobCounts;
-            items: /* One (flow, entity) start of a bulk-start job. */ BulkStartFlowsItem[];
+            /**
+             * Present for jobs of at most 200 items only, and never while the
+             * job is `preparing`. Read `counts` (and `preparation`) for progress
+             * and page items through `GET /v2/flows/bulk-jobs/{job_id}/items`.
+             *
+             */
+            items?: /* One entity's start of a bulk-start job's flow. */ BulkStartFlowsItem[];
         }
         export interface BulkStartFlowsJobCounts {
             total: number;
@@ -771,17 +890,60 @@ export declare namespace Components {
             cancelled: number;
         }
         /**
+         * Why a job failed while it was being prepared.
+         */
+        export interface BulkStartFlowsJobFailure {
+            /**
+             * `too_many_entities`, `no_entities`, `entities_incomplete` or `preparation_failed`.
+             */
+            error_code: string;
+            message: string;
+        }
+        /**
+         * Progress of a `preparing` job: finding its entities (`resolving`), then
+         * writing one item per entity (`writing`). Updated after every page and
+         * every chunk, so an `updated_at` that stops moving means the server is
+         * waiting to retry.
+         *
+         */
+        export interface BulkStartFlowsJobPreparation {
+            phase: "resolving" | "writing";
+            /**
+             * How many entities the search reported, for a job created from `entities_query`.
+             */
+            matched?: number;
+            /**
+             * Entities found so far.
+             */
+            resolved: number;
+            /**
+             * Items written so far.
+             */
+            written: number;
+            /**
+             * Items to write, once the entities are found.
+             */
+            total?: number;
+            /**
+             * The attempt preparing the job, from 1. Preparation fails after 5.
+             */
+            attempts: number;
+            updated_at: string; // date-time
+        }
+        /**
+         * * `preparing`: the entities are being resolved; nothing started
          * * `awaiting_approval`: preflight done, nothing started; waits for `APPROVE`
          * * `queued`: approved, waiting for a worker
          * * `running`: starts in progress
          * * `completed`: every start that was not skipped succeeded
          * * `completed_with_errors`: finished, at least one start failed
-         * * `failed`: the job itself failed; some starts may have happened, see items
+         * * `failed`: the job itself failed; some starts may have happened, see items.
+         *   A job that failed while `preparing` started nothing and carries `failure`
          * * `cancelled`: cancelled; flows already started are kept
-         * * `expired`: not approved within 24 hours
+         * * `expired`: not approved within 24 hours, or not prepared within 24 hours of its creation
          *
          */
-        export type BulkStartFlowsJobStatus = "awaiting_approval" | "queued" | "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "expired";
+        export type BulkStartFlowsJobStatus = "preparing" | "awaiting_approval" | "queued" | "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "expired";
         /**
          * A bulk-start job as listed in the history, without its items.
          */
@@ -789,14 +951,16 @@ export declare namespace Components {
             job_id: string;
             org_id: string;
             status: /**
+             * * `preparing`: the entities are being resolved; nothing started
              * * `awaiting_approval`: preflight done, nothing started; waits for `APPROVE`
              * * `queued`: approved, waiting for a worker
              * * `running`: starts in progress
              * * `completed`: every start that was not skipped succeeded
              * * `completed_with_errors`: finished, at least one start failed
-             * * `failed`: the job itself failed; some starts may have happened, see items
+             * * `failed`: the job itself failed; some starts may have happened, see items.
+             *   A job that failed while `preparing` started nothing and carries `failure`
              * * `cancelled`: cancelled; flows already started are kept
-             * * `expired`: not approved within 24 hours
+             * * `expired`: not approved within 24 hours, or not prepared within 24 hours of its creation
              *
              */
             BulkStartFlowsJobStatus;
@@ -825,15 +989,19 @@ export declare namespace Components {
              *
              */
             restarted_by?: string;
-            flows: BulkStartFlowsFlowSummary[];
+            flow: BulkStartFlowsFlowSummary;
+            /**
+             * Deprecated, use `flow`. Holds `flow` alone.
+             */
+            flows?: BulkStartFlowsFlowSummary[];
             /**
              * Schema of the job's entities, when they all share one. Omitted for a job over entities of several schemas.
              */
             entity_schema?: string;
             /**
-             * Ids of the job's entities, in request order.
+             * Ids of the job's entities, in request order. Only for jobs of at most 200 entities.
              */
-            entity_ids: [
+            entity_ids?: [
                 string?,
                 string?,
                 string?,
@@ -1036,30 +1204,850 @@ export declare namespace Components {
                 string?
             ];
             /**
-             * Number of entities in the job (length of `entity_ids`).
+             * Number of entities in the job.
              */
             entity_count: number;
+            /**
+             * The query `q` the entities were selected by, for a job created from `entities_query`.
+             */
+            entities_query?: string;
+            /**
+             * For a job created from `entities_query`: how many entities the search
+             * reported when the job was prepared. It counts an entity indexed twice
+             * twice, so it can exceed `entity_count` by a few; a larger gap fails
+             * preparation with `entities_incomplete`.
+             *
+             */
+            entities_matched?: number;
+            failure?: /* Why a job failed while it was being prepared. */ BulkStartFlowsJobFailure;
             counts: BulkStartFlowsJobCounts;
         }
         /**
-         * Start every flow in `flow_template_ids` on every entity in `entities`.
+         * Start the flow `flow_template_id` on every entity in `entities`, or on
+         * every entity `entities_query` matches. Exactly one of `flow_template_id`
+         * and the deprecated `flow_template_ids` is required, and exactly one of
+         * `entities` and `entities_query`.
+         *
          */
         export interface BulkStartFlowsReq {
             /**
-             * Flow templates to start. Unique.
+             * The flow template to start.
              */
-            flow_template_ids: [
-                string,
-                string?,
-                string?,
-                string?,
-                string?
+            flow_template_id?: string;
+            /**
+             * Deprecated, use `flow_template_id`. Accepted for one release with
+             * exactly one flow template.
+             *
+             */
+            flow_template_ids?: [
+                string
             ];
             /**
-             * Entities to start the flows on. Unique by `entity_id`.
+             * Entities to start the flow on. Unique by `entity_id`. At most 1,000.
+             *
              */
-            entities: [
+            entities?: [
                 BulkStartEntityRef,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
+                BulkStartEntityRef?,
                 BulkStartEntityRef?,
                 BulkStartEntityRef?,
                 BulkStartEntityRef?,
@@ -1260,6 +2248,13 @@ export declare namespace Components {
                 BulkStartEntityRef?,
                 BulkStartEntityRef?
             ];
+            entities_query?: /**
+             * The entities an entity search matches, as the entity table's "select all
+             * matching" selects them. Resolved once, in the background, when the job is prepared: the
+             * job holds the entities matching at that time (at most 10,000).
+             *
+             */
+            BulkStartEntitiesQuery;
             /**
              * Passed to every start, as `purposes` on `startFlowExecution`.
              */
@@ -2137,6 +3132,11 @@ export declare namespace Components {
              *
              */
             trigger_id?: string;
+            /**
+             * The bulk-start job that started this execution (`POST /v2/flows/executions:bulk-start`). Set by the bulk-start worker only; ignored on a start request.
+             *
+             */
+            bulk_job_id?: string;
         }
         export interface ImmediateSchedule {
             mode: "immediate";
@@ -2208,6 +3208,13 @@ export declare namespace Components {
         export interface LastEvaluatedKey {
             orgId?: string;
             creationTime?: string;
+        }
+        export interface ListBulkStartFlowsJobItemsResp {
+            results: /* One entity's start of a bulk-start job's flow. */ BulkStartFlowsItem[];
+            /**
+             * Cursor of the next page; absent on the last page.
+             */
+            next_cursor?: string;
         }
         export interface ListBulkStartFlowsJobsResp {
             results: /* A bulk-start job as listed in the history, without its items. */ BulkStartFlowsJobSummary[];
@@ -4491,7 +5498,14 @@ export declare namespace Paths {
         }
     }
     namespace BulkStartFlows {
-        export type RequestBody = /* Start every flow in `flow_template_ids` on every entity in `entities`. */ Components.Schemas.BulkStartFlowsReq;
+        export type RequestBody = /**
+         * Start the flow `flow_template_id` on every entity in `entities`, or on
+         * every entity `entities_query` matches. Exactly one of `flow_template_id`
+         * and the deprecated `flow_template_ids` is required, and exactly one of
+         * `entities` and `entities_query`.
+         *
+         */
+        Components.Schemas.BulkStartFlowsReq;
         namespace Responses {
             export type $202 = Components.Schemas.BulkStartFlowsJob;
             export type $400 = /**
@@ -5009,6 +6023,41 @@ export declare namespace Paths {
             }
             export interface $404 {
             }
+        }
+    }
+    namespace ListBulkStartFlowsJobItems {
+        namespace Parameters {
+            export type Cursor = string;
+            export type JobId = string;
+            export type Size = number;
+            export type Status = Components.Schemas.BulkStartFlowsItemStatus;
+        }
+        export interface PathParameters {
+            job_id: Parameters.JobId;
+        }
+        export interface QueryParameters {
+            status?: Parameters.Status;
+            size?: Parameters.Size;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ListBulkStartFlowsJobItemsResp;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export type $404 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
         }
     }
     namespace ListBulkStartFlowsJobs {
@@ -5575,6 +6624,7 @@ export declare namespace Paths {
     }
 }
 
+
 export interface OperationMethods {
   /**
    * getExecutions - getExecutions
@@ -5859,20 +6909,27 @@ export interface OperationMethods {
   /**
    * bulkStartFlows - bulkStartFlows
    * 
-   * Creates a job that starts one or more flows on many entities: every flow in
-   * `flow_template_ids` is started on every entity in `entities` (up to 5 flows,
-   * 200 entities, 1000 starts). Every start is manual.
+   * Creates a job that starts one flow on many entities: the flow
+   * `flow_template_id` is started on every entity in `entities`, or on every
+   * entity `entities_query` matches. Every start is manual.
    * 
-   * The request only runs a preflight and returns `202` with the job in status
-   * `awaiting_approval`. Nothing is started until the job is approved with
+   * Limits: up to 1,000 entities in `entities`, or up to 10,000 matched by
+   * `entities_query`.
+   * 
+   * The request only runs a preflight and returns `202` with the job. A job of
+   * at most 200 listed entities is returned in status `awaiting_approval`; a
+   * query, or a longer list, is returned in status `preparing` while the
+   * entities are resolved in the background, then moves to
+   * `awaiting_approval` (or to `failed`, with `failure`). Poll
+   * `GET /v2/flows/bulk-jobs/{job_id}`. Nothing is started until the job is approved with
    * `PATCH /v2/flows/bulk-jobs/{job_id}` (`action: APPROVE`); a job not approved
    * within 24 hours expires.
    * 
-   * The preflight checks the caller may trigger flows, loads every template, and
-   * matches each entity against the template's trigger. A pair whose entity type
-   * no trigger accepts is recorded as a `skipped` item with `error_code:
-   * trigger_entity_mismatch`. `flows[]` summarises per flow how many starts the
-   * job will make, which is what a confirmation dialog shows.
+   * The preflight checks the caller may trigger the flow, loads its template, and
+   * matches each entity against the template's trigger. An entity whose type no
+   * trigger accepts is recorded as a `skipped` item with `error_code:
+   * trigger_entity_mismatch`. `flow` summarises how many starts the job will
+   * make, which is what a confirmation dialog shows.
    * 
    * After approval the job runs in the background, paced to protect the
    * datastore (roughly 5–10 starts per second). Poll
@@ -5920,8 +6977,9 @@ export interface OperationMethods {
   /**
    * getBulkStartFlowsJob - getBulkStartFlowsJob
    * 
-   * Returns a bulk-start job with its counts and one item per (flow, entity)
-   * pair, including the started execution id or the error.
+   * Returns a bulk-start job with its counts. `items` is included for jobs of
+   * at most 200 items only (deprecated); page through the items with
+   * `GET /v2/flows/bulk-jobs/{job_id}/items`.
    * 
    */
   'getBulkStartFlowsJob'(
@@ -5948,17 +7006,32 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PatchBulkStartFlowsJob.Responses.$200>
   /**
+   * listBulkStartFlowsJobItems - listBulkStartFlowsJobItems
+   * 
+   * Pages through the items of a bulk-start job (one per entity), in request
+   * order, optionally only those in one status. An ended job reports items it
+   * never got to as `cancelled`.
+   * 
+   */
+  'listBulkStartFlowsJobItems'(
+    parameters?: Parameters<Paths.ListBulkStartFlowsJobItems.QueryParameters & Paths.ListBulkStartFlowsJobItems.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListBulkStartFlowsJobItems.Responses.$200>
+  /**
    * restartBulkStartFlowsJob - restartBulkStartFlowsJob
    * 
    * Restarts what is left of an ended bulk-start job: creates a new job, in
-   * `awaiting_approval`, from the job's `failed` items and the items it never
-   * started (`cancelled`). Started and skipped items are not repeated. Like
+   * `awaiting_approval`, from the job's `failed` and `skipped` items and the
+   * items it never started (`cancelled`). Started items are not repeated;
+   * skipped ones are checked against the flow's triggers again. Like
    * `bulkStartFlows`, it starts nothing: approve the new job with
    * `PATCH /v2/flows/bulk-jobs/{job_id}`.
    * 
-   * Only a job in `completed_with_errors`, `failed` or `cancelled` can be
-   * restarted. Each flow is loaded again: a flow deleted since becomes
-   * `skipped` items (`error_code: flow_not_found`). The new job names the
+   * Only an ended job (`completed`, `completed_with_errors`, `failed` or
+   * `cancelled`) with something left can be restarted. The flow is loaded again: a flow deleted since answers `404`.
+   * A restart of more than 200 items is returned in status `preparing`, like
+   * a large `bulkStartFlows`. The new job names the
    * source job in `restart_of`. A job is restarted at most once: approving
    * the new job marks the source job `restarted_by` it, and from then on
    * neither another restart of the source job nor the approval of another
@@ -6430,20 +7503,27 @@ export interface PathsDictionary {
     /**
      * bulkStartFlows - bulkStartFlows
      * 
-     * Creates a job that starts one or more flows on many entities: every flow in
-     * `flow_template_ids` is started on every entity in `entities` (up to 5 flows,
-     * 200 entities, 1000 starts). Every start is manual.
+     * Creates a job that starts one flow on many entities: the flow
+     * `flow_template_id` is started on every entity in `entities`, or on every
+     * entity `entities_query` matches. Every start is manual.
      * 
-     * The request only runs a preflight and returns `202` with the job in status
-     * `awaiting_approval`. Nothing is started until the job is approved with
+     * Limits: up to 1,000 entities in `entities`, or up to 10,000 matched by
+     * `entities_query`.
+     * 
+     * The request only runs a preflight and returns `202` with the job. A job of
+     * at most 200 listed entities is returned in status `awaiting_approval`; a
+     * query, or a longer list, is returned in status `preparing` while the
+     * entities are resolved in the background, then moves to
+     * `awaiting_approval` (or to `failed`, with `failure`). Poll
+     * `GET /v2/flows/bulk-jobs/{job_id}`. Nothing is started until the job is approved with
      * `PATCH /v2/flows/bulk-jobs/{job_id}` (`action: APPROVE`); a job not approved
      * within 24 hours expires.
      * 
-     * The preflight checks the caller may trigger flows, loads every template, and
-     * matches each entity against the template's trigger. A pair whose entity type
-     * no trigger accepts is recorded as a `skipped` item with `error_code:
-     * trigger_entity_mismatch`. `flows[]` summarises per flow how many starts the
-     * job will make, which is what a confirmation dialog shows.
+     * The preflight checks the caller may trigger the flow, loads its template, and
+     * matches each entity against the template's trigger. An entity whose type no
+     * trigger accepts is recorded as a `skipped` item with `error_code:
+     * trigger_entity_mismatch`. `flow` summarises how many starts the job will
+     * make, which is what a confirmation dialog shows.
      * 
      * After approval the job runs in the background, paced to protect the
      * datastore (roughly 5–10 starts per second). Poll
@@ -6497,8 +7577,9 @@ export interface PathsDictionary {
     /**
      * getBulkStartFlowsJob - getBulkStartFlowsJob
      * 
-     * Returns a bulk-start job with its counts and one item per (flow, entity)
-     * pair, including the started execution id or the error.
+     * Returns a bulk-start job with its counts. `items` is included for jobs of
+     * at most 200 items only (deprecated); page through the items with
+     * `GET /v2/flows/bulk-jobs/{job_id}/items`.
      * 
      */
     'get'(
@@ -6525,19 +7606,36 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PatchBulkStartFlowsJob.Responses.$200>
   }
+  ['/v2/flows/bulk-jobs/{job_id}/items']: {
+    /**
+     * listBulkStartFlowsJobItems - listBulkStartFlowsJobItems
+     * 
+     * Pages through the items of a bulk-start job (one per entity), in request
+     * order, optionally only those in one status. An ended job reports items it
+     * never got to as `cancelled`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListBulkStartFlowsJobItems.QueryParameters & Paths.ListBulkStartFlowsJobItems.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListBulkStartFlowsJobItems.Responses.$200>
+  }
   ['/v2/flows/bulk-jobs/{job_id}/restart']: {
     /**
      * restartBulkStartFlowsJob - restartBulkStartFlowsJob
      * 
      * Restarts what is left of an ended bulk-start job: creates a new job, in
-     * `awaiting_approval`, from the job's `failed` items and the items it never
-     * started (`cancelled`). Started and skipped items are not repeated. Like
+     * `awaiting_approval`, from the job's `failed` and `skipped` items and the
+     * items it never started (`cancelled`). Started items are not repeated;
+     * skipped ones are checked against the flow's triggers again. Like
      * `bulkStartFlows`, it starts nothing: approve the new job with
      * `PATCH /v2/flows/bulk-jobs/{job_id}`.
      * 
-     * Only a job in `completed_with_errors`, `failed` or `cancelled` can be
-     * restarted. Each flow is loaded again: a flow deleted since becomes
-     * `skipped` items (`error_code: flow_not_found`). The new job names the
+     * Only an ended job (`completed`, `completed_with_errors`, `failed` or
+     * `cancelled`) with something left can be restarted. The flow is loaded again: a flow deleted since answers `404`.
+     * A restart of more than 200 items is returned in status `preparing`, like
+     * a large `bulkStartFlows`. The new job names the
      * source job in `restart_of`. A job is restarted at most once: approving
      * the new job marks the source job `restarted_by` it, and from then on
      * neither another restart of the source job nor the approval of another
@@ -6723,6 +7821,7 @@ export interface PathsDictionary {
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
+
 export type ActionSchedule = Components.Schemas.ActionSchedule;
 export type ActiveBulkStartFlowsJobResp = Components.Schemas.ActiveBulkStartFlowsJobResp;
 export type AddTaskReq = Components.Schemas.AddTaskReq;
@@ -6742,12 +7841,16 @@ export type AutomationInputExtraContextRef = Components.Schemas.AutomationInputE
 export type AutomationInputExtraTaskRef = Components.Schemas.AutomationInputExtraTaskRef;
 export type AutomationOutputContext = Components.Schemas.AutomationOutputContext;
 export type AutomationTask = Components.Schemas.AutomationTask;
+export type BulkStartEntitiesQuery = Components.Schemas.BulkStartEntitiesQuery;
 export type BulkStartEntityRef = Components.Schemas.BulkStartEntityRef;
+export type BulkStartFlowsAutomaticTask = Components.Schemas.BulkStartFlowsAutomaticTask;
 export type BulkStartFlowsFlowSummary = Components.Schemas.BulkStartFlowsFlowSummary;
 export type BulkStartFlowsItem = Components.Schemas.BulkStartFlowsItem;
 export type BulkStartFlowsItemStatus = Components.Schemas.BulkStartFlowsItemStatus;
 export type BulkStartFlowsJob = Components.Schemas.BulkStartFlowsJob;
 export type BulkStartFlowsJobCounts = Components.Schemas.BulkStartFlowsJobCounts;
+export type BulkStartFlowsJobFailure = Components.Schemas.BulkStartFlowsJobFailure;
+export type BulkStartFlowsJobPreparation = Components.Schemas.BulkStartFlowsJobPreparation;
 export type BulkStartFlowsJobStatus = Components.Schemas.BulkStartFlowsJobStatus;
 export type BulkStartFlowsJobSummary = Components.Schemas.BulkStartFlowsJobSummary;
 export type BulkStartFlowsReq = Components.Schemas.BulkStartFlowsReq;
@@ -6788,6 +7891,7 @@ export type JourneyContextParameter = Components.Schemas.JourneyContextParameter
 export type JourneyExecutionInfo = Components.Schemas.JourneyExecutionInfo;
 export type JourneyPrefill = Components.Schemas.JourneyPrefill;
 export type LastEvaluatedKey = Components.Schemas.LastEvaluatedKey;
+export type ListBulkStartFlowsJobItemsResp = Components.Schemas.ListBulkStartFlowsJobItemsResp;
 export type ListBulkStartFlowsJobsResp = Components.Schemas.ListBulkStartFlowsJobsResp;
 export type LoopConfig = Components.Schemas.LoopConfig;
 export type LoopExecutionState = Components.Schemas.LoopExecutionState;

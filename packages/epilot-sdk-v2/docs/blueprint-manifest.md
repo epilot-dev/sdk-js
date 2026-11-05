@@ -41,7 +41,6 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`deleteBlueprintNote`](#deleteblueprintnote)
 - [`verifyBlueprint`](#verifyblueprint)
 - [`listMarketplaceSlugs`](#listmarketplaceslugs)
-- [`publishBlueprint`](#publishblueprint)
 - [`formatBlueprintDescription`](#formatblueprintdescription)
 - [`suggestBlueprintResources`](#suggestblueprintresources)
 - [`addBlueprintResource`](#addblueprintresource)
@@ -56,6 +55,8 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`installBlueprintV3`](#installblueprintv3)
 - [`restoreBlueprintDeploymentV3`](#restoreblueprintdeploymentv3)
 - [`getRestorePreview`](#getrestorepreview)
+- [`triggerRestorePreview`](#triggerrestorepreview)
+- [`getRestorePreviewReport`](#getrestorepreviewreport)
 - [`triggerDeploymentHealthCheckV3`](#triggerdeploymenthealthcheckv3)
 - [`getDeploymentHealthReportV3`](#getdeploymenthealthreportv3)
 - [`getBlueprintLineageV3`](#getblueprintlineagev3)
@@ -85,6 +86,17 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`updateMarketplaceListingVersion`](#updatemarketplacelistingversion)
 - [`publishMarketplaceListingVersion`](#publishmarketplacelistingversion)
 
+**merge-plans**
+- [`getBlueprintMergePlan`](#getblueprintmergeplan)
+- [`listBlueprintMergePlanResources`](#listblueprintmergeplanresources)
+- [`getBlueprintMergePlanResource`](#getblueprintmergeplanresource)
+- [`updateBlueprintMergePlanResolutions`](#updateblueprintmergeplanresolutions)
+- [`discardBlueprintMergePlan`](#discardblueprintmergeplan)
+- [`replanBlueprintMergePlan`](#replanblueprintmergeplan)
+- [`applyBlueprintMergePlan`](#applyblueprintmergeplan)
+- [`previewBlueprintMergeRevert`](#previewblueprintmergerevert)
+- [`applyBlueprintMergeRevert`](#applyblueprintmergerevert)
+
 **Uniqueness Criteria**
 - [`listUniquenessCriteria`](#listuniquenesscriteria)
 - [`getUniquenessCriteria`](#getuniquenesscriteria)
@@ -95,12 +107,6 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`UniquenessCriteriaResourceType`](#uniquenesscriteriaresourcetype)
 - [`UniquenessCriteria`](#uniquenesscriteria)
 - [`LineageEntry`](#lineageentry)
-- [`PatchFieldDiff`](#patchfielddiff)
-- [`PatchResourceDiff`](#patchresourcediff)
-- [`DetectChangesResult`](#detectchangesresult)
-- [`BlueprintPatch`](#blueprintpatch)
-- [`OrgPatchExecution`](#orgpatchexecution)
-- [`BlueprintPatchWithResults`](#blueprintpatchwithresults)
 - [`BlueprintNote`](#blueprintnote)
 - [`BlueprintID`](#blueprintid)
 - [`BlueprintResourceID`](#blueprintresourceid)
@@ -137,9 +143,9 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`HealthScanCoverage`](#healthscancoverage)
 - [`DeploymentHealthReport`](#deploymenthealthreport)
 - [`RestoreOutcome`](#restoreoutcome)
+- [`RestorePreviewReport`](#restorepreviewreport)
 - [`BlueprintJob`](#blueprintjob)
 - [`BlueprintDependenciesSyncJob`](#blueprintdependenciessyncjob)
-- [`BlueprintValidateJob`](#blueprintvalidatejob)
 - [`BlueprintVerificationJob`](#blueprintverificationjob)
 - [`LatestBlueprintVerification`](#latestblueprintverification)
 - [`VerificationSummary`](#verificationsummary)
@@ -179,6 +185,35 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`MarketplaceListing`](#marketplacelisting)
 - [`MarketplaceListingUpdate`](#marketplacelistingupdate)
 - [`MarketplaceListingVersion`](#marketplacelistingversion)
+- [`MergePlanState`](#mergeplanstate)
+- [`MergeOptionId`](#mergeoptionid)
+- [`MergeChoice`](#mergechoice)
+- [`MergeChoiceInput`](#mergechoiceinput)
+- [`MergeSectionRef`](#mergesectionref)
+- [`MergeSectionValue`](#mergesectionvalue)
+- [`MergeDecisionGroup`](#mergedecisiongroup)
+- [`MergePlanWarning`](#mergeplanwarning)
+- [`MergeBaseProvenance`](#mergebaseprovenance)
+- [`MergeResourceStatus`](#mergeresourcestatus)
+- [`MergeResourceEligibility`](#mergeresourceeligibility)
+- [`MergeResourceAutoCounts`](#mergeresourceautocounts)
+- [`MergePlanReview`](#mergeplanreview)
+- [`MergePlanApplyCounts`](#mergeplanapplycounts)
+- [`MergeResourceOutcome`](#mergeresourceoutcome)
+- [`MergePlanResourceSummary`](#mergeplanresourcesummary)
+- [`MergePlanResourcePage`](#mergeplanresourcepage)
+- [`MergePlanResourceDetail`](#mergeplanresourcedetail)
+- [`MergePlanResourceReview`](#mergeplanresourcereview)
+- [`MergePlanResolutionsUpdate`](#mergeplanresolutionsupdate)
+- [`MergePlanApplyRequest`](#mergeplanapplyrequest)
+- [`MergePlanRevisionRequest`](#mergeplanrevisionrequest)
+- [`MergePlanReplanResult`](#mergeplanreplanresult)
+- [`MergeRevertEntry`](#mergerevertentry)
+- [`MergeRevertPreview`](#mergerevertpreview)
+- [`MergeRevertSelection`](#mergerevertselection)
+- [`MergeRevertRequest`](#mergerevertrequest)
+- [`MergeRevertResult`](#mergerevertresult)
+- [`MergePlanError`](#mergeplanerror)
 
 ### `uploadManifest`
 
@@ -307,6 +342,11 @@ const { data } = await client.createBlueprint(
         performed_by: { /* ... */ },
         note: 'string',
         status: 'IN_PROGRESS',
+        merge_plan_id: 'string',
+        merge_snapshot_id: 'string',
+        snapshot_restore_available: true,
+        merge_plan_state: 'review_required',
+        revert_until: '1970-01-01T00:00:00.000Z',
         restore_details: { /* ... */ },
         has_revertible_changes: true,
         last_restore_job_id: 'string',
@@ -374,7 +414,10 @@ const { data } = await client.createBlueprint(
         parent_resource_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
         depends_on_addresses: ['string'],
         impact_on_install: ['create'],
-        impact_on_install_reason: ['string']
+        impact_on_install_reason: ['string'],
+        impact_on_install_changes: [ /* ... */ ],
+        impact_on_install_labels: {},
+        impact_on_install_summary: ['string']
       }
     ],
     source_type: 'custom'
@@ -415,6 +458,11 @@ const { data } = await client.createBlueprint(
       "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
+      "merge_plan_id": "string",
+      "merge_snapshot_id": "string",
+      "snapshot_restore_available": true,
+      "merge_plan_state": "review_required",
+      "revert_until": "1970-01-01T00:00:00.000Z",
       "restore_details": {},
       "has_revertible_changes": true,
       "last_restore_job_id": "string",
@@ -482,7 +530,10 @@ const { data } = await client.createBlueprint(
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ],
   "source_type": "custom"
@@ -603,7 +654,17 @@ const { data } = await client.preInstallBlueprint(
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [
+        {
+          "path": "string",
+          "destination": {},
+          "source": {},
+          "added": true
+        }
+      ],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ]
 }
@@ -670,7 +731,17 @@ const { data } = await client.getBlueprintPreview({
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [
+        {
+          "path": "string",
+          "destination": {},
+          "source": {},
+          "added": true
+        }
+      ],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ]
 }
@@ -725,6 +796,11 @@ const { data } = await client.getBlueprint({
       "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
+      "merge_plan_id": "string",
+      "merge_snapshot_id": "string",
+      "snapshot_restore_available": true,
+      "merge_plan_state": "review_required",
+      "revert_until": "1970-01-01T00:00:00.000Z",
       "restore_details": {},
       "has_revertible_changes": true,
       "last_restore_job_id": "string",
@@ -792,7 +868,10 @@ const { data } = await client.getBlueprint({
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ],
   "source_type": "custom"
@@ -845,6 +924,11 @@ const { data } = await client.updateBlueprint(
         performed_by: { /* ... */ },
         note: 'string',
         status: 'IN_PROGRESS',
+        merge_plan_id: 'string',
+        merge_snapshot_id: 'string',
+        snapshot_restore_available: true,
+        merge_plan_state: 'review_required',
+        revert_until: '1970-01-01T00:00:00.000Z',
         restore_details: { /* ... */ },
         has_revertible_changes: true,
         last_restore_job_id: 'string',
@@ -912,7 +996,10 @@ const { data } = await client.updateBlueprint(
         parent_resource_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
         depends_on_addresses: ['string'],
         impact_on_install: ['create'],
-        impact_on_install_reason: ['string']
+        impact_on_install_reason: ['string'],
+        impact_on_install_changes: [ /* ... */ ],
+        impact_on_install_labels: {},
+        impact_on_install_summary: ['string']
       }
     ],
     source_type: 'custom'
@@ -953,6 +1040,11 @@ const { data } = await client.updateBlueprint(
       "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
+      "merge_plan_id": "string",
+      "merge_snapshot_id": "string",
+      "snapshot_restore_available": true,
+      "merge_plan_state": "review_required",
+      "revert_until": "1970-01-01T00:00:00.000Z",
       "restore_details": {},
       "has_revertible_changes": true,
       "last_restore_job_id": "string",
@@ -1020,7 +1112,10 @@ const { data } = await client.updateBlueprint(
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ],
   "source_type": "custom"
@@ -1076,6 +1171,11 @@ const { data } = await client.deleteBlueprint({
       "performed_by": {},
       "note": "string",
       "status": "IN_PROGRESS",
+      "merge_plan_id": "string",
+      "merge_snapshot_id": "string",
+      "snapshot_restore_available": true,
+      "merge_plan_state": "review_required",
+      "revert_until": "1970-01-01T00:00:00.000Z",
       "restore_details": {},
       "has_revertible_changes": true,
       "last_restore_job_id": "string",
@@ -1143,7 +1243,10 @@ const { data } = await client.deleteBlueprint({
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ],
   "source_type": "custom"
@@ -1336,26 +1439,6 @@ const { data } = await client.listMarketplaceSlugs()
 
 ---
 
-### `publishBlueprint`
-
-Publish a blueprint to the marketplace. Exports the blueprint, uploads it to file-api with public access, and updates the Webflow CMS listing.
-
-`POST /v2/blueprint-manifest/blueprints:publish`
-
-```ts
-const { data } = await client.publishBlueprint(
-  null,
-  {
-    blueprint_id: 'c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341',
-    slug: 'string',
-    version: 'string',
-    name: 'string'
-  },
-)
-```
-
----
-
 ### `formatBlueprintDescription`
 
 Format a blueprint description as markdown using AI.
@@ -1421,7 +1504,17 @@ const { data } = await client.suggestBlueprintResources(
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [
+        {
+          "path": "string",
+          "destination": {},
+          "source": {},
+          "added": true
+        }
+      ],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ],
   "suggested_blueprint_name": "Hausanschluss",
@@ -1459,7 +1552,17 @@ const { data } = await client.addBlueprintResource(
     parent_resource_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
     depends_on_addresses: ['string'],
     impact_on_install: ['create'],
-    impact_on_install_reason: ['string']
+    impact_on_install_reason: ['string'],
+    impact_on_install_changes: [
+      {
+        path: 'string',
+        destination: {},
+        source: {},
+        added: true
+      }
+    ],
+    impact_on_install_labels: {},
+    impact_on_install_summary: ['string']
   },
 )
 ```
@@ -1483,7 +1586,17 @@ const { data } = await client.addBlueprintResource(
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [
+        {
+          "path": "string",
+          "destination": {},
+          "source": {},
+          "added": true
+        }
+      ],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ],
   "skipped": [
@@ -1507,7 +1620,10 @@ const { data } = await client.addBlueprintResource(
         "resourceDependency": "string",
         "resources": ["string"],
         "addresses": ["string"],
-        "originalError": "string"
+        "originalError": "string",
+        "current": 0,
+        "max_allowed": 0,
+        "planned": 0
       }
     }
   ],
@@ -1561,7 +1677,17 @@ const { data } = await client.bulkAddBlueprintResources(
       parent_resource_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
       depends_on_addresses: ['string'],
       impact_on_install: ['create'],
-      impact_on_install_reason: ['string']
+      impact_on_install_reason: ['string'],
+      impact_on_install_changes: [
+        {
+          path: 'string',
+          destination: {},
+          source: {},
+          added: true
+        }
+      ],
+      impact_on_install_labels: {},
+      impact_on_install_summary: ['string']
     }
   ],
 )
@@ -1586,7 +1712,17 @@ const { data } = await client.bulkAddBlueprintResources(
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [
+        {
+          "path": "string",
+          "destination": {},
+          "source": {},
+          "added": true
+        }
+      ],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ],
   "skipped": [
@@ -1610,7 +1746,10 @@ const { data } = await client.bulkAddBlueprintResources(
         "resourceDependency": "string",
         "resources": ["string"],
         "addresses": ["string"],
-        "originalError": "string"
+        "originalError": "string",
+        "current": 0,
+        "max_allowed": 0,
+        "planned": 0
       }
     }
   ],
@@ -1648,7 +1787,17 @@ const { data } = await client.bulkUpdateBlueprintResources(
       parent_resource_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
       depends_on_addresses: ['string'],
       impact_on_install: ['create'],
-      impact_on_install_reason: ['string']
+      impact_on_install_reason: ['string'],
+      impact_on_install_changes: [
+        {
+          path: 'string',
+          destination: {},
+          source: {},
+          added: true
+        }
+      ],
+      impact_on_install_labels: {},
+      impact_on_install_summary: ['string']
     }
   ],
 )
@@ -1673,7 +1822,17 @@ const { data } = await client.bulkUpdateBlueprintResources(
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [
+        {
+          "path": "string",
+          "destination": {},
+          "source": {},
+          "added": true
+        }
+      ],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ]
 }
@@ -1717,7 +1876,17 @@ const { data } = await client.bulkDeleteBlueprintResources(
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [
+        {
+          "path": "string",
+          "destination": {},
+          "source": {},
+          "added": true
+        }
+      ],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ]
 }
@@ -1752,7 +1921,17 @@ const { data } = await client.updateBlueprintResource(
     parent_resource_ids: ['c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341'],
     depends_on_addresses: ['string'],
     impact_on_install: ['create'],
-    impact_on_install_reason: ['string']
+    impact_on_install_reason: ['string'],
+    impact_on_install_changes: [
+      {
+        path: 'string',
+        destination: {},
+        source: {},
+        added: true
+      }
+    ],
+    impact_on_install_labels: {},
+    impact_on_install_summary: ['string']
   },
 )
 ```
@@ -1776,7 +1955,17 @@ const { data } = await client.updateBlueprintResource(
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [
+        {
+          "path": "string",
+          "destination": {},
+          "source": {},
+          "added": true
+        }
+      ],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ]
 }
@@ -1818,7 +2007,17 @@ const { data } = await client.deleteBlueprintResource({
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [
+        {
+          "path": "string",
+          "destination": {},
+          "source": {},
+          "added": true
+        }
+      ],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ]
 }
@@ -1865,7 +2064,10 @@ const { data } = await client.listBlueprintJobs()
                 "resourceDependency": "string",
                 "resources": ["string"],
                 "addresses": ["string"],
-                "originalError": "string"
+                "originalError": "string",
+                "current": 0,
+                "max_allowed": 0,
+                "planned": 0
               }
             }
           ],
@@ -1938,7 +2140,10 @@ const { data } = await client.getBlueprintJob({
             "resourceDependency": "string",
             "resources": ["string"],
             "addresses": ["string"],
-            "originalError": "string"
+            "originalError": "string",
+            "current": 0,
+            "max_allowed": 0,
+            "planned": 0
           }
         }
       ],
@@ -1987,6 +2192,7 @@ const { data } = await client.continueInstallationJob(
   {
     resources_to_ignore: ['string'],
     sync_notes: false,
+    include_field_diffs: false,
     source_auth_token: 'string'
   },
 )
@@ -2016,7 +2222,10 @@ const { data } = await client.continueInstallationJob(
             "resourceDependency": "string",
             "resources": ["string"],
             "addresses": ["string"],
-            "originalError": "string"
+            "originalError": "string",
+            "current": 0,
+            "max_allowed": 0,
+            "planned": 0
           }
         }
       ],
@@ -2059,8 +2268,13 @@ const { data } = await client.continueInstallationJob(
   ],
   "options": {
     "resources_to_ignore": ["string"],
-    "sync_notes": false
+    "sync_notes": false,
+    "include_field_diffs": false
   },
+  "merge_plan_id": "string",
+  "wait_kind": "plan",
+  "prefill_from_merge_plan_id": "string",
+  "assigned_merge_plan_id": "string",
   "status": "IN_PROGRESS"
 }
 ```
@@ -2121,7 +2335,10 @@ const { data } = await client.cancelBlueprintJob({
             "resourceDependency": "string",
             "resources": ["string"],
             "addresses": ["string"],
-            "originalError": "string"
+            "originalError": "string",
+            "current": 0,
+            "max_allowed": 0,
+            "planned": 0
           }
         }
       ],
@@ -2744,7 +2961,10 @@ const { data } = await client.publishBlueprintV3(
     blueprint_id: 'example',
   },
   {
-    publish_to_marketplace: false
+    publish_to_marketplace: false,
+    slug: 'string',
+    version: 'string',
+    name: 'string'
   },
 )
 ```
@@ -2813,13 +3033,475 @@ const { data } = await client.preInstallBlueprintV3(
       "parent_resource_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
       "depends_on_addresses": ["string"],
       "impact_on_install": ["create"],
-      "impact_on_install_reason": ["string"]
+      "impact_on_install_reason": ["string"],
+      "impact_on_install_changes": [
+        {
+          "path": "string",
+          "destination": {},
+          "source": {},
+          "added": true
+        }
+      ],
+      "impact_on_install_labels": {},
+      "impact_on_install_summary": ["string"]
     }
   ]
 }
 ```
 
 </details>
+
+---
+
+### `getBlueprintMergePlan`
+
+Summary of an update merge plan, with counts, warnings and the revision to send back.
+
+`GET /v3/blueprint-manifest/merge-plans/{merge_plan_id}`
+
+```ts
+const { data } = await client.getBlueprintMergePlan({
+  merge_plan_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "merge_plan_id": "string",
+  "plan_revision": 0,
+  "expected_plan_revision": 0,
+  "warnings": [
+    {
+      "code": "string",
+      "resource_key": "string",
+      "target": "string",
+      "message": "string"
+    }
+  ],
+  "blocked_reasons": ["string"],
+  "apply_counts": {
+    "updated": 0,
+    "kept": 0,
+    "removed": 0,
+    "restored": 0
+  },
+  "apply_counts_unknown": true,
+  "state": "review_required",
+  "job_id": "string",
+  "destination_blueprint_id": "string",
+  "source": {
+    "blueprint_id": "string",
+    "version": "string"
+  },
+  "resource_counts": {
+    "automatic": 0,
+    "decisions_required": 0,
+    "ready": 0,
+    "blocked": 0
+  },
+  "group_counts": {
+    "conflict": 0,
+    "confirm": 0,
+    "mandatory": 0,
+    "unresolved": 0
+  },
+  "warning_count": 0,
+  "auto_counts": {
+    "kept_customizations": 0,
+    "applied_updates": 0
+  },
+  "other_resource_count": 0,
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "expires_at": "1970-01-01T00:00:00.000Z",
+  "revert_until": "1970-01-01T00:00:00.000Z",
+  "supersedes": "string",
+  "superseded_by": "string",
+  "successor_failed": true
+}
+```
+
+</details>
+
+---
+
+### `listBlueprintMergePlanResources`
+
+Journeys of the plan, one page at a time. A cursor is valid only for the revision it was issued for.
+
+`GET /v3/blueprint-manifest/merge-plans/{merge_plan_id}/resources`
+
+```ts
+const { data } = await client.listBlueprintMergePlanResources({
+  merge_plan_id: 'example',
+  cursor: 'example',
+  limit: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "merge_plan_id": "string",
+  "plan_revision": 0,
+  "resources": [
+    {
+      "resource_key": "string",
+      "label": "string",
+      "status": "automatic",
+      "eligibility": "merge",
+      "blocking_reasons": ["string"],
+      "auto_counts": {
+        "from_current": 0,
+        "from_incoming": 0
+      },
+      "unresolved": 0,
+      "warning_count": 0,
+      "outcome": "applied"
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
+### `getBlueprintMergePlanResource`
+
+One journey of the plan with its decision groups and warnings.
+
+`GET /v3/blueprint-manifest/merge-plans/{merge_plan_id}/resources/{resource_key}`
+
+```ts
+const { data } = await client.getBlueprintMergePlanResource({
+  merge_plan_id: 'example',
+  resource_key: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "merge_plan_id": "string",
+  "plan_revision": 0,
+  "resource": {
+    "resource_key": "string",
+    "resource_type": "journey",
+    "lineage_id": "string",
+    "target_id": "string",
+    "label": "string",
+    "model_version": "string",
+    "base_provenance": {
+      "rung": "apply_evidence",
+      "job_id": "string",
+      "manifest_version": "string",
+      "reason": "no_evidence"
+    },
+    "eligibility": "merge",
+    "fast_path": true,
+    "auto_counts": {
+      "from_current": 0,
+      "from_incoming": 0
+    },
+    "decision_groups": [
+      {}
+    ],
+    "warnings": [
+      {}
+    ],
+    "status": "automatic",
+    "blocking_reasons": ["string"],
+    "outcome": "applied"
+  }
+}
+```
+
+</details>
+
+---
+
+### `updateBlueprintMergePlanResolutions`
+
+Saves choices for decision groups. Each submitted choice replaces the saved choice of the same group. Allowed while the plan waits for review.
+
+`PUT /v3/blueprint-manifest/merge-plans/{merge_plan_id}/resolutions`
+
+```ts
+const { data } = await client.updateBlueprintMergePlanResolutions(
+  {
+    merge_plan_id: 'example',
+  },
+  {
+    expected_plan_revision: 0,
+    resolutions: [
+      {
+        group_id: 'string',
+        group_signature: 'string',
+        option_id: 'string'
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "merge_plan_id": "string",
+  "plan_revision": 0,
+  "expected_plan_revision": 0,
+  "warnings": [
+    {
+      "code": "string",
+      "resource_key": "string",
+      "target": "string",
+      "message": "string"
+    }
+  ],
+  "blocked_reasons": ["string"],
+  "apply_counts": {
+    "updated": 0,
+    "kept": 0,
+    "removed": 0,
+    "restored": 0
+  },
+  "apply_counts_unknown": true,
+  "state": "review_required",
+  "job_id": "string",
+  "destination_blueprint_id": "string",
+  "source": {
+    "blueprint_id": "string",
+    "version": "string"
+  },
+  "resource_counts": {
+    "automatic": 0,
+    "decisions_required": 0,
+    "ready": 0,
+    "blocked": 0
+  },
+  "group_counts": {
+    "conflict": 0,
+    "confirm": 0,
+    "mandatory": 0,
+    "unresolved": 0
+  },
+  "warning_count": 0,
+  "auto_counts": {
+    "kept_customizations": 0,
+    "applied_updates": 0
+  },
+  "other_resource_count": 0,
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "expires_at": "1970-01-01T00:00:00.000Z",
+  "revert_until": "1970-01-01T00:00:00.000Z",
+  "supersedes": "string",
+  "superseded_by": "string",
+  "successor_failed": true
+}
+```
+
+</details>
+
+---
+
+### `discardBlueprintMergePlan`
+
+Discards a plan waiting for review and ends its job. Nothing is written.
+
+`POST /v3/blueprint-manifest/merge-plans/{merge_plan_id}:discard`
+
+```ts
+const { data } = await client.discardBlueprintMergePlan(
+  {
+    merge_plan_id: 'example',
+  },
+  {
+    expected_plan_revision: 0
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "merge_plan_id": "string",
+  "plan_revision": 0,
+  "expected_plan_revision": 0,
+  "warnings": [
+    {
+      "code": "string",
+      "resource_key": "string",
+      "target": "string",
+      "message": "string"
+    }
+  ],
+  "blocked_reasons": ["string"],
+  "apply_counts": {
+    "updated": 0,
+    "kept": 0,
+    "removed": 0,
+    "restored": 0
+  },
+  "apply_counts_unknown": true,
+  "state": "review_required",
+  "job_id": "string",
+  "destination_blueprint_id": "string",
+  "source": {
+    "blueprint_id": "string",
+    "version": "string"
+  },
+  "resource_counts": {
+    "automatic": 0,
+    "decisions_required": 0,
+    "ready": 0,
+    "blocked": 0
+  },
+  "group_counts": {
+    "conflict": 0,
+    "confirm": 0,
+    "mandatory": 0,
+    "unresolved": 0
+  },
+  "warning_count": 0,
+  "auto_counts": {
+    "kept_customizations": 0,
+    "applied_updates": 0
+  },
+  "other_resource_count": 0,
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "expires_at": "1970-01-01T00:00:00.000Z",
+  "revert_until": "1970-01-01T00:00:00.000Z",
+  "supersedes": "string",
+  "superseded_by": "string",
+  "successor_failed": true
+}
+```
+
+</details>
+
+---
+
+### `replanBlueprintMergePlan`
+
+Starts a new update job whose plan is prefilled with this plan's saved choices. A plan still waiting for review, or expired, becomes `superseded`.
+
+`POST /v3/blueprint-manifest/merge-plans/{merge_plan_id}:replan`
+
+```ts
+const { data } = await client.replanBlueprintMergePlan(
+  {
+    merge_plan_id: 'example',
+  },
+  {
+    expected_plan_revision: 0
+  },
+)
+```
+
+---
+
+### `applyBlueprintMergePlan`
+
+Approves the plan at `expected_plan_revision` with its current choices and resumes the parked update job with the caller's token. Only a `ready` plan whose job waits for this review can be applied. Re
+
+`POST /v3/blueprint-manifest/merge-plans/{merge_plan_id}:apply`
+
+```ts
+const { data } = await client.applyBlueprintMergePlan(
+  {
+    merge_plan_id: 'example',
+  },
+  {
+    expected_plan_revision: 0,
+    idempotency_key: 'string'
+  },
+)
+```
+
+---
+
+### `previewBlueprintMergeRevert`
+
+Lists what the update wrote, from its own journal, and what reverting each resource would do. Resources changed since the update need an explicit choice (`requires_choice`); `not_restorable` ones can 
+
+`POST /v3/blueprint-manifest/merge-plans/{merge_plan_id}:preview-revert`
+
+```ts
+const { data } = await client.previewBlueprintMergeRevert(
+  {
+    merge_plan_id: 'example',
+  },
+  {},
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "revert_preview_id": "string",
+  "preview_revision": 0,
+  "merge_plan_id": "string",
+  "entries": [
+    {
+      "resource_key": "string",
+      "lineage_id": "string",
+      "label": "string",
+      "resource_type": "string",
+      "category": "unchanged",
+      "default_action": "restore",
+      "requires_choice": true
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `applyBlueprintMergeRevert`
+
+Reverts the update as the preview describes it, with an explicit `action` for every preview entry. Starts a `restore` job and moves the plan to `reverting`; the job ends it `reverted`, or `revert_part
+
+`POST /v3/blueprint-manifest/merge-plans/{merge_plan_id}:revert`
+
+```ts
+const { data } = await client.applyBlueprintMergeRevert(
+  {
+    merge_plan_id: 'example',
+  },
+  {
+    revert_preview_id: 'string',
+    expected_preview_revision: 0,
+    idempotency_key: 'string',
+    selections: [
+      {
+        resource_key: 'string',
+        action: 'restore'
+      }
+    ],
+    session_credentials: {
+      refresh_token: 'string',
+      client_id: 'string',
+      pipeline_id: 'string'
+    }
+  },
+)
+```
 
 ---
 
@@ -2904,6 +3586,88 @@ const { data } = await client.getRestorePreview({
     }
   ],
   "has_effective_changes": true
+}
+```
+
+</details>
+
+---
+
+### `triggerRestorePreview`
+
+Starts computing the same forecast as `getRestorePreview` in the
+background. Large deployments take longer than the API Gateway
+timeout to forecast inline, so clients should prefer this endpoint.
+
+`POST /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore-preview`
+
+```ts
+const { data } = await client.triggerRestorePreview({
+  blueprint_id: 'example',
+  job_id: 'example',
+})
+```
+
+---
+
+### `getRestorePreviewReport`
+
+Returns a restore preview started by `triggerRestorePreview`. The
+`outcome` is present once `status` is `completed`. A preview whose
+worker stopped without reporting is returned as `failed`.
+
+`GET /v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview/{preview_id}`
+
+```ts
+const { data } = await client.getRestorePreviewReport({
+  blueprint_id: 'example',
+  job_id: 'example',
+  preview_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "preview_id": "string",
+  "job_id": "string",
+  "status": "running",
+  "requested_at": "1970-01-01T00:00:00.000Z",
+  "completed_at": "1970-01-01T00:00:00.000Z",
+  "outcome": {
+    "snapshot_id": "string",
+    "resources": [
+      {
+        "lineage_id": "string",
+        "type": "string",
+        "name": "string",
+        "target_id": "string",
+        "action": "restore",
+        "reason": "modified",
+        "last_synced_at": "1970-01-01T00:00:00.000Z",
+        "current_updated_at": "1970-01-01T00:00:00.000Z",
+        "error_message": "string",
+        "is_hidden": true,
+        "co_owned_by": [
+          {
+            "blueprint_id": "string",
+            "title": "string"
+          }
+        ],
+        "protected_by": [
+          {
+            "lineage_id": "string",
+            "type": "string",
+            "target_id": "string"
+          }
+        ]
+      }
+    ],
+    "has_effective_changes": true
+  },
+  "error": "string"
 }
 ```
 
@@ -3063,7 +3827,7 @@ const { data } = await client.getBlueprintLineageV3({
 
 Install one source blueprint into many destination organizations in a single
 request. The server schedules child V3 installs with `auto_apply=true` and caps
-active installs at `max_concurrency`. Per-t
+active installs at `max_concurrency`. Not a
 
 `POST /v3/blueprint-manifest/bulk-installs`
 
@@ -3077,7 +3841,8 @@ const { data } = await client.createBulkInstallV3(
     slug: 'string',
     options: {
       resources_to_ignore: ['string'],
-      sync_notes: false
+      sync_notes: false,
+      include_field_diffs: false
     },
     targets: [
       {
@@ -3122,12 +3887,14 @@ const { data } = await client.getBulkInstallV3({
     "in_progress": 0,
     "success": 0,
     "partial_success": 0,
-    "failed": 0
+    "failed": 0,
+    "review_required": 0
   },
   "slug": "string",
   "options": {
     "resources_to_ignore": ["string"],
-    "sync_notes": false
+    "sync_notes": false,
+    "include_field_diffs": false
   },
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
@@ -3166,6 +3933,7 @@ const { data } = await client.listBulkInstallTargetsV3({
       "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
       "status": "QUEUED",
       "job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+      "merge_plan_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z",
       "job": {
@@ -3188,7 +3956,10 @@ const { data } = await client.listBulkInstallTargetsV3({
                   "resourceDependency": "string",
                   "resources": ["string"],
                   "addresses": ["string"],
-                  "originalError": "string"
+                  "originalError": "string",
+                  "current": 0,
+                  "max_allowed": 0,
+                  "planned": 0
                 }
               }
             ],
@@ -3231,8 +4002,13 @@ const { data } = await client.listBulkInstallTargetsV3({
         ],
         "options": {
           "resources_to_ignore": ["string"],
-          "sync_notes": false
+          "sync_notes": false,
+          "include_field_diffs": false
         },
+        "merge_plan_id": "string",
+        "wait_kind": "plan",
+        "prefill_from_merge_plan_id": "string",
+        "assigned_merge_plan_id": "string",
         "status": "IN_PROGRESS"
       }
     }
@@ -3275,6 +4051,7 @@ const { data } = await client.retryBulkInstallTargetV3(
   "destination_blueprint_id": "c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341",
   "status": "QUEUED",
   "job_ids": ["c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341"],
+  "merge_plan_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
   "job": {
@@ -3297,7 +4074,10 @@ const { data } = await client.retryBulkInstallTargetV3(
               "resourceDependency": "string",
               "resources": ["string"],
               "addresses": ["string"],
-              "originalError": "string"
+              "originalError": "string",
+              "current": 0,
+              "max_allowed": 0,
+              "planned": 0
             }
           }
         ],
@@ -3340,8 +4120,13 @@ const { data } = await client.retryBulkInstallTargetV3(
     ],
     "options": {
       "resources_to_ignore": ["string"],
-      "sync_notes": false
+      "sync_notes": false,
+      "include_field_diffs": false
     },
+    "merge_plan_id": "string",
+    "wait_kind": "plan",
+    "prefill_from_merge_plan_id": "string",
+    "assigned_merge_plan_id": "string",
     "status": "IN_PROGRESS"
   }
 }
@@ -3498,158 +4283,10 @@ type UniquenessCriteria = {
 type LineageEntry = {
   lineage_id?: string
   target_id?: string
-  resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
   blueprint_instance_ids?: string[]
   fidelity?: "full" | "partial"
   last_synced_at?: string // date-time
-}
-```
-
-### `PatchFieldDiff`
-
-```ts
-type PatchFieldDiff = {
-  path?: string
-  op?: "changed" | "added" | "removed"
-  baseline_value?: unknown
-  current_value?: unknown
-}
-```
-
-### `PatchResourceDiff`
-
-```ts
-type PatchResourceDiff = {
-  type?: string
-  source_id?: string
-  address?: string
-  name?: string
-  changes?: Array<{
-    path?: string
-    op?: "changed" | "added" | "removed"
-    baseline_value?: unknown
-    current_value?: unknown
-  }>
-}
-```
-
-### `DetectChangesResult`
-
-```ts
-type DetectChangesResult = {
-  resources?: Array<{
-    type?: string
-    source_id?: string
-    address?: string
-    name?: string
-    changes?: Array<{
-      path?: { ... }
-      op?: { ... }
-      baseline_value?: { ... }
-      current_value?: { ... }
-    }>
-  }>
-}
-```
-
-### `BlueprintPatch`
-
-```ts
-type BlueprintPatch = {
-  patch_id?: string
-  version?: number
-  blueprint_id?: string
-  rollout_id?: string
-  source_org_id?: string
-  name?: string
-  description?: string
-  status?: "draft" | "ready" | "applying" | "applied" | "partial"
-  resources?: Array<{
-    type?: string
-    source_id?: string
-    address?: string
-    name?: string
-    changes?: Array<{
-      path?: { ... }
-      op?: { ... }
-      baseline_value?: { ... }
-      current_value?: { ... }
-    }>
-  }>
-  changelog?: string
-  created_by?: string
-  created_at?: string // date-time
-  applied_at?: string // date-time
-}
-```
-
-### `OrgPatchExecution`
-
-```ts
-type OrgPatchExecution = {
-  patch_id?: string
-  version?: number
-  org_id?: string
-  org_name?: string
-  dest_blueprint_id?: string
-  status?: "pending" | "in_progress" | "success" | "failed"
-  error?: string
-  applied_at?: string // date-time
-  retries?: number
-  changes_applied?: Array<{
-    path?: string
-    op?: "changed" | "added" | "removed"
-    baseline_value?: unknown
-    current_value?: unknown
-  }>
-}
-```
-
-### `BlueprintPatchWithResults`
-
-```ts
-type BlueprintPatchWithResults = {
-  patch_id?: string
-  version?: number
-  blueprint_id?: string
-  rollout_id?: string
-  source_org_id?: string
-  name?: string
-  description?: string
-  status?: "draft" | "ready" | "applying" | "applied" | "partial"
-  resources?: Array<{
-    type?: string
-    source_id?: string
-    address?: string
-    name?: string
-    changes?: Array<{
-      path?: { ... }
-      op?: { ... }
-      baseline_value?: { ... }
-      current_value?: { ... }
-    }>
-  }>
-  changelog?: string
-  created_by?: string
-  created_at?: string // date-time
-  applied_at?: string // date-time
-  org_results?: Array<{
-    patch_id?: string
-    version?: number
-    org_id?: string
-    org_name?: string
-    dest_blueprint_id?: string
-    status?: "pending" | "in_progress" | "success" | "failed"
-    error?: string
-    applied_at?: string // date-time
-    retries?: number
-    changes_applied?: Array<{
-      path?: { ... }
-      op?: { ... }
-      baseline_value?: { ... }
-      current_value?: { ... }
-    }>
-  }>
 }
 ```
 
@@ -3727,6 +4364,11 @@ type CommonBlueprintFields = {
     }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    merge_plan_id?: string
+    merge_snapshot_id?: string
+    snapshot_restore_available?: boolean
+    merge_plan_state?: "review_required" | "ready" | "approved" | "applying" | "applied" | "partially_applied" | "failed" | "discarded" | "expired" | "superseded" | "reverting" | "reverted" | "revert_partial"
+    revert_until?: string // date-time
     restore_details?: {
       has_revertible_changes?: { ... }
       resource_impact_summary?: { ... }
@@ -3786,6 +4428,7 @@ type CommonBlueprintFields = {
     disabled?: string[]
   }
   zip_file_name?: string
+  // ...
 }
 ```
 
@@ -3805,17 +4448,25 @@ type SuggestBlueprintResourcesResponse = {
   resources: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     address?: string
     is_root?: boolean
     is_ready?: boolean
     is_hidden?: boolean
     is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
     impact_on_install_reason?: string[]
+    impact_on_install_changes?: Array<{
+      path: { ... }
+      destination?: { ... }
+      source?: { ... }
+      added: { ... }
+    }>
+    impact_on_install_labels?: Record<string, string>
+    impact_on_install_summary?: string[]
   }>
   suggested_blueprint_name?: string
   explanation?: string
@@ -3832,7 +4483,7 @@ added to the Blueprint. Reasons are stable machine-readable codes.
 ```ts
 type SkippedBlueprintResource = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
   reason: "not_found" | "source_validation_failed" | "enrichment_failed"
 }
 ```
@@ -3843,17 +4494,25 @@ type SkippedBlueprintResource = {
 type BlueprintResource = {
   id: string
   name?: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
   address?: string
   is_root?: boolean
   is_ready?: boolean
   is_hidden?: boolean
   is_disabled?: boolean
-  hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
+  hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"[]
   parent_resource_ids?: string[]
   depends_on_addresses?: string[]
   impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
   impact_on_install_reason?: string[]
+  impact_on_install_changes?: Array<{
+    path: string
+    destination?: unknown
+    source?: unknown
+    added: boolean
+  }>
+  impact_on_install_labels?: Record<string, string>
+  impact_on_install_summary?: string[]
 }
 ```
 
@@ -3892,17 +4551,25 @@ type BlueprintPreview = {
   resources: Array<{
     id: string
     name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     address?: string
     is_root?: boolean
     is_ready?: boolean
     is_hidden?: boolean
     is_disabled?: boolean
-    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"[]
+    hard_dependencies?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"[]
     parent_resource_ids?: string[]
     depends_on_addresses?: string[]
     impact_on_install?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored" | "error"[]
     impact_on_install_reason?: string[]
+    impact_on_install_changes?: Array<{
+      path: { ... }
+      destination?: { ... }
+      source?: { ... }
+      added: { ... }
+    }>
+    impact_on_install_labels?: Record<string, string>
+    impact_on_install_summary?: string[]
   }>
 }
 ```
@@ -3946,6 +4613,11 @@ type CustomBlueprint = {
     }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    merge_plan_id?: string
+    merge_snapshot_id?: string
+    snapshot_restore_available?: boolean
+    merge_plan_state?: "review_required" | "ready" | "approved" | "applying" | "applied" | "partially_applied" | "failed" | "discarded" | "expired" | "superseded" | "reverting" | "reverted" | "revert_partial"
+    revert_until?: string // date-time
     restore_details?: {
       has_revertible_changes?: { ... }
       resource_impact_summary?: { ... }
@@ -4005,11 +4677,6 @@ type CustomBlueprint = {
     disabled?: string[]
   }
   zip_file_name?: string
-  resources?: Array<{
-    id: string
-    name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
-    address?: string
   // ...
 }
 ```
@@ -4053,6 +4720,11 @@ type FileBlueprint = {
     }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    merge_plan_id?: string
+    merge_snapshot_id?: string
+    snapshot_restore_available?: boolean
+    merge_plan_state?: "review_required" | "ready" | "approved" | "applying" | "applied" | "partially_applied" | "failed" | "discarded" | "expired" | "superseded" | "reverting" | "reverted" | "revert_partial"
+    revert_until?: string // date-time
     restore_details?: {
       has_revertible_changes?: { ... }
       resource_impact_summary?: { ... }
@@ -4112,11 +4784,6 @@ type FileBlueprint = {
     disabled?: string[]
   }
   zip_file_name?: string
-  source_type?: "file"
-  resources?: Array<{
-    id: string
-    name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   // ...
 }
 ```
@@ -4160,6 +4827,11 @@ type MarketplaceBlueprint = {
     }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    merge_plan_id?: string
+    merge_snapshot_id?: string
+    snapshot_restore_available?: boolean
+    merge_plan_state?: "review_required" | "ready" | "approved" | "applying" | "applied" | "partially_applied" | "failed" | "discarded" | "expired" | "superseded" | "reverting" | "reverted" | "revert_partial"
+    revert_until?: string // date-time
     restore_details?: {
       has_revertible_changes?: { ... }
       resource_impact_summary?: { ... }
@@ -4219,11 +4891,6 @@ type MarketplaceBlueprint = {
     disabled?: string[]
   }
   zip_file_name?: string
-  source_type?: "marketplace"
-  resources?: Array<{
-    id: string
-    name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   // ...
 }
 ```
@@ -4296,6 +4963,11 @@ type DeployedBlueprint = {
     }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    merge_plan_id?: string
+    merge_snapshot_id?: string
+    snapshot_restore_available?: boolean
+    merge_plan_state?: "review_required" | "ready" | "approved" | "applying" | "applied" | "partially_applied" | "failed" | "discarded" | "expired" | "superseded" | "reverting" | "reverted" | "revert_partial"
+    revert_until?: string // date-time
     restore_details?: {
       has_revertible_changes?: { ... }
       resource_impact_summary?: { ... }
@@ -4355,11 +5027,6 @@ type DeployedBlueprint = {
     disabled?: string[]
   }
   zip_file_name?: string
-  source_type?: "deploy"
-  resources?: Array<{
-    id: string
-    name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   // ...
 }
 ```
@@ -4403,6 +5070,11 @@ type AppBlueprint = {
     }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    merge_plan_id?: string
+    merge_snapshot_id?: string
+    snapshot_restore_available?: boolean
+    merge_plan_state?: "review_required" | "ready" | "approved" | "applying" | "applied" | "partially_applied" | "failed" | "discarded" | "expired" | "superseded" | "reverting" | "reverted" | "revert_partial"
+    revert_until?: string // date-time
     restore_details?: {
       has_revertible_changes?: { ... }
       resource_impact_summary?: { ... }
@@ -4462,11 +5134,6 @@ type AppBlueprint = {
     disabled?: string[]
   }
   zip_file_name?: string
-  source_type?: "app"
-  resources?: Array<{
-    id: string
-    name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
   // ...
 }
 ```
@@ -4510,6 +5177,11 @@ type Blueprint = {
     }
     note?: string
     status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    merge_plan_id?: string
+    merge_snapshot_id?: string
+    snapshot_restore_available?: boolean
+    merge_plan_state?: "review_required" | "ready" | "approved" | "applying" | "applied" | "partially_applied" | "failed" | "discarded" | "expired" | "superseded" | "reverting" | "reverted" | "revert_partial"
+    revert_until?: string // date-time
     restore_details?: {
       has_revertible_changes?: { ... }
       resource_impact_summary?: { ... }
@@ -4569,11 +5241,6 @@ type Blueprint = {
     disabled?: string[]
   }
   zip_file_name?: string
-  resources?: Array<{
-    id: string
-    name?: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
-    address?: string
   // ...
 }
 ```
@@ -4703,7 +5370,12 @@ type BlueprintInstallationJob = {
   options?: {
     resources_to_ignore?: string[]
     sync_notes?: boolean
+    include_field_diffs?: boolean
   }
+  merge_plan_id?: string
+  wait_kind?: "plan" | "reauth" | "merge_review"
+  prefill_from_merge_plan_id?: string
+  assigned_merge_plan_id?: string
   status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
 }
 ```
@@ -4718,7 +5390,7 @@ Aggregate status for a bulk install or one of its targets.
 - `FAILED`: all targets term
 
 ```ts
-type BulkInstallStatus = "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+type BulkInstallStatus = "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED" | "REVIEW_REQUIRED"
 ```
 
 ### `BulkInstallCounts`
@@ -4732,6 +5404,7 @@ type BulkInstallCounts = {
   success?: number
   partial_success?: number
   failed?: number
+  review_required?: number
 }
 ```
 
@@ -4744,7 +5417,7 @@ type BulkInstall = {
   bulk_job_id?: string
   source_org_id?: string
   source_blueprint_id?: string
-  status?: "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+  status?: "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED" | "REVIEW_REQUIRED"
   target_count?: number
   max_concurrency?: number
   counts?: {
@@ -4753,11 +5426,13 @@ type BulkInstall = {
     success?: number
     partial_success?: number
     failed?: number
+    review_required?: number
   }
   slug?: string
   options?: {
     resources_to_ignore?: string[]
     sync_notes?: boolean
+    include_field_diffs?: boolean
   }
   created_at?: string // date-time
   updated_at?: string // date-time
@@ -4775,8 +5450,9 @@ type BulkInstallTarget = {
   bulk_job_id?: string
   destination_org_id?: string
   destination_blueprint_id?: string
-  status?: "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+  status?: "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED" | "REVIEW_REQUIRED"
   job_ids?: string[]
+  merge_plan_id?: string
   created_at?: string // date-time
   updated_at?: string // date-time
   job?: {
@@ -4818,7 +5494,12 @@ type BulkInstallTarget = {
     options?: {
       resources_to_ignore?: { ... }
       sync_notes?: { ... }
+      include_field_diffs?: { ... }
     }
+    merge_plan_id?: string
+    wait_kind?: "plan" | "reauth" | "merge_review"
+    prefill_from_merge_plan_id?: string
+    assigned_merge_plan_id?: string
     status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
   }
 }
@@ -4832,8 +5513,9 @@ type BulkInstallTargetList = {
     bulk_job_id?: string
     destination_org_id?: string
     destination_blueprint_id?: string
-    status?: "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
+    status?: "QUEUED" | "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED" | "REVIEW_REQUIRED"
     job_ids?: string[]
+    merge_plan_id?: string
     created_at?: string // date-time
     updated_at?: string // date-time
     job?: {
@@ -4852,6 +5534,10 @@ type BulkInstallTargetList = {
       sync_engine?: { ... }
       resource_progress?: { ... }
       options?: { ... }
+      merge_plan_id?: { ... }
+      wait_kind?: { ... }
+      prefill_from_merge_plan_id?: { ... }
+      assigned_merge_plan_id?: { ... }
       status?: { ... }
     }
   }>
@@ -4880,6 +5566,7 @@ type BulkInstallCreateRequest = {
   options?: {
     resources_to_ignore?: string[]
     sync_notes?: boolean
+    include_field_diffs?: boolean
   }
   targets: Array<{
     destination_org_id: string
@@ -4920,6 +5607,7 @@ type BlueprintRestoreJob = {
   destination_blueprint_id?: string
   destination_org_id?: string
   install_job_id?: string
+  merge_plan_id?: string
   snapshot_id?: string
   sync_engine?: "v3"
   status?: "IN_PROGRESS" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
@@ -4969,7 +5657,7 @@ type RestoreOutcomeItem = {
   name?: string
   target_id?: string
   action: "restore" | "delete" | "skip" | "failed"
-  reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned" | "dependency_protected" | "already_deleted" | "non_revertible"
+  reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned" | "dependency_protected" | "already_deleted" | "non_revertible" | "not_created_by_install" | "unconfirmed" | "unknown_provenance"
   last_synced_at?: string // date-time
   current_updated_at?: string // date-time
   error_message?: string
@@ -5141,7 +5829,7 @@ type RestoreOutcome = {
     name?: string
     target_id?: string
     action: "restore" | "delete" | "skip" | "failed"
-    reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned" | "dependency_protected" | "already_deleted" | "non_revertible"
+    reason?: "modified" | "delete_unsupported" | "heuristic_match" | "co_owned" | "dependency_protected" | "already_deleted" | "non_revertible" | "not_created_by_install" | "unconfirmed" | "unknown_provenance"
     last_synced_at?: string // date-time
     current_updated_at?: string // date-time
     error_message?: string
@@ -5157,6 +5845,37 @@ type RestoreOutcome = {
     }>
   }>
   has_effective_changes?: boolean
+}
+```
+
+### `RestorePreviewReport`
+
+```ts
+type RestorePreviewReport = {
+  preview_id: string
+  job_id: string
+  status: "running" | "completed" | "failed"
+  requested_at: string // date-time
+  completed_at?: string // date-time
+  outcome?: {
+    snapshot_id?: string
+    resources?: Array<{
+      lineage_id: { ... }
+      type: { ... }
+      name?: { ... }
+      target_id?: { ... }
+      action: { ... }
+      reason?: { ... }
+      last_synced_at?: { ... }
+      current_updated_at?: { ... }
+      error_message?: { ... }
+      is_hidden?: { ... }
+      co_owned_by?: { ... }
+      protected_by?: { ... }
+    }>
+    has_effective_changes?: boolean
+  }
+  error?: string
 }
 ```
 
@@ -5241,7 +5960,12 @@ type BlueprintJob = {
   options?: {
     resources_to_ignore?: string[]
     sync_notes?: boolean
+    include_field_diffs?: boolean
   }
+  merge_plan_id?: string
+  wait_kind?: "plan" | "reauth" | "merge_review"
+  prefill_from_merge_plan_id?: string
+  assigned_merge_plan_id?: string
   status?: "IN_PROGRESS" | "WAITING_USER_ACTION" | "REAUTH_REQUIRED" | "CANCELED" | "SUCCESS" | "PARTIAL_SUCCESS" | "FAILED"
 } | {
   id?: string
@@ -5258,11 +5982,6 @@ type BlueprintJob = {
       installed_blueprint_id?: { ... }
       export_job_id?: { ... }
       resources?: { ... }
-    }
-  }>
-  triggered_at?: string // date-time
-  created_by?: {
-    name?: unknown
   // ...
 }
 ```
@@ -5297,52 +6016,6 @@ type BlueprintDependenciesSyncJob = {
   job_type?: "dependencies_sync"
   blueprint_id?: string
   status?: "IN_PROGRESS" | "SUCCESS" | "FAILED" | "CANCELED"
-}
-```
-
-### `BlueprintValidateJob`
-
-```ts
-type BlueprintValidateJob = {
-  id?: string
-  events?: Array<{
-    timestamp?: string // date-time
-    message?: string
-    errors?: Array<{
-      error?: { ... }
-      code?: { ... }
-      data?: { ... }
-    }>
-    level?: "info" | "warning" | "error"
-    data?: {
-      installed_blueprint_id?: { ... }
-      export_job_id?: { ... }
-      resources?: { ... }
-    }
-  }>
-  triggered_at?: string // date-time
-  created_by?: {
-    name?: unknown
-    org_id: string
-    user_id?: string
-    token_id?: string
-  }
-  job_type?: "validate"
-  blueprint_id?: string
-  status?: "IN_PROGRESS" | "SUCCESS" | "FAILED"
-  valid?: boolean
-  errors?: Array<{
-    error?: string | object
-    code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint"
-    data?: {
-      formattedResource?: { ... }
-      resource?: { ... }
-      resourceDependency?: { ... }
-      resources?: { ... }
-      addresses?: { ... }
-      originalError?: { ... }
-    }
-  }>
 }
 ```
 
@@ -5389,7 +6062,7 @@ type BlueprintVerificationJob = {
     fetch_errors?: number
   }
   resource_results?: Array<{
-    resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     resource_name?: string
     source_resource_id?: string
     source_resource_address?: string
@@ -5451,7 +6124,7 @@ type VerificationSummary = {
 
 ```ts
 type ResourceVerificationResult = {
-  resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  resource_type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
   resource_name?: string
   source_resource_id?: string
   source_resource_address?: string
@@ -5491,7 +6164,7 @@ type BlueprintJobEvent = {
   message?: string
   errors?: Array<{
     error?: string | object
-    code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint"
+    code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference"
     data?: {
       formattedResource?: { ... }
       resource?: { ... }
@@ -5499,6 +6172,9 @@ type BlueprintJobEvent = {
       resources?: { ... }
       addresses?: { ... }
       originalError?: { ... }
+      current?: { ... }
+      max_allowed?: { ... }
+      planned?: { ... }
     }
   }>
   level?: "info" | "warning" | "error"
@@ -5516,6 +6192,7 @@ type BlueprintJobEvent = {
 type BlueprintInstallationJobOptions = {
   resources_to_ignore?: string[]
   sync_notes?: boolean
+  include_field_diffs?: boolean
 }
 ```
 
@@ -5525,6 +6202,7 @@ type BlueprintInstallationJobOptions = {
 type ContinueInstallationJobRequest = {
   resources_to_ignore?: string[]
   sync_notes?: boolean
+  include_field_diffs?: boolean
   source_auth_token?: string // password
 }
 ```
@@ -5720,7 +6398,7 @@ type JobStatus = "PENDING" | "STARTED" | "WAITING_USER_ACTION" | "REAUTH_REQUIRE
 Type of the resource
 
 ```ts
-type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+type ResourceNodeType = "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
 ```
 
 ### `PlanChanges`
@@ -5734,7 +6412,7 @@ type PlanChanges = "create" | "update" | "internal-update" | "no-op" | "delete" 
 ```ts
 type CommonResourceNode = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
   name?: string
   source_id?: string
   is_virtual?: boolean
@@ -5746,14 +6424,14 @@ type CommonResourceNode = {
 ```ts
 type RootResourceNode = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
   name?: string
   source_id?: string
   is_virtual?: boolean
   address?: string
   dependencies?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     name?: string
     source_id?: string
     is_virtual?: true
@@ -5780,13 +6458,13 @@ type RootResourceNode = {
 ```ts
 type VirtualResourceNodeGroup = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
   name?: string
   source_id?: string
   is_virtual?: true
   dependencies?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5818,14 +6496,14 @@ type VirtualResourceNodeGroup = {
 ```ts
 type ResourceNode = {
   id: string
-  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+  type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
   name?: string
   source_id?: string
   is_virtual?: boolean
   address?: string
   dependencies?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5851,7 +6529,7 @@ type ResourceNode = {
   }>
   parents?: Array<{
     id?: string
-    type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type?: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
   }>
   changes?: "create" | "update" | "internal-update" | "no-op" | "delete" | "ignored"[]
   changes_reason?: string[]
@@ -5870,7 +6548,7 @@ type Job = {
   plan_file_content?: string
   resources_to_export?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5887,7 +6565,7 @@ type Job = {
     changes_reason?: string[]
   }> | {
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5906,7 +6584,7 @@ type Job = {
   large_resources_to_export_url?: string
   resources_to_import?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5923,7 +6601,7 @@ type Job = {
     changes_reason?: string[]
   }> | {
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -5948,7 +6626,7 @@ type Job = {
   is_verified?: boolean
   errors?: Array<{
     error?: string | object
-    code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint"
+    code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference"
     data?: {
       formattedResource?: { ... }
       resource?: { ... }
@@ -5956,11 +6634,11 @@ type Job = {
       resources?: { ... }
       addresses?: { ... }
       originalError?: { ... }
+      current?: { ... }
+      max_allowed?: { ... }
+      planned?: { ... }
     }
   }>
-  source_type?: "file" | "marketplace" | "sandbox"
-  imported_resources?: Array<{
-    id: string
   // ...
 }
 ```
@@ -6047,7 +6725,7 @@ type CommonImportFields = {
   source_type?: "file" | "marketplace" | "sandbox"
   imported_resources?: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -6064,7 +6742,7 @@ type CommonImportFields = {
     changes_reason?: string[]
   }> | {
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     name?: string
     source_id?: string
     is_virtual?: boolean
@@ -6113,7 +6791,7 @@ type BlueprintInstallStatus = "SUCCESS" | "PARTIAL" | "FAILED"
 ### `FormattedErrorCodes`
 
 ```ts
-type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint"
+type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference"
 ```
 
 ### `FormattedErrorData`
@@ -6131,7 +6809,7 @@ type FormattedErrorData = {
 ```ts
 type FormattedError = {
   error?: string | object
-  code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint"
+  code?: "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference"
   data?: {
     formattedResource?: {
       id?: { ... }
@@ -6143,6 +6821,9 @@ type FormattedError = {
     resources?: string[]
     addresses?: string[]
     originalError?: string
+    current?: number
+    max_allowed?: number
+    planned?: number
   }
 }
 ```
@@ -6164,7 +6845,7 @@ type CallerIdentity = {
 type SelectedResources = {
   exported_root_resources: Array<{
     id: string
-    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission"
+    type: "designbuilder" | "journey" | "product" | "price" | "product_recommendation" | "coupon" | "tax" | "automation_flow" | "entity_mapping" | "file" | "emailtemplate" | "schema" | "schema_attribute" | "schema_capability" | "schema_group" | "schema_group_headline" | "workflow_definition" | "closing_reason" | "taxonomy_classification" | "webhook" | "integration" | "dashboard" | "insight" | "custom_variable" | "usergroup" | "saved_view" | "app" | "role" | "portal_config" | "target" | "kanban" | "validation_rule" | "flow_template" | "taxonomy" | "notification_template" | "environment_variable" | "datasource" | "family" | "permission" | "email_signature" | "shared_inbox"
     address?: string
   }>
   selected_resources: string[]
@@ -6300,5 +6981,537 @@ type MarketplaceListingVersion = {
   recommended_apps?: string[]
   created_at: string // date-time
   published_at?: string // date-time
+}
+```
+
+### `MergePlanState`
+
+Lifecycle state of an update merge plan.
+
+```ts
+type MergePlanState = "review_required" | "ready" | "approved" | "applying" | "applied" | "partially_applied" | "failed" | "discarded" | "expired" | "superseded" | "reverting" | "reverted" | "revert_partial"
+```
+
+### `MergeOptionId`
+
+```ts
+type MergeOptionId = "keep_current" | "take_incoming" | "keep_absent" | "restore_incoming"
+```
+
+### `MergeChoice`
+
+The reviewer's choice for one decision group. Valid only while `group_signature` matches.
+
+```ts
+type MergeChoice = {
+  group_id: string
+  group_signature: string
+  option_id: "keep_current" | "take_incoming" | "keep_absent" | "restore_incoming"
+}
+```
+
+### `MergeChoiceInput`
+
+A submitted choice. `option_id` is not an enum here, so an option the group does not offer is answered with 422 `merge_plan_choice_invalid` and its `group_ids`, like every other invalid choice.
+
+```ts
+type MergeChoiceInput = {
+  group_id: string
+  group_signature: string
+  option_id: string
+}
+```
+
+### `MergeSectionRef`
+
+```ts
+type MergeSectionRef = {
+  resource_lineage_id: string
+  section_id: string
+  item_path?: Array<{
+    section_id: string
+    item_key: string
+  }>
+}
+```
+
+### `MergeSectionValue`
+
+A unit value in builder terms. `present` false means the unit does not exist on that side.
+
+```ts
+type MergeSectionValue = {
+  present: boolean
+  value?: unknown
+}
+```
+
+### `MergeDecisionGroup`
+
+```ts
+type MergeDecisionGroup = {
+  group_id: string
+  group_signature: string
+  kind: "conflict" | "mandatory" | "confirm"
+  scope: "units" | "order" | "resource"
+  section_refs: Array<{
+    resource_lineage_id: string
+    section_id: string
+    item_path?: Array<{
+      section_id: { ... }
+      item_key: { ... }
+    }>
+  }>
+  ui_concept: string
+  label_key: string
+  values: Array<{
+    section_ref: {
+      resource_lineage_id: { ... }
+      section_id: { ... }
+      item_path?: { ... }
+    }
+    label: string
+    base: {
+      present: { ... }
+      value?: { ... }
+    }
+    current: {
+      present: { ... }
+      value?: { ... }
+    }
+    incoming: {
+      present: { ... }
+      value?: { ... }
+    }
+  }>
+  options: Array<{
+    option_id: "keep_current" | "take_incoming" | "keep_absent" | "restore_incoming"
+    label_key: string
+    description_key: string
+  }>
+  selection_required: boolean
+  selected_option_id?: "keep_current" | "take_incoming" | "keep_absent" | "restore_incoming"
+  mandatory_declaration_ids: string[]
+  batch_key?: string
+  sequence_labels?: {
+    base?: string[]
+    current: string[]
+    incoming: string[]
+  }
+}
+```
+
+### `MergePlanWarning`
+
+A finding of the merged result that does not block the update.
+
+```ts
+type MergePlanWarning = {
+  code: string
+  target: string
+  unit_key?: string
+  level?: "warning"
+  message: string
+}
+```
+
+### `MergeBaseProvenance`
+
+```ts
+type MergeBaseProvenance = {
+  rung: "apply_evidence" | "none"
+  job_id?: string
+  manifest_version?: string
+  reason?: "no_evidence" | "unreconciled" | "no_manifest" | "not_in_manifest" | "translation_gap"
+}
+```
+
+### `MergeResourceStatus`
+
+```ts
+type MergeResourceStatus = "automatic" | "decisions_required" | "ready" | "blocked"
+```
+
+### `MergeResourceEligibility`
+
+```ts
+type MergeResourceEligibility = "merge" | "two_way" | "blocked" | "automatic_keep_absent" | "absence_decision"
+```
+
+### `MergeResourceAutoCounts`
+
+```ts
+type MergeResourceAutoCounts = {
+  from_current: number
+  from_incoming: number
+}
+```
+
+### `MergePlanReview`
+
+Summary of an update merge plan.
+
+```ts
+type MergePlanReview = {
+  merge_plan_id: string
+  plan_revision: number
+  expected_plan_revision: number
+  warnings: Array<{
+    code: string
+    resource_key: string
+    target: string
+    message: string
+  }>
+  blocked_reasons: string[]
+  apply_counts: {
+    updated: number
+    kept: number
+    removed: number
+    restored: number
+  }
+  apply_counts_unknown?: boolean
+  state: "review_required" | "ready" | "approved" | "applying" | "applied" | "partially_applied" | "failed" | "discarded" | "expired" | "superseded" | "reverting" | "reverted" | "revert_partial"
+  job_id: string
+  destination_blueprint_id: string
+  source: {
+    blueprint_id?: string
+    version?: string
+  }
+  resource_counts: {
+    automatic: number
+    decisions_required: number
+    ready: number
+    blocked: number
+  }
+  group_counts: {
+    conflict: number
+    confirm: number
+    mandatory: number
+    unresolved: number
+  }
+  warning_count: number
+  auto_counts: {
+    kept_customizations: number
+    applied_updates: number
+  }
+  other_resource_count: number
+  created_at: string // date-time
+  expires_at: string // date-time
+  revert_until: string // date-time
+  supersedes?: string
+  superseded_by?: string
+  successor_failed?: boolean
+}
+```
+
+### `MergePlanApplyCounts`
+
+Journeys by what apply does with the current choices: `updated` (written), `kept` (blocked, left as they are), `removed` (stay removed), `restored` (created again).
+
+```ts
+type MergePlanApplyCounts = {
+  updated: number
+  kept: number
+  removed: number
+  restored: number
+}
+```
+
+### `MergeResourceOutcome`
+
+Result of one journey after apply.
+
+```ts
+type MergeResourceOutcome = "applied" | "kept_removed" | "restored" | "merge_stale" | "failed"
+```
+
+### `MergePlanResourceSummary`
+
+```ts
+type MergePlanResourceSummary = {
+  resource_key: string
+  label: string
+  status: "automatic" | "decisions_required" | "ready" | "blocked"
+  eligibility: "merge" | "two_way" | "blocked" | "automatic_keep_absent" | "absence_decision"
+  blocking_reasons: string[]
+  auto_counts: {
+    from_current: number
+    from_incoming: number
+  }
+  unresolved: number
+  warning_count: number
+  outcome?: "applied" | "kept_removed" | "restored" | "merge_stale" | "failed"
+}
+```
+
+### `MergePlanResourcePage`
+
+```ts
+type MergePlanResourcePage = {
+  merge_plan_id: string
+  plan_revision: number
+  resources: Array<{
+    resource_key: string
+    label: string
+    status: "automatic" | "decisions_required" | "ready" | "blocked"
+    eligibility: "merge" | "two_way" | "blocked" | "automatic_keep_absent" | "absence_decision"
+    blocking_reasons: string[]
+    auto_counts: {
+      from_current: { ... }
+      from_incoming: { ... }
+    }
+    unresolved: number
+    warning_count: number
+    outcome?: "applied" | "kept_removed" | "restored" | "merge_stale" | "failed"
+  }>
+  next_cursor?: string
+}
+```
+
+### `MergePlanResourceDetail`
+
+```ts
+type MergePlanResourceDetail = {
+  resource_key: string
+  resource_type: "journey"
+  lineage_id: string
+  target_id: string
+  label: string
+  model_version: string
+  base_provenance: {
+    rung: "apply_evidence" | "none"
+    job_id?: string
+    manifest_version?: string
+    reason?: "no_evidence" | "unreconciled" | "no_manifest" | "not_in_manifest" | "translation_gap"
+  }
+  eligibility: "merge" | "two_way" | "blocked" | "automatic_keep_absent" | "absence_decision"
+  fast_path: boolean
+  auto_counts: {
+    from_current: number
+    from_incoming: number
+  }
+  decision_groups: Array<{
+    group_id: string
+    group_signature: string
+    kind: "conflict" | "mandatory" | "confirm"
+    scope: "units" | "order" | "resource"
+    section_refs: Array<{
+      resource_lineage_id: { ... }
+      section_id: { ... }
+      item_path?: { ... }
+    }>
+    ui_concept: string
+    label_key: string
+    values: Array<{
+      section_ref: { ... }
+      label: { ... }
+      base: { ... }
+      current: { ... }
+      incoming: { ... }
+    }>
+    options: Array<{
+      option_id: { ... }
+      label_key: { ... }
+      description_key: { ... }
+    }>
+    selection_required: boolean
+    selected_option_id?: "keep_current" | "take_incoming" | "keep_absent" | "restore_incoming"
+    mandatory_declaration_ids: string[]
+    batch_key?: string
+    sequence_labels?: {
+      base?: { ... }
+      current: { ... }
+      incoming: { ... }
+    }
+  }>
+  warnings: Array<{
+    code: string
+    target: string
+    unit_key?: string
+    level?: "warning"
+    message: string
+  }>
+  status: "automatic" | "decisions_required" | "ready" | "blocked"
+  blocking_reasons: string[]
+  outcome?: "applied" | "kept_removed" | "restored" | "merge_stale" | "failed"
+}
+```
+
+### `MergePlanResourceReview`
+
+```ts
+type MergePlanResourceReview = {
+  merge_plan_id: string
+  plan_revision: number
+  resource: {
+    resource_key: string
+    resource_type: "journey"
+    lineage_id: string
+    target_id: string
+    label: string
+    model_version: string
+    base_provenance: {
+      rung: { ... }
+      job_id?: { ... }
+      manifest_version?: { ... }
+      reason?: { ... }
+    }
+    eligibility: "merge" | "two_way" | "blocked" | "automatic_keep_absent" | "absence_decision"
+    fast_path: boolean
+    auto_counts: {
+      from_current: { ... }
+      from_incoming: { ... }
+    }
+    decision_groups: Array<{
+      group_id: { ... }
+      group_signature: { ... }
+      kind: { ... }
+      scope: { ... }
+      section_refs: { ... }
+      ui_concept: { ... }
+      label_key: { ... }
+      values: { ... }
+      options: { ... }
+      selection_required: { ... }
+      selected_option_id?: { ... }
+      mandatory_declaration_ids: { ... }
+      batch_key?: { ... }
+      sequence_labels?: { ... }
+    }>
+    warnings: Array<{
+      code: { ... }
+      target: { ... }
+      unit_key?: { ... }
+      level?: { ... }
+      message: { ... }
+    }>
+    status: "automatic" | "decisions_required" | "ready" | "blocked"
+    blocking_reasons: string[]
+    outcome?: "applied" | "kept_removed" | "restored" | "merge_stale" | "failed"
+  }
+}
+```
+
+### `MergePlanResolutionsUpdate`
+
+```ts
+type MergePlanResolutionsUpdate = {
+  expected_plan_revision: number
+  resolutions: Array<{
+    group_id: string
+    group_signature: string
+    option_id: string
+  }>
+}
+```
+
+### `MergePlanApplyRequest`
+
+```ts
+type MergePlanApplyRequest = {
+  expected_plan_revision: number
+  idempotency_key: string
+}
+```
+
+### `MergePlanRevisionRequest`
+
+Body of discard and refresh requests.
+
+```ts
+type MergePlanRevisionRequest = {
+  expected_plan_revision: number
+}
+```
+
+### `MergePlanReplanResult`
+
+```ts
+type MergePlanReplanResult = {
+  merge_plan_id: string
+  job_id: string
+}
+```
+
+### `MergeRevertEntry`
+
+```ts
+type MergeRevertEntry = {
+  resource_key: string
+  lineage_id: string
+  label: string
+  resource_type: string
+  category: "unchanged" | "changed_since_update" | "created_by_update" | "metadata_only" | "not_restorable"
+  default_action: "restore" | "keep"
+  requires_choice: boolean
+}
+```
+
+### `MergeRevertPreview`
+
+```ts
+type MergeRevertPreview = {
+  revert_preview_id: string
+  preview_revision: number
+  merge_plan_id: string
+  entries: Array<{
+    resource_key: string
+    lineage_id: string
+    label: string
+    resource_type: string
+    category: "unchanged" | "changed_since_update" | "created_by_update" | "metadata_only" | "not_restorable"
+    default_action: "restore" | "keep"
+    requires_choice: boolean
+  }>
+}
+```
+
+### `MergeRevertSelection`
+
+```ts
+type MergeRevertSelection = {
+  resource_key: string
+  action: "restore" | "keep"
+}
+```
+
+### `MergeRevertRequest`
+
+```ts
+type MergeRevertRequest = {
+  revert_preview_id: string
+  expected_preview_revision: number
+  idempotency_key: string
+  selections: Array<{
+    resource_key: string
+    action: "restore" | "keep"
+  }>
+  session_credentials?: {
+    refresh_token: string // password
+    client_id: string
+    pipeline_id?: string
+  }
+}
+```
+
+### `MergeRevertResult`
+
+```ts
+type MergeRevertResult = {
+  job_id: string
+}
+```
+
+### `MergePlanError`
+
+```ts
+type MergePlanError = {
+  status: number
+  error: string
+  group_ids?: string[]
+  action?: "replan"
+  merge_plan_id?: string
+  retry_after?: number
+  resource_keys?: string[]
 }
 ```

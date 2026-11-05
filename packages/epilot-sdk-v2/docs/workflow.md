@@ -50,6 +50,7 @@ const { data } = await workflowClient.getExecutions(...)
 - [`getActiveBulkStartFlowsJob`](#getactivebulkstartflowsjob)
 - [`getBulkStartFlowsJob`](#getbulkstartflowsjob)
 - [`patchBulkStartFlowsJob`](#patchbulkstartflowsjob)
+- [`listBulkStartFlowsJobItems`](#listbulkstartflowsjobitems)
 - [`restartBulkStartFlowsJob`](#restartbulkstartflowsjob)
 - [`patchTask`](#patchtask)
 - [`runTaskAutomation`](#runtaskautomation)
@@ -124,15 +125,20 @@ const { data } = await workflowClient.getExecutions(...)
 - [`PortalAudience`](#portalaudience)
 - [`PortalWorkflowsSearchResp`](#portalworkflowssearchresp)
 - [`BulkStartFlowsReq`](#bulkstartflowsreq)
+- [`BulkStartEntitiesQuery`](#bulkstartentitiesquery)
 - [`BulkStartEntityRef`](#bulkstartentityref)
 - [`BulkStartFlowsJobStatus`](#bulkstartflowsjobstatus)
 - [`BulkStartFlowsItemStatus`](#bulkstartflowsitemstatus)
 - [`BulkStartFlowsItem`](#bulkstartflowsitem)
 - [`BulkStartFlowsFlowSummary`](#bulkstartflowsflowsummary)
+- [`BulkStartFlowsAutomaticTask`](#bulkstartflowsautomatictask)
+- [`BulkStartFlowsJobFailure`](#bulkstartflowsjobfailure)
+- [`BulkStartFlowsJobPreparation`](#bulkstartflowsjobpreparation)
 - [`BulkStartFlowsJobCounts`](#bulkstartflowsjobcounts)
 - [`BulkStartFlowsJob`](#bulkstartflowsjob)
 - [`BulkStartFlowsJobSummary`](#bulkstartflowsjobsummary)
 - [`ListBulkStartFlowsJobsResp`](#listbulkstartflowsjobsresp)
+- [`ListBulkStartFlowsJobItemsResp`](#listbulkstartflowsjobitemsresp)
 - [`ActiveBulkStartFlowsJobResp`](#activebulkstartflowsjobresp)
 - [`PatchBulkStartFlowsJobReq`](#patchbulkstartflowsjobreq)
 - [`PortalWorkflowsBatchSearchReq`](#portalworkflowsbatchsearchreq)
@@ -680,7 +686,8 @@ const { data } = await client.updateStep(
             source: 'string',
             block_id: 'string',
             block_type: 'text-input',
-            block_field: 'string'
+            block_field: 'string',
+            country_code: 'string'
           }
         ],
         min_confidence: 0.8,
@@ -906,7 +913,8 @@ const { data } = await client.startFlowExecution(
           allow_subject_and_body_edit: true
         }
       },
-      trigger_id: 'string'
+      trigger_id: 'string',
+      bulk_job_id: 'string'
     },
     contexts: [
       {
@@ -1106,7 +1114,8 @@ const { data } = await client.startFlowExecution(
       "allow_execution_note": true,
       "email_review": {}
     },
-    "trigger_id": "string"
+    "trigger_id": "string",
+    "bulk_job_id": "string"
   },
   "configured_triggers": [
     {
@@ -1321,7 +1330,8 @@ const { data } = await client.getFlowExecution({
       "allow_execution_note": true,
       "email_review": {}
     },
-    "trigger_id": "string"
+    "trigger_id": "string",
+    "bulk_job_id": "string"
   },
   "configured_triggers": [
     {
@@ -1586,7 +1596,8 @@ const { data } = await client.patchFlowExecution(
       "allow_execution_note": true,
       "email_review": {}
     },
-    "trigger_id": "string"
+    "trigger_id": "string",
+    "bulk_job_id": "string"
   },
   "configured_triggers": [
     {
@@ -1779,9 +1790,9 @@ const { data } = await client.searchPortalWorkflowsBatch(
 
 ### `bulkStartFlows`
 
-Creates a job that starts one or more flows on many entities: every flow in
-`flow_template_ids` is started on every entity in `entities` (up to 5 flows,
-200 entities, 1000 starts). Every start is manu
+Creates a job that starts one flow on many entities: the flow
+`flow_template_id` is started on every entity in `entities`, or on every
+entity `entities_query` matches. Every start is manual.
 
 `POST /v2/flows/executions:bulk-start`
 
@@ -1789,6 +1800,7 @@ Creates a job that starts one or more flows on many entities: every flow in
 const { data } = await client.bulkStartFlows(
   null,
   {
+    flow_template_id: 'string',
     flow_template_ids: ['string'],
     entities: [
       {
@@ -1796,6 +1808,10 @@ const { data } = await client.bulkStartFlows(
         entity_schema: 'opportunity'
       }
     ],
+    entities_query: {
+      entity_schema: 'opportunity',
+      q: 'string'
+    },
     purposes: ['string']
   },
 )
@@ -1827,7 +1843,7 @@ const { data } = await client.listBulkStartFlowsJobs({
     {
       "job_id": "string",
       "org_id": "string",
-      "status": "awaiting_approval",
+      "status": "preparing",
       "created_by": "string",
       "created_by_org_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
@@ -1839,17 +1855,43 @@ const { data } = await client.listBulkStartFlowsJobs({
       "cancel_requested": true,
       "restart_of": "string",
       "restarted_by": "string",
+      "flow": {
+        "flow_template_id": "string",
+        "flow_name": "string",
+        "will_start": 0,
+        "skipped": 0,
+        "automatic_tasks": [
+          {
+            "task_id": "string",
+            "task_name": "string",
+            "task_type": "AUTOMATION"
+          }
+        ]
+      },
       "flows": [
         {
           "flow_template_id": "string",
           "flow_name": "string",
           "will_start": 0,
-          "skipped": 0
+          "skipped": 0,
+          "automatic_tasks": [
+            {
+              "task_id": "string",
+              "task_name": "string",
+              "task_type": "AUTOMATION"
+            }
+          ]
         }
       ],
       "entity_schema": "string",
       "entity_ids": ["string"],
       "entity_count": 0,
+      "entities_query": "string",
+      "entities_matched": 0,
+      "failure": {
+        "error_code": "string",
+        "message": "string"
+      },
       "counts": {
         "total": 0,
         "pending": 0,
@@ -1887,7 +1929,7 @@ const { data } = await client.getActiveBulkStartFlowsJob()
   "job": {
     "job_id": "string",
     "org_id": "string",
-    "status": "awaiting_approval",
+    "status": "preparing",
     "created_by": "string",
     "created_at": "1970-01-01T00:00:00.000Z",
     "updated_at": "1970-01-01T00:00:00.000Z",
@@ -1898,14 +1940,51 @@ const { data } = await client.getActiveBulkStartFlowsJob()
     "cancel_requested": true,
     "restart_of": "string",
     "restarted_by": "string",
+    "flow": {
+      "flow_template_id": "string",
+      "flow_name": "string",
+      "will_start": 0,
+      "skipped": 0,
+      "automatic_tasks": [
+        {
+          "task_id": "string",
+          "task_name": "string",
+          "task_type": "AUTOMATION"
+        }
+      ]
+    },
     "flows": [
       {
         "flow_template_id": "string",
         "flow_name": "string",
         "will_start": 0,
-        "skipped": 0
+        "skipped": 0,
+        "automatic_tasks": [
+          {
+            "task_id": "string",
+            "task_name": "string",
+            "task_type": "AUTOMATION"
+          }
+        ]
       }
     ],
+    "entity_count": 0,
+    "entity_schema": "string",
+    "entities_query": "string",
+    "entities_matched": 0,
+    "failure": {
+      "error_code": "string",
+      "message": "string"
+    },
+    "preparation": {
+      "phase": "resolving",
+      "matched": 0,
+      "resolved": 0,
+      "written": 0,
+      "total": 0,
+      "attempts": 0,
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    },
     "counts": {
       "total": 0,
       "pending": 0,
@@ -1936,8 +2015,9 @@ const { data } = await client.getActiveBulkStartFlowsJob()
 
 ### `getBulkStartFlowsJob`
 
-Returns a bulk-start job with its counts and one item per (flow, entity)
-pair, including the started execution id or the error.
+Returns a bulk-start job with its counts. `items` is included for jobs of
+at most 200 items only (deprecated); page through the items with
+`GET /v2/flows/bulk-jobs/{job_id}/items`.
 
 `GET /v2/flows/bulk-jobs/{job_id}`
 
@@ -1954,7 +2034,7 @@ const { data } = await client.getBulkStartFlowsJob({
 {
   "job_id": "string",
   "org_id": "string",
-  "status": "awaiting_approval",
+  "status": "preparing",
   "created_by": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -1965,14 +2045,51 @@ const { data } = await client.getBulkStartFlowsJob({
   "cancel_requested": true,
   "restart_of": "string",
   "restarted_by": "string",
+  "flow": {
+    "flow_template_id": "string",
+    "flow_name": "string",
+    "will_start": 0,
+    "skipped": 0,
+    "automatic_tasks": [
+      {
+        "task_id": "string",
+        "task_name": "string",
+        "task_type": "AUTOMATION"
+      }
+    ]
+  },
   "flows": [
     {
       "flow_template_id": "string",
       "flow_name": "string",
       "will_start": 0,
-      "skipped": 0
+      "skipped": 0,
+      "automatic_tasks": [
+        {
+          "task_id": "string",
+          "task_name": "string",
+          "task_type": "AUTOMATION"
+        }
+      ]
     }
   ],
+  "entity_count": 0,
+  "entity_schema": "string",
+  "entities_query": "string",
+  "entities_matched": 0,
+  "failure": {
+    "error_code": "string",
+    "message": "string"
+  },
+  "preparation": {
+    "phase": "resolving",
+    "matched": 0,
+    "resolved": 0,
+    "written": 0,
+    "total": 0,
+    "attempts": 0,
+    "updated_at": "1970-01-01T00:00:00.000Z"
+  },
   "counts": {
     "total": 0,
     "pending": 0,
@@ -2024,7 +2141,7 @@ const { data } = await client.patchBulkStartFlowsJob(
 {
   "job_id": "string",
   "org_id": "string",
-  "status": "awaiting_approval",
+  "status": "preparing",
   "created_by": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
@@ -2035,14 +2152,51 @@ const { data } = await client.patchBulkStartFlowsJob(
   "cancel_requested": true,
   "restart_of": "string",
   "restarted_by": "string",
+  "flow": {
+    "flow_template_id": "string",
+    "flow_name": "string",
+    "will_start": 0,
+    "skipped": 0,
+    "automatic_tasks": [
+      {
+        "task_id": "string",
+        "task_name": "string",
+        "task_type": "AUTOMATION"
+      }
+    ]
+  },
   "flows": [
     {
       "flow_template_id": "string",
       "flow_name": "string",
       "will_start": 0,
-      "skipped": 0
+      "skipped": 0,
+      "automatic_tasks": [
+        {
+          "task_id": "string",
+          "task_name": "string",
+          "task_type": "AUTOMATION"
+        }
+      ]
     }
   ],
+  "entity_count": 0,
+  "entity_schema": "string",
+  "entities_query": "string",
+  "entities_matched": 0,
+  "failure": {
+    "error_code": "string",
+    "message": "string"
+  },
+  "preparation": {
+    "phase": "resolving",
+    "matched": 0,
+    "resolved": 0,
+    "written": 0,
+    "total": 0,
+    "attempts": 0,
+    "updated_at": "1970-01-01T00:00:00.000Z"
+  },
   "counts": {
     "total": 0,
     "pending": 0,
@@ -2070,11 +2224,53 @@ const { data } = await client.patchBulkStartFlowsJob(
 
 ---
 
+### `listBulkStartFlowsJobItems`
+
+Pages through the items of a bulk-start job (one per entity), in request
+order, optionally only those in one status. An ended job reports items it
+never got to as `cancelled`.
+
+`GET /v2/flows/bulk-jobs/{job_id}/items`
+
+```ts
+const { data } = await client.listBulkStartFlowsJobItems({
+  job_id: 'example',
+  status: 'example',
+  size: 1,
+  cursor: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "flow_template_id": "string",
+      "entity_id": "string",
+      "entity_schema": "string",
+      "status": "pending",
+      "execution_id": "string",
+      "error_code": "string",
+      "error_message": "string",
+      "updated_at": "1970-01-01T00:00:00.000Z"
+    }
+  ],
+  "next_cursor": "string"
+}
+```
+
+</details>
+
+---
+
 ### `restartBulkStartFlowsJob`
 
 Restarts what is left of an ended bulk-start job: creates a new job, in
-`awaiting_approval`, from the job's `failed` items and the items it never
-started (`cancelled`). Started and skipped items are n
+`awaiting_approval`, from the job's `failed` and `skipped` items and the
+items it never started (`cancelled`). Started items are
 
 `POST /v2/flows/bulk-jobs/{job_id}/restart`
 
@@ -3319,7 +3515,8 @@ const { data } = await client.reconcileAutomationTask({
       "allow_execution_note": true,
       "email_review": {}
     },
-    "trigger_id": "string"
+    "trigger_id": "string",
+    "bulk_job_id": "string"
   },
   "configured_triggers": [
     {
@@ -4455,6 +4652,7 @@ type StepJourney = {
       block_id: { ... }
       block_type: { ... }
       block_field?: { ... }
+      country_code?: { ... }
     }>
     min_confidence?: number
     instructions?: string
@@ -4492,8 +4690,9 @@ type AiPrefillConfig = {
   mappings?: Array<{
     source: string
     block_id: string
-    block_type: "text-input" | "number-input" | "personal-information" | "meter-reading"
+    block_type: "text-input" | "number-input" | "personal-information" | "meter-reading" | "contact" | "single-choice" | "date-input" | "binary-input" | "address" | "payment-method" | "multiple-choice" | "availability-check"
     block_field?: string
+    country_code?: string
   }>
   min_confidence?: number
   instructions?: string
@@ -4518,8 +4717,9 @@ type AiPrefillExtractionField = {
 type AiPrefillMapping = {
   source: string
   block_id: string
-  block_type: "text-input" | "number-input" | "personal-information" | "meter-reading"
+  block_type: "text-input" | "number-input" | "personal-information" | "meter-reading" | "contact" | "single-choice" | "date-input" | "binary-input" | "address" | "payment-method" | "multiple-choice" | "availability-check"
   block_field?: string
+  country_code?: string
 }
 ```
 
@@ -5187,6 +5387,7 @@ type StartFlowReq = {
       email_review?: { ... }
     }
     trigger_id?: string
+    bulk_job_id?: string
   }
   contexts: Array<{
     entity_id?: string
@@ -5293,16 +5494,39 @@ type PortalWorkflowsSearchResp = {
 
 ### `BulkStartFlowsReq`
 
-Start every flow in `flow_template_ids` on every entity in `entities`.
+Start the flow `flow_template_id` on every entity in `entities`, or on
+every entity `entities_query` matches. Exactly one of `flow_template_id`
+and the deprecated `flow_template_ids` is required, and exactly one of
+`entities` and `entities_query`.
+
 
 ```ts
 type BulkStartFlowsReq = {
-  flow_template_ids: string[]
-  entities: Array<{
+  flow_template_id?: string
+  flow_template_ids?: string[]
+  entities?: Array<{
     entity_id: string
     entity_schema: string
   }>
+  entities_query?: {
+    entity_schema: string
+    q: string
+  }
   purposes?: string[]
+}
+```
+
+### `BulkStartEntitiesQuery`
+
+The entities an entity search matches, as the entity table's "select all
+matching" selects them. Resolved once, in the background, when the job is prepared: the
+job holds the entities matching at that time (at most 10,000).
+
+
+```ts
+type BulkStartEntitiesQuery = {
+  entity_schema: string
+  q: string
 }
 ```
 
@@ -5317,15 +5541,15 @@ type BulkStartEntityRef = {
 
 ### `BulkStartFlowsJobStatus`
 
+* `preparing`: the entities are being resolved; nothing started
 * `awaiting_approval`: preflight done, nothing started; waits for `APPROVE`
 * `queued`: approved, waiting for a worker
 * `running`: starts in progress
 * `completed`: every start that was not skipped succeeded
-* `completed_with_errors`: finished, at least one start failed
-* `failed`: the job itself f
+* `completed_with_errors`: 
 
 ```ts
-type BulkStartFlowsJobStatus = "awaiting_approval" | "queued" | "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "expired"
+type BulkStartFlowsJobStatus = "preparing" | "awaiting_approval" | "queued" | "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "expired"
 ```
 
 ### `BulkStartFlowsItemStatus`
@@ -5336,7 +5560,7 @@ type BulkStartFlowsItemStatus = "pending" | "started" | "failed" | "skipped" | "
 
 ### `BulkStartFlowsItem`
 
-One (flow, entity) start of a bulk-start job.
+One entity's start of a bulk-start job's flow.
 
 ```ts
 type BulkStartFlowsItem = {
@@ -5359,6 +5583,52 @@ type BulkStartFlowsFlowSummary = {
   flow_name: string
   will_start: number
   skipped: number
+  automatic_tasks?: Array<{
+    task_id: string
+    task_name: string
+    task_type: "AUTOMATION" | "AI_AGENT"
+  }>
+}
+```
+
+### `BulkStartFlowsAutomaticTask`
+
+```ts
+type BulkStartFlowsAutomaticTask = {
+  task_id: string
+  task_name: string
+  task_type: "AUTOMATION" | "AI_AGENT"
+}
+```
+
+### `BulkStartFlowsJobFailure`
+
+Why a job failed while it was being prepared.
+
+```ts
+type BulkStartFlowsJobFailure = {
+  error_code: string
+  message: string
+}
+```
+
+### `BulkStartFlowsJobPreparation`
+
+Progress of a `preparing` job: finding its entities (`resolving`), then
+writing one item per entity (`writing`). Updated after every page and
+every chunk, so an `updated_at` that stops moving means the server is
+waiting to retry.
+
+
+```ts
+type BulkStartFlowsJobPreparation = {
+  phase: "resolving" | "writing"
+  matched?: number
+  resolved: number
+  written: number
+  total?: number
+  attempts: number
+  updated_at: string // date-time
 }
 ```
 
@@ -5381,7 +5651,7 @@ type BulkStartFlowsJobCounts = {
 type BulkStartFlowsJob = {
   job_id: string
   org_id: string
-  status: "awaiting_approval" | "queued" | "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "expired"
+  status: "preparing" | "awaiting_approval" | "queued" | "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "expired"
   created_by: string
   created_at: string // date-time
   updated_at: string // date-time
@@ -5392,12 +5662,45 @@ type BulkStartFlowsJob = {
   cancel_requested?: boolean
   restart_of?: string
   restarted_by?: string
-  flows: Array<{
+  flow: {
     flow_template_id: string
     flow_name: string
     will_start: number
     skipped: number
+    automatic_tasks?: Array<{
+      task_id: { ... }
+      task_name: { ... }
+      task_type: { ... }
+    }>
+  }
+  flows?: Array<{
+    flow_template_id: string
+    flow_name: string
+    will_start: number
+    skipped: number
+    automatic_tasks?: Array<{
+      task_id: { ... }
+      task_name: { ... }
+      task_type: { ... }
+    }>
   }>
+  entity_count: number
+  entity_schema?: string
+  entities_query?: string
+  entities_matched?: number
+  failure?: {
+    error_code: string
+    message: string
+  }
+  preparation?: {
+    phase: "resolving" | "writing"
+    matched?: number
+    resolved: number
+    written: number
+    total?: number
+    attempts: number
+    updated_at: string // date-time
+  }
   counts: {
     total: number
     pending: number
@@ -5406,7 +5709,7 @@ type BulkStartFlowsJob = {
     skipped: number
     cancelled: number
   }
-  items: Array<{
+  items?: Array<{
     flow_template_id: string
     entity_id: string
     entity_schema: string
@@ -5427,7 +5730,7 @@ A bulk-start job as listed in the history, without its items.
 type BulkStartFlowsJobSummary = {
   job_id: string
   org_id: string
-  status: "awaiting_approval" | "queued" | "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "expired"
+  status: "preparing" | "awaiting_approval" | "queued" | "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "expired"
   created_by: string
   created_by_org_id?: string
   created_at: string // date-time
@@ -5439,15 +5742,37 @@ type BulkStartFlowsJobSummary = {
   cancel_requested?: boolean
   restart_of?: string
   restarted_by?: string
-  flows: Array<{
+  flow: {
     flow_template_id: string
     flow_name: string
     will_start: number
     skipped: number
+    automatic_tasks?: Array<{
+      task_id: { ... }
+      task_name: { ... }
+      task_type: { ... }
+    }>
+  }
+  flows?: Array<{
+    flow_template_id: string
+    flow_name: string
+    will_start: number
+    skipped: number
+    automatic_tasks?: Array<{
+      task_id: { ... }
+      task_name: { ... }
+      task_type: { ... }
+    }>
   }>
   entity_schema?: string
-  entity_ids: string[]
+  entity_ids?: string[]
   entity_count: number
+  entities_query?: string
+  entities_matched?: number
+  failure?: {
+    error_code: string
+    message: string
+  }
   counts: {
     total: number
     pending: number
@@ -5466,7 +5791,7 @@ type ListBulkStartFlowsJobsResp = {
   results: Array<{
     job_id: string
     org_id: string
-    status: "awaiting_approval" | "queued" | "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "expired"
+    status: "preparing" | "awaiting_approval" | "queued" | "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "expired"
     created_by: string
     created_by_org_id?: string
     created_at: string // date-time
@@ -5478,15 +5803,29 @@ type ListBulkStartFlowsJobsResp = {
     cancel_requested?: boolean
     restart_of?: string
     restarted_by?: string
-    flows: Array<{
+    flow: {
       flow_template_id: { ... }
       flow_name: { ... }
       will_start: { ... }
       skipped: { ... }
+      automatic_tasks?: { ... }
+    }
+    flows?: Array<{
+      flow_template_id: { ... }
+      flow_name: { ... }
+      will_start: { ... }
+      skipped: { ... }
+      automatic_tasks?: { ... }
     }>
     entity_schema?: string
-    entity_ids: string[]
+    entity_ids?: string[]
     entity_count: number
+    entities_query?: string
+    entities_matched?: number
+    failure?: {
+      error_code: { ... }
+      message: { ... }
+    }
     counts: {
       total: { ... }
       pending: { ... }
@@ -5500,6 +5839,24 @@ type ListBulkStartFlowsJobsResp = {
 }
 ```
 
+### `ListBulkStartFlowsJobItemsResp`
+
+```ts
+type ListBulkStartFlowsJobItemsResp = {
+  results: Array<{
+    flow_template_id: string
+    entity_id: string
+    entity_schema: string
+    status: "pending" | "started" | "failed" | "skipped" | "cancelled"
+    execution_id?: string
+    error_code?: string
+    error_message?: string
+    updated_at?: string // date-time
+  }>
+  next_cursor?: string
+}
+```
+
 ### `ActiveBulkStartFlowsJobResp`
 
 ```ts
@@ -5507,7 +5864,7 @@ type ActiveBulkStartFlowsJobResp = {
   job: {
     job_id: string
     org_id: string
-    status: "awaiting_approval" | "queued" | "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "expired"
+    status: "preparing" | "awaiting_approval" | "queued" | "running" | "completed" | "completed_with_errors" | "failed" | "cancelled" | "expired"
     created_by: string
     created_at: string // date-time
     updated_at: string // date-time
@@ -5518,12 +5875,37 @@ type ActiveBulkStartFlowsJobResp = {
     cancel_requested?: boolean
     restart_of?: string
     restarted_by?: string
-    flows: Array<{
+    flow: {
       flow_template_id: { ... }
       flow_name: { ... }
       will_start: { ... }
       skipped: { ... }
+      automatic_tasks?: { ... }
+    }
+    flows?: Array<{
+      flow_template_id: { ... }
+      flow_name: { ... }
+      will_start: { ... }
+      skipped: { ... }
+      automatic_tasks?: { ... }
     }>
+    entity_count: number
+    entity_schema?: string
+    entities_query?: string
+    entities_matched?: number
+    failure?: {
+      error_code: { ... }
+      message: { ... }
+    }
+    preparation?: {
+      phase: { ... }
+      matched?: { ... }
+      resolved: { ... }
+      written: { ... }
+      total?: { ... }
+      attempts: { ... }
+      updated_at: { ... }
+    }
     counts: {
       total: { ... }
       pending: { ... }
@@ -5532,7 +5914,7 @@ type ActiveBulkStartFlowsJobResp = {
       skipped: { ... }
       cancelled: { ... }
     }
-    items: Array<{
+    items?: Array<{
       flow_template_id: { ... }
       entity_id: { ... }
       entity_schema: { ... }
@@ -6055,6 +6437,7 @@ type FlowTrigger = {
     }
   }
   trigger_id?: string
+  bulk_job_id?: string
 }
 ```
 
