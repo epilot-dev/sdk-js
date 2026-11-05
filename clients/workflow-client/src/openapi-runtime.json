@@ -325,6 +325,32 @@
         "responses": {}
       }
     },
+    "/v2/flows/bulk-jobs/{job_id}/items": {
+      "get": {
+        "operationId": "listBulkStartFlowsJobItems",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BulkJobIdParam"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/flows/bulk-jobs/{job_id}/restart": {
       "post": {
         "operationId": "restartBulkStartFlowsJob",

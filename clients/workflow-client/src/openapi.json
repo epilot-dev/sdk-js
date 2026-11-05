@@ -1256,7 +1256,7 @@
       "post": {
         "operationId": "bulkStartFlows",
         "summary": "bulkStartFlows",
-        "description": "Creates a job that starts one or more flows on many entities: every flow in\n`flow_template_ids` is started on every entity in `entities` (up to 5 flows,\n200 entities, 1000 starts). Every start is manual.\n\nThe request only runs a preflight and returns `202` with the job in status\n`awaiting_approval`. Nothing is started until the job is approved with\n`PATCH /v2/flows/bulk-jobs/{job_id}` (`action: APPROVE`); a job not approved\nwithin 24 hours expires.\n\nThe preflight checks the caller may trigger flows, loads every template, and\nmatches each entity against the template's trigger. A pair whose entity type\nno trigger accepts is recorded as a `skipped` item with `error_code:\ntrigger_entity_mismatch`. `flows[]` summarises per flow how many starts the\njob will make, which is what a confirmation dialog shows.\n\nAfter approval the job runs in the background, paced to protect the\ndatastore (roughly 5–10 starts per second). Poll\n`GET /v2/flows/bulk-jobs/{job_id}` for progress; the user who created the\njob is notified in-app when it finishes.\n",
+        "description": "Creates a job that starts one flow on many entities: the flow\n`flow_template_id` is started on every entity in `entities`, or on every\nentity `entities_query` matches. Every start is manual.\n\nLimits: up to 1,000 entities in `entities`, or up to 10,000 matched by\n`entities_query`.\n\nThe request only runs a preflight and returns `202` with the job. A job of\nat most 200 listed entities is returned in status `awaiting_approval`; a\nquery, or a longer list, is returned in status `preparing` while the\nentities are resolved in the background, then moves to\n`awaiting_approval` (or to `failed`, with `failure`). Poll\n`GET /v2/flows/bulk-jobs/{job_id}`. Nothing is started until the job is approved with\n`PATCH /v2/flows/bulk-jobs/{job_id}` (`action: APPROVE`); a job not approved\nwithin 24 hours expires.\n\nThe preflight checks the caller may trigger the flow, loads its template, and\nmatches each entity against the template's trigger. An entity whose type no\ntrigger accepts is recorded as a `skipped` item with `error_code:\ntrigger_entity_mismatch`. `flow` summarises how many starts the job will\nmake, which is what a confirmation dialog shows.\n\nAfter approval the job runs in the background, paced to protect the\ndatastore (roughly 5–10 starts per second). Poll\n`GET /v2/flows/bulk-jobs/{job_id}` for progress; the user who created the\njob is notified in-app when it finishes.\n",
         "tags": [
           "Flows V2"
         ],
@@ -1268,13 +1268,10 @@
                 "$ref": "#/components/schemas/BulkStartFlowsReq"
               },
               "examples": {
-                "twoFlowsOnOpportunities": {
-                  "summary": "Start two flows on two opportunities",
+                "oneFlowOnOpportunities": {
+                  "summary": "Start a flow on two opportunities",
                   "value": {
-                    "flow_template_ids": [
-                      "tpl_abc123def456",
-                      "tpl_789ghi012jkl"
-                    ],
+                    "flow_template_id": "tpl_abc123def456",
                     "entities": [
                       {
                         "entity_id": "3fa3fa86-0907-4642-a57e-0fe30a19874d",
@@ -1319,7 +1316,7 @@
             "description": "The caller may not trigger flows in this organization"
           },
           "404": {
-            "description": "A flow template does not exist",
+            "description": "The flow template does not exist",
             "content": {
               "application/json": {
                 "schema": {
@@ -1329,7 +1326,7 @@
             }
           },
           "409": {
-            "description": "A flow template is disabled, or another bulk start of the caller is\nstill running (`error_code: BULK_START_ALREADY_RUNNING`, with\n`active_job_id`).\n",
+            "description": "The flow template is disabled, or another bulk start of the caller is\nstill running (`error_code: BULK_START_ALREADY_RUNNING`, with\n`active_job_id`).\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -1444,7 +1441,7 @@
       "get": {
         "operationId": "getBulkStartFlowsJob",
         "summary": "getBulkStartFlowsJob",
-        "description": "Returns a bulk-start job with its counts and one item per (flow, entity)\npair, including the started execution id or the error.\n",
+        "description": "Returns a bulk-start job with its counts. `items` is included for jobs of\nat most 200 items only (deprecated); page through the items with\n`GET /v2/flows/bulk-jobs/{job_id}/items`.\n",
         "tags": [
           "Flows V2"
         ],
@@ -1545,7 +1542,88 @@
             }
           },
           "409": {
-            "description": "The action is not allowed in the job's current status, or (on `APPROVE`)\nanother bulk start of the caller is still running\n(`error_code: BULK_START_ALREADY_RUNNING`, with `active_job_id`), or the\njob restarts a job that another approved job already restarted\n(`error_code: BULK_START_ALREADY_RESTARTED`).\n",
+            "description": "The action is not allowed in the job's current status, or (on `APPROVE`)\nanother bulk start of the caller is still running\n(`error_code: BULK_START_ALREADY_RUNNING`, with `active_job_id`), or the\njob starts more than 1,000 flows while another such job runs in the\norganization (`error_code: BULK_START_ORG_LARGE_JOB_RUNNING`, with\n`active_job_id`), or the job restarts a job that another approved job\nalready restarted (`error_code: BULK_START_ALREADY_RESTARTED`).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/bulk-jobs/{job_id}/items": {
+      "get": {
+        "operationId": "listBulkStartFlowsJobItems",
+        "summary": "listBulkStartFlowsJobItems",
+        "description": "Pages through the items of a bulk-start job (one per entity), in request\norder, optionally only those in one status. An ended job reports items it\nnever got to as `cancelled`.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BulkJobIdParam"
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BulkStartFlowsItemStatus"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "description": "The `next_cursor` of the previous page.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListBulkStartFlowsJobItemsResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid size, status or cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Job not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1561,7 +1639,7 @@
       "post": {
         "operationId": "restartBulkStartFlowsJob",
         "summary": "restartBulkStartFlowsJob",
-        "description": "Restarts what is left of an ended bulk-start job: creates a new job, in\n`awaiting_approval`, from the job's `failed` items and the items it never\nstarted (`cancelled`). Started and skipped items are not repeated. Like\n`bulkStartFlows`, it starts nothing: approve the new job with\n`PATCH /v2/flows/bulk-jobs/{job_id}`.\n\nOnly a job in `completed_with_errors`, `failed` or `cancelled` can be\nrestarted. Each flow is loaded again: a flow deleted since becomes\n`skipped` items (`error_code: flow_not_found`). The new job names the\nsource job in `restart_of`. A job is restarted at most once: approving\nthe new job marks the source job `restarted_by` it, and from then on\nneither another restart of the source job nor the approval of another\nrestart preflight of it is allowed.\n",
+        "description": "Restarts what is left of an ended bulk-start job: creates a new job, in\n`awaiting_approval`, from the job's `failed` and `skipped` items and the\nitems it never started (`cancelled`). Started items are not repeated;\nskipped ones are checked against the flow's triggers again. Like\n`bulkStartFlows`, it starts nothing: approve the new job with\n`PATCH /v2/flows/bulk-jobs/{job_id}`.\n\nOnly an ended job (`completed`, `completed_with_errors`, `failed` or\n`cancelled`) with something left can be restarted. The flow is loaded again: a flow deleted since answers `404`.\nA restart of more than 200 items is returned in status `preparing`, like\na large `bulkStartFlows`. The new job names the\nsource job in `restart_of`. A job is restarted at most once: approving\nthe new job marks the source job `restarted_by` it, and from then on\nneither another restart of the source job nor the approval of another\nrestart preflight of it is allowed.\n",
         "tags": [
           "Flows V2"
         ],
@@ -3355,11 +3433,23 @@
               "text-input",
               "number-input",
               "personal-information",
-              "meter-reading"
+              "meter-reading",
+              "contact",
+              "single-choice",
+              "date-input",
+              "binary-input",
+              "address",
+              "payment-method",
+              "multiple-choice",
+              "availability-check"
             ]
           },
           "block_field": {
             "type": "string"
+          },
+          "country_code": {
+            "type": "string",
+            "description": "The country an address or availability-check block is configured for, used when the extraction names none"
           }
         }
       },
@@ -4271,29 +4361,33 @@
       },
       "BulkStartFlowsReq": {
         "type": "object",
-        "description": "Start every flow in `flow_template_ids` on every entity in `entities`.",
-        "required": [
-          "flow_template_ids",
-          "entities"
-        ],
+        "description": "Start the flow `flow_template_id` on every entity in `entities`, or on\nevery entity `entities_query` matches. Exactly one of `flow_template_id`\nand the deprecated `flow_template_ids` is required, and exactly one of\n`entities` and `entities_query`.\n",
         "properties": {
+          "flow_template_id": {
+            "type": "string",
+            "description": "The flow template to start."
+          },
           "flow_template_ids": {
             "type": "array",
-            "description": "Flow templates to start. Unique.",
+            "deprecated": true,
+            "description": "Deprecated, use `flow_template_id`. Accepted for one release with\nexactly one flow template.\n",
             "minItems": 1,
-            "maxItems": 5,
+            "maxItems": 1,
             "items": {
               "type": "string"
             }
           },
           "entities": {
             "type": "array",
-            "description": "Entities to start the flows on. Unique by `entity_id`.",
+            "description": "Entities to start the flow on. Unique by `entity_id`. At most 1,000.\n",
             "minItems": 1,
-            "maxItems": 200,
+            "maxItems": 1000,
             "items": {
               "$ref": "#/components/schemas/BulkStartEntityRef"
             }
+          },
+          "entities_query": {
+            "$ref": "#/components/schemas/BulkStartEntitiesQuery"
           },
           "purposes": {
             "type": "array",
@@ -4301,6 +4395,26 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "BulkStartEntitiesQuery": {
+        "type": "object",
+        "description": "The entities an entity search matches, as the entity table's \"select all\nmatching\" selects them. Resolved once, in the background, when the job is prepared: the\njob holds the entities matching at that time (at most 10,000).\n",
+        "required": [
+          "entity_schema",
+          "q"
+        ],
+        "properties": {
+          "entity_schema": {
+            "type": "string",
+            "description": "Schema of the entities; the search is limited to it.",
+            "example": "opportunity"
+          },
+          "q": {
+            "type": "string",
+            "description": "Lucene query of the entity search (the table's search).",
+            "minLength": 1
           }
         }
       },
@@ -4322,8 +4436,9 @@
       },
       "BulkStartFlowsJobStatus": {
         "type": "string",
-        "description": "* `awaiting_approval`: preflight done, nothing started; waits for `APPROVE`\n* `queued`: approved, waiting for a worker\n* `running`: starts in progress\n* `completed`: every start that was not skipped succeeded\n* `completed_with_errors`: finished, at least one start failed\n* `failed`: the job itself failed; some starts may have happened, see items\n* `cancelled`: cancelled; flows already started are kept\n* `expired`: not approved within 24 hours\n",
+        "description": "* `preparing`: the entities are being resolved; nothing started\n* `awaiting_approval`: preflight done, nothing started; waits for `APPROVE`\n* `queued`: approved, waiting for a worker\n* `running`: starts in progress\n* `completed`: every start that was not skipped succeeded\n* `completed_with_errors`: finished, at least one start failed\n* `failed`: the job itself failed; some starts may have happened, see items.\n  A job that failed while `preparing` started nothing and carries `failure`\n* `cancelled`: cancelled; flows already started are kept\n* `expired`: not approved within 24 hours, or not prepared within 24 hours of its creation\n",
         "enum": [
+          "preparing",
           "awaiting_approval",
           "queued",
           "running",
@@ -4346,7 +4461,7 @@
       },
       "BulkStartFlowsItem": {
         "type": "object",
-        "description": "One (flow, entity) start of a bulk-start job.",
+        "description": "One entity's start of a bulk-start job's flow.",
         "required": [
           "flow_template_id",
           "entity_id",
@@ -4355,7 +4470,8 @@
         ],
         "properties": {
           "flow_template_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The job's flow template (the same on every item)."
           },
           "entity_id": {
             "type": "string"
@@ -4400,11 +4516,102 @@
           },
           "will_start": {
             "type": "integer",
-            "description": "Entities this flow will be started on."
+            "description": "Entities the flow will be started on."
           },
           "skipped": {
             "type": "integer",
-            "description": "Entities no trigger of this flow accepts."
+            "description": "Entities no trigger of the flow accepts."
+          },
+          "automatic_tasks": {
+            "type": "array",
+            "description": "Tasks of the flow that run on their own (automations and AI agents\nwith `trigger_mode: automatic`): side effects that happen on every\nentity the flow starts on.\n",
+            "items": {
+              "$ref": "#/components/schemas/BulkStartFlowsAutomaticTask"
+            }
+          }
+        }
+      },
+      "BulkStartFlowsAutomaticTask": {
+        "type": "object",
+        "required": [
+          "task_id",
+          "task_name",
+          "task_type"
+        ],
+        "properties": {
+          "task_id": {
+            "type": "string"
+          },
+          "task_name": {
+            "type": "string"
+          },
+          "task_type": {
+            "type": "string",
+            "enum": [
+              "AUTOMATION",
+              "AI_AGENT"
+            ]
+          }
+        }
+      },
+      "BulkStartFlowsJobFailure": {
+        "type": "object",
+        "description": "Why a job failed while it was being prepared.",
+        "required": [
+          "error_code",
+          "message"
+        ],
+        "properties": {
+          "error_code": {
+            "type": "string",
+            "description": "`too_many_entities`, `no_entities`, `entities_incomplete` or `preparation_failed`."
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "BulkStartFlowsJobPreparation": {
+        "type": "object",
+        "description": "Progress of a `preparing` job: finding its entities (`resolving`), then\nwriting one item per entity (`writing`). Updated after every page and\nevery chunk, so an `updated_at` that stops moving means the server is\nwaiting to retry.\n",
+        "required": [
+          "phase",
+          "resolved",
+          "written",
+          "attempts",
+          "updated_at"
+        ],
+        "properties": {
+          "phase": {
+            "type": "string",
+            "enum": [
+              "resolving",
+              "writing"
+            ]
+          },
+          "matched": {
+            "type": "integer",
+            "description": "How many entities the search reported, for a job created from `entities_query`."
+          },
+          "resolved": {
+            "type": "integer",
+            "description": "Entities found so far."
+          },
+          "written": {
+            "type": "integer",
+            "description": "Items written so far."
+          },
+          "total": {
+            "type": "integer",
+            "description": "Items to write, once the entities are found."
+          },
+          "attempts": {
+            "type": "integer",
+            "description": "The attempt preparing the job, from 1. Preparation fails after 5."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -4449,9 +4656,9 @@
           "created_at",
           "updated_at",
           "expires_at",
-          "flows",
-          "counts",
-          "items"
+          "flow",
+          "entity_count",
+          "counts"
         ],
         "properties": {
           "job_id": {
@@ -4502,17 +4709,46 @@
             "type": "string",
             "description": "The approved job that restarts this job's failed and never-started items.\nA job is restarted at most once.\n"
           },
+          "flow": {
+            "$ref": "#/components/schemas/BulkStartFlowsFlowSummary"
+          },
           "flows": {
             "type": "array",
+            "deprecated": true,
+            "description": "Deprecated, use `flow`. Holds `flow` alone.",
             "items": {
               "$ref": "#/components/schemas/BulkStartFlowsFlowSummary"
             }
+          },
+          "entity_count": {
+            "type": "integer",
+            "description": "Number of entities in the job (0 while `preparing`)."
+          },
+          "entity_schema": {
+            "type": "string",
+            "description": "Schema of the job's entities, when they all share one."
+          },
+          "entities_query": {
+            "type": "string",
+            "description": "The query `q` the entities were selected by, for a job created from `entities_query`."
+          },
+          "entities_matched": {
+            "type": "integer",
+            "description": "For a job created from `entities_query`: how many entities the search\nreported when the job was prepared. It counts an entity indexed twice\ntwice, so it can exceed `entity_count` by a few; a larger gap fails\npreparation with `entities_incomplete`.\n"
+          },
+          "failure": {
+            "$ref": "#/components/schemas/BulkStartFlowsJobFailure"
+          },
+          "preparation": {
+            "$ref": "#/components/schemas/BulkStartFlowsJobPreparation"
           },
           "counts": {
             "$ref": "#/components/schemas/BulkStartFlowsJobCounts"
           },
           "items": {
             "type": "array",
+            "deprecated": true,
+            "description": "Present for jobs of at most 200 items only, and never while the\njob is `preparing`. Read `counts` (and `preparation`) for progress\nand page items through `GET /v2/flows/bulk-jobs/{job_id}/items`.\n",
             "items": {
               "$ref": "#/components/schemas/BulkStartFlowsItem"
             }
@@ -4530,8 +4766,7 @@
           "created_at",
           "updated_at",
           "expires_at",
-          "flows",
-          "entity_ids",
+          "flow",
           "entity_count",
           "counts"
         ],
@@ -4587,8 +4822,13 @@
             "type": "string",
             "description": "The approved job that restarts this job's failed and never-started items.\nA job is restarted at most once.\n"
           },
+          "flow": {
+            "$ref": "#/components/schemas/BulkStartFlowsFlowSummary"
+          },
           "flows": {
             "type": "array",
+            "deprecated": true,
+            "description": "Deprecated, use `flow`. Holds `flow` alone.",
             "items": {
               "$ref": "#/components/schemas/BulkStartFlowsFlowSummary"
             }
@@ -4599,7 +4839,7 @@
           },
           "entity_ids": {
             "type": "array",
-            "description": "Ids of the job's entities, in request order.",
+            "description": "Ids of the job's entities, in request order. Only for jobs of at most 200 entities.",
             "maxItems": 200,
             "items": {
               "type": "string"
@@ -4607,7 +4847,18 @@
           },
           "entity_count": {
             "type": "integer",
-            "description": "Number of entities in the job (length of `entity_ids`)."
+            "description": "Number of entities in the job."
+          },
+          "entities_query": {
+            "type": "string",
+            "description": "The query `q` the entities were selected by, for a job created from `entities_query`."
+          },
+          "entities_matched": {
+            "type": "integer",
+            "description": "For a job created from `entities_query`: how many entities the search\nreported when the job was prepared. It counts an entity indexed twice\ntwice, so it can exceed `entity_count` by a few; a larger gap fails\npreparation with `entities_incomplete`.\n"
+          },
+          "failure": {
+            "$ref": "#/components/schemas/BulkStartFlowsJobFailure"
           },
           "counts": {
             "$ref": "#/components/schemas/BulkStartFlowsJobCounts"
@@ -4624,6 +4875,24 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/BulkStartFlowsJobSummary"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Cursor of the next page; absent on the last page."
+          }
+        }
+      },
+      "ListBulkStartFlowsJobItemsResp": {
+        "type": "object",
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkStartFlowsItem"
             }
           },
           "next_cursor": {
@@ -5282,6 +5551,10 @@
           "trigger_id": {
             "type": "string",
             "description": "Id of the template trigger (primary or additional) that started this execution — a reference to a `ConfiguredTrigger.id`. On a start request it may name the trigger explicitly; when absent the engine resolves it from the automation source or the starting entity. Absent on executions recorded before multi-trigger flows existed.\n"
+          },
+          "bulk_job_id": {
+            "type": "string",
+            "description": "The bulk-start job that started this execution (`POST /v2/flows/executions:bulk-start`). Set by the bulk-start worker only; ignored on a start request.\n"
           }
         }
       },

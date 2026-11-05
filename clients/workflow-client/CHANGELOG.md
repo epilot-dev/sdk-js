@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.24.0
+
+### Minor Changes
+
+- Bulk start of flows: one flow per job (`flow_template_id`, `flow`), up to 10,000 entities via `entities_query`, a `preparing` status with `preparation` progress, job `counts` / `failure` / `entity_count`, `flow.automatic_tasks`, and the new `listBulkStartFlowsJobItems` operation (`GET /v2/flows/bulk-jobs/{job_id}/items`). Breaking for typed callers: `flow_template_ids` and `flows` are removed from the bulk-start types.
+
 ## 1.22.0
 
 ### Minor Changes
