@@ -243,6 +243,10 @@
           {
             "name": "email_status",
             "in": "query"
+          },
+          {
+            "name": "entity_ui_status",
+            "in": "query"
           }
         ],
         "responses": {}
