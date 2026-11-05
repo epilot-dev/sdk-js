@@ -25,6 +25,7 @@ CLIENTS=(
   "email-template-client"
   "entity-client"
   "entity-mapping-client"
+  "entity-ui-client"
   "file-client"
   "identity-client"
   "journey-client"

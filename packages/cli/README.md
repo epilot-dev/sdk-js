@@ -91,6 +91,7 @@ APIs
   email-template       Email template API
   entity               Entity API
   entity-mapping       Entity Mapping API
+  entity-ui            Entity UI API
   environments         Environments API
   event-catalog        Event Catalog API
   file                 File API
@@ -428,6 +429,7 @@ Full documentation with sample calls and responses for all APIs:
 | Email template API | `epilot email-template` | [docs](./docs/email-template.md) |
 | Entity API | `epilot entity` | [docs](./docs/entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | [docs](./docs/entity-mapping.md) |
+| Entity UI API | `epilot entity-ui` | [docs](./docs/entity-ui.md) |
 | Environments API | `epilot environments` | [docs](./docs/environments.md) |
 | Event Catalog API | `epilot event-catalog` | [docs](./docs/event-catalog.md) |
 | File API | `epilot file` | [docs](./docs/file.md) |
