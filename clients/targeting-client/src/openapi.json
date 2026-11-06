@@ -178,7 +178,7 @@
       "post": {
         "operationId": "setupCampaign",
         "summary": "setupCampaign",
-        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n",
+        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n\nThe campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is\nlaunched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,\n`CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and\nnothing is created.\n",
         "tags": [
           "Campaign"
         ],
@@ -1855,6 +1855,16 @@
                 "items": {
                   "$ref": "#/components/schemas/BaseUUID"
                 }
+              },
+              "start_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Optional start of the campaign. Launching the campaign before this time schedules it, and\nit starts on its own at this time. Without it, the campaign starts when it is launched.\n"
+              },
+              "end_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Optional end of the campaign. Must be after `start_date` and in the future. The campaign\nstops on its own at this time. Without it, the campaign runs until it is stopped.\n"
               }
             },
             "required": [

@@ -1856,6 +1856,18 @@ declare namespace Components {
                  * b8c01433-5556-4e2b-aad4-6f5348d1df84
                  */
                 BaseUUID /* uuid */[];
+                /**
+                 * Optional start of the campaign. Launching the campaign before this time schedules it, and
+                 * it starts on its own at this time. Without it, the campaign starts when it is launched.
+                 *
+                 */
+                start_date?: string; // date-time
+                /**
+                 * Optional end of the campaign. Must be after `start_date` and in the future. The campaign
+                 * stops on its own at this time. Without it, the campaign runs until it is stopped.
+                 *
+                 */
+                end_date?: string; // date-time
             };
             /**
              * Optional journey configuration selected in the wizard. Only sent by the
@@ -2462,6 +2474,11 @@ export interface OperationMethods {
    * Creates a `campaign` entity together with its related entities and configurations in a single call.
    * Used by the campaign wizard UI, but not restricted to it.
    * 
+   * The campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is
+   * launched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,
+   * `CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and
+   * nothing is created.
+   * 
    */
   'setupCampaign'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -2712,6 +2729,11 @@ export interface PathsDictionary {
      * 
      * Creates a `campaign` entity together with its related entities and configurations in a single call.
      * Used by the campaign wizard UI, but not restricted to it.
+     * 
+     * The campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is
+     * launched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,
+     * `CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and
+     * nothing is created.
      * 
      */
     'post'(
