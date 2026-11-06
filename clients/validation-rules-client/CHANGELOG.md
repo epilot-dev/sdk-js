@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.0-rc.5
+
+### Minor Changes
+
+- `UsedBy.type` accepts `portal`: the Customer Portal API records which portals use a rule (`source_id` is the portal ID)
+
 ## 1.6.0-rc.4
 
 ### Minor Changes

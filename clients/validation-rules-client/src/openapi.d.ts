@@ -224,7 +224,7 @@ declare namespace Components {
              * Describes where and how a validation rule is applied.
              */
             used_by?: /**
-             * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys or entity schemas that reference them.
+             * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys, entity schemas or portals that reference them.
              * example:
              * {
              *   "type": "journey",
@@ -1026,7 +1026,7 @@ declare namespace Components {
              * Describes where and how a validation rule is applied.
              */
             used_by?: /**
-             * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys or entity schemas that reference them.
+             * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys, entity schemas or portals that reference them.
              * example:
              * {
              *   "type": "journey",
@@ -1071,7 +1071,7 @@ declare namespace Components {
             ContextRequirement[];
         }
         /**
-         * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys or entity schemas that reference them.
+         * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys, entity schemas or portals that reference them.
          * example:
          * {
          *   "type": "journey",
@@ -1080,11 +1080,11 @@ declare namespace Components {
          */
         export interface UsedBy {
             /**
-             * The context in which the rule is used - either a journey block or an entity schema attribute.
+             * The context in which the rule is used - a journey block, an entity schema attribute or a portal registration field.
              * example:
              * journey
              */
-            type: "journey" | "entity";
+            type: "journey" | "entity" | "portal";
             /**
              * Slug of the entity schema using this rule. Only applicable when `type` is `entity`.
              * example:
@@ -1092,7 +1092,9 @@ declare namespace Components {
              */
             schema_slug?: string;
             /**
-             * Unique identifier of the source (e.g. journey ID or entity attribute key) that references this rule.
+             * Unique identifier of the source that references this rule: the journey ID for `journey`, the entity
+             * attribute key for `entity`, the portal ID for `portal`.
+             *
              * example:
              * journey-xyz789
              */
@@ -1114,7 +1116,7 @@ declare namespace Components {
              * Describes where and how a validation rule is applied.
              */
             used_by?: /**
-             * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys or entity schemas that reference them.
+             * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys, entity schemas or portals that reference them.
              * example:
              * {
              *   "type": "journey",
@@ -1199,7 +1201,7 @@ declare namespace Components {
              * Describes where and how a validation rule is applied.
              */
             used_by?: /**
-             * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys or entity schemas that reference them.
+             * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys, entity schemas or portals that reference them.
              * example:
              * {
              *   "type": "journey",
@@ -1357,7 +1359,7 @@ declare namespace Paths {
             ruleId: Parameters.RuleId;
         }
         export type RequestBody = /**
-         * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys or entity schemas that reference them.
+         * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys, entity schemas or portals that reference them.
          * example:
          * {
          *   "type": "journey",
@@ -1559,7 +1561,7 @@ declare namespace Paths {
             ruleId: Parameters.RuleId;
         }
         export type RequestBody = /**
-         * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys or entity schemas that reference them.
+         * Describes where and how a validation rule is applied. Used to track associations between rules and the journeys, entity schemas or portals that reference them.
          * example:
          * {
          *   "type": "journey",
@@ -1716,7 +1718,11 @@ export interface OperationMethods {
    * 
    * Adds a single `used_by` reference to an existing validation rule.
    * 
-   * Use this endpoint when attaching a validation rule to a journey block or entity attribute to track where the rule is applied.
+   * Use this endpoint when attaching a validation rule to a journey block, entity attribute or portal registration field to track where the rule is applied.
+   * 
+   * Journey and entity references require the `entity:edit` permission on `journey`. Portal references
+   * (`type: portal`) are managed by the Customer Portal API when a portal configuration is saved or published,
+   * and accept only internal service-to-service tokens.
    * 
    */
   'addUsedByReference'(
@@ -1729,7 +1735,10 @@ export interface OperationMethods {
    * 
    * Removes a specific `used_by` reference from an existing validation rule.
    * 
-   * Use this endpoint when detaching a validation rule from a journey block or entity attribute.
+   * Use this endpoint when detaching a validation rule from a journey block, entity attribute or portal registration field.
+   * 
+   * Journey and entity references require the `entity:edit` permission on `journey`. Portal references
+   * (`type: portal`) are managed by the Customer Portal API and accept only internal service-to-service tokens.
    * 
    */
   'removeUsedByReference'(
@@ -1803,7 +1812,11 @@ export interface PathsDictionary {
      * 
      * Adds a single `used_by` reference to an existing validation rule.
      * 
-     * Use this endpoint when attaching a validation rule to a journey block or entity attribute to track where the rule is applied.
+     * Use this endpoint when attaching a validation rule to a journey block, entity attribute or portal registration field to track where the rule is applied.
+     * 
+     * Journey and entity references require the `entity:edit` permission on `journey`. Portal references
+     * (`type: portal`) are managed by the Customer Portal API when a portal configuration is saved or published,
+     * and accept only internal service-to-service tokens.
      * 
      */
     'post'(
@@ -1816,7 +1829,10 @@ export interface PathsDictionary {
      * 
      * Removes a specific `used_by` reference from an existing validation rule.
      * 
-     * Use this endpoint when detaching a validation rule from a journey block or entity attribute.
+     * Use this endpoint when detaching a validation rule from a journey block, entity attribute or portal registration field.
+     * 
+     * Journey and entity references require the `entity:edit` permission on `journey`. Portal references
+     * (`type: portal`) are managed by the Customer Portal API and accept only internal service-to-service tokens.
      * 
      */
     'delete'(
