@@ -127,6 +127,9 @@
           "403": {
             "$ref": "#/components/responses/Forbidden"
           },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -2403,6 +2406,9 @@
           "403": {
             "$ref": "#/components/responses/Forbidden"
           },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -2533,6 +2539,9 @@
           "403": {
             "$ref": "#/components/responses/Forbidden"
           },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -2623,7 +2632,7 @@
       "post": {
         "operationId": "upsertEmailTemplatesByPortalId",
         "summary": "upsertEmailTemplatesByPortalId",
-        "description": "Upserts the email templates of a portal by portal ID",
+        "description": "Upserts the email templates of a portal by portal ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -2685,6 +2694,9 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3153,6 +3165,9 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -3222,6 +3237,11 @@
                     "customerPortal": {
                       "type": "object",
                       "properties": {
+                        "link": {
+                          "type": "string",
+                          "description": "The portal's start page",
+                          "example": "https://end-customer-portal.ecp.dev.epilot.io"
+                        },
                         "invitationLink": {
                           "type": "string",
                           "example": "https://end-customer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com"
@@ -3249,6 +3269,11 @@
                     "installerPortal": {
                       "type": "object",
                       "properties": {
+                        "link": {
+                          "type": "string",
+                          "description": "The portal's start page",
+                          "example": "https://installer-portal.ecp.dev.epilot.io"
+                        },
                         "invitationLink": {
                           "type": "string",
                           "example": "https://installer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com"
@@ -3276,6 +3301,11 @@
                     "portalUser": {
                       "type": "object",
                       "properties": {
+                        "link": {
+                          "type": "string",
+                          "description": "The portal's start page",
+                          "example": "https://employee-portal.ecp.dev.epilot.io"
+                        },
                         "invitationLink": {
                           "type": "string",
                           "example": "https://employee-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com"
@@ -4064,7 +4094,7 @@
       "post": {
         "operationId": "identifyContact",
         "summary": "identifyContact",
-        "description": "Identify a contact by the surface's identifiers and, on a match, issue a short-lived\nbearer token that acts as that contact.\n\nThe identifiers checked are the surface's own `identifiers` when it configures any,\notherwise the portal's `registration_identifiers`. Their values are sent in the\n`registration_identifiers` request property. Resolution is otherwise identical to\n`checkContactExistsV3`: the same lookup, `registrationIdentifiersCheck` hook and\nTIMEOUT semantics, run on the surface's identifiers. The token does not grant a portal\nsession; it is accepted only on the operations listed in `allowed_operations`, and\nexpires at `expires_at`. Requires `surface_id` to name a surface of the portal whose\n`authentication` is `registration_identifiers`; returns 403 otherwise. The token is\nconfined to that surface's data access. Requests may be rate limited (429).\n\nNo portal session is expected, but the caller must present a public access token\n(`token_type: journey` or `token_type: portal`) as the bearer, minted for the same\n`org_id`; the request is rejected with 401 otherwise. It binds the call to the journey\nor portal it comes from — the token is public, so it proves origin, not identity.\n",
+        "description": "Identify a contact by the surface's identifiers and, on a match, issue a short-lived\nbearer token that acts as that contact.\n\nThe identifiers checked are the surface's own `identifiers` when it configures any,\notherwise the portal's `registration_identifiers`. Their values are sent in the\n`registration_identifiers` request property. Resolution is otherwise identical to\n`checkContactExistsV3`: the same lookup, `registrationIdentifiersCheck` hook and\nTIMEOUT semantics, run on the surface's identifiers. The token does not grant a portal\nsession; it is accepted only on the operations listed in `allowed_operations`, and\nexpires at `expires_at`. Requires `surface_id` to name a surface of the portal whose\n`authentication` is `registration_identifiers`; returns 403 otherwise. The token is\nconfined to that surface's data access. Requests may be rate limited (429).\n\nIdentifiers with a `validation_rule_id` must pass that rule before the contact is looked up.\nOtherwise the response is 400 with `reason: INVALID_IDENTIFIER_VALUE` and\n`fields: [{ schema, name, rule_id }]` naming each failing identifier.\n\nNo portal session is expected, but the caller must present a public access token\n(`token_type: journey` or `token_type: portal`) as the bearer, minted for the same\n`org_id`; the request is rejected with 401 otherwise. It binds the call to the journey\nor portal it comes from — the token is public, so it proves origin, not identity.\n",
         "security": [],
         "tags": [
           "Public"
@@ -6570,7 +6600,7 @@
       "post": {
         "operationId": "addContractByIdentifiers",
         "summary": "addContractByIdentifiers",
-        "description": "Self-assign contract(s) by pre-configured identifiers.",
+        "description": "Self-assign contract(s) by pre-configured identifiers.\n\nValues of `contract_identifiers` with a `validation_rule_id` must pass that rule before any\ncontract is looked up. Otherwise the response is 400 with `reason: INVALID_IDENTIFIER_VALUE`\nand `fields: [{ schema, name, rule_id }]` naming each failing identifier.\n",
         "tags": [
           "ECP"
         ],
@@ -7122,6 +7152,9 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -7184,115 +7217,6 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/user/files": {
-      "get": {
-        "operationId": "getAllFiles",
-        "summary": "getAllFiles",
-        "description": "Fetch all documents under the related entities of a contact. Use searchPortalUserEntities instead.",
-        "deprecated": true,
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "schema": {
-              "type": "number",
-              "description": "Initial offset to set for the search results",
-              "example": 0
-            },
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "schema": {
-              "type": "number",
-              "description": "Size of the search results",
-              "example": 0
-            },
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "entity_ids",
-            "description": "List of entity ids to filter the results",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/EntityId"
-              },
-              "minItems": 1,
-              "uniqueItems": true,
-              "example": [
-                "4910096f-000a-4504-bf5a-d3774ec3032a",
-                "7c9f8536-6266-42e8-a0de-c60b61aa81a7"
-              ]
-            }
-          },
-          {
-            "in": "query",
-            "name": "file_types",
-            "description": "List of `File.type`'s to filter the results",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minItems": 1,
-              "uniqueItems": true,
-              "example": [
-                "document",
-                "image"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The files have been fetched successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/FileItem"
-                      }
-                    },
-                    "hits": {
-                      "type": "number",
-                      "description": "Total number of files for pagination",
-                      "example": 50
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -7441,49 +7365,6 @@
                     "file": {
                       "$ref": "#/components/schemas/FileItem"
                     }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/v2/portal/user/files/count-by-entity": {
-      "get": {
-        "operationId": "getFilesCountByEntity",
-        "summary": "getFilesCountByEntity",
-        "description": "Fetch file counts for all ECP user related entities",
-        "deprecated": true,
-        "tags": [
-          "ECP"
-        ],
-        "security": [
-          {
-            "PortalAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The file counts have been fetched successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EntityFileCount"
                   }
                 }
               }
@@ -9538,7 +9419,7 @@
       "put": {
         "operationId": "updatePortalPage",
         "summary": "updatePortalPage",
-        "description": "Update a portal page by id",
+        "description": "Update a portal page by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -9578,6 +9459,9 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -9586,7 +9470,7 @@
       "delete": {
         "operationId": "deletePortalPage",
         "summary": "deletePortalPage",
-        "description": "Delete a portal page by id",
+        "description": "Delete a portal page by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -9607,6 +9491,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -9822,7 +9709,7 @@
       "post": {
         "operationId": "createPortalPage",
         "summary": "createPortalPage",
-        "description": "Create a new portal page",
+        "description": "Create a new portal page. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -9861,6 +9748,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -10149,7 +10039,7 @@
       "post": {
         "operationId": "createPortalPageBlock",
         "summary": "createPortalPageBlock",
-        "description": "Create a new portal page block",
+        "description": "Create a new portal page block. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -10188,6 +10078,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -10300,7 +10193,7 @@
       "put": {
         "operationId": "updatePortalPageBlock",
         "summary": "updatePortalPageBlock",
-        "description": "Update a portal page block by id",
+        "description": "Update a portal page block by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -10340,6 +10233,9 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -10348,7 +10244,7 @@
       "delete": {
         "operationId": "deletePortalPageBlock",
         "summary": "deletePortalPageBlock",
-        "description": "Delete a portal page block by id",
+        "description": "Delete a portal page block by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -10369,6 +10265,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -11185,7 +11084,7 @@
       "put": {
         "operationId": "putPortalConfig",
         "summary": "putPortalConfig",
-        "description": "Updates a specific portal configuration by ID.",
+        "description": "Updates a specific portal configuration by ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -11214,6 +11113,16 @@
               "default": "id"
             },
             "description": "Determines how pages are matched for upsert operations:\n- `id` (default): Match pages by their ID. Use this when page IDs are stable and known upfront.\n- `slug`: Match pages by their slug. When a request page has the same slug as an existing page, the existing page ID is adopted. Use this when page ids are unknown or when source page IDs differ from destination page IDs. A page may also bring its `_lineage_id` (the blueprint source page id); it is set once, on pages that have none.\n"
+          },
+          {
+            "in": "query",
+            "name": "expected_updated_at",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "The portal config's `_updated_at` as you read it. Send it when the request body is a config you read earlier and changed:\nthe write is refused with `409` (`reason: PORTAL_CHANGED`) when the portal changed since, instead of overwriting that change.\nRead the config again, re-apply your change and retry. Without it the request replaces the config as before.\n"
           }
         ],
         "requestBody": {
@@ -11254,6 +11163,12 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PortalSaveTooLarge"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -11308,7 +11223,7 @@
       "post": {
         "operationId": "createPortalRevision",
         "summary": "createPortalRevision",
-        "description": "Creates a new revision — a complete, immutable snapshot of the portal's configuration, pages and email templates. Nothing about the live portal changes; the snapshot only becomes live when it is published.\n\nThe payload must be COMPLETE. This endpoint does not merge against live or against the previous revision: publishing a revision deletes every live page the revision does not contain. The server validates structure only — `pages` present, each page carrying `id`, `slug`, `order` and `blocks`, and no two pages sharing an `id` or a `slug`. Semantic completeness of the config is a promise the caller makes, and a partial payload is honoured rather than rejected.\n\n`email_templates` is optional, and absence means \"keep the portal's current templates\", never \"no templates\". A present but partial map is taken verbatim.\n",
+        "description": "Creates a new revision — a complete, immutable snapshot of the portal's configuration, pages and email templates. Nothing about the live portal changes; the snapshot only becomes live when it is published.\n\nThe payload must be COMPLETE. This endpoint does not merge against live or against the previous revision: publishing a revision deletes every live page the revision does not contain. The server validates structure only — `pages` present, each page carrying `id`, `slug`, `order` and `blocks`, and no two pages sharing an `id` or a `slug`. Semantic completeness of the config is a promise the caller makes, and a partial payload is honoured rather than rejected.\n\n`email_templates` is optional, and absence means \"keep the portal's current templates\", never \"no templates\". A present but partial map is taken verbatim.\n\nWith `publish`, the revision is published in the same call: save and publish in one step.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -11658,7 +11573,7 @@
       "post": {
         "operationId": "publishPortalRevision",
         "summary": "publishPortalRevision",
-        "description": "Makes one revision the portal's live configuration, atomically: either everything below takes effect or nothing does. Publish is a full-snapshot replace: it writes config, every page and email templates to match the revision exactly, and deletes every live page the revision does not contain.\n\nAccepts any valid `revision_id` for the portal, old or new. There is no separate rollback endpoint and none is needed.\n\nThe same atomic publish stamps `name`, `description` and `published_at` onto the revision being published — permanently, on that revision, and not on any later one that supersedes it as live. `name` is generated server-side when the request omits it, so every published revision carries one.\n\nConflict detection covers the live config only: publish is rejected with `409` when the live config changed after publish read it. Live pages, their redirect routes and the email templates are replaced outright — a concurrent edit to a live page is not detected and is overwritten. `409` is also returned when the revision's stored config or email templates cannot be read, or when two of its pages would resolve to the same slug. A domain the revision claims that another portal already owns is a `400`.\n",
+        "description": "Makes one revision the portal's live configuration, atomically: either everything below takes effect or nothing does. Publish is a full-snapshot replace: it writes config, every page and email templates to match the revision exactly, and deletes every live page the revision does not contain.\n\nAccepts any valid `revision_id` for the portal, old or new. There is no separate rollback endpoint and none is needed.\n\nThe same atomic publish stamps `name`, `description` and `published_at` onto the revision being published — permanently, on that revision, and not on any later one that supersedes it as live. `name` is generated server-side when the request omits it, so every published revision carries one.\n\nPublish is rejected with `409` (`reason: PORTAL_CHANGED`) when the revision was built on a published revision that is no longer live: publishing it would revert every write published since. Reload, re-apply the change and save again, or send `force: true` to publish it anyway. A revision that was published before is a rollback and is never refused for this. Publish is also rejected with `409` when the live config changed after publish read it. Every write to a versioned portal publishes a revision, so these checks cover pages and email templates too. `409` is also returned when the revision's stored config or email templates cannot be read, or when two of its pages would resolve to the same slug. A domain the revision claims that another portal already owns is a `400`.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -12578,7 +12493,7 @@
       "put": {
         "operationId": "putMobileConfig",
         "summary": "putMobileConfig",
-        "description": "Merges the provided fields into the portal's mobile app configuration\n(deep merge). Only mobile_config is modified; all other portal settings\nare left untouched.\n",
+        "description": "Merges the provided fields into the portal's mobile app configuration\n(deep merge). Only mobile_config is modified; all other portal settings\nare left untouched.\n\nWith portal versioning on, the change is published as a revision, like\nevery other write to a versioned portal. `409` when the portal kept\nchanging while the write was retried.\n",
         "tags": [
           "ECP Admin"
         ],
@@ -12631,6 +12546,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -12720,6 +12638,51 @@
                   },
                   "required": [
                     "reason"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "PortalSaveTooLarge": {
+        "description": "The save is too large, so nothing was saved. Either one page or the portal settings exceed\nthe size a single page or the settings may have (`PORTAL_PAGE_TOO_LARGE`,\n`PORTAL_CONFIG_TOO_LARGE`), or the save changes too much at once (`PORTAL_SAVE_TOO_LARGE`).\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResp"
+                },
+                {
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "PORTAL_PAGE_TOO_LARGE",
+                        "PORTAL_CONFIG_TOO_LARGE",
+                        "PORTAL_SAVE_TOO_LARGE"
+                      ]
+                    },
+                    "page_id": {
+                      "type": "string",
+                      "description": "The page that is too large (PORTAL_PAGE_TOO_LARGE)"
+                    },
+                    "page_slug": {
+                      "type": "string",
+                      "description": "The page that is too large (PORTAL_PAGE_TOO_LARGE)"
+                    },
+                    "size_bytes": {
+                      "type": "integer",
+                      "description": "Size of the page or the settings, when known"
+                    },
+                    "max_size_bytes": {
+                      "type": "integer",
+                      "description": "The most a page or the settings may hold"
+                    }
+                  },
+                  "required": [
+                    "code"
                   ]
                 }
               ]
@@ -13679,6 +13642,11 @@
             "$ref": "#/components/schemas/Origin",
             "description": "Origin of the portal"
           },
+          "draft": {
+            "type": "boolean",
+            "default": false,
+            "description": "Only for portals with versioning enabled. `true` uploads the files and returns their URLs without changing the portal: the caller puts them into its next revision, and they go live when that revision is published. Otherwise the uploaded images are committed as a published revision named `Updated via API`.\n"
+          },
           "files": {
             "type": "array",
             "items": {
@@ -13893,7 +13861,7 @@
           },
           "identity_providers": {
             "type": "array",
-            "description": "SSO identity providers for the portal. When sent on a portal save (PUT/POST),\nthe list is fully synced — incoming providers are upserted and any existing\nproviders not in the list are deleted. Omit the field to leave SSO\nconfiguration unchanged; send an empty array to remove all providers.\n\nSecrets: a provider sent without `oidc_config.client_secret` keeps the\nstored secret for the same slug; an explicit empty string clears it.\n`getPortalConfigV3` returns providers with raw secrets redacted;\n`{{ env.VAR }}` references pass through.\n",
+            "description": "SSO identity providers for the portal. When sent on a portal save (PUT/POST),\nthe list is fully synced — incoming providers are upserted and any existing\nproviders not in the list are deleted. Omit the field to leave SSO\nconfiguration unchanged; send an empty array to remove all providers.\n\nSecrets: a provider sent without `oidc_config.client_secret` keeps the\nstored secret for the same slug; an explicit empty string clears it.\nA sent secret must be an `{{ env.VAR }}` reference (unless\n`expose_client_secret` is set): a plaintext value is rejected with 400\n(`PLAINTEXT_CLIENT_SECRET`).\n`getPortalConfigV3` returns providers with raw secrets redacted;\n`{{ env.VAR }}` references pass through.\n",
             "items": {
               "$ref": "#/components/schemas/ProviderConfig"
             }
@@ -13936,6 +13904,9 @@
           "design_id": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the design used to build the portal"
+          },
+          "header": {
+            "$ref": "#/components/schemas/PortalHeader"
           },
           "allowed_portal_entities": {
             "type": "array",
@@ -14507,6 +14478,17 @@
           },
           "engagement_center_task_templates": {
             "$ref": "#/components/schemas/EngagementCenterTaskTemplates"
+          },
+          "engagement_center_title": {
+            "type": "object",
+            "description": "Name of the engagement center shown to portal users (header button and drawer title), keyed by language (de, en). A blank or absent language keeps the portal's own translated default.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "de": "Mein Postfach",
+              "en": "My inbox"
+            }
           }
         }
       },
@@ -14653,6 +14635,14 @@
                 "description": "Feature flags for the portal",
                 "additionalProperties": {
                   "type": "boolean"
+                }
+              },
+              "registration_validation_rules": {
+                "type": "object",
+                "readOnly": true,
+                "description": "Public portal config only. The validation rules referenced by `validation_rule_id` on the\nregistration fields and the `contract_identifiers`, keyed by rule ID, so the registration and\nadd-contract forms can check values as they are typed. Present only when such rules are configured.\n",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/RegistrationValidationRule"
                 }
               },
               "grants": {
@@ -16557,11 +16547,6 @@
                     },
                     "_schema": {
                       "$ref": "#/components/schemas/EntitySlug"
-                    },
-                    "_title": {
-                      "type": "string",
-                      "description": "The title of the parent entity",
-                      "example": "Opportunity ABC"
                     }
                   }
                 }
@@ -16610,33 +16595,6 @@
             "type": "string",
             "format": "uri",
             "description": "Optional download URL for the file, returned for any kind — including \"unsupported\" — whenever the file entity exposes one. It is only a Content-Disposition: attachment URL for files with access_control \"private\", where it is a short-lived signed URL; for any other access level it is the file entity's plain public/CDN object URL, which carries no attachment disposition and may render inline in the browser. Absent when the file entity exposes no usable URL, so clients must handle it being missing."
-          }
-        }
-      },
-      "EntityFileCount": {
-        "type": "object",
-        "required": [
-          "entity_id",
-          "file_count",
-          "_schema"
-        ],
-        "properties": {
-          "entity_id": {
-            "$ref": "#/components/schemas/EntityId",
-            "description": "The ID of the parent entity"
-          },
-          "_schema": {
-            "$ref": "#/components/schemas/EntitySlug"
-          },
-          "_title": {
-            "type": "string",
-            "description": "The title of the parent entity",
-            "example": "Opportunity ABC"
-          },
-          "file_count": {
-            "type": "integer",
-            "description": "Number of files associated with the entity and shared with portal user",
-            "example": 2
           }
         }
       },
@@ -16746,7 +16704,7 @@
           },
           "identifiers": {
             "type": "array",
-            "description": "Identifier attributes a caller must supply on this surface to be identified. Only\nused with `authentication: registration_identifiers`.\n\nOmitted or empty means the surface uses the portal's `registration_identifiers`.\nWhen set, these replace the portal's `registration_identifiers` on this surface\nonly: `identifyContact` requires a value for each of them (400 listing the missing\nones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`\nhook on them, and refuses to issue tokens (403) unless there are at least two.\nEntries without `name` or `schema` are ignored.\n",
+            "description": "Identifier attributes a caller must supply on this surface to be identified. Only\nused with `authentication: registration_identifiers`.\n\nOmitted or empty means the surface uses the portal's `registration_identifiers`.\nWhen set, these replace the portal's `registration_identifiers` on this surface\nonly: `identifyContact` requires a value for each of them (400 listing the missing\nones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`\nhook on them, and refuses to issue tokens (403) unless there are at least two.\nEntries without `name` or `schema` are ignored. A `validation_rule_id` on an\nidentifier (own or inherited) is checked before the lookup.\n",
             "items": {
               "$ref": "#/components/schemas/RegistrationIdentifier"
             },
@@ -18030,7 +17988,7 @@
             }
           },
           "sort": {
-            "description": "Sort order of the results: an `attribute:order` pair, or a list of Elasticsearch sort fields that are\nused as they are, e.g. the sort order of a target as returned by the Targeting API.\nWithout a sort, the sort order of the first requested target that defines one applies.\n",
+            "description": "Sort order of the results: an `attribute:order` pair, or a list of Elasticsearch sort fields that are\nused as they are, e.g. the sort order of a target as returned by the Targeting API.\nWithout a sort, the sort order of the first requested target that defines one applies, else lists\nthat include files are sorted by file date, newest first.\n",
             "oneOf": [
               {
                 "type": "string",
@@ -18215,6 +18173,10 @@
           },
           "schema": {
             "$ref": "#/components/schemas/EntitySlug"
+          },
+          "validation_rule_id": {
+            "type": "string",
+            "description": "ID of a validation rule of the organization that the value must pass. Checked on\nself-registration (400 `INVALID_REGISTRATION_FIELD`) and, for an access point's identifiers or\nthe `registration_identifiers` it inherits, by `identifyContact` before the contact is looked up\n(400 `INVALID_IDENTIFIER_VALUE`). Rules that cannot be checked here are ignored.\n"
           }
         }
       },
@@ -18233,6 +18195,10 @@
             "type": "boolean",
             "description": "Whether the user must provide a value for this attribute",
             "default": false
+          },
+          "validation_rule_id": {
+            "type": "string",
+            "description": "ID of a validation rule of the organization that the value must pass on self-registration\n(400 `INVALID_REGISTRATION_FIELD`). Rules that cannot be checked here are ignored.\n"
           }
         }
       },
@@ -18245,6 +18211,40 @@
           },
           "schema": {
             "$ref": "#/components/schemas/EntitySlug"
+          },
+          "validation_rule_id": {
+            "type": "string",
+            "description": "ID of a validation rule of the organization that the value must pass when a portal user adds a\ncontract (`addContractByIdentifiers`, 400 `INVALID_IDENTIFIER_VALUE`). Rules that cannot be\nchecked here are ignored.\n"
+          }
+        }
+      },
+      "RegistrationValidationRule": {
+        "type": "object",
+        "description": "A validation rule of the organization, as embedded in the public portal config.",
+        "required": [
+          "_id",
+          "_schema_version",
+          "title",
+          "rule"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "ID of the validation rule"
+          },
+          "_schema_version": {
+            "type": "string",
+            "description": "Schema version of the validation rule",
+            "example": "v2"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the validation rule"
+          },
+          "rule": {
+            "type": "object",
+            "description": "The rule to evaluate, in the format of the Validation Rules API.",
+            "additionalProperties": true
           }
         }
       },
@@ -21270,6 +21270,130 @@
           }
         ]
       },
+      "PortalHeader": {
+        "type": "object",
+        "description": "Settings of the portal's header bar, stored once per portal.\n",
+        "properties": {
+          "design": {
+            "type": "object",
+            "description": "The design of the header bar",
+            "additionalProperties": true,
+            "properties": {
+              "overrides": {
+                "$ref": "#/components/schemas/PortalHeaderDesignOverrides"
+              }
+            }
+          }
+        }
+      },
+      "PortalHeaderDesignOverrides": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Design overrides scoped to the header bar. Only `components.inputs` and `elements.icon_actions` can be overridden; colours, shape and every other key are refused with a 400 on every write. `null` clears the overrides.\n",
+        "nullable": true,
+        "properties": {
+          "components": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "inputs": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Inputs in the header bar, such as search",
+                "properties": {
+                  "style": {
+                    "type": "string",
+                    "enum": [
+                      "soft",
+                      "surface",
+                      "outline",
+                      "ghost"
+                    ]
+                  },
+                  "color": {
+                    "type": "string",
+                    "enum": [
+                      "primary",
+                      "neutral"
+                    ]
+                  },
+                  "label_position": {
+                    "type": "string",
+                    "enum": [
+                      "outset",
+                      "inset"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "elements": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "icon_actions": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Icon buttons in the header bar",
+                "properties": {
+                  "style": {
+                    "type": "string",
+                    "enum": [
+                      "solid",
+                      "soft",
+                      "surface",
+                      "outline",
+                      "ghost"
+                    ]
+                  },
+                  "color": {
+                    "description": "A button colour, or a custom colour of the portal's design by id",
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "primary",
+                          "neutral",
+                          "danger"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "custom"
+                        ],
+                        "properties": {
+                          "custom": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "components": {
+            "inputs": {
+              "style": "soft",
+              "color": "neutral",
+              "label_position": "inset"
+            }
+          },
+          "elements": {
+            "icon_actions": {
+              "style": "ghost",
+              "color": "primary"
+            }
+          }
+        }
+      },
       "CommonConfigAttributesV3": {
         "type": "object",
         "properties": {
@@ -21306,6 +21430,9 @@
           "design_id": {
             "$ref": "#/components/schemas/EntityId",
             "description": "ID of the design used to build the portal"
+          },
+          "header": {
+            "$ref": "#/components/schemas/PortalHeader"
           },
           "allowed_portal_entities": {
             "type": "array",
@@ -22469,8 +22596,31 @@
               "based_on_revision_id": {
                 "type": "string"
               },
+              "base_published_revision_id": {
+                "type": "string",
+                "description": "The published revision the client showed as live when the edit started. Publishing this revision after a newer one went live is refused (`409`, `reason: PORTAL_CHANGED`) unless forced. Ignored when `based_on_revision_id` is a draft: the draft's own base applies. Absent: what is live when the revision is saved.\n"
+              },
               "revision_source": {
                 "$ref": "#/components/schemas/RevisionSource"
+              },
+              "publish": {
+                "type": "object",
+                "description": "Save and publish in one call. Present, the new revision is published right away, as `publishPortalRevision` would publish it, and the response carries the result in `published`. A publish that fails also discards the new revision, so the call either goes live or leaves nothing behind.\n",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name stamped onto the revision when it is published."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Description stamped onto the revision when it is published."
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Publish even when live moved past the published revision this one is based on. See `PublishRevisionRequest.force`."
+                  }
+                }
               },
               "pages": {
                 "type": "array",
@@ -22502,6 +22652,11 @@
             "type": "string",
             "maxLength": 8000,
             "description": "Optional description stamped onto the revision at publish time"
+          },
+          "force": {
+            "type": "boolean",
+            "default": false,
+            "description": "Publish even when the revision was built on a published revision that is no longer live. Every write published since is reverted. Without it such a publish is a `409` with `reason: PORTAL_CHANGED`.\n"
           }
         }
       },
@@ -22621,6 +22776,14 @@
                 "items": {
                   "$ref": "#/components/schemas/ProviderConfig"
                 }
+              },
+              "published": {
+                "description": "Only when the request asked to `publish`. The result of publishing this revision.",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PublishResult"
+                  }
+                ]
               }
             }
           }

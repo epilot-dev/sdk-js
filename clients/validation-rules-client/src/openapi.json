@@ -682,7 +682,7 @@
       "post": {
         "operationId": "addUsedByReference",
         "summary": "addUsedByReference",
-        "description": "Adds a single `used_by` reference to an existing validation rule.\n\nUse this endpoint when attaching a validation rule to a journey block or entity attribute to track where the rule is applied.\n",
+        "description": "Adds a single `used_by` reference to an existing validation rule.\n\nUse this endpoint when attaching a validation rule to a journey block, entity attribute or portal registration field to track where the rule is applied.\n\nJourney and entity references require the `entity:edit` permission on `journey`. Portal references\n(`type: portal`) are managed by the Customer Portal API when a portal configuration is saved or published,\nand accept only internal service-to-service tokens.\n",
         "tags": [
           "Validation Rules"
         ],
@@ -841,7 +841,7 @@
       "delete": {
         "operationId": "removeUsedByReference",
         "summary": "removeUsedByReference",
-        "description": "Removes a specific `used_by` reference from an existing validation rule.\n\nUse this endpoint when detaching a validation rule from a journey block or entity attribute.\n",
+        "description": "Removes a specific `used_by` reference from an existing validation rule.\n\nUse this endpoint when detaching a validation rule from a journey block, entity attribute or portal registration field.\n\nJourney and entity references require the `entity:edit` permission on `journey`. Portal references\n(`type: portal`) are managed by the Customer Portal API and accept only internal service-to-service tokens.\n",
         "tags": [
           "Validation Rules"
         ],
@@ -1148,7 +1148,7 @@
       },
       "UsedBy": {
         "type": "object",
-        "description": "Describes where and how a validation rule is applied. Used to track associations between rules and the journeys or entity schemas that reference them.",
+        "description": "Describes where and how a validation rule is applied. Used to track associations between rules and the journeys, entity schemas or portals that reference them.",
         "required": [
           "type"
         ],
@@ -1157,9 +1157,10 @@
             "type": "string",
             "enum": [
               "journey",
-              "entity"
+              "entity",
+              "portal"
             ],
-            "description": "The context in which the rule is used - either a journey block or an entity schema attribute.",
+            "description": "The context in which the rule is used - a journey block, an entity schema attribute or a portal registration field.",
             "example": "journey"
           },
           "schema_slug": {
@@ -1169,7 +1170,7 @@
           },
           "source_id": {
             "type": "string",
-            "description": "Unique identifier of the source (e.g. journey ID or entity attribute key) that references this rule.",
+            "description": "Unique identifier of the source that references this rule: the journey ID for `journey`, the entity\nattribute key for `entity`, the portal ID for `portal`.\n",
             "example": "journey-xyz789"
           }
         },

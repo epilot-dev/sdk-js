@@ -1693,33 +1693,6 @@
         "responses": {}
       }
     },
-    "/v2/portal/user/files": {
-      "get": {
-        "operationId": "getAllFiles",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "entity_ids"
-          },
-          {
-            "in": "query",
-            "name": "file_types"
-          }
-        ],
-        "responses": {}
-      }
-    },
     "/v2/portal/user/file/{id}": {
       "get": {
         "operationId": "getFileById",
@@ -1757,13 +1730,6 @@
             "required": true
           }
         ],
-        "responses": {}
-      }
-    },
-    "/v2/portal/user/files/count-by-entity": {
-      "get": {
-        "operationId": "getFilesCountByEntity",
-        "deprecated": true,
         "responses": {}
       }
     },
@@ -2705,6 +2671,11 @@
             "in": "query",
             "name": "page_upsert_mode",
             "required": false
+          },
+          {
+            "in": "query",
+            "name": "expected_updated_at",
+            "required": false
           }
         ],
         "requestBody": {
@@ -3039,6 +3010,11 @@
         }
       },
       "ContractAssignmentConflict": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "PortalSaveTooLarge": {
         "content": {
           "application/json": {}
         }
