@@ -261,6 +261,24 @@
         "responses": {}
       }
     },
+    "/v2/outlook/mailbox/{email}/sync/estimate": {
+      "get": {
+        "operationId": "getMailboxSyncEstimate",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "timeframes",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/outlook/mailbox/{email}/sync/retry": {
       "post": {
         "operationId": "retryMailboxSync",
