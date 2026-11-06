@@ -267,7 +267,6 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ActivityItem`](#activityitem)
 - [`FileItem`](#fileitem)
 - [`FilePreviewResult`](#filepreviewresult)
-- [`EntityFileCount`](#entityfilecount)
 - [`AdminUser`](#adminuser)
 - [`PortalSurface`](#portalsurface)
 - [`PortalSurfaceDataAccess`](#portalsurfacedataaccess)
@@ -302,6 +301,7 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`RegistrationIdentifier`](#registrationidentifier)
 - [`AdditionalContactAttribute`](#additionalcontactattribute)
 - [`ContractIdentifier`](#contractidentifier)
+- [`RegistrationValidationRule`](#registrationvalidationrule)
 - [`AcceptanceDecision`](#acceptancedecision)
 - [`TriggerPortalFlow`](#triggerportalflow)
 - [`ExtensionConfig`](#extensionconfig)
@@ -368,6 +368,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`Block`](#block)
 - [`PageRequest`](#pagerequest)
 - [`Page`](#page)
+- [`PortalHeader`](#portalheader)
+- [`PortalHeaderDesignOverrides`](#portalheaderdesignoverrides)
 - [`CommonConfigAttributesV3`](#commonconfigattributesv3)
 - [`PortalId`](#portalid)
 - [`PortalDataExportColumn`](#portaldataexportcolumn)
@@ -565,6 +567,11 @@ const { data } = await client.getPortalConfigByDomain({
     "is_redirection_enabled": true
   },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "header": {
+    "design": {
+      "overrides": {}
+    }
+  },
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "self_registration_account_setting": "ALLOW_WITH_CREATION",
@@ -778,6 +785,10 @@ const { data } = await client.getPortalConfigByDomain({
     "title": "{{task.name}}",
     "subtitle": "{{workflow.name}} · {{entity._title}}"
   },
+  "engagement_center_title": {
+    "de": "Mein Postfach",
+    "en": "My inbox"
+  },
   "id": 12345,
   "organization_id": 12345,
   "_manifest": ["string"],
@@ -799,6 +810,7 @@ const { data } = await client.getPortalConfigByDomain({
     }
   },
   "feature_flags": {},
+  "registration_validation_rules": {},
   "grants": [
     {
       "action": "entity-read",
@@ -1497,6 +1509,11 @@ const { data } = await client.getPublicPortalConfigV3({
     "is_redirection_enabled": true
   },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "header": {
+    "design": {
+      "overrides": {}
+    }
+  },
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "self_registration_account_setting": "ALLOW_WITH_CREATION",
@@ -1710,6 +1727,10 @@ const { data } = await client.getPublicPortalConfigV3({
     "title": "{{task.name}}",
     "subtitle": "{{workflow.name}} · {{entity._title}}"
   },
+  "engagement_center_title": {
+    "de": "Mein Postfach",
+    "en": "My inbox"
+  },
   "id": 12345,
   "organization_id": 12345,
   "_manifest": ["string"],
@@ -1731,6 +1752,7 @@ const { data } = await client.getPublicPortalConfigV3({
     }
   },
   "feature_flags": {},
+  "registration_validation_rules": {},
   "grants": [
     {
       "action": "entity-read",
@@ -1824,6 +1846,11 @@ const { data } = await client.getOrgPortalConfigV3({
     "is_redirection_enabled": true
   },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "header": {
+    "design": {
+      "overrides": {}
+    }
+  },
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "self_registration_account_setting": "ALLOW_WITH_CREATION",
@@ -2037,6 +2064,10 @@ const { data } = await client.getOrgPortalConfigV3({
     "title": "{{task.name}}",
     "subtitle": "{{workflow.name}} · {{entity._title}}"
   },
+  "engagement_center_title": {
+    "de": "Mein Postfach",
+    "en": "My inbox"
+  },
   "id": 12345,
   "organization_id": 12345,
   "_manifest": ["string"],
@@ -2058,6 +2089,7 @@ const { data } = await client.getOrgPortalConfigV3({
     }
   },
   "feature_flags": {},
+  "registration_validation_rules": {},
   "grants": [
     {
       "action": "entity-read",
@@ -2120,6 +2152,7 @@ const { data } = await client.getAllPortalConfigs()
       "epilot_domain": "example-portal-12345.ecp.epilot.cloud",
       "domain_settings": {},
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "header": {},
       "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
       "self_registration_account_setting": "ALLOW_WITH_CREATION",
@@ -2161,6 +2194,7 @@ const { data } = await client.getAllPortalConfigs()
       "notification_triggers": [],
       "engagement_center_enabled": true,
       "engagement_center_task_templates": {},
+      "engagement_center_title": {},
       "id": 12345,
       "organization_id": 12345,
       "_manifest": ["string"],
@@ -2169,6 +2203,7 @@ const { data } = await client.getAllPortalConfigs()
       "held_back": [],
       "org_settings": {},
       "feature_flags": {},
+      "registration_validation_rules": {},
       "grants": [],
       "identity_providers": [],
       "preview_revision": {}
@@ -2251,7 +2286,7 @@ const { data } = await client.listEmailTemplateReferences(
 
 ### `upsertEmailTemplatesByPortalId`
 
-Upserts the email templates of a portal by portal ID
+Upserts the email templates of a portal by portal ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the
 
 `POST /v3/portal/email-templates/{portal_id}`
 
@@ -2576,6 +2611,7 @@ const { data } = await client.savePortalFilesV3(
   },
   {
     origin: 'string',
+    draft: false,
     files: [
       {
         filename: 12345,
@@ -2643,18 +2679,21 @@ const { data } = await client.replaceECPTemplateVariables(
 ```json
 {
   "customerPortal": {
+    "link": "https://end-customer-portal.ecp.dev.epilot.io",
     "invitationLink": "https://end-customer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com",
     "newDocumentLink": "https://end-customer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
     "entityLink": "https://end-customer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
     "userEmailsOnEntity": ["john@doe.com", "mary@doe.com"]
   },
   "installerPortal": {
+    "link": "https://installer-portal.ecp.dev.epilot.io",
     "invitationLink": "https://installer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com",
     "newDocumentLink": "https://installer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
     "entityLink": "https://installer-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
     "userEmailsOnEntity": ["peter@doe.com", "jane@doe.com"]
   },
   "portalUser": {
+    "link": "https://employee-portal.ecp.dev.epilot.io",
     "invitationLink": "https://employee-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com",
     "newDocumentLink": "https://employee-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
     "entityLink": "https://employee-portal.ecp.dev.epilot.io/requests/opportunities/b8fef220-abe0-4382-a704-26848f60977b",
@@ -4422,8 +4461,7 @@ const { data } = await client.trackFileDownloaded({
     "_relations": [
       {
         "entity_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
-        "_schema": "contact",
-        "_title": "Opportunity ABC"
+        "_schema": "contact"
       }
     ],
     "is_new": true,
@@ -5724,7 +5762,7 @@ const { data } = await client.getPortalPage({
 
 ### `updatePortalPage`
 
-Update a portal page by id
+Update a portal page by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A 
 
 `PUT /v2/portal/pages/{id}`
 
@@ -5809,7 +5847,7 @@ const { data } = await client.updatePortalPage(
 
 ### `deletePortalPage`
 
-Delete a portal page by id
+Delete a portal page by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A 
 
 `DELETE /v2/portal/pages/{id}`
 
@@ -5989,7 +6027,7 @@ const { data } = await client.getPortalPages({
 
 ### `createPortalPage`
 
-Create a new portal page
+Create a new portal page. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A co
 
 `POST /v2/portal/pages`
 
@@ -6329,7 +6367,7 @@ const { data } = await client.getDefaultPages()
 
 ### `createPortalPageBlock`
 
-Create a new portal page block
+Create a new portal page block. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision
 
 `POST /v2/portal/pages/{id}/blocks`
 
@@ -6496,7 +6534,7 @@ const { data } = await client.getPortalPageBlock({
 
 ### `updatePortalPageBlock`
 
-Update a portal page block by id
+Update a portal page block by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revisi
 
 `PUT /v2/portal/pages/{id}/blocks/{block_id}`
 
@@ -6567,7 +6605,7 @@ const { data } = await client.updatePortalPageBlock(
 
 ### `deletePortalPageBlock`
 
-Delete a portal page block by id
+Delete a portal page block by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revisi
 
 `DELETE /v2/portal/pages/{id}/blocks/{block_id}`
 
@@ -6942,6 +6980,11 @@ const { data } = await client.createPortalConfig(
       is_redirection_enabled: true
     },
     design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+    header: {
+      design: {
+        overrides: { /* ... */ }
+      }
+    },
     allowed_portal_entities: ['contact', 'contract'],
     self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
     self_registration_account_setting: 'ALLOW_WITH_CREATION',
@@ -7252,6 +7295,11 @@ const { data } = await client.createPortalConfig(
     "is_redirection_enabled": true
   },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "header": {
+    "design": {
+      "overrides": {}
+    }
+  },
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "self_registration_account_setting": "ALLOW_WITH_CREATION",
@@ -7600,6 +7648,11 @@ const { data } = await client.getPortalConfigV3({
     "is_redirection_enabled": true
   },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "header": {
+    "design": {
+      "overrides": {}
+    }
+  },
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "self_registration_account_setting": "ALLOW_WITH_CREATION",
@@ -7851,7 +7904,7 @@ const { data } = await client.getPortalConfigV3({
 
 ### `putPortalConfig`
 
-Updates a specific portal configuration by ID.
+Updates a specific portal configuration by ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal
 
 `PUT /v3/portal/config/{portal_id}`
 
@@ -7860,6 +7913,7 @@ const { data } = await client.putPortalConfig(
   {
     portal_id: 'example',
     page_upsert_mode: 'example',
+    expected_updated_at: 'example',
   },
   {
     entity_actions: [
@@ -7944,6 +7998,11 @@ const { data } = await client.putPortalConfig(
       is_redirection_enabled: true
     },
     design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+    header: {
+      design: {
+        overrides: { /* ... */ }
+      }
+    },
     allowed_portal_entities: ['contact', 'contract'],
     self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
     self_registration_account_setting: 'ALLOW_WITH_CREATION',
@@ -8278,6 +8337,11 @@ const { data } = await client.putPortalConfig(
     "is_redirection_enabled": true
   },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "header": {
+    "design": {
+      "overrides": {}
+    }
+  },
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "self_registration_account_setting": "ALLOW_WITH_CREATION",
@@ -8636,6 +8700,11 @@ const { data } = await client.createPortalRevision(
       is_redirection_enabled: true
     },
     design_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+    header: {
+      design: {
+        overrides: { /* ... */ }
+      }
+    },
     allowed_portal_entities: ['contact', 'contract'],
     self_registration_setting: 'ALLOW_WITH_CONTACT_CREATION',
     self_registration_account_setting: 'ALLOW_WITH_CREATION',
@@ -8836,9 +8905,15 @@ const { data } = await client.createPortalRevision(
     origin: 'string',
     global_blocks: {},
     based_on_revision_id: 'string',
+    base_published_revision_id: 'string',
     revision_source: {
       type: 'blueprint_sync',
       blueprint_title: 'string'
+    },
+    publish: {
+      name: 'string',
+      description: 'string',
+      force: false
     },
     pages: [
       {
@@ -8941,7 +9016,15 @@ const { data } = await client.createPortalRevision(
       "expose_client_secret": false,
       "debug_mode_until": "2026-10-30T12:00:00.000Z"
     }
-  ]
+  ],
+  "published": {
+    "revision_id": "string",
+    "published_at": "1970-01-01T00:00:00.000Z",
+    "published_by": "string",
+    "name": "FAQ page launch",
+    "post_publish_warnings": ["string"],
+    "held_back": ["allowed_entities_change"]
+  }
 }
 ```
 
@@ -9177,7 +9260,8 @@ const { data } = await client.publishPortalRevision(
   {
     revision_id: '2026-08-25T14:03:11.482Z-a7f3c1d9',
     name: 'FAQ page launch',
-    description: 'string'
+    description: 'string',
+    force: false
   },
 )
 ```
@@ -9230,6 +9314,7 @@ const { data } = await client.listAllPortalConfigs()
       "epilot_domain": "example-portal-1.ecp.epilot.io",
       "domain_settings": {},
       "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "header": {},
       "allowed_portal_entities": ["contact", "contract"],
       "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
       "self_registration_account_setting": "ALLOW_WITH_CREATION",
@@ -9357,7 +9442,8 @@ const { data } = await client.listPortalConfigSummaries()
       "registration_identifiers": [
         {
           "name": "string",
-          "schema": "contact"
+          "schema": "contact",
+          "validation_rule_id": "string"
         }
       ],
       "surfaces": [
@@ -9582,6 +9668,11 @@ const { data } = await client.clonePortalConfig(
     "is_redirection_enabled": true
   },
   "design_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+  "header": {
+    "design": {
+      "overrides": {}
+    }
+  },
   "allowed_portal_entities": ["contact", "contract"],
   "self_registration_setting": "ALLOW_WITH_CONTACT_CREATION",
   "self_registration_account_setting": "ALLOW_WITH_CREATION",
@@ -10600,6 +10691,7 @@ type SaveEntityFile = {
 ```ts
 type SavePortalFile = {
   origin: string
+  draft?: boolean
   files: Array<{
     filename?: string
     file_type: string
@@ -10770,6 +10862,11 @@ type CommonConfigAttributes = {
     is_redirection_enabled?: boolean
   }
   design_id?: string // uuid
+  header?: {
+    design?: {
+      overrides?: { ... }
+    }
+  }
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
   self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
@@ -10816,11 +10913,6 @@ type CommonConfigAttributes = {
     cognito_user_pool_id?: string
     timeouts?: {
       refresh_token?: { ... }
-      access_token?: { ... }
-      id_token?: { ... }
-    }
-    advanced_authentication?: {
-      user_activity_logging?: { ... }
   // ...
 }
 ```
@@ -11007,6 +11099,11 @@ type PortalConfig = {
     is_redirection_enabled?: boolean
   }
   design_id?: string // uuid
+  header?: {
+    design?: {
+      overrides?: { ... }
+    }
+  }
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
   self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
@@ -11053,11 +11150,6 @@ type PortalConfig = {
     cognito_user_pool_id?: string
     timeouts?: {
       refresh_token?: { ... }
-      access_token?: { ... }
-      id_token?: { ... }
-    }
-    advanced_authentication?: {
-      user_activity_logging?: { ... }
   // ...
 }
 ```
@@ -12222,7 +12314,6 @@ type FileItem = {
   _relations?: Array<{
     entity_id?: string // uuid
     _schema?: string
-    _title?: string
   }>
   is_new?: boolean
   custom_download_url_auth?: "token" | "presigned"
@@ -12237,17 +12328,6 @@ type FilePreviewResult = {
   url?: string // uri
   requires_auth?: boolean
   download_url?: string // uri
-}
-```
-
-### `EntityFileCount`
-
-```ts
-type EntityFileCount = {
-  entity_id: string // uuid
-  _schema: string
-  _title?: string
-  file_count: number
 }
 ```
 
@@ -12288,6 +12368,7 @@ type PortalSurface = {
   identifiers?: Array<{
     name?: string
     schema?: string
+    validation_rule_id?: string
   }>
   data_access?: {
     entities?: Array<{
@@ -12939,6 +13020,7 @@ type IdentifierAttribute = {
 type RegistrationIdentifier = {
   name?: string
   schema?: string
+  validation_rule_id?: string
 }
 ```
 
@@ -12953,6 +13035,7 @@ an existing contact.
 type AdditionalContactAttribute = {
   name: string
   required?: boolean
+  validation_rule_id?: string
 }
 ```
 
@@ -12962,6 +13045,20 @@ type AdditionalContactAttribute = {
 type ContractIdentifier = {
   name?: string
   schema?: string
+  validation_rule_id?: string
+}
+```
+
+### `RegistrationValidationRule`
+
+A validation rule of the organization, as embedded in the public portal config.
+
+```ts
+type RegistrationValidationRule = {
+  _id: string
+  _schema_version: string
+  title: string
+  rule: Record<string, unknown>
 }
 ```
 
@@ -14478,6 +14575,45 @@ type Page = {
 }
 ```
 
+### `PortalHeader`
+
+Settings of the portal's header bar, stored once per portal.
+
+
+```ts
+type PortalHeader = {
+  design?: {
+    overrides?: {
+      components?: { ... }
+      elements?: { ... }
+    }
+  }
+}
+```
+
+### `PortalHeaderDesignOverrides`
+
+Design overrides scoped to the header bar. Only `components.inputs` and `elements.icon_actions` can be overridden; colours, shape and every other key are refused with a 400 on every write. `null` clears the overrides.
+
+
+```ts
+type PortalHeaderDesignOverrides = {
+  components?: {
+    inputs?: {
+      style?: { ... }
+      color?: { ... }
+      label_position?: { ... }
+    }
+  }
+  elements?: {
+    icon_actions?: {
+      style?: { ... }
+      color?: { ... }
+    }
+  }
+}
+```
+
 ### `CommonConfigAttributesV3`
 
 ```ts
@@ -14530,6 +14666,11 @@ type CommonConfigAttributesV3 = {
     is_redirection_enabled?: boolean
   }
   design_id?: string // uuid
+  header?: {
+    design?: {
+      overrides?: { ... }
+    }
+  }
   allowed_portal_entities?: string[]
   self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
   self_registration_account_setting?: "ALLOW_WITH_CREATION" | "DENY" | "ALWAYS_CREATE" | "BLOCK_IF_PORTAL_USER_EXISTS" | "DISALLOW_COMPLETELY"
@@ -14576,11 +14717,6 @@ type CommonConfigAttributesV3 = {
     cognito_user_pool_id?: string
     timeouts?: {
       refresh_token?: { ... }
-      access_token?: { ... }
-      id_token?: { ... }
-    }
-    advanced_authentication?: {
-      user_activity_logging?: { ... }
   // ...
 }
 ```
@@ -14819,8 +14955,8 @@ type PortalConfigV3 = {
     is_redirection_enabled?: boolean
   }
   design_id?: string // uuid
-  allowed_portal_entities?: string[]
-  self_registration_setting?: "ALLOW_WITH_CONTACT_CREATION" | "ALLOW_WITHOUT_CONTACT_CREATION" | "DENY" | "ALWAYS_CREATE_CONTACT" | "DISALLOW_COMPLETELY" | "BLOCK_IF_PORTAL_USER_EXISTS"
+  header?: {
+    design?: {
   // ...
 }
 ```
@@ -14935,6 +15071,7 @@ type PortalConfigSummaryV3 = {
   registration_identifiers?: Array<{
     name?: string
     schema?: string
+    validation_rule_id?: string
   }>
   surfaces?: Array<{
     id: string
@@ -14945,6 +15082,7 @@ type PortalConfigSummaryV3 = {
     identifiers?: Array<{
       name?: { ... }
       schema?: { ... }
+      validation_rule_id?: { ... }
     }>
     data_access?: {
       entities?: { ... }
@@ -15113,6 +15251,7 @@ type PublishRevisionRequest = {
   revision_id: string
   name?: string
   description?: string
+  force?: boolean
 }
 ```
 
@@ -15229,6 +15368,18 @@ type PortalRevisionCreated = {
     expose_client_secret?: boolean
     debug_mode_until?: string // date-time
   }>
+  published?: {
+    revision_id: string
+    published_at: string // date-time
+    published_by?: string
+    name?: string
+    post_publish_warnings: string[]
+    held_back?: Array<{
+      page_id: { ... }
+      block_id?: { ... }
+      reason: { ... }
+    }>
+  }
 }
 ```
 

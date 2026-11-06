@@ -650,7 +650,7 @@ type UpdateValidationRuleRequest = {
   title?: string
   placeholder?: string
   used_by?: Array<{
-    type: "journey" | "entity"
+    type: "journey" | "entity" | "portal"
     schema_slug?: string
     source_id?: string
   }>
@@ -717,7 +717,7 @@ type ValidationRuleBase = {
   title?: string
   placeholder?: string
   used_by?: Array<{
-    type: "journey" | "entity"
+    type: "journey" | "entity" | "portal"
     schema_slug?: string
     source_id?: string
   }>
@@ -795,11 +795,11 @@ type ValidationRule = {
 
 ### `UsedBy`
 
-Describes where and how a validation rule is applied. Used to track associations between rules and the journeys or entity schemas that reference them.
+Describes where and how a validation rule is applied. Used to track associations between rules and the journeys, entity schemas or portals that reference them.
 
 ```ts
 type UsedBy = {
-  type: "journey" | "entity"
+  type: "journey" | "entity" | "portal"
   schema_slug?: string
   source_id?: string
 }
