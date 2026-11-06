@@ -1,5 +1,14 @@
 # @epilot/customer-portal-client
 
+## 0.52.0-rc.1
+
+### Minor Changes
+
+- Optional `validation_rule_id` on registration identifiers, additional contact attributes, contact identifiers for accounts, contract identifiers and access point identifiers
+- Public portal config: `registration_validation_rules` (rules for the registration and add-contract forms, keyed by rule ID) and the `RegistrationValidationRule` schema
+- 400 reasons `INVALID_REGISTRATION_FIELD` (registration) and `INVALID_IDENTIFIER_VALUE` (`identifyContact`, add contract by identifiers), with `fields: [{ schema, name, rule_id }]`
+- Email template variables: `link` (the portal's start page)
+
 ## 0.36.0
 
 ### Minor Changes

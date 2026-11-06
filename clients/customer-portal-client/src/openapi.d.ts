@@ -254,6 +254,12 @@ declare namespace Components {
              * Whether the user must provide a value for this attribute
              */
             required?: boolean;
+            /**
+             * ID of a validation rule of the organization that the value must pass on self-registration
+             * (400 `INVALID_REGISTRATION_FIELD`). Rules that cannot be checked here are ignored.
+             *
+             */
+            validation_rule_id?: string;
         }
         export interface AdminUser {
             [name: string]: any;
@@ -2618,6 +2624,13 @@ declare namespace Components {
              * contact
              */
             EntitySlug;
+            /**
+             * ID of a validation rule of the organization that the value must pass when a portal user adds a
+             * contract (`addContractByIdentifiers`, 400 `INVALID_IDENTIFIER_VALUE`). Rules that cannot be
+             * checked here are ignored.
+             *
+             */
+            validation_rule_id?: string;
         }
         export interface CreateSupportRequest {
             report_type: SupportReportType;
@@ -3458,13 +3471,15 @@ declare namespace Components {
             /**
              * Sort order of the results: an `attribute:order` pair, or a list of Elasticsearch sort fields that are
              * used as they are, e.g. the sort order of a target as returned by the Targeting API.
-             * Without a sort, the sort order of the first requested target that defines one applies.
+             * Without a sort, the sort order of the first requested target that defines one applies, else lists
+             * that include files are sorted by file date, newest first.
              *
              */
             sort?: /**
              * Sort order of the results: an `attribute:order` pair, or a list of Elasticsearch sort fields that are
              * used as they are, e.g. the sort order of a target as returned by the Targeting API.
-             * Without a sort, the sort order of the first requested target that defines one applies.
+             * Without a sort, the sort order of the first requested target that defines one applies, else lists
+             * that include files are sorted by file date, newest first.
              *
              */
             string | string /* ^[^\s:,]+:(asc|desc)$ */[];
@@ -7236,6 +7251,15 @@ declare namespace Components {
                 [name: string]: boolean;
             };
             /**
+             * Public portal config only. The validation rules referenced by `validation_rule_id` on the
+             * registration fields and the `contract_identifiers`, keyed by rule ID, so the registration and
+             * add-contract forms can check values as they are typed. Present only when such rules are configured.
+             *
+             */
+            registration_validation_rules?: {
+                [name: string]: /* A validation rule of the organization, as embedded in the public portal config. */ RegistrationValidationRule;
+            };
+            /**
              * Permissions granted to a portal user while accessing entities
              */
             grants?: Grant[];
@@ -7420,6 +7444,9 @@ declare namespace Components {
              *
              * Secrets: a provider sent without `oidc_config.client_secret` keeps the
              * stored secret for the same slug; an explicit empty string clears it.
+             * A sent secret must be an `{{ env.VAR }}` reference (unless
+             * `expose_client_secret` is set): a plaintext value is rejected with 400
+             * (`PLAINTEXT_CLIENT_SECRET`).
              * `getPortalConfigV3` returns providers with raw secrets redacted;
              * `{{ env.VAR }}` references pass through.
              *
@@ -8480,6 +8507,9 @@ declare namespace Components {
              *
              * Secrets: a provider sent without `oidc_config.client_secret` keeps the
              * stored secret for the same slug; an explicit empty string clears it.
+             * A sent secret must be an `{{ env.VAR }}` reference (unless
+             * `expose_client_secret` is set): a plaintext value is rejected with 400
+             * (`PLAINTEXT_CLIENT_SECRET`).
              * `getPortalConfigV3` returns providers with raw secrets redacted;
              * `{{ env.VAR }}` references pass through.
              *
@@ -9151,7 +9181,8 @@ declare namespace Components {
              * only: `identifyContact` requires a value for each of them (400 listing the missing
              * ones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`
              * hook on them, and refuses to issue tokens (403) unless there are at least two.
-             * Entries without `name` or `schema` are ignored.
+             * Entries without `name` or `schema` are ignored. A `validation_rule_id` on an
+             * identifier (own or inherited) is checked before the lookup.
              *
              * example:
              * [
@@ -10081,6 +10112,39 @@ declare namespace Components {
              * contact
              */
             EntitySlug;
+            /**
+             * ID of a validation rule of the organization that the value must pass. Checked on
+             * self-registration (400 `INVALID_REGISTRATION_FIELD`) and, for an access point's identifiers or
+             * the `registration_identifiers` it inherits, by `identifyContact` before the contact is looked up
+             * (400 `INVALID_IDENTIFIER_VALUE`). Rules that cannot be checked here are ignored.
+             *
+             */
+            validation_rule_id?: string;
+        }
+        /**
+         * A validation rule of the organization, as embedded in the public portal config.
+         */
+        export interface RegistrationValidationRule {
+            /**
+             * ID of the validation rule
+             */
+            _id: string;
+            /**
+             * Schema version of the validation rule
+             * example:
+             * v2
+             */
+            _schema_version: string;
+            /**
+             * Title of the validation rule
+             */
+            title: string;
+            /**
+             * The rule to evaluate, in the format of the Validation Rules API.
+             */
+            rule: {
+                [name: string]: any;
+            };
         }
         /**
          * An entity that describes a reimbursement billing event.
@@ -10906,6 +10970,9 @@ declare namespace Components {
              *
              * Secrets: a provider sent without `oidc_config.client_secret` keeps the
              * stored secret for the same slug; an explicit empty string clears it.
+             * A sent secret must be an `{{ env.VAR }}` reference (unless
+             * `expose_client_secret` is set): a plaintext value is rejected with 400
+             * (`PLAINTEXT_CLIENT_SECRET`).
              * `getPortalConfigV3` returns providers with raw secrets redacted;
              * `{{ env.VAR }}` references pass through.
              *
@@ -10984,6 +11051,9 @@ declare namespace Components {
              *
              * Secrets: a provider sent without `oidc_config.client_secret` keeps the
              * stored secret for the same slug; an explicit empty string clears it.
+             * A sent secret must be an `{{ env.VAR }}` reference (unless
+             * `expose_client_secret` is set): a plaintext value is rejected with 400
+             * (`PLAINTEXT_CLIENT_SECRET`).
              * `getPortalConfigV3` returns providers with raw secrets redacted;
              * `{{ env.VAR }}` references pass through.
              *
@@ -11609,6 +11679,9 @@ declare namespace Components {
              *
              * Secrets: a provider sent without `oidc_config.client_secret` keeps the
              * stored secret for the same slug; an explicit empty string clears it.
+             * A sent secret must be an `{{ env.VAR }}` reference (unless
+             * `expose_client_secret` is set): a plaintext value is rejected with 400
+             * (`PLAINTEXT_CLIENT_SECRET`).
              * `getPortalConfigV3` returns providers with raw secrets redacted;
              * `{{ env.VAR }}` references pass through.
              *
@@ -16417,6 +16490,15 @@ declare namespace Paths {
                     [name: string]: boolean;
                 };
                 /**
+                 * Public portal config only. The validation rules referenced by `validation_rule_id` on the
+                 * registration fields and the `contract_identifiers`, keyed by rule ID, so the registration and
+                 * add-contract forms can check values as they are typed. Present only when such rules are configured.
+                 *
+                 */
+                registration_validation_rules?: {
+                    [name: string]: /* A validation rule of the organization, as embedded in the public portal config. */ Components.Schemas.RegistrationValidationRule;
+                };
+                /**
                  * Permissions granted to a portal user while accessing entities
                  */
                 grants?: Components.Schemas.Grant[];
@@ -17103,6 +17185,15 @@ declare namespace Paths {
                  */
                 feature_flags?: {
                     [name: string]: boolean;
+                };
+                /**
+                 * Public portal config only. The validation rules referenced by `validation_rule_id` on the
+                 * registration fields and the `contract_identifiers`, keyed by rule ID, so the registration and
+                 * add-contract forms can check values as they are typed. Present only when such rules are configured.
+                 *
+                 */
+                registration_validation_rules?: {
+                    [name: string]: /* A validation rule of the organization, as embedded in the public portal config. */ Components.Schemas.RegistrationValidationRule;
                 };
                 /**
                  * Permissions granted to a portal user while accessing entities
@@ -18363,6 +18454,15 @@ declare namespace Paths {
                  */
                 feature_flags?: {
                     [name: string]: boolean;
+                };
+                /**
+                 * Public portal config only. The validation rules referenced by `validation_rule_id` on the
+                 * registration fields and the `contract_identifiers`, keyed by rule ID, so the registration and
+                 * add-contract forms can check values as they are typed. Present only when such rules are configured.
+                 *
+                 */
+                registration_validation_rules?: {
+                    [name: string]: /* A validation rule of the organization, as embedded in the public portal config. */ Components.Schemas.RegistrationValidationRule;
                 };
                 /**
                  * Permissions granted to a portal user while accessing entities
@@ -19737,6 +19837,12 @@ declare namespace Paths {
             export interface $200 {
                 customerPortal?: {
                     /**
+                     * The portal's start page
+                     * example:
+                     * https://end-customer-portal.ecp.dev.epilot.io
+                     */
+                    link?: string;
+                    /**
                      * example:
                      * https://end-customer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com
                      */
@@ -19762,6 +19868,12 @@ declare namespace Paths {
                 };
                 installerPortal?: {
                     /**
+                     * The portal's start page
+                     * example:
+                     * https://installer-portal.ecp.dev.epilot.io
+                     */
+                    link?: string;
+                    /**
                      * example:
                      * https://installer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com
                      */
@@ -19786,6 +19898,12 @@ declare namespace Paths {
                     userEmailsOnEntity?: string[];
                 };
                 portalUser?: {
+                    /**
+                     * The portal's start page
+                     * example:
+                     * https://employee-portal.ecp.dev.epilot.io
+                     */
+                    link?: string;
                     /**
                      * example:
                      * https://employee-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com
@@ -21730,6 +21848,10 @@ export interface OperationMethods {
    * `authentication` is `registration_identifiers`; returns 403 otherwise. The token is
    * confined to that surface's data access. Requests may be rate limited (429).
    * 
+   * Identifiers with a `validation_rule_id` must pass that rule before the contact is looked up.
+   * Otherwise the response is 400 with `reason: INVALID_IDENTIFIER_VALUE` and
+   * `fields: [{ schema, name, rule_id }]` naming each failing identifier.
+   * 
    * No portal session is expected, but the caller must present a public access token
    * (`token_type: journey` or `token_type: portal`) as the bearer, minted for the same
    * `org_id`; the request is rejected with 401 otherwise. It binds the call to the journey
@@ -22129,6 +22251,11 @@ export interface OperationMethods {
    * addContractByIdentifiers - addContractByIdentifiers
    * 
    * Self-assign contract(s) by pre-configured identifiers.
+   * 
+   * Values of `contract_identifiers` with a `validation_rule_id` must pass that rule before any
+   * contract is looked up. Otherwise the response is 400 with `reason: INVALID_IDENTIFIER_VALUE`
+   * and `fields: [{ schema, name, rule_id }]` naming each failing identifier.
+   * 
    */
   'addContractByIdentifiers'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -23886,6 +24013,10 @@ export interface PathsDictionary {
      * `authentication` is `registration_identifiers`; returns 403 otherwise. The token is
      * confined to that surface's data access. Requests may be rate limited (429).
      * 
+     * Identifiers with a `validation_rule_id` must pass that rule before the contact is looked up.
+     * Otherwise the response is 400 with `reason: INVALID_IDENTIFIER_VALUE` and
+     * `fields: [{ schema, name, rule_id }]` naming each failing identifier.
+     * 
      * No portal session is expected, but the caller must present a public access token
      * (`token_type: journey` or `token_type: portal`) as the bearer, minted for the same
      * `org_id`; the request is rejected with 401 otherwise. It binds the call to the journey
@@ -24349,6 +24480,11 @@ export interface PathsDictionary {
      * addContractByIdentifiers - addContractByIdentifiers
      * 
      * Self-assign contract(s) by pre-configured identifiers.
+     * 
+     * Values of `contract_identifiers` with a `validation_rule_id` must pass that rule before any
+     * contract is looked up. Otherwise the response is 400 with `reason: INVALID_IDENTIFIER_VALUE`
+     * and `fields: [{ schema, name, rule_id }]` naming each failing identifier.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -25731,6 +25867,7 @@ export type ReadBy = Components.Schemas.ReadBy;
 export type ReadingStatus = Components.Schemas.ReadingStatus;
 export type Reason = Components.Schemas.Reason;
 export type RegistrationIdentifier = Components.Schemas.RegistrationIdentifier;
+export type RegistrationValidationRule = Components.Schemas.RegistrationValidationRule;
 export type ReimbursementEvent = Components.Schemas.ReimbursementEvent;
 export type RevisionPage = Components.Schemas.RevisionPage;
 export type RevisionPageRequest = Components.Schemas.RevisionPageRequest;

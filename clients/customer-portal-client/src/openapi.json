@@ -3222,6 +3222,11 @@
                     "customerPortal": {
                       "type": "object",
                       "properties": {
+                        "link": {
+                          "type": "string",
+                          "description": "The portal's start page",
+                          "example": "https://end-customer-portal.ecp.dev.epilot.io"
+                        },
                         "invitationLink": {
                           "type": "string",
                           "example": "https://end-customer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com"
@@ -3249,6 +3254,11 @@
                     "installerPortal": {
                       "type": "object",
                       "properties": {
+                        "link": {
+                          "type": "string",
+                          "description": "The portal's start page",
+                          "example": "https://installer-portal.ecp.dev.epilot.io"
+                        },
                         "invitationLink": {
                           "type": "string",
                           "example": "https://installer-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com"
@@ -3276,6 +3286,11 @@
                     "portalUser": {
                       "type": "object",
                       "properties": {
+                        "link": {
+                          "type": "string",
+                          "description": "The portal's start page",
+                          "example": "https://employee-portal.ecp.dev.epilot.io"
+                        },
                         "invitationLink": {
                           "type": "string",
                           "example": "https://employee-portal.ecp.dev.epilot.io/register?contactId=7aa44fb8-d60e-40cc-9a3a-ba09a1ff7f51&email=john@doe.com"
@@ -4064,7 +4079,7 @@
       "post": {
         "operationId": "identifyContact",
         "summary": "identifyContact",
-        "description": "Identify a contact by the surface's identifiers and, on a match, issue a short-lived\nbearer token that acts as that contact.\n\nThe identifiers checked are the surface's own `identifiers` when it configures any,\notherwise the portal's `registration_identifiers`. Their values are sent in the\n`registration_identifiers` request property. Resolution is otherwise identical to\n`checkContactExistsV3`: the same lookup, `registrationIdentifiersCheck` hook and\nTIMEOUT semantics, run on the surface's identifiers. The token does not grant a portal\nsession; it is accepted only on the operations listed in `allowed_operations`, and\nexpires at `expires_at`. Requires `surface_id` to name a surface of the portal whose\n`authentication` is `registration_identifiers`; returns 403 otherwise. The token is\nconfined to that surface's data access. Requests may be rate limited (429).\n\nNo portal session is expected, but the caller must present a public access token\n(`token_type: journey` or `token_type: portal`) as the bearer, minted for the same\n`org_id`; the request is rejected with 401 otherwise. It binds the call to the journey\nor portal it comes from — the token is public, so it proves origin, not identity.\n",
+        "description": "Identify a contact by the surface's identifiers and, on a match, issue a short-lived\nbearer token that acts as that contact.\n\nThe identifiers checked are the surface's own `identifiers` when it configures any,\notherwise the portal's `registration_identifiers`. Their values are sent in the\n`registration_identifiers` request property. Resolution is otherwise identical to\n`checkContactExistsV3`: the same lookup, `registrationIdentifiersCheck` hook and\nTIMEOUT semantics, run on the surface's identifiers. The token does not grant a portal\nsession; it is accepted only on the operations listed in `allowed_operations`, and\nexpires at `expires_at`. Requires `surface_id` to name a surface of the portal whose\n`authentication` is `registration_identifiers`; returns 403 otherwise. The token is\nconfined to that surface's data access. Requests may be rate limited (429).\n\nIdentifiers with a `validation_rule_id` must pass that rule before the contact is looked up.\nOtherwise the response is 400 with `reason: INVALID_IDENTIFIER_VALUE` and\n`fields: [{ schema, name, rule_id }]` naming each failing identifier.\n\nNo portal session is expected, but the caller must present a public access token\n(`token_type: journey` or `token_type: portal`) as the bearer, minted for the same\n`org_id`; the request is rejected with 401 otherwise. It binds the call to the journey\nor portal it comes from — the token is public, so it proves origin, not identity.\n",
         "security": [],
         "tags": [
           "Public"
@@ -6570,7 +6585,7 @@
       "post": {
         "operationId": "addContractByIdentifiers",
         "summary": "addContractByIdentifiers",
-        "description": "Self-assign contract(s) by pre-configured identifiers.",
+        "description": "Self-assign contract(s) by pre-configured identifiers.\n\nValues of `contract_identifiers` with a `validation_rule_id` must pass that rule before any\ncontract is looked up. Otherwise the response is 400 with `reason: INVALID_IDENTIFIER_VALUE`\nand `fields: [{ schema, name, rule_id }]` naming each failing identifier.\n",
         "tags": [
           "ECP"
         ],
@@ -13893,7 +13908,7 @@
           },
           "identity_providers": {
             "type": "array",
-            "description": "SSO identity providers for the portal. When sent on a portal save (PUT/POST),\nthe list is fully synced — incoming providers are upserted and any existing\nproviders not in the list are deleted. Omit the field to leave SSO\nconfiguration unchanged; send an empty array to remove all providers.\n\nSecrets: a provider sent without `oidc_config.client_secret` keeps the\nstored secret for the same slug; an explicit empty string clears it.\n`getPortalConfigV3` returns providers with raw secrets redacted;\n`{{ env.VAR }}` references pass through.\n",
+            "description": "SSO identity providers for the portal. When sent on a portal save (PUT/POST),\nthe list is fully synced — incoming providers are upserted and any existing\nproviders not in the list are deleted. Omit the field to leave SSO\nconfiguration unchanged; send an empty array to remove all providers.\n\nSecrets: a provider sent without `oidc_config.client_secret` keeps the\nstored secret for the same slug; an explicit empty string clears it.\nA sent secret must be an `{{ env.VAR }}` reference (unless\n`expose_client_secret` is set): a plaintext value is rejected with 400\n(`PLAINTEXT_CLIENT_SECRET`).\n`getPortalConfigV3` returns providers with raw secrets redacted;\n`{{ env.VAR }}` references pass through.\n",
             "items": {
               "$ref": "#/components/schemas/ProviderConfig"
             }
@@ -14653,6 +14668,14 @@
                 "description": "Feature flags for the portal",
                 "additionalProperties": {
                   "type": "boolean"
+                }
+              },
+              "registration_validation_rules": {
+                "type": "object",
+                "readOnly": true,
+                "description": "Public portal config only. The validation rules referenced by `validation_rule_id` on the\nregistration fields and the `contract_identifiers`, keyed by rule ID, so the registration and\nadd-contract forms can check values as they are typed. Present only when such rules are configured.\n",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/RegistrationValidationRule"
                 }
               },
               "grants": {
@@ -16746,7 +16769,7 @@
           },
           "identifiers": {
             "type": "array",
-            "description": "Identifier attributes a caller must supply on this surface to be identified. Only\nused with `authentication: registration_identifiers`.\n\nOmitted or empty means the surface uses the portal's `registration_identifiers`.\nWhen set, these replace the portal's `registration_identifiers` on this surface\nonly: `identifyContact` requires a value for each of them (400 listing the missing\nones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`\nhook on them, and refuses to issue tokens (403) unless there are at least two.\nEntries without `name` or `schema` are ignored.\n",
+            "description": "Identifier attributes a caller must supply on this surface to be identified. Only\nused with `authentication: registration_identifiers`.\n\nOmitted or empty means the surface uses the portal's `registration_identifiers`.\nWhen set, these replace the portal's `registration_identifiers` on this surface\nonly: `identifyContact` requires a value for each of them (400 listing the missing\nones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`\nhook on them, and refuses to issue tokens (403) unless there are at least two.\nEntries without `name` or `schema` are ignored. A `validation_rule_id` on an\nidentifier (own or inherited) is checked before the lookup.\n",
             "items": {
               "$ref": "#/components/schemas/RegistrationIdentifier"
             },
@@ -18030,7 +18053,7 @@
             }
           },
           "sort": {
-            "description": "Sort order of the results: an `attribute:order` pair, or a list of Elasticsearch sort fields that are\nused as they are, e.g. the sort order of a target as returned by the Targeting API.\nWithout a sort, the sort order of the first requested target that defines one applies.\n",
+            "description": "Sort order of the results: an `attribute:order` pair, or a list of Elasticsearch sort fields that are\nused as they are, e.g. the sort order of a target as returned by the Targeting API.\nWithout a sort, the sort order of the first requested target that defines one applies, else lists\nthat include files are sorted by file date, newest first.\n",
             "oneOf": [
               {
                 "type": "string",
@@ -18215,6 +18238,10 @@
           },
           "schema": {
             "$ref": "#/components/schemas/EntitySlug"
+          },
+          "validation_rule_id": {
+            "type": "string",
+            "description": "ID of a validation rule of the organization that the value must pass. Checked on\nself-registration (400 `INVALID_REGISTRATION_FIELD`) and, for an access point's identifiers or\nthe `registration_identifiers` it inherits, by `identifyContact` before the contact is looked up\n(400 `INVALID_IDENTIFIER_VALUE`). Rules that cannot be checked here are ignored.\n"
           }
         }
       },
@@ -18233,6 +18260,10 @@
             "type": "boolean",
             "description": "Whether the user must provide a value for this attribute",
             "default": false
+          },
+          "validation_rule_id": {
+            "type": "string",
+            "description": "ID of a validation rule of the organization that the value must pass on self-registration\n(400 `INVALID_REGISTRATION_FIELD`). Rules that cannot be checked here are ignored.\n"
           }
         }
       },
@@ -18245,6 +18276,40 @@
           },
           "schema": {
             "$ref": "#/components/schemas/EntitySlug"
+          },
+          "validation_rule_id": {
+            "type": "string",
+            "description": "ID of a validation rule of the organization that the value must pass when a portal user adds a\ncontract (`addContractByIdentifiers`, 400 `INVALID_IDENTIFIER_VALUE`). Rules that cannot be\nchecked here are ignored.\n"
+          }
+        }
+      },
+      "RegistrationValidationRule": {
+        "type": "object",
+        "description": "A validation rule of the organization, as embedded in the public portal config.",
+        "required": [
+          "_id",
+          "_schema_version",
+          "title",
+          "rule"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "ID of the validation rule"
+          },
+          "_schema_version": {
+            "type": "string",
+            "description": "Schema version of the validation rule",
+            "example": "v2"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the validation rule"
+          },
+          "rule": {
+            "type": "object",
+            "description": "The rule to evaluate, in the format of the Validation Rules API.",
+            "additionalProperties": true
           }
         }
       },
