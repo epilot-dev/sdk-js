@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.0
+
+### Minor Changes
+
+- Stable release of the 1.6.0 prereleases (same content as 1.6.0-rc.5)
+
 ## 1.6.0-rc.5
 
 ### Minor Changes
