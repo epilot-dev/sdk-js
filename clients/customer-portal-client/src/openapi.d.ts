@@ -48,6 +48,33 @@ declare namespace Components {
             message?: string;
         } | void;
         export type NotFound = Schemas.ErrorResp;
+        export interface PortalSaveTooLarge {
+            /**
+             * Error message
+             */
+            message?: string;
+            /**
+             * Machine-readable cause, when the API can name one. `PORTAL_USER_PENDING_ACTIVATION` means the portal user is authenticated but not mapped to a contact yet, so re-authenticating will not help.
+             */
+            reason?: string;
+            code: "PORTAL_PAGE_TOO_LARGE" | "PORTAL_CONFIG_TOO_LARGE" | "PORTAL_SAVE_TOO_LARGE";
+            /**
+             * The page that is too large (PORTAL_PAGE_TOO_LARGE)
+             */
+            page_id?: string;
+            /**
+             * The page that is too large (PORTAL_PAGE_TOO_LARGE)
+             */
+            page_slug?: string;
+            /**
+             * Size of the page or the settings, when known
+             */
+            size_bytes?: number;
+            /**
+             * The most a page or the settings may hold
+             */
+            max_size_bytes?: number;
+        }
         export type ServiceUnavailable = Schemas.ErrorResp;
         export type TooManyRequests = Schemas.ErrorResp;
         export type Unauthorized = Schemas.ErrorResp;
@@ -1051,6 +1078,11 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            header?: /**
+             * Settings of the portal's header bar, stored once per portal.
+             *
+             */
+            PortalHeader;
             /**
              * Allowed portal entities for the portal
              * example:
@@ -1573,6 +1605,17 @@ declare namespace Components {
              */
             engagement_center_enabled?: boolean;
             engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ EngagementCenterTaskTemplates;
+            /**
+             * Name of the engagement center shown to portal users (header button and drawer title), keyed by language (de, en). A blank or absent language keeps the portal's own translated default.
+             * example:
+             * {
+             *   "de": "Mein Postfach",
+             *   "en": "My inbox"
+             * }
+             */
+            engagement_center_title?: {
+                [name: string]: string;
+            };
         }
         export interface CommonConfigAttributesV3 {
             /**
@@ -1615,6 +1658,11 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            header?: /**
+             * Settings of the portal's header bar, stored once per portal.
+             *
+             */
+            PortalHeader;
             /**
              * Allowed portal entities for the portal
              * example:
@@ -3008,35 +3056,6 @@ declare namespace Components {
             allowed_increment?: string;
             number_of_days_before_restriction?: number;
             grace_period?: number;
-        }
-        export interface EntityFileCount {
-            /**
-             * The ID of the parent entity
-             */
-            entity_id: /**
-             * Entity ID
-             * example:
-             * 5da0a718-c822-403d-9f5d-20d4584e0528
-             */
-            EntityId /* uuid */;
-            _schema: /**
-             * URL-friendly identifier for the entity schema
-             * example:
-             * contact
-             */
-            EntitySlug;
-            /**
-             * The title of the parent entity
-             * example:
-             * Opportunity ABC
-             */
-            _title?: string;
-            /**
-             * Number of files associated with the entity and shared with portal user
-             * example:
-             * 2
-             */
-            file_count: number;
         }
         export interface EntityGetParams {
             /**
@@ -5088,12 +5107,6 @@ declare namespace Components {
                  * contact
                  */
                 EntitySlug;
-                /**
-                 * The title of the parent entity
-                 * example:
-                 * Opportunity ABC
-                 */
-                _title?: string;
             }[];
             /**
              * Indicate whether the user has not seen/downloaded the file before
@@ -6667,6 +6680,11 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            header?: /**
+             * Settings of the portal's header bar, stored once per portal.
+             *
+             */
+            PortalHeader;
             /**
              * Allowed portal entities for the portal
              * example:
@@ -7190,6 +7208,17 @@ declare namespace Components {
             engagement_center_enabled?: boolean;
             engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ EngagementCenterTaskTemplates;
             /**
+             * Name of the engagement center shown to portal users (header button and drawer title), keyed by language (de, en). A blank or absent language keeps the portal's own translated default.
+             * example:
+             * {
+             *   "de": "Mein Postfach",
+             *   "en": "My inbox"
+             * }
+             */
+            engagement_center_title?: {
+                [name: string]: string;
+            };
+            /**
              * ID of the organization
              * example:
              * 12345
@@ -7486,6 +7515,11 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            header?: /**
+             * Settings of the portal's header bar, stored once per portal.
+             *
+             */
+            PortalHeader;
             /**
              * Allowed portal entities for the portal
              * example:
@@ -8220,6 +8254,85 @@ declare namespace Components {
             portal_copilot_visibility?: /* Limits portal chat to portal users matching targets, with the same rules as page and block visibility. Without targets every signed-in portal user can use the chat. */ PortalCopilotVisibility;
         }
         /**
+         * Settings of the portal's header bar, stored once per portal.
+         *
+         */
+        export interface PortalHeader {
+            /**
+             * The design of the header bar
+             */
+            design?: {
+                [name: string]: any;
+                overrides?: /**
+                 * Design overrides scoped to the header bar. Only `components.inputs` and `elements.icon_actions` can be overridden; colours, shape and every other key are refused with a 400 on every write. `null` clears the overrides.
+                 *
+                 * example:
+                 * {
+                 *   "components": {
+                 *     "inputs": {
+                 *       "style": "soft",
+                 *       "color": "neutral",
+                 *       "label_position": "inset"
+                 *     }
+                 *   },
+                 *   "elements": {
+                 *     "icon_actions": {
+                 *       "style": "ghost",
+                 *       "color": "primary"
+                 *     }
+                 *   }
+                 * }
+                 */
+                PortalHeaderDesignOverrides;
+            };
+        }
+        /**
+         * Design overrides scoped to the header bar. Only `components.inputs` and `elements.icon_actions` can be overridden; colours, shape and every other key are refused with a 400 on every write. `null` clears the overrides.
+         *
+         * example:
+         * {
+         *   "components": {
+         *     "inputs": {
+         *       "style": "soft",
+         *       "color": "neutral",
+         *       "label_position": "inset"
+         *     }
+         *   },
+         *   "elements": {
+         *     "icon_actions": {
+         *       "style": "ghost",
+         *       "color": "primary"
+         *     }
+         *   }
+         * }
+         */
+        export type PortalHeaderDesignOverrides = {
+            components?: {
+                /**
+                 * Inputs in the header bar, such as search
+                 */
+                inputs?: {
+                    style?: "soft" | "surface" | "outline" | "ghost";
+                    color?: "primary" | "neutral";
+                    label_position?: "outset" | "inset";
+                };
+            };
+            elements?: {
+                /**
+                 * Icon buttons in the header bar
+                 */
+                icon_actions?: {
+                    style?: "solid" | "soft" | "surface" | "outline" | "ghost";
+                    /**
+                     * A button colour, or a custom colour of the portal's design by id
+                     */
+                    color?: /* A button colour, or a custom colour of the portal's design by id */ ("primary" | "neutral" | "danger") | {
+                        custom: string; // ^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$
+                    };
+                };
+            };
+        } | null;
+        /**
          * ID of the portal
          * example:
          * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
@@ -8431,6 +8544,36 @@ declare namespace Components {
              *
              */
             ProviderConfig[];
+            /**
+             * Only when the request asked to `publish`. The result of publishing this revision.
+             */
+            published?: {
+                revision_id: string;
+                published_at: string; // date-time
+                published_by?: string;
+                /**
+                 * The name now on the revision: the one sent in the request, or the one a previous publish set when this request omitted `name`. Absent when neither exists.
+                 *
+                 * example:
+                 * FAQ page launch
+                 */
+                name?: string;
+                /**
+                 * Stable, machine-readable codes for best-effort post-publish side effects that exhausted their retries. Publishing itself succeeded; these are not error messages and not meant for display as-is. Clients map each code to their own localized text.
+                 * Known codes: `allowed_entities_change` (portal entity grants and detail pages did not sync), `dns_records_clear` (the previous domain's DNS records were not cleared). New codes may be added without a client update, so treat an unrecognized code as a generic "a follow-up step did not finish" case rather than an error.
+                 *
+                 */
+                post_publish_warnings: string[];
+                /**
+                 * Only present when non-empty: blueprint-managed live pages/blocks this publish could not replace because the publisher is not the owning blueprint. Their live version stays as it is; the rest of the revision was published. Detach a node to make it publishable.
+                 *
+                 * example:
+                 * [
+                 *   "allowed_entities_change"
+                 * ]
+                 */
+                held_back?: /* A blueprint-managed page or block a write tried to change; the stored version was kept. */ HeldBackNode[];
+            };
         }
         export interface PortalRevisionList {
             results: PortalRevisionSummary[];
@@ -8563,6 +8706,11 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            header?: /**
+             * Settings of the portal's header bar, stored once per portal.
+             *
+             */
+            PortalHeader;
             /**
              * Allowed portal entities for the portal
              * example:
@@ -9074,11 +9222,34 @@ declare namespace Components {
                 [name: string]: Block;
             };
             based_on_revision_id?: string;
+            /**
+             * The published revision the client showed as live when the edit started. Publishing this revision after a newer one went live is refused (`409`, `reason: PORTAL_CHANGED`) unless forced. Ignored when `based_on_revision_id` is a draft: the draft's own base applies. Absent: what is live when the revision is saved.
+             *
+             */
+            base_published_revision_id?: string;
             revision_source?: /**
              * Where a revision came from, when it was not saved in the builder. Not part of the portal config. The builder renders it in the viewer's language for an unnamed revision.
              *
              */
             RevisionSource;
+            /**
+             * Save and publish in one call. Present, the new revision is published right away, as `publishPortalRevision` would publish it, and the response carries the result in `published`. A publish that fails also discards the new revision, so the call either goes live or leaves nothing behind.
+             *
+             */
+            publish?: {
+                /**
+                 * Name stamped onto the revision when it is published.
+                 */
+                name?: string;
+                /**
+                 * Description stamped onto the revision when it is published.
+                 */
+                description?: string;
+                /**
+                 * Publish even when live moved past the published revision this one is based on. See `PublishRevisionRequest.force`.
+                 */
+                force?: boolean;
+            };
             pages: /**
              * A page inside a revision snapshot. `additionalProperties` is true on purpose — a page carries fields this schema does not name and they must survive into the snapshot and back onto the live page when it is published.
              *
@@ -10085,6 +10256,11 @@ declare namespace Components {
              * Optional description stamped onto the revision at publish time
              */
             description?: string;
+            /**
+             * Publish even when the revision was built on a published revision that is no longer live. Every write published since is reverted. Without it such a publish is a `409` with `reason: PORTAL_CHANGED`.
+             *
+             */
+            force?: boolean;
         }
         /**
          * The person who recorded the reading
@@ -10704,6 +10880,11 @@ declare namespace Components {
              * Origin of the portal
              */
             origin: /* Origin of the portal */ Origin;
+            /**
+             * Only for portals with versioning enabled. `true` uploads the files and returns their URLs without changing the portal: the caller puts them into its next revision, and they go live when that revision is published. Otherwise the uploaded images are committed as a published revision named `Updated via API`.
+             *
+             */
+            draft?: boolean;
             files: {
                 /**
                  * File name
@@ -11107,6 +11288,11 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            header?: /**
+             * Settings of the portal's header bar, stored once per portal.
+             *
+             */
+            PortalHeader;
             /**
              * Allowed portal entities for the portal
              * example:
@@ -11629,6 +11815,17 @@ declare namespace Components {
              */
             engagement_center_enabled?: boolean;
             engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ EngagementCenterTaskTemplates;
+            /**
+             * Name of the engagement center shown to portal users (header button and drawer title), keyed by language (de, en). A blank or absent language keeps the portal's own translated default.
+             * example:
+             * {
+             *   "de": "Mein Postfach",
+             *   "en": "My inbox"
+             * }
+             */
+            engagement_center_title?: {
+                [name: string]: string;
+            };
         }
         export interface UpsertPortalConfigV3 {
             /**
@@ -11735,6 +11932,11 @@ declare namespace Components {
              * 5da0a718-c822-403d-9f5d-20d4584e0528
              */
             EntityId /* uuid */;
+            header?: /**
+             * Settings of the portal's header bar, stored once per portal.
+             *
+             */
+            PortalHeader;
             /**
              * Allowed portal entities for the portal
              * example:
@@ -13005,6 +13207,7 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -13015,6 +13218,7 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -13220,6 +13424,7 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -13230,6 +13435,7 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -13611,99 +13817,6 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
-    namespace GetAllFiles {
-        namespace Parameters {
-            /**
-             * example:
-             * [
-             *   "4910096f-000a-4504-bf5a-d3774ec3032a",
-             *   "7c9f8536-6266-42e8-a0de-c60b61aa81a7"
-             * ]
-             */
-            export type EntityIds = [
-                /**
-                 * Entity ID
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                Components.Schemas.EntityId /* uuid */,
-                .../**
-                 * Entity ID
-                 * example:
-                 * 5da0a718-c822-403d-9f5d-20d4584e0528
-                 */
-                Components.Schemas.EntityId /* uuid */[]
-            ];
-            /**
-             * example:
-             * [
-             *   "document",
-             *   "image"
-             * ]
-             */
-            export type FileTypes = [
-                string,
-                ...string[]
-            ];
-            /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            export type From = number;
-            /**
-             * Size of the search results
-             * example:
-             * 0
-             */
-            export type Size = number;
-        }
-        export interface QueryParameters {
-            from: /**
-             * Initial offset to set for the search results
-             * example:
-             * 0
-             */
-            Parameters.From;
-            size: /**
-             * Size of the search results
-             * example:
-             * 0
-             */
-            Parameters.Size;
-            entity_ids?: /**
-             * example:
-             * [
-             *   "4910096f-000a-4504-bf5a-d3774ec3032a",
-             *   "7c9f8536-6266-42e8-a0de-c60b61aa81a7"
-             * ]
-             */
-            Parameters.EntityIds;
-            file_types?: /**
-             * example:
-             * [
-             *   "document",
-             *   "image"
-             * ]
-             */
-            Parameters.FileTypes;
-        }
-        namespace Responses {
-            export interface $200 {
-                results?: /* The file entity */ Components.Schemas.FileItem[];
-                /**
-                 * Total number of files for pagination
-                 * example:
-                 * 50
-                 */
-                hits?: number;
-            }
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -15608,15 +15721,6 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
-    namespace GetFilesCountByEntity {
-        namespace Responses {
-            export type $200 = Components.Schemas.EntityFileCount[];
-            export type $401 = Components.Responses.Unauthorized;
-            export type $403 = Components.Responses.Forbidden;
-            export type $404 = Components.Responses.NotFound;
-            export type $500 = Components.Responses.InternalServerError;
-        }
-    }
     namespace GetMeterReadings {
         export interface RequestBody {
             meter_id: string;
@@ -15906,6 +16010,11 @@ declare namespace Paths {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.EntityId /* uuid */;
+                header?: /**
+                 * Settings of the portal's header bar, stored once per portal.
+                 *
+                 */
+                Components.Schemas.PortalHeader;
                 /**
                  * Allowed portal entities for the portal
                  * example:
@@ -16428,6 +16537,17 @@ declare namespace Paths {
                  */
                 engagement_center_enabled?: boolean;
                 engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ Components.Schemas.EngagementCenterTaskTemplates;
+                /**
+                 * Name of the engagement center shown to portal users (header button and drawer title), keyed by language (de, en). A blank or absent language keeps the portal's own translated default.
+                 * example:
+                 * {
+                 *   "de": "Mein Postfach",
+                 *   "en": "My inbox"
+                 * }
+                 */
+                engagement_center_title?: {
+                    [name: string]: string;
+                };
                 /**
                  * ID of the organization
                  * example:
@@ -16603,6 +16723,11 @@ declare namespace Paths {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.EntityId /* uuid */;
+                header?: /**
+                 * Settings of the portal's header bar, stored once per portal.
+                 *
+                 */
+                Components.Schemas.PortalHeader;
                 /**
                  * Allowed portal entities for the portal
                  * example:
@@ -17125,6 +17250,17 @@ declare namespace Paths {
                  */
                 engagement_center_enabled?: boolean;
                 engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ Components.Schemas.EngagementCenterTaskTemplates;
+                /**
+                 * Name of the engagement center shown to portal users (header button and drawer title), keyed by language (de, en). A blank or absent language keeps the portal's own translated default.
+                 * example:
+                 * {
+                 *   "de": "Mein Postfach",
+                 *   "en": "My inbox"
+                 * }
+                 */
+                engagement_center_title?: {
+                    [name: string]: string;
+                };
                 /**
                  * ID of the organization
                  * example:
@@ -17872,6 +18008,11 @@ declare namespace Paths {
                  * 5da0a718-c822-403d-9f5d-20d4584e0528
                  */
                 Components.Schemas.EntityId /* uuid */;
+                header?: /**
+                 * Settings of the portal's header bar, stored once per portal.
+                 *
+                 */
+                Components.Schemas.PortalHeader;
                 /**
                  * Allowed portal entities for the portal
                  * example:
@@ -18394,6 +18535,17 @@ declare namespace Paths {
                  */
                 engagement_center_enabled?: boolean;
                 engagement_center_task_templates?: /* Handlebars templates rendering each outstanding task (to-do) row in the portal's engagement center. Resolved server-side per task against the task's entity (same variable syntax as page block templates, e.g. `{{order.order_number}}`, custom and environment variables) plus `task.*` (the workflow step, e.g. `{{task.name}}`), `workflow.*` (the execution, e.g. `{{workflow.name}}`) and `entity.*` (the task's entity regardless of its schema, e.g. `{{entity._title}}`). A template that is absent or blank keeps the portal's default rendering for that line. Admin/builder-only — never exposed via the public portal config. */ Components.Schemas.EngagementCenterTaskTemplates;
+                /**
+                 * Name of the engagement center shown to portal users (header button and drawer title), keyed by language (de, en). A blank or absent language keeps the portal's own translated default.
+                 * example:
+                 * {
+                 *   "de": "Mein Postfach",
+                 *   "en": "My inbox"
+                 * }
+                 */
+                engagement_center_title?: {
+                    [name: string]: string;
+                };
                 /**
                  * ID of the organization
                  * example:
@@ -19494,6 +19646,7 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -19745,11 +19898,13 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
     namespace PutPortalConfig {
         namespace Parameters {
+            export type ExpectedUpdatedAt = string; // date-time
             export type PageUpsertMode = "id" | "slug";
             /**
              * example:
@@ -19766,6 +19921,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             page_upsert_mode?: Parameters.PageUpsertMode;
+            expected_updated_at?: Parameters.ExpectedUpdatedAt /* date-time */;
         }
         export type RequestBody = Components.Schemas.PortalConfigV3;
         namespace Responses {
@@ -19774,6 +19930,8 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $413 = Components.Responses.PortalSaveTooLarge;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -20045,6 +20203,7 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -20069,6 +20228,7 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -20604,6 +20764,7 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -20614,6 +20775,7 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -20792,6 +20954,7 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -20810,6 +20973,7 @@ declare namespace Paths {
             }
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -20829,6 +20993,7 @@ declare namespace Paths {
             export type $400 = Components.Responses.InvalidRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -21601,7 +21766,8 @@ export interface OperationMethods {
   /**
    * upsertEmailTemplatesByPortalId - upsertEmailTemplatesByPortalId
    * 
-   * Upserts the email templates of a portal by portal ID
+   * Upserts the email templates of a portal by portal ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+   * 
    */
   'upsertEmailTemplatesByPortalId'(
     parameters?: Parameters<Paths.UpsertEmailTemplatesByPortalId.PathParameters> | null,
@@ -22346,16 +22512,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRegistrationIdentifiers.Responses.$200>
   /**
-   * getAllFiles - getAllFiles
-   * 
-   * Fetch all documents under the related entities of a contact. Use searchPortalUserEntities instead.
-   */
-  'getAllFiles'(
-    parameters?: Parameters<Paths.GetAllFiles.QueryParameters> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetAllFiles.Responses.$200>
-  /**
    * getFileById - getFileById
    * 
    * Fetch a document with ID. Use getPortalUserEntity instead.
@@ -22385,16 +22541,6 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TrackFileDownloaded.Responses.$200>
-  /**
-   * getFilesCountByEntity - getFilesCountByEntity
-   * 
-   * Fetch file counts for all ECP user related entities
-   */
-  'getFilesCountByEntity'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetFilesCountByEntity.Responses.$200>
   /**
    * getBillingEvents - getBillingEvents
    * 
@@ -22760,7 +22906,8 @@ export interface OperationMethods {
   /**
    * updatePortalPage - updatePortalPage
    * 
-   * Update a portal page by id
+   * Update a portal page by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+   * 
    */
   'updatePortalPage'(
     parameters?: Parameters<Paths.V2PortalPages$Id.PathParameters> | null,
@@ -22770,7 +22917,8 @@ export interface OperationMethods {
   /**
    * deletePortalPage - deletePortalPage
    * 
-   * Delete a portal page by id
+   * Delete a portal page by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+   * 
    */
   'deletePortalPage'(
     parameters?: Parameters<Paths.V2PortalPages$Id.PathParameters> | null,
@@ -22812,7 +22960,8 @@ export interface OperationMethods {
   /**
    * createPortalPage - createPortalPage
    * 
-   * Create a new portal page
+   * Create a new portal page. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+   * 
    */
   'createPortalPage'(
     parameters?: Parameters<Paths.V2PortalPages.QueryParameters> | null,
@@ -22877,7 +23026,8 @@ export interface OperationMethods {
   /**
    * createPortalPageBlock - createPortalPageBlock
    * 
-   * Create a new portal page block
+   * Create a new portal page block. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+   * 
    */
   'createPortalPageBlock'(
     parameters?: Parameters<Paths.V2PortalPages$IdBlocks.PathParameters> | null,
@@ -22897,7 +23047,8 @@ export interface OperationMethods {
   /**
    * updatePortalPageBlock - updatePortalPageBlock
    * 
-   * Update a portal page block by id
+   * Update a portal page block by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+   * 
    */
   'updatePortalPageBlock'(
     parameters?: Parameters<Paths.V2PortalPages$IdBlocks$BlockId.PathParameters> | null,
@@ -22907,7 +23058,8 @@ export interface OperationMethods {
   /**
    * deletePortalPageBlock - deletePortalPageBlock
    * 
-   * Delete a portal page block by id
+   * Delete a portal page block by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+   * 
    */
   'deletePortalPageBlock'(
     parameters?: Parameters<Paths.V2PortalPages$IdBlocks$BlockId.PathParameters> | null,
@@ -23037,7 +23189,8 @@ export interface OperationMethods {
   /**
    * putPortalConfig - putPortalConfig
    * 
-   * Updates a specific portal configuration by ID.
+   * Updates a specific portal configuration by ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+   * 
    */
   'putPortalConfig'(
     parameters?: Parameters<Paths.PutPortalConfig.QueryParameters & Paths.PutPortalConfig.PathParameters> | null,
@@ -23076,6 +23229,8 @@ export interface OperationMethods {
    * The payload must be COMPLETE. This endpoint does not merge against live or against the previous revision: publishing a revision deletes every live page the revision does not contain. The server validates structure only — `pages` present, each page carrying `id`, `slug`, `order` and `blocks`, and no two pages sharing an `id` or a `slug`. Semantic completeness of the config is a promise the caller makes, and a partial payload is honoured rather than rejected.
    * 
    * `email_templates` is optional, and absence means "keep the portal's current templates", never "no templates". A present but partial map is taken verbatim.
+   * 
+   * With `publish`, the revision is published in the same call: save and publish in one step.
    * 
    */
   'createPortalRevision'(
@@ -23137,7 +23292,7 @@ export interface OperationMethods {
    * 
    * The same atomic publish stamps `name`, `description` and `published_at` onto the revision being published — permanently, on that revision, and not on any later one that supersedes it as live. `name` is generated server-side when the request omits it, so every published revision carries one.
    * 
-   * Conflict detection covers the live config only: publish is rejected with `409` when the live config changed after publish read it. Live pages, their redirect routes and the email templates are replaced outright — a concurrent edit to a live page is not detected and is overwritten. `409` is also returned when the revision's stored config or email templates cannot be read, or when two of its pages would resolve to the same slug. A domain the revision claims that another portal already owns is a `400`.
+   * Publish is rejected with `409` (`reason: PORTAL_CHANGED`) when the revision was built on a published revision that is no longer live: publishing it would revert every write published since. Reload, re-apply the change and save again, or send `force: true` to publish it anyway. A revision that was published before is a rollback and is never refused for this. Publish is also rejected with `409` when the live config changed after publish read it. Every write to a versioned portal publishes a revision, so these checks cover pages and email templates too. `409` is also returned when the revision's stored config or email templates cannot be read, or when two of its pages would resolve to the same slug. A domain the revision claims that another portal already owns is a `400`.
    * 
    */
   'publishPortalRevision'(
@@ -23289,6 +23444,10 @@ export interface OperationMethods {
    * Merges the provided fields into the portal's mobile app configuration
    * (deep merge). Only mobile_config is modified; all other portal settings
    * are left untouched.
+   * 
+   * With portal versioning on, the change is published as a revision, like
+   * every other write to a versioned portal. `409` when the portal kept
+   * changing while the write was retried.
    * 
    */
   'putMobileConfig'(
@@ -23718,7 +23877,8 @@ export interface PathsDictionary {
     /**
      * upsertEmailTemplatesByPortalId - upsertEmailTemplatesByPortalId
      * 
-     * Upserts the email templates of a portal by portal ID
+     * Upserts the email templates of a portal by portal ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.UpsertEmailTemplatesByPortalId.PathParameters> | null,
@@ -24591,18 +24751,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRegistrationIdentifiers.Responses.$200>
   }
-  ['/v2/portal/user/files']: {
-    /**
-     * getAllFiles - getAllFiles
-     * 
-     * Fetch all documents under the related entities of a contact. Use searchPortalUserEntities instead.
-     */
-    'get'(
-      parameters?: Parameters<Paths.GetAllFiles.QueryParameters> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetAllFiles.Responses.$200>
-  }
   ['/v2/portal/user/file/{id}']: {
     /**
      * getFileById - getFileById
@@ -24638,18 +24786,6 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TrackFileDownloaded.Responses.$200>
-  }
-  ['/v2/portal/user/files/count-by-entity']: {
-    /**
-     * getFilesCountByEntity - getFilesCountByEntity
-     * 
-     * Fetch file counts for all ECP user related entities
-     */
-    'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetFilesCountByEntity.Responses.$200>
   }
   ['/v2/portal/billing/events']: {
     /**
@@ -25071,7 +25207,8 @@ export interface PathsDictionary {
     /**
      * updatePortalPage - updatePortalPage
      * 
-     * Update a portal page by id
+     * Update a portal page by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.V2PortalPages$Id.PathParameters> | null,
@@ -25081,7 +25218,8 @@ export interface PathsDictionary {
     /**
      * deletePortalPage - deletePortalPage
      * 
-     * Delete a portal page by id
+     * Delete a portal page by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+     * 
      */
     'delete'(
       parameters?: Parameters<Paths.V2PortalPages$Id.PathParameters> | null,
@@ -25129,7 +25267,8 @@ export interface PathsDictionary {
     /**
      * createPortalPage - createPortalPage
      * 
-     * Create a new portal page
+     * Create a new portal page. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.V2PortalPages.QueryParameters> | null,
@@ -25194,7 +25333,8 @@ export interface PathsDictionary {
     /**
      * createPortalPageBlock - createPortalPageBlock
      * 
-     * Create a new portal page block
+     * Create a new portal page block. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.V2PortalPages$IdBlocks.PathParameters> | null,
@@ -25226,7 +25366,8 @@ export interface PathsDictionary {
     /**
      * updatePortalPageBlock - updatePortalPageBlock
      * 
-     * Update a portal page block by id
+     * Update a portal page block by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.V2PortalPages$IdBlocks$BlockId.PathParameters> | null,
@@ -25236,7 +25377,8 @@ export interface PathsDictionary {
     /**
      * deletePortalPageBlock - deletePortalPageBlock
      * 
-     * Delete a portal page block by id
+     * Delete a portal page block by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+     * 
      */
     'delete'(
       parameters?: Parameters<Paths.V2PortalPages$IdBlocks$BlockId.PathParameters> | null,
@@ -25390,7 +25532,8 @@ export interface PathsDictionary {
     /**
      * putPortalConfig - putPortalConfig
      * 
-     * Updates a specific portal configuration by ID.
+     * Updates a specific portal configuration by ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.PutPortalConfig.QueryParameters & Paths.PutPortalConfig.PathParameters> | null,
@@ -25420,6 +25563,8 @@ export interface PathsDictionary {
      * The payload must be COMPLETE. This endpoint does not merge against live or against the previous revision: publishing a revision deletes every live page the revision does not contain. The server validates structure only — `pages` present, each page carrying `id`, `slug`, `order` and `blocks`, and no two pages sharing an `id` or a `slug`. Semantic completeness of the config is a promise the caller makes, and a partial payload is honoured rather than rejected.
      * 
      * `email_templates` is optional, and absence means "keep the portal's current templates", never "no templates". A present but partial map is taken verbatim.
+     * 
+     * With `publish`, the revision is published in the same call: save and publish in one step.
      * 
      */
     'post'(
@@ -25498,7 +25643,7 @@ export interface PathsDictionary {
      * 
      * The same atomic publish stamps `name`, `description` and `published_at` onto the revision being published — permanently, on that revision, and not on any later one that supersedes it as live. `name` is generated server-side when the request omits it, so every published revision carries one.
      * 
-     * Conflict detection covers the live config only: publish is rejected with `409` when the live config changed after publish read it. Live pages, their redirect routes and the email templates are replaced outright — a concurrent edit to a live page is not detected and is overwritten. `409` is also returned when the revision's stored config or email templates cannot be read, or when two of its pages would resolve to the same slug. A domain the revision claims that another portal already owns is a `400`.
+     * Publish is rejected with `409` (`reason: PORTAL_CHANGED`) when the revision was built on a published revision that is no longer live: publishing it would revert every write published since. Reload, re-apply the change and save again, or send `force: true` to publish it anyway. A revision that was published before is a rollback and is never refused for this. Publish is also rejected with `409` when the live config changed after publish read it. Every write to a versioned portal publishes a revision, so these checks cover pages and email templates too. `409` is also returned when the revision's stored config or email templates cannot be read, or when two of its pages would resolve to the same slug. A domain the revision claims that another portal already owns is a `400`.
      * 
      */
     'post'(
@@ -25677,6 +25822,10 @@ export interface PathsDictionary {
      * (deep merge). Only mobile_config is modified; all other portal settings
      * are left untouched.
      * 
+     * With portal versioning on, the change is published as a revision, like
+     * every other write to a versioned portal. `409` when the portal kept
+     * changing while the write was retried.
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.PutMobileConfig.QueryParameters> | null,
@@ -25738,7 +25887,6 @@ export type EmailTemplates = Components.Schemas.EmailTemplates;
 export type EngagementCenterTaskTemplates = Components.Schemas.EngagementCenterTaskTemplates;
 export type Entity = Components.Schemas.Entity;
 export type EntityEditRule = Components.Schemas.EntityEditRule;
-export type EntityFileCount = Components.Schemas.EntityFileCount;
 export type EntityGetParams = Components.Schemas.EntityGetParams;
 export type EntityId = Components.Schemas.EntityId;
 export type EntityItem = Components.Schemas.EntityItem;
@@ -25820,6 +25968,8 @@ export type PortalCopilotVisibility = Components.Schemas.PortalCopilotVisibility
 export type PortalDataExportColumn = Components.Schemas.PortalDataExportColumn;
 export type PortalDescriptionOverrides = Components.Schemas.PortalDescriptionOverrides;
 export type PortalFeatureSettings = Components.Schemas.PortalFeatureSettings;
+export type PortalHeader = Components.Schemas.PortalHeader;
+export type PortalHeaderDesignOverrides = Components.Schemas.PortalHeaderDesignOverrides;
 export type PortalId = Components.Schemas.PortalId;
 export type PortalNameOverrides = Components.Schemas.PortalNameOverrides;
 export type PortalNotification = Components.Schemas.PortalNotification;

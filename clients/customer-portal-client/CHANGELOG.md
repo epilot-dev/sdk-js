@@ -1,5 +1,12 @@
 # @epilot/customer-portal-client
 
+## 0.52.0
+
+### Minor Changes
+
+- Regenerated from the deployed Customer Portal API: everything in 0.52.0-rc.1, plus the portal `header` config (`PortalHeader`, `PortalHeaderDesignOverrides`), `engagement_center_title`, `force` on publishing a revision, `draft` on portal files, and 409/413 responses on the config, page, block, email template and file writes
+- Removed `getAllFiles` (`GET /v2/portal/user/files`) and `getFilesCountByEntity` (`GET /v2/portal/user/files/count-by-entity`) with `EntityFileCount`: the API no longer serves them
+
 ## 0.52.0-rc.1
 
 ### Minor Changes
