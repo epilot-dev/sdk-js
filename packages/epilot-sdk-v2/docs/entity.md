@@ -170,6 +170,7 @@ const { data } = await entityClient.listSchemas(...)
 - [`UserRelationAttribute`](#userrelationattribute)
 - [`PartnerOrganisationAttribute`](#partnerorganisationattribute)
 - [`PortalAccessAttribute`](#portalaccessattribute)
+- [`PortalRoleAttribute`](#portalroleattribute)
 - [`DefaultAddressFields`](#defaultaddressfields)
 - [`AddressAttribute`](#addressattribute)
 - [`AddressRelationAttribute`](#addressrelationattribute)
@@ -5232,7 +5233,7 @@ const { data } = await client.createSchemaCapability(
         edit_mode_config: { /* ... */ },
         type: 'link'
       },
-      /* ... 33 more */
+      /* ... 34 more */
     ],
     overridable_attribute: false,
     managed_fields: ['status'],
@@ -5669,7 +5670,7 @@ const { data } = await client.putSchemaCapability(
         edit_mode_config: { /* ... */ },
         type: 'link'
       },
-      /* ... 33 more */
+      /* ... 34 more */
     ],
     overridable_attribute: false,
     managed_fields: ['status'],
@@ -8179,6 +8180,72 @@ type PortalAccessAttribute = {
 }
 ```
 
+### `PortalRoleAttribute`
+
+```ts
+type PortalRoleAttribute = {
+  id?: string
+  name: string
+  label: string
+  placeholder?: string
+  hidden?: boolean
+  show_in_table?: boolean
+  sortable?: boolean
+  required?: boolean
+  readonly?: boolean
+  deprecated?: boolean
+  overridable_attribute?: boolean
+  default_value?: unknown
+  group?: string
+  order?: number
+  layout?: string
+  hide_label?: boolean
+  icon?: string
+  render_condition?: string
+  data_classification?: "public" | "pii"
+  _purpose?: string[]
+  _manifest?: string // uuid[]
+  constraints?: object
+  feature_flag?: string
+  settings_flag?: Array<{
+    name?: string
+    enabled?: boolean
+  }>
+  value_formatter?: string
+  preview_value_formatter?: string
+  entity_builder_disable_edit?: boolean
+  protected?: boolean
+  info_helpers?: {
+    hint_text?: string
+    hint_text_key?: string
+    hint_custom_component?: string
+    hint_tooltip_placement?: string
+  }
+  explicit_searchable?: boolean
+  exclude_from_search?: boolean
+  repeatable?: boolean
+  has_primary?: boolean
+  edit_mode?: "direct" | "external" | "approval"
+  edit_mode_config?: {
+    match_strategy?: "exact" | "fuzzy" | "any"
+    fuzzy_config?: {
+      type: { ... }
+      suffix_length?: { ... }
+      fields_to_ignore?: { ... }
+      regex_flags?: { ... }
+      country_code?: { ... }
+      match_on?: { ... }
+      key?: { ... }
+      mode?: { ... }
+      ordered?: { ... }
+      require_tags_match?: { ... }
+      pattern?: { ... }
+    }
+  }
+  type: "portal_role"
+}
+```
+
 ### `DefaultAddressFields`
 
 Default fields visible on addresses
@@ -9666,7 +9733,7 @@ type LocationConditionDefinition = {
   name: string
   label: string
   type: "location"
-  format?: "postal_code" | "postal_code_city"
+  format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
 }
 ```
 
@@ -9697,7 +9764,7 @@ type ConditionDefinition = {
   name: string
   label: string
   type: "location"
-  format?: "postal_code" | "postal_code_city"
+  format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
 }
 ```
 

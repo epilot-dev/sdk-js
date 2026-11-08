@@ -6838,6 +6838,9 @@
             "$ref": "#/components/schemas/PortalAccessAttribute"
           },
           {
+            "$ref": "#/components/schemas/PortalRoleAttribute"
+          },
+          {
             "$ref": "#/components/schemas/PhoneAttribute"
           },
           {
@@ -7801,6 +7804,25 @@
           }
         ]
       },
+      "PortalRoleAttribute": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          {
+            "type": "object",
+            "description": "Portal role of a portal user. The value is a portal role slug (e.g. `default_end_customer_portal_role`).\nAn empty value means the portal's default role is used.\n",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "portal_role"
+                ]
+              }
+            }
+          }
+        ]
+      },
       "DefaultAddressFields": {
         "type": "array",
         "nullable": true,
@@ -8638,7 +8660,7 @@
           },
           {
             "type": "object",
-            "description": "A condition whose value identifies a place.",
+            "description": "A condition whose value identifies a place, or the grid operator a place is connected to.",
             "properties": {
               "type": {
                 "type": "string",
@@ -8649,10 +8671,12 @@
               },
               "format": {
                 "type": "string",
-                "description": "The shape of the location value. Immutable once the condition has been saved.",
+                "description": "What the location value holds. `postal_code` and `postal_code_city` are address fields;\n`power_grid_operator` and `gas_grid_operator` are the 13-digit code number of a power or\ngas grid operator. Immutable once the condition has been saved.\n",
                 "enum": [
                   "postal_code",
-                  "postal_code_city"
+                  "postal_code_city",
+                  "power_grid_operator",
+                  "gas_grid_operator"
                 ]
               }
             },
