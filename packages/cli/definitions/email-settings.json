@@ -943,6 +943,9 @@
                       "2y"
                     ],
                     "description": "Optional timeframe for initial mailbox sync. When provided, triggers an automatic\nmailbox sync after connecting the mailbox, syncing emails from the specified period.\n"
+                  },
+                  "sync_options": {
+                    "$ref": "#/components/schemas/OutlookMailboxSyncOptions"
                   }
                 }
               }
@@ -988,7 +991,7 @@
             }
           },
           "400": {
-            "description": "Bad request - missing email parameter"
+            "description": "Bad request - missing email parameter, or invalid `sync_options` (`recent_window_days` without `mirror_recent`)"
           },
           "401": {
             "description": "Not connected to Microsoft 365"
@@ -1075,6 +1078,62 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v2/outlook/mailbox/{email}/sync-options": {
+      "put": {
+        "operationId": "updateOutlookMailboxSyncOptions",
+        "summary": "Update Outlook Mailbox Sync Options",
+        "description": "Replaces the sync options of an already connected Outlook mailbox. The body replaces the stored\noptions entirely. `recent_window_days` is only allowed with `deletion_policy` `mirror_recent`\nand defaults to 30 when omitted.\n",
+        "tags": [
+          "O365 Outlook Connection"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "Email address of the connected Outlook mailbox"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutlookMailboxSyncOptions"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sync options updated; returns the updated mailbox mapping",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectedOutlookEmail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid sync options (`recent_window_days` without `mirror_recent`)"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "No Outlook mapping found for this email address"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -3416,6 +3475,29 @@
           }
         ]
       },
+      "OutlookMailboxSyncOptions": {
+        "type": "object",
+        "description": "Per-mailbox options for what happens in epilot when a mail is deleted in Outlook.\n",
+        "required": [
+          "deletion_policy"
+        ],
+        "properties": {
+          "deletion_policy": {
+            "type": "string",
+            "enum": [
+              "mirror",
+              "mirror_recent",
+              "keep"
+            ],
+            "description": "- `mirror`: a mail deleted in Outlook is deleted in epilot (default behavior when no sync options are set).\n- `mirror_recent`: only mails received within the last `recent_window_days` days are deleted in epilot.\n- `keep`: mails deleted in Outlook are kept in epilot.\n"
+          },
+          "recent_window_days": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Only allowed with `deletion_policy` `mirror_recent`. Defaults to 30 when omitted.\n"
+          }
+        }
+      },
       "ConnectedOutlookEmail": {
         "type": "object",
         "description": "Mapping between an Outlook email and its Outlook Connection.\nThis tracks which provider/tenant provisions each Outlook email.\n",
@@ -3447,6 +3529,9 @@
           "connected_by_user_id": {
             "type": "string",
             "description": "User who connected this mailbox"
+          },
+          "sync_options": {
+            "$ref": "#/components/schemas/OutlookMailboxSyncOptions"
           }
         }
       },

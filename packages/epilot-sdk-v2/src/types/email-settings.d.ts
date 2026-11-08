@@ -191,6 +191,11 @@ export declare namespace Components {
              * User who connected this mailbox
              */
             connected_by_user_id?: string;
+            sync_options?: /**
+             * Per-mailbox options for what happens in epilot when a mail is deleted in Outlook.
+             *
+             */
+            OutlookMailboxSyncOptions;
         }
         /**
          * Request payload for creating a new email address.
@@ -628,6 +633,24 @@ export declare namespace Components {
              * The email addresses that could not be deleted (connection disconnect only)
              */
             email_addresses?: string /* email */[];
+        }
+        /**
+         * Per-mailbox options for what happens in epilot when a mail is deleted in Outlook.
+         *
+         */
+        export interface OutlookMailboxSyncOptions {
+            /**
+             * - `mirror`: a mail deleted in Outlook is deleted in epilot (default behavior when no sync options are set).
+             * - `mirror_recent`: only mails received within the last `recent_window_days` days are deleted in epilot.
+             * - `keep`: mails deleted in Outlook are kept in epilot.
+             *
+             */
+            deletion_policy: "mirror" | "mirror_recent" | "keep";
+            /**
+             * Only allowed with `deletion_policy` `mirror_recent`. Defaults to 30 when omitted.
+             *
+             */
+            recent_window_days?: number;
         }
         /**
          * Request payload for provisioning an epilot-managed email address.
@@ -1246,6 +1269,11 @@ export declare namespace Paths {
              *
              */
             mailboxSyncTimeframe?: "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y";
+            sync_options?: /**
+             * Per-mailbox options for what happens in epilot when a mail is deleted in Outlook.
+             *
+             */
+            Components.Schemas.OutlookMailboxSyncOptions;
         }
         namespace Responses {
             export interface $201 {
@@ -1864,6 +1892,34 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace UpdateOutlookMailboxSyncOptions {
+        namespace Parameters {
+            export type Email = string; // email
+        }
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
+        }
+        export type RequestBody = /**
+         * Per-mailbox options for what happens in epilot when a mail is deleted in Outlook.
+         *
+         */
+        Components.Schemas.OutlookMailboxSyncOptions;
+        namespace Responses {
+            export type $200 = /**
+             * Mapping between an Outlook email and its Outlook Connection.
+             * This tracks which provider/tenant provisions each Outlook email.
+             *
+             */
+            Components.Schemas.ConnectedOutlookEmail;
+            export interface $400 {
+            }
+            export type $403 = Components.Responses.Forbidden;
+            export interface $404 {
+            }
+            export interface $500 {
+            }
+        }
+    }
     namespace UpdateSetting {
         namespace Parameters {
             export type Id = string;
@@ -2359,6 +2415,19 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DisconnectOutlookMailbox.Responses.$200>
+  /**
+   * updateOutlookMailboxSyncOptions - Update Outlook Mailbox Sync Options
+   * 
+   * Replaces the sync options of an already connected Outlook mailbox. The body replaces the stored
+   * options entirely. `recent_window_days` is only allowed with `deletion_policy` `mirror_recent`
+   * and defaults to 30 when omitted.
+   * 
+   */
+  'updateOutlookMailboxSyncOptions'(
+    parameters?: Parameters<Paths.UpdateOutlookMailboxSyncOptions.PathParameters> | null,
+    data?: Paths.UpdateOutlookMailboxSyncOptions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateOutlookMailboxSyncOptions.Responses.$200>
   /**
    * startMailboxSync - Start Mailbox Sync
    * 
@@ -3128,6 +3197,21 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DisconnectOutlookMailbox.Responses.$200>
   }
+  ['/v2/outlook/mailbox/{email}/sync-options']: {
+    /**
+     * updateOutlookMailboxSyncOptions - Update Outlook Mailbox Sync Options
+     * 
+     * Replaces the sync options of an already connected Outlook mailbox. The body replaces the stored
+     * options entirely. `recent_window_days` is only allowed with `deletion_policy` `mirror_recent`
+     * and defaults to 30 when omitted.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateOutlookMailboxSyncOptions.PathParameters> | null,
+      data?: Paths.UpdateOutlookMailboxSyncOptions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateOutlookMailboxSyncOptions.Responses.$200>
+  }
   ['/v2/outlook/mailbox/{email}/sync']: {
     /**
      * startMailboxSync - Start Mailbox Sync
@@ -3561,6 +3645,7 @@ export type MyCalendarConnectionResponse = Components.Schemas.MyCalendarConnecti
 export type OutlookConnectionError = Components.Schemas.OutlookConnectionError;
 export type OutlookConnectionStatus = Components.Schemas.OutlookConnectionStatus;
 export type OutlookDisconnectError = Components.Schemas.OutlookDisconnectError;
+export type OutlookMailboxSyncOptions = Components.Schemas.OutlookMailboxSyncOptions;
 export type ProvisionEpilotEmailAddressPayload = Components.Schemas.ProvisionEpilotEmailAddressPayload;
 export type RestrictDuplicatesWithinSetting = Components.Schemas.RestrictDuplicatesWithinSetting;
 export type SetEmailAddressPrimaryPayload = Components.Schemas.SetEmailAddressPrimaryPayload;
