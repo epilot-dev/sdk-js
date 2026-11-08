@@ -938,7 +938,8 @@ const { data } = await client.startMailboxSync(
     email: 'example',
   },
   {
-    timeframe: '5m'
+    timeframe: '5m',
+    since: '1970-01-01T00:00:00.000Z'
   },
 )
 ```
@@ -997,6 +998,7 @@ Estimate Mailbox Sync
 const { data } = await client.getMailboxSyncEstimate({
   email: 'example',
   timeframes: 'example',
+  since: 'example',
 })
 ```
 
@@ -1876,7 +1878,7 @@ type ConnectOutlookRequest = {
 type MailboxSyncStatus = {
   execution_id: string
   status: "RUNNING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "CANCELLED"
-  timeframe: "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y"
+  timeframe: "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y" | "custom"
   timeframe_start?: string // date-time
   started_at: string // date-time
   completed_at?: string // date-time
@@ -1911,7 +1913,7 @@ type MailboxSyncFolderStatuses = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" 
 
 ```ts
 type MailboxSyncEstimate = {
-  timeframe: "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y"
+  timeframe: "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y" | "custom"
   since: string // date-time
   inbox_messages: number
   sent_messages: number
@@ -1922,10 +1924,10 @@ type MailboxSyncEstimate = {
 
 ### `MailboxSyncTimeframePeriods`
 
-Mailbox sync period.
+Mailbox sync period. `custom` is a sync started with an explicit `since`.
 
 ```ts
-type MailboxSyncTimeframePeriods = "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y"
+type MailboxSyncTimeframePeriods = "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y" | "custom"
 ```
 
 ### `InboxBucketResponse`

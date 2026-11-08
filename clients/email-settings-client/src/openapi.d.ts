@@ -457,7 +457,7 @@ declare namespace Components {
             inbox_id: string;
         }
         export interface MailboxSyncEstimate {
-            timeframe: /* Mailbox sync period. */ MailboxSyncTimeframePeriods;
+            timeframe: /* Mailbox sync period. `custom` is a sync started with an explicit `since`. */ MailboxSyncTimeframePeriods;
             /**
              * Start of the timeframe; the sync imports messages from this point on.
              */
@@ -474,7 +474,7 @@ declare namespace Components {
         export interface MailboxSyncStatus {
             execution_id: string;
             status: MailboxSyncStatuses;
-            timeframe: /* Mailbox sync period. */ MailboxSyncTimeframePeriods;
+            timeframe: /* Mailbox sync period. `custom` is a sync started with an explicit `since`. */ MailboxSyncTimeframePeriods;
             /**
              * Start of the range the sync covers; it imports messages from this point up to started_at.
              */
@@ -496,9 +496,9 @@ declare namespace Components {
         }
         export type MailboxSyncStatuses = "RUNNING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "CANCELLED";
         /**
-         * Mailbox sync period.
+         * Mailbox sync period. `custom` is a sync started with an explicit `since`.
          */
-        export type MailboxSyncTimeframePeriods = "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y";
+        export type MailboxSyncTimeframePeriods = "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y" | "custom";
         /**
          * Per-user calendar connection metadata, or null when the caller has
          * not connected their personal calendar yet.
@@ -1515,6 +1515,7 @@ declare namespace Paths {
     namespace GetMailboxSyncEstimate {
         namespace Parameters {
             export type Email = string; // email
+            export type Since = string; // date-time
             /**
              * example:
              * 1m,1y,2y
@@ -1530,6 +1531,7 @@ declare namespace Paths {
              * 1m,1y,2y
              */
             Parameters.Timeframes;
+            since?: Parameters.Since /* date-time */;
         }
         namespace Responses {
             export interface $200 {
@@ -1797,19 +1799,20 @@ declare namespace Paths {
         export interface PathParameters {
             email: Parameters.Email /* email */;
         }
+        /**
+         * Either `timeframe` or `since`.
+         */
         export interface RequestBody {
             /**
-             * Sync period:
-             * - 5m: last 5 minutes (quick sync)
-             * - 1w: 1 week
-             * - 2w: 2 weeks
-             * - 1m: 1 month
-             * - 3m: 3 months
-             * - 6m: 6 months
-             * - 1y: 1 year
+             * Sync period, up to now: 5m, 1d, 1w, 2w, 1m, 3m, 6m, 1y or 2y. `custom` is not accepted here; send `since` instead.
              *
              */
-            timeframe: "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y";
+            timeframe?: "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y" | "custom";
+            /**
+             * Start of a custom period, up to now. At most 2 years back. The sync is recorded with timeframe `custom`.
+             *
+             */
+            since?: string; // date-time
         }
         namespace Responses {
             export interface $202 {
@@ -1818,7 +1821,7 @@ declare namespace Paths {
                  */
                 execution_id: string;
                 status: Components.Schemas.MailboxSyncStatuses;
-                timeframe: /* Mailbox sync period. */ Components.Schemas.MailboxSyncTimeframePeriods;
+                timeframe: /* Mailbox sync period. `custom` is a sync started with an explicit `since`. */ Components.Schemas.MailboxSyncTimeframePeriods;
             }
             export interface $400 {
             }
