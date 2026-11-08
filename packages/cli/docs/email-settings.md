@@ -65,7 +65,9 @@ epilot email-settings provisionEpilotEmailAddress
 - [`disconnectOutlookMailbox`](#disconnectoutlookmailbox) — Disconnects a single Outlook mailbox by email address.
 - [`startMailboxSync`](#startmailboxsync) — Triggers an Outlook mailbox sync for the specified email address.
 - [`getMailboxSyncStatus`](#getmailboxsyncstatus) — Returns the current or latest sync status for the specified mailbox.
+- [`getMailboxSyncEstimate`](#getmailboxsyncestimate) — Counts the inbox and sent messages a mailbox sync would import for each timeframe, with the same date filter the
 - [`retryMailboxSync`](#retrymailboxsync) — Retries failed messages from a previous sync execution.
+- [`cancelMailboxSync`](#cancelmailboxsync) — Stops the running sync of an Outlook mailbox and marks it CANCELLED.
 - [`getConnectedOutlookEmails`](#getconnectedoutlookemails) — Returns all Outlook email addresses connected to the organization.
 - [`outlookOAuthCallback`](#outlookoauthcallback) — Exchanges authorization code for tokens and stores them.
 
@@ -144,7 +146,8 @@ epilot email-settings provisionEpilotEmailAddress --jsonata '$'
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
   "is_primary": false,
-  "is_epilot_email_address": false
+  "is_epilot_email_address": false,
+  "provider": "outlook"
 }
 ```
 
@@ -197,7 +200,8 @@ epilot email-settings setEmailAddressPrimary --jsonata '$'
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
   "is_primary": false,
-  "is_epilot_email_address": false
+  "is_epilot_email_address": false,
+  "provider": "outlook"
 }
 ```
 
@@ -256,7 +260,8 @@ epilot email-settings getEmailAddress -p id=123e4567-e89b-12d3-a456-426614174000
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
   "is_primary": false,
-  "is_epilot_email_address": false
+  "is_epilot_email_address": false,
+  "provider": "outlook"
 }
 ```
 
@@ -338,7 +343,8 @@ epilot email-settings updateEmailAddress -p id=123e4567-e89b-12d3-a456-426614174
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
   "is_primary": false,
-  "is_epilot_email_address": false
+  "is_epilot_email_address": false,
+  "provider": "outlook"
 }
 ```
 
@@ -418,7 +424,8 @@ epilot email-settings listEmailAddresses --jsonata '$'
     "shared_inbox_id": "inbox-xyz",
     "is_active": true,
     "is_primary": false,
-    "is_epilot_email_address": false
+    "is_epilot_email_address": false,
+    "provider": "outlook"
   }
 ]
 ```
@@ -485,7 +492,8 @@ epilot email-settings addEmailAddress --jsonata '$'
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
   "is_primary": false,
-  "is_epilot_email_address": false
+  "is_epilot_email_address": false,
+  "provider": "outlook"
 }
 ```
 
@@ -1178,7 +1186,8 @@ epilot email-settings connectOutlookMailbox --jsonata 'email_address'
     "shared_inbox_id": "inbox-xyz",
     "is_active": true,
     "is_primary": false,
-    "is_epilot_email_address": false
+    "is_epilot_email_address": false,
+    "provider": "outlook"
   },
   "outlook_email": "user@example.com",
   "tenant_id": "string",
@@ -1254,7 +1263,7 @@ Triggers an Outlook mailbox sync for the specified email address.
 ```bash
 epilot email-settings startMailboxSync \
   -p email=user@example.com \
-  -d '{"timeframe":"5m"}'
+  -d '{"timeframe":"5m","since":"1970-01-01T00:00:00.000Z"}'
 ```
 
 Using positional args for path parameters:
@@ -1316,6 +1325,7 @@ epilot email-settings getMailboxSyncStatus -p email=user@example.com --jsonata '
   "execution_id": "string",
   "status": "RUNNING",
   "timeframe": "5m",
+  "timeframe_start": "1970-01-01T00:00:00.000Z",
   "started_at": "1970-01-01T00:00:00.000Z",
   "completed_at": "1970-01-01T00:00:00.000Z",
   "inbox": {
@@ -1330,6 +1340,61 @@ epilot email-settings getMailboxSyncStatus -p email=user@example.com --jsonata '
     "processed_messages": 0,
     "failed_messages": 0
   }
+}
+```
+
+</details>
+
+---
+
+### `getMailboxSyncEstimate`
+
+Counts the inbox and sent messages a mailbox sync would import for each timeframe, with the same date filter the
+
+`GET /v2/outlook/mailbox/{email}/sync/estimate`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `email` | path | string (email) | Yes | Email address of the Outlook mailbox |
+| `timeframes` | query | string | No | Comma-separated timeframes to estimate. Defaults to `1m,1y,2y`, or to none when `since` is given. |
+| `since` | query | string (date-time) | No | Also estimate a custom period from this point up to now (returned with timeframe `custom`). At most 2 years back. |
+
+**Sample Call**
+
+```bash
+epilot email-settings getMailboxSyncEstimate \
+  -p email=user@example.com
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot email-settings getMailboxSyncEstimate user@example.com
+```
+
+With JSONata filter:
+
+```bash
+epilot email-settings getMailboxSyncEstimate -p email=user@example.com --jsonata 'estimates'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "estimates": [
+    {
+      "timeframe": "5m",
+      "since": "1970-01-01T00:00:00.000Z",
+      "inbox_messages": 0,
+      "sent_messages": 0,
+      "total_messages": 0,
+      "estimated_duration_seconds": 0
+    }
+  ]
 }
 ```
 
@@ -1376,6 +1441,51 @@ With JSONata filter:
 ```bash
 epilot email-settings retryMailboxSync -p email=user@example.com --jsonata '$'
 ```
+
+---
+
+### `cancelMailboxSync`
+
+Stops the running sync of an Outlook mailbox and marks it CANCELLED.
+
+`POST /v2/outlook/mailbox/{email}/sync/cancel`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `email` | path | string (email) | Yes | Email address of the Outlook mailbox |
+
+**Sample Call**
+
+```bash
+epilot email-settings cancelMailboxSync \
+  -p email=user@example.com
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot email-settings cancelMailboxSync user@example.com
+```
+
+With JSONata filter:
+
+```bash
+epilot email-settings cancelMailboxSync -p email=user@example.com --jsonata 'execution_id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "execution_id": "string",
+  "status": "RUNNING"
+}
+```
+
+</details>
 
 ---
 
@@ -1858,7 +1968,8 @@ epilot email-settings connectSmtpSender --jsonata 'email_address'
     "shared_inbox_id": "inbox-xyz",
     "is_active": true,
     "is_primary": false,
-    "is_epilot_email_address": false
+    "is_epilot_email_address": false,
+    "provider": "outlook"
   },
   "sender": {
     "email": "user@example.com",
@@ -1979,7 +2090,7 @@ Retrieves settings of a specific type for the organization.
 
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
-| `type` | query | "signature" \| "email_domain" \| "email_address" \| "whitelist_email_address" \| "restrict_duplicates_within" | Yes | The type of settings to retrieve. Determines which category of
+| `type` | query | "signature" \| "email_domain" \| "email_address" \| "whitelist_email_address" \| "restrict_duplicates_within" \| "allowed_recipient_domains" \| "auto_link_identifier_attributes" | Yes | The type of settings to retrieve. Determines which category of
 email settings will be returned.
  |
 | `id` | query | string | No | Optional ID to retrieve a specific setting. If omitted, all settings
@@ -2011,6 +2122,8 @@ epilot email-settings getSettings -p type=signature --jsonata '$'
     "type": "signature",
     "value": "Best regards, The Team",
     "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "schemas": {},
+    "excluded_senders": ["newsletter@partner.de", "@noreply.example.com"],
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-20T14:45:00Z",
     "created_by": "user-123",
@@ -2048,6 +2161,8 @@ epilot email-settings addSetting \
   "type": "signature",
   "value": "Best regards, The Team",
   "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+  "schemas": {},
+  "excluded_senders": ["newsletter@partner.de", "@noreply.example.com"],
   "created_at": "2024-01-15T10:30:00Z",
   "updated_at": "2024-01-20T14:45:00Z",
   "created_by": "user-123",
@@ -2079,6 +2194,8 @@ epilot email-settings addSetting --jsonata '$'
     "type": "signature",
     "value": "Best regards, The Team",
     "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "schemas": {},
+    "excluded_senders": ["newsletter@partner.de", "@noreply.example.com"],
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-20T14:45:00Z",
     "created_by": "user-123",
@@ -2115,28 +2232,8 @@ cat body.json | epilot email-settings deleteSetting
 With JSONata filter:
 
 ```bash
-epilot email-settings deleteSetting --jsonata 'id'
+epilot email-settings deleteSetting --jsonata '$'
 ```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "id": "a10bd0ff-4391-4cfc-88ee-b19d718a9bf7",
-  "name": "Default Signature",
-  "org_id": "org-123",
-  "type": "signature",
-  "value": "Best regards, The Team",
-  "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
-  "created_at": "2024-01-15T10:30:00Z",
-  "updated_at": "2024-01-20T14:45:00Z",
-  "created_by": "user-123",
-  "updated_by": "user-456"
-}
-```
-
-</details>
 
 ---
 
@@ -2173,6 +2270,8 @@ epilot email-settings updateSetting \
   "type": "signature",
   "value": "Best regards, The Team",
   "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+  "schemas": {},
+  "excluded_senders": ["newsletter@partner.de", "@noreply.example.com"],
   "created_at": "2024-01-15T10:30:00Z",
   "updated_at": "2024-01-20T14:45:00Z",
   "created_by": "user-123",
@@ -2209,6 +2308,8 @@ epilot email-settings updateSetting -p id=a10bd0ff-4391-4cfc-88ee-b19d718a9bf7 -
   "type": "signature",
   "value": "Best regards, The Team",
   "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+  "schemas": {},
+  "excluded_senders": ["newsletter@partner.de", "@noreply.example.com"],
   "created_at": "2024-01-15T10:30:00Z",
   "updated_at": "2024-01-20T14:45:00Z",
   "created_by": "user-123",
@@ -2288,6 +2389,8 @@ epilot email-settings addDomain --jsonata '$'
     "type": "signature",
     "value": "Best regards, The Team",
     "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "schemas": {},
+    "excluded_senders": ["newsletter@partner.de", "@noreply.example.com"],
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-20T14:45:00Z",
     "created_by": "user-123",
@@ -2368,6 +2471,8 @@ epilot email-settings verifyNameServers --jsonata '$'
     "type": "signature",
     "value": "Best regards, The Team",
     "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "schemas": {},
+    "excluded_senders": ["newsletter@partner.de", "@noreply.example.com"],
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-20T14:45:00Z",
     "created_by": "user-123",
@@ -2419,6 +2524,8 @@ epilot email-settings verifyDnsRecords --jsonata '$'
     "type": "signature",
     "value": "Best regards, The Team",
     "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "schemas": {},
+    "excluded_senders": ["newsletter@partner.de", "@noreply.example.com"],
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-20T14:45:00Z",
     "created_by": "user-123",
@@ -2470,6 +2577,8 @@ epilot email-settings verifyDomain --jsonata '$'
     "type": "signature",
     "value": "Best regards, The Team",
     "html": "<p>Best regards,<br/><strong>The Team</strong></p>",
+    "schemas": {},
+    "excluded_senders": ["newsletter@partner.de", "@noreply.example.com"],
     "created_at": "2024-01-15T10:30:00Z",
     "updated_at": "2024-01-20T14:45:00Z",
     "created_by": "user-123",

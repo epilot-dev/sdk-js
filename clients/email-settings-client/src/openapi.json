@@ -1105,9 +1105,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "timeframe"
-                ],
+                "description": "Either `timeframe` or `since`.",
                 "properties": {
                   "timeframe": {
                     "allOf": [
@@ -1115,7 +1113,12 @@
                         "$ref": "#/components/schemas/MailboxSyncTimeframePeriods"
                       }
                     ],
-                    "description": "Sync period:\n- 5m: last 5 minutes (quick sync)\n- 1w: 1 week\n- 2w: 2 weeks\n- 1m: 1 month\n- 3m: 3 months\n- 6m: 6 months\n- 1y: 1 year\n"
+                    "description": "Sync period, up to now: 5m, 1d, 1w, 2w, 1m, 3m, 6m, 1y or 2y. `custom` is not accepted here; send `since` instead.\n"
+                  },
+                  "since": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Start of a custom period, up to now. At most 2 years back. The sync is recorded with timeframe `custom`.\n"
                   }
                 }
               }
@@ -1240,7 +1243,17 @@
               "type": "string",
               "example": "1m,1y,2y"
             },
-            "description": "Comma-separated timeframes to estimate. Defaults to `1m,1y,2y`."
+            "description": "Comma-separated timeframes to estimate. Defaults to `1m,1y,2y`, or to none when `since` is given."
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Also estimate a custom period from this point up to now (returned with timeframe `custom`). At most 2 years back."
           }
         ],
         "responses": {
@@ -2942,9 +2955,10 @@
           "3m",
           "6m",
           "1y",
-          "2y"
+          "2y",
+          "custom"
         ],
-        "description": "Mailbox sync period."
+        "description": "Mailbox sync period. `custom` is a sync started with an explicit `since`."
       },
       "InboxBucketResponse": {
         "type": "object",
