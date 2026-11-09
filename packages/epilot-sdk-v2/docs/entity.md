@@ -6744,15 +6744,7 @@ type GenerateEntityTableAIFiltersRequest = {
     name?: string
     group?: string
     allowedSchemas?: string[]
-    relatedOptions?: Array<{
-      type?: { ... }
-      label: { ... }
-      label_type?: { ... }
-      name?: { ... }
-      group?: { ... }
-      allowedSchemas?: { ... }
-      relatedOptions?: { ... }
-    }>
+    relatedOptions?: { ... }[]
   }>
 }
 ```
@@ -6787,23 +6779,7 @@ type EntityTableFilterOption = {
   name?: string
   group?: string
   allowedSchemas?: string[]
-  relatedOptions?: Array<{
-    type?: "search" | "filter"
-    label: string
-    label_type?: string
-    name?: string
-    group?: string
-    allowedSchemas?: string[]
-    relatedOptions?: Array<{
-      type?: { ... }
-      label: { ... }
-      label_type?: { ... }
-      name?: { ... }
-      group?: { ... }
-      allowedSchemas?: { ... }
-      relatedOptions?: { ... }
-    }>
-  }>
+  relatedOptions?: { ... }[]
 }
 ```
 
@@ -10607,36 +10583,9 @@ type EntityListParams = {
     exists?: {
       field: { ... }
     }
-    $and?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $or?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $not?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
+    $and?: { ... }
+    $or?: { ... }
+    $not?: { ... }
   }>
   allow_targeting_all_schemas?: boolean
   sort?: string | string[]
@@ -10678,90 +10627,10 @@ type SearchFilter = Array<{
   exists?: {
     field: string
   }
-  $and?: Array<{
-    term?: Record<string, string | number | boolean>
-    terms?: Record<string, string | number | boolean[]>
-    ids?: {
-      values?: { ... }
-    }
-    range?: Record<string, {
-      gt?: { ... }
-      gte?: { ... }
-      lt?: { ... }
-      lte?: { ... }
-      format?: { ... }
-      relation?: { ... }
-      time_zone?: { ... }
-    }>
-    exists?: {
-      field: { ... }
-    }
-    $and?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $or?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $not?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-  }>
-  $or?: Array<{
-    term?: Record<string, string | number | boolean>
-    terms?: Record<string, string | number | boolean[]>
-    ids?: {
-      values?: { ... }
-    }
-    range?: Record<string, {
-      gt?: { ... }
-      gte?: { ... }
-      lt?: { ... }
-      lte?: { ... }
-      format?: { ... }
-      relation?: { ... }
-      time_zone?: { ... }
-    }>
-    exists?: {
-      field: { ... }
-    }
-    $and?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $or?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-  // ...
-}
+  $and?: { ... }
+  $or?: { ... }
+  $not?: { ... }
+}>
 ```
 
 ### `SearchFilterValue`

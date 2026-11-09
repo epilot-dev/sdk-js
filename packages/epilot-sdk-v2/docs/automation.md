@@ -4479,36 +4479,9 @@ type BulkTriggerRequest = {
     exists?: {
       field: { ... }
     }
-    $and?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $or?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $not?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
+    $and?: { ... }
+    $or?: { ... }
+    $not?: { ... }
   }>
   trigger_context?: Record<string, string>
 }
@@ -4833,90 +4806,10 @@ type EntitySearchFilter = Array<{
   exists?: {
     field: string
   }
-  $and?: Array<{
-    term?: Record<string, string | number | boolean>
-    terms?: Record<string, string | number | boolean[]>
-    ids?: {
-      values?: { ... }
-    }
-    range?: Record<string, {
-      gt?: { ... }
-      gte?: { ... }
-      lt?: { ... }
-      lte?: { ... }
-      format?: { ... }
-      relation?: { ... }
-      time_zone?: { ... }
-    }>
-    exists?: {
-      field: { ... }
-    }
-    $and?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $or?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $not?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-  }>
-  $or?: Array<{
-    term?: Record<string, string | number | boolean>
-    terms?: Record<string, string | number | boolean[]>
-    ids?: {
-      values?: { ... }
-    }
-    range?: Record<string, {
-      gt?: { ... }
-      gte?: { ... }
-      lt?: { ... }
-      lte?: { ... }
-      format?: { ... }
-      relation?: { ... }
-      time_zone?: { ... }
-    }>
-    exists?: {
-      field: { ... }
-    }
-    $and?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-      exists?: { ... }
-      $and?: { ... }
-      $or?: { ... }
-      $not?: { ... }
-    }>
-    $or?: Array<{
-      term?: { ... }
-      terms?: { ... }
-      ids?: { ... }
-      range?: { ... }
-  // ...
-}
+  $and?: { ... }
+  $or?: { ... }
+  $not?: { ... }
+}>
 ```
 
 ### `EntitySearchFilterValue`
@@ -4978,39 +4871,7 @@ type Comparison = "equals" | "any_of" | "not_empty" | "is_empty"
 
 ```ts
 type FilterConditionOnEvent = {
-  $or?: Array<{
-    $or?: Array<{
-      $or?: { ... }
-    } | Record<string, Array<string | {
-      equals-ignore-case?: { ... }
-    } | {
-      anything-but?: { ... }
-    } | {
-      numeric?: { ... }
-    } | {
-      exists?: { ... }
-    } | {
-      prefix?: { ... }
-    } | {
-      suffix?: { ... }
-    } | {
-      wildcard?: { ... }
-    }>>>
-  } | Record<string, Array<string | {
-    equals-ignore-case?: string
-  } | {
-    anything-but?: string[]
-  } | {
-    numeric?: string | number[]
-  } | {
-    exists?: boolean
-  } | {
-    prefix?: string
-  } | {
-    suffix?: string
-  } | {
-    wildcard?: string
-  }>>>
+  $or?: { ... }[]
 } | Record<string, Array<string | {
   equals-ignore-case?: string
 } | {
@@ -5088,25 +4949,7 @@ type WildcardCondition = {
 
 ```ts
 type OrCondition = {
-  $or?: Array<{
-    $or?: Array<{
-      $or?: { ... }
-    } | Record<string, Array<string | {
-      equals-ignore-case?: { ... }
-    } | {
-      anything-but?: { ... }
-    } | {
-      numeric?: { ... }
-    } | {
-      exists?: { ... }
-    } | {
-      prefix?: { ... }
-    } | {
-      suffix?: { ... }
-    } | {
-      wildcard?: { ... }
-    }>>>
-  } | Record<string, Array<string | {
+  $or?: Array<{ ... } | Record<string, Array<string | {
     equals-ignore-case?: string
   } | {
     anything-but?: string[]
@@ -5128,39 +4971,7 @@ type OrCondition = {
 
 ```ts
 type DiffAdded = {
-  $or?: Array<{
-    $or?: Array<{
-      $or?: { ... }
-    } | Record<string, Array<string | {
-      equals-ignore-case?: { ... }
-    } | {
-      anything-but?: { ... }
-    } | {
-      numeric?: { ... }
-    } | {
-      exists?: { ... }
-    } | {
-      prefix?: { ... }
-    } | {
-      suffix?: { ... }
-    } | {
-      wildcard?: { ... }
-    }>>>
-  } | Record<string, Array<string | {
-    equals-ignore-case?: string
-  } | {
-    anything-but?: string[]
-  } | {
-    numeric?: string | number[]
-  } | {
-    exists?: boolean
-  } | {
-    prefix?: string
-  } | {
-    suffix?: string
-  } | {
-    wildcard?: string
-  }>>>
+  $or?: { ... }[]
 } | Record<string, Array<string | {
   equals-ignore-case?: string
 } | {
@@ -5182,39 +4993,7 @@ type DiffAdded = {
 
 ```ts
 type DiffUpdated = {
-  $or?: Array<{
-    $or?: Array<{
-      $or?: { ... }
-    } | Record<string, Array<string | {
-      equals-ignore-case?: { ... }
-    } | {
-      anything-but?: { ... }
-    } | {
-      numeric?: { ... }
-    } | {
-      exists?: { ... }
-    } | {
-      prefix?: { ... }
-    } | {
-      suffix?: { ... }
-    } | {
-      wildcard?: { ... }
-    }>>>
-  } | Record<string, Array<string | {
-    equals-ignore-case?: string
-  } | {
-    anything-but?: string[]
-  } | {
-    numeric?: string | number[]
-  } | {
-    exists?: boolean
-  } | {
-    prefix?: string
-  } | {
-    suffix?: string
-  } | {
-    wildcard?: string
-  }>>>
+  $or?: { ... }[]
 } | Record<string, Array<string | {
   equals-ignore-case?: string
 } | {
@@ -5236,39 +5015,7 @@ type DiffUpdated = {
 
 ```ts
 type DiffDeleted = {
-  $or?: Array<{
-    $or?: Array<{
-      $or?: { ... }
-    } | Record<string, Array<string | {
-      equals-ignore-case?: { ... }
-    } | {
-      anything-but?: { ... }
-    } | {
-      numeric?: { ... }
-    } | {
-      exists?: { ... }
-    } | {
-      prefix?: { ... }
-    } | {
-      suffix?: { ... }
-    } | {
-      wildcard?: { ... }
-    }>>>
-  } | Record<string, Array<string | {
-    equals-ignore-case?: string
-  } | {
-    anything-but?: string[]
-  } | {
-    numeric?: string | number[]
-  } | {
-    exists?: boolean
-  } | {
-    prefix?: string
-  } | {
-    suffix?: string
-  } | {
-    wildcard?: string
-  }>>>
+  $or?: { ... }[]
 } | Record<string, Array<string | {
   equals-ignore-case?: string
 } | {

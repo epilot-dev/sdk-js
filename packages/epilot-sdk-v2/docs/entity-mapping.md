@@ -1968,19 +1968,7 @@ type MappingAttributeV2 = {
     }
     _each?: string
     _as?: string
-    _map?: {
-      _set?: { ... }
-      _append?: { ... }
-      _prepend?: { ... }
-      _uniq?: { ... }
-      _retain_old_values?: { ... }
-      _copy?: { ... }
-      _template?: { ... }
-      _random?: { ... }
-      _each?: { ... }
-      _as?: { ... }
-      _map?: { ... }
-    } | string | boolean | number | Record<string, unknown> | unknown[]
+    _map?: { ... }
   } | string | boolean | number | Record<string, unknown> | unknown[]
   origin?: "system_recommendation" | "user_manually" | "entity_updating_system_recommendation"
 }
@@ -2016,37 +2004,7 @@ type OperationNode = {
   }
   _each?: string
   _as?: string
-  _map?: {
-    _set?: string | boolean | number | Record<string, unknown> | unknown[]
-    _append?: unknown
-    _prepend?: unknown
-    _uniq?: boolean | string[]
-    _retain_old_values?: boolean
-    _copy?: string
-    _template?: string
-    _random?: {
-      type: { ... }
-    } | {
-      type: { ... }
-      min?: { ... }
-      max?: { ... }
-    }
-    _each?: string
-    _as?: string
-    _map?: {
-      _set?: { ... }
-      _append?: { ... }
-      _prepend?: { ... }
-      _uniq?: { ... }
-      _retain_old_values?: { ... }
-      _copy?: { ... }
-      _template?: { ... }
-      _random?: { ... }
-      _each?: { ... }
-      _as?: { ... }
-      _map?: { ... }
-    } | string | boolean | number | Record<string, unknown> | unknown[]
-  } | string | boolean | number | Record<string, unknown> | unknown[]
+  _map?: { ... }
 } | string | boolean | number | Record<string, unknown> | unknown[]
 ```
 
@@ -2070,37 +2028,7 @@ type OperationObjectNode = {
   }
   _each?: string
   _as?: string
-  _map?: {
-    _set?: string | boolean | number | Record<string, unknown> | unknown[]
-    _append?: unknown
-    _prepend?: unknown
-    _uniq?: boolean | string[]
-    _retain_old_values?: boolean
-    _copy?: string
-    _template?: string
-    _random?: {
-      type: { ... }
-    } | {
-      type: { ... }
-      min?: { ... }
-      max?: { ... }
-    }
-    _each?: string
-    _as?: string
-    _map?: {
-      _set?: { ... }
-      _append?: { ... }
-      _prepend?: { ... }
-      _uniq?: { ... }
-      _retain_old_values?: { ... }
-      _copy?: { ... }
-      _template?: { ... }
-      _random?: { ... }
-      _each?: { ... }
-      _as?: { ... }
-      _map?: { ... }
-    } | string | boolean | number | Record<string, unknown> | unknown[]
-  } | string | boolean | number | Record<string, unknown> | unknown[]
+  _map?: { ... } | string | boolean | number | Record<string, unknown> | unknown[]
 }
 ```
 

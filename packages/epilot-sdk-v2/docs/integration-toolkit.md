@@ -8054,82 +8054,10 @@ Describes the inferred type shape of a JSONata expression
 ```ts
 type TypeDescriptor = {
   kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
-  properties?: Record<string, {
-    kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
-    properties?: Record<string, {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-    items?: {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }
-    source?: string
-    variants?: Array<{
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-  }>
-  items?: {
-    kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
-    properties?: Record<string, {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-    items?: {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }
-    source?: string
-    variants?: Array<{
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-  }
+  properties?: Record<string, { ... }>
+  items?: { ... }
   source?: string
-  variants?: Array<{
-    kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
-    properties?: Record<string, {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-    items?: {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }
-    source?: string
-    variants?: Array<{
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-  }>
+  variants?: { ... }[]
 }
 ```
 
@@ -8143,53 +8071,17 @@ type UseCaseTypePreview = {
   name?: string
   request_shape: {
     kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
-    properties?: Record<string, {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-    items?: {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }
+    properties?: Record<string, { ... }>
+    items?: { ... }
     source?: string
-    variants?: Array<{
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
+    variants?: { ... }[]
   }
   response_shape: {
     kind: "object" | "array" | "string" | "number" | "boolean" | "null" | "unknown" | "union"
-    properties?: Record<string, {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
-    items?: {
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }
+    properties?: Record<string, { ... }>
+    items?: { ... }
     source?: string
-    variants?: Array<{
-      kind: { ... }
-      properties?: { ... }
-      items?: { ... }
-      source?: { ... }
-      variants?: { ... }
-    }>
+    variants?: { ... }[]
   }
   existing_annotations?: {
     request?: Record<string, string>

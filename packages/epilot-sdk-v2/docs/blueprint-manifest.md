@@ -4379,7 +4379,7 @@ const { data } = await client.applyBlueprintMergePlan(
 
 ### `previewBlueprintMergeRevert`
 
-Lists what the update wrote, from its own journal, and what reverting each resource would do. Resources changed since the update need an explicit choice (`requires_choice`); `not_restorable` ones can
+Lists what the update wrote, from its own journal, and what reverting each resource would do. Resources changed since the update need an explicit choice (`requires_choice`); `not_restorable` ones can 
 
 `POST /v3/blueprint-manifest/merge-plans/{merge_plan_id}:preview-revert`
 
@@ -4454,7 +4454,7 @@ const { data } = await client.applyBlueprintMergeRevert(
 
 Install a blueprint into a single destination org using the V3 engine (direct API
 calls, no Terraform). Creates resources in topological order with global ID
-replacement and supports checkpoint-based
+replacement and supports checkpoint-based 
 
 `POST /v3/blueprint-manifest/blueprint:install`
 
@@ -4896,7 +4896,7 @@ const { data } = await client.listBulkInstallTargetsV3({
 
 Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`
 targets. Starts a new child install with `auto_apply=true`, appends its job id to
-`job_ids`, and reuses the same target
+`job_ids`, and reuses the same target 
 
 `POST /v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets/{destination_org_id}:retry`
 
@@ -5819,7 +5819,7 @@ const { data } = await client.getBlueprintTestInterpretation({
 
 ### `confirmBlueprintTestInterpretationV2`
 
-Save the author's confirmed selection of a completed interpretation as a v2 test case (201), or as a new revision of the case it rewrites (200, needs expected_revision). Ambiguous parts need a chosen
+Save the author's confirmed selection of a completed interpretation as a v2 test case (201), or as a new revision of the case it rewrites (200, needs expected_revision). Ambiguous parts need a chosen 
 
 `POST /v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations/{interpretation_id}/confirm`
 
