@@ -3670,6 +3670,70 @@
         }
       }
     },
+    "/v1/conditional-pricing/{slug}/conditions:usage": {
+      "get": {
+        "description": "Returns, for each condition the schema declares and each option a `select` condition\ndeclares, how many variants pin it, and for the schema as a whole how many conditional\nentities and variants it has. An entity builder reads it when it loads a schema:\n\n- **Remove condition** is unlocked when the condition's `variants` is 0.\n- Removing a `select` option is unlocked when that option's `variants` is 0.\n- Turning conditional pricing off for the schema is locked while `total.entities` or\n  `total.variants` is above 0.\n- A condition removed while variants still pin it is listed in `undeclared`. Declaring it\n  again with the same `name`, `type`, `format` and `options` makes those variants\n  resolvable once more. Labels are not known and are entered again.\n\nRemoving a condition or option that variants pin makes those variants unresolvable. The\ncounts are of what the search index holds, which lags the stored variants by up to about 90\nseconds, and a variant can be written between this read and a schema save. A variant the\nindex does not hold is not counted.\n",
+        "operationId": "$getConditionUsage",
+        "summary": "$getConditionUsage",
+        "tags": [
+          "Conditional Pricing API"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "description": "The conditional entity type whose schema to report on",
+            "schema": {
+              "$ref": "#/components/schemas/ConditionalEntitySlug"
+            },
+            "required": true,
+            "example": "price"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The schema's condition usage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionUsage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, e.g. the slug names no conditional entity type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`CONDITIONAL_PRICING_NOT_ENABLED`: the organization has not opted in to Conditional\nPricing. Without a `code`: the token names no organization this API can act for.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SCHEMA_NOT_FOUND`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConditionalPricingError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/conditional-pricing/organization": {
       "get": {
         "description": "Returns whether the calling organization has Conditional Pricing on, whether its search\ncollection is ready or still being deleted, and, once it is on, whether it is in use. While it\nis in use, or while its collection is being set up or deleted, switching it is refused, so a UI\ncan lock the switch. Answers `200` for an organization that has not turned it on.\n",
@@ -5895,7 +5959,7 @@
       },
       "ConditionType": {
         "type": "string",
-        "description": "The kind of value a condition holds, which decides how a pinned value is matched against a\nresolve context.\n\n- `string`: an arbitrary string, matched exactly and case-sensitively\n- `number`: a numeric value\n- `date`: a single date\n- `daterange`: a window with a from and an until timestamp; either end may be left open\n- `boolean`: a true/false value\n- `select`: one of the values declared in `options`, which is always a closed vocabulary\n- `location`: a geographic value, shaped by `format`\n",
+        "description": "The kind of value a condition holds, which decides how a pinned value is matched against a\nresolve context.\n\n- `string`: an arbitrary string, matched exactly and case-sensitively\n- `number`: a numeric value\n- `date`: a single date\n- `daterange`: a window from a `from` to an `until`, both included; either end may be left open\n- `boolean`: a true/false value\n- `select`: one of the values declared in `options`, which is always a closed vocabulary\n- `location`: a geographic value, shaped by `format`\n",
         "enum": [
           "string",
           "number",
@@ -6039,6 +6103,203 @@
               "PROVISIONING",
               "ACTIVE"
             ]
+          }
+        }
+      },
+      "ConditionUsage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "total",
+          "conditions",
+          "undeclared"
+        ],
+        "properties": {
+          "total": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "variants",
+              "entities"
+            ],
+            "properties": {
+              "variants": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "The schema's variants in the search index."
+              },
+              "entities": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "The schema's entities flagged `is_conditional`, soft-deleted ones included, whether or\nnot the caller may read them.\n"
+              }
+            }
+          },
+          "conditions": {
+            "type": "array",
+            "description": "One entry per condition the schema declares, in its order, zeros included.",
+            "items": {
+              "$ref": "#/components/schemas/DeclaredConditionUsage"
+            }
+          },
+          "undeclared": {
+            "type": "array",
+            "description": "The conditions variants pin that the schema no longer declares, one entry per name and\ntype, most pinned first, at most 100. Empty when there are none. Each entry carries what\ndeclaring the condition again needs, so that its variants resolve once more.\n",
+            "items": {
+              "$ref": "#/components/schemas/UndeclaredConditionUsage"
+            }
+          }
+        },
+        "example": {
+          "total": {
+            "variants": 1252,
+            "entities": 38
+          },
+          "conditions": [
+            {
+              "name": "delivery_area",
+              "variants": 1240,
+              "entities": 37
+            },
+            {
+              "name": "customer_type",
+              "variants": 12,
+              "entities": 3,
+              "options": [
+                {
+                  "value": "private",
+                  "variants": 12
+                },
+                {
+                  "value": "business",
+                  "variants": 0
+                }
+              ],
+              "undeclared_options": []
+            },
+            {
+              "name": "offer_period",
+              "variants": 0,
+              "entities": 0
+            }
+          ],
+          "undeclared": [
+            {
+              "name": "legacy_customer_type",
+              "type": "select",
+              "variants": 1,
+              "entities": 1,
+              "options": [
+                {
+                  "value": "private",
+                  "variants": 1
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "DeclaredConditionUsage": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A `select` condition always carries `options` and `undeclared_options`. A condition of any\nother type carries neither.\n",
+        "required": [
+          "name",
+          "variants",
+          "entities"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "customer_type"
+          },
+          "variants": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many variants pin the condition. Exact."
+          },
+          "entities": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many entities those variants belong to. Approximate above about 3,000, so it should\nnot decide a lock.\n"
+          },
+          "options": {
+            "type": "array",
+            "description": "One entry per option the condition declares, in its order, zeros included.",
+            "items": {
+              "$ref": "#/components/schemas/ConditionOptionUsage"
+            }
+          },
+          "undeclared_options": {
+            "type": "array",
+            "description": "The values variants pin that the condition no longer declares, most pinned first, at\nmost 100. Empty when there are none. Listing a value again makes its variants resolvable.\n",
+            "items": {
+              "$ref": "#/components/schemas/ConditionOptionUsage"
+            }
+          }
+        }
+      },
+      "UndeclaredConditionUsage": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A condition variants pin under this name and type that the schema does not declare. A name\npinned under two types is listed once for each.\n",
+        "required": [
+          "name",
+          "type",
+          "variants",
+          "entities"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "legacy_customer_type"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ConditionType"
+          },
+          "format": {
+            "type": "string",
+            "description": "The format the variants pin a `location` in. Absent for every other type.",
+            "enum": [
+              "postal_code",
+              "postal_code_city"
+            ]
+          },
+          "variants": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many variants pin the condition under this type."
+          },
+          "entities": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many entities those variants belong to. Approximate above about 3,000."
+          },
+          "options": {
+            "type": "array",
+            "description": "For a `select` only: the values variants pin, most pinned first, at most 100. Declaring\nthem as the condition's options makes the variants pinning them resolvable.\n",
+            "items": {
+              "$ref": "#/components/schemas/ConditionOptionUsage"
+            }
+          }
+        }
+      },
+      "ConditionOptionUsage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "value",
+          "variants"
+        ],
+        "properties": {
+          "value": {
+            "type": "string",
+            "example": "private"
+          },
+          "variants": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many variants pin the value. Exact."
           }
         }
       },
@@ -6359,7 +6620,7 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/PinnedConditionValue"
         },
-        "description": "The situation this variant applies to: a flat map keyed by condition name. A condition left\nout is a wildcard, which is what makes adding a condition to a schema non-breaking for\nexisting variants.\n\nExact values only; predicates belong to reads. Values are stored canonicalized for their\ntype: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`\nand `until` in that form where an empty string is an open end, a `location` of format\n`postal_code` the postal code itself and one of format `postal_code_city` an object carrying\n`postal_code` and `city`.\n\nA date-only `date` or `daterange` value is midnight of that day in the organization's\ntimezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.\n\n`default` and names beginning with `_` are reserved; use the request's `default` flag.\n",
+        "description": "The situation this variant applies to: a flat map keyed by condition name. A condition left\nout is a wildcard, which is what makes adding a condition to a schema non-breaking for\nexisting variants.\n\nExact values only; predicates belong to reads. Values are stored canonicalized for their\ntype: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`\nand `until` in that form where an empty string is an open end, a `location` of format\n`postal_code` the postal code itself and one of format `postal_code_city` an object carrying\n`postal_code` and `city`.\n\nA date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the\norganization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only\n`until` is the last millisecond of that day: `2026-04-30` is stored as\n`2026-04-30T21:59:59.999Z`.\n\n`default` and names beginning with `_` are reserved; use the request's `default` flag.\n",
         "example": {
           "postal_code": "46045"
         }
@@ -6401,7 +6662,7 @@
       "ConditionDateRange": {
         "type": "object",
         "additionalProperties": false,
-        "description": "The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and a date\nis midnight of that day in the organization's timezone. A bound that is absent, `null` or an\nempty string is an open end; stored, an open end is an empty string.\n",
+        "description": "The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and both\nare included. A date names the whole day in the organization's timezone: as `from` it starts\nat midnight, as `until` it runs to the day's last millisecond. So\n`{ \"from\": \"2026-10-01\", \"until\": \"2026-10-31\" }` is all of October, and a window may start\nand end on the same day. A date-time names one moment. A bound that is absent, `null` or an\nempty string is an open end; stored, an open end is an empty string.\n",
         "properties": {
           "from": {
             "type": "string",
@@ -6411,7 +6672,7 @@
           "until": {
             "type": "string",
             "nullable": true,
-            "example": "2027-01-01"
+            "example": "2026-12-31"
           }
         }
       },
