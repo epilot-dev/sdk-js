@@ -233,6 +233,112 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases": {
+      "get": {
+        "operationId": "listBlueprintTestCases",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createBlueprintTestCase",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}": {
+      "get": {
+        "operationId": "getBlueprintTestCase",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "revision",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateBlueprintTestCase",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteBlueprintTestCase",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "expected_revision",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/notes": {
       "post": {
         "operationId": "addBlueprintNote",
@@ -713,6 +819,112 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/assistant/messages": {
+      "post": {
+        "operationId": "sendBlueprintAssistantMessage",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/assistant/conversations": {
+      "get": {
+        "operationId": "listBlueprintAssistantConversations",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "query",
+            "name": "mine",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/assistant/conversations/{conversation_id}": {
+      "get": {
+        "operationId": "getBlueprintAssistantConversation",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "conversation_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/assistant/skills": {
+      "get": {
+        "operationId": "listBlueprintAssistantSkills",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "uploadBlueprintAssistantSkill",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/assistant/skills/{skill_name}": {
+      "get": {
+        "operationId": "getBlueprintAssistantSkill",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BlueprintAssistantSkillName"
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateBlueprintAssistantSkill",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BlueprintAssistantSkillName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteBlueprintAssistantSkill",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BlueprintAssistantSkillName"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v3/blueprint-manifest/blueprints:pre-install": {
       "post": {
         "operationId": "preInstallBlueprintV3",
@@ -1123,6 +1335,340 @@
         "operationId": "deleteUniquenessCriteria",
         "responses": {}
       }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/source-operations/{run_id}": {
+      "get": {
+        "operationId": "getSourceTestOperation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/source-confirmed-runs": {
+      "post": {
+        "operationId": "createSourceConfirmedRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/runs": {
+      "post": {
+        "operationId": "createBlueprintTestRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listBlueprintTestRuns",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "limit"
+          },
+          {
+            "in": "query",
+            "name": "cursor"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/runs/{run_id}": {
+      "get": {
+        "operationId": "getBlueprintTestRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite": {
+      "get": {
+        "operationId": "getBlueprintTestSuite",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/runs": {
+      "post": {
+        "operationId": "createBlueprintTestSuiteRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/runs/{run_id}": {
+      "get": {
+        "operationId": "getBlueprintTestSuiteRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions": {
+      "post": {
+        "operationId": "createBlueprintGraphSuggestions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}": {
+      "get": {
+        "operationId": "getBlueprintGraphSuggestions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "generation_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "shape",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/accept": {
+      "post": {
+        "operationId": "acceptBlueprintGraphSuggestions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "generation_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite:migrate-v1": {
+      "post": {
+        "operationId": "migrateBlueprintV1TestCases",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations": {
+      "post": {
+        "operationId": "createBlueprintTestInterpretation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations/{interpretation_id}": {
+      "get": {
+        "operationId": "getBlueprintTestInterpretation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "interpretation_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations/{interpretation_id}/confirm": {
+      "post": {
+        "operationId": "confirmBlueprintTestInterpretationV2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "interpretation_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -1134,6 +1680,11 @@
       },
       "JobID": {
         "name": "job_id",
+        "in": "path",
+        "required": true
+      },
+      "BlueprintAssistantSkillName": {
+        "name": "skill_name",
         "in": "path",
         "required": true
       }
