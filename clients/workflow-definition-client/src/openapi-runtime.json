@@ -283,6 +283,50 @@
         "responses": {}
       }
     },
+    "/v1/workflows/closing-reason-categories": {
+      "get": {
+        "operationId": "getAllClosingReasonCategories",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createClosingReasonCategory",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/workflows/closing-reason-categories/{categoryId}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "categoryId",
+          "required": true,
+          "description": "unique id to identify the closing reason category."
+        }
+      ],
+      "get": {
+        "operationId": "getClosingReasonCategory",
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateClosingReasonCategory",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteClosingReasonCategory",
+        "responses": {}
+      }
+    },
     "/v1/workflows/definitions/{definitionId}/closing-reasons": {
       "get": {
         "operationId": "getWorkflowClosingReasons",

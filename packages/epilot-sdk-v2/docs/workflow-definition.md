@@ -50,6 +50,11 @@ const { data } = await workflowDefinitionClient.getMaxAllowedLimit(...)
 - [`updateClosingReason`](#updateclosingreason)
 - [`deleteClosingReason`](#deleteclosingreason)
 - [`changeReasonStatus`](#changereasonstatus)
+- [`getAllClosingReasonCategories`](#getallclosingreasoncategories)
+- [`createClosingReasonCategory`](#createclosingreasoncategory)
+- [`getClosingReasonCategory`](#getclosingreasoncategory)
+- [`updateClosingReasonCategory`](#updateclosingreasoncategory)
+- [`deleteClosingReasonCategory`](#deleteclosingreasoncategory)
 
 **Schemas**
 - [`FlowTemplateBase`](#flowtemplatebase)
@@ -127,6 +132,11 @@ const { data } = await workflowDefinitionClient.getMaxAllowedLimit(...)
 - [`ChangeReasonStatusReq`](#changereasonstatusreq)
 - [`ClosingReasons`](#closingreasons)
 - [`ClosingReason`](#closingreason)
+- [`ClosingReasonCategoryRef`](#closingreasoncategoryref)
+- [`ClosingReasonCategories`](#closingreasoncategories)
+- [`ClosingReasonCategory`](#closingreasoncategory)
+- [`ClosingReasonCategoryPayload`](#closingreasoncategorypayload)
+- [`ClosingReasonCategoryNotFoundResp`](#closingreasoncategorynotfoundresp)
 - [`ClosingReasonsStatus`](#closingreasonsstatus)
 - [`ClosingReasonsIds`](#closingreasonsids)
 - [`ClosingReasonId`](#closingreasonid)
@@ -575,6 +585,8 @@ const { data } = await client.createFlowTemplate(
         id: 'string',
         title: 'string',
         status: 'ACTIVE',
+        categoryId: 'c9wq81x',
+        category: { /* ... */ },
         lastUpdateTime: 'string',
         creationTime: 'string'
       }
@@ -762,6 +774,8 @@ const { data } = await client.createFlowTemplate(
       "id": "string",
       "title": "string",
       "status": "ACTIVE",
+      "categoryId": "c9wq81x",
+      "category": {},
       "lastUpdateTime": "string",
       "creationTime": "string"
     }
@@ -1034,6 +1048,8 @@ const { data } = await client.getFlowTemplate({
       "id": "string",
       "title": "string",
       "status": "ACTIVE",
+      "categoryId": "c9wq81x",
+      "category": {},
       "lastUpdateTime": "string",
       "creationTime": "string"
     }
@@ -1235,6 +1251,8 @@ const { data } = await client.updateFlowTemplate(
         id: 'string',
         title: 'string',
         status: 'ACTIVE',
+        categoryId: 'c9wq81x',
+        category: { /* ... */ },
         lastUpdateTime: 'string',
         creationTime: 'string'
       }
@@ -1422,6 +1440,8 @@ const { data } = await client.updateFlowTemplate(
       "id": "string",
       "title": "string",
       "status": "ACTIVE",
+      "categoryId": "c9wq81x",
+      "category": {},
       "lastUpdateTime": "string",
       "creationTime": "string"
     }
@@ -1640,6 +1660,8 @@ const { data } = await client.duplicateFlowTemplate({
       "id": "string",
       "title": "string",
       "status": "ACTIVE",
+      "categoryId": "c9wq81x",
+      "category": {},
       "lastUpdateTime": "string",
       "creationTime": "string"
     }
@@ -1973,6 +1995,11 @@ const { data } = await client.getAllClosingReasons({
       "id": "string",
       "title": "string",
       "status": "ACTIVE",
+      "categoryId": "c9wq81x",
+      "category": {
+        "id": "string",
+        "title": "string"
+      },
       "lastUpdateTime": "string",
       "creationTime": "string"
     }
@@ -1997,6 +2024,11 @@ const { data } = await client.createClosingReason(
     id: 'string',
     title: 'string',
     status: 'ACTIVE',
+    categoryId: 'c9wq81x',
+    category: {
+      id: 'string',
+      title: 'string'
+    },
     lastUpdateTime: 'string',
     creationTime: 'string'
   },
@@ -2011,6 +2043,11 @@ const { data } = await client.createClosingReason(
   "id": "string",
   "title": "string",
   "status": "ACTIVE",
+  "categoryId": "c9wq81x",
+  "category": {
+    "id": "string",
+    "title": "string"
+  },
   "lastUpdateTime": "string",
   "creationTime": "string"
 }
@@ -2040,6 +2077,11 @@ const { data } = await client.getClosingReason({
   "id": "string",
   "title": "string",
   "status": "ACTIVE",
+  "categoryId": "c9wq81x",
+  "category": {
+    "id": "string",
+    "title": "string"
+  },
   "lastUpdateTime": "string",
   "creationTime": "string"
 }
@@ -2064,6 +2106,11 @@ const { data } = await client.updateClosingReason(
     id: 'string',
     title: 'string',
     status: 'ACTIVE',
+    categoryId: 'c9wq81x',
+    category: {
+      id: 'string',
+      title: 'string'
+    },
     lastUpdateTime: 'string',
     creationTime: 'string'
   },
@@ -2078,6 +2125,11 @@ const { data } = await client.updateClosingReason(
   "id": "string",
   "title": "string",
   "status": "ACTIVE",
+  "categoryId": "c9wq81x",
+  "category": {
+    "id": "string",
+    "title": "string"
+  },
   "lastUpdateTime": "string",
   "creationTime": "string"
 }
@@ -2116,6 +2168,142 @@ const { data } = await client.changeReasonStatus(
     status: 'ACTIVE'
   },
 )
+```
+
+---
+
+### `getAllClosingReasonCategories`
+
+Get all closing reason categories defined in the organization.
+
+`GET /v1/workflows/closing-reason-categories`
+
+```ts
+const { data } = await client.getAllClosingReasonCategories()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "categories": [
+    {
+      "id": "string",
+      "title": "Wirtschaftlichkeit",
+      "lastUpdateTime": "string",
+      "creationTime": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createClosingReasonCategory`
+
+Create a category that closing reasons can be grouped under. Titles are unique per organization, ignoring case and surrounding whitespace.
+
+`POST /v1/workflows/closing-reason-categories`
+
+```ts
+const { data } = await client.createClosingReasonCategory(
+  null,
+  {
+    title: 'Wirtschaftlichkeit'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "title": "Wirtschaftlichkeit",
+  "lastUpdateTime": "string",
+  "creationTime": "string"
+}
+```
+
+</details>
+
+---
+
+### `getClosingReasonCategory`
+
+Get a closing reason category by id.
+
+`GET /v1/workflows/closing-reason-categories/{categoryId}`
+
+```ts
+const { data } = await client.getClosingReasonCategory({
+  categoryId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "title": "Wirtschaftlichkeit",
+  "lastUpdateTime": "string",
+  "creationTime": "string"
+}
+```
+
+</details>
+
+---
+
+### `updateClosingReasonCategory`
+
+Rename a closing reason category. Running flows keep the title they started with.
+
+`PATCH /v1/workflows/closing-reason-categories/{categoryId}`
+
+```ts
+const { data } = await client.updateClosingReasonCategory(
+  {
+    categoryId: 'example',
+  },
+  {
+    title: 'Wirtschaftlichkeit'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "title": "Wirtschaftlichkeit",
+  "lastUpdateTime": "string",
+  "creationTime": "string"
+}
+```
+
+</details>
+
+---
+
+### `deleteClosingReasonCategory`
+
+Delete a closing reason category. Its reasons are kept and lose their category.
+
+`DELETE /v1/workflows/closing-reason-categories/{categoryId}`
+
+```ts
+const { data } = await client.deleteClosingReasonCategory({
+  categoryId: 'example',
+})
 ```
 
 ---
@@ -4414,6 +4602,11 @@ type ClosingReasons = {
     id?: string
     title?: string
     status?: "ACTIVE" | "INACTIVE"
+    categoryId?: string
+    category?: {
+      id: { ... }
+      title: { ... }
+    }
     lastUpdateTime?: string
     creationTime?: string
   }>
@@ -4429,8 +4622,68 @@ type ClosingReason = {
   id?: string
   title?: string
   status?: "ACTIVE" | "INACTIVE"
+  categoryId?: string
+  category?: {
+    id: string
+    title: string
+  }
   lastUpdateTime?: string
   creationTime?: string
+}
+```
+
+### `ClosingReasonCategoryRef`
+
+The reason's category, resolved when a flow template is read. Ignored on writes.
+
+```ts
+type ClosingReasonCategoryRef = {
+  id: string
+  title: string
+}
+```
+
+### `ClosingReasonCategories`
+
+```ts
+type ClosingReasonCategories = {
+  categories: Array<{
+    id?: string
+    title?: string
+    lastUpdateTime?: string
+    creationTime?: string
+  }>
+}
+```
+
+### `ClosingReasonCategory`
+
+A category that groups closing reasons, e.g. "Wirtschaftlichkeit" for several economic reasons
+
+```ts
+type ClosingReasonCategory = {
+  id?: string
+  title?: string
+  lastUpdateTime?: string
+  creationTime?: string
+}
+```
+
+### `ClosingReasonCategoryPayload`
+
+```ts
+type ClosingReasonCategoryPayload = {
+  title: string
+}
+```
+
+### `ClosingReasonCategoryNotFoundResp`
+
+Error response returned when a closing reason category is not found.
+
+```ts
+type ClosingReasonCategoryNotFoundResp = {
+  message?: string
 }
 ```
 
