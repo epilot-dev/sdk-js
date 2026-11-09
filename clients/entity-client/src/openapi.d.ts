@@ -855,7 +855,12 @@ declare namespace Components {
              */
             journey_id: string;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute;
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /**
+         * Portal role of a portal user. The value is a portal role slug (e.g. `default_end_customer_portal_role`).
+         * An empty value means the portal's default role is used.
+         *
+         */
+        PortalRoleAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute;
         /**
          * a readonly computed ID for the attribute including schema slug and the attribute ID
          */
@@ -871,7 +876,12 @@ declare namespace Components {
              * contact
              */
             schema?: string;
-        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute);
+        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /**
+         * Portal role of a portal user. The value is a portal role slug (e.g. `default_end_customer_portal_role`).
+         * An empty value means the portal's default role is used.
+         *
+         */
+        PortalRoleAttribute | /* Phone number */ PhoneAttribute | /* Email address */ EmailAttribute | /* Payment method */ PaymentAttribute | /* Price component */ PriceComponentAttribute);
         /**
          * Automation entity
          */
@@ -2039,7 +2049,7 @@ declare namespace Components {
          * `location` condition carries `format`.
          *
          */
-        /* A condition whose value is a plain scalar, with no further configuration. */ ScalarConditionDefinition | /* A condition whose value is one of a fixed set of options. */ SelectConditionDefinition | /* A condition whose value identifies a place. */ LocationConditionDefinition;
+        /* A condition whose value is a plain scalar, with no further configuration. */ ScalarConditionDefinition | /* A condition whose value is one of a fixed set of options. */ SelectConditionDefinition | /* A condition whose value identifies a place, or the grid operator a place is connected to. */ LocationConditionDefinition;
         /**
          * Consent Management
          */
@@ -8034,7 +8044,7 @@ declare namespace Components {
             results?: /* A saved entity view */ SavedViewItem[];
         }
         /**
-         * A condition whose value identifies a place.
+         * A condition whose value identifies a place, or the grid operator a place is connected to.
          */
         export interface LocationConditionDefinition {
             /**
@@ -8065,9 +8075,12 @@ declare namespace Components {
              */
             type: "location";
             /**
-             * The shape of the location value. Immutable once the condition has been saved.
+             * What the location value holds. `postal_code` and `postal_code_city` are address fields;
+             * `power_grid_operator` and `gas_grid_operator` are the 13-digit code number of a power or
+             * gas grid operator. Immutable once the condition has been saved.
+             *
              */
-            format?: "postal_code" | "postal_code_city";
+            format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator";
         }
         /**
          * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
@@ -10416,6 +10429,221 @@ declare namespace Components {
                 FuzzyConfig;
             };
             type: "portal_access";
+        }
+        /**
+         * Portal role of a portal user. The value is a portal role slug (e.g. `default_end_customer_portal_role`).
+         * An empty value means the portal's default role is used.
+         *
+         */
+        export interface PortalRoleAttribute {
+            /**
+             * ID for the entity attribute
+             * example:
+             * d5839b94-ba20-4225-a78e-76951d352bd6
+             */
+            id?: string;
+            name: string;
+            label: string;
+            placeholder?: string;
+            /**
+             * Do not render attribute in entity views
+             */
+            hidden?: boolean;
+            /**
+             * Render as a column in table views. When defined, overrides `hidden`
+             */
+            show_in_table?: boolean;
+            /**
+             * Allow sorting by this attribute in table views if `show_in_table` is true
+             */
+            sortable?: boolean;
+            required?: boolean;
+            readonly?: boolean;
+            deprecated?: boolean;
+            /**
+             * Allow conditional variants of the entity to override this attribute's value.
+             * Only meaningful on schemas that declare `conditions`. Unflagged attributes stay
+             * fixed on the base entity.
+             *
+             * Accepted on scalar attributes and on relations — a variant overrides a relation by
+             * replacing its whole `$relation` list (e.g. a product's prices). Rejected on system
+             * (`_`-prefixed), `readonly`, `hidden`, `computed` and `repeatable` attributes.
+             *
+             */
+            overridable_attribute?: boolean;
+            default_value?: any;
+            /**
+             * Which group the attribute should appear in. Accepts group ID or group name
+             */
+            group?: string;
+            /**
+             * Attribute sort order (ascending) in group
+             * example:
+             * 0
+             */
+            order?: number;
+            /**
+             * example:
+             * full_width
+             */
+            layout?: string;
+            /**
+             * When set to true, will hide the label of the field.
+             */
+            hide_label?: boolean;
+            /**
+             * Code name of the icon to used to represent this attribute.
+             * The value must be a valid @epilot/base-elements Icon name
+             *
+             */
+            icon?: string;
+            /**
+             * Defines the conditional rendering expression for showing this field.
+             * When a valid expression is parsed, their evaluation defines the visibility of this attribute.
+             * Note: Empty or invalid expression have no effect on the field visibility.
+             *
+             */
+            render_condition?: string;
+            /**
+             * Data classification of the attribute, used by anonymized responses (`?anonymize=true` or tokens minted with `anonymize: true`).
+             *
+             * - `pii`: the attribute value is always anonymized in anonymized responses (use to opt in free-text fields containing personal data)
+             * - `public`: the attribute value is never anonymized (use to opt out fields matched by built-in defaults, e.g. non-personal identifiers)
+             *
+             * When unset, built-in defaults apply based on the attribute type (email, phone, address, payment) and a curated list of well-known PII fields.
+             *
+             */
+            data_classification?: "public" | "pii";
+            _purpose?: /**
+             * example:
+             * taxonomy-slug:classification-slug
+             */
+            ClassificationId[];
+            /**
+             * Manifest ID used to create/update the schema attribute
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
+             * A set of constraints applicable to the attribute.
+             * These constraints should and will be enforced by the attribute renderer.
+             *
+             * example:
+             * {
+             *   "disablePast": true
+             * }
+             */
+            constraints?: {
+                [key: string]: any;
+            };
+            /**
+             * This attribute should only be active when the feature flag is enabled
+             * example:
+             * FF_MY_FEATURE_FLAG
+             */
+            feature_flag?: string;
+            /**
+             * This attribute should only be active when one of the provided settings have the correct value
+             */
+            settings_flag?: SettingFlag[];
+            value_formatter?: string;
+            preview_value_formatter?: string;
+            /**
+             * Setting to `true` disables editing the attribute on the entity builder UI
+             */
+            entity_builder_disable_edit?: boolean;
+            /**
+             * Setting to `true` prevents the attribute from being modified / deleted
+             */
+            protected?: boolean;
+            /**
+             * A set of configurations meant to document and assist the user in filling the attribute.
+             */
+            info_helpers?: {
+                /**
+                 * The text to be displayed in the attribute hint helper.
+                 * When specified it overrides the `hint_text_key` configuration.
+                 *
+                 */
+                hint_text?: string;
+                /**
+                 * The key of the hint text to be displayed in the attribute hint helper.
+                 * The key should be a valid i18n key.
+                 *
+                 */
+                hint_text_key?: string;
+                /**
+                 * The name of the custom component to be used as the hint helper.
+                 * The component should be registered in the `@epilot360/entity-ui` on the index of the components directory.
+                 * When specified it overrides the `hint_text` or `hint_text_key` configuration.
+                 *
+                 */
+                hint_custom_component?: string;
+                /**
+                 * The placement of the hint tooltip.
+                 * The value should be a valid `@mui/core` tooltip placement.
+                 *
+                 * example:
+                 * top
+                 */
+                hint_tooltip_placement?: string;
+            };
+            /**
+             * When set to true, this attribute will always be searchable regardless of
+             * the ELASTIC_MAX_SEARCH_FIELDS limit. Use this for critical search fields
+             * that must always be included in search operations.
+             *
+             */
+            explicit_searchable?: boolean;
+            /**
+             * When set to true, this attribute will be excluded from search fields.
+             * Use this for fields that should not be matched during entity search operations,
+             * such as internal hashes or identifiers that might accidentally match search terms.
+             *
+             */
+            exclude_from_search?: boolean;
+            /**
+             * The attribute is a repeatable
+             */
+            repeatable?: boolean;
+            has_primary?: boolean;
+            /**
+             * Controls how updates to this attribute are handled. See the `EditMode`
+             * schema for the per-mode semantics. Defaults to `direct`.
+             *
+             */
+            edit_mode?: "direct" | "external" | "approval";
+            /**
+             * Configuration for auto-clear matching on `edit_mode: external` attributes.
+             * `match_strategy` and `fuzzy_config` are only consulted for `external` mode —
+             * they are ignored for `approval` mode, which resolves via explicit
+             * `:apply` / `:dismiss` endpoints and never auto-clears.
+             *
+             */
+            edit_mode_config?: {
+                match_strategy?: /**
+                 * Strategy for auto-clearing a changeset on an `edit_mode: external` attribute
+                 * when a direct write (`?direct=true`) arrives — typically an ERP inbound sync.
+                 * Ignored for `edit_mode: approval`, which does not auto-clear and is resolved
+                 * exclusively via the `:apply` / `:dismiss` changeset endpoints.
+                 * - `exact`: The inbound value must exactly match the proposed value (deep equality).
+                 * - `fuzzy`: The inbound value is compared using the configured `fuzzy_config` algorithm.
+                 * - `any`: Any update to the attribute clears the changeset, regardless of value.
+                 *
+                 */
+                MatchStrategy;
+                fuzzy_config?: /**
+                 * Configuration for fuzzy auto-clear matching on `edit_mode: external` attributes.
+                 * Not used for `edit_mode: approval`.
+                 *
+                 * Type compatibility with attribute shape is enforced at schema save time:
+                 * - scalar string attributes: `suffix`, `digits_only`, `regex`
+                 * - repeatable attributes: `set_equivalent`, `entry_match`, `ignore_fields`, `normalize_phone`
+                 * - relation attributes: `relation_set`
+                 *
+                 */
+                FuzzyConfig;
+            };
+            type: "portal_role";
         }
         /**
          * Price component
@@ -21347,6 +21575,7 @@ export type PaymentAttribute = Components.Schemas.PaymentAttribute;
 export type PaymentMethodRelationAttribute = Components.Schemas.PaymentMethodRelationAttribute;
 export type PhoneAttribute = Components.Schemas.PhoneAttribute;
 export type PortalAccessAttribute = Components.Schemas.PortalAccessAttribute;
+export type PortalRoleAttribute = Components.Schemas.PortalRoleAttribute;
 export type PriceComponentAttribute = Components.Schemas.PriceComponentAttribute;
 export type PurposeAttribute = Components.Schemas.PurposeAttribute;
 export type RedirectEntityView = Components.Schemas.RedirectEntityView;
