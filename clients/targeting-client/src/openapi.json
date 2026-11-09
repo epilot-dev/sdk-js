@@ -38,7 +38,7 @@
       "post": {
         "operationId": "changeCampaignStatus",
         "summary": "changeCampaignStatus",
-        "description": "Moves a campaign to its next status, depending on its current one:\n\n- `draft`: launches the campaign. With a `start_date` still in the future it becomes `scheduled` and\n  starts on its own at that time; otherwise it starts now (`activating`, then `active`). Rejected with\n  400 if the dates are invalid: `INVALID_CAMPAIGN_DATES` (unparsable), `CAMPAIGN_END_BEFORE_START`\n  or `CAMPAIGN_END_IN_PAST`.\n- `scheduled`: cancels the schedule; the campaign goes back to `draft` and keeps its dates.\n- `active`: stops the campaign (`inactive`) and sets `end_date` to now.\n- `inactive`: resets the campaign to `draft`.\n\nStatus transition is accompanied by side effects, e.g., automation execution.\n",
+        "description": "Moves a campaign to its next status, depending on its current one:\n\n- `draft`: launches the campaign. With a `start_date` still in the future it becomes `scheduled` and\n  starts on its own at that time; otherwise it starts now (`activating`, then `active`). Rejected with\n  400 if the dates are invalid: `INVALID_CAMPAIGN_DATES` (unparsable), `CAMPAIGN_END_BEFORE_START`\n  or `CAMPAIGN_END_IN_PAST`.\n- `scheduled`: cancels the schedule; the campaign goes back to `draft` and keeps its dates.\n- `active`: stops the campaign (`inactive`) and sets `end_date` to now.\n- `inactive`: resets the campaign to `draft` and clears its `start_date` and `end_date`: they\n  recorded the previous run, and a past end date would block launching it again.\n\nOnly launching needs a target and a delivery method (an automation flow, a portal block or a valid\nNext Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or\n`CAMPAIGN_HAS_NO_DELIVERY_METHOD`. Cancelling, stopping and resetting work without them.\n\nStatus transition is accompanied by side effects, e.g., automation execution.\n",
         "tags": [
           "Campaign"
         ],
@@ -60,6 +60,9 @@
             "$ref": "#/components/responses/ClientErrorResponse"
           },
           "403": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "409": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
           "500": {

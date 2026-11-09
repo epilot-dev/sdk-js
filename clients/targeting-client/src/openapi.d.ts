@@ -2117,6 +2117,7 @@ declare namespace Paths {
             export type $200 = Components.Responses.CampaignResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
             export type $403 = Components.Responses.ClientErrorResponse;
+            export type $409 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
@@ -2417,7 +2418,12 @@ export interface OperationMethods {
    *   or `CAMPAIGN_END_IN_PAST`.
    * - `scheduled`: cancels the schedule; the campaign goes back to `draft` and keeps its dates.
    * - `active`: stops the campaign (`inactive`) and sets `end_date` to now.
-   * - `inactive`: resets the campaign to `draft`.
+   * - `inactive`: resets the campaign to `draft` and clears its `start_date` and `end_date`: they
+   *   recorded the previous run, and a past end date would block launching it again.
+   * 
+   * Only launching needs a target and a delivery method (an automation flow, a portal block or a valid
+   * Next Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or
+   * `CAMPAIGN_HAS_NO_DELIVERY_METHOD`. Cancelling, stopping and resetting work without them.
    * 
    * Status transition is accompanied by side effects, e.g., automation execution.
    * 
@@ -2665,7 +2671,12 @@ export interface PathsDictionary {
      *   or `CAMPAIGN_END_IN_PAST`.
      * - `scheduled`: cancels the schedule; the campaign goes back to `draft` and keeps its dates.
      * - `active`: stops the campaign (`inactive`) and sets `end_date` to now.
-     * - `inactive`: resets the campaign to `draft`.
+     * - `inactive`: resets the campaign to `draft` and clears its `start_date` and `end_date`: they
+     *   recorded the previous run, and a past end date would block launching it again.
+     * 
+     * Only launching needs a target and a delivery method (an automation flow, a portal block or a valid
+     * Next Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or
+     * `CAMPAIGN_HAS_NO_DELIVERY_METHOD`. Cancelling, stopping and resetting work without them.
      * 
      * Status transition is accompanied by side effects, e.g., automation execution.
      * 
