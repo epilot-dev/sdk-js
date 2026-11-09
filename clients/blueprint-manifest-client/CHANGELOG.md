@@ -1,5 +1,13 @@
 # @epilot/blueprint-manifest-client
 
+## 6.1.0
+
+### Minor Changes
+
+- Update the Blueprint Manifest client from the merged API specification, including
+  V3SourceResource, V3MissingSourceResource, V3SourceDrift, hydrated source_drift
+  metadata on blueprint plans and jobs, and the source_resources_missing error code.
+
 ## 6.0.0
 
 ### Major Changes
