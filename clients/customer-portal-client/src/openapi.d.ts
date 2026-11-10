@@ -8277,8 +8277,7 @@ declare namespace Components {
                  *   },
                  *   "elements": {
                  *     "icon_actions": {
-                 *       "style": "ghost",
-                 *       "color": "primary"
+                 *       "variant": "icon"
                  *     }
                  *   }
                  * }
@@ -8300,8 +8299,7 @@ declare namespace Components {
          *   },
          *   "elements": {
          *     "icon_actions": {
-         *       "style": "ghost",
-         *       "color": "primary"
+         *       "variant": "icon"
          *     }
          *   }
          * }
@@ -8319,16 +8317,11 @@ declare namespace Components {
             };
             elements?: {
                 /**
-                 * Icon buttons in the header bar
+                 * Icon buttons in the header bar (inbox, profile, menu). They draw as the Button variant picked here, with that variant's look in the portal design; unset keeps the icon variant.
+                 *
                  */
                 icon_actions?: {
-                    style?: "solid" | "soft" | "surface" | "outline" | "ghost";
-                    /**
-                     * A button colour, or a custom colour of the portal's design by id
-                     */
-                    color?: /* A button colour, or a custom colour of the portal's design by id */ ("primary" | "neutral" | "danger") | {
-                        custom: string; // ^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$
-                    };
+                    variant?: "primary" | "secondary" | "tertiary" | "icon";
                 };
             };
         } | null;
