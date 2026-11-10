@@ -58,6 +58,7 @@ const { data } = await workflowClient.getExecutions(...)
 - [`executeTask`](#executetask)
 - [`patchPhase`](#patchphase)
 - [`addTask`](#addtask)
+- [`rescheduleTask`](#rescheduletask)
 - [`cancelTaskSchedule`](#canceltaskschedule)
 - [`reconcileAutomationTask`](#reconcileautomationtask)
 - [`runTaskScheduleNow`](#runtaskschedulenow)
@@ -172,6 +173,8 @@ const { data } = await workflowClient.getExecutions(...)
 - [`ActionSchedule`](#actionschedule)
 - [`ImmediateSchedule`](#immediateschedule)
 - [`DelayedSchedule`](#delayedschedule)
+- [`RescheduleTaskReq`](#rescheduletaskreq)
+- [`ScheduleChange`](#schedulechange)
 - [`RelativeSchedule`](#relativeschedule)
 - [`DecisionTask`](#decisiontask)
 - [`AiAgentTask`](#aiagenttask)
@@ -1038,6 +1041,7 @@ const { data } = await client.startFlowExecution(
       "start_date_config": {},
       "requirements": [],
       "required": true,
+      "only_assignee_can_complete": true,
       "subtasks": [],
       "subtask_states": {},
       "journey_submission": {},
@@ -1145,6 +1149,7 @@ Retrieves a complete flow execution by ID, including all phases, tasks, edges, c
 ```ts
 const { data } = await client.getFlowExecution({
   execution_id: 'example',
+  skip_heal: true,
 })
 ```
 
@@ -1254,6 +1259,7 @@ const { data } = await client.getFlowExecution({
       "start_date_config": {},
       "requirements": [],
       "required": true,
+      "only_assignee_can_complete": true,
       "subtasks": [],
       "subtask_states": {},
       "journey_submission": {},
@@ -1520,6 +1526,7 @@ const { data } = await client.patchFlowExecution(
       "start_date_config": {},
       "requirements": [],
       "required": true,
+      "only_assignee_can_complete": true,
       "subtasks": [],
       "subtask_states": {},
       "journey_submission": {},
@@ -1985,6 +1992,7 @@ const { data } = await client.getActiveBulkStartFlowsJob()
       "attempts": 0,
       "updated_at": "1970-01-01T00:00:00.000Z"
     },
+    "cancelled_by": "string",
     "counts": {
       "total": 0,
       "pending": 0,
@@ -2090,6 +2098,7 @@ const { data } = await client.getBulkStartFlowsJob({
     "attempts": 0,
     "updated_at": "1970-01-01T00:00:00.000Z"
   },
+  "cancelled_by": "string",
   "counts": {
     "total": 0,
     "pending": 0,
@@ -2197,6 +2206,7 @@ const { data } = await client.patchBulkStartFlowsJob(
     "attempts": 0,
     "updated_at": "1970-01-01T00:00:00.000Z"
   },
+  "cancelled_by": "string",
   "counts": {
     "total": 0,
     "pending": 0,
@@ -2466,6 +2476,7 @@ const { data } = await client.patchTask(
     }
   ],
   "required": true,
+  "only_assignee_can_complete": true,
   "subtasks": [
     {
       "id": "string",
@@ -2652,6 +2663,7 @@ const { data } = await client.runTaskAutomation(
     }
   ],
   "required": true,
+  "only_assignee_can_complete": true,
   "subtasks": [
     {
       "id": "string",
@@ -2909,6 +2921,7 @@ const { data } = await client.executeTask({
     }
   ],
   "required": true,
+  "only_assignee_can_complete": true,
   "subtasks": [
     {
       "id": "string",
@@ -3219,6 +3232,185 @@ const { data } = await client.addTask(
     }
   ],
   "required": true,
+  "only_assignee_can_complete": true,
+  "subtasks": [
+    {
+      "id": "string",
+      "name": "string",
+      "party": "description",
+      "required": true
+    }
+  ],
+  "subtask_states": {},
+  "journey_submission": {
+    "submission_entity_id": "string",
+    "submitted_at": "1970-01-01T00:00:00.000Z"
+  },
+  "completion_gates_reset_at": "1970-01-01T00:00:00.000Z",
+  "journey_gate_waived_at": "1970-01-01T00:00:00.000Z",
+  "assigned_to": ["string"],
+  "ecp_placeholder_assignees": {
+    "placeholder_ecp_customers": ["string"],
+    "placeholder_ecp_installers": ["string"]
+  },
+  "analytics": {
+    "started_at": "1970-01-01T00:00:00.000Z",
+    "in_progress_at": "1970-01-01T00:00:00.000Z",
+    "completed_at": "1970-01-01T00:00:00.000Z",
+    "status_updated_at": "1970-01-01T00:00:00.000Z",
+    "in_progress_by": "string",
+    "completed_by": "string",
+    "skipped_at": "1970-01-01T00:00:00.000Z",
+    "skipped_by": "string",
+    "on_hold_by": "string"
+  },
+  "loop_iterations": {},
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "manually_created": true,
+  "enabled": true,
+  "ecp": {
+    "enabled": true,
+    "label": "string",
+    "description": "string",
+    "journey": {
+      "id": "string",
+      "journeyId": "string",
+      "name": "string",
+      "portal_button_label": "string",
+      "complete_task_automatically": true,
+      "journey_submission_required": true,
+      "context_parameters": [],
+      "ai_prefill": {}
+    }
+  },
+  "installer": {
+    "enabled": true,
+    "label": "string",
+    "description": "string",
+    "journey": {
+      "id": "string",
+      "journeyId": "string",
+      "name": "string",
+      "portal_button_label": "string",
+      "complete_task_automatically": true,
+      "journey_submission_required": true,
+      "context_parameters": [],
+      "ai_prefill": {}
+    }
+  },
+  "partner": {
+    "enabled": true,
+    "label": "string",
+    "description": "string"
+  },
+  "audience_order": ["description"],
+  "taxonomies": ["string"],
+  "phase_id": "string",
+  "task_type": "MANUAL",
+  "loop_config": {
+    "max_iterations": 3,
+    "crt_iterations": 0
+  }
+}
+```
+
+</details>
+
+---
+
+### `rescheduleTask`
+
+Moves the execution date of a scheduled task that has not run yet (AL-3774). The task must be SCHEDULED with a booked timer, and its flow open. The task's timer is replaced by one for the new date, so
+
+`PUT /v2/flows/executions/{execution_id}/tasks/{task_id}/schedule`
+
+```ts
+const { data } = await client.rescheduleTask(
+  {
+    execution_id: 'example',
+    task_id: 'example',
+  },
+  {
+    scheduled_at: 'string',
+    reason: 'string'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "loop_membership": [
+    {
+      "loop_id": "string",
+      "runs_in_loop": true
+    }
+  ],
+  "template_id": "string",
+  "name": "string",
+  "description": {
+    "enabled": true,
+    "value": "string"
+  },
+  "status": "UNASSIGNED",
+  "journey": {
+    "id": "string",
+    "journeyId": "string",
+    "name": "string",
+    "portal_button_label": "string",
+    "complete_task_automatically": true,
+    "journey_submission_required": true,
+    "context_parameters": [
+      {}
+    ],
+    "ai_prefill": {
+      "enabled": false,
+      "source": {},
+      "extraction_fields": [],
+      "mappings": [],
+      "min_confidence": 0.8,
+      "instructions": "string"
+    }
+  },
+  "journey_prefill": {
+    "status": "PENDING",
+    "agent_execution_id": "string",
+    "dispatched_at": "1970-01-01T00:00:00.000Z",
+    "extracted_at": "1970-01-01T00:00:00.000Z",
+    "initial_state": {},
+    "field_confidence": {},
+    "dropped": [
+      {}
+    ]
+  },
+  "due_date": "2021-04-27T12:00:00.000Z",
+  "due_date_config": {
+    "duration": 0,
+    "unit": "minutes",
+    "type": "WORKFLOW_STARTED",
+    "task_id": "string",
+    "phase_id": "string"
+  },
+  "start_date": "2021-04-27T12:00:00.000Z",
+  "start_date_config": {
+    "duration": 0,
+    "unit": "minutes",
+    "type": "WORKFLOW_STARTED",
+    "task_id": "string"
+  },
+  "requirements": [
+    {
+      "task_id": "string",
+      "phase_id": "string",
+      "when": "TASK_FINISHED"
+    }
+  ],
+  "required": true,
+  "only_assignee_can_complete": true,
   "subtasks": [
     {
       "id": "string",
@@ -3439,6 +3631,7 @@ const { data } = await client.reconcileAutomationTask({
       "start_date_config": {},
       "requirements": [],
       "required": true,
+      "only_assignee_can_complete": true,
       "subtasks": [],
       "subtask_states": {},
       "journey_submission": {},
@@ -3622,6 +3815,7 @@ const { data } = await client.runTaskScheduleNow({
     }
   ],
   "required": true,
+  "only_assignee_can_complete": true,
   "subtasks": [
     {
       "id": "string",
@@ -5520,7 +5714,7 @@ type BulkStartFlowsReq = {
 
 The entities an entity search matches, as the entity table's "select all
 matching" selects them. Resolved once, in the background, when the job is prepared: the
-job holds the entities matching at that time (at most 10,000).
+job holds the entities matching at that time (at most 80,000).
 
 
 ```ts
@@ -5701,6 +5895,7 @@ type BulkStartFlowsJob = {
     attempts: number
     updated_at: string // date-time
   }
+  cancelled_by?: string
   counts: {
     total: number
     pending: number
@@ -5906,6 +6101,7 @@ type ActiveBulkStartFlowsJobResp = {
       attempts: { ... }
       updated_at: { ... }
     }
+    cancelled_by?: string
     counts: {
       total: { ... }
       pending: { ... }
@@ -6582,6 +6778,7 @@ type Task = {
     when: "TASK_FINISHED" | "PHASE_FINISHED"
   }>
   required?: boolean
+  only_assignee_can_complete?: boolean
   subtasks?: Array<{
     id: string
     name?: string
@@ -6614,7 +6811,6 @@ type Task = {
     status_updated_at?: string // date-time
     in_progress_by?: string
     completed_by?: string
-    skipped_at?: string // date-time
   // ...
 }
 ```
@@ -6695,6 +6891,7 @@ type ManualTask = {
     when: "TASK_FINISHED" | "PHASE_FINISHED"
   }>
   required?: boolean
+  only_assignee_can_complete?: boolean
   subtasks?: Array<{
     id: string
     name?: string
@@ -6727,7 +6924,6 @@ type ManualTask = {
     status_updated_at?: string // date-time
     in_progress_by?: string
     completed_by?: string
-    skipped_at?: string // date-time
   // ...
 }
 ```
@@ -6802,6 +6998,7 @@ type AutomationTask = {
     when: "TASK_FINISHED" | "PHASE_FINISHED"
   }>
   required?: boolean
+  only_assignee_can_complete?: boolean
   subtasks?: Array<{
     id: string
     name?: string
@@ -6834,7 +7031,6 @@ type AutomationTask = {
     status_updated_at?: string // date-time
     in_progress_by?: string
     completed_by?: string
-    skipped_at?: string // date-time
   // ...
 }
 ```
@@ -6920,6 +7116,14 @@ type ActionSchedule = {
   schedule_id?: string
   scheduled_at?: string
   error_reason?: string
+  rescheduled?: {
+    schedule_id: string
+    original_scheduled_at: string
+    previous_scheduled_at: string
+    changed_by: string
+    changed_at: string
+    reason?: string
+  }
 } | {
   mode: "relative"
   direction: "before" | "after"
@@ -6934,6 +7138,14 @@ type ActionSchedule = {
   schedule_id?: string
   scheduled_at?: string
   error_reason?: string
+  rescheduled?: {
+    schedule_id: string
+    original_scheduled_at: string
+    previous_scheduled_at: string
+    changed_by: string
+    changed_at: string
+    reason?: string
+  }
 }
 ```
 
@@ -6955,6 +7167,42 @@ type DelayedSchedule = {
   schedule_id?: string
   scheduled_at?: string
   error_reason?: string
+  rescheduled?: {
+    schedule_id: string
+    original_scheduled_at: string
+    previous_scheduled_at: string
+    changed_by: string
+    changed_at: string
+    reason?: string
+  }
+}
+```
+
+### `RescheduleTaskReq`
+
+```ts
+type RescheduleTaskReq = {
+  scheduled_at: string
+  reason?: string
+}
+```
+
+### `ScheduleChange`
+
+A person moved the execution date of this booked schedule (AL-3774).
+It describes the booking named by `schedule_id` only: once the task's
+`schedule.schedule_id` differs (the timer fired and a reset or re-arm
+booked a new one, run-now released it, a revert cleared it), the change
+no longer applies a
+
+```ts
+type ScheduleChange = {
+  schedule_id: string
+  original_scheduled_at: string
+  previous_scheduled_at: string
+  changed_by: string
+  changed_at: string
+  reason?: string
 }
 ```
 
@@ -6975,6 +7223,14 @@ type RelativeSchedule = {
   schedule_id?: string
   scheduled_at?: string
   error_reason?: string
+  rescheduled?: {
+    schedule_id: string
+    original_scheduled_at: string
+    previous_scheduled_at: string
+    changed_by: string
+    changed_at: string
+    reason?: string
+  }
 }
 ```
 
@@ -7048,6 +7304,7 @@ type DecisionTask = {
     when: "TASK_FINISHED" | "PHASE_FINISHED"
   }>
   required?: boolean
+  only_assignee_can_complete?: boolean
   subtasks?: Array<{
     id: string
     name?: string
@@ -7080,7 +7337,6 @@ type DecisionTask = {
     status_updated_at?: string // date-time
     in_progress_by?: string
     completed_by?: string
-    skipped_at?: string // date-time
   // ...
 }
 ```
@@ -7155,6 +7411,7 @@ type AiAgentTask = {
     when: "TASK_FINISHED" | "PHASE_FINISHED"
   }>
   required?: boolean
+  only_assignee_can_complete?: boolean
   subtasks?: Array<{
     id: string
     name?: string
@@ -7187,7 +7444,6 @@ type AiAgentTask = {
     status_updated_at?: string // date-time
     in_progress_by?: string
     completed_by?: string
-    skipped_at?: string // date-time
   // ...
 }
 ```
@@ -7295,6 +7551,7 @@ type TaskBase = {
     when: "TASK_FINISHED" | "PHASE_FINISHED"
   }>
   required?: boolean
+  only_assignee_can_complete?: boolean
   subtasks?: Array<{
     id: string
     name?: string
@@ -7327,7 +7584,6 @@ type TaskBase = {
     status_updated_at?: string // date-time
     in_progress_by?: string
     completed_by?: string
-    skipped_at?: string // date-time
   // ...
 }
 ```

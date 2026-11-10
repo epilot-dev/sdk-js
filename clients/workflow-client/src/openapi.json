@@ -929,6 +929,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/SkipHealParam"
           }
         ],
         "responses": {
@@ -1256,7 +1259,7 @@
       "post": {
         "operationId": "bulkStartFlows",
         "summary": "bulkStartFlows",
-        "description": "Creates a job that starts one flow on many entities: the flow\n`flow_template_id` is started on every entity in `entities`, or on every\nentity `entities_query` matches. Every start is manual.\n\nLimits: up to 1,000 entities in `entities`, or up to 10,000 matched by\n`entities_query`.\n\nThe request only runs a preflight and returns `202` with the job. A job of\nat most 200 listed entities is returned in status `awaiting_approval`; a\nquery, or a longer list, is returned in status `preparing` while the\nentities are resolved in the background, then moves to\n`awaiting_approval` (or to `failed`, with `failure`). Poll\n`GET /v2/flows/bulk-jobs/{job_id}`. Nothing is started until the job is approved with\n`PATCH /v2/flows/bulk-jobs/{job_id}` (`action: APPROVE`); a job not approved\nwithin 24 hours expires.\n\nThe preflight checks the caller may trigger the flow, loads its template, and\nmatches each entity against the template's trigger. An entity whose type no\ntrigger accepts is recorded as a `skipped` item with `error_code:\ntrigger_entity_mismatch`. `flow` summarises how many starts the job will\nmake, which is what a confirmation dialog shows.\n\nAfter approval the job runs in the background, paced to protect the\ndatastore (roughly 5–10 starts per second). Poll\n`GET /v2/flows/bulk-jobs/{job_id}` for progress; the user who created the\njob is notified in-app when it finishes.\n",
+        "description": "Creates a job that starts one flow on many entities: the flow\n`flow_template_id` is started on every entity in `entities`, or on every\nentity `entities_query` matches. Every start is manual.\n\nLimits: up to 1,000 entities in `entities`, or up to 80,000 matched by\n`entities_query`.\n\nThe request only runs a preflight and returns `202` with the job. A job of\nat most 200 listed entities is returned in status `awaiting_approval`; a\nquery, or a longer list, is returned in status `preparing` while the\nentities are resolved in the background, then moves to\n`awaiting_approval` (or to `failed`, with `failure`). Poll\n`GET /v2/flows/bulk-jobs/{job_id}`. Nothing is started until the job is approved with\n`PATCH /v2/flows/bulk-jobs/{job_id}` (`action: APPROVE`); a job not approved\nwithin 24 hours expires.\n\nThe preflight checks the caller may trigger the flow, loads its template, and\nmatches each entity against the template's trigger. An entity whose type no\ntrigger accepts is recorded as a `skipped` item with `error_code:\ntrigger_entity_mismatch`. `flow` summarises how many starts the job will\nmake, which is what a confirmation dialog shows.\n\nAfter approval the job runs in the background, paced to protect the\ndatastore (roughly 5–10 starts per second). Poll\n`GET /v2/flows/bulk-jobs/{job_id}` for progress; the user who created the\njob is notified in-app when it finishes.\n",
         "tags": [
           "Flows V2"
         ],
@@ -1482,7 +1485,7 @@
       "patch": {
         "operationId": "patchBulkStartFlowsJob",
         "summary": "patchBulkStartFlowsJob",
-        "description": "Approves or cancels a bulk-start job.\n\n- `APPROVE`: only from `awaiting_approval`, before the job expires. Queues the\n  job; starts begin within seconds.\n- `CANCEL`: from `awaiting_approval` or `queued` the job is cancelled at once.\n  From `running` the job stops at its next checkpoint (a few seconds), or at\n  once when no worker currently holds it; flows already started are kept and\n  the remaining items become `cancelled`.\n",
+        "description": "Approves or cancels a bulk-start job.\n\n- `APPROVE`: only from `awaiting_approval`, before the job expires. Queues the\n  job; starts begin within seconds.\n- `CANCEL`: only by the job's creator, or by someone allowed to cancel workflows\n  (`workflow:execution:cancel`); anyone else gets `403`. From `awaiting_approval`\n  or `queued` the job is cancelled at once.\n  From `running` the job stops at its next checkpoint (a few seconds), or at\n  once when no worker currently holds it; flows already started are kept and\n  the remaining items become `cancelled`.\n",
         "tags": [
           "Flows V2"
         ],
@@ -2197,6 +2200,104 @@
       }
     },
     "/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule": {
+      "put": {
+        "operationId": "rescheduleTask",
+        "summary": "rescheduleTask",
+        "description": "Moves the execution date of a scheduled task that has not run yet (AL-3774). The task must be SCHEDULED with a booked timer, and its flow open. The task's timer is replaced by one for the new date, so the task runs once, on the new date; the change is recorded on the schedule as `rescheduled` and logged in the activity feed. Requires `workflow:execution:task:update_date`. Rescheduling again moves it from the date it has now. To run the task at once, use runTaskScheduleNow.",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ExecutionIdParam"
+          },
+          {
+            "$ref": "#/components/parameters/TaskIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RescheduleTaskReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - returns the rescheduled task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors - the date is not at least a minute in the future, or the task cannot be rescheduled (not booked, already run, not a scheduled automation or decision, or its flow is closed or done)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The task has already started, or it started or changed while it was being rescheduled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "operationId": "cancelTaskSchedule",
         "summary": "cancelTaskSchedule",
@@ -2552,6 +2653,16 @@
         "required": false,
         "description": "When true, the execution is marked as deleted but retained in storage for archival\nand audit purposes. When false (default), the execution is permanently removed.\nSoft-deleted executions do not appear in normal queries.\n",
         "example": true
+      },
+      "SkipHealParam": {
+        "in": "query",
+        "name": "skip_heal",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        },
+        "description": "When true, the execution is not healed and nothing is written back. The response is otherwise the same as without it."
       }
     },
     "schemas": {
@@ -4400,7 +4511,7 @@
       },
       "BulkStartEntitiesQuery": {
         "type": "object",
-        "description": "The entities an entity search matches, as the entity table's \"select all\nmatching\" selects them. Resolved once, in the background, when the job is prepared: the\njob holds the entities matching at that time (at most 10,000).\n",
+        "description": "The entities an entity search matches, as the entity table's \"select all\nmatching\" selects them. Resolved once, in the background, when the job is prepared: the\njob holds the entities matching at that time (at most 80,000).\n",
         "required": [
           "entity_schema",
           "q"
@@ -4741,6 +4852,10 @@
           },
           "preparation": {
             "$ref": "#/components/schemas/BulkStartFlowsJobPreparation"
+          },
+          "cancelled_by": {
+            "type": "string",
+            "description": "The user who cancelled the job: its creator, or someone allowed to cancel\nworkflows (`workflow:execution:cancel`).\n"
           },
           "counts": {
             "$ref": "#/components/schemas/BulkStartFlowsJobCounts"
@@ -5198,7 +5313,7 @@
               "UPCOMING",
               "NOT_REACHED"
             ],
-            "description": "Derived progress status:\n- COMPLETED: the run moved past this stage, or finished in it\n- IN_PROGRESS: the flow's current work is inside this stage\n- UPCOMING: the flow has not reached this stage yet\n- NOT_REACHED: the flow finished (DONE or CLOSED) before reaching this stage — a run may legitimately end at any stage\n"
+            "description": "Derived progress status:\n- COMPLETED: the run moved past this stage, or finished in it, or — while an earlier stage is still open — all its tasks are already closed\n- IN_PROGRESS: the flow's current work is inside this stage — the lowest stage with an open task, or a later one already being worked on ahead of it. Several stages can be IN_PROGRESS at once\n- UPCOMING: the flow has not reached this stage yet\n- NOT_REACHED: the flow finished (DONE or CLOSED) before reaching this stage — a run may legitimately end at any stage\n"
           },
           "completed_at": {
             "type": "string",
@@ -5954,6 +6069,62 @@
           "error_reason": {
             "type": "string",
             "description": "Set by the backend when scheduling this task FAILED (e.g. the\nreferenced date attribute is empty/unreadable, or the resolved fire\ntime is already in the past). A JSON string\n({ error_code, error_reason, error_info }) describing why, so the UI\ncan show a specific warning and ask the user to fix the date\nattribute and re-schedule. Cleared when the task is successfully\n(re-)armed. This is the decision-task counterpart of\nAutomationInfo.error_reason (decision tasks have no automation_config).\n"
+          },
+          "rescheduled": {
+            "$ref": "#/components/schemas/ScheduleChange"
+          }
+        }
+      },
+      "RescheduleTaskReq": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scheduled_at"
+        ],
+        "properties": {
+          "scheduled_at": {
+            "type": "string",
+            "description": "The new execution date, an ISO 8601 instant with an offset, at least a minute from now"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Why the date moved, shown with the change and in the activity feed"
+          }
+        }
+      },
+      "ScheduleChange": {
+        "type": "object",
+        "description": "A person moved the execution date of this booked schedule (AL-3774).\nIt describes the booking named by `schedule_id` only: once the task's\n`schedule.schedule_id` differs (the timer fired and a reset or re-arm\nbooked a new one, run-now released it, a revert cleared it), the change\nno longer applies and readers must ignore it. Server-written.\n",
+        "required": [
+          "schedule_id",
+          "original_scheduled_at",
+          "previous_scheduled_at",
+          "changed_by",
+          "changed_at"
+        ],
+        "properties": {
+          "schedule_id": {
+            "type": "string",
+            "description": "The booking this change produced"
+          },
+          "original_scheduled_at": {
+            "type": "string",
+            "description": "The execution date the schedule's configuration resolved to, before any change"
+          },
+          "previous_scheduled_at": {
+            "type": "string",
+            "description": "The execution date this change replaced"
+          },
+          "changed_by": {
+            "type": "string",
+            "description": "Who changed it, as an assignee id (the user id, prefixed with `<org id>_` for a partner user)"
+          },
+          "changed_at": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
           }
         }
       },
@@ -6020,6 +6191,9 @@
           "error_reason": {
             "type": "string",
             "description": "Set by the backend when scheduling this task FAILED (e.g. the\nreferenced date attribute is empty/unreadable, or the resolved fire\ntime is already in the past). A JSON string\n({ error_code, error_reason, error_info }) describing why, so the UI\ncan show a specific warning and ask the user to fix the date\nattribute and re-schedule. Cleared when the task is successfully\n(re-)armed. This is the decision-task counterpart of\nAutomationInfo.error_reason (decision tasks have no automation_config).\n"
+          },
+          "rescheduled": {
+            "$ref": "#/components/schemas/ScheduleChange"
           }
         },
         "required": [
@@ -6265,6 +6439,10 @@
           "required": {
             "type": "boolean",
             "description": "When true, the task is required and users cannot skip it (enforced on PATCH and schedule cancellation). Snapshotted from the template at flow start. Unrelated to `requirements`, which gate when a task becomes enabled. System-driven skips are unaffected — tasks on a not-taken decision branch, and automation tasks whose automation execution itself reports a skipped verdict (e.g. unmet trigger conditions). Not patchable — ignored on client patches."
+          },
+          "only_assignee_can_complete": {
+            "type": "boolean",
+            "description": "When true, only the task's assignees may change its status (start, pause, complete, skip, clear or reopen it), or choose its branch on a manual decision: a user named in `assigned_to`, a member of a group or partner organisation named there, or a user a variable assignment resolves to. Read from the stored task's assignees, never from the request, so a caller cannot assign themselves and complete in one PATCH. Everyone else, org admins and service tokens included, gets 403; a task without an assignee keeps its status until someone is assigned. The engine's own scheduler dispatch and the completion from a submitted journey are exempt. Snapshotted from the template at flow start. Not patchable — ignored on client patches."
           },
           "subtasks": {
             "type": "array",

@@ -12,6 +12,7 @@ declare namespace Components {
         export type ExecutionIdParam = string;
         export type PhaseIdParam = string;
         export type ScheduleIdParam = string;
+        export type SkipHealParam = boolean;
         export type SoftDeleteParam = boolean;
         export type TaskIdParam = string;
     }
@@ -24,6 +25,7 @@ declare namespace Components {
     }
     export interface QueryParameters {
         SoftDeleteParam?: Parameters.SoftDeleteParam;
+        SkipHealParam?: Parameters.SkipHealParam;
     }
     namespace Schemas {
         export type ActionSchedule = ImmediateSchedule | DelayedSchedule | RelativeSchedule;
@@ -103,6 +105,12 @@ declare namespace Components {
                  *
                  */
                 BulkStartFlowsJobPreparation;
+                /**
+                 * The user who cancelled the job: its creator, or someone allowed to cancel
+                 * workflows (`workflow:execution:cancel`).
+                 *
+                 */
+                cancelled_by?: string;
                 counts: BulkStartFlowsJobCounts;
                 /**
                  * Present for jobs of at most 200 items only, and never while the
@@ -253,6 +261,10 @@ declare namespace Components {
              * When true, the task is required and users cannot skip it (enforced on PATCH and schedule cancellation). Snapshotted from the template at flow start. Unrelated to `requirements`, which gate when a task becomes enabled. System-driven skips are unaffected — tasks on a not-taken decision branch, and automation tasks whose automation execution itself reports a skipped verdict (e.g. unmet trigger conditions). Not patchable — ignored on client patches.
              */
             required?: boolean;
+            /**
+             * When true, only the task's assignees may change its status (start, pause, complete, skip, clear or reopen it), or choose its branch on a manual decision: a user named in `assigned_to`, a member of a group or partner organisation named there, or a user a variable assignment resolves to. Read from the stored task's assignees, never from the request, so a caller cannot assign themselves and complete in one PATCH. Everyone else, org admins and service tokens included, gets 403; a task without an assignee keeps its status until someone is assigned. The engine's own scheduler dispatch and the completion from a submitted journey are exempt. Snapshotted from the template at flow start. Not patchable — ignored on client patches.
+             */
+            only_assignee_can_complete?: boolean;
             /**
              * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) whenever a description is written: at flow start, on add-task, on a description PATCH and on a loop reset. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate the task's person action — completing a manual task or manual decision, running a manual automation, approving a manual AI task's result — and a partner user is held only to the party they can see: the partner description, or the co-worker description when no partner description is enabled. Not patchable directly — a description PATCH may add, remove, rename and reorder items, but it may neither make a required item optional nor drop it, and it may not repeat an id (400).
              */
@@ -635,6 +647,10 @@ declare namespace Components {
              */
             required?: boolean;
             /**
+             * When true, only the task's assignees may change its status (start, pause, complete, skip, clear or reopen it), or choose its branch on a manual decision: a user named in `assigned_to`, a member of a group or partner organisation named there, or a user a variable assignment resolves to. Read from the stored task's assignees, never from the request, so a caller cannot assign themselves and complete in one PATCH. Everyone else, org admins and service tokens included, gets 403; a task without an assignee keeps its status until someone is assigned. The engine's own scheduler dispatch and the completion from a submitted journey are exempt. Snapshotted from the template at flow start. Not patchable — ignored on client patches.
+             */
+            only_assignee_can_complete?: boolean;
+            /**
              * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) whenever a description is written: at flow start, on add-task, on a description PATCH and on a loop reset. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate the task's person action — completing a manual task or manual decision, running a manual automation, approving a manual AI task's result — and a partner user is held only to the party they can see: the partner description, or the co-worker description when no partner description is enabled. Not patchable directly — a description PATCH may add, remove, rename and reorder items, but it may neither make a required item optional nor drop it, and it may not repeat an id (400).
              */
             subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
@@ -723,7 +739,7 @@ declare namespace Components {
         /**
          * The entities an entity search matches, as the entity table's "select all
          * matching" selects them. Resolved once, in the background, when the job is prepared: the
-         * job holds the entities matching at that time (at most 10,000).
+         * job holds the entities matching at that time (at most 80,000).
          *
          */
         export interface BulkStartEntitiesQuery {
@@ -871,6 +887,12 @@ declare namespace Components {
              *
              */
             BulkStartFlowsJobPreparation;
+            /**
+             * The user who cancelled the job: its creator, or someone allowed to cancel
+             * workflows (`workflow:execution:cancel`).
+             *
+             */
+            cancelled_by?: string;
             counts: BulkStartFlowsJobCounts;
             /**
              * Present for jobs of at most 200 items only, and never while the
@@ -2250,7 +2272,7 @@ declare namespace Components {
             entities_query?: /**
              * The entities an entity search matches, as the entity table's "select all
              * matching" selects them. Resolved once, in the background, when the job is prepared: the
-             * job holds the entities matching at that time (at most 10,000).
+             * job holds the entities matching at that time (at most 80,000).
              *
              */
             BulkStartEntitiesQuery;
@@ -2451,6 +2473,10 @@ declare namespace Components {
              */
             required?: boolean;
             /**
+             * When true, only the task's assignees may change its status (start, pause, complete, skip, clear or reopen it), or choose its branch on a manual decision: a user named in `assigned_to`, a member of a group or partner organisation named there, or a user a variable assignment resolves to. Read from the stored task's assignees, never from the request, so a caller cannot assign themselves and complete in one PATCH. Everyone else, org admins and service tokens included, gets 403; a task without an assignee keeps its status until someone is assigned. The engine's own scheduler dispatch and the completion from a submitted journey are exempt. Snapshotted from the template at flow start. Not patchable — ignored on client patches.
+             */
+            only_assignee_can_complete?: boolean;
+            /**
              * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) whenever a description is written: at flow start, on add-task, on a description PATCH and on a loop reset. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate the task's person action — completing a manual task or manual decision, running a manual automation, approving a manual AI task's result — and a partner user is held only to the party they can see: the partner description, or the co-worker description when no partner description is enabled. Not patchable directly — a description PATCH may add, remove, rename and reorder items, but it may neither make a required item optional nor drop it, and it may not repeat an id (400).
              */
             subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
@@ -2589,6 +2615,15 @@ declare namespace Components {
              *
              */
             error_reason?: string;
+            rescheduled?: /**
+             * A person moved the execution date of this booked schedule (AL-3774).
+             * It describes the booking named by `schedule_id` only: once the task's
+             * `schedule.schedule_id` differs (the timer fired and a reset or re-arm
+             * booked a new one, run-now released it, a revert cleared it), the change
+             * no longer applies and readers must ignore it. Server-written.
+             *
+             */
+            ScheduleChange;
         }
         /**
          * Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678). A template may set it only on a task that has a start date; sent on a task, phase or flow without one, it is stored but has no effect, and the stored due date stays.
@@ -3350,6 +3385,10 @@ declare namespace Components {
              */
             required?: boolean;
             /**
+             * When true, only the task's assignees may change its status (start, pause, complete, skip, clear or reopen it), or choose its branch on a manual decision: a user named in `assigned_to`, a member of a group or partner organisation named there, or a user a variable assignment resolves to. Read from the stored task's assignees, never from the request, so a caller cannot assign themselves and complete in one PATCH. Everyone else, org admins and service tokens included, gets 403; a task without an assignee keeps its status until someone is assigned. The engine's own scheduler dispatch and the completion from a submitted journey are exempt. Snapshotted from the template at flow start. Not patchable — ignored on client patches.
+             */
+            only_assignee_can_complete?: boolean;
+            /**
              * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) whenever a description is written: at flow start, on add-task, on a description PATCH and on a loop reset. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate the task's person action — completing a manual task or manual decision, running a manual automation, approving a manual AI task's result — and a partner user is held only to the party they can see: the partner description, or the co-worker description when no partner description is enabled. Not patchable directly — a description PATCH may add, remove, rename and reorder items, but it may neither make a required item optional nor drop it, and it may not repeat an id (400).
              */
             subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
@@ -3794,8 +3833,8 @@ declare namespace Components {
             description?: string;
             /**
              * Derived progress status:
-             * - COMPLETED: the run moved past this stage, or finished in it
-             * - IN_PROGRESS: the flow's current work is inside this stage
+             * - COMPLETED: the run moved past this stage, or finished in it, or — while an earlier stage is still open — all its tasks are already closed
+             * - IN_PROGRESS: the flow's current work is inside this stage — the lowest stage with an open task, or a later one already being worked on ahead of it. Several stages can be IN_PROGRESS at once
              * - UPCOMING: the flow has not reached this stage yet
              * - NOT_REACHED: the flow finished (DONE or CLOSED) before reaching this stage — a run may legitimately end at any stage
              *
@@ -4046,6 +4085,25 @@ declare namespace Components {
              *
              */
             error_reason?: string;
+            rescheduled?: /**
+             * A person moved the execution date of this booked schedule (AL-3774).
+             * It describes the booking named by `schedule_id` only: once the task's
+             * `schedule.schedule_id` differs (the timer fired and a reset or re-arm
+             * booked a new one, run-now released it, a revert cleared it), the change
+             * no longer applies and readers must ignore it. Server-written.
+             *
+             */
+            ScheduleChange;
+        }
+        export interface RescheduleTaskReq {
+            /**
+             * The new execution date, an ISO 8601 instant with an offset, at least a minute from now
+             */
+            scheduled_at: string;
+            /**
+             * Why the date moved, shown with the change and in the activity feed
+             */
+            reason?: string;
         }
         /**
          * The bounded choice a person makes when running a semi-automated task. Optional in full: a task that configures no choice runs from its automation's stored configuration.
@@ -4054,6 +4112,34 @@ declare namespace Components {
          */
         export interface RunTaskAutomationReq {
             action_inputs?: /* Run-time inputs keyed by the automation action they belong to. An action whose key is absent runs entirely from its configuration. */ TaskAutomationActionInputs;
+        }
+        /**
+         * A person moved the execution date of this booked schedule (AL-3774).
+         * It describes the booking named by `schedule_id` only: once the task's
+         * `schedule.schedule_id` differs (the timer fired and a reset or re-arm
+         * booked a new one, run-now released it, a revert cleared it), the change
+         * no longer applies and readers must ignore it. Server-written.
+         *
+         */
+        export interface ScheduleChange {
+            /**
+             * The booking this change produced
+             */
+            schedule_id: string;
+            /**
+             * The execution date the schedule's configuration resolved to, before any change
+             */
+            original_scheduled_at: string;
+            /**
+             * The execution date this change replaced
+             */
+            previous_scheduled_at: string;
+            /**
+             * Who changed it, as an assignee id (the user id, prefixed with `<org id>_` for a partner user)
+             */
+            changed_by: string;
+            changed_at: string;
+            reason?: string;
         }
         export interface SearchExecutionsReq {
             name?: string;
@@ -4743,6 +4829,10 @@ declare namespace Components {
              * When true, the task is required and users cannot skip it (enforced on PATCH and schedule cancellation). Snapshotted from the template at flow start. Unrelated to `requirements`, which gate when a task becomes enabled. System-driven skips are unaffected — tasks on a not-taken decision branch, and automation tasks whose automation execution itself reports a skipped verdict (e.g. unmet trigger conditions). Not patchable — ignored on client patches.
              */
             required?: boolean;
+            /**
+             * When true, only the task's assignees may change its status (start, pause, complete, skip, clear or reopen it), or choose its branch on a manual decision: a user named in `assigned_to`, a member of a group or partner organisation named there, or a user a variable assignment resolves to. Read from the stored task's assignees, never from the request, so a caller cannot assign themselves and complete in one PATCH. Everyone else, org admins and service tokens included, gets 403; a task without an assignee keeps its status until someone is assigned. The engine's own scheduler dispatch and the completion from a submitted journey are exempt. Snapshotted from the template at flow start. Not patchable — ignored on client patches.
+             */
+            only_assignee_can_complete?: boolean;
             /**
              * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) whenever a description is written: at flow start, on add-task, on a description PATCH and on a loop reset. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate the task's person action — completing a manual task or manual decision, running a manual automation, approving a manual AI task's result — and a partner user is held only to the party they can see: the partner description, or the co-worker description when no partner description is enabled. Not patchable directly — a description PATCH may add, remove, rename and reorder items, but it may neither make a required item optional nor drop it, and it may not repeat an id (400).
              */
@@ -6010,9 +6100,13 @@ declare namespace Paths {
     namespace GetFlowExecution {
         namespace Parameters {
             export type ExecutionId = string;
+            export type SkipHeal = boolean;
         }
         export interface PathParameters {
             execution_id: Parameters.ExecutionId;
+        }
+        export interface QueryParameters {
+            skip_heal?: Parameters.SkipHeal;
         }
         namespace Responses {
             export type $200 = Components.Schemas.FlowExecution;
@@ -6276,6 +6370,56 @@ declare namespace Paths {
              */
             Components.Schemas.ErrorResp;
             export type $404 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $500 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+        }
+    }
+    namespace RescheduleTask {
+        namespace Parameters {
+            export type ExecutionId = string;
+            export type TaskId = string;
+        }
+        export interface PathParameters {
+            execution_id: Parameters.ExecutionId;
+            task_id: Parameters.TaskId;
+        }
+        export type RequestBody = Components.Schemas.RescheduleTaskReq;
+        namespace Responses {
+            export type $200 = Components.Schemas.Task;
+            export type $400 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $401 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $403 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $404 = /**
+             * Standard error response returned when an API request fails.
+             * Contains a human-readable message describing the error.
+             *
+             */
+            Components.Schemas.ErrorResp;
+            export type $409 = /**
              * Standard error response returned when an API request fails.
              * Contains a human-readable message describing the error.
              *
@@ -6794,7 +6938,7 @@ export interface OperationMethods {
    * 
    */
   'getFlowExecution'(
-    parameters?: Parameters<Paths.GetFlowExecution.PathParameters> | null,
+    parameters?: Parameters<Paths.GetFlowExecution.QueryParameters & Paths.GetFlowExecution.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFlowExecution.Responses.$200>
@@ -6912,7 +7056,7 @@ export interface OperationMethods {
    * `flow_template_id` is started on every entity in `entities`, or on every
    * entity `entities_query` matches. Every start is manual.
    * 
-   * Limits: up to 1,000 entities in `entities`, or up to 10,000 matched by
+   * Limits: up to 1,000 entities in `entities`, or up to 80,000 matched by
    * `entities_query`.
    * 
    * The request only runs a preflight and returns `202` with the job. A job of
@@ -6993,7 +7137,9 @@ export interface OperationMethods {
    * 
    * - `APPROVE`: only from `awaiting_approval`, before the job expires. Queues the
    *   job; starts begin within seconds.
-   * - `CANCEL`: from `awaiting_approval` or `queued` the job is cancelled at once.
+   * - `CANCEL`: only by the job's creator, or by someone allowed to cancel workflows
+   *   (`workflow:execution:cancel`); anyone else gets `403`. From `awaiting_approval`
+   *   or `queued` the job is cancelled at once.
    *   From `running` the job stops at its next checkpoint (a few seconds), or at
    *   once when no worker currently holds it; flows already started are kept and
    *   the remaining items become `cancelled`.
@@ -7131,6 +7277,16 @@ export interface OperationMethods {
     data?: Paths.AddTask.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddTask.Responses.$201>
+  /**
+   * rescheduleTask - rescheduleTask
+   * 
+   * Moves the execution date of a scheduled task that has not run yet (AL-3774). The task must be SCHEDULED with a booked timer, and its flow open. The task's timer is replaced by one for the new date, so the task runs once, on the new date; the change is recorded on the schedule as `rescheduled` and logged in the activity feed. Requires `workflow:execution:task:update_date`. Rescheduling again moves it from the date it has now. To run the task at once, use runTaskScheduleNow.
+   */
+  'rescheduleTask'(
+    parameters?: Parameters<Paths.RescheduleTask.PathParameters> | null,
+    data?: Paths.RescheduleTask.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RescheduleTask.Responses.$200>
   /**
    * cancelTaskSchedule - cancelTaskSchedule
    * 
@@ -7380,7 +7536,7 @@ export interface PathsDictionary {
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetFlowExecution.PathParameters> | null,
+      parameters?: Parameters<Paths.GetFlowExecution.QueryParameters & Paths.GetFlowExecution.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFlowExecution.Responses.$200>
@@ -7506,7 +7662,7 @@ export interface PathsDictionary {
      * `flow_template_id` is started on every entity in `entities`, or on every
      * entity `entities_query` matches. Every start is manual.
      * 
-     * Limits: up to 1,000 entities in `entities`, or up to 10,000 matched by
+     * Limits: up to 1,000 entities in `entities`, or up to 80,000 matched by
      * `entities_query`.
      * 
      * The request only runs a preflight and returns `202` with the job. A job of
@@ -7593,7 +7749,9 @@ export interface PathsDictionary {
      * 
      * - `APPROVE`: only from `awaiting_approval`, before the job expires. Queues the
      *   job; starts begin within seconds.
-     * - `CANCEL`: from `awaiting_approval` or `queued` the job is cancelled at once.
+     * - `CANCEL`: only by the job's creator, or by someone allowed to cancel workflows
+     *   (`workflow:execution:cancel`); anyone else gets `403`. From `awaiting_approval`
+     *   or `queued` the job is cancelled at once.
      *   From `running` the job stops at its next checkpoint (a few seconds), or at
      *   once when no worker currently holds it; flows already started are kept and
      *   the remaining items become `cancelled`.
@@ -7749,6 +7907,16 @@ export interface PathsDictionary {
     ): OperationResponse<Paths.AddTask.Responses.$201>
   }
   ['/v2/flows/executions/{execution_id}/tasks/{task_id}/schedule']: {
+    /**
+     * rescheduleTask - rescheduleTask
+     * 
+     * Moves the execution date of a scheduled task that has not run yet (AL-3774). The task must be SCHEDULED with a booked timer, and its flow open. The task's timer is replaced by one for the new date, so the task runs once, on the new date; the change is recorded on the schedule as `rescheduled` and logged in the activity feed. Requires `workflow:execution:task:update_date`. Rescheduling again moves it from the date it has now. To run the task at once, use runTaskScheduleNow.
+     */
+    'put'(
+      parameters?: Parameters<Paths.RescheduleTask.PathParameters> | null,
+      data?: Paths.RescheduleTask.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RescheduleTask.Responses.$200>
     /**
      * cancelTaskSchedule - cancelTaskSchedule
      * 
@@ -7917,7 +8085,9 @@ export type PortalWorkflowsBatchSearchResp = Components.Schemas.PortalWorkflowsB
 export type PortalWorkflowsSearchReq = Components.Schemas.PortalWorkflowsSearchReq;
 export type PortalWorkflowsSearchResp = Components.Schemas.PortalWorkflowsSearchResp;
 export type RelativeSchedule = Components.Schemas.RelativeSchedule;
+export type RescheduleTaskReq = Components.Schemas.RescheduleTaskReq;
 export type RunTaskAutomationReq = Components.Schemas.RunTaskAutomationReq;
+export type ScheduleChange = Components.Schemas.ScheduleChange;
 export type SearchExecutionsReq = Components.Schemas.SearchExecutionsReq;
 export type SearchExecutionsResp = Components.Schemas.SearchExecutionsResp;
 export type SearchFlowsReq = Components.Schemas.SearchFlowsReq;
