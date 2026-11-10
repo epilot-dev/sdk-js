@@ -1,6 +1,6 @@
 import type { Document } from 'openapi-client-axios';
 
-import { createApiClient } from '../client-factory';
+import { createApiClient, jsonContent } from '../client-factory';
 import { expand } from '../compact';
 import type { CompactDefinition } from '../compact';
 import { createApiHandle } from '../proxy';
@@ -24,19 +24,20 @@ const loadDefinition = (): Document => {
   return _definition;
 };
 
+// help and openapi import by static path, so a bundler includes only this API's docs and spec.
+/** Markdown docs of this API */
+export const help = (): Promise<string> => jsonContent(import('../docs/identity.json'));
+
+/** Rejects: no OpenAPI specification is bundled for this API */
+export const openapi = (): Promise<Document> => Promise.reject(new Error('No OpenAPI spec for "identity"'));
+
+const create = (): Client => createApiClient<Client>({ definition: loadDefinition(), help, openapi });
+
 let _instance: Client | null = null;
 
-const resolve = (): Client => {
-  if (!_instance) {
-    const def = loadDefinition();
-    _instance = createApiClient<Client>({ definition: def, apiName: 'identity' });
-  }
-  return _instance;
-};
-
 const _handle: ApiHandle<Client> = createApiHandle({
-  resolveClient: resolve,
-  createClient: () => createApiClient<Client>({ definition: loadDefinition(), apiName: 'identity' }),
+  resolveClient: () => (_instance ??= create()),
+  createClient: create,
   apiName: 'identity',
 });
 

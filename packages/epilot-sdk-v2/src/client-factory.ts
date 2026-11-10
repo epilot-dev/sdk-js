@@ -3,8 +3,6 @@ import type { Document } from 'openapi-client-axios';
 import _OpenAPIClientAxios from 'openapi-client-axios';
 
 import { authorize, type TokenArg } from './authorize';
-import { help as helpFn } from './help';
-import { openapi as openapiFn } from './openapi';
 
 // Handle CJS/ESM interop — when bundled as CJS, the default export may be nested under .default
 const OpenAPIClientAxios = (
@@ -13,13 +11,18 @@ const OpenAPIClientAxios = (
     : _OpenAPIClientAxios
 ) as typeof _OpenAPIClientAxios;
 
+/** Resolves a lazily imported JSON module to its content. */
+export const jsonContent = <T>(module: Promise<unknown>): Promise<T> =>
+  module.then((mod) => ((mod as { default?: T })?.default ?? mod) as T);
+
 export const createApiClient = <T extends AxiosInstance = AxiosInstance>(params: {
   definition: Document;
   token?: TokenArg | null;
   headers?: Record<string, string>;
-  apiName?: string;
+  help?: () => Promise<string>;
+  openapi?: () => Promise<Document>;
 }): T => {
-  const { definition, token, headers, apiName } = params;
+  const { definition, token, headers, help, openapi } = params;
   const api = new OpenAPIClientAxios({ definition, quick: true });
   const client = api.initSync<T>();
 
@@ -34,9 +37,11 @@ export const createApiClient = <T extends AxiosInstance = AxiosInstance>(params:
     authorize(client, token);
   }
 
-  if (apiName) {
-    (client as Record<string, unknown>).help = () => helpFn(apiName);
-    (client as Record<string, unknown>).openapi = () => openapiFn(apiName);
+  if (help) {
+    (client as Record<string, unknown>).help = help;
+  }
+  if (openapi) {
+    (client as Record<string, unknown>).openapi = openapi;
   }
 
   return client;

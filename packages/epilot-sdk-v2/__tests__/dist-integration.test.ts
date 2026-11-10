@@ -5,7 +5,7 @@
  * and make real API calls intercepted by msw.
  */
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname, relative, resolve } from 'node:path';
 
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
@@ -17,6 +17,27 @@ const DEFS_DIR = resolve(__dirname, '../definitions');
 
 const ENTITY_BASE = 'https://entity.sls.epilot.io';
 const USER_BASE = 'https://user.sls.epilot.io';
+
+/** Dist files an entry can load through static and dynamic imports of its code chunks. */
+const reachableDistFiles = (entry: string): string[] => {
+  const reached = new Set<string>();
+  const pending = [entry];
+
+  while (pending.length > 0) {
+    const file = pending.pop() as string;
+    if (reached.has(file)) continue;
+    reached.add(file);
+    // Docs and specs are data: their text may look like imports.
+    if (!file.startsWith('apis/') && !file.startsWith('chunk-')) continue;
+
+    const source = readFileSync(resolve(DIST_DIR, file), 'utf-8');
+    for (const [, specifier] of source.matchAll(/(?:from|import|require)\s*\(?\s*['"](\.{1,2}\/[^'"]+)['"]/g)) {
+      pending.push(relative(DIST_DIR, resolve(DIST_DIR, dirname(file), specifier)));
+    }
+  }
+
+  return [...reached];
+};
 
 const server = setupServer();
 
@@ -172,6 +193,21 @@ describe('all dist APIs importable', () => {
       expect(mod.createClient).toBeTypeOf('function');
     }
   });
+
+  it('ESM and CJS entries export help and openapi, and their clients carry the same', async () => {
+    const esm = await import('../dist/apis/entity.js');
+    const cjs = require('../dist/apis/entity.cjs');
+
+    for (const mod of [esm, cjs]) {
+      const docs = await mod.help();
+      const spec = await mod.openapi();
+
+      expect(docs).toContain('# Entity API');
+      expect(spec.info.title).toBe('Entity API');
+      expect(await mod.getClient().help()).toBe(docs);
+      expect(await mod.createClient().openapi()).toEqual(spec);
+    }
+  });
 });
 
 // ─── 4. Definition files ──────────────────────────────────────────────
@@ -212,6 +248,22 @@ describe('lazy loading', () => {
   it('index.cjs does not inline definition data', () => {
     const content = readFileSync(resolve(DIST_DIR, 'index.cjs'), 'utf-8');
     expect(content.length).toBeLessThan(50_000);
+  });
+
+  it('an API entry reaches only its own docs and spec', () => {
+    for (const extension of ['.js', '.cjs']) {
+      const entries = readdirSync(APIS_DIR).filter((f) => f.endsWith(extension) && !f.startsWith('_'));
+
+      for (const entry of entries) {
+        const api = entry.slice(0, -extension.length);
+        const ownDocsOrSpec = new RegExp(`^${api}-[A-Z0-9]{8}\\${extension}$`);
+        const foreignFiles = reachableDistFiles(`apis/${entry}`).filter(
+          (file) => !file.startsWith('apis/') && !file.startsWith('chunk-') && !ownDocsOrSpec.test(file),
+        );
+
+        expect(foreignFiles, entry).toEqual([]);
+      }
+    }
   });
 
   it('dist file structure is complete', () => {
