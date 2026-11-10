@@ -21748,6 +21748,17 @@ declare namespace Components {
              * The street number to search for providers
              */
             street_number?: string | null;
+            /**
+             * Which grids the search answers with, by whether they are closed distribution grids
+             * (geschlossene Verteilernetze), such as a railway's grid at a station.
+             *
+             * - `all`: every grid, closed distribution grids included.
+             * - `exclude_closed`: closed distribution grids are left out. An address inside one gets
+             *   no provider, the same answer as an address with no grid for that commodity.
+             * - `only_closed`: only closed distribution grids. An address outside one gets no provider.
+             *
+             */
+            grid_filter?: "all" | "exclude_closed" | "only_closed";
         }
         /**
          * The search providers payload
