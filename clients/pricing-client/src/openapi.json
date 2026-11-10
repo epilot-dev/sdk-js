@@ -2481,6 +2481,14 @@
                     "street": "Media Park",
                     "street_number": "8a"
                   }
+                },
+                "Search providers excluding closed distribution grids": {
+                  "value": {
+                    "type": "power",
+                    "postal_code": "66111",
+                    "city": "Saarbrücken",
+                    "grid_filter": "exclude_closed"
+                  }
                 }
               }
             }
@@ -12281,6 +12289,16 @@
             "description": "The street number to search for providers",
             "type": "string",
             "nullable": true
+          },
+          "grid_filter": {
+            "description": "Which grids the search answers with, by whether they are closed distribution grids\n(geschlossene Verteilernetze), such as a railway's grid at a station.\n\n- `all`: every grid, closed distribution grids included.\n- `exclude_closed`: closed distribution grids are left out. An address inside one gets\n  no provider, the same answer as an address with no grid for that commodity.\n- `only_closed`: only closed distribution grids. An address outside one gets no provider.\n",
+            "type": "string",
+            "enum": [
+              "all",
+              "exclude_closed",
+              "only_closed"
+            ],
+            "default": "all"
           }
         },
         "required": [
