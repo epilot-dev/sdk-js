@@ -1,6 +1,6 @@
 # epilot CLI — API Reference
 
-All 53 epilot APIs available via the CLI.
+All 54 epilot APIs available via the CLI.
 
 ## Setup
 
@@ -35,6 +35,7 @@ npx epilot auth login
 | Email template API | `epilot email-template` | 7 | [email-template.md](./email-template.md) |
 | Entity API | `epilot entity` | 88 | [entity.md](./entity.md) |
 | Entity Mapping API | `epilot entity-mapping` | 12 | [entity-mapping.md](./entity-mapping.md) |
+| Entity UI API | `epilot entity-ui` | 3 | [entity-ui.md](./entity-ui.md) |
 | Environments API | `epilot environments` | 8 | [environments.md](./environments.md) |
 | Event Catalog API | `epilot event-catalog` | 15 | [event-catalog.md](./event-catalog.md) |
 | File API | `epilot file` | 38 | [file.md](./file.md) |

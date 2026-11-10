@@ -72,6 +72,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.emailTemplate` | `@epilot/sdk/email-template` | [docs](./packages/epilot-sdk-v2/docs/email-template.md) |
 | `epilot.entity` | `@epilot/sdk/entity` | [docs](./packages/epilot-sdk-v2/docs/entity.md) |
 | `epilot.entityMapping` | `@epilot/sdk/entity-mapping` | [docs](./packages/epilot-sdk-v2/docs/entity-mapping.md) |
+| `epilot.entityUi` | `@epilot/sdk/entity-ui` | [docs](./packages/epilot-sdk-v2/docs/entity-ui.md) |
 | `epilot.environments` | `@epilot/sdk/environments` | [docs](./packages/epilot-sdk-v2/docs/environments.md) |
 | `epilot.eventCatalog` | `@epilot/sdk/event-catalog` | [docs](./packages/epilot-sdk-v2/docs/event-catalog.md) |
 | `epilot.externalValues` | `@epilot/sdk/external-values` | [docs](./packages/epilot-sdk-v2/docs/external-values.md) |
