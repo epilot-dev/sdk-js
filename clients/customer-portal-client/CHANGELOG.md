@@ -1,5 +1,11 @@
 # @epilot/customer-portal-client
 
+## 0.53.0
+
+### Minor Changes
+
+- Regenerated from the Customer Portal API: `PortalHeaderDesignOverrides.elements.icon_actions` is now `{ variant?: 'primary' | 'secondary' | 'tertiary' | 'icon' }` (design-document 0.1.0-alpha.13 slots), replacing `{ style, color }`
+
 ## 0.52.1
 
 ### Patch Changes

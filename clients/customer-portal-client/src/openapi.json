@@ -21335,42 +21335,15 @@
               "icon_actions": {
                 "type": "object",
                 "additionalProperties": false,
-                "description": "Icon buttons in the header bar",
+                "description": "Icon buttons in the header bar (inbox, profile, menu). They draw as the Button variant picked here, with that variant's look in the portal design; unset keeps the icon variant.\n",
                 "properties": {
-                  "style": {
+                  "variant": {
                     "type": "string",
                     "enum": [
-                      "solid",
-                      "soft",
-                      "surface",
-                      "outline",
-                      "ghost"
-                    ]
-                  },
-                  "color": {
-                    "description": "A button colour, or a custom colour of the portal's design by id",
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "enum": [
-                          "primary",
-                          "neutral",
-                          "danger"
-                        ]
-                      },
-                      {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                          "custom"
-                        ],
-                        "properties": {
-                          "custom": {
-                            "type": "string",
-                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
-                          }
-                        }
-                      }
+                      "primary",
+                      "secondary",
+                      "tertiary",
+                      "icon"
                     ]
                   }
                 }
@@ -21388,8 +21361,7 @@
           },
           "elements": {
             "icon_actions": {
-              "style": "ghost",
-              "color": "primary"
+              "variant": "icon"
             }
           }
         }
