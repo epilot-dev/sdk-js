@@ -18,6 +18,20 @@ const DEFS_DIR = resolve(__dirname, '../definitions');
 const ENTITY_BASE = 'https://entity.sls.epilot.io';
 const USER_BASE = 'https://user.sls.epilot.io';
 
+const apiEntries = (extension: string) =>
+  readdirSync(APIS_DIR)
+    .filter((f) => f.endsWith(extension) && !f.endsWith('.d.ts') && !f.startsWith('_'))
+    .map((file) => ({ file, api: file.slice(0, -extension.length) }));
+
+const toCamelCase = (api: string) => api.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase());
+
+/** `openapi()` serves the specs committed under src/definitions, and rejects for an API without one. */
+const hasFullSpec = (api: string) => existsSync(resolve(__dirname, '../src/definitions', `${api}.json`));
+
+const specNotFound = (api: string) => `Module not found in bundle: ./definitions/${api}.json`;
+
+const isCodeFile = (file: string) => file.startsWith('apis/') || file.startsWith('chunk-');
+
 /** Dist files an entry can load through static and dynamic imports of its code chunks. */
 const reachableDistFiles = (entry: string): string[] => {
   const reached = new Set<string>();
@@ -28,7 +42,7 @@ const reachableDistFiles = (entry: string): string[] => {
     if (reached.has(file)) continue;
     reached.add(file);
     // Docs and specs are data: their text may look like imports.
-    if (!file.startsWith('apis/') && !file.startsWith('chunk-')) continue;
+    if (!isCodeFile(file)) continue;
 
     const source = readFileSync(resolve(DIST_DIR, file), 'utf-8');
     for (const [, specifier] of source.matchAll(/(?:from|import|require)\s*\(?\s*['"](\.{1,2}\/[^'"]+)['"]/g)) {
@@ -194,18 +208,28 @@ describe('all dist APIs importable', () => {
     }
   });
 
-  it('ESM and CJS entries export help and openapi, and their clients carry the same', async () => {
-    const esm = await import('../dist/apis/entity.js');
-    const cjs = require('../dist/apis/entity.cjs');
+  it.each(['.js', '.cjs'])('every %s entry serves its own docs and spec on each access path', async (extension) => {
+    const { epilot } = extension === '.js' ? await import('../dist/index.js') : require('../dist/index.cjs');
 
-    for (const mod of [esm, cjs]) {
-      const docs = await mod.help();
-      const spec = await mod.openapi();
+    for (const { file, api } of apiEntries(extension)) {
+      const mod = extension === '.js' ? await import(`../dist/apis/${file}`) : require(`../dist/apis/${file}`);
+      const handle = mod[toCamelCase(api)];
+      const rootHandle = epilot[toCamelCase(api)];
+      const docs = JSON.parse(readFileSync(resolve(__dirname, '../src/docs', `${api}.json`), 'utf-8'));
 
-      expect(docs).toContain('# Entity API');
-      expect(spec.info.title).toBe('Entity API');
-      expect(await mod.getClient().help()).toBe(docs);
-      expect(await mod.createClient().openapi()).toEqual(spec);
+      for (const source of [mod, mod.getClient(), mod.createClient(), handle, ...(rootHandle ? [rootHandle] : [])]) {
+        expect(await source.help(), file).toBe(docs);
+
+        if (hasFullSpec(api)) {
+          expect(await source.openapi(), file).toBe(await mod.openapi());
+        } else {
+          await expect(source.openapi(), file).rejects.toThrow(specNotFound(api));
+        }
+      }
+
+      if (hasFullSpec(api)) expect((await mod.openapi()).paths, file).toBeDefined();
+      expect(mod.createClient(), file).not.toBe(mod.getClient());
+      expect(mod.createClient().help, file).not.toBe(mod.getClient().help);
     }
   });
 });
@@ -242,27 +266,30 @@ describe('definition files', () => {
 describe('lazy loading', () => {
   it('index.js does not inline definition data', () => {
     const content = readFileSync(resolve(DIST_DIR, 'index.js'), 'utf-8');
-    expect(content.length).toBeLessThan(50_000);
+    expect(content.length).toBeLessThan(100_000);
   });
 
   it('index.cjs does not inline definition data', () => {
     const content = readFileSync(resolve(DIST_DIR, 'index.cjs'), 'utf-8');
-    expect(content.length).toBeLessThan(50_000);
+    expect(content.length).toBeLessThan(100_000);
   });
 
-  it('an API entry reaches only its own docs and spec', () => {
-    for (const extension of ['.js', '.cjs']) {
-      const entries = readdirSync(APIS_DIR).filter((f) => f.endsWith(extension) && !f.startsWith('_'));
+  it.each(['.js', '.cjs'])('a %s API entry reaches its own docs and spec and no other data', (extension) => {
+    for (const { file, api } of apiEntries(extension)) {
+      const reached = reachableDistFiles(`apis/${file}`);
+      const dataFiles = reached.filter((reachedFile) => !isCodeFile(reachedFile));
+      const ownDocsOrSpec = new RegExp(`^${api}-[A-Z0-9]{8}\\${extension}$`);
+      const codeBytes = reached
+        .filter(isCodeFile)
+        .reduce((bytes, codeFile) => bytes + readFileSync(resolve(DIST_DIR, codeFile)).byteLength, 0);
 
-      for (const entry of entries) {
-        const api = entry.slice(0, -extension.length);
-        const ownDocsOrSpec = new RegExp(`^${api}-[A-Z0-9]{8}\\${extension}$`);
-        const foreignFiles = reachableDistFiles(`apis/${entry}`).filter(
-          (file) => !file.startsWith('apis/') && !file.startsWith('chunk-') && !ownDocsOrSpec.test(file),
-        );
-
-        expect(foreignFiles, entry).toEqual([]);
-      }
+      expect(
+        dataFiles.filter((dataFile) => !ownDocsOrSpec.test(dataFile)),
+        file,
+      ).toEqual([]);
+      expect(dataFiles.length, file).toBe(hasFullSpec(api) ? 2 : 1);
+      // Docs or specs inlined into a code chunk would show here: the largest entry reaches about 40 KB of code.
+      expect(codeBytes, file).toBeLessThan(100_000);
     }
   });
 

@@ -11,9 +11,17 @@ const OpenAPIClientAxios = (
     : _OpenAPIClientAxios
 ) as typeof _OpenAPIClientAxios;
 
-/** Resolves a lazily imported JSON module to its content. */
-export const jsonContent = <T>(module: Promise<unknown>): Promise<T> =>
-  module.then((mod) => ((mod as { default?: T })?.default ?? mod) as T);
+/** Content of a lazily imported JSON module. */
+export const jsonContent = <T>(mod: unknown): T => ((mod as { default?: T })?.default ?? mod) as T;
+
+/** Docs of one API, or the text `help()` resolves to when they cannot be loaded. */
+export const docsContent = async (filename: string, load: () => Promise<unknown>): Promise<string> => {
+  try {
+    return jsonContent<string>(await load());
+  } catch {
+    return `No documentation found for "${filename}". Run help() to see available APIs.`;
+  }
+};
 
 export const createApiClient = <T extends AxiosInstance = AxiosInstance>(params: {
   definition: Document;
@@ -37,11 +45,12 @@ export const createApiClient = <T extends AxiosInstance = AxiosInstance>(params:
     authorize(client, token);
   }
 
+  // A closure per client, so clients do not share one function object.
   if (help) {
-    (client as Record<string, unknown>).help = help;
+    (client as Record<string, unknown>).help = () => help();
   }
   if (openapi) {
-    (client as Record<string, unknown>).openapi = openapi;
+    (client as Record<string, unknown>).openapi = () => openapi();
   }
 
   return client;

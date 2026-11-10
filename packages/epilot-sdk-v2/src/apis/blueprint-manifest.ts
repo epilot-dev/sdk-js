@@ -1,6 +1,6 @@
 import type { Document } from 'openapi-client-axios';
 
-import { createApiClient, jsonContent } from '../client-factory';
+import { createApiClient, docsContent, jsonContent } from '../client-factory';
 import { expand } from '../compact';
 import type { CompactDefinition } from '../compact';
 import { createApiHandle } from '../proxy';
@@ -26,10 +26,12 @@ const loadDefinition = (): Document => {
 
 // help and openapi import by static path, so a bundler includes only this API's docs and spec.
 /** Markdown docs of this API */
-export const help = (): Promise<string> => jsonContent(import('../docs/blueprint-manifest.json'));
+export const help = async (): Promise<string> =>
+  docsContent('blueprint-manifest.json', () => import('../docs/blueprint-manifest.json'));
 
 /** Full OpenAPI specification of this API */
-export const openapi = (): Promise<Document> => jsonContent(import('../definitions/blueprint-manifest.json'));
+export const openapi = async (): Promise<Document> =>
+  jsonContent(await import('../definitions/blueprint-manifest.json'));
 
 const create = (): Client => createApiClient<Client>({ definition: loadDefinition(), help, openapi });
 

@@ -376,20 +376,23 @@ const mockJsonExample = (schema: Schema): string | null => {
 
 const generateApiFile = (client: ClientInfo): string => {
   const clientType = client.hasTypes ? 'Client' : 'AxiosInstance';
-  const openapiExport = existsSync(resolve(DEFS_DIR, `${client.kebabName}.json`))
+  const hasFullSpec = existsSync(resolve(DEFS_DIR, `${client.kebabName}.json`));
+  const openapiExport = hasFullSpec
     ? [
         `/** Full OpenAPI specification of this API */`,
-        `export const openapi = (): Promise<Document> => jsonContent(import('../definitions/${client.kebabName}.json'))`,
+        `export const openapi = async (): Promise<Document> => jsonContent(await import('../definitions/${client.kebabName}.json'))`,
       ]
     : [
-        `/** Rejects: no OpenAPI specification is bundled for this API */`,
-        `export const openapi = (): Promise<Document> => Promise.reject(new Error('No OpenAPI spec for "${client.kebabName}"'))`,
+        `/** Rejects: src/definitions holds no full spec for this API */`,
+        `export const openapi = async (): Promise<Document> => {`,
+        `  throw new Error('Module not found in bundle: ./definitions/${client.kebabName}.json')`,
+        `}`,
       ];
 
   const lines = [
     `import type { Document } from 'openapi-client-axios'`,
     ``,
-    `import { createApiClient, jsonContent } from '../client-factory'`,
+    `import { createApiClient, docsContent${hasFullSpec ? ', jsonContent' : ''} } from '../client-factory'`,
     `import { expand } from '../compact'`,
     `import type { CompactDefinition } from '../compact'`,
     `import { createApiHandle } from '../proxy'`,
@@ -432,7 +435,7 @@ const generateApiFile = (client: ClientInfo): string => {
     ``,
     `// help and openapi import by static path, so a bundler includes only this API's docs and spec.`,
     `/** Markdown docs of this API */`,
-    `export const help = (): Promise<string> => jsonContent(import('../docs/${client.kebabName}.json'))`,
+    `export const help = async (): Promise<string> => docsContent('${client.kebabName}.json', () => import('../docs/${client.kebabName}.json'))`,
     ``,
     ...openapiExport,
     ``,

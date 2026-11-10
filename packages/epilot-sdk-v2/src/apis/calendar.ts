@@ -1,6 +1,6 @@
 import type { Document } from 'openapi-client-axios';
 
-import { createApiClient, jsonContent } from '../client-factory';
+import { createApiClient, docsContent } from '../client-factory';
 import { expand } from '../compact';
 import type { CompactDefinition } from '../compact';
 import { createApiHandle } from '../proxy';
@@ -26,10 +26,12 @@ const loadDefinition = (): Document => {
 
 // help and openapi import by static path, so a bundler includes only this API's docs and spec.
 /** Markdown docs of this API */
-export const help = (): Promise<string> => jsonContent(import('../docs/calendar.json'));
+export const help = async (): Promise<string> => docsContent('calendar.json', () => import('../docs/calendar.json'));
 
-/** Rejects: no OpenAPI specification is bundled for this API */
-export const openapi = (): Promise<Document> => Promise.reject(new Error('No OpenAPI spec for "calendar"'));
+/** Rejects: src/definitions holds no full spec for this API */
+export const openapi = async (): Promise<Document> => {
+  throw new Error('Module not found in bundle: ./definitions/calendar.json');
+};
 
 const create = (): Client => createApiClient<Client>({ definition: loadDefinition(), help, openapi });
 
