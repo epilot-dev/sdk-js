@@ -1533,7 +1533,8 @@ const { data } = await client.$searchProviders(
     postal_code: 'string',
     city: 'string',
     street: 'string',
-    street_number: 'string'
+    street_number: 'string',
+    grid_filter: 'all'
   },
 )
 ```
@@ -6080,6 +6081,7 @@ type SearchProvidersParams = {
   city?: string
   street?: string
   street_number?: string
+  grid_filter?: "all" | "exclude_closed" | "only_closed"
 }
 ```
 
