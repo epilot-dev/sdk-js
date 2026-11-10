@@ -377,14 +377,13 @@ const mockJsonExample = (schema: Schema): string | null => {
 const generateApiFile = (client: ClientInfo): string => {
   const clientType = client.hasTypes ? 'Client' : 'AxiosInstance';
   const hasFullSpec = existsSync(resolve(DEFS_DIR, `${client.kebabName}.json`));
-  const openapiExport = hasFullSpec
+  const openapi = hasFullSpec
     ? [
-        `/** Full OpenAPI specification of this API */`,
-        `export const openapi = async (): Promise<Document> => jsonContent(await import('../definitions/${client.kebabName}.json'))`,
+        `const openapi = async (): Promise<Document> => jsonContent(await import('../definitions/${client.kebabName}.json'))`,
       ]
     : [
-        `/** Rejects: src/definitions holds no full spec for this API */`,
-        `export const openapi = async (): Promise<Document> => {`,
+        `// src/definitions holds no full spec for this API.`,
+        `const openapi = async (): Promise<Document> => {`,
         `  throw new Error('Module not found in bundle: ./definitions/${client.kebabName}.json')`,
         `}`,
       ];
@@ -434,12 +433,11 @@ const generateApiFile = (client: ClientInfo): string => {
     `}`,
     ``,
     `// help and openapi import by static path, so a bundler includes only this API's docs and spec.`,
-    `/** Markdown docs of this API */`,
-    `export const help = async (): Promise<string> => docsContent('${client.kebabName}.json', () => import('../docs/${client.kebabName}.json'))`,
+    `const help = async (): Promise<string> => docsContent('${client.kebabName}.json', () => import('../docs/${client.kebabName}.json'))`,
     ``,
-    ...openapiExport,
+    ...openapi,
     ``,
-    `const create = (): ${clientType} => createApiClient<${clientType}>({ definition: loadDefinition(), help, openapi })`,
+    `const create = (): ${clientType} => createApiClient<${clientType}>({ definition: loadDefinition(), apiName: '${client.apiName}', help, openapi })`,
     ``,
     `let _instance: ${clientType} | null = null`,
     ``,

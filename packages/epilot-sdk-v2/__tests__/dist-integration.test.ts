@@ -217,17 +217,19 @@ describe('all dist APIs importable', () => {
       const rootHandle = epilot[toCamelCase(api)];
       const docs = JSON.parse(readFileSync(resolve(__dirname, '../src/docs', `${api}.json`), 'utf-8'));
 
-      for (const source of [mod, mod.getClient(), mod.createClient(), handle, ...(rootHandle ? [rootHandle] : [])]) {
+      for (const source of [mod.getClient(), mod.createClient(), handle, ...(rootHandle ? [rootHandle] : [])]) {
         expect(await source.help(), file).toBe(docs);
 
         if (hasFullSpec(api)) {
-          expect(await source.openapi(), file).toBe(await mod.openapi());
+          expect(await source.openapi(), file).toBe(await mod.getClient().openapi());
         } else {
           await expect(source.openapi(), file).rejects.toThrow(specNotFound(api));
         }
       }
 
-      if (hasFullSpec(api)) expect((await mod.openapi()).paths, file).toBeDefined();
+      if (hasFullSpec(api)) expect((await mod.getClient().openapi()).paths, file).toBeDefined();
+      expect(mod.help, file).toBeUndefined();
+      expect(mod.openapi, file).toBeUndefined();
       expect(mod.createClient(), file).not.toBe(mod.getClient());
       expect(mod.createClient().help, file).not.toBe(mod.getClient().help);
     }

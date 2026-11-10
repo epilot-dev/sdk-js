@@ -53,8 +53,9 @@ export const resolveClient = (params: {
       definition,
       token: state.token,
       headers: state.globalHeaders,
-      help: () => help(name),
-      openapi: () => openapi(name),
+      apiName: name,
+      help,
+      openapi,
     });
 
     // Apply large response interceptor for S3-backed payloads

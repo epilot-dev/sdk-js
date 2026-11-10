@@ -16,8 +16,8 @@ describe('docsContent', () => {
 describe('createApiClient', () => {
   it('gives each client its own help and openapi function', () => {
     const loaders = { help: async () => 'docs', openapi: async () => definition };
-    const first = createApiClient({ definition, ...loaders }) as unknown as typeof loaders;
-    const second = createApiClient({ definition, ...loaders }) as unknown as typeof loaders;
+    const first = createApiClient({ definition, apiName: 'entity', ...loaders }) as unknown as typeof loaders;
+    const second = createApiClient({ definition, apiName: 'entity', ...loaders }) as unknown as typeof loaders;
 
     expect(first.help).not.toBe(second.help);
     expect(first.openapi).not.toBe(second.openapi);

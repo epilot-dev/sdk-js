@@ -27,10 +27,11 @@ export const createApiClient = <T extends AxiosInstance = AxiosInstance>(params:
   definition: Document;
   token?: TokenArg | null;
   headers?: Record<string, string>;
-  help?: () => Promise<string>;
-  openapi?: () => Promise<Document>;
+  apiName?: string;
+  help?: (apiName: string) => Promise<string>;
+  openapi?: (apiName: string) => Promise<Document>;
 }): T => {
-  const { definition, token, headers, help, openapi } = params;
+  const { definition, token, headers, apiName, help, openapi } = params;
   const api = new OpenAPIClientAxios({ definition, quick: true });
   const client = api.initSync<T>();
 
@@ -45,12 +46,9 @@ export const createApiClient = <T extends AxiosInstance = AxiosInstance>(params:
     authorize(client, token);
   }
 
-  // A closure per client, so clients do not share one function object.
-  if (help) {
-    (client as Record<string, unknown>).help = () => help();
-  }
-  if (openapi) {
-    (client as Record<string, unknown>).openapi = () => openapi();
+  if (apiName && help && openapi) {
+    (client as Record<string, unknown>).help = () => help(apiName);
+    (client as Record<string, unknown>).openapi = () => openapi(apiName);
   }
 
   return client;

@@ -25,13 +25,12 @@ const loadDefinition = (): Document => {
 };
 
 // help and openapi import by static path, so a bundler includes only this API's docs and spec.
-/** Markdown docs of this API */
-export const help = async (): Promise<string> => docsContent('workflow.json', () => import('../docs/workflow.json'));
+const help = async (): Promise<string> => docsContent('workflow.json', () => import('../docs/workflow.json'));
 
-/** Full OpenAPI specification of this API */
-export const openapi = async (): Promise<Document> => jsonContent(await import('../definitions/workflow.json'));
+const openapi = async (): Promise<Document> => jsonContent(await import('../definitions/workflow.json'));
 
-const create = (): Client => createApiClient<Client>({ definition: loadDefinition(), help, openapi });
+const create = (): Client =>
+  createApiClient<Client>({ definition: loadDefinition(), apiName: 'workflow', help, openapi });
 
 let _instance: Client | null = null;
 
