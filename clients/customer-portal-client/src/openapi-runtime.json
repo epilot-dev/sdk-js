@@ -2112,6 +2112,95 @@
         "responses": {}
       }
     },
+    "/v2/portal/metering/meter/{meter_id}": {
+      "get": {
+        "operationId": "getMeter",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/metering/meter/{meter_id}/counters": {
+      "get": {
+        "operationId": "getMeterCounters",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/metering/meter/{meter_id}/readings": {
+      "post": {
+        "operationId": "createMeterReadings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/metering/meter/{meter_id}/allowed-reading": {
+      "get": {
+        "operationId": "getAllowedMeterReading",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/metering/counter/{counter_id}": {
+      "get": {
+        "operationId": "getMeterCounter",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "counter_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/metering/contract/{contract_id}/meters": {
+      "get": {
+        "operationId": "getContractMeters",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/portal/public/sso/providers/{provider_slug}": {
       "get": {
         "operationId": "getSSOProvider",

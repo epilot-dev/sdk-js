@@ -55,6 +55,9 @@
     "/v2/portal/portal": {
       "post": {
         "operationId": "upsertPortal",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "deprecated": true,
         "summary": "upsertPortal",
         "description": "Upserts the settings for a portal of an organization.",
@@ -2341,6 +2344,9 @@
     "/v2/portal/email-templates": {
       "post": {
         "operationId": "upsertEmailTemplates",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "deprecated": true,
         "summary": "upsertEmailTemplates",
         "description": "Upserts the email templates of a portal",
@@ -2464,6 +2470,9 @@
     "/v3/portal/email-templates:migrate-references": {
       "post": {
         "operationId": "migrateEmailTemplateReferences",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "migrateEmailTemplateReferences",
         "description": "Walk every email-template config row in the caller's org and re-point any\nfield on `email_templates` that currently references `source_template_id`\nat `destination_template_id`. Intended to be called from the email-template\nmigration flow when a duplicated template is refined.\n\nRows are keyed by portal id (`portal_sk_v3`); a row without one is skipped.\nReturns the portal IDs that were rewritten and any whose update failed.\n",
         "tags": [
@@ -2631,6 +2640,9 @@
     "/v3/portal/email-templates/{portal_id}": {
       "post": {
         "operationId": "upsertEmailTemplatesByPortalId",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "upsertEmailTemplatesByPortalId",
         "description": "Upserts the email templates of a portal by portal ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
@@ -2868,6 +2880,9 @@
     "/v2/portal/widgets": {
       "post": {
         "operationId": "upsertPortalWidget",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "upsertPortalWidget",
         "description": "Upsert widget for a portal of an organization.",
         "deprecated": true,
@@ -3041,6 +3056,9 @@
       },
       "post": {
         "operationId": "upsertPortalWidgetV3",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "upsertPortalWidgetV3",
         "description": "Upsert widget for a portal by portal_id.",
         "security": [
@@ -8811,7 +8829,7 @@
                   "include_counter": {
                     "type": "boolean",
                     "default": false,
-                    "description": "When true, the response includes `counter` with the counter's unit, OBIS number, direction and tariff type. Access is checked by metering-api on the counter's parent meter."
+                    "description": "When true, the response includes `counter` with the counter's unit, OBIS number, direction and tariff type, if the caller has access to the counter's meter."
                   },
                   "templates_ref": {
                     "$ref": "#/components/schemas/TemplatesRef",
@@ -8857,6 +8875,417 @@
                     },
                     "counter": {
                       "$ref": "#/components/schemas/MeterReadingCounterDetails"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/meter/{meter_id}": {
+      "get": {
+        "operationId": "getMeter",
+        "summary": "getMeter",
+        "description": "Retrieves a meter of the portal user, with its journey actions and related entities.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the meter."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The meter with its journey actions and relations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "entity": {
+                          "$ref": "#/components/schemas/Meter"
+                        },
+                        "journey_actions": {
+                          "$ref": "#/components/schemas/JourneyActions"
+                        },
+                        "relations": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/EntityItem"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/meter/{meter_id}/counters": {
+      "get": {
+        "operationId": "getMeterCounters",
+        "summary": "getMeterCounters",
+        "description": "Retrieves the counters of a meter of the portal user.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the meter."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The counters of the meter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterCounter"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/meter/{meter_id}/readings": {
+      "post": {
+        "operationId": "createMeterReadings",
+        "summary": "createMeterReadings",
+        "description": "Inserts readings for several counters of a meter of the portal user at once, one reading per\ncounter and at most 100 per request. Use `createMeterReading` instead when the portal has a\nmeter reading plausibility check hook configured.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the meter."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "readings"
+                ],
+                "properties": {
+                  "readings": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "items": {
+                      "$ref": "#/components/schemas/PortalMeterReading"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created meter readings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterReading"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/meter/{meter_id}/allowed-reading": {
+      "get": {
+        "operationId": "getAllowedMeterReading",
+        "summary": "getAllowedMeterReading",
+        "x-contact-identification-token": true,
+        "description": "Returns the allowed min/max reading per counter of the meter, derived from its reading history.\nUnlike `getAllowedMeterReadingRange`, this needs no plausibility check hook.\n",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meter_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the meter."
+          },
+          {
+            "in": "query",
+            "name": "timestamp",
+            "required": false,
+            "description": "If not provided, the system will default to now.",
+            "schema": {
+              "type": "string",
+              "example": "2022-10-01T10:10:00.000Z"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Allowed reading per counter of the meter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "counter_id": {
+                            "type": "string"
+                          },
+                          "min_value": {
+                            "type": "number"
+                          },
+                          "max_value": {
+                            "type": "number"
+                          },
+                          "last_reading": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/counter/{counter_id}": {
+      "get": {
+        "operationId": "getMeterCounter",
+        "summary": "getMeterCounter",
+        "description": "Retrieves a counter of a meter of the portal user, incl. its unit and last reading.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "counter_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the meter counter."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The meter counter.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/MeterCounter"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/portal/metering/contract/{contract_id}/meters": {
+      "get": {
+        "operationId": "getContractMeters",
+        "summary": "getContractMeters",
+        "description": "Retrieves the meters of a contract of the portal user.",
+        "tags": [
+          "ECP"
+        ],
+        "security": [
+          {
+            "PortalAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contract_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the contract."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The meters of the contract.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Meter"
+                      }
                     }
                   }
                 }
@@ -9418,6 +9847,9 @@
       },
       "put": {
         "operationId": "updatePortalPage",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "updatePortalPage",
         "description": "Update a portal page by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
@@ -9516,6 +9948,9 @@
       ],
       "post": {
         "operationId": "detachPortalPage",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "detachPortalPage",
         "description": "Detach a blueprint-managed page from its blueprint. The page and all of its blocks become local (editable, no longer updated by the blueprint) and the page's lineage is tombstoned on the portal so future syncs skip it. One-way. Idempotent for pages that are not managed.\n",
         "tags": [
@@ -9577,6 +10012,9 @@
       ],
       "post": {
         "operationId": "detachPortalPageBlock",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "detachPortalPageBlock",
         "description": "Detach a blueprint-managed block. The block becomes the customer's and its lineage is tombstoned on the page so future syncs skip it. A managed page stays managed and keeps receiving blueprint updates for everything else. One-way. Idempotent for blocks that are not managed.\n",
         "tags": [
@@ -9708,6 +10146,9 @@
       },
       "post": {
         "operationId": "createPortalPage",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "createPortalPage",
         "description": "Create a new portal page. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
@@ -10038,6 +10479,9 @@
       ],
       "post": {
         "operationId": "createPortalPageBlock",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "createPortalPageBlock",
         "description": "Create a new portal page block. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
@@ -10192,6 +10636,9 @@
       },
       "put": {
         "operationId": "updatePortalPageBlock",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "updatePortalPageBlock",
         "description": "Update a portal page block by id. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
@@ -11083,6 +11530,9 @@
       },
       "put": {
         "operationId": "putPortalConfig",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "putPortalConfig",
         "description": "Updates a specific portal configuration by ID. On a portal with versioning enabled, the change is stored as a revision (`Updated via API`) and published in the same call, so every change to the portal has a revision. A concurrent write is retried on the server; if it keeps conflicting the call fails with `409` and nothing is changed.\n",
         "tags": [
@@ -11222,6 +11672,9 @@
     "/v3/portal/config/{portal_id}/revisions": {
       "post": {
         "operationId": "createPortalRevision",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "createPortalRevision",
         "description": "Creates a new revision — a complete, immutable snapshot of the portal's configuration, pages and email templates. Nothing about the live portal changes; the snapshot only becomes live when it is published.\n\nThe payload must be COMPLETE. This endpoint does not merge against live or against the previous revision: publishing a revision deletes every live page the revision does not contain. The server validates structure only — `pages` present, each page carrying `id`, `slug`, `order` and `blocks`, and no two pages sharing an `id` or a `slug`. Semantic completeness of the config is a promise the caller makes, and a partial payload is honoured rather than rejected.\n\n`email_templates` is optional, and absence means \"keep the portal's current templates\", never \"no templates\". A present but partial map is taken verbatim.\n\nWith `publish`, the revision is published in the same call: save and publish in one step.\n",
         "tags": [
@@ -11572,6 +12025,9 @@
     "/v3/portal/config/{portal_id}/publish": {
       "post": {
         "operationId": "publishPortalRevision",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "publishPortalRevision",
         "description": "Makes one revision the portal's live configuration, atomically: either everything below takes effect or nothing does. Publish is a full-snapshot replace: it writes config, every page and email templates to match the revision exactly, and deletes every live page the revision does not contain.\n\nAccepts any valid `revision_id` for the portal, old or new. There is no separate rollback endpoint and none is needed.\n\nThe same atomic publish stamps `name`, `description` and `published_at` onto the revision being published — permanently, on that revision, and not on any later one that supersedes it as live. `name` is generated server-side when the request omits it, so every published revision carries one.\n\nPublish is rejected with `409` (`reason: PORTAL_CHANGED`) when the revision was built on a published revision that is no longer live: publishing it would revert every write published since. Reload, re-apply the change and save again, or send `force: true` to publish it anyway. A revision that was published before is a rollback and is never refused for this. Publish is also rejected with `409` when the live config changed after publish read it. Every write to a versioned portal publishes a revision, so these checks cover pages and email templates too. `409` is also returned when the revision's stored config or email templates cannot be read, or when two of its pages would resolve to the same slug. A domain the revision claims that another portal already owns is a `400`.\n",
         "tags": [
@@ -11732,6 +12188,9 @@
     "/v3/portal/config/swap": {
       "post": {
         "operationId": "swapPortalConfig",
+        "x-epilot-agent": {
+          "effect": "destructive"
+        },
         "summary": "swapPortalConfig",
         "description": "Swaps the portal configuration of two portals. Without `mode` both portals exchange pages and experience config live, as before. With `mode: copy` (portal versioning only) nothing live changes: the source's setup is saved as an unpublished revision on the target to review and publish. Domain and access/security settings never move.",
         "tags": [
@@ -11845,6 +12304,9 @@
     "/v3/portal/config/clone": {
       "post": {
         "operationId": "clonePortalConfig",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "clonePortalConfig",
         "description": "Creates a new portal by cloning configuration and pages from an existing portal. The new portal gets its own domain, users, email templates, and authentication settings.",
         "tags": [
@@ -12492,6 +12954,9 @@
       },
       "put": {
         "operationId": "putMobileConfig",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "putMobileConfig",
         "description": "Merges the provided fields into the portal's mobile app configuration\n(deep merge). Only mobile_config is modified; all other portal settings\nare left untouched.\n\nWith portal versioning on, the change is published as a revision, like\nevery other write to a versioned portal. `409` when the portal kept\nchanging while the write was retried.\n",
         "tags": [
@@ -14023,7 +14488,7 @@
           },
           "cognito_details": {
             "type": "object",
-            "description": "AWS Cognito Pool details for the portal",
+            "description": "AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.",
             "properties": {
               "cognito_user_pool_client_id": {
                 "type": "string",
@@ -16704,7 +17169,7 @@
           },
           "identifiers": {
             "type": "array",
-            "description": "Identifier attributes a caller must supply on this surface to be identified. Only\nused with `authentication: registration_identifiers`.\n\nOmitted or empty means the surface uses the portal's `registration_identifiers`.\nWhen set, these replace the portal's `registration_identifiers` on this surface\nonly: `identifyContact` requires a value for each of them (400 listing the missing\nones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`\nhook on them, and refuses to issue tokens (403) unless there are at least two.\nEntries without `name` or `schema` are ignored. A `validation_rule_id` on an\nidentifier (own or inherited) is checked before the lookup.\n",
+            "description": "Identifier attributes a caller must supply on this surface to be identified. Only\nused with `authentication: registration_identifiers`.\n\nOmitted or empty means the surface uses the portal's `registration_identifiers`.\nWhen set, these replace the portal's `registration_identifiers` on this surface\nonly: `identifyContact` requires a value for each of them (400 listing the missing\nones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`\nhook on them, and refuses to issue tokens (403) unless there are at least two.\nEntries without `name` or `schema` are ignored. A `validation_rule_id` on an\nidentifier (own or inherited) is checked before the lookup. An own identifier without\na `validation_rule_id` uses the rule of the portal's registration identifier for the\nsame field (`schema` and `name`), if that has one.\n",
             "items": {
               "$ref": "#/components/schemas/RegistrationIdentifier"
             },
@@ -20309,6 +20774,102 @@
           }
         }
       },
+      "PortalMeterReading": {
+        "type": "object",
+        "description": "A meter reading submitted by a portal user for a counter of the meter in the path.",
+        "required": [
+          "value",
+          "counter_id"
+        ],
+        "properties": {
+          "value": {
+            "type": "number"
+          },
+          "counter_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/Direction"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "read_by": {
+            "$ref": "#/components/schemas/ReadBy"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/Reason"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReadingStatus"
+          },
+          "remark": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MeterCounter": {
+        "description": "A counter (measurement channel) of a meter",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "type": "object",
+            "required": [
+              "_schema"
+            ],
+            "properties": {
+              "_schema": {
+                "type": "string",
+                "enum": [
+                  "meter_counter"
+                ]
+              },
+              "obis_number": {
+                "type": "string"
+              },
+              "direction": {
+                "$ref": "#/components/schemas/Direction"
+              },
+              "transformer_ratio": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "forecast_reading_value": {
+                "type": "string"
+              },
+              "forecast_as_of": {
+                "type": "string"
+              },
+              "current_consumption": {
+                "type": "number"
+              },
+              "last_reading": {
+                "type": "string"
+              },
+              "conversion_factor": {
+                "type": "number"
+              },
+              "tariff_type": {
+                "$ref": "#/components/schemas/TariffType"
+              }
+            }
+          }
+        ]
+      },
       "MeterReadingPhoto": {
         "type": "object",
         "required": [
@@ -21167,7 +21728,7 @@
           },
           "is_system": {
             "type": "boolean",
-            "description": "Whether the page is a system page",
+            "description": "Whether the page is a system page. Server-managed on createPortalPage and updatePortalPage.",
             "example": false
           },
           "is_detail": {
@@ -21335,42 +21896,15 @@
               "icon_actions": {
                 "type": "object",
                 "additionalProperties": false,
-                "description": "Icon buttons in the header bar",
+                "description": "Icon buttons in the header bar (inbox, profile, menu). They draw as the Button variant picked here, with that variant's look in the portal design; unset keeps the icon variant.\n",
                 "properties": {
-                  "style": {
+                  "variant": {
                     "type": "string",
                     "enum": [
-                      "solid",
-                      "soft",
-                      "surface",
-                      "outline",
-                      "ghost"
-                    ]
-                  },
-                  "color": {
-                    "description": "A button colour, or a custom colour of the portal's design by id",
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "enum": [
-                          "primary",
-                          "neutral",
-                          "danger"
-                        ]
-                      },
-                      {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "required": [
-                          "custom"
-                        ],
-                        "properties": {
-                          "custom": {
-                            "type": "string",
-                            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
-                          }
-                        }
-                      }
+                      "primary",
+                      "secondary",
+                      "tertiary",
+                      "icon"
                     ]
                   }
                 }
@@ -21388,8 +21922,7 @@
           },
           "elements": {
             "icon_actions": {
-              "style": "ghost",
-              "color": "primary"
+              "variant": "icon"
             }
           }
         }
@@ -21549,7 +22082,7 @@
           },
           "cognito_details": {
             "type": "object",
-            "description": "AWS Cognito Pool details for the portal",
+            "description": "AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.",
             "properties": {
               "cognito_user_pool_client_id": {
                 "type": "string",
