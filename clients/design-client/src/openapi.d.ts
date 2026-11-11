@@ -599,17 +599,6 @@ declare namespace Components {
          * journey
          */
         export type Application = string;
-        export interface BrandItem {
-            id: string;
-            name: string;
-            created_by?: string;
-            created_date?: string;
-            main_brand?: string;
-            organization_id?: string;
-            updated_date?: string;
-            updated_by?: string;
-            status?: string;
-        }
         export interface ConsumerData {
             widgets: (WidgetData)[];
             customer_portals: (CustomerPortalData)[];
@@ -1090,19 +1079,6 @@ declare namespace Components {
                     [name: string]: any;
                 };
                 consumer?: ConsumerData;
-            }[];
-        }
-        export interface GetBrandsRes {
-            brands?: {
-                id: string;
-                name: string;
-                created_by?: string;
-                created_date?: string;
-                main_brand?: string;
-                organization_id?: string;
-                updated_date?: string;
-                updated_by?: string;
-                status?: string;
             }[];
         }
         export interface GetDesignRes {
@@ -2458,12 +2434,6 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
-    namespace GetBrands {
-        namespace Responses {
-            export type $200 = Components.Schemas.GetBrandsRes[];
-            export type $500 = Components.Schemas.ErrorResp;
-        }
-    }
     namespace GetConsumerDesign {
         namespace Parameters {
             export type Application = /**
@@ -2524,12 +2494,6 @@ declare namespace Paths {
             export type $200 = Components.Schemas.GetFilesRes;
             export type $400 = Components.Schemas.ErrorResp;
             export type $401 = Components.Schemas.ErrorResp;
-            export type $500 = Components.Schemas.ErrorResp;
-        }
-    }
-    namespace GetLimit {
-        namespace Responses {
-            export type $200 = number;
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
@@ -2751,26 +2715,6 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UploadFile.Responses.$201>
   /**
-   * getLimit - getLimit
-   * 
-   * Gets designs number limit from database per organization
-   */
-  'getLimit'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetLimit.Responses.$200>
-  /**
-   * getBrands - getBrands
-   * 
-   * Scan all brands linked to a organization, based in orgId attribute from JWT auth token
-   */
-  'getBrands'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: any,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GetBrands.Responses.$200>
-  /**
    * getConsumerDesign - getConsumerDesign
    * 
    * Search for a especific design owned by user organization
@@ -2936,30 +2880,6 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFiles.Responses.$200>
   }
-  ['/v1/designs/limit']: {
-    /**
-     * getLimit - getLimit
-     * 
-     * Gets designs number limit from database per organization
-     */
-    'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetLimit.Responses.$200>
-  }
-  ['/v1/brands']: {
-    /**
-     * getBrands - getBrands
-     * 
-     * Scan all brands linked to a organization, based in orgId attribute from JWT auth token
-     */
-    'get'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: any,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GetBrands.Responses.$200>
-  }
   ['/v1/designs/consumer/{application}/{consumerId}']: {
     /**
      * getConsumerDesign - getConsumerDesign
@@ -3005,7 +2925,6 @@ export type AddConsumerReq = Components.Schemas.AddConsumerReq;
 export type AddDesignReq = Components.Schemas.AddDesignReq;
 export type AddDesignRes = Components.Schemas.AddDesignRes;
 export type Application = Components.Schemas.Application;
-export type BrandItem = Components.Schemas.BrandItem;
 export type ConsumerData = Components.Schemas.ConsumerData;
 export type Custom_Style = Components.Schemas.CustomStyle;
 export type CustomerPortalData = Components.Schemas.CustomerPortalData;
@@ -3027,7 +2946,6 @@ export type GenerateDesignReq = Components.Schemas.GenerateDesignReq;
 export type GenerateDesignRes = Components.Schemas.GenerateDesignRes;
 export type GeneratedDesign = Components.Schemas.GeneratedDesign;
 export type GetAllDesignsRes = Components.Schemas.GetAllDesignsRes;
-export type GetBrandsRes = Components.Schemas.GetBrandsRes;
 export type GetDesignRes = Components.Schemas.GetDesignRes;
 export type GetFilesRes = Components.Schemas.GetFilesRes;
 export type ItemMetada = Components.Schemas.ItemMetada;

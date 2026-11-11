@@ -162,20 +162,6 @@
         "responses": {}
       }
     },
-    "/v1/designs/limit": {
-      "get": {
-        "deprecated": true,
-        "operationId": "getLimit",
-        "responses": {}
-      }
-    },
-    "/v1/brands": {
-      "get": {
-        "deprecated": true,
-        "operationId": "getBrands",
-        "responses": {}
-      }
-    },
     "/v1/designs/consumer/{application}/{consumerId}": {
       "get": {
         "operationId": "getConsumerDesign",

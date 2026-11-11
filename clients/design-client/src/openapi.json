@@ -896,85 +896,6 @@
         }
       }
     },
-    "/v1/designs/limit": {
-      "get": {
-        "deprecated": true,
-        "operationId": "getLimit",
-        "x-epilot-permissions": [
-          {
-            "access": "org"
-          }
-        ],
-        "summary": "getLimit",
-        "description": "Gets designs number limit from database per organization",
-        "tags": [
-          "design-builder"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success - limit loaded with success.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "number"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Other errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/brands": {
-      "get": {
-        "deprecated": true,
-        "operationId": "getBrands",
-        "x-epilot-permissions": [
-          {
-            "access": "org"
-          }
-        ],
-        "summary": "getBrands",
-        "description": "Scan all brands linked to a organization, based in orgId attribute from JWT auth token",
-        "tags": [
-          "design-builder"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success - brands loaded with success. Empty array if org has no designs.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GetBrandsRes"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Other errors",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResp"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/designs/consumer/{application}/{consumerId}": {
       "get": {
         "operationId": "getConsumerDesign",
@@ -1342,21 +1263,6 @@
           }
         }
       },
-      "GetBrandsRes": {
-        "type": "object",
-        "properties": {
-          "brands": {
-            "type": "array",
-            "items": {
-              "allOf": [
-                {
-                  "$ref": "#/components/schemas/BrandItem"
-                }
-              ]
-            }
-          }
-        }
-      },
       "AddDesignReq": {
         "type": "object",
         "properties": {
@@ -1576,42 +1482,6 @@
           "status",
           "edited",
           "style"
-        ]
-      },
-      "BrandItem": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "created_by": {
-            "type": "string"
-          },
-          "created_date": {
-            "type": "string"
-          },
-          "main_brand": {
-            "type": "string"
-          },
-          "organization_id": {
-            "type": "string"
-          },
-          "updated_date": {
-            "type": "string"
-          },
-          "updated_by": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "name"
         ]
       },
       "Design_Document_V1": {
