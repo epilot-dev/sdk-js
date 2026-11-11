@@ -97,6 +97,12 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`createMeterReading`](#createmeterreading)
 - [`getAllowedMeterReadingRange`](#getallowedmeterreadingrange)
 - [`getMeterReadings`](#getmeterreadings)
+- [`getMeter`](#getmeter)
+- [`getMeterCounters`](#getmetercounters)
+- [`createMeterReadings`](#createmeterreadings)
+- [`getAllowedMeterReading`](#getallowedmeterreading)
+- [`getMeterCounter`](#getmetercounter)
+- [`getContractMeters`](#getcontractmeters)
 - [`getPortalPage`](#getportalpage)
 - [`getPortalPages`](#getportalpages)
 - [`getTriggeredJourney`](#gettriggeredjourney)
@@ -343,6 +349,8 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`ReadBy`](#readby)
 - [`ReadingStatus`](#readingstatus)
 - [`MeterReading`](#meterreading)
+- [`PortalMeterReading`](#portalmeterreading)
+- [`MeterCounter`](#metercounter)
 - [`MeterReadingPhoto`](#meterreadingphoto)
 - [`MeterReadingPhotoData`](#meterreadingphotodata)
 - [`SSOLoginToken`](#ssologintoken)
@@ -5553,6 +5561,317 @@ const { data } = await client.getMeterReadings(
     "direction": "feed-in",
     "tariff_type": "string"
   }
+}
+```
+
+</details>
+
+---
+
+### `getMeter`
+
+Retrieves a meter of the portal user, with its journey actions and related entities.
+
+`GET /v2/portal/metering/meter/{meter_id}`
+
+```ts
+const { data } = await client.getMeter({
+  meter_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": {
+    "entity": {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
+      "_schema": "meter"
+    },
+    "journey_actions": {
+      "journey_id": "string",
+      "action_label": {
+        "en": "string",
+        "de": "string"
+      },
+      "slug": "string",
+      "rules": [
+        {
+          "entity": "string",
+          "attribute": "string",
+          "attribute_value": "string"
+        }
+      ]
+    },
+    "relations": [
+      {
+        "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+        "_title": "Example Entity",
+        "_org": "123",
+        "_tags": ["example", "mock"],
+        "_created_at": "2021-02-09T12:41:43.662Z",
+        "_updated_at": "2021-02-09T12:41:43.662Z",
+        "templates_output_highlighted": {},
+        "search_snippets": [
+          {
+            "field": "string",
+            "fragment": "string"
+          }
+        ],
+        "templates_output": {
+          "content_top_name": "Customer #123456",
+          "main_content_name": "Orange Flexible A2 (654321)",
+          "content_bottom_name": "Porscheplatz 1, 70435 Stuttgart, Germany",
+          "nested_content": {
+            "title": "Orange Flexible A2",
+            "subtitle": "654321"
+          }
+        },
+        "_schema": "contact"
+      }
+    ]
+  }
+}
+```
+
+</details>
+
+---
+
+### `getMeterCounters`
+
+Retrieves the counters of a meter of the portal user.
+
+`GET /v2/portal/metering/meter/{meter_id}/counters`
+
+```ts
+const { data } = await client.getMeterCounters({
+  meter_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "_schema": "meter_counter",
+      "obis_number": "string",
+      "direction": "feed-in",
+      "transformer_ratio": 0,
+      "unit": "string",
+      "forecast_reading_value": "string",
+      "forecast_as_of": "string",
+      "current_consumption": 0,
+      "last_reading": "string",
+      "conversion_factor": 0,
+      "tariff_type": "ht"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createMeterReadings`
+
+Inserts readings for several counters of a meter of the portal user at once, one reading per
+counter and at most 100 per request. Use `createMeterReading` instead when the portal has a
+meter reading p
+
+`POST /v2/portal/metering/meter/{meter_id}/readings`
+
+```ts
+const { data } = await client.createMeterReadings(
+  {
+    meter_id: 'example',
+  },
+  {
+    readings: [
+      {
+        value: 0,
+        counter_id: '5da0a718-c822-403d-9f5d-20d4584e0528',
+        direction: 'feed-in',
+        timestamp: 'string',
+        read_by: 'John Doe',
+        reason: 'Storing the feed-in record',
+        source: 'ECP',
+        status: 'valid',
+        remark: 'string',
+        metadata: {}
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "value": 240,
+      "read_by": "John Doe",
+      "reason": "Storing the feed-in record",
+      "meter_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "counter_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "direction": "feed-in",
+      "timestamp": "2022-10-10",
+      "source": "ECP",
+      "status": "valid",
+      "external_id": "string",
+      "remark": "Customer reported unusual consumption",
+      "metadata": {
+        "registration_id": "1234567890",
+        "business_unit": "ABC"
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getAllowedMeterReading`
+
+Returns the allowed min/max reading per counter of the meter, derived from its reading history.
+Unlike `getAllowedMeterReadingRange`, this needs no plausibility check hook.
+
+`GET /v2/portal/metering/meter/{meter_id}/allowed-reading`
+
+```ts
+const { data } = await client.getAllowedMeterReading({
+  meter_id: 'example',
+  timestamp: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "counter_id": "string",
+      "min_value": 0,
+      "max_value": 0,
+      "last_reading": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getMeterCounter`
+
+Retrieves a counter of a meter of the portal user, incl. its unit and last reading.
+
+`GET /v2/portal/metering/counter/{counter_id}`
+
+```ts
+const { data } = await client.getMeterCounter({
+  counter_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": {
+    "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+    "_title": "Example Entity",
+    "_org": "123",
+    "_tags": ["example", "mock"],
+    "_created_at": "2021-02-09T12:41:43.662Z",
+    "_updated_at": "2021-02-09T12:41:43.662Z",
+    "_schema": "meter_counter",
+    "obis_number": "string",
+    "direction": "feed-in",
+    "transformer_ratio": 0,
+    "unit": "string",
+    "forecast_reading_value": "string",
+    "forecast_as_of": "string",
+    "current_consumption": 0,
+    "last_reading": "string",
+    "conversion_factor": 0,
+    "tariff_type": "ht"
+  }
+}
+```
+
+</details>
+
+---
+
+### `getContractMeters`
+
+Retrieves the meters of a contract of the portal user.
+
+`GET /v2/portal/metering/contract/{contract_id}/meters`
+
+```ts
+const { data } = await client.getContractMeters({
+  contract_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "data": [
+    {
+      "_id": "5da0a718-c822-403d-9f5d-20d4584e0528",
+      "_title": "Example Entity",
+      "_org": "123",
+      "_tags": ["example", "mock"],
+      "_created_at": "2021-02-09T12:41:43.662Z",
+      "_updated_at": "2021-02-09T12:41:43.662Z",
+      "templates_output_highlighted": {},
+      "search_snippets": [
+        {
+          "field": "string",
+          "fragment": "string"
+        }
+      ],
+      "_schema": "meter"
+    }
+  ]
 }
 ```
 
@@ -14018,6 +14337,51 @@ type MeterReading = {
 }
 ```
 
+### `PortalMeterReading`
+
+A meter reading submitted by a portal user for a counter of the meter in the path.
+
+```ts
+type PortalMeterReading = {
+  value: number
+  counter_id: string // uuid
+  direction?: "feed-in" | "feed-out"
+  timestamp?: string
+  read_by?: string
+  reason?: "" | "regular" | "irregular" | "last" | "first" | "meter_change" | "contract_change" | "meter_adjustment"
+  source?: "ECP" | "ERP" | "360" | "journey-submission"
+  status?: "valid" | "in-validation" | "implausible" | null | ""
+  remark?: string
+  metadata?: Record<string, string>
+}
+```
+
+### `MeterCounter`
+
+A counter (measurement channel) of a meter
+
+```ts
+type MeterCounter = {
+  _id: string // uuid
+  _title: string
+  _org: string
+  _tags?: string[]
+  _created_at: string // date-time
+  _updated_at: string // date-time
+  _schema: "meter_counter"
+  obis_number?: string
+  direction?: "feed-in" | "feed-out"
+  transformer_ratio?: number
+  unit?: string
+  forecast_reading_value?: string
+  forecast_as_of?: string
+  current_consumption?: number
+  last_reading?: string
+  conversion_factor?: number
+  tariff_type?: "ht" | "nt"
+}
+```
+
 ### `MeterReadingPhoto`
 
 ```ts
@@ -14607,8 +14971,7 @@ type PortalHeaderDesignOverrides = {
   }
   elements?: {
     icon_actions?: {
-      style?: { ... }
-      color?: { ... }
+      variant?: { ... }
     }
   }
 }
