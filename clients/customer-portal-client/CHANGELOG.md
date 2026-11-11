@@ -1,5 +1,13 @@
 # @epilot/customer-portal-client
 
+## 0.53.0
+
+### Minor Changes
+
+- `x-epilot-agent` annotations on the operations that change a portal's live configuration (`effect: config` on `upsertPortal`, `putPortalConfig`, `publishPortalRevision`, `createPortalRevision`, `clonePortalConfig`, the page and block writes, the email template and widget upserts and `putMobileConfig`; `effect: destructive` on `swapPortalConfig`), so agents ask a person before calling them
+- Metering pass-throughs: `getContractMeters`, `getMeter`, `getMeterCounters`, `getMeterCounter`, `getAllowedMeterReading`, `createMeterReadings`, with `MeterCounter` and `PortalMeterReading`
+- `cognito_details` and the page `is_system` flag are documented as server-managed
+
 ## 0.52.1
 
 ### Patch Changes

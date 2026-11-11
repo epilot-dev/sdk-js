@@ -1168,7 +1168,7 @@ declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -1748,7 +1748,7 @@ declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -5519,6 +5519,61 @@ declare namespace Components {
             };
             schema?: string;
         }
+        /**
+         * A counter (measurement channel) of a meter
+         */
+        export interface MeterCounter {
+            _id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            /**
+             * Title of the entity
+             * example:
+             * Example Entity
+             */
+            _title: string;
+            /**
+             * Organization ID the entity belongs to
+             * example:
+             * 123
+             */
+            _org: string;
+            /**
+             * Array of entity tags
+             * example:
+             * [
+             *   "example",
+             *   "mock"
+             * ]
+             */
+            _tags?: string[];
+            /**
+             * Creation timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _created_at: string; // date-time
+            /**
+             * Last update timestamp of the entity
+             * example:
+             * 2021-02-09T12:41:43.662Z
+             */
+            _updated_at: string; // date-time
+            _schema: "meter_counter";
+            obis_number?: string;
+            direction?: Direction;
+            transformer_ratio?: number;
+            unit?: string;
+            forecast_reading_value?: string;
+            forecast_as_of?: string;
+            current_consumption?: number;
+            last_reading?: string;
+            conversion_factor?: number;
+            tariff_type?: TariffType;
+        }
         export interface MeterReading {
             /**
              * The reading value of the meter
@@ -6415,7 +6470,7 @@ declare namespace Components {
              */
             order: number;
             /**
-             * Whether the page is a system page
+             * Whether the page is a system page. Server-managed on createPortalPage and updatePortalPage.
              * example:
              * false
              */
@@ -6581,7 +6636,7 @@ declare namespace Components {
              */
             order: number;
             /**
-             * Whether the page is a system page
+             * Whether the page is a system page. Server-managed on createPortalPage and updatePortalPage.
              * example:
              * false
              */
@@ -6770,7 +6825,7 @@ declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -7605,7 +7660,7 @@ declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -8277,8 +8332,7 @@ declare namespace Components {
                  *   },
                  *   "elements": {
                  *     "icon_actions": {
-                 *       "style": "ghost",
-                 *       "color": "primary"
+                 *       "variant": "icon"
                  *     }
                  *   }
                  * }
@@ -8300,8 +8354,7 @@ declare namespace Components {
          *   },
          *   "elements": {
          *     "icon_actions": {
-         *       "style": "ghost",
-         *       "color": "primary"
+         *       "variant": "icon"
          *     }
          *   }
          * }
@@ -8319,16 +8372,11 @@ declare namespace Components {
             };
             elements?: {
                 /**
-                 * Icon buttons in the header bar
+                 * Icon buttons in the header bar (inbox, profile, menu). They draw as the Button variant picked here, with that variant's look in the portal design; unset keeps the icon variant.
+                 *
                  */
                 icon_actions?: {
-                    style?: "solid" | "soft" | "surface" | "outline" | "ghost";
-                    /**
-                     * A button colour, or a custom colour of the portal's design by id
-                     */
-                    color?: /* A button colour, or a custom colour of the portal's design by id */ ("primary" | "neutral" | "danger") | {
-                        custom: string; // ^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$
-                    };
+                    variant?: "primary" | "secondary" | "tertiary" | "icon";
                 };
             };
         } | null;
@@ -8338,6 +8386,40 @@ declare namespace Components {
          * 453ad7bf-86d5-46c8-8252-bcc868df5e3c
          */
         export type PortalId = string;
+        /**
+         * A meter reading submitted by a portal user for a counter of the meter in the path.
+         */
+        export interface PortalMeterReading {
+            value: number;
+            counter_id: /**
+             * Entity ID
+             * example:
+             * 5da0a718-c822-403d-9f5d-20d4584e0528
+             */
+            EntityId /* uuid */;
+            direction?: Direction;
+            timestamp?: string;
+            read_by?: /**
+             * The person who recorded the reading
+             * example:
+             * John Doe
+             */
+            ReadBy;
+            reason?: /**
+             * The reason for recording the reading
+             * If no reason is specified or left empty, the Epilot UI will show 'Regular' as the default display text
+             *
+             * example:
+             * Storing the feed-in record
+             */
+            Reason;
+            source?: Source;
+            status?: ReadingStatus;
+            remark?: string | null;
+            metadata?: {
+                [name: string]: string;
+            };
+        }
         /**
          * Portal-facing overrides of a flow or stage title, configured per portal
          * audience in the Flows Hub. Served unresolved because this endpoint asks
@@ -8796,7 +8878,7 @@ declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -9353,7 +9435,9 @@ declare namespace Components {
              * ones otherwise), runs the contact lookup and the `registrationIdentifiersCheck`
              * hook on them, and refuses to issue tokens (403) unless there are at least two.
              * Entries without `name` or `schema` are ignored. A `validation_rule_id` on an
-             * identifier (own or inherited) is checked before the lookup.
+             * identifier (own or inherited) is checked before the lookup. An own identifier without
+             * a `validation_rule_id` uses the rule of the portal's registration identifier for the
+             * same field (`schema` and `name`), if that has one.
              *
              * example:
              * [
@@ -10515,7 +10599,7 @@ declare namespace Components {
              */
             order: number;
             /**
-             * Whether the page is a system page
+             * Whether the page is a system page. Server-managed on createPortalPage and updatePortalPage.
              * example:
              * false
              */
@@ -11378,7 +11462,7 @@ declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -12022,7 +12106,7 @@ declare namespace Components {
                 prevent_user_enumeration?: boolean;
             };
             /**
-             * AWS Cognito Pool details for the portal
+             * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
              */
             cognito_details?: {
                 /**
@@ -13189,6 +13273,127 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace CreateMeterReadings {
+        namespace Parameters {
+            export type MeterId = string;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+        }
+        export interface RequestBody {
+            readings: [
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?,
+                /* A meter reading submitted by a portal user for a counter of the meter in the path. */ Components.Schemas.PortalMeterReading?
+            ];
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: Components.Schemas.MeterReading[];
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace CreatePortalConfig {
         export type RequestBody = Components.Schemas.UpsertPortalConfigV3;
         namespace Responses {
@@ -14082,6 +14287,40 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetAllowedMeterReading {
+        namespace Parameters {
+            export type MeterId = string;
+            /**
+             * example:
+             * 2022-10-01T10:10:00.000Z
+             */
+            export type Timestamp = string;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+        }
+        export interface QueryParameters {
+            timestamp?: /**
+             * example:
+             * 2022-10-01T10:10:00.000Z
+             */
+            Parameters.Timestamp;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: {
+                    counter_id?: string;
+                    min_value?: number;
+                    max_value?: number;
+                    last_reading?: string; // date-time
+                }[];
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetAllowedMeterReadingRange {
         namespace Parameters {
             export type ContextEntities = /**
@@ -14456,6 +14695,23 @@ declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetContractMeters {
+        namespace Parameters {
+            export type ContractId = string;
+        }
+        export interface PathParameters {
+            contract_id: Parameters.ContractId;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: /* The meter entity */ Components.Schemas.Meter[];
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -15721,6 +15977,63 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetMeter {
+        namespace Parameters {
+            export type MeterId = string;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: {
+                    entity?: /* The meter entity */ Components.Schemas.Meter;
+                    journey_actions?: Components.Schemas.JourneyActions;
+                    relations?: Components.Schemas.EntityItem[];
+                };
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetMeterCounter {
+        namespace Parameters {
+            export type CounterId = string;
+        }
+        export interface PathParameters {
+            counter_id: Parameters.CounterId;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: /* A counter (measurement channel) of a meter */ Components.Schemas.MeterCounter;
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetMeterCounters {
+        namespace Parameters {
+            export type MeterId = string;
+        }
+        export interface PathParameters {
+            meter_id: Parameters.MeterId;
+        }
+        namespace Responses {
+            export interface $200 {
+                data?: /* A counter (measurement channel) of a meter */ Components.Schemas.MeterCounter[];
+            }
+            export type $400 = Components.Responses.InvalidRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetMeterReadings {
         export interface RequestBody {
             meter_id: string;
@@ -15741,7 +16054,7 @@ declare namespace Paths {
                 [name: string]: string;
             };
             /**
-             * When true, the response includes `counter` with the counter's unit, OBIS number, direction and tariff type. Access is checked by metering-api on the counter's parent meter.
+             * When true, the response includes `counter` with the counter's unit, OBIS number, direction and tariff type, if the caller has access to the counter's meter.
              */
             include_counter?: boolean;
             /**
@@ -16100,7 +16413,7 @@ declare namespace Paths {
                     prevent_user_enumeration?: boolean;
                 };
                 /**
-                 * AWS Cognito Pool details for the portal
+                 * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
                  */
                 cognito_details?: {
                     /**
@@ -16813,7 +17126,7 @@ declare namespace Paths {
                     prevent_user_enumeration?: boolean;
                 };
                 /**
-                 * AWS Cognito Pool details for the portal
+                 * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
                  */
                 cognito_details?: {
                     /**
@@ -18098,7 +18411,7 @@ declare namespace Paths {
                     prevent_user_enumeration?: boolean;
                 };
                 /**
-                 * AWS Cognito Pool details for the portal
+                 * AWS Cognito Pool details for the portal. Pool and client identifiers are server-managed and ignored on write.
                  */
                 cognito_details?: {
                     /**
@@ -22793,6 +23106,71 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   /**
+   * getMeter - getMeter
+   * 
+   * Retrieves a meter of the portal user, with its journey actions and related entities.
+   */
+  'getMeter'(
+    parameters?: Parameters<Paths.GetMeter.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMeter.Responses.$200>
+  /**
+   * getMeterCounters - getMeterCounters
+   * 
+   * Retrieves the counters of a meter of the portal user.
+   */
+  'getMeterCounters'(
+    parameters?: Parameters<Paths.GetMeterCounters.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMeterCounters.Responses.$200>
+  /**
+   * createMeterReadings - createMeterReadings
+   * 
+   * Inserts readings for several counters of a meter of the portal user at once, one reading per
+   * counter and at most 100 per request. Use `createMeterReading` instead when the portal has a
+   * meter reading plausibility check hook configured.
+   * 
+   */
+  'createMeterReadings'(
+    parameters?: Parameters<Paths.CreateMeterReadings.PathParameters> | null,
+    data?: Paths.CreateMeterReadings.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateMeterReadings.Responses.$200>
+  /**
+   * getAllowedMeterReading - getAllowedMeterReading
+   * 
+   * Returns the allowed min/max reading per counter of the meter, derived from its reading history.
+   * Unlike `getAllowedMeterReadingRange`, this needs no plausibility check hook.
+   * 
+   */
+  'getAllowedMeterReading'(
+    parameters?: Parameters<Paths.GetAllowedMeterReading.QueryParameters & Paths.GetAllowedMeterReading.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAllowedMeterReading.Responses.$200>
+  /**
+   * getMeterCounter - getMeterCounter
+   * 
+   * Retrieves a counter of a meter of the portal user, incl. its unit and last reading.
+   */
+  'getMeterCounter'(
+    parameters?: Parameters<Paths.GetMeterCounter.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMeterCounter.Responses.$200>
+  /**
+   * getContractMeters - getContractMeters
+   * 
+   * Retrieves the meters of a contract of the portal user.
+   */
+  'getContractMeters'(
+    parameters?: Parameters<Paths.GetContractMeters.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetContractMeters.Responses.$200>
+  /**
    * getSSOProvider - getSSOProvider
    * 
    * Returns the public configuration of a single SSO identity provider with env var
@@ -25080,6 +25458,83 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMeterReadings.Responses.$200>
   }
+  ['/v2/portal/metering/meter/{meter_id}']: {
+    /**
+     * getMeter - getMeter
+     * 
+     * Retrieves a meter of the portal user, with its journey actions and related entities.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMeter.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMeter.Responses.$200>
+  }
+  ['/v2/portal/metering/meter/{meter_id}/counters']: {
+    /**
+     * getMeterCounters - getMeterCounters
+     * 
+     * Retrieves the counters of a meter of the portal user.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMeterCounters.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMeterCounters.Responses.$200>
+  }
+  ['/v2/portal/metering/meter/{meter_id}/readings']: {
+    /**
+     * createMeterReadings - createMeterReadings
+     * 
+     * Inserts readings for several counters of a meter of the portal user at once, one reading per
+     * counter and at most 100 per request. Use `createMeterReading` instead when the portal has a
+     * meter reading plausibility check hook configured.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateMeterReadings.PathParameters> | null,
+      data?: Paths.CreateMeterReadings.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateMeterReadings.Responses.$200>
+  }
+  ['/v2/portal/metering/meter/{meter_id}/allowed-reading']: {
+    /**
+     * getAllowedMeterReading - getAllowedMeterReading
+     * 
+     * Returns the allowed min/max reading per counter of the meter, derived from its reading history.
+     * Unlike `getAllowedMeterReadingRange`, this needs no plausibility check hook.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetAllowedMeterReading.QueryParameters & Paths.GetAllowedMeterReading.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAllowedMeterReading.Responses.$200>
+  }
+  ['/v2/portal/metering/counter/{counter_id}']: {
+    /**
+     * getMeterCounter - getMeterCounter
+     * 
+     * Retrieves a counter of a meter of the portal user, incl. its unit and last reading.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMeterCounter.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMeterCounter.Responses.$200>
+  }
+  ['/v2/portal/metering/contract/{contract_id}/meters']: {
+    /**
+     * getContractMeters - getContractMeters
+     * 
+     * Retrieves the meters of a contract of the portal user.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetContractMeters.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetContractMeters.Responses.$200>
+  }
   ['/v2/portal/public/sso/providers/{provider_slug}']: {
     /**
      * getSSOProvider - getSSOProvider
@@ -25935,6 +26390,7 @@ export type JourneyContextUsagesResponse = Components.Schemas.JourneyContextUsag
 export type JuiceSettings = Components.Schemas.JuiceSettings;
 export type Meter = Components.Schemas.Meter;
 export type MeterChartWidget = Components.Schemas.MeterChartWidget;
+export type MeterCounter = Components.Schemas.MeterCounter;
 export type MeterReading = Components.Schemas.MeterReading;
 export type MeterReadingCounterDetails = Components.Schemas.MeterReadingCounterDetails;
 export type MeterReadingPhoto = Components.Schemas.MeterReadingPhoto;
@@ -25971,6 +26427,7 @@ export type PortalFeatureSettings = Components.Schemas.PortalFeatureSettings;
 export type PortalHeader = Components.Schemas.PortalHeader;
 export type PortalHeaderDesignOverrides = Components.Schemas.PortalHeaderDesignOverrides;
 export type PortalId = Components.Schemas.PortalId;
+export type PortalMeterReading = Components.Schemas.PortalMeterReading;
 export type PortalNameOverrides = Components.Schemas.PortalNameOverrides;
 export type PortalNotification = Components.Schemas.PortalNotification;
 export type PortalRevision = Components.Schemas.PortalRevision;
