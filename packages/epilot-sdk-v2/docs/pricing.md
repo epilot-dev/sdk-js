@@ -90,6 +90,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`IntegrationId`](#integrationid)
 - [`ConditionalEntitySlug`](#conditionalentityslug)
 - [`ConditionType`](#conditiontype)
+- [`LocationFormat`](#locationformat)
 - [`ConditionDefinition`](#conditiondefinition)
 - [`ConditionSet`](#conditionset)
 - [`ConditionSetCatalog`](#conditionsetcatalog)
@@ -3077,6 +3078,19 @@ resolve context.
 type ConditionType = "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
 ```
 
+### `LocationFormat`
+
+The value shape of a `location` condition. Absent for every other type.
+
+- `postal_code`: a postal code
+- `postal_code_city`: a postal code and a city
+- `power_grid_operator`: the code number of the power grid operator an address is connected to
+- `gas_grid_operator`: the code number of the gas grid
+
+```ts
+type LocationFormat = "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
+```
+
 ### `ConditionDefinition`
 
 One condition dimension, in the shape a schema's `conditions` array holds it — copy it in verbatim.
@@ -3091,7 +3105,7 @@ type ConditionDefinition = {
     value: string
     title?: string
   }>
-  format?: "postal_code" | "postal_code_city"
+  format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
 }
 ```
 
@@ -3113,7 +3127,7 @@ type ConditionSet = {
       value: { ... }
       title?: { ... }
     }>
-    format?: "postal_code" | "postal_code_city"
+    format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
   }>
 }
 ```
@@ -3170,7 +3184,7 @@ type ConditionUsage = {
   undeclared: Array<{
     name: string
     type: "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
-    format?: "postal_code" | "postal_code_city"
+    format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
     variants: number
     entities: number
     options?: Array<{
@@ -3213,7 +3227,7 @@ pinned under two types is listed once for each.
 type UndeclaredConditionUsage = {
   name: string
   type: "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
-  format?: "postal_code" | "postal_code_city"
+  format?: "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator"
   variants: number
   entities: number
   options?: Array<{
@@ -3495,7 +3509,9 @@ type PinnedConditions = Record<string, string | number | boolean | {
 ### `PinnedConditionValue`
 
 One condition's exact value. Which of these shapes a condition takes is set by its type in the
-entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+`location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+13 digits.
 
 
 ```ts
