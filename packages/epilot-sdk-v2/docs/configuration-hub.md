@@ -126,6 +126,8 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`SyncPlanMatch`](#syncplanmatch)
 - [`SyncPlanDiffStatus`](#syncplandiffstatus)
 - [`SyncResourcePlan`](#syncresourceplan)
+- [`SyncPlanConflict`](#syncplanconflict)
+- [`SyncPlanConflictPath`](#syncplanconflictpath)
 - [`SyncPlanCounts`](#syncplancounts)
 - [`SyncPlan`](#syncplan)
 - [`SyncPlanChange`](#syncplanchange)
@@ -135,6 +137,7 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`SyncPlanReplanRequest`](#syncplanreplanrequest)
 - [`SyncPlanMissingDependency`](#syncplanmissingdependency)
 - [`SyncPlanApplyErrorResponse`](#syncplanapplyerrorresponse)
+- [`SyncPlanUnresolvedConflict`](#syncplanunresolvedconflict)
 - [`DeleteJobStatus`](#deletejobstatus)
 - [`DeleteJobResourceStatus`](#deletejobresourcestatus)
 - [`DeleteJobCounts`](#deletejobcounts)
@@ -836,7 +839,8 @@ const { data } = await client.createSyncJob(
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -957,7 +961,8 @@ const { data } = await client.listSyncJobs({
         "no_change": 0,
         "skip": 0,
         "failed": 0,
-        "not_compared": 0
+        "not_compared": 0,
+        "conflicts": 0
       },
       "planned_at": "1970-01-01T00:00:00.000Z",
       "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1076,7 +1081,8 @@ const { data } = await client.getSyncJob({
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1287,7 +1293,8 @@ const { data } = await client.retrySyncJob(
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1351,12 +1358,7 @@ const { data } = await client.planSyncJobRetry(
       "source_id": "string",
       "target_id": "string",
       "title": "string",
-      "required_by": {
-        "type": "string",
-        "source_id": "string",
-        "title": "string",
-        "reason": "typed_reference"
-      },
+      "required_by": {},
       "status": "pending",
       "phase": "phase_0",
       "attempt": 0,
@@ -1364,20 +1366,7 @@ const { data } = await client.planSyncJobRetry(
       "updated_at": "1970-01-01T00:00:00.000Z",
       "source_link": "string",
       "target_link": "string",
-      "plan": {
-        "action": "create",
-        "match": "lineage",
-        "diff_status": "computed",
-        "change_count": 0,
-        "changed_paths": ["string"],
-        "note": "string",
-        "depends_on": [
-          {
-            "type": "string",
-            "source_id": "string"
-          }
-        ]
-      },
+      "plan": {},
       "excluded_from_apply": "unchanged"
     }
   ],
@@ -1387,12 +1376,7 @@ const { data } = await client.planSyncJobRetry(
       "source_id": "string",
       "target_id": "string",
       "title": "string",
-      "required_by": {
-        "type": "string",
-        "source_id": "string",
-        "title": "string",
-        "reason": "typed_reference"
-      },
+      "required_by": {},
       "status": "pending",
       "phase": "phase_0",
       "attempt": 0,
@@ -1400,20 +1384,7 @@ const { data } = await client.planSyncJobRetry(
       "updated_at": "1970-01-01T00:00:00.000Z",
       "source_link": "string",
       "target_link": "string",
-      "plan": {
-        "action": "create",
-        "match": "lineage",
-        "diff_status": "computed",
-        "change_count": 0,
-        "changed_paths": ["string"],
-        "note": "string",
-        "depends_on": [
-          {
-            "type": "string",
-            "source_id": "string"
-          }
-        ]
-      },
+      "plan": {},
       "excluded_from_apply": "unchanged"
     }
   ],
@@ -1513,7 +1484,8 @@ const { data } = await client.cancelSyncJob({
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1619,6 +1591,7 @@ const { data } = await client.listSyncJobResources({
   status: 'example',
   type: 'example',
   plan_action: 'example',
+  has_conflicts: true,
 })
 ```
 
@@ -1659,7 +1632,34 @@ const { data } = await client.listSyncJobResources({
             "type": "string",
             "source_id": "string"
           }
-        ]
+        ],
+        "conflicts": [
+          {
+            "code": "mostly_replaced",
+            "certainty": "exact",
+            "requires_decision": true,
+            "paths": [
+              {
+                "path": "string",
+                "kind": "added",
+                "base": {},
+                "source": {},
+                "target": {}
+              }
+            ],
+            "paths_truncated": true,
+            "total_paths": 0,
+            "last_synced_at": "1970-01-01T00:00:00.000Z",
+            "target_updated_at": "1970-01-01T00:00:00.000Z",
+            "target_updated_by": "string",
+            "target_updated_by_name": "string",
+            "source_updated_at": "1970-01-01T00:00:00.000Z",
+            "replaced_ratio": 0.92,
+            "replaced_fields": 198,
+            "total_fields": 214
+          }
+        ],
+        "conflict_resolution": "overwrite"
       },
       "excluded_from_apply": "unchanged"
     }
@@ -1697,6 +1697,7 @@ const { data } = await client.getSyncPlan({
   "expires_at": "1970-01-01T00:00:00.000Z",
   "planned_at": "1970-01-01T00:00:00.000Z",
   "replanned_at": "1970-01-01T00:00:00.000Z",
+  "conflicts_checked_at": "1970-01-01T00:00:00.000Z",
   "source_org_id": "string",
   "target_org_id": "string",
   "started_at": "1970-01-01T00:00:00.000Z",
@@ -1708,7 +1709,8 @@ const { data } = await client.getSyncPlan({
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "by_type": [
     {
@@ -1719,6 +1721,7 @@ const { data } = await client.getSyncPlan({
       "skip": 0,
       "failed": 0,
       "not_compared": 0,
+      "conflicts": 0,
       "type": "string"
     }
   ],
@@ -1857,6 +1860,12 @@ const { data } = await client.applySyncPlan(
         source_id: 'string'
       }
     ],
+    overwrite_conflicts: [
+      {
+        type: 'string',
+        source_id: 'string'
+      }
+    ],
     allow_missing_dependencies: false
   },
 )
@@ -1936,7 +1945,8 @@ const { data } = await client.applySyncPlan(
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -2289,6 +2299,12 @@ const { data } = await client.listPreviews()
       "preview_org_id": "string",
       "sync_job_id": "string",
       "sync_status": "string",
+      "skipped_types": [
+        {
+          "type": "string",
+          "reason": "string"
+        }
+      ],
       "requested_by": {
         "user_id": "string",
         "email": "string"
@@ -2329,6 +2345,12 @@ const { data } = await client.getPreview({
   "preview_org_id": "string",
   "sync_job_id": "string",
   "sync_status": "string",
+  "skipped_types": [
+    {
+      "type": "string",
+      "reason": "string"
+    }
+  ],
   "requested_by": {
     "user_id": "string",
     "email": "string"
@@ -2926,6 +2948,8 @@ type SyncJobRetryPlan = {
       changed_paths?: { ... }
       note?: { ... }
       depends_on?: { ... }
+      conflicts?: { ... }
+      conflict_resolution?: { ... }
     }
     excluded_from_apply?: "unchanged" | "excluded" | "not_syncable"
   }>
@@ -2955,6 +2979,8 @@ type SyncJobRetryPlan = {
       changed_paths?: { ... }
       note?: { ... }
       depends_on?: { ... }
+      conflicts?: { ... }
+      conflict_resolution?: { ... }
     }
     excluded_from_apply?: "unchanged" | "excluded" | "not_syncable"
   }>
@@ -3290,6 +3316,7 @@ type SyncJob = {
     skip: number
     failed: number
     not_compared: number
+    conflicts?: number
   }
   planned_at?: string // date-time
   expires_at?: string // date-time
@@ -3373,6 +3400,7 @@ type SyncJobListResponse = {
       skip: { ... }
       failed: { ... }
       not_compared: { ... }
+      conflicts?: { ... }
     }
     planned_at?: string // date-time
     expires_at?: string // date-time
@@ -3430,6 +3458,23 @@ type SyncJobResource = {
       type: { ... }
       source_id: { ... }
     }>
+    conflicts?: Array<{
+      code: { ... }
+      certainty: { ... }
+      requires_decision: { ... }
+      paths: { ... }
+      paths_truncated: { ... }
+      total_paths: { ... }
+      last_synced_at?: { ... }
+      target_updated_at?: { ... }
+      target_updated_by?: { ... }
+      target_updated_by_name?: { ... }
+      source_updated_at?: { ... }
+      replaced_ratio?: { ... }
+      replaced_fields?: { ... }
+      total_fields?: { ... }
+    }>
+    conflict_resolution?: "overwrite" | "keep_target"
   }
   excluded_from_apply?: "unchanged" | "excluded" | "not_syncable"
 }
@@ -3468,6 +3513,8 @@ type SyncJobResourceListResponse = {
       changed_paths?: { ... }
       note?: { ... }
       depends_on?: { ... }
+      conflicts?: { ... }
+      conflict_resolution?: { ... }
     }
     excluded_from_apply?: "unchanged" | "excluded" | "not_syncable"
   }>
@@ -3526,6 +3573,76 @@ type SyncResourcePlan = {
     type: string
     source_id: string
   }>
+  conflicts?: Array<{
+    code: "mostly_replaced" | "target_edited" | "both_edited" | "target_only_removed"
+    certainty: "exact" | "possible"
+    requires_decision: boolean
+    paths: Array<{
+      path: { ... }
+      kind: { ... }
+      base?: { ... }
+      source?: { ... }
+      target?: { ... }
+    }>
+    paths_truncated: boolean
+    total_paths: number
+    last_synced_at?: string // date-time
+    target_updated_at?: string // date-time
+    target_updated_by?: string
+    target_updated_by_name?: string
+    source_updated_at?: string // date-time
+    replaced_ratio?: number
+    replaced_fields?: number
+    total_fields?: number
+  }>
+  conflict_resolution?: "overwrite" | "keep_target"
+}
+```
+
+### `SyncPlanConflict`
+
+Target edits since the last sync that applying the row would
+overwrite. Detection compares normalized plan views (the projection
+`getSyncPlanDiff` uses: no own ids, org ids, timestamps or audit
+fields; references rewritten through lineage; array items matched by
+identity), never edit dates alone.
+
+W
+
+```ts
+type SyncPlanConflict = {
+  code: "mostly_replaced" | "target_edited" | "both_edited" | "target_only_removed"
+  certainty: "exact" | "possible"
+  requires_decision: boolean
+  paths: Array<{
+    path: string
+    kind: "added" | "removed" | "changed" | "reordered"
+    base?: unknown
+    source?: unknown
+    target?: unknown
+  }>
+  paths_truncated: boolean
+  total_paths: number
+  last_synced_at?: string // date-time
+  target_updated_at?: string // date-time
+  target_updated_by?: string
+  target_updated_by_name?: string
+  source_updated_at?: string // date-time
+  replaced_ratio?: number
+  replaced_fields?: number
+  total_fields?: number
+}
+```
+
+### `SyncPlanConflictPath`
+
+```ts
+type SyncPlanConflictPath = {
+  path: string
+  kind: "added" | "removed" | "changed" | "reordered"
+  base?: unknown
+  source?: unknown
+  target?: unknown
 }
 ```
 
@@ -3546,6 +3663,7 @@ type SyncPlanCounts = {
   skip: number
   failed: number
   not_compared: number
+  conflicts?: number
 }
 ```
 
@@ -3560,6 +3678,7 @@ type SyncPlan = {
   expires_at?: string // date-time
   planned_at?: string // date-time
   replanned_at?: string // date-time
+  conflicts_checked_at?: string // date-time
   source_org_id: string
   target_org_id: string
   started_at?: string // date-time
@@ -3572,6 +3691,7 @@ type SyncPlan = {
     skip: number
     failed: number
     not_compared: number
+    conflicts?: number
   }
   by_type: Array<{
     total: number
@@ -3581,6 +3701,7 @@ type SyncPlan = {
     skip: number
     failed: number
     not_compared: number
+    conflicts?: number
     type: string
   }>
   applied_by?: string[]
@@ -3671,6 +3792,10 @@ type SyncPlanApplyRequest = {
     type: string
     source_id: string
   }>
+  overwrite_conflicts?: Array<{
+    type: string
+    source_id: string
+  }>
   allow_missing_dependencies?: boolean
 }
 ```
@@ -3708,7 +3833,8 @@ type SyncPlanMissingDependency = {
 type SyncPlanApplyErrorResponse = {
   status?: number
   error?: string
-  code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies"
+  code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies" | "unresolved_conflicts"
+  message?: string
   invalid_resources?: Array<{
     type: string
     source_id: string
@@ -3723,6 +3849,23 @@ type SyncPlanApplyErrorResponse = {
       title?: { ... }
     }>
   }>
+  resources?: Array<{
+    type: string
+    source_id: string
+    title?: string
+    codes: "target_edited" | "both_edited" | "target_only_removed"[]
+  }>
+}
+```
+
+### `SyncPlanUnresolvedConflict`
+
+```ts
+type SyncPlanUnresolvedConflict = {
+  type: string
+  source_id: string
+  title?: string
+  codes: "target_edited" | "both_edited" | "target_only_removed"[]
 }
 ```
 
@@ -3941,6 +4084,10 @@ type Preview = {
   preview_org_id?: string
   sync_job_id?: string
   sync_status?: string
+  skipped_types?: Array<{
+    type: string
+    reason: string
+  }>
   requested_by: {
     user_id?: string
     email?: string

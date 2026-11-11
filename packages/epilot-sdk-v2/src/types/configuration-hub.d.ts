@@ -309,7 +309,7 @@ export declare namespace Components {
         }
         export interface CreatePreviewRequest {
             /**
-             * Display name of the preview. Defaults to `Preview <date>`.
+             * Display name of the preview. Defaults to `Preview`.
              */
             name?: string;
             /**
@@ -652,6 +652,15 @@ export declare namespace Components {
              * Final status of the copy sync job (`succeeded` or `partial`).
              */
             sync_status?: string;
+            /**
+             * Configuration types that could not be listed in the source org (e.g. the
+             * API answered 403), so the preview has none of them.
+             *
+             */
+            skipped_types?: {
+                type: string;
+                reason: string;
+            }[];
             requested_by: {
                 user_id?: string;
                 email?: string;
@@ -1503,6 +1512,10 @@ export declare namespace Components {
              * When a partial replan (`replanSyncPlan` with `resources`) last finished.
              */
             replanned_at?: string; // date-time
+            /**
+             * When conflict detection last ran (end of planning or of a replan).
+             */
+            conflicts_checked_at?: string; // date-time
             source_org_id: string;
             target_org_id: string;
             started_at?: string; // date-time
@@ -1523,6 +1536,10 @@ export declare namespace Components {
                 skip: number;
                 failed: number;
                 not_compared: number;
+                /**
+                 * Rows with at least one conflict (`plan.conflicts`).
+                 */
+                conflicts?: number;
                 type: string;
             }[];
             /**
@@ -1549,9 +1566,17 @@ export declare namespace Components {
             /**
              * Machine-readable reason, for clients that show their own message.
              */
-            code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies";
+            code?: "target_auth_token_missing" | "empty_selection" | "invalid_resources" | "plan_not_ready" | "plan_expired" | "nothing_to_apply" | "missing_dependencies" | "unresolved_conflicts";
+            /**
+             * Same as `error` (set with `unresolved_conflicts`).
+             */
+            message?: string;
             invalid_resources?: SyncJobResourceRef[];
             missing_dependencies?: SyncPlanMissingDependency[];
+            /**
+             * With `unresolved_conflicts`, the applied rows with undecided conflicts.
+             */
+            resources?: SyncPlanUnresolvedConflict[];
         }
         export interface SyncPlanApplyRequest {
             /**
@@ -1574,6 +1599,13 @@ export declare namespace Components {
              * Rows of the plan to leave out.
              */
             exclude?: SyncJobResourceRef[];
+            /**
+             * Rows with conflicts to apply anyway, overwriting the target's
+             * changes. Applied rows with conflicts that are not listed here
+             * make the request fail with `unresolved_conflicts`.
+             *
+             */
+            overwrite_conflicts?: SyncJobResourceRef[];
             /**
              * Apply even when left-out resources that would be created are
              * referenced by applied ones. Those references then keep pointing
@@ -1619,6 +1651,177 @@ export declare namespace Components {
             after?: any;
         }
         /**
+         * Target edits since the last sync that applying the row would
+         * overwrite. Detection compares normalized plan views (the projection
+         * `getSyncPlanDiff` uses: no own ids, org ids, timestamps or audit
+         * fields; references rewritten through lineage; array items matched by
+         * identity), never edit dates alone.
+         *
+         * With a stored **base** (the target as the last sync left it):
+         * three-way, `certainty: exact`. Without one: two-way target vs
+         * source, `certainty: possible`; values only the target has are
+         * `target_only_removed`, other differences count as `target_edited`
+         * only when the target was written after the last sync (plus a short
+         * grace for the sync's own writes). On a first sync (never synced)
+         * only target-only content is flagged. These three codes are never
+         * set on heuristic matches.
+         *
+         * `mostly_replaced` is independent of match, lineage and base: the
+         * update would change or remove at least half of the target's leaf
+         * fields (see `replaced_ratio`), on a target of at least 10 fields.
+         * Typically a heuristic match to a different resource. It sorts first
+         * and can come with the other codes on the same row.
+         *
+         */
+        export interface SyncPlanConflict {
+            /**
+             * `mostly_replaced`: applying the row replaces most of the target
+             * (`replaced_ratio` >= 0.5); check the counterpart is the right
+             * one. `certainty` is always `exact`, `paths` empty.
+             * `target_edited`: the target changed these paths since the last
+             * sync and the source did not; the update reverts them.
+             * `both_edited`: both changed the same paths, to different values.
+             * `target_only_removed`: the update removes items only the target
+             * has (added there since the last sync, or, without a base, not in
+             * the source).
+             *
+             */
+            code: "mostly_replaced" | "target_edited" | "both_edited" | "target_only_removed";
+            /**
+             * `exact`: decided from a stored base. `possible`: no base yet.
+             */
+            certainty: "exact" | "possible";
+            /**
+             * Always true for now. `applySyncPlan` refuses the row until it is overwritten or left out.
+             */
+            requires_decision: boolean;
+            /**
+             * The affected paths (at most 50). Values are plan-view values; a
+             * value whose JSON is over 1 KB is replaced by
+             * `{ "__truncated": true, "json_bytes": <size> }`. Empty when the
+             * target changed but the copies could not be compared.
+             *
+             */
+            paths: [
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?,
+                SyncPlanConflictPath?
+            ];
+            /**
+             * True when paths or values were left out. `total_paths` is still exact.
+             */
+            paths_truncated: boolean;
+            total_paths: number;
+            /**
+             * When Config Hub last synced the resource (lineage), when known.
+             */
+            last_synced_at?: string; // date-time
+            target_updated_at?: string; // date-time
+            /**
+             * User id of the target's last editor, when its API exposes one.
+             */
+            target_updated_by?: string;
+            /**
+             * Display name of `target_updated_by`, when resolvable cheaply. Not set yet.
+             */
+            target_updated_by_name?: string;
+            source_updated_at?: string; // date-time
+            /**
+             * `mostly_replaced` only: `replaced_fields / total_fields`, rounded
+             * to two decimals. Show as a percentage, `round(ratio * 100)`.
+             *
+             * example:
+             * 0.92
+             */
+            replaced_ratio?: number;
+            /**
+             * `mostly_replaced` only: leaf fields of the target the apply
+             * changes or removes (fields only the source has don't count).
+             *
+             * example:
+             * 198
+             */
+            replaced_fields?: number;
+            /**
+             * `mostly_replaced` only: leaf fields of the target's normalized
+             * plan view. A scalar array is one field; per-org ids (UUIDs
+             * lineage doesn't know, the org's own id) are not fields.
+             *
+             * example:
+             * 214
+             */
+            total_fields?: number;
+        }
+        export interface SyncPlanConflictPath {
+            /**
+             * Same notation as `SyncPlanChange.path`.
+             */
+            path: string;
+            /**
+             * The change applying the row would make to the target.
+             */
+            kind: "added" | "removed" | "changed" | "reordered";
+            /**
+             * The value at the last sync. Absent when unknown (always for `possible`).
+             */
+            base?: any;
+            /**
+             * The value applying writes. Absent for `removed`.
+             */
+            source?: any;
+            /**
+             * The target's current value. Absent for `added`.
+             */
+            target?: any;
+        }
+        /**
          * Planned resources by action. `not_compared` counts the `update`
          * resources whose copies could not be compared (it is part of
          * `update`, not in addition to it). `failed` counts resources planning
@@ -1633,6 +1836,10 @@ export declare namespace Components {
             skip: number;
             failed: number;
             not_compared: number;
+            /**
+             * Rows with at least one conflict (`plan.conflicts`).
+             */
+            conflicts?: number;
         }
         export interface SyncPlanDiff {
             type: string;
@@ -1744,6 +1951,12 @@ export declare namespace Components {
              */
             resources?: SyncJobResourceRef[];
         }
+        export interface SyncPlanUnresolvedConflict {
+            type: string;
+            source_id: string;
+            title?: string;
+            codes: ("target_edited" | "both_edited" | "target_only_removed")[];
+        }
         /**
          * The resource that referenced the dependency.
          */
@@ -1822,6 +2035,46 @@ export declare namespace Components {
              * Other resources of the plan this resource references.
              */
             depends_on?: SyncJobResourceRef[];
+            /**
+             * Changes made in the target since the last sync that applying
+             * this `update` would overwrite, or (`mostly_replaced`) an update
+             * that would replace most of the target. Absent when there are
+             * none. Detected while planning from normalized diffs (see
+             * `SyncPlanConflict`); heuristic matches only get
+             * `mostly_replaced`.
+             *
+             */
+            conflicts?: /**
+             * Target edits since the last sync that applying the row would
+             * overwrite. Detection compares normalized plan views (the projection
+             * `getSyncPlanDiff` uses: no own ids, org ids, timestamps or audit
+             * fields; references rewritten through lineage; array items matched by
+             * identity), never edit dates alone.
+             *
+             * With a stored **base** (the target as the last sync left it):
+             * three-way, `certainty: exact`. Without one: two-way target vs
+             * source, `certainty: possible`; values only the target has are
+             * `target_only_removed`, other differences count as `target_edited`
+             * only when the target was written after the last sync (plus a short
+             * grace for the sync's own writes). On a first sync (never synced)
+             * only target-only content is flagged. These three codes are never
+             * set on heuristic matches.
+             *
+             * `mostly_replaced` is independent of match, lineage and base: the
+             * update would change or remove at least half of the target's leaf
+             * fields (see `replaced_ratio`), on a target of at least 10 fields.
+             * Typically a heuristic match to a different resource. It sorts first
+             * and can come with the other codes on the same row.
+             *
+             */
+            SyncPlanConflict[];
+            /**
+             * On rows of a job applying a plan, for rows with conflicts:
+             * `overwrite` when the row was applied anyway (listed in
+             * `overwrite_conflicts`), `keep_target` when it was left out.
+             *
+             */
+            conflict_resolution?: "overwrite" | "keep_target";
         }
     }
 }
@@ -2205,6 +2458,7 @@ export declare namespace Paths {
     namespace ListSyncJobResources {
         namespace Parameters {
             export type Cursor = string;
+            export type HasConflicts = boolean;
             export type Id = string;
             export type PlanAction = /**
              * What a real run would do with a planned resource:
@@ -2236,6 +2490,7 @@ export declare namespace Paths {
             status?: Parameters.Status;
             type?: Parameters.Type;
             plan_action?: Parameters.PlanAction;
+            has_conflicts?: Parameters.HasConflicts;
         }
         namespace Responses {
             export type $200 = /* Cursor-paginated list of sync job resources. */ Components.Schemas.SyncJobResourceListResponse;
@@ -2908,6 +3163,15 @@ export interface OperationMethods {
    * rejected with 409 and `missing_dependencies`, unless
    * `allow_missing_dependencies` is set.
    * 
+   * Rows whose plan has conflicts (`plan.conflicts`: the target was
+   * changed since the last sync, and applying would overwrite that, or
+   * applying would replace most of the target) need a decision: list them in `overwrite_conflicts` to apply them anyway,
+   * or leave them out (`exclude`, or a `resources` list without them) to
+   * keep the target's version. Applying one without a decision is
+   * rejected with 409 and `unresolved_conflicts`; nothing is applied.
+   * The decision is recorded on the apply job's rows
+   * (`plan.conflict_resolution`).
+   * 
    * Applied resources go through the normal sync phases, so a change in
    * the target since planning is handled like in any sync. A plan can be
    * applied up to 24 hours after it finished (`expires_at`); plan again
@@ -3578,6 +3842,15 @@ export interface PathsDictionary {
      * rejected with 409 and `missing_dependencies`, unless
      * `allow_missing_dependencies` is set.
      * 
+     * Rows whose plan has conflicts (`plan.conflicts`: the target was
+     * changed since the last sync, and applying would overwrite that, or
+     * applying would replace most of the target) need a decision: list them in `overwrite_conflicts` to apply them anyway,
+     * or leave them out (`exclude`, or a `resources` list without them) to
+     * keep the target's version. Applying one without a decision is
+     * rejected with 409 and `unresolved_conflicts`; nothing is applied.
+     * The decision is recorded on the apply job's rows
+     * (`plan.conflict_resolution`).
+     * 
      * Applied resources go through the normal sync phases, so a change in
      * the target since planning is handled like in any sync. A plan can be
      * applied up to 24 hours after it finished (`expires_at`); plan again
@@ -3818,6 +4091,8 @@ export type SyncPlanAction = Components.Schemas.SyncPlanAction;
 export type SyncPlanApplyErrorResponse = Components.Schemas.SyncPlanApplyErrorResponse;
 export type SyncPlanApplyRequest = Components.Schemas.SyncPlanApplyRequest;
 export type SyncPlanChange = Components.Schemas.SyncPlanChange;
+export type SyncPlanConflict = Components.Schemas.SyncPlanConflict;
+export type SyncPlanConflictPath = Components.Schemas.SyncPlanConflictPath;
 export type SyncPlanCounts = Components.Schemas.SyncPlanCounts;
 export type SyncPlanDiff = Components.Schemas.SyncPlanDiff;
 export type SyncPlanDiffListResponse = Components.Schemas.SyncPlanDiffListResponse;
@@ -3825,5 +4100,6 @@ export type SyncPlanDiffStatus = Components.Schemas.SyncPlanDiffStatus;
 export type SyncPlanMatch = Components.Schemas.SyncPlanMatch;
 export type SyncPlanMissingDependency = Components.Schemas.SyncPlanMissingDependency;
 export type SyncPlanReplanRequest = Components.Schemas.SyncPlanReplanRequest;
+export type SyncPlanUnresolvedConflict = Components.Schemas.SyncPlanUnresolvedConflict;
 export type SyncRequiredBy = Components.Schemas.SyncRequiredBy;
 export type SyncResourcePlan = Components.Schemas.SyncResourcePlan;

@@ -1375,6 +1375,14 @@
             "schema": {
               "$ref": "#/components/schemas/SyncPlanAction"
             }
+          },
+          {
+            "name": "has_conflicts",
+            "in": "query",
+            "description": "`true`: only rows whose plan has conflicts (`plan.conflicts`), so\na client can load every conflict without paging through the plan.\n",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -1614,7 +1622,7 @@
           }
         ],
         "summary": "applySyncPlan",
-        "description": "Run a finished plan for real. Creates a new sync job (it carries\n`applied_from_plan`; the plan's `applied_by` gets the new job's id)\nand enqueues it.\n\nBy default the job applies every resource the plan would `create` or\n`update`. `no_change` and `skip` resources are not written. Change\nthe selection with:\n- `resources`: apply exactly these rows of the plan. Can include\n  `no_change` rows to write them anyway.\n- `exclude`: leave these rows out (applied after `resources`).\n\nRows that are not applied are still listed on the new job, as\n`skipped` with `excluded_from_apply`. Their existing targets keep\nresolving references from the applied resources.\n\nLeaving out a resource the plan would create, while an applied\nresource references it, would leave that reference pointing at a\nresource that does not exist in the target. The request is then\nrejected with 409 and `missing_dependencies`, unless\n`allow_missing_dependencies` is set.\n\nApplied resources go through the normal sync phases, so a change in\nthe target since planning is handled like in any sync. A plan can be\napplied up to 24 hours after it finished (`expires_at`); plan again\nafter that. A plan can be applied more than once; each apply job is\nadded to the plan's `applied_by`.\n\nErrors carry a machine-readable `code`.\n",
+        "description": "Run a finished plan for real. Creates a new sync job (it carries\n`applied_from_plan`; the plan's `applied_by` gets the new job's id)\nand enqueues it.\n\nBy default the job applies every resource the plan would `create` or\n`update`. `no_change` and `skip` resources are not written. Change\nthe selection with:\n- `resources`: apply exactly these rows of the plan. Can include\n  `no_change` rows to write them anyway.\n- `exclude`: leave these rows out (applied after `resources`).\n\nRows that are not applied are still listed on the new job, as\n`skipped` with `excluded_from_apply`. Their existing targets keep\nresolving references from the applied resources.\n\nLeaving out a resource the plan would create, while an applied\nresource references it, would leave that reference pointing at a\nresource that does not exist in the target. The request is then\nrejected with 409 and `missing_dependencies`, unless\n`allow_missing_dependencies` is set.\n\nRows whose plan has conflicts (`plan.conflicts`: the target was\nchanged since the last sync, and applying would overwrite that, or\napplying would replace most of the target) need a decision: list them in `overwrite_conflicts` to apply them anyway,\nor leave them out (`exclude`, or a `resources` list without them) to\nkeep the target's version. Applying one without a decision is\nrejected with 409 and `unresolved_conflicts`; nothing is applied.\nThe decision is recorded on the apply job's rows\n(`plan.conflict_resolution`).\n\nApplied resources go through the normal sync phases, so a change in\nthe target since planning is handled like in any sync. A plan can be\napplied up to 24 hours after it finished (`expires_at`); plan again\nafter that. A plan can be applied more than once; each apply job is\nadded to the plan's `applied_by`.\n\nErrors carry a machine-readable `code`.\n",
         "tags": [
           "Sync"
         ],
@@ -1675,7 +1683,7 @@
             }
           },
           "409": {
-            "description": "The job is not a finished plan, it finished more than 24 hours ago,\nthe selection applies nothing, or it leaves out resources that\napplied ones depend on (listed in `missing_dependencies`)\n",
+            "description": "The job is not a finished plan, it finished more than 24 hours ago,\nthe selection applies nothing, it applies rows with undecided\nconflicts (listed in `resources`, code `unresolved_conflicts`), or\nit leaves out resources that applied ones depend on (listed in\n`missing_dependencies`)\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -3888,11 +3896,147 @@
             "items": {
               "$ref": "#/components/schemas/SyncJobResourceRef"
             }
+          },
+          "conflicts": {
+            "type": "array",
+            "description": "Changes made in the target since the last sync that applying\nthis `update` would overwrite, or (`mostly_replaced`) an update\nthat would replace most of the target. Absent when there are\nnone. Detected while planning from normalized diffs (see\n`SyncPlanConflict`); heuristic matches only get\n`mostly_replaced`.\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncPlanConflict"
+            }
+          },
+          "conflict_resolution": {
+            "type": "string",
+            "description": "On rows of a job applying a plan, for rows with conflicts:\n`overwrite` when the row was applied anyway (listed in\n`overwrite_conflicts`), `keep_target` when it was left out.\n",
+            "enum": [
+              "overwrite",
+              "keep_target"
+            ]
           }
         },
         "required": [
           "action",
           "match"
+        ]
+      },
+      "SyncPlanConflict": {
+        "type": "object",
+        "description": "Target edits since the last sync that applying the row would\noverwrite. Detection compares normalized plan views (the projection\n`getSyncPlanDiff` uses: no own ids, org ids, timestamps or audit\nfields; references rewritten through lineage; array items matched by\nidentity), never edit dates alone.\n\nWith a stored **base** (the target as the last sync left it):\nthree-way, `certainty: exact`. Without one: two-way target vs\nsource, `certainty: possible`; values only the target has are\n`target_only_removed`, other differences count as `target_edited`\nonly when the target was written after the last sync (plus a short\ngrace for the sync's own writes). On a first sync (never synced)\nonly target-only content is flagged. These three codes are never\nset on heuristic matches.\n\n`mostly_replaced` is independent of match, lineage and base: the\nupdate would change or remove at least half of the target's leaf\nfields (see `replaced_ratio`), on a target of at least 10 fields.\nTypically a heuristic match to a different resource. It sorts first\nand can come with the other codes on the same row.\n",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "`mostly_replaced`: applying the row replaces most of the target\n(`replaced_ratio` >= 0.5); check the counterpart is the right\none. `certainty` is always `exact`, `paths` empty.\n`target_edited`: the target changed these paths since the last\nsync and the source did not; the update reverts them.\n`both_edited`: both changed the same paths, to different values.\n`target_only_removed`: the update removes items only the target\nhas (added there since the last sync, or, without a base, not in\nthe source).\n",
+            "enum": [
+              "mostly_replaced",
+              "target_edited",
+              "both_edited",
+              "target_only_removed"
+            ]
+          },
+          "certainty": {
+            "type": "string",
+            "description": "`exact`: decided from a stored base. `possible`: no base yet.",
+            "enum": [
+              "exact",
+              "possible"
+            ]
+          },
+          "requires_decision": {
+            "type": "boolean",
+            "description": "Always true for now. `applySyncPlan` refuses the row until it is overwritten or left out."
+          },
+          "paths": {
+            "type": "array",
+            "description": "The affected paths (at most 50). Values are plan-view values; a\nvalue whose JSON is over 1 KB is replaced by\n`{ \"__truncated\": true, \"json_bytes\": <size> }`. Empty when the\ntarget changed but the copies could not be compared.\n",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/SyncPlanConflictPath"
+            }
+          },
+          "paths_truncated": {
+            "type": "boolean",
+            "description": "True when paths or values were left out. `total_paths` is still exact."
+          },
+          "total_paths": {
+            "type": "integer"
+          },
+          "last_synced_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When Config Hub last synced the resource (lineage), when known."
+          },
+          "target_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "target_updated_by": {
+            "type": "string",
+            "description": "User id of the target's last editor, when its API exposes one."
+          },
+          "target_updated_by_name": {
+            "type": "string",
+            "description": "Display name of `target_updated_by`, when resolvable cheaply. Not set yet."
+          },
+          "source_updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "replaced_ratio": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "`mostly_replaced` only: `replaced_fields / total_fields`, rounded\nto two decimals. Show as a percentage, `round(ratio * 100)`.\n",
+            "example": 0.92
+          },
+          "replaced_fields": {
+            "type": "integer",
+            "description": "`mostly_replaced` only: leaf fields of the target the apply\nchanges or removes (fields only the source has don't count).\n",
+            "example": 198
+          },
+          "total_fields": {
+            "type": "integer",
+            "description": "`mostly_replaced` only: leaf fields of the target's normalized\nplan view. A scalar array is one field; per-org ids (UUIDs\nlineage doesn't know, the org's own id) are not fields.\n",
+            "example": 214
+          }
+        },
+        "required": [
+          "code",
+          "certainty",
+          "requires_decision",
+          "paths",
+          "paths_truncated",
+          "total_paths"
+        ]
+      },
+      "SyncPlanConflictPath": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Same notation as `SyncPlanChange.path`."
+          },
+          "kind": {
+            "type": "string",
+            "description": "The change applying the row would make to the target.",
+            "enum": [
+              "added",
+              "removed",
+              "changed",
+              "reordered"
+            ]
+          },
+          "base": {
+            "description": "The value at the last sync. Absent when unknown (always for `possible`)."
+          },
+          "source": {
+            "description": "The value applying writes. Absent for `removed`."
+          },
+          "target": {
+            "description": "The target's current value. Absent for `added`."
+          }
+        },
+        "required": [
+          "path",
+          "kind"
         ]
       },
       "SyncPlanCounts": {
@@ -3919,6 +4063,10 @@
           },
           "not_compared": {
             "type": "integer"
+          },
+          "conflicts": {
+            "type": "integer",
+            "description": "Rows with at least one conflict (`plan.conflicts`)."
           }
         },
         "required": [
@@ -3962,6 +4110,11 @@
             "type": "string",
             "format": "date-time",
             "description": "When a partial replan (`replanSyncPlan` with `resources`) last finished."
+          },
+          "conflicts_checked_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When conflict detection last ran (end of planning or of a replan)."
           },
           "source_org_id": {
             "type": "string"
@@ -4154,6 +4307,13 @@
               "$ref": "#/components/schemas/SyncJobResourceRef"
             }
           },
+          "overwrite_conflicts": {
+            "type": "array",
+            "description": "Rows with conflicts to apply anyway, overwriting the target's\nchanges. Applied rows with conflicts that are not listed here\nmake the request fail with `unresolved_conflicts`.\n",
+            "items": {
+              "$ref": "#/components/schemas/SyncJobResourceRef"
+            }
+          },
           "allow_missing_dependencies": {
             "type": "boolean",
             "default": false,
@@ -4241,8 +4401,13 @@
               "plan_not_ready",
               "plan_expired",
               "nothing_to_apply",
-              "missing_dependencies"
+              "missing_dependencies",
+              "unresolved_conflicts"
             ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Same as `error` (set with `unresolved_conflicts`)."
           },
           "invalid_resources": {
             "type": "array",
@@ -4255,8 +4420,45 @@
             "items": {
               "$ref": "#/components/schemas/SyncPlanMissingDependency"
             }
+          },
+          "resources": {
+            "type": "array",
+            "description": "With `unresolved_conflicts`, the applied rows with undecided conflicts.",
+            "items": {
+              "$ref": "#/components/schemas/SyncPlanUnresolvedConflict"
+            }
           }
         }
+      },
+      "SyncPlanUnresolvedConflict": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "codes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "target_edited",
+                "both_edited",
+                "target_only_removed"
+              ]
+            }
+          }
+        },
+        "required": [
+          "type",
+          "source_id",
+          "codes"
+        ]
       },
       "DeleteJobStatus": {
         "type": "string",
@@ -4547,7 +4749,7 @@
           "name": {
             "type": "string",
             "maxLength": 100,
-            "description": "Display name of the preview. Defaults to `Preview <date>`."
+            "description": "Display name of the preview. Defaults to `Preview`."
           },
           "requester": {
             "type": "object",
@@ -4614,6 +4816,25 @@
           "sync_status": {
             "type": "string",
             "description": "Final status of the copy sync job (`succeeded` or `partial`)."
+          },
+          "skipped_types": {
+            "type": "array",
+            "description": "Configuration types that could not be listed in the source org (e.g. the\nAPI answered 403), so the preview has none of them.\n",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "reason"
+              ]
+            }
           },
           "requested_by": {
             "type": "object",
