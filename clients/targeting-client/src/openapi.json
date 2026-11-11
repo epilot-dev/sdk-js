@@ -38,7 +38,7 @@
       "post": {
         "operationId": "changeCampaignStatus",
         "summary": "changeCampaignStatus",
-        "description": "Change the status of a campaign to a desired status.\n\nThe status can be one of the following: active, inactive.\n\nStatus transition is accompanied by side effects, e.g., automation execution.\n",
+        "description": "Moves a campaign to its next status, depending on its current one:\n\n- `draft`: launches the campaign. With a `start_date` still in the future it becomes `scheduled` and\n  starts on its own at that time; otherwise it starts now (`activating`, then `active`). Rejected with\n  400 if the dates are invalid: `INVALID_CAMPAIGN_DATES` (unparsable), `CAMPAIGN_END_BEFORE_START`\n  or `CAMPAIGN_END_IN_PAST`.\n- `scheduled`: cancels the schedule; the campaign goes back to `draft` and keeps its dates.\n- `active`: stops the campaign (`inactive`) and sets `end_date` to now.\n- `inactive`: resets the campaign to `draft` and clears its `start_date` and `end_date`: they\n  recorded the previous run, and a past end date would block launching it again.\n\nOnly launching needs a target and a delivery method (an automation flow, a portal block or a valid\nNext Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or\n`CAMPAIGN_HAS_NO_DELIVERY_METHOD`. Cancelling, stopping and resetting work without them.\n\nStatus transition is accompanied by side effects, e.g., automation execution.\n",
         "tags": [
           "Campaign"
         ],
@@ -57,6 +57,12 @@
             "$ref": "#/components/responses/CampaignResponse"
           },
           "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "403": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "409": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
           "500": {
@@ -131,7 +137,7 @@
       "post": {
         "operationId": "retriggerCampaignAutomations",
         "summary": "retriggerCampaignAutomations",
-        "description": "Retrigger automation executions for specific campaign recipients that have failed.\n\nThis endpoint starts new automation executions for the specified recipients\nusing the campaign's associated automation flow. Only recipients with\nautomation_status 'failed' will be processed. Recipients with other statuses\n(success, pending, in_progress, cancelled) will be skipped to prevent\naccidentally retriggering successful or ongoing automations.\n",
+        "description": "Retrigger automation executions for specific campaign recipients that have failed.\n\nThis endpoint starts new automation executions for the specified recipients\nusing the campaign's associated automation flow. Only recipients with\nautomation_status 'failed' will be processed. Recipients with other statuses\n(success, pending, in_progress, cancelled) will be skipped to prevent\naccidentally retriggering successful or ongoing automations.\n\nA campaign that has ended (at its `end_date`, or stopped by hand) starts no new\nautomation runs: the request is rejected with 400 and message `Campaign has ended`.\n",
         "tags": [
           "Campaign Delivery"
         ],
@@ -175,7 +181,7 @@
       "post": {
         "operationId": "setupCampaign",
         "summary": "setupCampaign",
-        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n",
+        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n\nThe campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is\nlaunched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,\n`CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and\nnothing is created.\n",
         "tags": [
           "Campaign"
         ],
@@ -199,6 +205,9 @@
             "$ref": "#/components/responses/SetupCampaignResponse"
           },
           "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "403": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
           "500": {
@@ -646,6 +655,14 @@
             "schema": {
               "$ref": "#/components/schemas/EmailStatus"
             }
+          },
+          {
+            "name": "entity_ui_status",
+            "in": "query",
+            "description": "Filter by Entity UI (Next Best Action) status",
+            "schema": {
+              "$ref": "#/components/schemas/EntityUiStatus"
+            }
           }
         ],
         "responses": {
@@ -936,9 +953,11 @@
       },
       "CampaignStatus": {
         "type": "string",
+        "description": "Lifecycle status of a campaign.\n\n- `draft`: not launched yet.\n- `scheduled`: launched with a `start_date` still in the future. It collects no recipients and\n  appears through no delivery method until it starts on its own at `start_date`.\n- `activating`: launching; recipients are being collected.\n- `active`: running.\n- `inactive`: stopped, by hand or on its own at `end_date`.\n",
         "default": "draft",
         "enum": [
           "draft",
+          "scheduled",
           "activating",
           "active",
           "inactive"
@@ -997,11 +1016,13 @@
               },
               "start_date": {
                 "type": "string",
-                "format": "date"
+                "format": "date-time",
+                "description": "When the campaign starts. Optional: if set to a future time when the campaign is launched,\nthe campaign is `scheduled` and starts on its own at this time. Otherwise it is set to the\ntime the campaign is launched.\n"
               },
               "end_date": {
                 "type": "string",
-                "format": "date"
+                "format": "date-time",
+                "description": "When the campaign ends. Optional: if set, the running campaign stops on its own at this\ntime. Otherwise it is set to the time the campaign is stopped by hand.\n"
               },
               "flow_id": {
                 "type": "string"
@@ -1051,7 +1072,7 @@
           },
           "search": {
             "type": "string",
-            "description": "Free text search entered in the target builder.\nNot applied when resolving the target, e.g. by `getTargetQueries` or `matchTargets`.\n"
+            "description": "Free text search entered in the target builder.\nApplied when resolving the target like the search of entity views: matched against all fields and combined with `filter` using AND.\n"
           },
           "sort": {
             "type": "array",
@@ -1358,7 +1379,7 @@
           },
           "sort": {
             "type": "array",
-            "description": "Elasticsearch sort fields for the target's sort order, ready to be passed to entity search.\nEnds with an `_id` tie-breaker so the order is stable. Omitted when the target has no sort.\n",
+            "description": "Elasticsearch sort fields for the target's sort order, ready to be passed to entity search.\nEnds with an `_id` tie-breaker so the order is stable. A target with a limit but no sort returns\n`_created_at:desc` and `_id:desc` (newest first). Omitted when the target has neither.\n",
             "items": {
               "type": "string"
             },
@@ -1837,6 +1858,16 @@
                 "items": {
                   "$ref": "#/components/schemas/BaseUUID"
                 }
+              },
+              "start_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Optional start of the campaign. Launching the campaign before this time schedules it, and\nit starts on its own at this time. Without it, the campaign starts when it is launched.\n"
+              },
+              "end_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Optional end of the campaign. Must be after `start_date` and in the future. The campaign\nstops on its own at this time. Without it, the campaign runs until it is stopped.\n"
               }
             },
             "required": [
