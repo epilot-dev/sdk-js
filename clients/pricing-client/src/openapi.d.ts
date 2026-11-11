@@ -203,7 +203,9 @@ declare namespace Components {
             conditions?: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                 * 13 digits.
                  *
                  */
                 PinnedConditionValue;
@@ -1988,8 +1990,9 @@ declare namespace Components {
              * Exact values only; predicates belong to reads. Values are stored canonicalized for their
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
              * and `until` in that form where an empty string is an open end, a `location` of format
-             * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
-             * `postal_code` and `city`.
+             * `postal_code` the postal code itself, one of format `postal_code_city` an object carrying
+             * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` the
+             * grid operator's code number: a string of exactly 13 digits, whatever its prefix.
              *
              * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
              * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
@@ -4638,8 +4641,9 @@ declare namespace Components {
              * Exact values only; predicates belong to reads. Values are stored canonicalized for their
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
              * and `until` in that form where an empty string is an open end, a `location` of format
-             * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
-             * `postal_code` and `city`.
+             * `postal_code` the postal code itself, one of format `postal_code_city` an object carrying
+             * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` the
+             * grid operator's code number: a string of exactly 13 digits, whatever its prefix.
              *
              * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
              * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
@@ -7301,7 +7305,8 @@ declare namespace Components {
              *
              * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
              *   or `date` condition
-             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition, or a
+             *   `location` of format `power_grid_operator` or `gas_grid_operator`
              * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
              * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
              *
@@ -7314,7 +7319,10 @@ declare namespace Components {
              * case-sensitively. A `location` of format
              * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
              * `postal_code` and `city`, named as an entity address names them, whose city is compared
-             * case- and whitespace-insensitively.
+             * case- and whitespace-insensitively. One of format `power_grid_operator` or `gas_grid_operator`
+             * is the grid operator's code number, a string of exactly 13 digits, matched exactly; it is
+             * never looked up, so the caller supplies it, and a context without it gets only the variants
+             * that pin no grid operator.
              *
              * `default` and names beginning with `_` are reserved and cannot be supplied.
              *
@@ -7336,7 +7344,8 @@ declare namespace Components {
              *
              * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
              *   or `date` condition
-             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition, or a
+             *   `location` of format `power_grid_operator` or `gas_grid_operator`
              * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
              * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
              *
@@ -7349,7 +7358,10 @@ declare namespace Components {
              * case-sensitively. A `location` of format
              * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
              * `postal_code` and `city`, named as an entity address names them, whose city is compared
-             * case- and whitespace-insensitively.
+             * case- and whitespace-insensitively. One of format `power_grid_operator` or `gas_grid_operator`
+             * is the grid operator's code number, a string of exactly 13 digits, matched exactly; it is
+             * never looked up, so the caller supplies it, and a context without it gets only the variants
+             * that pin no grid operator.
              *
              * `default` and names beginning with `_` are reserved and cannot be supplied.
              *
@@ -7371,7 +7383,8 @@ declare namespace Components {
              *
              * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
              *   or `date` condition
-             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition, or a
+             *   `location` of format `power_grid_operator` or `gas_grid_operator`
              * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
              * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
              *
@@ -7384,7 +7397,10 @@ declare namespace Components {
              * case-sensitively. A `location` of format
              * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
              * `postal_code` and `city`, named as an entity address names them, whose city is compared
-             * case- and whitespace-insensitively.
+             * case- and whitespace-insensitively. One of format `power_grid_operator` or `gas_grid_operator`
+             * is the grid operator's code number, a string of exactly 13 digits, matched exactly; it is
+             * never looked up, so the caller supplies it, and a context without it gets only the variants
+             * that pin no grid operator.
              *
              * `default` and names beginning with `_` are reserved and cannot be supplied.
              *
@@ -7766,7 +7782,9 @@ declare namespace Components {
                 _conditions: {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                     * 13 digits.
                      *
                      */
                     PinnedConditionValue;
@@ -8010,7 +8028,9 @@ declare namespace Components {
                 _conditions: {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                     * 13 digits.
                      *
                      */
                     PinnedConditionValue;
@@ -8201,7 +8221,9 @@ declare namespace Components {
                 _conditions: {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                     * 13 digits.
                      *
                      */
                     PinnedConditionValue;
@@ -11513,10 +11535,16 @@ declare namespace Components {
                 value: string;
                 title?: string;
             })[];
-            /**
+            format?: /**
              * The value shape of a `location` condition. Absent for every other type.
+             *
+             * - `postal_code`: a postal code
+             * - `postal_code_city`: a postal code and a city
+             * - `power_grid_operator`: the code number of the power grid operator an address is connected to
+             * - `gas_grid_operator`: the code number of the gas grid operator an address is connected to
+             *
              */
-            format?: "postal_code" | "postal_code_city";
+            LocationFormat;
         }
         export interface ConditionOptionUsage {
             /**
@@ -14037,8 +14065,9 @@ declare namespace Components {
              * Exact values only; predicates belong to reads. Values are stored canonicalized for their
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
              * and `until` in that form where an empty string is an open end, a `location` of format
-             * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
-             * `postal_code` and `city`.
+             * `postal_code` the postal code itself, one of format `postal_code_city` an object carrying
+             * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` the
+             * grid operator's code number: a string of exactly 13 digits, whatever its prefix.
              *
              * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
              * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
@@ -14113,7 +14142,9 @@ declare namespace Components {
             conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                 * 13 digits.
                  *
                  */
                 PinnedConditionValue;
@@ -15516,6 +15547,10 @@ declare namespace Components {
              * condition matches any value. `{ "exists": false }` selects the variants that leave it
              * unpinned.
              *
+             * A `location` of format `power_grid_operator` or `gas_grid_operator` takes `in`, so one
+             * filter lists the variants pinned to any of several code numbers, each a string of exactly
+             * 13 digits. A `location` of format `postal_code` or `postal_code_city` does not.
+             *
              * A `location` of format `postal_code_city` also takes its postal code alone,
              * `{ "postal_code": "10115" }`, matching that postal code in any city.
              *
@@ -15570,6 +15605,16 @@ declare namespace Components {
              */
             cursor?: string;
         }
+        /**
+         * The value shape of a `location` condition. Absent for every other type.
+         *
+         * - `postal_code`: a postal code
+         * - `postal_code_city`: a postal code and a city
+         * - `power_grid_operator`: the code number of the power grid operator an address is connected to
+         * - `gas_grid_operator`: the code number of the gas grid operator an address is connected to
+         *
+         */
+        export type LocationFormat = "postal_code" | "postal_code_city" | "power_grid_operator" | "gas_grid_operator";
         /**
          * Market participant data
          */
@@ -16995,7 +17040,9 @@ declare namespace Components {
             conditions?: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                 * 13 digits.
                  *
                  */
                 PinnedConditionValue;
@@ -17019,12 +17066,16 @@ declare namespace Components {
         }
         /**
          * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-         * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+         * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+         * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+         * 13 digits.
          *
          */
         export type PinnedConditionValue = /**
          * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-         * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+         * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+         * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+         * 13 digits.
          *
          */
         string | number | boolean | /**
@@ -17050,8 +17101,9 @@ declare namespace Components {
          * Exact values only; predicates belong to reads. Values are stored canonicalized for their
          * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
          * and `until` in that form where an empty string is an open end, a `location` of format
-         * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
-         * `postal_code` and `city`.
+         * `postal_code` the postal code itself, one of format `postal_code_city` an object carrying
+         * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` the
+         * grid operator's code number: a string of exactly 13 digits, whatever its prefix.
          *
          * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
          * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
@@ -17068,7 +17120,9 @@ declare namespace Components {
         export interface PinnedConditions {
             [name: string]: /**
              * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-             * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+             * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+             * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+             * 13 digits.
              *
              */
             PinnedConditionValue;
@@ -20412,7 +20466,9 @@ declare namespace Components {
             conditions?: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                 * 13 digits.
                  *
                  */
                 PinnedConditionValue;
@@ -20453,7 +20509,8 @@ declare namespace Components {
              *
              * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
              *   or `date` condition
-             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+             * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition, or a
+             *   `location` of format `power_grid_operator` or `gas_grid_operator`
              * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
              * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
              *
@@ -20466,7 +20523,10 @@ declare namespace Components {
              * case-sensitively. A `location` of format
              * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
              * `postal_code` and `city`, named as an entity address names them, whose city is compared
-             * case- and whitespace-insensitively.
+             * case- and whitespace-insensitively. One of format `power_grid_operator` or `gas_grid_operator`
+             * is the grid operator's code number, a string of exactly 13 digits, matched exactly; it is
+             * never looked up, so the caller supplies it, and a context without it gets only the variants
+             * that pin no grid operator.
              *
              * `default` and names beginning with `_` are reserved and cannot be supplied.
              *
@@ -21318,7 +21378,8 @@ declare namespace Components {
          *
          * - `{ "lt": v }`, `{ "lte": v }`, `{ "gt": v }`, `{ "gte": v }` — order, against a `number`
          *   or `date` condition
-         * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition
+         * - `{ "in": [...] }` — membership, against a `string`, `select` or `number` condition, or a
+         *   `location` of format `power_grid_operator` or `gas_grid_operator`
          * - `{ "between": "2026-03-01" }` — `daterange` containment, which a plain date also means
          * - `{ "exists": true }` — pinned to any value; `{ "exists": false }` — left unpinned
          *
@@ -21331,7 +21392,10 @@ declare namespace Components {
          * case-sensitively. A `location` of format
          * `postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying
          * `postal_code` and `city`, named as an entity address names them, whose city is compared
-         * case- and whitespace-insensitively.
+         * case- and whitespace-insensitively. One of format `power_grid_operator` or `gas_grid_operator`
+         * is the grid operator's code number, a string of exactly 13 digits, matched exactly; it is
+         * never looked up, so the caller supplies it, and a context without it gets only the variants
+         * that pin no grid operator.
          *
          * `default` and names beginning with `_` are reserved and cannot be supplied.
          *
@@ -21590,7 +21654,9 @@ declare namespace Components {
                 _conditions: {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                     * 13 digits.
                      *
                      */
                     PinnedConditionValue;
@@ -21675,7 +21741,9 @@ declare namespace Components {
             _conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                 * 13 digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22087,10 +22155,16 @@ declare namespace Components {
              *
              */
             ConditionType;
-            /**
-             * The format the variants pin a `location` in. Absent for every other type.
+            format?: /**
+             * The value shape of a `location` condition. Absent for every other type.
+             *
+             * - `postal_code`: a postal code
+             * - `postal_code_city`: a postal code and a city
+             * - `power_grid_operator`: the code number of the power grid operator an address is connected to
+             * - `gas_grid_operator`: the code number of the gas grid operator an address is connected to
+             *
              */
-            format?: "postal_code" | "postal_code_city";
+            LocationFormat;
             /**
              * How many variants pin the condition under this type.
              */
@@ -22155,6 +22229,10 @@ declare namespace Components {
          * condition matches any value. `{ "exists": false }` selects the variants that leave it
          * unpinned.
          *
+         * A `location` of format `power_grid_operator` or `gas_grid_operator` takes `in`, so one
+         * filter lists the variants pinned to any of several code numbers, each a string of exactly
+         * 13 digits. A `location` of format `postal_code` or `postal_code_city` does not.
+         *
          * A `location` of format `postal_code_city` also takes its postal code alone,
          * `{ "postal_code": "10115" }`, matching that postal code in any city.
          *
@@ -22199,7 +22277,9 @@ declare namespace Components {
         export interface VariantConditions {
             [name: string]: /**
              * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-             * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+             * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+             * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+             * 13 digits.
              *
              */
             PinnedConditionValue;
@@ -22250,7 +22330,9 @@ declare namespace Components {
             conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                 * 13 digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22293,6 +22375,10 @@ declare namespace Components {
              * A variant matches only where it pins the condition — unlike `:resolve`, where an unpinned
              * condition matches any value. `{ "exists": false }` selects the variants that leave it
              * unpinned.
+             *
+             * A `location` of format `power_grid_operator` or `gas_grid_operator` takes `in`, so one
+             * filter lists the variants pinned to any of several code numbers, each a string of exactly
+             * 13 digits. A `location` of format `postal_code` or `postal_code_city` does not.
              *
              * A `location` of format `postal_code_city` also takes its postal code alone,
              * `{ "postal_code": "10115" }`, matching that postal code in any city.
@@ -22388,7 +22474,9 @@ declare namespace Components {
             conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                 * 13 digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22433,7 +22521,9 @@ declare namespace Components {
                 conditions: {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                     * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                     * 13 digits.
                      *
                      */
                     PinnedConditionValue;
@@ -22541,7 +22631,9 @@ declare namespace Components {
             conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                 * 13 digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22640,7 +22732,9 @@ declare namespace Components {
             conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                 * 13 digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22791,7 +22885,9 @@ declare namespace Components {
             conditions: {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
-                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.
+                 * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
+                 * 13 digits.
                  *
                  */
                 PinnedConditionValue;
@@ -26842,6 +26938,7 @@ export type IntegrationCredentialsResult = Components.Schemas.IntegrationCredent
 export type IntegrationId = Components.Schemas.IntegrationId;
 export type JourneyContext = Components.Schemas.JourneyContext;
 export type ListVariantsRequest = Components.Schemas.ListVariantsRequest;
+export type LocationFormat = Components.Schemas.LocationFormat;
 export type MarketParticipant = Components.Schemas.MarketParticipant;
 export type MarkupPricingModel = Components.Schemas.MarkupPricingModel;
 export type MetaData = Components.Schemas.MetaData;
