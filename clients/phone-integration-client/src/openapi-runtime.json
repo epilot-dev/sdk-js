@@ -58,6 +58,33 @@
         "responses": {}
       }
     },
+    "/v1/calls/active": {
+      "get": {
+        "operationId": "getActiveCall",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "reportActiveCall",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "clearActiveCall",
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/manager/status": {
       "get": {
         "operationId": "getManagerStatus",
@@ -395,7 +422,7 @@
           "name": "tag",
           "in": "path",
           "required": true,
-          "description": "The skill, URL-encoded (e.g. `language%3Agerman`)"
+          "description": "The skill, URL-encoded (e.g. `language%3Agerman`), in any letter case (see `Skill`)"
         }
       ],
       "delete": {
@@ -415,7 +442,7 @@
           "name": "tag",
           "in": "path",
           "required": true,
-          "description": "The skill, URL-encoded (e.g. `language%3Agerman`)"
+          "description": "The skill, URL-encoded (e.g. `language%3Agerman`), in any letter case (see `Skill`)"
         }
       ],
       "put": {
