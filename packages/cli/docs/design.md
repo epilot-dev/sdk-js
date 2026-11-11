@@ -37,14 +37,15 @@ epilot design getAllDesigns
 - [`getAllDesigns`](#getalldesigns) — Scan all designs linked to a organization, based in orgId attribute from JWT auth token
 - [`addDesign`](#adddesign) — Create a brand new design linked to a organization, based in orgId attribute from JWT auth token
 - [`getDesign`](#getdesign) — Search for a especific design owned by user organization
-- [`updateDesign`](#updatedesign) — Update a especific design owned by user organization. A body with `version: 1` is validated against the design document 
+- [`updateDesign`](#updatedesign) — Update a especific design owned by user organization
 - [`deleteDesign`](#deletedesign) — Search and delete for a especific design owned by user organization
 - [`duplicateDesign`](#duplicatedesign) — Duplicate an existing design owned by the user organization. The copy carries over the style, custom CSS and name (marke
-- [`generateDesign`](#generatedesign) — Generates a design (palette, text colours, font, logo and border radius) from a public
-- [`generateDesignDocument`](#generatedesigndocument) — Reads a public website and returns a v1 design document plus one finding for each
+- [`getThemeFromDesign`](#getthemefromdesign) — Search for a especific design owned by user organization and parse them to a new or old theme
 - [`getFiles`](#getfiles) — List all files for the user organization bucket
 - [`uploadFile`](#uploadfile) — Upload a new file for the user organization bucket
 - [`getConsumerDesign`](#getconsumerdesign) — Search for a especific design owned by user organization
+- [`addConsumer`](#addconsumer) — Add a consumer that uses a specific design
+- [`removeConsumer`](#removeconsumer) — Remove a consumer that uses a specific design
 
 ### `getAllDesigns`
 
@@ -85,14 +86,7 @@ epilot design getAllDesigns --jsonata 'designs'
       "_manifest": ["string"],
       "custom_theme": "string",
       "use_custom_theme": true,
-      "design_tokens": {},
-      "version": 1,
-      "colors": {},
-      "typography": {},
-      "shape": {},
-      "components": {},
-      "assets": {},
-      "consumer": {}
+      "design_tokens": {}
     }
   ]
 }
@@ -203,16 +197,6 @@ epilot design addDesign \
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
-    },
-    "version": 1,
-    "colors": {},
-    "typography": {},
-    "shape": {},
-    "components": {},
-    "assets": {},
-    "consumer": {
-      "widgets": [],
-      "customer_portals": []
     }
   }
 }'
@@ -322,16 +306,6 @@ epilot design addDesign --jsonata 'design'
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
-    },
-    "version": 1,
-    "colors": {},
-    "typography": {},
-    "shape": {},
-    "components": {},
-    "assets": {},
-    "consumer": {
-      "widgets": [],
-      "customer_portals": []
     }
   }
 }
@@ -464,16 +438,6 @@ epilot design getDesign -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a --jsona
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
-    },
-    "version": 1,
-    "colors": {},
-    "typography": {},
-    "shape": {},
-    "components": {},
-    "assets": {},
-    "consumer": {
-      "widgets": [],
-      "customer_portals": []
     }
   }
 }
@@ -485,7 +449,7 @@ epilot design getDesign -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a --jsona
 
 ### `updateDesign`
 
-Update a especific design owned by user organization. A body with `version: 1` is validated against the design document 
+Update a especific design owned by user organization
 
 `PUT /v1/designs/{designId}`
 
@@ -494,7 +458,6 @@ Update a especific design owned by user organization. A body with `version: 1` i
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `designId` | path | string | Yes |  |
-| `If-Match` | header | string | No | The `last_modified_at` of the design the client read. When it no longer matches the stored design, the update is rejected with 409. Without the header the update is unconditional. |
 
 **Request Body** (required)
 
@@ -593,16 +556,6 @@ epilot design updateDesign \
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
-    },
-    "version": 1,
-    "colors": {},
-    "typography": {},
-    "shape": {},
-    "components": {},
-    "assets": {},
-    "consumer": {
-      "widgets": [],
-      "customer_portals": []
     }
   }
 }'
@@ -784,16 +737,6 @@ epilot design duplicateDesign -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a -
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
-    },
-    "version": 1,
-    "colors": {},
-    "typography": {},
-    "shape": {},
-    "components": {},
-    "assets": {},
-    "consumer": {
-      "widgets": [],
-      "customer_portals": []
     }
   }
 }
@@ -803,31 +746,38 @@ epilot design duplicateDesign -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a -
 
 ---
 
-### `generateDesign`
+### `getThemeFromDesign`
 
-Generates a design (palette, text colours, font, logo and border radius) from a public
+Search for a especific design owned by user organization and parse them to a new or old theme
 
-`POST /v1/designs/generate`
+`GET /v1/designs/{designId}/parse`
 
-**Request Body** (required)
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `designId` | path | string | Yes |  |
+| `orgId` | query | string | No | Organization id of the user |
+| `theme` | query | "NEW" \| "OLD" | Yes |  |
 
 **Sample Call**
 
 ```bash
-epilot design generateDesign \
-  -d '{"url":"https://www.twl.de"}'
+epilot design getThemeFromDesign \
+  -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a \
+  -p theme=NEW
 ```
 
-Using stdin pipe:
+Using positional args for path parameters:
 
 ```bash
-cat body.json | epilot design generateDesign
+epilot design getThemeFromDesign 4a062990-a6a3-11eb-9828-4f3da7d4935a
 ```
 
 With JSONata filter:
 
 ```bash
-epilot design generateDesign --jsonata 'design'
+epilot design getThemeFromDesign -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a -p theme=NEW --jsonata 'theme'
 ```
 
 <details>
@@ -835,7 +785,11 @@ epilot design generateDesign --jsonata 'design'
 
 ```json
 {
+  "theme": "NEW",
   "design": {
+    "id": "string",
+    "last_modified_at": "string",
+    "style_name": "string",
     "style": {
       "logo": {
         "main": {
@@ -875,92 +829,10 @@ epilot design generateDesign --jsonata 'design'
         "secondary": "string"
       }
     },
-    "theme": {
-      "shape": {
-        "borderRadius": "8"
-      }
-    }
-  },
-  "cached": true
-}
-```
-
-</details>
-
----
-
-### `generateDesignDocument`
-
-Reads a public website and returns a v1 design document plus one finding for each
-
-`POST /v1/designs/document/generate`
-
-**Request Body** (required)
-
-**Sample Call**
-
-```bash
-epilot design generateDesignDocument \
-  -d '{"url":"https://www.stadtwerke-musterstadt.de"}'
-```
-
-Using stdin pipe:
-
-```bash
-cat body.json | epilot design generateDesignDocument
-```
-
-With JSONata filter:
-
-```bash
-epilot design generateDesignDocument --jsonata 'document'
-```
-
-<details>
-<summary>Sample Response</summary>
-
-```json
-{
-  "document": {
-    "version": 1,
-    "colors": {},
-    "typography": {},
-    "shape": {},
-    "components": {},
-    "assets": {},
-    "consumer": {
-      "widgets": [
-        {
-          "id": "string",
-          "name": "string"
-        }
-      ],
-      "customer_portals": [
-        {
-          "id": "string",
-          "name": "string"
-        }
-      ]
-    }
-  },
-  "findings": [
-    {
-      "id": "primary_color",
-      "status": "found",
-      "detail": {
-        "family": "string"
-      }
-    },
-    {
-      "id": "primary_color",
-      "status": "found",
-      "detail": {
-        "family": "string"
-      }
-    }
-  ],
-  "site_name": "Stadtwerke Musterstadt",
-  "cached": true
+    "custom_theme": "string",
+    "use_custom_theme": true,
+    "journey_design_tokens": {}
+  }
 }
 ```
 
@@ -1173,21 +1045,99 @@ epilot design getConsumerDesign -p consumerId=4a062990-a6a3-11eb-9828-4f3da7d493
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
-    },
-    "version": 1,
-    "colors": {},
-    "typography": {},
-    "shape": {},
-    "components": {},
-    "assets": {},
-    "consumer": {
-      "widgets": [],
-      "customer_portals": []
     }
   }
 }
 ```
 
 </details>
+
+---
+
+### `addConsumer`
+
+Add a consumer that uses a specific design
+
+`PUT /v1/designs/addConsumer/{application}/{designId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `designId` | path | string | Yes |  |
+| `application` | path | string | Yes | Type of application that uses the design |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot design addConsumer \
+  -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a \
+  -p application=journey \
+  -d '{"consumer_id":"4a062990-a6a3-11eb-9828-4f3da7d4935a","consumer_name":"string","should_delete":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot design addConsumer 4a062990-a6a3-11eb-9828-4f3da7d4935a journey
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot design addConsumer -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a -p application=journey
+```
+
+With JSONata filter:
+
+```bash
+epilot design addConsumer -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a -p application=journey --jsonata '$'
+```
+
+---
+
+### `removeConsumer`
+
+Remove a consumer that uses a specific design
+
+`PUT /v1/designs/removeConsumer/{application}/{designId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `designId` | path | string | Yes |  |
+| `application` | path | string | Yes | Type of application that uses the design |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot design removeConsumer \
+  -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a \
+  -p application=journey \
+  -d '{"consumer_id":"4a062990-a6a3-11eb-9828-4f3da7d4935a","should_delete":"string"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot design removeConsumer 4a062990-a6a3-11eb-9828-4f3da7d4935a journey
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot design removeConsumer -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a -p application=journey
+```
+
+With JSONata filter:
+
+```bash
+epilot design removeConsumer -p designId=4a062990-a6a3-11eb-9828-4f3da7d4935a -p application=journey --jsonata '$'
+```
 
 ---

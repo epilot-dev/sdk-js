@@ -17,11 +17,9 @@ export declare namespace Components {
              */
             DesignId;
             consumer_name: string;
+            should_delete?: string;
         }
         export interface AddDesignReq {
-            /**
-             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.
-             */
             design: {
                 brand_id?: string;
                 brand_name?: string;
@@ -282,29 +280,9 @@ export declare namespace Components {
                      */
                     chip_hover_text_color?: string;
                 };
-                version?: 1;
-                colors?: {
-                    [name: string]: any;
-                };
-                typography?: {
-                    [name: string]: any;
-                };
-                shape?: {
-                    [name: string]: any;
-                };
-                components?: {
-                    [name: string]: any;
-                };
-                assets?: {
-                    [name: string]: any;
-                };
-                consumer?: ConsumerData;
             };
         }
         export interface AddDesignRes {
-            /**
-             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.
-             */
             design?: {
                 id?: string;
                 /**
@@ -575,23 +553,6 @@ export declare namespace Components {
                      */
                     chip_hover_text_color?: string;
                 };
-                version?: 1;
-                colors?: {
-                    [name: string]: any;
-                };
-                typography?: {
-                    [name: string]: any;
-                };
-                shape?: {
-                    [name: string]: any;
-                };
-                components?: {
-                    [name: string]: any;
-                };
-                assets?: {
-                    [name: string]: any;
-                };
-                consumer?: ConsumerData;
             };
         }
         /**
@@ -622,33 +583,6 @@ export declare namespace Components {
         export interface CustomerPortalData {
             id: string;
             name: string;
-        }
-        /**
-         * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.
-         */
-        export interface DesignDocumentV1 {
-            version?: 1;
-            colors?: {
-                [name: string]: any;
-            };
-            typography?: {
-                [name: string]: any;
-            };
-            shape?: {
-                [name: string]: any;
-            };
-            components?: {
-                [name: string]: any;
-            };
-            assets?: {
-                [name: string]: any;
-            };
-            consumer?: ConsumerData;
-        }
-        export interface DesignFinding {
-            id: FindingId;
-            status: FindingStatus;
-            detail?: FindingDetail;
         }
         /**
          * Id of the design
@@ -701,10 +635,6 @@ export declare namespace Components {
         }
         export interface ErrorResp {
             message?: string;
-            /**
-             * Machine-readable reason, e.g. `invalid_url` or `rate_limited`
-             */
-            code?: string;
             error?: {
                 [key: string]: any;
             };
@@ -720,14 +650,6 @@ export declare namespace Components {
              */
             file_id?: string;
         }
-        export interface FindingDetail {
-            /**
-             * Font family that was found but cannot be loaded
-             */
-            family: string;
-        }
-        export type FindingId = "primary_color" | "fonts" | "corners" | "primary_button" | "logo" | "favicon";
-        export type FindingStatus = "found" | "not_found" | "not_available";
         export interface FontData {
             font_id: string;
             font_name: string;
@@ -740,68 +662,6 @@ export declare namespace Components {
         export interface FontResponseUrl {
             type?: "WOFF2" | "WOFF" | "TTF" | "EOT";
             url?: string;
-        }
-        export interface GenerateDesignDocumentReq {
-            /**
-             * Public website to read the design from
-             * example:
-             * https://www.stadtwerke-musterstadt.de
-             */
-            url: string; // uri
-        }
-        export interface GenerateDesignDocumentRes {
-            document: /* Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet. */ DesignDocumentV1;
-            findings: [
-                DesignFinding,
-                DesignFinding,
-                DesignFinding,
-                DesignFinding,
-                DesignFinding,
-                DesignFinding
-            ];
-            /**
-             * example:
-             * Stadtwerke Musterstadt
-             */
-            site_name: string;
-            /**
-             * True when the response was served from an earlier successful generation for this organization, normalised URL and generator version
-             */
-            cached: boolean;
-        }
-        export interface GenerateDesignReq {
-            /**
-             * Public website to derive the design from
-             * example:
-             * https://www.twl.de
-             */
-            url: string; // uri
-        }
-        export interface GenerateDesignRes {
-            design: /* Partial design to merge into the design being edited */ GeneratedDesign;
-            /**
-             * True when the design was generated earlier for this organization and URL
-             */
-            cached: boolean;
-        }
-        /**
-         * Partial design to merge into the design being edited
-         */
-        export interface GeneratedDesign {
-            style: {
-                logo: LogoData;
-                palette: PaletteData;
-                typography: TypographyData;
-            };
-            theme: {
-                shape: {
-                    /**
-                     * example:
-                     * 8
-                     */
-                    borderRadius: string;
-                };
-            };
         }
         export interface GetAllDesignsRes {
             designs?: {
@@ -1074,23 +934,6 @@ export declare namespace Components {
                      */
                     chip_hover_text_color?: string;
                 };
-                version?: 1;
-                colors?: {
-                    [name: string]: any;
-                };
-                typography?: {
-                    [name: string]: any;
-                };
-                shape?: {
-                    [name: string]: any;
-                };
-                components?: {
-                    [name: string]: any;
-                };
-                assets?: {
-                    [name: string]: any;
-                };
-                consumer?: ConsumerData;
             }[];
         }
         export interface GetBrandsRes {
@@ -1107,9 +950,6 @@ export declare namespace Components {
             }[];
         }
         export interface GetDesignRes {
-            /**
-             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.
-             */
             design?: {
                 id?: string;
                 /**
@@ -1380,23 +1220,6 @@ export declare namespace Components {
                      */
                     chip_hover_text_color?: string;
                 };
-                version?: 1;
-                colors?: {
-                    [name: string]: any;
-                };
-                typography?: {
-                    [name: string]: any;
-                };
-                shape?: {
-                    [name: string]: any;
-                };
-                components?: {
-                    [name: string]: any;
-                };
-                assets?: {
-                    [name: string]: any;
-                };
-                consumer?: ConsumerData;
             };
         }
         export type GetFilesRes = {
@@ -1696,28 +1519,6 @@ export declare namespace Components {
                 journey_design_tokens?: {
                     [key: string]: any;
                 };
-                version?: 1;
-                colors?: {
-                    [name: string]: any;
-                };
-                typography?: {
-                    [name: string]: any;
-                };
-                shape?: {
-                    [name: string]: any;
-                };
-                components?: {
-                    [name: string]: any;
-                };
-                assets?: {
-                    [name: string]: any;
-                };
-                /**
-                 * v1 designs only: the journey group of @epilot/design-document (custom_css, tokens and the journey overrides primary_color, font, border_radius, logo), derived on read from the stored journey fields and compared with the stored v1 groups. What a journey paints from it equals what it paints from the theme built from the old fields. Not returned by GET.
-                 */
-                journey?: {
-                    [name: string]: any;
-                };
             };
         }
         export interface RemoveConsumerReq {
@@ -1727,6 +1528,7 @@ export declare namespace Components {
              * 4a062990-a6a3-11eb-9828-4f3da7d4935a
              */
             DesignId;
+            should_delete?: string;
         }
         export interface ShapeData {
             border_radius?: number;
@@ -1742,304 +1544,7 @@ export declare namespace Components {
             primary: string;
             secondary: string;
         }
-        export interface UpdateDesignConflict {
-            message?: string;
-            /**
-             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.
-             */
-            design?: {
-                id?: string;
-                /**
-                 * Creation date and time
-                 * example:
-                 * 2021-01-30T08:30:00Z
-                 */
-                created_at?: string;
-                created_by?: string;
-                edited: boolean;
-                last_modified_at?: string;
-                brand_id?: string;
-                brand_name?: string;
-                user?: {
-                    emailaddress?: string;
-                    fullname?: string;
-                    name?: string;
-                    userid?: string;
-                };
-                style_name: string;
-                style: {
-                    logo?: LogoData;
-                    palette: PaletteData;
-                    typography: TypographyData;
-                    shape?: ShapeData;
-                    consumer: ConsumerData;
-                };
-                is_default?: boolean;
-                /**
-                 * The manifest IDs associated with this design
-                 */
-                _manifest?: string[];
-                custom_theme?: string;
-                use_custom_theme?: boolean;
-                /**
-                 * Design tokens for journey customization
-                 */
-                design_tokens?: {
-                    coupon?: string;
-                    cashback?: string;
-                    custom_css?: string;
-                    /**
-                     * Accent color, defaults to primary
-                     */
-                    accent_color?: string;
-                    /**
-                     * Global outline/focus color
-                     */
-                    outline_color?: string;
-                    /**
-                     * Divider line color
-                     */
-                    divider_color?: string;
-                    /**
-                     * Link text color
-                     */
-                    link_color?: string;
-                    /**
-                     * Link hover text color
-                     */
-                    link_hover_color?: string;
-                    /**
-                     * Font size scale factor
-                     */
-                    font_size_scale?: "xs" | "sm" | "md" | "lg" | "xl";
-                    /**
-                     * Topbar minimum height in pixels
-                     */
-                    topbar_height?: number;
-                    /**
-                     * Logo/content alignment in the top bar
-                     */
-                    topbar_logo_alignment?: "flex-start" | "center" | "flex-end";
-                    /**
-                     * Logo size in pixels
-                     */
-                    logo_size?: number;
-                    /**
-                     * Input field background color
-                     */
-                    input_background?: string;
-                    /**
-                     * Input field border color
-                     */
-                    input_border_color?: string;
-                    /**
-                     * Input field text color
-                     */
-                    input_text_color?: string;
-                    /**
-                     * Input field label color
-                     */
-                    input_label_color?: string;
-                    /**
-                     * Input field border radius in pixels
-                     */
-                    input_border_radius?: number;
-                    /**
-                     * Input field height in pixels
-                     */
-                    input_height?: number;
-                    /**
-                     * Input field variant style
-                     */
-                    input_variant?: "outlined" | "filled" | "underlined";
-                    /**
-                     * Primary button background color or gradient
-                     */
-                    button_primary_bg?: string;
-                    /**
-                     * Primary button text color
-                     */
-                    button_primary_text?: string;
-                    /**
-                     * Primary button hover background color or gradient
-                     */
-                    button_primary_hover_bg?: string;
-                    /**
-                     * Primary button hover text color
-                     */
-                    button_primary_hover_text?: string;
-                    /**
-                     * Outlined button border color
-                     */
-                    button_outlined_border?: string;
-                    /**
-                     * Outlined button text color
-                     */
-                    button_outlined_text?: string;
-                    /**
-                     * Outlined button hover background color
-                     */
-                    button_outlined_hover_bg?: string;
-                    /**
-                     * Outlined button hover text color
-                     */
-                    button_outlined_hover_text?: string;
-                    /**
-                     * Ghost button background color
-                     */
-                    button_ghost_bg?: string;
-                    /**
-                     * Ghost button text color
-                     */
-                    button_ghost_text?: string;
-                    /**
-                     * Ghost button hover background color
-                     */
-                    button_ghost_hover_bg?: string;
-                    /**
-                     * Ghost button hover text color
-                     */
-                    button_ghost_hover_text?: string;
-                    /**
-                     * Button border radius in pixels
-                     */
-                    button_border_radius?: number;
-                    /**
-                     * Button height in pixels
-                     */
-                    button_height?: number;
-                    /**
-                     * Card background color
-                     */
-                    card_background?: string;
-                    /**
-                     * Card border color for outlined variant
-                     */
-                    card_border_color?: string;
-                    /**
-                     * Card visual variant
-                     */
-                    card_variant?: "shadow" | "outlined";
-                    /**
-                     * Summary card background color
-                     */
-                    summary_card_background?: string;
-                    /**
-                     * Toggle button selected background color
-                     */
-                    toggle_selected_bg?: string;
-                    /**
-                     * Toggle button selected text color
-                     */
-                    toggle_selected_text?: string;
-                    /**
-                     * Toggle button hover background color
-                     */
-                    toggle_hover_bg?: string;
-                    /**
-                     * Toggle button hover text color
-                     */
-                    toggle_hover_text?: string;
-                    /**
-                     * Toggle group wrapper border color
-                     */
-                    toggle_border_color?: string;
-                    /**
-                     * Dropdown option hover background color
-                     */
-                    dropdown_hover_bg?: string;
-                    /**
-                     * Dropdown option hover text color
-                     */
-                    dropdown_hover_text?: string;
-                    /**
-                     * Dropdown option selected background color
-                     */
-                    dropdown_selected_bg?: string;
-                    /**
-                     * Dropdown option selected text color
-                     */
-                    dropdown_selected_text?: string;
-                    /**
-                     * Switch unchecked thumb color
-                     */
-                    switch_unchecked_color?: string;
-                    /**
-                     * Switch unchecked track background color
-                     */
-                    switch_unchecked_bg?: string;
-                    /**
-                     * Switch border radius in pixels
-                     */
-                    switch_border_radius?: number;
-                    /**
-                     * Checkbox unchecked border color
-                     */
-                    checkbox_unchecked_color?: string;
-                    /**
-                     * Checkbox label text color
-                     */
-                    checkbox_label_color?: string;
-                    /**
-                     * Radio button unchecked border color
-                     */
-                    radio_unchecked_color?: string;
-                    /**
-                     * Radio button label text color
-                     */
-                    radio_label_color?: string;
-                    /**
-                     * Date picker selected date background color
-                     */
-                    datepicker_selected_bg?: string;
-                    /**
-                     * Date picker selected date text color
-                     */
-                    datepicker_selected_color?: string;
-                    /**
-                     * Date picker border radius in pixels
-                     */
-                    datepicker_border_radius?: number;
-                    /**
-                     * Chip background color
-                     */
-                    chip_background?: string;
-                    /**
-                     * Chip hover background color
-                     */
-                    chip_hover_background?: string;
-                    /**
-                     * Chip text color
-                     */
-                    chip_text_color?: string;
-                    /**
-                     * Chip hover text color
-                     */
-                    chip_hover_text_color?: string;
-                };
-                version?: 1;
-                colors?: {
-                    [name: string]: any;
-                };
-                typography?: {
-                    [name: string]: any;
-                };
-                shape?: {
-                    [name: string]: any;
-                };
-                components?: {
-                    [name: string]: any;
-                };
-                assets?: {
-                    [name: string]: any;
-                };
-                consumer?: ConsumerData;
-            };
-        }
         export interface UpdateDesignReq {
-            /**
-             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.
-             */
             design: {
                 brand_id?: string;
                 brand_name?: string;
@@ -2300,23 +1805,6 @@ export declare namespace Components {
                      */
                     chip_hover_text_color?: string;
                 };
-                version?: 1;
-                colors?: {
-                    [name: string]: any;
-                };
-                typography?: {
-                    [name: string]: any;
-                };
-                shape?: {
-                    [name: string]: any;
-                };
-                components?: {
-                    [name: string]: any;
-                };
-                assets?: {
-                    [name: string]: any;
-                };
-                consumer?: ConsumerData;
             };
         }
         export interface UploadFileReq {
@@ -2400,9 +1888,7 @@ export declare namespace Paths {
             export type $401 = Components.Schemas.ErrorResp;
             export interface $404 {
             }
-            export type $409 = Components.Schemas.ErrorResp;
             export type $500 = Components.Schemas.ErrorResp;
-            export type $503 = Components.Schemas.ErrorResp;
         }
     }
     namespace DuplicateDesign {
@@ -2424,33 +1910,6 @@ export declare namespace Paths {
             export interface $404 {
             }
             export type $500 = Components.Schemas.ErrorResp;
-        }
-    }
-    namespace GenerateDesign {
-        export type RequestBody = Components.Schemas.GenerateDesignReq;
-        namespace Responses {
-            export type $200 = Components.Schemas.GenerateDesignRes;
-            export type $201 = Components.Schemas.GenerateDesignRes;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $403 = Components.Schemas.ErrorResp;
-            export type $422 = Components.Schemas.ErrorResp;
-            export type $502 = Components.Schemas.ErrorResp;
-            export type $504 = Components.Schemas.ErrorResp;
-        }
-    }
-    namespace GenerateDesignDocument {
-        export type RequestBody = Components.Schemas.GenerateDesignDocumentReq;
-        namespace Responses {
-            export type $200 = Components.Schemas.GenerateDesignDocumentRes;
-            export type $201 = Components.Schemas.GenerateDesignDocumentRes;
-            export type $400 = Components.Schemas.ErrorResp;
-            export type $401 = Components.Schemas.ErrorResp;
-            export type $403 = Components.Schemas.ErrorResp;
-            export type $422 = Components.Schemas.ErrorResp;
-            export type $429 = Components.Schemas.ErrorResp;
-            export type $502 = Components.Schemas.ErrorResp;
-            export type $504 = Components.Schemas.ErrorResp;
         }
     }
     namespace GetAllDesigns {
@@ -2592,9 +2051,6 @@ export declare namespace Paths {
         }
     }
     namespace UpdateDesign {
-        export interface HeaderParameters {
-            "If-Match"?: Parameters.IfMatch;
-        }
         namespace Parameters {
             export type DesignId = /**
              * Id of the design
@@ -2602,7 +2058,6 @@ export declare namespace Paths {
              * 4a062990-a6a3-11eb-9828-4f3da7d4935a
              */
             Components.Schemas.DesignId;
-            export type IfMatch = string;
         }
         export interface PathParameters {
             designId: Parameters.DesignId;
@@ -2615,7 +2070,6 @@ export declare namespace Paths {
             export type $401 = Components.Schemas.ErrorResp;
             export interface $404 {
             }
-            export type $409 = Components.Schemas.UpdateDesignConflict;
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
@@ -2665,10 +2119,10 @@ export interface OperationMethods {
   /**
    * updateDesign - updateDesign
    * 
-   * Update a especific design owned by user organization. A body with `version: 1` is validated against the design document v1 schema and stored as v1. A v1 body leaves the stored `style`, `design_tokens`, `custom_theme` and `use_custom_theme` untouched. A body without `version` on a v1 design is treated as an old client's read-modify-write: those four fields are stored as sent, and brand-wide changes in `style` are applied to the v1 groups.
+   * Update a especific design owned by user organization
    */
   'updateDesign'(
-    parameters?: Parameters<Paths.UpdateDesign.HeaderParameters & Paths.UpdateDesign.PathParameters> | null,
+    parameters?: Parameters<Paths.UpdateDesign.PathParameters> | null,
     data?: Paths.UpdateDesign.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateDesign.Responses.$204>
@@ -2695,42 +2149,13 @@ export interface OperationMethods {
   /**
    * getThemeFromDesign - getThemeFromDesign
    * 
-   * Search for a especific design owned by user organization and parse them to a new or old theme. Deprecated: kept for old readers only. For a v1 design the response carries the v1 groups and the derived `journey` group next to the stored old fields and the theme built from them; new runtimes read the v1 groups.
+   * Search for a especific design owned by user organization and parse them to a new or old theme
    */
   'getThemeFromDesign'(
     parameters?: Parameters<Paths.GetThemeFromDesign.QueryParameters & Paths.GetThemeFromDesign.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetThemeFromDesign.Responses.$200>
-  /**
-   * generateDesign - generateDesign
-   * 
-   * Generates a design (palette, text colours, font, logo and border radius) from a public
-   * website with AI. The result is cached per organization and URL for 30 days.
-   * 
-   */
-  'generateDesign'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.GenerateDesign.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GenerateDesign.Responses.$200 | Paths.GenerateDesign.Responses.$201>
-  /**
-   * generateDesignDocument - generateDesignDocument
-   * 
-   * Reads a public website and returns a v1 design document plus one finding for each
-   * id in fixed order. This version chooses the favicon in code and derives the site name.
-   * The other findings are `not_found` until they are implemented. The document contains
-   * only the leaves that passed validation, and defaults are not pruned.
-   * Successful responses are cached per organization, normalised URL and generator version
-   * for 7 days. Each organization may run 20 new generations per UTC day; cache hits do not
-   * count toward the limit. A client abort still finishes on the server and is cached.
-   * 
-   */
-  'generateDesignDocument'(
-    parameters?: Parameters<UnknownParamsObject> | null,
-    data?: Paths.GenerateDesignDocument.RequestBody,
-    config?: AxiosRequestConfig  
-  ): OperationResponse<Paths.GenerateDesignDocument.Responses.$200 | Paths.GenerateDesignDocument.Responses.$201>
   /**
    * getFiles - getFiles
    * 
@@ -2850,10 +2275,10 @@ export interface PathsDictionary {
     /**
      * updateDesign - updateDesign
      * 
-     * Update a especific design owned by user organization. A body with `version: 1` is validated against the design document v1 schema and stored as v1. A v1 body leaves the stored `style`, `design_tokens`, `custom_theme` and `use_custom_theme` untouched. A body without `version` on a v1 design is treated as an old client's read-modify-write: those four fields are stored as sent, and brand-wide changes in `style` are applied to the v1 groups.
+     * Update a especific design owned by user organization
      */
     'put'(
-      parameters?: Parameters<Paths.UpdateDesign.HeaderParameters & Paths.UpdateDesign.PathParameters> | null,
+      parameters?: Parameters<Paths.UpdateDesign.PathParameters> | null,
       data?: Paths.UpdateDesign.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateDesign.Responses.$204>
@@ -2874,46 +2299,13 @@ export interface PathsDictionary {
     /**
      * getThemeFromDesign - getThemeFromDesign
      * 
-     * Search for a especific design owned by user organization and parse them to a new or old theme. Deprecated: kept for old readers only. For a v1 design the response carries the v1 groups and the derived `journey` group next to the stored old fields and the theme built from them; new runtimes read the v1 groups.
+     * Search for a especific design owned by user organization and parse them to a new or old theme
      */
     'get'(
       parameters?: Parameters<Paths.GetThemeFromDesign.QueryParameters & Paths.GetThemeFromDesign.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetThemeFromDesign.Responses.$200>
-  }
-  ['/v1/designs/generate']: {
-    /**
-     * generateDesign - generateDesign
-     * 
-     * Generates a design (palette, text colours, font, logo and border radius) from a public
-     * website with AI. The result is cached per organization and URL for 30 days.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.GenerateDesign.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GenerateDesign.Responses.$200 | Paths.GenerateDesign.Responses.$201>
-  }
-  ['/v1/designs/document/generate']: {
-    /**
-     * generateDesignDocument - generateDesignDocument
-     * 
-     * Reads a public website and returns a v1 design document plus one finding for each
-     * id in fixed order. This version chooses the favicon in code and derives the site name.
-     * The other findings are `not_found` until they are implemented. The document contains
-     * only the leaves that passed validation, and defaults are not pruned.
-     * Successful responses are cached per organization, normalised URL and generator version
-     * for 7 days. Each organization may run 20 new generations per UTC day; cache hits do not
-     * count toward the limit. A client abort still finishes on the server and is cached.
-     * 
-     */
-    'post'(
-      parameters?: Parameters<UnknownParamsObject> | null,
-      data?: Paths.GenerateDesignDocument.RequestBody,
-      config?: AxiosRequestConfig  
-    ): OperationResponse<Paths.GenerateDesignDocument.Responses.$200 | Paths.GenerateDesignDocument.Responses.$201>
   }
   ['/v1/designs/files']: {
     /**
@@ -3010,23 +2402,13 @@ export type BrandItem = Components.Schemas.BrandItem;
 export type ConsumerData = Components.Schemas.ConsumerData;
 export type Custom_Style = Components.Schemas.CustomStyle;
 export type CustomerPortalData = Components.Schemas.CustomerPortalData;
-export type Design_Document_V1 = Components.Schemas.DesignDocumentV1;
-export type DesignFinding = Components.Schemas.DesignFinding;
 export type DesignId = Components.Schemas.DesignId;
 export type DesignItem = Components.Schemas.DesignItem;
 export type DesignParameters = Components.Schemas.DesignParameters;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type FileData = Components.Schemas.FileData;
-export type FindingDetail = Components.Schemas.FindingDetail;
-export type FindingId = Components.Schemas.FindingId;
-export type FindingStatus = Components.Schemas.FindingStatus;
 export type FontData = Components.Schemas.FontData;
 export type FontResponseUrl = Components.Schemas.FontResponseUrl;
-export type GenerateDesignDocumentReq = Components.Schemas.GenerateDesignDocumentReq;
-export type GenerateDesignDocumentRes = Components.Schemas.GenerateDesignDocumentRes;
-export type GenerateDesignReq = Components.Schemas.GenerateDesignReq;
-export type GenerateDesignRes = Components.Schemas.GenerateDesignRes;
-export type GeneratedDesign = Components.Schemas.GeneratedDesign;
 export type GetAllDesignsRes = Components.Schemas.GetAllDesignsRes;
 export type GetBrandsRes = Components.Schemas.GetBrandsRes;
 export type GetDesignRes = Components.Schemas.GetDesignRes;
@@ -3040,7 +2422,6 @@ export type RemoveConsumerReq = Components.Schemas.RemoveConsumerReq;
 export type ShapeData = Components.Schemas.ShapeData;
 export type Theme = Components.Schemas.Theme;
 export type TypographyData = Components.Schemas.TypographyData;
-export type UpdateDesignConflict = Components.Schemas.UpdateDesignConflict;
 export type UpdateDesignReq = Components.Schemas.UpdateDesignReq;
 export type UploadFileReq = Components.Schemas.UploadFileReq;
 export type UploadFileRes = Components.Schemas.UploadFileRes;

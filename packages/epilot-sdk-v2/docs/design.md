@@ -31,11 +31,12 @@ const { data } = await designClient.getAllDesigns(...)
 - [`deleteDesign`](#deletedesign)
 - [`updateDesign`](#updatedesign)
 - [`duplicateDesign`](#duplicatedesign)
-- [`generateDesign`](#generatedesign)
-- [`generateDesignDocument`](#generatedesigndocument)
+- [`getThemeFromDesign`](#getthemefromdesign)
 - [`uploadFile`](#uploadfile)
 - [`getFiles`](#getfiles)
 - [`getConsumerDesign`](#getconsumerdesign)
+- [`addConsumer`](#addconsumer)
+- [`removeConsumer`](#removeconsumer)
 
 **Schemas**
 - [`UploadFileReq`](#uploadfilereq)
@@ -52,8 +53,6 @@ const { data } = await designClient.getAllDesigns(...)
 - [`RemoveConsumerReq`](#removeconsumerreq)
 - [`DesignItem`](#designitem)
 - [`BrandItem`](#branditem)
-- [`Design_Document_V1`](#design_document_v1)
-- [`UpdateDesignConflict`](#updatedesignconflict)
 - [`Custom_Style`](#custom_style)
 - [`Journey`](#journey)
 - [`ConsumerData`](#consumerdata)
@@ -66,15 +65,6 @@ const { data } = await designClient.getAllDesigns(...)
 - [`FontData`](#fontdata)
 - [`FontResponseUrl`](#fontresponseurl)
 - [`WidgetPortalData`](#widgetportaldata)
-- [`GenerateDesignReq`](#generatedesignreq)
-- [`GenerateDesignRes`](#generatedesignres)
-- [`GenerateDesignDocumentReq`](#generatedesigndocumentreq)
-- [`FindingId`](#findingid)
-- [`FindingStatus`](#findingstatus)
-- [`FindingDetail`](#findingdetail)
-- [`DesignFinding`](#designfinding)
-- [`GenerateDesignDocumentRes`](#generatedesigndocumentres)
-- [`GeneratedDesign`](#generateddesign)
 - [`ErrorResp`](#errorresp)
 - [`FileData`](#filedata)
 - [`DesignId`](#designid)
@@ -114,14 +104,7 @@ const { data } = await client.getAllDesigns()
       "_manifest": ["string"],
       "custom_theme": "string",
       "use_custom_theme": true,
-      "design_tokens": {},
-      "version": 1,
-      "colors": {},
-      "typography": {},
-      "shape": {},
-      "components": {},
-      "assets": {},
-      "consumer": {}
+      "design_tokens": {}
     }
   ]
 }
@@ -223,16 +206,6 @@ const { data } = await client.addDesign(
         chip_hover_background: 'string',
         chip_text_color: 'string',
         chip_hover_text_color: 'string'
-      },
-      version: 1,
-      colors: {},
-      typography: {},
-      shape: {},
-      components: {},
-      assets: {},
-      consumer: {
-        widgets: [ /* ... */ ],
-        customer_portals: [ /* ... */ ]
       }
     }
   },
@@ -331,16 +304,6 @@ const { data } = await client.addDesign(
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
-    },
-    "version": 1,
-    "colors": {},
-    "typography": {},
-    "shape": {},
-    "components": {},
-    "assets": {},
-    "consumer": {
-      "widgets": [],
-      "customer_portals": []
     }
   }
 }
@@ -454,16 +417,6 @@ const { data } = await client.getDesign({
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
-    },
-    "version": 1,
-    "colors": {},
-    "typography": {},
-    "shape": {},
-    "components": {},
-    "assets": {},
-    "consumer": {
-      "widgets": [],
-      "customer_portals": []
     }
   }
 }
@@ -489,7 +442,7 @@ const { data } = await client.deleteDesign({
 
 ### `updateDesign`
 
-Update a especific design owned by user organization. A body with `version: 1` is validated against the design document v1 schema and stored as v1. A v1 body leaves the stored `style`, `design_tokens`
+Update a especific design owned by user organization
 
 `PUT /v1/designs/{designId}`
 
@@ -497,7 +450,6 @@ Update a especific design owned by user organization. A body with `version: 1` i
 const { data } = await client.updateDesign(
   {
     designId: 'example',
-    If-Match: 'example',
   },
   {
     design: {
@@ -582,16 +534,6 @@ const { data } = await client.updateDesign(
         chip_hover_background: 'string',
         chip_text_color: 'string',
         chip_hover_text_color: 'string'
-      },
-      version: 1,
-      colors: {},
-      typography: {},
-      shape: {},
-      components: {},
-      assets: {},
-      consumer: {
-        widgets: [ /* ... */ ],
-        customer_portals: [ /* ... */ ]
       }
     }
   },
@@ -704,16 +646,6 @@ const { data } = await client.duplicateDesign({
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
-    },
-    "version": 1,
-    "colors": {},
-    "typography": {},
-    "shape": {},
-    "components": {},
-    "assets": {},
-    "consumer": {
-      "widgets": [],
-      "customer_portals": []
     }
   }
 }
@@ -723,20 +655,18 @@ const { data } = await client.duplicateDesign({
 
 ---
 
-### `generateDesign`
+### `getThemeFromDesign`
 
-Generates a design (palette, text colours, font, logo and border radius) from a public
-website with AI. The result is cached per organization and URL for 30 days.
+Search for a especific design owned by user organization and parse them to a new or old theme
 
-`POST /v1/designs/generate`
+`GET /v1/designs/{designId}/parse`
 
 ```ts
-const { data } = await client.generateDesign(
-  null,
-  {
-    url: 'https://www.twl.de'
-  },
-)
+const { data } = await client.getThemeFromDesign({
+  designId: 'example',
+  orgId: 'example',
+  theme: 'example',
+})
 ```
 
 <details>
@@ -744,7 +674,11 @@ const { data } = await client.generateDesign(
 
 ```json
 {
+  "theme": "NEW",
   "design": {
+    "id": "string",
+    "last_modified_at": "string",
+    "style_name": "string",
     "style": {
       "logo": {
         "main": {
@@ -784,82 +718,10 @@ const { data } = await client.generateDesign(
         "secondary": "string"
       }
     },
-    "theme": {
-      "shape": {
-        "borderRadius": "8"
-      }
-    }
-  },
-  "cached": true
-}
-```
-
-</details>
-
----
-
-### `generateDesignDocument`
-
-Reads a public website and returns a v1 design document plus one finding for each
-id in fixed order. This version chooses the favicon in code and derives the site name.
-The other findings are `not_fou
-
-`POST /v1/designs/document/generate`
-
-```ts
-const { data } = await client.generateDesignDocument(
-  null,
-  {
-    url: 'https://www.stadtwerke-musterstadt.de'
-  },
-)
-```
-
-<details>
-<summary>Response</summary>
-
-```json
-{
-  "document": {
-    "version": 1,
-    "colors": {},
-    "typography": {},
-    "shape": {},
-    "components": {},
-    "assets": {},
-    "consumer": {
-      "widgets": [
-        {
-          "id": "string",
-          "name": "string"
-        }
-      ],
-      "customer_portals": [
-        {
-          "id": "string",
-          "name": "string"
-        }
-      ]
-    }
-  },
-  "findings": [
-    {
-      "id": "primary_color",
-      "status": "found",
-      "detail": {
-        "family": "string"
-      }
-    },
-    {
-      "id": "primary_color",
-      "status": "found",
-      "detail": {
-        "family": "string"
-      }
-    }
-  ],
-  "site_name": "Stadtwerke Musterstadt",
-  "cached": true
+    "custom_theme": "string",
+    "use_custom_theme": true,
+    "journey_design_tokens": {}
+  }
 }
 ```
 
@@ -1032,22 +894,55 @@ const { data } = await client.getConsumerDesign({
       "chip_hover_background": "string",
       "chip_text_color": "string",
       "chip_hover_text_color": "string"
-    },
-    "version": 1,
-    "colors": {},
-    "typography": {},
-    "shape": {},
-    "components": {},
-    "assets": {},
-    "consumer": {
-      "widgets": [],
-      "customer_portals": []
     }
   }
 }
 ```
 
 </details>
+
+---
+
+### `addConsumer`
+
+Add a consumer that uses a specific design
+
+`PUT /v1/designs/addConsumer/{application}/{designId}`
+
+```ts
+const { data } = await client.addConsumer(
+  {
+    designId: 'example',
+    application: 'example',
+  },
+  {
+    consumer_id: '4a062990-a6a3-11eb-9828-4f3da7d4935a',
+    consumer_name: 'string',
+    should_delete: 'string'
+  },
+)
+```
+
+---
+
+### `removeConsumer`
+
+Remove a consumer that uses a specific design
+
+`PUT /v1/designs/removeConsumer/{application}/{designId}`
+
+```ts
+const { data } = await client.removeConsumer(
+  {
+    designId: 'example',
+    application: 'example',
+  },
+  {
+    consumer_id: '4a062990-a6a3-11eb-9828-4f3da7d4935a',
+    should_delete: 'string'
+  },
+)
+```
 
 ---
 
@@ -1182,18 +1077,7 @@ type GetAllDesignsRes = {
       chip_text_color?: { ... }
       chip_hover_text_color?: { ... }
     }
-    version?: 1
-    colors?: Record<string, unknown>
-    typography?: Record<string, unknown>
-    shape?: Record<string, unknown>
-    components?: Record<string, unknown>
-    assets?: Record<string, unknown>
-    consumer?: {
-      widgets: { ... }
-      customer_portals: { ... }
-    }
   }>
-  // ...
 }
 ```
 
@@ -1302,16 +1186,6 @@ type AddDesignReq = {
       chip_text_color?: { ... }
       chip_hover_text_color?: { ... }
     }
-    version?: 1
-    colors?: Record<string, unknown>
-    typography?: Record<string, unknown>
-    shape?: Record<string, unknown>
-    components?: Record<string, unknown>
-    assets?: Record<string, unknown>
-    consumer?: {
-      widgets: { ... }
-      customer_portals: { ... }
-    }
   }
 }
 ```
@@ -1408,18 +1282,7 @@ type AddDesignRes = {
       chip_text_color?: { ... }
       chip_hover_text_color?: { ... }
     }
-    version?: 1
-    colors?: Record<string, unknown>
-    typography?: Record<string, unknown>
-    shape?: Record<string, unknown>
-    components?: Record<string, unknown>
-    assets?: Record<string, unknown>
-    consumer?: {
-      widgets: { ... }
-      customer_portals: { ... }
-    }
   }
-  // ...
 }
 ```
 
@@ -1515,18 +1378,7 @@ type GetDesignRes = {
       chip_text_color?: { ... }
       chip_hover_text_color?: { ... }
     }
-    version?: 1
-    colors?: Record<string, unknown>
-    typography?: Record<string, unknown>
-    shape?: Record<string, unknown>
-    components?: Record<string, unknown>
-    assets?: Record<string, unknown>
-    consumer?: {
-      widgets: { ... }
-      customer_portals: { ... }
-    }
   }
-  // ...
 }
 ```
 
@@ -1617,16 +1469,6 @@ type UpdateDesignReq = {
       chip_text_color?: { ... }
       chip_hover_text_color?: { ... }
     }
-    version?: 1
-    colors?: Record<string, unknown>
-    typography?: Record<string, unknown>
-    shape?: Record<string, unknown>
-    components?: Record<string, unknown>
-    assets?: Record<string, unknown>
-    consumer?: {
-      widgets: { ... }
-      customer_portals: { ... }
-    }
   }
 }
 ```
@@ -1649,6 +1491,7 @@ type ItemMetada = {
 type AddConsumerReq = {
   consumer_id: string
   consumer_name: string
+  should_delete?: string
 }
 ```
 
@@ -1657,6 +1500,7 @@ type AddConsumerReq = {
 ```ts
 type RemoveConsumerReq = {
   consumer_id: string
+  should_delete?: string
 }
 ```
 
@@ -1717,138 +1561,6 @@ type BrandItem = {
   updated_date?: string
   updated_by?: string
   status?: string
-}
-```
-
-### `Design_Document_V1`
-
-Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and 
-
-```ts
-type Design_Document_V1 = {
-  version?: 1
-  colors?: Record<string, unknown>
-  typography?: Record<string, unknown>
-  shape?: Record<string, unknown>
-  components?: Record<string, unknown>
-  assets?: Record<string, unknown>
-  consumer?: {
-    widgets: Array<{
-      id: { ... }
-      name: { ... }
-    }>
-    customer_portals: Array<{
-      id: { ... }
-      name: { ... }
-    }>
-  }
-}
-```
-
-### `UpdateDesignConflict`
-
-```ts
-type UpdateDesignConflict = {
-  message?: string
-  design?: {
-    id?: string
-    created_at?: string
-    created_by?: string
-    edited: boolean
-    last_modified_at?: string
-    brand_id?: string
-    brand_name?: string
-    user?: {
-      emailaddress?: { ... }
-      fullname?: { ... }
-      name?: { ... }
-      userid?: { ... }
-    }
-    style_name: string
-    style: {
-      logo?: { ... }
-      palette: { ... }
-      typography: { ... }
-      shape?: { ... }
-      consumer: { ... }
-    }
-    is_default?: boolean
-    _manifest?: string[]
-    custom_theme?: string
-    use_custom_theme?: boolean
-    design_tokens?: {
-      coupon?: { ... }
-      cashback?: { ... }
-      custom_css?: { ... }
-      accent_color?: { ... }
-      outline_color?: { ... }
-      divider_color?: { ... }
-      link_color?: { ... }
-      link_hover_color?: { ... }
-      font_size_scale?: { ... }
-      topbar_height?: { ... }
-      topbar_logo_alignment?: { ... }
-      logo_size?: { ... }
-      input_background?: { ... }
-      input_border_color?: { ... }
-      input_text_color?: { ... }
-      input_label_color?: { ... }
-      input_border_radius?: { ... }
-      input_height?: { ... }
-      input_variant?: { ... }
-      button_primary_bg?: { ... }
-      button_primary_text?: { ... }
-      button_primary_hover_bg?: { ... }
-      button_primary_hover_text?: { ... }
-      button_outlined_border?: { ... }
-      button_outlined_text?: { ... }
-      button_outlined_hover_bg?: { ... }
-      button_outlined_hover_text?: { ... }
-      button_ghost_bg?: { ... }
-      button_ghost_text?: { ... }
-      button_ghost_hover_bg?: { ... }
-      button_ghost_hover_text?: { ... }
-      button_border_radius?: { ... }
-      button_height?: { ... }
-      card_background?: { ... }
-      card_border_color?: { ... }
-      card_variant?: { ... }
-      summary_card_background?: { ... }
-      toggle_selected_bg?: { ... }
-      toggle_selected_text?: { ... }
-      toggle_hover_bg?: { ... }
-      toggle_hover_text?: { ... }
-      toggle_border_color?: { ... }
-      dropdown_hover_bg?: { ... }
-      dropdown_hover_text?: { ... }
-      dropdown_selected_bg?: { ... }
-      dropdown_selected_text?: { ... }
-      switch_unchecked_color?: { ... }
-      switch_unchecked_bg?: { ... }
-      switch_border_radius?: { ... }
-      checkbox_unchecked_color?: { ... }
-      checkbox_label_color?: { ... }
-      radio_unchecked_color?: { ... }
-      radio_label_color?: { ... }
-      datepicker_selected_bg?: { ... }
-      datepicker_selected_color?: { ... }
-      datepicker_border_radius?: { ... }
-      chip_background?: { ... }
-      chip_hover_background?: { ... }
-      chip_text_color?: { ... }
-      chip_hover_text_color?: { ... }
-    }
-    version?: 1
-    colors?: Record<string, unknown>
-    typography?: Record<string, unknown>
-    shape?: Record<string, unknown>
-    components?: Record<string, unknown>
-    assets?: Record<string, unknown>
-    consumer?: {
-      widgets: { ... }
-      customer_portals: { ... }
-    }
-  // ...
 }
 ```
 
@@ -2056,139 +1768,11 @@ type WidgetPortalData = {
 }
 ```
 
-### `GenerateDesignReq`
-
-```ts
-type GenerateDesignReq = {
-  url: string // uri
-}
-```
-
-### `GenerateDesignRes`
-
-```ts
-type GenerateDesignRes = {
-  design: {
-    style: {
-      logo: { ... }
-      palette: { ... }
-      typography: { ... }
-    }
-    theme: {
-      shape: { ... }
-    }
-  }
-  cached: boolean
-}
-```
-
-### `GenerateDesignDocumentReq`
-
-```ts
-type GenerateDesignDocumentReq = {
-  url: string // uri
-}
-```
-
-### `FindingId`
-
-```ts
-type FindingId = "primary_color" | "fonts" | "corners" | "primary_button" | "logo" | "favicon"
-```
-
-### `FindingStatus`
-
-```ts
-type FindingStatus = "found" | "not_found" | "not_available"
-```
-
-### `FindingDetail`
-
-```ts
-type FindingDetail = {
-  family: string
-}
-```
-
-### `DesignFinding`
-
-```ts
-type DesignFinding = {
-  id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo" | "favicon"
-  status: "found" | "not_found" | "not_available"
-  detail?: {
-    family: string
-  }
-}
-```
-
-### `GenerateDesignDocumentRes`
-
-```ts
-type GenerateDesignDocumentRes = {
-  document: {
-    version?: 1
-    colors?: Record<string, unknown>
-    typography?: Record<string, unknown>
-    shape?: Record<string, unknown>
-    components?: Record<string, unknown>
-    assets?: Record<string, unknown>
-    consumer?: {
-      widgets: { ... }
-      customer_portals: { ... }
-    }
-  }
-  findings: Array<{
-    id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo" | "favicon"
-    status: "found" | "not_found" | "not_available"
-    detail?: {
-      family: { ... }
-    }
-  }>
-  site_name: string
-  cached: boolean
-}
-```
-
-### `GeneratedDesign`
-
-Partial design to merge into the design being edited
-
-```ts
-type GeneratedDesign = {
-  style: {
-    logo: {
-      main?: { ... }
-    }
-    palette: {
-      primary: { ... }
-      secondary: { ... }
-      error: { ... }
-      background: { ... }
-      paper: { ... }
-      navbar: { ... }
-      portal_login_background?: { ... }
-    }
-    typography: {
-      font: { ... }
-      primary: { ... }
-      secondary: { ... }
-    }
-  }
-  theme: {
-    shape: {
-      borderRadius: { ... }
-    }
-  }
-}
-```
-
 ### `ErrorResp`
 
 ```ts
 type ErrorResp = {
   message?: string
-  code?: string
   error?: object
 }
 ```
@@ -2257,13 +1841,6 @@ type ParseThemeFromDesignResp = {
     custom_theme?: string
     use_custom_theme?: boolean
     journey_design_tokens?: object
-    version?: 1
-    colors?: Record<string, unknown>
-    typography?: Record<string, unknown>
-    shape?: Record<string, unknown>
-    components?: Record<string, unknown>
-    assets?: Record<string, unknown>
-    journey?: Record<string, unknown>
   }
 }
 ```
