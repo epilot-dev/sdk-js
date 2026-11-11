@@ -994,7 +994,8 @@ epilot configuration-hub createSyncJob --jsonata 'id'
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1119,7 +1120,8 @@ epilot configuration-hub getSyncJob -p id=123e4567-e89b-12d3-a456-426614174000 -
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1369,7 +1371,8 @@ epilot configuration-hub retrySyncJob -p id=123e4567-e89b-12d3-a456-426614174000
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1449,12 +1452,7 @@ epilot configuration-hub planSyncJobRetry -p id=123e4567-e89b-12d3-a456-42661417
       "source_id": "string",
       "target_id": "string",
       "title": "string",
-      "required_by": {
-        "type": "string",
-        "source_id": "string",
-        "title": "string",
-        "reason": "typed_reference"
-      },
+      "required_by": {},
       "status": "pending",
       "phase": "phase_0",
       "attempt": 0,
@@ -1462,20 +1460,7 @@ epilot configuration-hub planSyncJobRetry -p id=123e4567-e89b-12d3-a456-42661417
       "updated_at": "1970-01-01T00:00:00.000Z",
       "source_link": "string",
       "target_link": "string",
-      "plan": {
-        "action": "create",
-        "match": "lineage",
-        "diff_status": "computed",
-        "change_count": 0,
-        "changed_paths": ["string"],
-        "note": "string",
-        "depends_on": [
-          {
-            "type": "string",
-            "source_id": "string"
-          }
-        ]
-      },
+      "plan": {},
       "excluded_from_apply": "unchanged"
     }
   ],
@@ -1485,12 +1470,7 @@ epilot configuration-hub planSyncJobRetry -p id=123e4567-e89b-12d3-a456-42661417
       "source_id": "string",
       "target_id": "string",
       "title": "string",
-      "required_by": {
-        "type": "string",
-        "source_id": "string",
-        "title": "string",
-        "reason": "typed_reference"
-      },
+      "required_by": {},
       "status": "pending",
       "phase": "phase_0",
       "attempt": 0,
@@ -1498,20 +1478,7 @@ epilot configuration-hub planSyncJobRetry -p id=123e4567-e89b-12d3-a456-42661417
       "updated_at": "1970-01-01T00:00:00.000Z",
       "source_link": "string",
       "target_link": "string",
-      "plan": {
-        "action": "create",
-        "match": "lineage",
-        "diff_status": "computed",
-        "change_count": 0,
-        "changed_paths": ["string"],
-        "note": "string",
-        "depends_on": [
-          {
-            "type": "string",
-            "source_id": "string"
-          }
-        ]
-      },
+      "plan": {},
       "excluded_from_apply": "unchanged"
     }
   ],
@@ -1619,7 +1586,8 @@ epilot configuration-hub cancelSyncJob -p id=123e4567-e89b-12d3-a456-42661417400
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -1750,6 +1718,9 @@ List the per-resource rows for a sync job. Supports filtering by status
 | `plan_action` | query | "create" \| "update" \| "no_change" \| "skip" | No | Filter resources by plan action (`plan.action`). Only rows of plan
 jobs and of jobs applying a plan carry one.
  |
+| `has_conflicts` | query | boolean | No | `true`: only rows whose plan has conflicts (`plan.conflicts`), so
+a client can load every conflict without paging through the plan.
+ |
 
 **Sample Call**
 
@@ -1807,7 +1778,34 @@ epilot configuration-hub listSyncJobResources -p id=123e4567-e89b-12d3-a456-4266
             "type": "string",
             "source_id": "string"
           }
-        ]
+        ],
+        "conflicts": [
+          {
+            "code": "mostly_replaced",
+            "certainty": "exact",
+            "requires_decision": true,
+            "paths": [
+              {
+                "path": "string",
+                "kind": "added",
+                "base": {},
+                "source": {},
+                "target": {}
+              }
+            ],
+            "paths_truncated": true,
+            "total_paths": 0,
+            "last_synced_at": "1970-01-01T00:00:00.000Z",
+            "target_updated_at": "1970-01-01T00:00:00.000Z",
+            "target_updated_by": "string",
+            "target_updated_by_name": "string",
+            "source_updated_at": "1970-01-01T00:00:00.000Z",
+            "replaced_ratio": 0.92,
+            "replaced_fields": 198,
+            "total_fields": 214
+          }
+        ],
+        "conflict_resolution": "overwrite"
       },
       "excluded_from_apply": "unchanged"
     }
@@ -1862,6 +1860,7 @@ epilot configuration-hub getSyncPlan -p id=123e4567-e89b-12d3-a456-426614174000 
   "expires_at": "1970-01-01T00:00:00.000Z",
   "planned_at": "1970-01-01T00:00:00.000Z",
   "replanned_at": "1970-01-01T00:00:00.000Z",
+  "conflicts_checked_at": "1970-01-01T00:00:00.000Z",
   "source_org_id": "string",
   "target_org_id": "string",
   "started_at": "1970-01-01T00:00:00.000Z",
@@ -1873,7 +1872,8 @@ epilot configuration-hub getSyncPlan -p id=123e4567-e89b-12d3-a456-426614174000 
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "by_type": [
     {
@@ -1884,6 +1884,7 @@ epilot configuration-hub getSyncPlan -p id=123e4567-e89b-12d3-a456-426614174000 
       "skip": 0,
       "failed": 0,
       "not_compared": 0,
+      "conflicts": 0,
       "type": "string"
     }
   ],
@@ -2073,6 +2074,12 @@ epilot configuration-hub applySyncPlan \
       "source_id": "string"
     }
   ],
+  "overwrite_conflicts": [
+    {
+      "type": "string",
+      "source_id": "string"
+    }
+  ],
   "allow_missing_dependencies": false
 }'
 ```
@@ -2160,7 +2167,8 @@ epilot configuration-hub applySyncPlan -p id=123e4567-e89b-12d3-a456-42661417400
     "no_change": 0,
     "skip": 0,
     "failed": 0,
-    "not_compared": 0
+    "not_compared": 0,
+    "conflicts": 0
   },
   "planned_at": "1970-01-01T00:00:00.000Z",
   "expires_at": "1970-01-01T00:00:00.000Z",
@@ -2578,6 +2586,12 @@ epilot configuration-hub listPreviews --jsonata 'results[0]'
       "preview_org_id": "string",
       "sync_job_id": "string",
       "sync_status": "string",
+      "skipped_types": [
+        {
+          "type": "string",
+          "reason": "string"
+        }
+      ],
       "requested_by": {
         "user_id": "string",
         "email": "string"
@@ -2666,6 +2680,12 @@ epilot configuration-hub getPreview -p id=123e4567-e89b-12d3-a456-426614174000 -
   "preview_org_id": "string",
   "sync_job_id": "string",
   "sync_status": "string",
+  "skipped_types": [
+    {
+      "type": "string",
+      "reason": "string"
+    }
+  ],
   "requested_by": {
     "user_id": "string",
     "email": "string"

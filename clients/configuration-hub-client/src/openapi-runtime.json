@@ -358,6 +358,10 @@
           {
             "name": "plan_action",
             "in": "query"
+          },
+          {
+            "name": "has_conflicts",
+            "in": "query"
           }
         ],
         "responses": {}
