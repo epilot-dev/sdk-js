@@ -96,7 +96,7 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 
 ### `changeCampaignStatus`
 
-Change the status of a campaign to a desired status.
+Moves a campaign to its next status, depending on its current one:
 
 `POST /v1/campaign/{campaign_id}/status`
 
@@ -133,8 +133,8 @@ const { data } = await client.changeCampaignStatus({
     "name": "string",
     "goal": "string",
     "status": "draft",
-    "start_date": "1970-01-01",
-    "end_date": "1970-01-01",
+    "start_date": "1970-01-01T00:00:00.000Z",
+    "end_date": "1970-01-01T00:00:00.000Z",
     "flow_id": "string",
     "job_id": "string",
     "target": {
@@ -294,7 +294,9 @@ const { data } = await client.setupCampaign(
     campaign: {
       name: 'string',
       goal: 'string',
-      target_ids: ['b8c01433-5556-4e2b-aad4-6f5348d1df84']
+      target_ids: ['b8c01433-5556-4e2b-aad4-6f5348d1df84'],
+      start_date: '1970-01-01T00:00:00.000Z',
+      end_date: '1970-01-01T00:00:00.000Z'
     },
     journey: {
       journey_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
@@ -402,8 +404,8 @@ const { data } = await client.matchCampaigns(
         "name": "string",
         "goal": "string",
         "status": "draft",
-        "start_date": "1970-01-01",
-        "end_date": "1970-01-01",
+        "start_date": "1970-01-01T00:00:00.000Z",
+        "end_date": "1970-01-01T00:00:00.000Z",
         "flow_id": "string",
         "job_id": "string",
         "target": {
@@ -946,6 +948,7 @@ const { data } = await client.getRecipients({
   automation_status: ['...'],
   portal_status: 'example',
   email_status: 'example',
+  entity_ui_status: 'example',
 })
 ```
 
@@ -1170,8 +1173,16 @@ type BaseSystemFieldsRequired = object
 
 ### `CampaignStatus`
 
+Lifecycle status of a campaign.
+
+- `draft`: not launched yet.
+- `scheduled`: launched with a `start_date` still in the future. It collects no recipients and
+  appears through no delivery method until it starts on its own at `start_date`.
+- `activating`: launching; recipients are being collected.
+- `
+
 ```ts
-type CampaignStatus = "draft" | "activating" | "active" | "inactive"
+type CampaignStatus = "draft" | "scheduled" | "activating" | "active" | "inactive"
 ```
 
 ### `ExecutionSummaryItem`
@@ -1217,9 +1228,9 @@ type Campaign = {
   }
   name?: string
   goal?: string
-  status?: "draft" | "activating" | "active" | "inactive"
-  start_date?: string // date
-  end_date?: string // date
+  status?: "draft" | "scheduled" | "activating" | "active" | "inactive"
+  start_date?: string // date-time
+  end_date?: string // date-time
   flow_id?: string
   job_id?: string
   target?: {
@@ -1601,6 +1612,8 @@ type SetupCampaignRequest = {
     name: string
     goal?: string
     target_ids: string // uuid[]
+    start_date?: string // date-time
+    end_date?: string // date-time
   }
   journey?: {
     journey_id: string // uuid
@@ -1645,6 +1658,8 @@ type SetupTariffChangeCampaignRequest = {
     name: string
     goal?: string
     target_ids: string // uuid[]
+    start_date?: string // date-time
+    end_date?: string // date-time
   }
   journey?: {
     journey_id: string // uuid

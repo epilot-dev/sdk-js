@@ -321,14 +321,47 @@ export declare namespace Components {
             _acl?: /* Access control list (ACL) for an entity. Defines sharing access to external orgs or users. */ BaseEntityAcl;
             name?: string;
             goal?: string;
-            status?: CampaignStatus;
-            start_date?: string; // date
-            end_date?: string; // date
+            status?: /**
+             * Lifecycle status of a campaign.
+             *
+             * - `draft`: not launched yet.
+             * - `scheduled`: launched with a `start_date` still in the future. It collects no recipients and
+             *   appears through no delivery method until it starts on its own at `start_date`.
+             * - `activating`: launching; recipients are being collected.
+             * - `active`: running.
+             * - `inactive`: stopped, by hand or on its own at `end_date`.
+             *
+             */
+            CampaignStatus;
+            /**
+             * When the campaign starts. Optional: if set to a future time when the campaign is launched,
+             * the campaign is `scheduled` and starts on its own at this time. Otherwise it is set to the
+             * time the campaign is launched.
+             *
+             */
+            start_date?: string; // date-time
+            /**
+             * When the campaign ends. Optional: if set, the running campaign stops on its own at this
+             * time. Otherwise it is set to the time the campaign is stopped by hand.
+             *
+             */
+            end_date?: string; // date-time
             flow_id?: string;
             job_id?: string;
             target?: BaseRelation;
         }
-        export type CampaignStatus = "draft" | "activating" | "active" | "inactive";
+        /**
+         * Lifecycle status of a campaign.
+         *
+         * - `draft`: not launched yet.
+         * - `scheduled`: launched with a `start_date` still in the future. It collects no recipients and
+         *   appears through no delivery method until it starts on its own at `start_date`.
+         * - `activating`: launching; recipients are being collected.
+         * - `active`: running.
+         * - `inactive`: stopped, by hand or on its own at `end_date`.
+         *
+         */
+        export type CampaignStatus = "draft" | "scheduled" | "activating" | "active" | "inactive";
         /**
          * Describes the structure of a client error response, which can be one of several types:
          * 1. `MessageError`: Contains a 'message' field for general descriptive errors.
@@ -1824,6 +1857,18 @@ export declare namespace Components {
                  * b8c01433-5556-4e2b-aad4-6f5348d1df84
                  */
                 BaseUUID /* uuid */[];
+                /**
+                 * Optional start of the campaign. Launching the campaign before this time schedules it, and
+                 * it starts on its own at this time. Without it, the campaign starts when it is launched.
+                 *
+                 */
+                start_date?: string; // date-time
+                /**
+                 * Optional end of the campaign. Must be after `start_date` and in the future. The campaign
+                 * stops on its own at this time. Without it, the campaign runs until it is stopped.
+                 *
+                 */
+                end_date?: string; // date-time
             };
             /**
              * Optional journey configuration selected in the wizard. Only sent by the
@@ -1966,7 +2011,7 @@ export declare namespace Components {
             };
             /**
              * Free text search entered in the target builder.
-             * Not applied when resolving the target, e.g. by `getTargetQueries` or `matchTargets`.
+             * Applied when resolving the target like the search of entity views: matched against all fields and combined with `filter` using AND.
              *
              */
             search?: string;
@@ -2003,7 +2048,8 @@ export declare namespace Components {
             error?: string;
             /**
              * Elasticsearch sort fields for the target's sort order, ready to be passed to entity search.
-             * Ends with an `_id` tie-breaker so the order is stable. Omitted when the target has no sort.
+             * Ends with an `_id` tie-breaker so the order is stable. A target with a limit but no sort returns
+             * `_created_at:desc` and `_id:desc` (newest first). Omitted when the target has neither.
              *
              * example:
              * [
@@ -2071,6 +2117,8 @@ export declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Responses.CampaignResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
+            export type $403 = Components.Responses.ClientErrorResponse;
+            export type $409 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
         }
     }
@@ -2168,6 +2216,13 @@ export declare namespace Paths {
              *
              */
             Components.Schemas.EmailStatus;
+            export type EntityUiStatus = /**
+             * Lifecycle status of a Next Best Action on the Entity-UI channel. Unlike the portal
+             * channel there is no `sent` state: an NBA recipient is born at `seen`, the moment the
+             * action is first rendered to an agent.
+             *
+             */
+            Components.Schemas.EntityUiStatus;
             export type Limit = number;
             export type Next = string;
             export type PortalStatus = Components.Schemas.PortalStatus;
@@ -2183,6 +2238,7 @@ export declare namespace Paths {
             automation_status?: Parameters.AutomationStatus;
             portal_status?: Parameters.PortalStatus;
             email_status?: Parameters.EmailStatus;
+            entity_ui_status?: Parameters.EntityUiStatus;
         }
         namespace Responses {
             export type $200 = Components.Responses.RecipientsResponse;
@@ -2267,6 +2323,7 @@ export declare namespace Paths {
         namespace Responses {
             export type $201 = Components.Responses.SetupCampaignResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
+            export type $403 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
             export type $504 = Components.Responses.ServerErrorResponse;
         }
@@ -2354,9 +2411,20 @@ export interface OperationMethods {
   /**
    * changeCampaignStatus - changeCampaignStatus
    * 
-   * Change the status of a campaign to a desired status.
+   * Moves a campaign to its next status, depending on its current one:
    * 
-   * The status can be one of the following: active, inactive.
+   * - `draft`: launches the campaign. With a `start_date` still in the future it becomes `scheduled` and
+   *   starts on its own at that time; otherwise it starts now (`activating`, then `active`). Rejected with
+   *   400 if the dates are invalid: `INVALID_CAMPAIGN_DATES` (unparsable), `CAMPAIGN_END_BEFORE_START`
+   *   or `CAMPAIGN_END_IN_PAST`.
+   * - `scheduled`: cancels the schedule; the campaign goes back to `draft` and keeps its dates.
+   * - `active`: stops the campaign (`inactive`) and sets `end_date` to now.
+   * - `inactive`: resets the campaign to `draft` and clears its `start_date` and `end_date`: they
+   *   recorded the previous run, and a past end date would block launching it again.
+   * 
+   * Only launching needs a target and a delivery method (an automation flow, a portal block or a valid
+   * Next Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or
+   * `CAMPAIGN_HAS_NO_DELIVERY_METHOD`. Cancelling, stopping and resetting work without them.
    * 
    * Status transition is accompanied by side effects, e.g., automation execution.
    * 
@@ -2398,6 +2466,9 @@ export interface OperationMethods {
    * (success, pending, in_progress, cancelled) will be skipped to prevent
    * accidentally retriggering successful or ongoing automations.
    * 
+   * A campaign that has ended (at its `end_date`, or stopped by hand) starts no new
+   * automation runs: the request is rejected with 400 and message `Campaign has ended`.
+   * 
    */
   'retriggerCampaignAutomations'(
     parameters?: Parameters<Paths.RetriggerCampaignAutomations.PathParameters> | null,
@@ -2409,6 +2480,11 @@ export interface OperationMethods {
    * 
    * Creates a `campaign` entity together with its related entities and configurations in a single call.
    * Used by the campaign wizard UI, but not restricted to it.
+   * 
+   * The campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is
+   * launched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,
+   * `CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and
+   * nothing is created.
    * 
    */
   'setupCampaign'(
@@ -2588,9 +2664,20 @@ export interface PathsDictionary {
     /**
      * changeCampaignStatus - changeCampaignStatus
      * 
-     * Change the status of a campaign to a desired status.
+     * Moves a campaign to its next status, depending on its current one:
      * 
-     * The status can be one of the following: active, inactive.
+     * - `draft`: launches the campaign. With a `start_date` still in the future it becomes `scheduled` and
+     *   starts on its own at that time; otherwise it starts now (`activating`, then `active`). Rejected with
+     *   400 if the dates are invalid: `INVALID_CAMPAIGN_DATES` (unparsable), `CAMPAIGN_END_BEFORE_START`
+     *   or `CAMPAIGN_END_IN_PAST`.
+     * - `scheduled`: cancels the schedule; the campaign goes back to `draft` and keeps its dates.
+     * - `active`: stops the campaign (`inactive`) and sets `end_date` to now.
+     * - `inactive`: resets the campaign to `draft` and clears its `start_date` and `end_date`: they
+     *   recorded the previous run, and a past end date would block launching it again.
+     * 
+     * Only launching needs a target and a delivery method (an automation flow, a portal block or a valid
+     * Next Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or
+     * `CAMPAIGN_HAS_NO_DELIVERY_METHOD`. Cancelling, stopping and resetting work without them.
      * 
      * Status transition is accompanied by side effects, e.g., automation execution.
      * 
@@ -2638,6 +2725,9 @@ export interface PathsDictionary {
      * (success, pending, in_progress, cancelled) will be skipped to prevent
      * accidentally retriggering successful or ongoing automations.
      * 
+     * A campaign that has ended (at its `end_date`, or stopped by hand) starts no new
+     * automation runs: the request is rejected with 400 and message `Campaign has ended`.
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.RetriggerCampaignAutomations.PathParameters> | null,
@@ -2651,6 +2741,11 @@ export interface PathsDictionary {
      * 
      * Creates a `campaign` entity together with its related entities and configurations in a single call.
      * Used by the campaign wizard UI, but not restricted to it.
+     * 
+     * The campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is
+     * launched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,
+     * `CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and
+     * nothing is created.
      * 
      */
     'post'(
