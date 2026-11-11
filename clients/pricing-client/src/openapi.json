@@ -5978,6 +5978,16 @@
           "location"
         ]
       },
+      "LocationFormat": {
+        "type": "string",
+        "description": "The value shape of a `location` condition. Absent for every other type.\n\n- `postal_code`: a postal code\n- `postal_code_city`: a postal code and a city\n- `power_grid_operator`: the code number of the power grid operator an address is connected to\n- `gas_grid_operator`: the code number of the gas grid operator an address is connected to\n",
+        "enum": [
+          "postal_code",
+          "postal_code_city",
+          "power_grid_operator",
+          "gas_grid_operator"
+        ]
+      },
       "ConditionDefinition": {
         "type": "object",
         "description": "One condition dimension, in the shape a schema's `conditions` array holds it — copy it in verbatim.",
@@ -6040,12 +6050,7 @@
             ]
           },
           "format": {
-            "type": "string",
-            "description": "The value shape of a `location` condition. Absent for every other type.",
-            "enum": [
-              "postal_code",
-              "postal_code_city"
-            ]
+            "$ref": "#/components/schemas/LocationFormat"
           }
         }
       },
@@ -6266,12 +6271,7 @@
             "$ref": "#/components/schemas/ConditionType"
           },
           "format": {
-            "type": "string",
-            "description": "The format the variants pin a `location` in. Absent for every other type.",
-            "enum": [
-              "postal_code",
-              "postal_code_city"
-            ]
+            "$ref": "#/components/schemas/LocationFormat"
           },
           "variants": {
             "type": "integer",
@@ -6481,7 +6481,7 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/ContextConditionValue"
         },
-        "description": "The situation to resolve for: a flat map keyed by condition name. A condition left out\nmatches only variants that leave it unpinned; an empty map therefore returns the `default`\nvariant. A key naming no condition the schema declares is ignored, as if it were left out.\n\nEach value is an exact value, typed by its condition, or a single-operator predicate:\n\n- `{ \"lt\": v }`, `{ \"lte\": v }`, `{ \"gt\": v }`, `{ \"gte\": v }` — order, against a `number`\n  or `date` condition\n- `{ \"in\": [...] }` — membership, against a `string`, `select` or `number` condition\n- `{ \"between\": \"2026-03-01\" }` — `daterange` containment, which a plain date also means\n- `{ \"exists\": true }` — pinned to any value; `{ \"exists\": false }` — left unpinned\n\nA `date` or `daterange` value is an RFC 3339 date or date-time. A date is midnight of that day\nin the organization's timezone and a date-time keeps the moment it names, so\n`2026-03-31T23:30:00Z`, already 1 April in Berlin, falls inside a range pinned from\n`2026-04-01`.\n\nAn `in` list carries at most 50,000 values. A `string` or `select` matches exactly and\ncase-sensitively. A `location` of format\n`postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying\n`postal_code` and `city`, named as an entity address names them, whose city is compared\ncase- and whitespace-insensitively.\n\n`default` and names beginning with `_` are reserved and cannot be supplied.\n",
+        "description": "The situation to resolve for: a flat map keyed by condition name. A condition left out\nmatches only variants that leave it unpinned; an empty map therefore returns the `default`\nvariant. A key naming no condition the schema declares is ignored, as if it were left out.\n\nEach value is an exact value, typed by its condition, or a single-operator predicate:\n\n- `{ \"lt\": v }`, `{ \"lte\": v }`, `{ \"gt\": v }`, `{ \"gte\": v }` — order, against a `number`\n  or `date` condition\n- `{ \"in\": [...] }` — membership, against a `string`, `select` or `number` condition, or a\n  `location` of format `power_grid_operator` or `gas_grid_operator`\n- `{ \"between\": \"2026-03-01\" }` — `daterange` containment, which a plain date also means\n- `{ \"exists\": true }` — pinned to any value; `{ \"exists\": false }` — left unpinned\n\nA `date` or `daterange` value is an RFC 3339 date or date-time. A date is midnight of that day\nin the organization's timezone and a date-time keeps the moment it names, so\n`2026-03-31T23:30:00Z`, already 1 April in Berlin, falls inside a range pinned from\n`2026-04-01`.\n\nAn `in` list carries at most 50,000 values. A `string` or `select` matches exactly and\ncase-sensitively. A `location` of format\n`postal_code` is the postal code itself; one of format `postal_code_city` is an object carrying\n`postal_code` and `city`, named as an entity address names them, whose city is compared\ncase- and whitespace-insensitively. One of format `power_grid_operator` or `gas_grid_operator`\nis the grid operator's code number, a string of exactly 13 digits, matched exactly; it is\nnever looked up, so the caller supplies it, and a context without it gets only the variants\nthat pin no grid operator.\n\n`default` and names beginning with `_` are reserved and cannot be supplied.\n",
         "example": {
           "postal_code": "46045",
           "consumption": {
@@ -6628,13 +6628,13 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/PinnedConditionValue"
         },
-        "description": "The situation this variant applies to: a flat map keyed by condition name. A condition left\nout is a wildcard, which is what makes adding a condition to a schema non-breaking for\nexisting variants.\n\nExact values only; predicates belong to reads. Values are stored canonicalized for their\ntype: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`\nand `until` in that form where an empty string is an open end, a `location` of format\n`postal_code` the postal code itself and one of format `postal_code_city` an object carrying\n`postal_code` and `city`.\n\nA date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the\norganization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only\n`until` is the last millisecond of that day: `2026-04-30` is stored as\n`2026-04-30T21:59:59.999Z`.\n\n`default` and names beginning with `_` are reserved; use the request's `default` flag.\n",
+        "description": "The situation this variant applies to: a flat map keyed by condition name. A condition left\nout is a wildcard, which is what makes adding a condition to a schema non-breaking for\nexisting variants.\n\nExact values only; predicates belong to reads. Values are stored canonicalized for their\ntype: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`\nand `until` in that form where an empty string is an open end, a `location` of format\n`postal_code` the postal code itself, one of format `postal_code_city` an object carrying\n`postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` the\ngrid operator's code number: a string of exactly 13 digits, whatever its prefix.\n\nA date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the\norganization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only\n`until` is the last millisecond of that day: `2026-04-30` is stored as\n`2026-04-30T21:59:59.999Z`.\n\n`default` and names beginning with `_` are reserved; use the request's `default` flag.\n",
         "example": {
           "postal_code": "46045"
         }
       },
       "PinnedConditionValue": {
-        "description": "One condition's exact value. Which of these shapes a condition takes is set by its type in the\nentity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`.\n",
+        "description": "One condition's exact value. Which of these shapes a condition takes is set by its type in the\nentity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A\n`location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly\n13 digits.\n",
         "anyOf": [
           {
             "type": "string"
@@ -7478,7 +7478,7 @@
             }
           ]
         },
-        "description": "Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the\nsame exact values and predicates a resolve context does. A condition left out is not\nfiltered on. An `in` list carries at most 50,000 values.\n\nA variant matches only where it pins the condition — unlike `:resolve`, where an unpinned\ncondition matches any value. `{ \"exists\": false }` selects the variants that leave it\nunpinned.\n\nA `location` of format `postal_code_city` also takes its postal code alone,\n`{ \"postal_code\": \"10115\" }`, matching that postal code in any city.\n\n`default` is accepted as an exact boolean and takes no predicate: `true` selects the\nentity's fallback variant, `false` every variant that is not it. Names beginning with `_`\nare reserved.\n",
+        "description": "Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the\nsame exact values and predicates a resolve context does. A condition left out is not\nfiltered on. An `in` list carries at most 50,000 values.\n\nA variant matches only where it pins the condition — unlike `:resolve`, where an unpinned\ncondition matches any value. `{ \"exists\": false }` selects the variants that leave it\nunpinned.\n\nA `location` of format `power_grid_operator` or `gas_grid_operator` takes `in`, so one\nfilter lists the variants pinned to any of several code numbers, each a string of exactly\n13 digits. A `location` of format `postal_code` or `postal_code_city` does not.\n\nA `location` of format `postal_code_city` also takes its postal code alone,\n`{ \"postal_code\": \"10115\" }`, matching that postal code in any city.\n\n`default` is accepted as an exact boolean and takes no predicate: `true` selects the\nentity's fallback variant, `false` every variant that is not it. Names beginning with `_`\nare reserved.\n",
         "example": {
           "postal_code": "46045",
           "consumption": {
