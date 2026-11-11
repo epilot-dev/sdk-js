@@ -24,6 +24,11 @@
     "/v1/designs": {
       "get": {
         "operationId": "getAllDesigns",
+        "x-epilot-permissions": [
+          {
+            "action": "design:view"
+          }
+        ],
         "summary": "getAllDesigns",
         "description": "Scan all designs linked to a organization, based in orgId attribute from JWT auth token",
         "tags": [
@@ -54,6 +59,11 @@
       },
       "post": {
         "operationId": "addDesign",
+        "x-epilot-permissions": [
+          {
+            "action": "design:create"
+          }
+        ],
         "summary": "addDesign",
         "description": "Create a brand new design linked to a organization, based in orgId attribute from JWT auth token",
         "tags": [
@@ -117,6 +127,11 @@
     "/v1/designs/{designId}": {
       "get": {
         "operationId": "getDesign",
+        "x-epilot-permissions": [
+          {
+            "action": "design:view"
+          }
+        ],
         "summary": "getDesign",
         "description": "Search for a especific design owned by user organization",
         "tags": [
@@ -180,6 +195,11 @@
       },
       "delete": {
         "operationId": "deleteDesign",
+        "x-epilot-permissions": [
+          {
+            "action": "design:delete"
+          }
+        ],
         "summary": "deleteDesign",
         "description": "Search and delete for a especific design owned by user organization",
         "tags": [
@@ -222,8 +242,28 @@
           "404": {
             "description": "No design found"
           },
+          "409": {
+            "description": "The design cannot be deleted: it is the only one of the organization, it is still\nassigned to journeys (listed in `journeys`) or portals (listed in `portals`), or the\ncaller may not view the organization's portals, so their usage cannot be checked.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "customer-portal-api could not be reached to check which portals use the design. Retry later.",
             "content": {
               "application/json": {
                 "schema": {
@@ -236,8 +276,13 @@
       },
       "put": {
         "operationId": "updateDesign",
+        "x-epilot-permissions": [
+          {
+            "action": "design:edit"
+          }
+        ],
         "summary": "updateDesign",
-        "description": "Update a especific design owned by user organization",
+        "description": "Update a especific design owned by user organization. A body with `version: 1` is validated against the design document v1 schema and stored as v1. A v1 body leaves the stored `style`, `design_tokens`, `custom_theme` and `use_custom_theme` untouched. A body without `version` on a v1 design is treated as an old client's read-modify-write: those four fields are stored as sent, and brand-wide changes in `style` are applied to the v1 groups.",
         "tags": [
           "design-builder"
         ],
@@ -248,6 +293,15 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/DesignId"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "description": "The `last_modified_at` of the design the client read. When it no longer matches the stored design, the update is rejected with 409. Without the header the update is unconditional.",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -289,6 +343,16 @@
           "404": {
             "description": "No design found"
           },
+          "409": {
+            "description": "The design was changed since the `If-Match` value was read. Returns the current design.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateDesignConflict"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Other errors",
             "content": {
@@ -305,6 +369,11 @@
     "/v1/designs/{designId}/duplicate": {
       "post": {
         "operationId": "duplicateDesign",
+        "x-epilot-permissions": [
+          {
+            "action": "design:create"
+          }
+        ],
         "summary": "duplicateDesign",
         "description": "Duplicate an existing design owned by the user organization. The copy carries over the style, custom CSS and name (marked as a copy) but does NOT carry over journey/portal relations, so the new design starts with 0 consumers, exactly like a freshly created design.",
         "tags": [
@@ -371,7 +440,8 @@
       "get": {
         "operationId": "getThemeFromDesign",
         "summary": "getThemeFromDesign",
-        "description": "Search for a especific design owned by user organization and parse them to a new or old theme",
+        "deprecated": true,
+        "description": "Search for a especific design owned by user organization and parse them to a new or old theme. Deprecated: kept for old readers only. For a v1 design the response carries the v1 groups and the derived `journey` group next to the stored old fields and the theme built from them; new runtimes read the v1 groups.",
         "security": [],
         "tags": [
           "design-builder"
@@ -450,9 +520,245 @@
         }
       }
     },
+    "/v1/designs/generate": {
+      "post": {
+        "operationId": "generateDesign",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "design:create"
+              },
+              {
+                "action": "design:edit"
+              }
+            ]
+          }
+        ],
+        "summary": "generateDesign",
+        "description": "Generates a design (palette, text colours, font, logo and border radius) from a public\nwebsite with AI. The result is cached per organization and URL for 30 days.\n",
+        "tags": [
+          "design-builder"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateDesignReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A design generated earlier for this organization and URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateDesignRes"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "A newly generated design",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateDesignRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The URL is not a valid http(s) URL (`invalid_url`) or points to a private network (`blocked_url`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller may not edit designs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The website could not be fetched (`fetch_failed`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The design could not be generated (`generation_failed`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "The generation did not finish in time",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/designs/document/generate": {
+      "post": {
+        "operationId": "generateDesignDocument",
+        "x-epilot-permissions": [
+          {
+            "action": "design:create"
+          }
+        ],
+        "summary": "generateDesignDocument",
+        "description": "Reads a public website and returns a v1 design document plus one finding for each\nid in fixed order. This version chooses the favicon in code and derives the site name.\nThe other findings are `not_found` until they are implemented. The document contains\nonly the leaves that passed validation, and defaults are not pruned.\nSuccessful responses are cached per organization, normalised URL and generator version\nfor 7 days. Each organization may run 20 new generations per UTC day; cache hits do not\ncount toward the limit. A client abort still finishes on the server and is cached.\n",
+        "tags": [
+          "design-builder"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateDesignDocumentReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A design document generated earlier for this organization, URL and generator version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateDesignDocumentRes"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "A newly generated design document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateDesignDocumentRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The URL is not a valid http(s) URL (`invalid_url`) or points to a private network (`blocked_url`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller does not have design:create",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The website could not be fetched (`fetch_failed`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The organization has used today's generation limit (`rate_limited`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Generation failed, or no finding survived (`generation_failed`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "The 27 second budget ran out (`timeout`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/designs/files": {
       "post": {
         "operationId": "uploadFile",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "uploadFile",
         "description": "Upload a new file for the user organization bucket",
         "tags": [
@@ -519,6 +825,11 @@
       },
       "get": {
         "operationId": "getFiles",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getFiles",
         "description": "List all files for the user organization bucket",
         "tags": [
@@ -589,6 +900,11 @@
       "get": {
         "deprecated": true,
         "operationId": "getLimit",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getLimit",
         "description": "Gets designs number limit from database per organization",
         "tags": [
@@ -622,6 +938,11 @@
       "get": {
         "deprecated": true,
         "operationId": "getBrands",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getBrands",
         "description": "Scan all brands linked to a organization, based in orgId attribute from JWT auth token",
         "tags": [
@@ -657,6 +978,11 @@
     "/v1/designs/consumer/{application}/{consumerId}": {
       "get": {
         "operationId": "getConsumerDesign",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "getConsumerDesign",
         "description": "Search for a especific design owned by user organization",
         "tags": [
@@ -730,6 +1056,30 @@
     "/v1/designs/addConsumer/{application}/{designId}": {
       "put": {
         "operationId": "addConsumer",
+        "deprecated": true,
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "entity:edit",
+                "resource": "journey"
+              },
+              {
+                "action": "customer_portal:edit"
+              },
+              {
+                "action": "installer_portal:edit"
+              },
+              {
+                "action": "portal:content:edit",
+                "resource": "{consumer_id}"
+              },
+              {
+                "action": "design:edit"
+              }
+            ]
+          }
+        ],
         "summary": "addConsumer",
         "description": "Add a consumer that uses a specific design",
         "tags": [
@@ -809,6 +1159,30 @@
     "/v1/designs/removeConsumer/{application}/{designId}": {
       "put": {
         "operationId": "removeConsumer",
+        "deprecated": true,
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "entity:edit",
+                "resource": "journey"
+              },
+              {
+                "action": "customer_portal:edit"
+              },
+              {
+                "action": "installer_portal:edit"
+              },
+              {
+                "action": "portal:content:edit",
+                "resource": "{consumer_id}"
+              },
+              {
+                "action": "design:edit"
+              }
+            ]
+          }
+        ],
         "summary": "removeConsumer",
         "description": "Remove a consumer that uses a specific design",
         "tags": [
@@ -959,6 +1333,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/Journey"
+                },
+                {
+                  "$ref": "#/components/schemas/Design_Document_V1"
                 }
               ]
             }
@@ -993,6 +1370,9 @@
               },
               {
                 "$ref": "#/components/schemas/Journey"
+              },
+              {
+                "$ref": "#/components/schemas/Design_Document_V1"
               }
             ]
           }
@@ -1017,6 +1397,9 @@
               },
               {
                 "$ref": "#/components/schemas/Journey"
+              },
+              {
+                "$ref": "#/components/schemas/Design_Document_V1"
               }
             ]
           }
@@ -1038,6 +1421,9 @@
               },
               {
                 "$ref": "#/components/schemas/Journey"
+              },
+              {
+                "$ref": "#/components/schemas/Design_Document_V1"
               }
             ]
           }
@@ -1056,6 +1442,9 @@
               },
               {
                 "$ref": "#/components/schemas/Journey"
+              },
+              {
+                "$ref": "#/components/schemas/Design_Document_V1"
               }
             ]
           }
@@ -1094,9 +1483,6 @@
           },
           "consumer_name": {
             "type": "string"
-          },
-          "should_delete": {
-            "type": "string"
           }
         },
         "required": [
@@ -1109,10 +1495,6 @@
         "properties": {
           "consumer_id": {
             "$ref": "#/components/schemas/DesignId"
-          },
-          "should_delete": {
-            "type": "string",
-            "deprecated": true
           }
         },
         "required": [
@@ -1231,6 +1613,68 @@
           "id",
           "name"
         ]
+      },
+      "Design_Document_V1": {
+        "type": "object",
+        "description": "Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "enum": [
+              1
+            ]
+          },
+          "colors": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "typography": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "shape": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "components": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "assets": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "consumer": {
+            "$ref": "#/components/schemas/ConsumerData"
+          }
+        }
+      },
+      "UpdateDesignConflict": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "design": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ItemMetada"
+              },
+              {
+                "$ref": "#/components/schemas/DesignItem"
+              },
+              {
+                "$ref": "#/components/schemas/Custom_Style"
+              },
+              {
+                "$ref": "#/components/schemas/Journey"
+              },
+              {
+                "$ref": "#/components/schemas/Design_Document_V1"
+              }
+            ]
+          }
+        }
       },
       "Custom_Style": {
         "type": "object",
@@ -1696,11 +2140,187 @@
           "name"
         ]
       },
+      "GenerateDesignReq": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Public website to derive the design from",
+            "example": "https://www.twl.de"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "GenerateDesignRes": {
+        "type": "object",
+        "properties": {
+          "design": {
+            "$ref": "#/components/schemas/GeneratedDesign"
+          },
+          "cached": {
+            "type": "boolean",
+            "description": "True when the design was generated earlier for this organization and URL"
+          }
+        },
+        "required": [
+          "design",
+          "cached"
+        ]
+      },
+      "GenerateDesignDocumentReq": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Public website to read the design from",
+            "example": "https://www.stadtwerke-musterstadt.de"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "FindingId": {
+        "type": "string",
+        "enum": [
+          "primary_color",
+          "fonts",
+          "corners",
+          "primary_button",
+          "logo",
+          "favicon"
+        ]
+      },
+      "FindingStatus": {
+        "type": "string",
+        "enum": [
+          "found",
+          "not_found",
+          "not_available"
+        ]
+      },
+      "FindingDetail": {
+        "type": "object",
+        "properties": {
+          "family": {
+            "type": "string",
+            "description": "Font family that was found but cannot be loaded"
+          }
+        },
+        "required": [
+          "family"
+        ]
+      },
+      "DesignFinding": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/FindingId"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FindingStatus"
+          },
+          "detail": {
+            "$ref": "#/components/schemas/FindingDetail"
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ]
+      },
+      "GenerateDesignDocumentRes": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "$ref": "#/components/schemas/Design_Document_V1"
+          },
+          "findings": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "items": {
+              "$ref": "#/components/schemas/DesignFinding"
+            }
+          },
+          "site_name": {
+            "type": "string",
+            "example": "Stadtwerke Musterstadt"
+          },
+          "cached": {
+            "type": "boolean",
+            "description": "True when the response was served from an earlier successful generation for this organization, normalised URL and generator version"
+          }
+        },
+        "required": [
+          "document",
+          "findings",
+          "site_name",
+          "cached"
+        ]
+      },
+      "GeneratedDesign": {
+        "type": "object",
+        "description": "Partial design to merge into the design being edited",
+        "properties": {
+          "style": {
+            "type": "object",
+            "properties": {
+              "logo": {
+                "$ref": "#/components/schemas/LogoData"
+              },
+              "palette": {
+                "$ref": "#/components/schemas/PaletteData"
+              },
+              "typography": {
+                "$ref": "#/components/schemas/TypographyData"
+              }
+            },
+            "required": [
+              "logo",
+              "palette",
+              "typography"
+            ]
+          },
+          "theme": {
+            "type": "object",
+            "properties": {
+              "shape": {
+                "type": "object",
+                "properties": {
+                  "borderRadius": {
+                    "type": "string",
+                    "example": "8"
+                  }
+                },
+                "required": [
+                  "borderRadius"
+                ]
+              }
+            },
+            "required": [
+              "shape"
+            ]
+          }
+        },
+        "required": [
+          "style",
+          "theme"
+        ]
+      },
       "ErrorResp": {
         "type": "object",
         "properties": {
           "message": {
             "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "description": "Machine-readable reason, e.g. `invalid_url` or `rate_limited`"
           },
           "error": {
             "type": "object"
@@ -1817,6 +2437,37 @@
               "journey_design_tokens": {
                 "type": "object",
                 "description": "Design tokens for journey customization (renamed from design_tokens)"
+              },
+              "version": {
+                "type": "integer",
+                "enum": [
+                  1
+                ]
+              },
+              "colors": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "typography": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "shape": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "components": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "assets": {
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "journey": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "v1 designs only: the journey group of @epilot/design-document (custom_css, tokens and the journey overrides primary_color, font, border_radius, logo), derived on read from the stored journey fields and compared with the stored v1 groups. What a journey paints from it equals what it paints from the theme built from the old fields. Not returned by GET."
               }
             }
           }
