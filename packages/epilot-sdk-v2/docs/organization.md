@@ -33,29 +33,30 @@ const { data } = await organizationClient.getCurrentOrganization(...)
 - [`getSettings`](#getsettings)
 - [`putSettingsValue`](#putsettingsvalue)
 - [`deleteSettingsValue`](#deletesettingsvalue)
+- [`notifySettingsValueUpdated`](#notifysettingsvalueupdated)
 
 **Feature Settings**
 - [`getOrganizationFeatureSettings`](#getorganizationfeaturesettings)
 
+**Announcements**
+- [`getActiveAnnouncement`](#getactiveannouncement)
+- [`acknowledgeAnnouncement`](#acknowledgeannouncement)
+
 **Schemas**
 - [`OrganizationId`](#organizationid)
 - [`Organization`](#organization)
-- [`InternalOrganization`](#internalorganization)
-- [`SettingKey`](#settingkey)
 - [`Settings`](#settings)
 - [`SettingsValue`](#settingsvalue)
-- [`CreateOrganizationRequest`](#createorganizationrequest)
-- [`DataPointsResponse`](#datapointsresponse)
-- [`DataPoint`](#datapoint)
-- [`OrganizationToCleanup`](#organizationtocleanup)
-- [`OrganizationCleanupStatus`](#organizationcleanupstatus)
-- [`HubspotCompany`](#hubspotcompany)
-- [`HubspotCompaniesResponse`](#hubspotcompaniesresponse)
-- [`HubspotOrganizationData`](#hubspotorganizationdata)
 - [`FeatureSettings`](#featuresettings)
 - [`FeatureFlagMetadata`](#featureflagmetadata)
 - [`I18nString`](#i18nstring)
 - [`VisibilityRule`](#visibilityrule)
+- [`AnnouncementType`](#announcementtype)
+- [`AnnouncementMessage`](#announcementmessage)
+- [`Announcement`](#announcement)
+- [`AnnouncementOrganizationStatusValue`](#announcementorganizationstatusvalue)
+- [`AnnouncementOrganizationStatus`](#announcementorganizationstatus)
+- [`ActiveAnnouncementResponse`](#activeannouncementresponse)
 
 ### `getCurrentOrganization`
 
@@ -309,15 +310,139 @@ const { data } = await client.deleteSettingsValue({
 
 ---
 
+### `notifySettingsValueUpdated`
+
+Sends an internal notification that an organization setting was updated.
+
+`POST /v2/organization/{org_id}/settings/{key}/notifications`
+
+```ts
+const { data } = await client.notifySettingsValueUpdated(
+  {
+    org_id: 'example',
+    key: 'example',
+  },
+  {
+    user_email: 'string',
+    org_name: 'string',
+    value: {
+      enabled: true
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "delivered": true
+}
+```
+
+</details>
+
+---
+
 ### `getOrganizationFeatureSettings`
 
-Get organization feature settings
+Get organization feature settings.
 
 `GET /v2/organization/feature-settings`
 
 ```ts
 const { data } = await client.getOrganizationFeatureSettings()
 ```
+
+---
+
+### `getActiveAnnouncement`
+
+Returns the announcement (e.g. a subprocessor change notice) to show as a portal banner for the
+caller's organization.
+
+`GET /v2/organization/announcements/active`
+
+```ts
+const { data } = await client.getActiveAnnouncement()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "announcement": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "type": "subprocessor_change",
+    "message": {
+      "de": "Wir haben unsere Liste der Subdienstleister aktualisiert (gültig ab 01.11.2026). Bitte prüfe die Änderungen.",
+      "en": "We have updated our list of subprocessors (effective 01.11.2026). Please review the changes."
+    },
+    "link_url": "string",
+    "list_version": "string",
+    "effective_date": "1970-01-01",
+    "window_days": 0,
+    "status": "draft",
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "created_by": "string",
+    "updated_at": "1970-01-01T00:00:00.000Z",
+    "published_at": "1970-01-01T00:00:00.000Z",
+    "published_by": "string",
+    "expires_at": "1970-01-01T00:00:00.000Z",
+    "archived_at": "1970-01-01T00:00:00.000Z",
+    "archived_by": "string",
+    "materialized_at": "1970-01-01T00:00:00.000Z"
+  },
+  "can_acknowledge": true
+}
+```
+
+</details>
+
+---
+
+### `acknowledgeAnnouncement`
+
+Acknowledges an announcement on behalf of the caller's organization. Only org admins
+(`organization:edit`) may acknowledge.
+
+`POST /v2/organization/announcements/{announcement_id}/acknowledge`
+
+```ts
+const { data } = await client.acknowledgeAnnouncement(
+  {
+    announcement_id: 'example',
+  },
+  {
+    portal: '360'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "announcement_id": "string",
+  "org_id": "string",
+  "org_name": "string",
+  "status": "acknowledged",
+  "acknowledged_by": {
+    "user_id": "string",
+    "name": "string",
+    "email": "string"
+  },
+  "acknowledged_at": "1970-01-01T00:00:00.000Z",
+  "portal": "360",
+  "list_version": "string",
+  "recorded_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
 
 ---
 
@@ -353,7 +478,7 @@ type Organization = {
     street?: string
     street_number?: string
   }
-  organization_use?: "Production" | "Sandbox"
+  organization_use?: "Production" | "Sandbox" | "Preview"
   parent_production_org_id?: string
   created_date?: string // date-time
   logo_url?: string
@@ -367,54 +492,6 @@ type Organization = {
   free_user_limit?: number
   tags?: string[]
 }
-```
-
-### `InternalOrganization`
-
-Extended organization object with internal-only fields.
-
-Includes all fields from the base Organization schema plus additional
-internal metadata used for platform administration and support.
-
-
-```ts
-type InternalOrganization = {
-  id?: string
-  name?: string
-  email?: string
-  phone?: string
-  website?: string
-  address?: {
-    country?: string
-    city?: string
-    postal_code?: string
-    street?: string
-    street_number?: string
-  }
-  organization_use?: "Production" | "Sandbox"
-  parent_production_org_id?: string
-  created_date?: string // date-time
-  logo_url?: string
-  logo_thumbnail_url?: string
-  signature?: string
-  is_unlicensed_org?: boolean
-  style?: Record<string, unknown>
-  type?: "Vendor" | "Partner"
-  symbol?: string
-  pricing_tier?: string
-  free_user_limit?: number
-  tags?: string[]
-}
-```
-
-### `SettingKey`
-
-A unique key identifying an organization setting.
-Common setting keys include: double_opt_in, email_tracking, default_language, workflow_notifications
-
-
-```ts
-type SettingKey = string
 ```
 
 ### `Settings`
@@ -435,141 +512,6 @@ Can be any valid JSON type: string, number, boolean, array, or object.
 
 ```ts
 type SettingsValue = string | number | boolean | Record<string, unknown>[] | Record<string, unknown>
-```
-
-### `CreateOrganizationRequest`
-
-Request payload for creating a new organization
-
-```ts
-type CreateOrganizationRequest = {
-  organization_detail?: {
-    name: string
-    email_address?: string
-    type: string
-    organization_use?: "Production" | "Sandbox"
-    pricing_tier_id: string
-  }
-  owner_user?: {
-    full_name?: string
-    email_address: string
-  }
-}
-```
-
-### `DataPointsResponse`
-
-List of data point metrics for all organizations
-
-```ts
-type DataPointsResponse = Array<{
-  id?: number
-  max_customer?: number
-  actual_customer?: number
-}>
-```
-
-### `DataPoint`
-
-Data point metrics for a single organization, used for usage tracking and billing
-
-```ts
-type DataPoint = {
-  id?: number
-  max_customer?: number
-  actual_customer?: number
-}
-```
-
-### `OrganizationToCleanup`
-
-Represents an organization that has been marked for deletion and requires cleanup.
-Contains metadata about the deletion request.
-
-
-```ts
-type OrganizationToCleanup = {
-  org_id: string
-  deleted_at: string // date-time
-  deleted_by: string
-}
-```
-
-### `OrganizationCleanupStatus`
-
-Records the cleanup status reported by a specific service for an organization.
-Each service that stores organization data reports its cleanup operations here.
-
-
-```ts
-type OrganizationCleanupStatus = {
-  org_id: string
-  service_name: string
-  operations?: Array<{
-    action?: string
-    resource?: string
-    extra_info?: string | number | boolean | Record<string, unknown>[] | Record<string, unknown>
-  }>
-}
-```
-
-### `HubspotCompany`
-
-Represents a company record from HubSpot CRM synchronized to the epilot data warehouse.
-Used for CRM integration and organization mapping.
-
-
-```ts
-type HubspotCompany = {
-  company_id?: string
-  company_name?: string
-  domain?: string
-}
-```
-
-### `HubspotCompaniesResponse`
-
-Response containing a list of HubSpot companies matching the search criteria
-
-```ts
-type HubspotCompaniesResponse = {
-  results?: Array<{
-    company_id?: string
-    company_name?: string
-    domain?: string
-  }>
-  total?: number
-}
-```
-
-### `HubspotOrganizationData`
-
-HubSpot company data associated with an epilot organization.
-Contains business metrics and CRM properties synced from HubSpot.
-
-
-```ts
-type HubspotOrganizationData = {
-  company_id?: string
-  company_name?: string
-  domain?: string
-  current_mrr?: string
-  potential_mrr?: string
-  company_size?: string
-  pricing_tier?: string
-  lifecyclestage?: string
-  industry?: string
-  numberofemployees?: string
-  customer_number?: string
-  no_of_users?: string
-  activation_rate?: string
-  active_features?: string
-  usecases_implemented?: string
-  buyer_journey?: string
-  country?: string
-  city?: string
-  properties?: Record<string, unknown>
-}
 ```
 
 ### `FeatureSettings`
@@ -598,6 +540,7 @@ type FeatureSettings = {
       type: { ... }
       setting_key?: { ... }
       flag_name?: { ... }
+      pricing_tier_classes?: { ... }
       action?: { ... }
       resource?: { ... }
       rule?: { ... }
@@ -628,9 +571,10 @@ type FeatureFlagMetadata = {
   reverse_checked?: boolean
   is_visible_for_partner?: boolean
   visibility_rules: Array<{
-    type: "always" | "never" | "advanced_mode" | "pricing_tier" | "feature_flag" | "permission" | "setting_enabled" | "flag_enabled" | "not" | "and" | "or"
+    type: "always" | "never" | "advanced_mode" | "pricing_tier" | "pricing_tier_class" | "production_org" | "feature_flag" | "permission" | "setting_enabled" | "flag_enabled" | "not" | "and" | "or"
     setting_key?: string
     flag_name?: string
+    pricing_tier_classes?: string[]
     action?: string
     resource?: string
     rule?: { ... }
@@ -658,12 +602,111 @@ at the top level. Supports boolean combinators (and, or, not) for complex logic.
 
 ```ts
 type VisibilityRule = {
-  type: "always" | "never" | "advanced_mode" | "pricing_tier" | "feature_flag" | "permission" | "setting_enabled" | "flag_enabled" | "not" | "and" | "or"
+  type: "always" | "never" | "advanced_mode" | "pricing_tier" | "pricing_tier_class" | "production_org" | "feature_flag" | "permission" | "setting_enabled" | "flag_enabled" | "not" | "and" | "or"
   setting_key?: string
   flag_name?: string
+  pricing_tier_classes?: string[]
   action?: string
   resource?: string
   rule?: { ... }
   rules?: { ... }[]
+}
+```
+
+### `AnnouncementType`
+
+```ts
+type AnnouncementType = "subprocessor_change"
+```
+
+### `AnnouncementMessage`
+
+```ts
+type AnnouncementMessage = {
+  de: string
+  en?: string
+}
+```
+
+### `Announcement`
+
+```ts
+type Announcement = {
+  id: string // uuid
+  type: "subprocessor_change"
+  message: {
+    de: string
+    en?: string
+  }
+  link_url: string
+  list_version: string
+  effective_date: string // date
+  window_days: number
+  status: "draft" | "published" | "archived"
+  created_at: string // date-time
+  created_by?: string
+  updated_at: string // date-time
+  published_at?: string // date-time
+  published_by?: string
+  expires_at?: string // date-time
+  archived_at?: string // date-time
+  archived_by?: string
+  materialized_at?: string // date-time
+}
+```
+
+### `AnnouncementOrganizationStatusValue`
+
+```ts
+type AnnouncementOrganizationStatusValue = "acknowledged" | "pending" | "expired" | "superseded"
+```
+
+### `AnnouncementOrganizationStatus`
+
+```ts
+type AnnouncementOrganizationStatus = {
+  announcement_id: string
+  org_id: string
+  org_name?: string
+  status: "acknowledged" | "pending" | "expired" | "superseded"
+  acknowledged_by?: {
+    user_id: string
+    name?: string
+    email?: string
+  }
+  acknowledged_at?: string // date-time
+  portal?: string
+  list_version: string
+  recorded_at?: string // date-time
+}
+```
+
+### `ActiveAnnouncementResponse`
+
+```ts
+type ActiveAnnouncementResponse = {
+  announcement: {
+    id: string // uuid
+    type: "subprocessor_change"
+    message: {
+      de: { ... }
+      en?: { ... }
+    }
+    link_url: string
+    list_version: string
+    effective_date: string // date
+    window_days: number
+    status: "draft" | "published" | "archived"
+    created_at: string // date-time
+    created_by?: string
+    updated_at: string // date-time
+    published_at?: string // date-time
+    published_by?: string
+    expires_at?: string // date-time
+    archived_at?: string // date-time
+    archived_by?: string
+    materialized_at?: string // date-time
+  }
+  can_acknowledge: boolean
 }
 ```

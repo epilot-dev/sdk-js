@@ -240,6 +240,28 @@
         "responses": {}
       }
     },
+    "/v1/configs/sync-jobs/{id}/health": {
+      "get": {
+        "operationId": "getSyncJobHealth",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/health:run": {
+      "post": {
+        "operationId": "runSyncJobHealth",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/configs/sync-jobs/{id}/retry": {
       "post": {
         "operationId": "retrySyncJob",
@@ -498,6 +520,35 @@
           {
             "name": "include_dependency_only",
             "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/previews": {
+      "post": {
+        "operationId": "createPreview",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listPreviews",
+        "responses": {}
+      }
+    },
+    "/v1/previews/{id}": {
+      "get": {
+        "operationId": "getPreview",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
           }
         ],
         "responses": {}

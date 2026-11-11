@@ -39,6 +39,10 @@
     {
       "name": "Health",
       "description": "Configuration health scans, reports, coverage requests, cleanup and ignored findings"
+    },
+    {
+      "name": "Previews",
+      "description": "Preview orgs — temporary copies of an org's configuration"
     }
   ],
   "paths": {
@@ -961,6 +965,102 @@
           },
           "404": {
             "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/health": {
+      "get": {
+        "operationId": "getSyncJobHealth",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "getSyncJobHealth",
+        "description": "Targeted health check of an applied (non-dry-run) sync job. When the job\nreaches its terminal status, the target org is scanned asynchronously\nfor the configs the job wrote — rows with status `created` or\n`patched` and a `target_id` — using the same finding logic as\n`getHealthReport`, plus `source_org_reference` for written payloads\nthat still carry a source-org id, and `secret_value_missing` (warning)\nfor a referenced SecretString variable the job created: a sync copies\na variable's key, never its value, so setting it is a manual step. It runs for `succeeded` and\n`partial` jobs, and for `failed` jobs that wrote at least one config;\notherwise it is `skipped`. Best-effort: it never changes the job's own\nstatus, and its results never replace the org-wide health report.\nReadable from both the source and the target org.\n\nA finished job that never had a check (it finished before checks\nexisted) reports `not_run`. A check left `pending` or `running` for\nlonger than the scan can take is reported as `failed`; both can be\nstarted again with `runSyncJobHealth`.\n",
+        "tags": [
+          "Sync",
+          "Health"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Health check of the job's written configs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJobHealth"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/configs/sync-jobs/{id}/health:run": {
+      "post": {
+        "operationId": "runSyncJobHealth",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "runSyncJobHealth",
+        "description": "Start the targeted health check of a finished, applied sync job again:\nfor jobs that finished before checks existed (`not_run`), checks that\nfailed or got stuck, or to re-check after fixing something. Same scope\nand rules as the automatic check after every import. Callable from the\nsource or the target org; the scan runs in the target org. Answers with\nthe check's new state (`pending`) and runs asynchronously; poll\n`getSyncJobHealth`.\n",
+        "tags": [
+          "Sync",
+          "Health"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SyncJobId"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Health check started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncJobHealth"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sync job not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`job_not_applied` (a plan: nothing was written), `job_not_finished`\n(the job is still running), or `health_check_running` (a check is\nalready pending or running)\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -1903,6 +2003,122 @@
           }
         }
       }
+    },
+    "/v1/previews": {
+      "post": {
+        "operationId": "createPreview",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:sync"
+          }
+        ],
+        "summary": "createPreview",
+        "description": "Starts a preview of the caller's current org (internal callers: the org in `x-ivy-org-id`,\nplus `requester`): a new, temporary org with\n`organization_use: Preview` (parent = this org) that receives a copy of all of\nthis org's configuration through a sync job. When the copy is done, the\nrequesting user is invited to the preview org as owner with a\n\"your preview org is ready\" email. Runs asynchronously; poll `getPreview`.\n",
+        "tags": [
+          "Previews"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePreviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Preview creation started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Preview"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Too many previews are being created for this org at the same time"
+          }
+        }
+      },
+      "get": {
+        "operationId": "listPreviews",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "listPreviews",
+        "description": "Lists the previews requested from the caller's current org, newest first (max 50).",
+        "tags": [
+          "Previews"
+        ],
+        "responses": {
+          "200": {
+            "description": "Previews of this org",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Preview"
+                      }
+                    }
+                  },
+                  "required": [
+                    "results"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/previews/{id}": {
+      "get": {
+        "operationId": "getPreview",
+        "x-epilot-permissions": [
+          {
+            "action": "configuration_hub:view"
+          }
+        ],
+        "summary": "getPreview",
+        "description": "Returns a preview requested from the caller's current org, with its progress.",
+        "tags": [
+          "Previews"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Preview"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Preview not found in this org"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2283,7 +2499,10 @@
               "orphaned_price",
               "duplicate_price",
               "inactive_price_in_use",
-              "incomplete_configuration"
+              "incomplete_configuration",
+              "source_org_reference",
+              "secret_value_missing",
+              "env_value_missing"
             ]
           },
           "severity": {
@@ -2793,6 +3012,10 @@
           "status": {
             "type": "integer"
           },
+          "code": {
+            "type": "string",
+            "description": "Machine-readable reason, where the operation documents one"
+          },
           "error": {
             "type": "string"
           }
@@ -3229,6 +3452,94 @@
           "level"
         ]
       },
+      "SyncJobHealthStatus": {
+        "type": "string",
+        "description": "State of a sync job's post-import health check. `pending`: queued,\n`running`: scanning, `done`: findings available, `failed`: the check\nitself failed or did not finish (the import is unaffected), `skipped`:\nnothing to check (a plan, a job that wrote nothing, or a cancelled\njob), `not_run`: a finished job that never had a check (start one with\n`runSyncJobHealth`).\n",
+        "enum": [
+          "pending",
+          "running",
+          "done",
+          "failed",
+          "skipped",
+          "not_run"
+        ]
+      },
+      "HealthSeverityCounts": {
+        "type": "object",
+        "required": [
+          "error",
+          "warning",
+          "info"
+        ],
+        "properties": {
+          "error": {
+            "type": "integer"
+          },
+          "warning": {
+            "type": "integer"
+          },
+          "info": {
+            "type": "integer"
+          }
+        }
+      },
+      "SyncJobHealthCheck": {
+        "type": "object",
+        "description": "Compact state of the job's post-import health check. Full results:\n`getSyncJobHealth`. Absent on plans and on jobs that finished before\nthe check existed.\n",
+        "required": [
+          "status",
+          "counts"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/SyncJobHealthStatus"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/HealthSeverityCounts"
+          }
+        }
+      },
+      "SyncJobHealth": {
+        "type": "object",
+        "description": "Targeted health check of the configs a sync job wrote into the target\norg. Findings carry `first_seen` = `last_seen` = `finished_at`.\n",
+        "required": [
+          "status",
+          "scanned",
+          "counts",
+          "findings"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/SyncJobHealthStatus"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "scanned": {
+            "type": "integer",
+            "description": "Written configs whose payload was read."
+          },
+          "counts": {
+            "$ref": "#/components/schemas/HealthSeverityCounts"
+          },
+          "error": {
+            "type": "string",
+            "description": "Why the check failed or was skipped."
+          },
+          "findings": {
+            "type": "array",
+            "description": "Errors first, then warnings, then info. Empty unless `done`.",
+            "items": {
+              "$ref": "#/components/schemas/HealthFinding"
+            }
+          }
+        }
+      },
       "SyncJob": {
         "type": "object",
         "description": "Sync job header as surfaced by `getSyncJob` and the create response. The\ncanonical persistence shape is described in `docs/sync/INTERFACES.md`.\n",
@@ -3270,6 +3581,9 @@
           "finished_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "health_check": {
+            "$ref": "#/components/schemas/SyncJobHealthCheck"
           },
           "events": {
             "type": "array",
@@ -4225,6 +4539,114 @@
           "resources_count",
           "resources",
           "skipped_types"
+        ]
+      },
+      "CreatePreviewRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Display name of the preview. Defaults to `Preview <date>`."
+          },
+          "requester": {
+            "type": "object",
+            "description": "Internal callers only (e.g. the admin portal, with the source org in `x-ivy-org-id`):\nwho gets invited to the preview org as owner; `user_id` or `email` is required. Users\nalways invite themselves; sending this with a user token is rejected with 403.\n",
+            "properties": {
+              "user_id": {
+                "type": "string",
+                "description": "A user of the source org (preferred). They are invited, and the copy job acts as\nthem (e.g. they own the copied dashboards). Email, name and language come from\ntheir user record.\n"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "description": "Used when `user_id` is not given."
+              },
+              "display_name": {
+                "type": "string"
+              },
+              "language": {
+                "type": "string",
+                "enum": [
+                  "de",
+                  "en"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "PreviewStatus": {
+        "type": "string",
+        "enum": [
+          "creating_org",
+          "copying_configuration",
+          "inviting",
+          "ready",
+          "failed"
+        ],
+        "description": "- creating_org: the preview org is being created\n- copying_configuration: the sync job copying this org's configuration is running\n- inviting: the requester is being invited to the preview org\n- ready: the requester got the \"your preview org is ready\" email\n- failed: see `error`\n"
+      },
+      "Preview": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PreviewStatus"
+          },
+          "source_org_id": {
+            "type": "string",
+            "description": "The org the preview copies (the org it was requested from)."
+          },
+          "preview_org_id": {
+            "type": "string",
+            "description": "The preview org, once created."
+          },
+          "sync_job_id": {
+            "type": "string",
+            "description": "The sync job copying the configuration (see `getSyncJob`)."
+          },
+          "sync_status": {
+            "type": "string",
+            "description": "Final status of the copy sync job (`succeeded` or `partial`)."
+          },
+          "requested_by": {
+            "type": "object",
+            "properties": {
+              "user_id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error": {
+            "type": "string",
+            "description": "Why the preview failed."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "source_org_id",
+          "requested_by",
+          "created_at",
+          "updated_at"
         ]
       }
     }

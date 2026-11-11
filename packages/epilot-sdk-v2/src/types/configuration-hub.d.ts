@@ -307,6 +307,33 @@ export declare namespace Components {
              */
             target_id: string;
         }
+        export interface CreatePreviewRequest {
+            /**
+             * Display name of the preview. Defaults to `Preview <date>`.
+             */
+            name?: string;
+            /**
+             * Internal callers only (e.g. the admin portal, with the source org in `x-ivy-org-id`):
+             * who gets invited to the preview org as owner; `user_id` or `email` is required. Users
+             * always invite themselves; sending this with a user token is rejected with 403.
+             *
+             */
+            requester?: {
+                /**
+                 * A user of the source org (preferred). They are invited, and the copy job acts as
+                 * them (e.g. they own the copied dashboards). Email, name and language come from
+                 * their user record.
+                 *
+                 */
+                user_id?: string;
+                /**
+                 * Used when `user_id` is not given.
+                 */
+                email?: string; // email
+                display_name?: string;
+                language?: "de" | "en";
+            };
+        }
         /**
          * Bulk-delete job header surfaced by `createDeleteJob`/`getDeleteJob`.
          */
@@ -419,6 +446,10 @@ export declare namespace Components {
         export type DeleteJobStatus = "pending" | "in_progress" | "succeeded" | "partial" | "failed" | "cancelled";
         export interface ErrorResponse {
             status: number;
+            /**
+             * Machine-readable reason, where the operation documents one
+             */
+            code?: string;
             error: string;
         }
         export interface HealthFinding {
@@ -426,7 +457,7 @@ export declare namespace Components {
              * Stable finding identity — unchanged across rescans.
              */
             id: string;
-            code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration";
+            code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing";
             severity: "error" | "warning" | "info";
             /**
              * Config type carrying the problem.
@@ -535,6 +566,11 @@ export declare namespace Components {
             status: "scanning" | "failed";
             error?: string;
         }
+        export interface HealthSeverityCounts {
+            error: number;
+            warning: number;
+            info: number;
+        }
         /**
          * Result of an index rebuild operation
          */
@@ -588,6 +624,54 @@ export declare namespace Components {
                 title?: string;
             } | null;
         }
+        export interface Preview {
+            id: string;
+            name: string;
+            status: /**
+             * - creating_org: the preview org is being created
+             * - copying_configuration: the sync job copying this org's configuration is running
+             * - inviting: the requester is being invited to the preview org
+             * - ready: the requester got the "your preview org is ready" email
+             * - failed: see `error`
+             *
+             */
+            PreviewStatus;
+            /**
+             * The org the preview copies (the org it was requested from).
+             */
+            source_org_id: string;
+            /**
+             * The preview org, once created.
+             */
+            preview_org_id?: string;
+            /**
+             * The sync job copying the configuration (see `getSyncJob`).
+             */
+            sync_job_id?: string;
+            /**
+             * Final status of the copy sync job (`succeeded` or `partial`).
+             */
+            sync_status?: string;
+            requested_by: {
+                user_id?: string;
+                email?: string;
+            };
+            created_at: string; // date-time
+            updated_at: string; // date-time
+            /**
+             * Why the preview failed.
+             */
+            error?: string;
+        }
+        /**
+         * - creating_org: the preview org is being created
+         * - copying_configuration: the sync job copying this org's configuration is running
+         * - inviting: the requester is being invited to the preview org
+         * - ready: the requester got the "your preview org is ready" email
+         * - failed: see `error`
+         *
+         */
+        export type PreviewStatus = "creating_org" | "copying_configuration" | "inviting" | "ready" | "failed";
         /**
          * Configuration resource type identifier.
          * Matches blueprint-manifest-api V3 naming conventions.
@@ -724,6 +808,13 @@ export declare namespace Components {
             current_batch?: /* Position within the current topological batch for the active phase. */ SyncJobBatch;
             started_at: string; // date-time
             finished_at?: string; // date-time
+            health_check?: /**
+             * Compact state of the job's post-import health check. Full results:
+             * `getSyncJobHealth`. Absent on plans and on jobs that finished before
+             * the check existed.
+             *
+             */
+            SyncJobHealthCheck;
             /**
              * Deprecated — use `listSyncJobEvents`. Up to 10 op-log events,
              * ordered by resource index rather than recency.
@@ -1055,6 +1146,67 @@ export declare namespace Components {
              */
             source: "events" | "op_log";
         }
+        /**
+         * Targeted health check of the configs a sync job wrote into the target
+         * org. Findings carry `first_seen` = `last_seen` = `finished_at`.
+         *
+         */
+        export interface SyncJobHealth {
+            status: /**
+             * State of a sync job's post-import health check. `pending`: queued,
+             * `running`: scanning, `done`: findings available, `failed`: the check
+             * itself failed or did not finish (the import is unaffected), `skipped`:
+             * nothing to check (a plan, a job that wrote nothing, or a cancelled
+             * job), `not_run`: a finished job that never had a check (start one with
+             * `runSyncJobHealth`).
+             *
+             */
+            SyncJobHealthStatus;
+            started_at?: string; // date-time
+            finished_at?: string; // date-time
+            /**
+             * Written configs whose payload was read.
+             */
+            scanned: number;
+            counts: HealthSeverityCounts;
+            /**
+             * Why the check failed or was skipped.
+             */
+            error?: string;
+            /**
+             * Errors first, then warnings, then info. Empty unless `done`.
+             */
+            findings: HealthFinding[];
+        }
+        /**
+         * Compact state of the job's post-import health check. Full results:
+         * `getSyncJobHealth`. Absent on plans and on jobs that finished before
+         * the check existed.
+         *
+         */
+        export interface SyncJobHealthCheck {
+            status: /**
+             * State of a sync job's post-import health check. `pending`: queued,
+             * `running`: scanning, `done`: findings available, `failed`: the check
+             * itself failed or did not finish (the import is unaffected), `skipped`:
+             * nothing to check (a plan, a job that wrote nothing, or a cancelled
+             * job), `not_run`: a finished job that never had a check (start one with
+             * `runSyncJobHealth`).
+             *
+             */
+            SyncJobHealthStatus;
+            counts: HealthSeverityCounts;
+        }
+        /**
+         * State of a sync job's post-import health check. `pending`: queued,
+         * `running`: scanning, `done`: findings available, `failed`: the check
+         * itself failed or did not finish (the import is unaffected), `skipped`:
+         * nothing to check (a plan, a job that wrote nothing, or a cancelled
+         * job), `not_run`: a finished job that never had a check (start one with
+         * `runSyncJobHealth`).
+         *
+         */
+        export type SyncJobHealthStatus = "pending" | "running" | "done" | "failed" | "skipped" | "not_run";
         /**
          * Cursor-paginated list of sync jobs.
          */
@@ -1755,6 +1907,14 @@ export declare namespace Paths {
             export type $400 = Components.Schemas.ErrorResponse;
         }
     }
+    namespace CreatePreview {
+        export type RequestBody = Components.Schemas.CreatePreviewRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.Preview;
+            export interface $409 {
+            }
+        }
+    }
     namespace CreateSyncJob {
         export type RequestBody = /**
          * Request body for `createSyncJob`. `target_auth_token` is the destination
@@ -1848,6 +2008,19 @@ export declare namespace Paths {
             export type $200 = /* Current index build state */ Components.Schemas.IndexStatusResponse;
         }
     }
+    namespace GetPreview {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Preview;
+            export interface $404 {
+            }
+        }
+    }
     namespace GetSyncJob {
         namespace Parameters {
             export type Id = string;
@@ -1862,6 +2035,23 @@ export declare namespace Paths {
              *
              */
             Components.Schemas.SyncJob;
+            export type $404 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace GetSyncJobHealth {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * Targeted health check of the configs a sync job wrote into the target
+             * org. Findings carry `first_seen` = `last_seen` = `finished_at`.
+             *
+             */
+            Components.Schemas.SyncJobHealth;
             export type $404 = Components.Schemas.ErrorResponse;
         }
     }
@@ -1973,6 +2163,13 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* Cursor-paginated list of delete jobs. */ Components.Schemas.DeleteJobListResponse;
+        }
+    }
+    namespace ListPreviews {
+        namespace Responses {
+            export interface $200 {
+                results: Components.Schemas.Preview[];
+            }
         }
     }
     namespace ListSyncJobEvents {
@@ -2181,6 +2378,24 @@ export declare namespace Paths {
             Components.Schemas.SyncJob;
             export type $400 = Components.Schemas.SyncJobRetryErrorResponse;
             export type $404 = Components.Schemas.ErrorResponse;
+        }
+    }
+    namespace RunSyncJobHealth {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $202 = /**
+             * Targeted health check of the configs a sync job wrote into the target
+             * org. Findings carry `first_seen` = `last_seen` = `finished_at`.
+             *
+             */
+            Components.Schemas.SyncJobHealth;
+            export type $404 = Components.Schemas.ErrorResponse;
+            export type $409 = Components.Schemas.ErrorResponse;
         }
     }
     namespace SetHealthFindingsIgnored {
@@ -2495,6 +2710,50 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSyncJob.Responses.$200>
   /**
+   * getSyncJobHealth - getSyncJobHealth
+   * 
+   * Targeted health check of an applied (non-dry-run) sync job. When the job
+   * reaches its terminal status, the target org is scanned asynchronously
+   * for the configs the job wrote — rows with status `created` or
+   * `patched` and a `target_id` — using the same finding logic as
+   * `getHealthReport`, plus `source_org_reference` for written payloads
+   * that still carry a source-org id, and `secret_value_missing` (warning)
+   * for a referenced SecretString variable the job created: a sync copies
+   * a variable's key, never its value, so setting it is a manual step. It runs for `succeeded` and
+   * `partial` jobs, and for `failed` jobs that wrote at least one config;
+   * otherwise it is `skipped`. Best-effort: it never changes the job's own
+   * status, and its results never replace the org-wide health report.
+   * Readable from both the source and the target org.
+   * 
+   * A finished job that never had a check (it finished before checks
+   * existed) reports `not_run`. A check left `pending` or `running` for
+   * longer than the scan can take is reported as `failed`; both can be
+   * started again with `runSyncJobHealth`.
+   * 
+   */
+  'getSyncJobHealth'(
+    parameters?: Parameters<Paths.GetSyncJobHealth.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSyncJobHealth.Responses.$200>
+  /**
+   * runSyncJobHealth - runSyncJobHealth
+   * 
+   * Start the targeted health check of a finished, applied sync job again:
+   * for jobs that finished before checks existed (`not_run`), checks that
+   * failed or got stuck, or to re-check after fixing something. Same scope
+   * and rules as the automatic check after every import. Callable from the
+   * source or the target org; the scan runs in the target org. Answers with
+   * the check's new state (`pending`) and runs asynchronously; poll
+   * `getSyncJobHealth`.
+   * 
+   */
+  'runSyncJobHealth'(
+    parameters?: Parameters<Paths.RunSyncJobHealth.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RunSyncJobHealth.Responses.$202>
+  /**
    * retrySyncJob - retrySyncJob
    * 
    * Retry the unresolved resources from a prior sync job: `failed` rows, plus
@@ -2766,6 +3025,42 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetConfigInventory.Responses.$200>
+  /**
+   * listPreviews - listPreviews
+   * 
+   * Lists the previews requested from the caller's current org, newest first (max 50).
+   */
+  'listPreviews'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListPreviews.Responses.$200>
+  /**
+   * createPreview - createPreview
+   * 
+   * Starts a preview of the caller's current org (internal callers: the org in `x-ivy-org-id`,
+   * plus `requester`): a new, temporary org with
+   * `organization_use: Preview` (parent = this org) that receives a copy of all of
+   * this org's configuration through a sync job. When the copy is done, the
+   * requesting user is invited to the preview org as owner with a
+   * "your preview org is ready" email. Runs asynchronously; poll `getPreview`.
+   * 
+   */
+  'createPreview'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreatePreview.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreatePreview.Responses.$202>
+  /**
+   * getPreview - getPreview
+   * 
+   * Returns a preview requested from the caller's current org, with its progress.
+   */
+  'getPreview'(
+    parameters?: Parameters<Paths.GetPreview.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetPreview.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -3062,6 +3357,54 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSyncJob.Responses.$200>
+  }
+  ['/v1/configs/sync-jobs/{id}/health']: {
+    /**
+     * getSyncJobHealth - getSyncJobHealth
+     * 
+     * Targeted health check of an applied (non-dry-run) sync job. When the job
+     * reaches its terminal status, the target org is scanned asynchronously
+     * for the configs the job wrote — rows with status `created` or
+     * `patched` and a `target_id` — using the same finding logic as
+     * `getHealthReport`, plus `source_org_reference` for written payloads
+     * that still carry a source-org id, and `secret_value_missing` (warning)
+     * for a referenced SecretString variable the job created: a sync copies
+     * a variable's key, never its value, so setting it is a manual step. It runs for `succeeded` and
+     * `partial` jobs, and for `failed` jobs that wrote at least one config;
+     * otherwise it is `skipped`. Best-effort: it never changes the job's own
+     * status, and its results never replace the org-wide health report.
+     * Readable from both the source and the target org.
+     * 
+     * A finished job that never had a check (it finished before checks
+     * existed) reports `not_run`. A check left `pending` or `running` for
+     * longer than the scan can take is reported as `failed`; both can be
+     * started again with `runSyncJobHealth`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSyncJobHealth.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSyncJobHealth.Responses.$200>
+  }
+  ['/v1/configs/sync-jobs/{id}/health:run']: {
+    /**
+     * runSyncJobHealth - runSyncJobHealth
+     * 
+     * Start the targeted health check of a finished, applied sync job again:
+     * for jobs that finished before checks existed (`not_run`), checks that
+     * failed or got stuck, or to re-check after fixing something. Same scope
+     * and rules as the automatic check after every import. Callable from the
+     * source or the target org; the scan runs in the target org. Answers with
+     * the check's new state (`pending`) and runs asynchronously; poll
+     * `getSyncJobHealth`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.RunSyncJobHealth.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RunSyncJobHealth.Responses.$202>
   }
   ['/v1/configs/sync-jobs/{id}/retry']: {
     /**
@@ -3365,6 +3708,46 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetConfigInventory.Responses.$200>
   }
+  ['/v1/previews']: {
+    /**
+     * createPreview - createPreview
+     * 
+     * Starts a preview of the caller's current org (internal callers: the org in `x-ivy-org-id`,
+     * plus `requester`): a new, temporary org with
+     * `organization_use: Preview` (parent = this org) that receives a copy of all of
+     * this org's configuration through a sync job. When the copy is done, the
+     * requesting user is invited to the preview org as owner with a
+     * "your preview org is ready" email. Runs asynchronously; poll `getPreview`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreatePreview.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreatePreview.Responses.$202>
+    /**
+     * listPreviews - listPreviews
+     * 
+     * Lists the previews requested from the caller's current org, newest first (max 50).
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListPreviews.Responses.$200>
+  }
+  ['/v1/previews/{id}']: {
+    /**
+     * getPreview - getPreview
+     * 
+     * Returns a preview requested from the caller's current org, with its progress.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetPreview.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetPreview.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -3382,6 +3765,7 @@ export type ConfigListResponse = Components.Schemas.ConfigListResponse;
 export type ConfigNode = Components.Schemas.ConfigNode;
 export type ConfigTypeInfo = Components.Schemas.ConfigTypeInfo;
 export type ConfirmLineageRequest = Components.Schemas.ConfirmLineageRequest;
+export type CreatePreviewRequest = Components.Schemas.CreatePreviewRequest;
 export type DeleteJob = Components.Schemas.DeleteJob;
 export type DeleteJobCounts = Components.Schemas.DeleteJobCounts;
 export type DeleteJobListResponse = Components.Schemas.DeleteJobListResponse;
@@ -3394,10 +3778,13 @@ export type ErrorResponse = Components.Schemas.ErrorResponse;
 export type HealthFinding = Components.Schemas.HealthFinding;
 export type HealthReportResponse = Components.Schemas.HealthReportResponse;
 export type HealthScanStartResponse = Components.Schemas.HealthScanStartResponse;
+export type HealthSeverityCounts = Components.Schemas.HealthSeverityCounts;
 export type IndexRebuildResponse = Components.Schemas.IndexRebuildResponse;
 export type IndexStatusResponse = Components.Schemas.IndexStatusResponse;
 export type LineageEntryResponse = Components.Schemas.LineageEntryResponse;
 export type MatchSuggestion = Components.Schemas.MatchSuggestion;
+export type Preview = Components.Schemas.Preview;
+export type PreviewStatus = Components.Schemas.PreviewStatus;
 export type ResourceType = Components.Schemas.ResourceType;
 export type SnapshotInventoryItem = Components.Schemas.SnapshotInventoryItem;
 export type SnapshotInventorySkippedType = Components.Schemas.SnapshotInventorySkippedType;
@@ -3411,6 +3798,9 @@ export type SyncJobCounts = Components.Schemas.SyncJobCounts;
 export type SyncJobEvent = Components.Schemas.SyncJobEvent;
 export type SyncJobEventDependency = Components.Schemas.SyncJobEventDependency;
 export type SyncJobEventListResponse = Components.Schemas.SyncJobEventListResponse;
+export type SyncJobHealth = Components.Schemas.SyncJobHealth;
+export type SyncJobHealthCheck = Components.Schemas.SyncJobHealthCheck;
+export type SyncJobHealthStatus = Components.Schemas.SyncJobHealthStatus;
 export type SyncJobListResponse = Components.Schemas.SyncJobListResponse;
 export type SyncJobRequest = Components.Schemas.SyncJobRequest;
 export type SyncJobResource = Components.Schemas.SyncJobResource;
