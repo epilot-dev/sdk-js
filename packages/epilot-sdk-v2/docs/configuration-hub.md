@@ -50,6 +50,8 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`createSyncJob`](#createsyncjob)
 - [`listSyncJobs`](#listsyncjobs)
 - [`getSyncJob`](#getsyncjob)
+- [`getSyncJobHealth`](#getsyncjobhealth)
+- [`runSyncJobHealth`](#runsyncjobhealth)
 - [`retrySyncJob`](#retrysyncjob)
 - [`planSyncJobRetry`](#plansyncjobretry)
 - [`cancelSyncJob`](#cancelsyncjob)
@@ -66,6 +68,11 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`listDeleteJobs`](#listdeletejobs)
 - [`getDeleteJob`](#getdeletejob)
 - [`listDeleteJobResources`](#listdeletejobresources)
+
+**Previews**
+- [`createPreview`](#createpreview)
+- [`listPreviews`](#listpreviews)
+- [`getPreview`](#getpreview)
 
 **Schemas**
 - [`ResourceType`](#resourcetype)
@@ -107,6 +114,10 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`SyncRequiredBy`](#syncrequiredby)
 - [`SyncJobEventListResponse`](#syncjobeventlistresponse)
 - [`SyncJobBatch`](#syncjobbatch)
+- [`SyncJobHealthStatus`](#syncjobhealthstatus)
+- [`HealthSeverityCounts`](#healthseveritycounts)
+- [`SyncJobHealthCheck`](#syncjobhealthcheck)
+- [`SyncJobHealth`](#syncjobhealth)
 - [`SyncJob`](#syncjob)
 - [`SyncJobListResponse`](#syncjoblistresponse)
 - [`SyncJobResource`](#syncjobresource)
@@ -135,6 +146,9 @@ const { data } = await configurationHubClient.listConfigTypes(...)
 - [`SnapshotInventoryItem`](#snapshotinventoryitem)
 - [`SnapshotInventorySkippedType`](#snapshotinventoryskippedtype)
 - [`ConfigInventoryResponse`](#configinventoryresponse)
+- [`CreatePreviewRequest`](#createpreviewrequest)
+- [`PreviewStatus`](#previewstatus)
+- [`Preview`](#preview)
 
 ### `listConfigTypes`
 
@@ -776,6 +790,14 @@ const { data } = await client.createSyncJob(
   },
   "started_at": "1970-01-01T00:00:00.000Z",
   "finished_at": "1970-01-01T00:00:00.000Z",
+  "health_check": {
+    "status": "pending",
+    "counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    }
+  },
   "events": [
     {
       "id": "string",
@@ -889,6 +911,14 @@ const { data } = await client.listSyncJobs({
       },
       "started_at": "1970-01-01T00:00:00.000Z",
       "finished_at": "1970-01-01T00:00:00.000Z",
+      "health_check": {
+        "status": "pending",
+        "counts": {
+          "error": 0,
+          "warning": 0,
+          "info": 0
+        }
+      },
       "events": [
         {
           "id": "string",
@@ -1000,6 +1030,14 @@ const { data } = await client.getSyncJob({
   },
   "started_at": "1970-01-01T00:00:00.000Z",
   "finished_at": "1970-01-01T00:00:00.000Z",
+  "health_check": {
+    "status": "pending",
+    "counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    }
+  },
   "events": [
     {
       "id": "string",
@@ -1067,6 +1105,88 @@ const { data } = await client.getSyncJob({
 
 ---
 
+### `getSyncJobHealth`
+
+Targeted health check of an applied (non-dry-run) sync job. When the job
+reaches its terminal status, the target org is scanned asynchronously
+for the configs the job wrote — rows with status `created
+
+`GET /v1/configs/sync-jobs/{id}/health`
+
+```ts
+const { data } = await client.getSyncJobHealth({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status": "pending",
+  "started_at": "1970-01-01T00:00:00.000Z",
+  "finished_at": "1970-01-01T00:00:00.000Z",
+  "scanned": 0,
+  "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 0
+  },
+  "error": "string",
+  "findings": [
+    {
+      "id": "string",
+      "code": "broken_reference",
+      "severity": "error",
+      "source_type": "string",
+      "source_id": "string",
+      "source_title": "string",
+      "message": "string",
+      "message_key": "string",
+      "message_params": {},
+      "ref_type": "string",
+      "ref_id": "string",
+      "ref_title": "string",
+      "source_link": "string",
+      "ref_link": "string",
+      "owner_type": "string",
+      "owner_id": "string",
+      "owner_title": "string",
+      "owner_link": "string",
+      "path": "string",
+      "cleanable": true,
+      "ignored": true,
+      "ignored_at": "1970-01-01T00:00:00.000Z",
+      "ignored_by": "string",
+      "ignored_reason": "string",
+      "first_seen": "1970-01-01T00:00:00.000Z",
+      "last_seen": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `runSyncJobHealth`
+
+Start the targeted health check of a finished, applied sync job again:
+for jobs that finished before checks existed (`not_run`), checks that
+failed or got stuck, or to re-check after fixing something.
+
+`POST /v1/configs/sync-jobs/{id}/health:run`
+
+```ts
+const { data } = await client.runSyncJobHealth({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+---
+
 ### `retrySyncJob`
 
 Retry the unresolved resources from a prior sync job: `failed` rows, plus
@@ -1121,6 +1241,14 @@ const { data } = await client.retrySyncJob(
   },
   "started_at": "1970-01-01T00:00:00.000Z",
   "finished_at": "1970-01-01T00:00:00.000Z",
+  "health_check": {
+    "status": "pending",
+    "counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    }
+  },
   "events": [
     {
       "id": "string",
@@ -1339,6 +1467,14 @@ const { data } = await client.cancelSyncJob({
   },
   "started_at": "1970-01-01T00:00:00.000Z",
   "finished_at": "1970-01-01T00:00:00.000Z",
+  "health_check": {
+    "status": "pending",
+    "counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    }
+  },
   "events": [
     {
       "id": "string",
@@ -1754,6 +1890,14 @@ const { data } = await client.applySyncPlan(
   },
   "started_at": "1970-01-01T00:00:00.000Z",
   "finished_at": "1970-01-01T00:00:00.000Z",
+  "health_check": {
+    "status": "pending",
+    "counts": {
+      "error": 0,
+      "warning": 0,
+      "info": 0
+    }
+  },
   "events": [
     {
       "id": "string",
@@ -2096,6 +2240,109 @@ const { data } = await client.getConfigInventory({
 
 ---
 
+### `createPreview`
+
+Starts a preview of the caller's current org (internal callers: the org in `x-ivy-org-id`,
+plus `requester`): a new, temporary org with
+`organization_use: Preview` (parent = this org) that receives a 
+
+`POST /v1/previews`
+
+```ts
+const { data } = await client.createPreview(
+  null,
+  {
+    name: 'string',
+    requester: {
+      user_id: 'string',
+      email: 'user@example.com',
+      display_name: 'string',
+      language: 'de'
+    }
+  },
+)
+```
+
+---
+
+### `listPreviews`
+
+Lists the previews requested from the caller's current org, newest first (max 50).
+
+`GET /v1/previews`
+
+```ts
+const { data } = await client.listPreviews()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "id": "string",
+      "name": "string",
+      "status": "creating_org",
+      "source_org_id": "string",
+      "preview_org_id": "string",
+      "sync_job_id": "string",
+      "sync_status": "string",
+      "requested_by": {
+        "user_id": "string",
+        "email": "string"
+      },
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "error": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getPreview`
+
+Returns a preview requested from the caller's current org, with its progress.
+
+`GET /v1/previews/{id}`
+
+```ts
+const { data } = await client.getPreview({
+  id: '123e4567-e89b-12d3-a456-426614174000',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "name": "string",
+  "status": "creating_org",
+  "source_org_id": "string",
+  "preview_org_id": "string",
+  "sync_job_id": "string",
+  "sync_status": "string",
+  "requested_by": {
+    "user_id": "string",
+    "email": "string"
+  },
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "error": "string"
+}
+```
+
+</details>
+
+---
+
 ## Schemas
 
 ### `ResourceType`
@@ -2236,7 +2483,7 @@ type HealthScanStartResponse = {
 ```ts
 type HealthFinding = {
   id: string
-  code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration"
+  code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
   severity: "error" | "warning" | "info"
   source_type: string
   source_id: string
@@ -2290,7 +2537,7 @@ type HealthReportResponse = {
   error?: string
   findings: Array<{
     id: string
-    code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration"
+    code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
     severity: "error" | "warning" | "info"
     source_type: string
     source_id: string
@@ -2561,6 +2808,7 @@ type BreakLineageResponse = {
 ```ts
 type ErrorResponse = {
   status: number
+  code?: string
   error: string
 }
 ```
@@ -2881,6 +3129,95 @@ type SyncJobBatch = {
 }
 ```
 
+### `SyncJobHealthStatus`
+
+State of a sync job's post-import health check. `pending`: queued,
+`running`: scanning, `done`: findings available, `failed`: the check
+itself failed or did not finish (the import is unaffected), `skipped`:
+nothing to check (a plan, a job that wrote nothing, or a cancelled
+job), `not_run`: a finishe
+
+```ts
+type SyncJobHealthStatus = "pending" | "running" | "done" | "failed" | "skipped" | "not_run"
+```
+
+### `HealthSeverityCounts`
+
+```ts
+type HealthSeverityCounts = {
+  error: number
+  warning: number
+  info: number
+}
+```
+
+### `SyncJobHealthCheck`
+
+Compact state of the job's post-import health check. Full results:
+`getSyncJobHealth`. Absent on plans and on jobs that finished before
+the check existed.
+
+
+```ts
+type SyncJobHealthCheck = {
+  status: "pending" | "running" | "done" | "failed" | "skipped" | "not_run"
+  counts: {
+    error: number
+    warning: number
+    info: number
+  }
+}
+```
+
+### `SyncJobHealth`
+
+Targeted health check of the configs a sync job wrote into the target
+org. Findings carry `first_seen` = `last_seen` = `finished_at`.
+
+
+```ts
+type SyncJobHealth = {
+  status: "pending" | "running" | "done" | "failed" | "skipped" | "not_run"
+  started_at?: string // date-time
+  finished_at?: string // date-time
+  scanned: number
+  counts: {
+    error: number
+    warning: number
+    info: number
+  }
+  error?: string
+  findings: Array<{
+    id: string
+    code: "broken_reference" | "inactive_reference" | "unreadable_config" | "orphaned_group_reference" | "uuid_group_label" | "duplicate_attribute_name" | "duplicate_headline" | "unreachable_attribute_purpose" | "orphaned_price" | "duplicate_price" | "inactive_price_in_use" | "incomplete_configuration" | "source_org_reference" | "secret_value_missing" | "env_value_missing"
+    severity: "error" | "warning" | "info"
+    source_type: string
+    source_id: string
+    source_title: string
+    message: string
+    message_key?: string
+    message_params?: Record<string, unknown>
+    ref_type?: string
+    ref_id?: string
+    ref_title?: string
+    source_link?: string
+    ref_link?: string
+    owner_type?: string
+    owner_id?: string
+    owner_title?: string
+    owner_link?: string
+    path?: string
+    cleanable?: boolean
+    ignored?: boolean
+    ignored_at?: string // date-time
+    ignored_by?: string
+    ignored_reason?: string
+    first_seen: string // date-time
+    last_seen: string // date-time
+  }>
+}
+```
+
 ### `SyncJob`
 
 Sync job header as surfaced by `getSyncJob` and the create response. The
@@ -2912,6 +3249,14 @@ type SyncJob = {
   }
   started_at: string // date-time
   finished_at?: string // date-time
+  health_check?: {
+    status: "pending" | "running" | "done" | "failed" | "skipped" | "not_run"
+    counts: {
+      error: { ... }
+      warning: { ... }
+      info: { ... }
+    }
+  }
   events?: Array<{
     id?: string
     kind?: "resource" | "dependency" | "step"
@@ -2996,6 +3341,10 @@ type SyncJobListResponse = {
     }
     started_at: string // date-time
     finished_at?: string // date-time
+    health_check?: {
+      status: { ... }
+      counts: { ... }
+    }
     events?: Array<{
       id?: { ... }
       kind?: { ... }
@@ -3551,5 +3900,53 @@ type ConfigInventoryResponse = {
     type: string
     reason: string
   }>
+}
+```
+
+### `CreatePreviewRequest`
+
+```ts
+type CreatePreviewRequest = {
+  name?: string
+  requester?: {
+    user_id?: string
+    email?: string // email
+    display_name?: string
+    language?: "de" | "en"
+  }
+}
+```
+
+### `PreviewStatus`
+
+- creating_org: the preview org is being created
+- copying_configuration: the sync job copying this org's configuration is running
+- inviting: the requester is being invited to the preview org
+- ready: the requester got the "your preview org is ready" email
+- failed: see `error`
+
+
+```ts
+type PreviewStatus = "creating_org" | "copying_configuration" | "inviting" | "ready" | "failed"
+```
+
+### `Preview`
+
+```ts
+type Preview = {
+  id: string
+  name: string
+  status: "creating_org" | "copying_configuration" | "inviting" | "ready" | "failed"
+  source_org_id: string
+  preview_org_id?: string
+  sync_job_id?: string
+  sync_status?: string
+  requested_by: {
+    user_id?: string
+    email?: string
+  }
+  created_at: string // date-time
+  updated_at: string // date-time
+  error?: string
 }
 ```

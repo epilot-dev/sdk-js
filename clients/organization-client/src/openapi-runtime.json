@@ -94,6 +94,30 @@
         "responses": {}
       }
     },
+    "/v2/organization/{org_id}/settings/{key}/notifications": {
+      "post": {
+        "operationId": "notifySettingsValueUpdated",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/organization/feature-settings": {
       "get": {
         "operationId": "getOrganizationFeatureSettings",
@@ -106,9 +130,40 @@
         "deprecated": true,
         "responses": {}
       }
+    },
+    "/v2/organization/announcements/active": {
+      "get": {
+        "operationId": "getActiveAnnouncement",
+        "responses": {}
+      }
+    },
+    "/v2/organization/announcements/{announcement_id}/acknowledge": {
+      "post": {
+        "operationId": "acknowledgeAnnouncement",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AnnouncementIdPathParam"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
-  "components": {},
+  "components": {
+    "parameters": {
+      "AnnouncementIdPathParam": {
+        "in": "path",
+        "name": "announcement_id",
+        "required": true
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://organization-v2.sls.epilot.io"

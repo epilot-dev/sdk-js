@@ -7,103 +7,117 @@ import type {
 } from 'openapi-client-axios';
 
 declare namespace Components {
+    namespace Parameters {
+        export type AnnouncementIdPathParam = string;
+    }
+    export interface PathParameters {
+        AnnouncementIdPathParam?: Parameters.AnnouncementIdPathParam;
+    }
     namespace Schemas {
-        /**
-         * Request payload for creating a new organization
-         */
-        export interface CreateOrganizationRequest {
+        export interface ActiveAnnouncementResponse {
+            announcement: {
+                id: string; // uuid
+                type: AnnouncementType;
+                message: AnnouncementMessage;
+                link_url: string;
+                list_version: string;
+                effective_date: string; // date
+                window_days: number;
+                status: "draft" | "published" | "archived";
+                created_at: string; // date-time
+                /**
+                 * Internal caller that created the announcement (not returned to customers)
+                 */
+                created_by?: string;
+                updated_at: string; // date-time
+                published_at?: string; // date-time
+                /**
+                 * Internal caller that published the announcement (not returned to customers)
+                 */
+                published_by?: string;
+                /**
+                 * published_at + window_days
+                 */
+                expires_at?: string; // date-time
+                archived_at?: string; // date-time
+                archived_by?: string;
+                /**
+                 * When the daily job wrote expired/superseded records after the window closed
+                 */
+                materialized_at?: string; // date-time
+            } | null;
             /**
-             * Core organization information for the new tenant
+             * Whether the caller may acknowledge (organization:edit)
              */
-            organization_detail?: {
-                /**
-                 * Display name for the organization
-                 * example:
-                 * epilot
-                 */
-                name: string;
-                /**
-                 * Primary contact email for the organization
-                 * example:
-                 * epilot@epilot.cloud
-                 */
-                email_address?: string;
-                /**
-                 * Organization type classification.
-                 * - Vendor: Primary organization type for epilot customers
-                 * - Partner: Partner organization type
-                 *
-                 * example:
-                 * Vendor
-                 */
-                type: string;
-                /**
-                 * Whether this is a production or sandbox environment.
-                 * Sandbox organizations are for testing and linked to a production org.
-                 *
-                 */
-                organization_use?: "Production" | "Sandbox";
-                /**
-                 * The ULID of the pricing tier to assign to this organization.
-                 * Determines feature access and billing.
-                 *
-                 * example:
-                 * 01GEKHZHSN19KK10ZS92Y3WY9B
-                 */
-                pricing_tier_id: string;
-            };
-            /**
-             * Initial owner user details.
-             * This user will receive an invitation email to complete registration
-             * and become the organization administrator.
-             *
-             */
-            owner_user?: {
-                /**
-                 * Full name of the owner user
-                 * example:
-                 * Ny Huynh
-                 */
-                full_name?: string;
-                /**
-                 * Email address for the invitation (must be unique in the platform)
-                 * example:
-                 * ny.huynhthi@axonactive.com
-                 */
-                email_address: string;
-            };
+            can_acknowledge: boolean;
         }
-        /**
-         * Data point metrics for a single organization, used for usage tracking and billing
-         */
-        export interface DataPoint {
+        export interface Announcement {
+            id: string; // uuid
+            type: AnnouncementType;
+            message: AnnouncementMessage;
+            link_url: string;
+            list_version: string;
+            effective_date: string; // date
+            window_days: number;
+            status: "draft" | "published" | "archived";
+            created_at: string; // date-time
             /**
-             * The organization ID (numeric format)
-             * example:
-             * 206801
+             * Internal caller that created the announcement (not returned to customers)
              */
-            id?: number;
+            created_by?: string;
+            updated_at: string; // date-time
+            published_at?: string; // date-time
             /**
-             * Maximum number of customer entities recorded in the previous month.
-             * Used as a high-water mark for billing calculations.
-             *
-             * example:
-             * 10
+             * Internal caller that published the announcement (not returned to customers)
              */
-            max_customer?: number;
+            published_by?: string;
             /**
-             * Current count of customer entities in the organization.
-             * Represents the actual usage at the time of the query.
-             *
-             * example:
-             * 10
+             * published_at + window_days
              */
-            actual_customer?: number;
+            expires_at?: string; // date-time
+            archived_at?: string; // date-time
+            archived_by?: string;
+            /**
+             * When the daily job wrote expired/superseded records after the window closed
+             */
+            materialized_at?: string; // date-time
         }
-        /**
-         * List of data point metrics for all organizations
-         */
-        export type DataPointsResponse = /* Data point metrics for a single organization, used for usage tracking and billing */ DataPoint[];
+        export interface AnnouncementMessage {
+            /**
+             * example:
+             * Wir haben unsere Liste der Subdienstleister aktualisiert (gültig ab 01.11.2026). Bitte prüfe die Änderungen.
+             */
+            de: string;
+            /**
+             * example:
+             * We have updated our list of subprocessors (effective 01.11.2026). Please review the changes.
+             */
+            en?: string;
+        }
+        export interface AnnouncementOrganizationStatus {
+            announcement_id: string;
+            org_id: string;
+            org_name?: string;
+            status: AnnouncementOrganizationStatusValue;
+            acknowledged_by?: {
+                user_id: string;
+                name?: string;
+                email?: string;
+            };
+            acknowledged_at?: string; // date-time
+            /**
+             * example:
+             * 360
+             */
+            portal?: string;
+            list_version: string;
+            /**
+             * When the record was written (acknowledgement or materialization by the daily job)
+             */
+            recorded_at?: string; // date-time
+        }
+        export type AnnouncementOrganizationStatusValue = "acknowledged" | "pending" | "expired" | "superseded";
+        export type AnnouncementType = "subprocessor_change";
         /**
          * Metadata for a single feature flag toggle
          */
@@ -162,172 +176,6 @@ declare namespace Components {
             feature_flags: /* Metadata for a single feature flag toggle */ FeatureFlagMetadata[];
         }
         /**
-         * Response containing a list of HubSpot companies matching the search criteria
-         */
-        export interface HubspotCompaniesResponse {
-            /**
-             * List of HubSpot companies matching the query
-             */
-            results?: /**
-             * Represents a company record from HubSpot CRM synchronized to the epilot data warehouse.
-             * Used for CRM integration and organization mapping.
-             *
-             */
-            HubspotCompany[];
-            /**
-             * Total number of companies in the response
-             * example:
-             * 10
-             */
-            total?: number;
-        }
-        /**
-         * Represents a company record from HubSpot CRM synchronized to the epilot data warehouse.
-         * Used for CRM integration and organization mapping.
-         *
-         */
-        export interface HubspotCompany {
-            /**
-             * The unique HubSpot company identifier
-             * example:
-             * 12345678901
-             */
-            company_id?: string;
-            /**
-             * The display name of the company in HubSpot
-             * example:
-             * Acme Corp
-             */
-            company_name?: string | null;
-            /**
-             * The primary web domain associated with the company
-             * example:
-             * acme.com
-             */
-            domain?: string | null;
-        }
-        /**
-         * HubSpot company data associated with an epilot organization.
-         * Contains business metrics and CRM properties synced from HubSpot.
-         *
-         */
-        export interface HubspotOrganizationData {
-            /**
-             * The unique HubSpot company identifier
-             * example:
-             * 5278308807
-             */
-            company_id?: string;
-            /**
-             * The display name of the company in HubSpot
-             * example:
-             * Stadtwerke Meerbusch Willich Netz
-             */
-            company_name?: string | null;
-            /**
-             * The primary web domain associated with the company
-             * example:
-             * stadtwerke-service.de
-             */
-            domain?: string | null;
-            /**
-             * Current Monthly Recurring Revenue
-             * example:
-             * 11033.33
-             */
-            current_mrr?: string | null;
-            /**
-             * Potential Monthly Recurring Revenue
-             * example:
-             * 20000
-             */
-            potential_mrr?: string | null;
-            /**
-             * Company size classification
-             * example:
-             * Large
-             */
-            company_size?: string | null;
-            /**
-             * Current pricing tier
-             * example:
-             * Professional
-             */
-            pricing_tier?: string | null;
-            /**
-             * HubSpot lifecycle stage
-             * example:
-             * customer
-             */
-            lifecyclestage?: string | null;
-            /**
-             * Industry classification
-             * example:
-             * Energiedienstleister
-             */
-            industry?: string | null;
-            /**
-             * Number of employees
-             * example:
-             * 200
-             */
-            numberofemployees?: string | null;
-            /**
-             * epilot customer number
-             * example:
-             * 10031
-             */
-            customer_number?: string | null;
-            /**
-             * Number of active users
-             * example:
-             * 34
-             */
-            no_of_users?: string | null;
-            /**
-             * User activation rate
-             * example:
-             * 0.647059
-             */
-            activation_rate?: string | null;
-            /**
-             * List of active features
-             * example:
-             * Installer Portal
-             */
-            active_features?: string | null;
-            /**
-             * Implemented use cases
-             * example:
-             * GRID: Installations (MGA);GRID: House Connections
-             */
-            usecases_implemented?: string | null;
-            /**
-             * Current buyer's journey stage
-             * example:
-             * Expansion-Ready
-             */
-            buyer_journey?: string | null;
-            /**
-             * Company country
-             * example:
-             * Germany
-             */
-            country?: string | null;
-            /**
-             * Company city
-             * example:
-             * Willich
-             */
-            city?: string | null;
-            /**
-             * Full HubSpot properties object with all available fields
-             */
-            properties?: {
-                [name: string]: any;
-            };
-        }
-        /**
          * Internationalized string with a translation key and optional default value
          */
         export interface I18nString {
@@ -343,124 +191,6 @@ declare namespace Components {
              * Canary Updates
              */
             default_value?: string;
-        }
-        /**
-         * Extended organization object with internal-only fields.
-         *
-         * Includes all fields from the base Organization schema plus additional
-         * internal metadata used for platform administration and support.
-         *
-         */
-        export interface InternalOrganization {
-            id?: /**
-             * Unique identifier for an organization (tenant) in the epilot platform
-             * example:
-             * 739224
-             */
-            OrganizationId;
-            /**
-             * Organization name
-             * example:
-             * Epilot
-             */
-            name?: string | null;
-            /**
-             * Organization contact email
-             * example:
-             * someone@epilot.cloud
-             */
-            email?: string | null;
-            /**
-             * Organization contact phone
-             * example:
-             * +49123123123
-             */
-            phone?: string | null;
-            /**
-             * Organization website
-             * example:
-             * https://epilot.cloud
-             */
-            website?: string | null;
-            /**
-             * Organization postal address
-             */
-            address?: {
-                [name: string]: any;
-                country?: string | null;
-                city?: string | null;
-                postal_code?: string | null;
-                street?: string | null;
-                street_number?: string | null;
-            };
-            /**
-             * Indicates whether this is a production or sandbox organization.
-             * Sandbox organizations are linked to a parent production organization for testing purposes.
-             *
-             */
-            organization_use?: "Production" | "Sandbox";
-            /**
-             * The ID of the parent production organization.
-             * Only set for sandbox organizations to link them to their production counterpart.
-             *
-             */
-            parent_production_org_id?: string | null;
-            /**
-             * Organization created date
-             */
-            created_date?: string; // date-time
-            /**
-             * Organization logo URL
-             * example:
-             * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
-             */
-            logo_url?: string | null;
-            /**
-             * Organization logo thumbnail URL
-             * example:
-             * https://epilot-playground-organization-data.s3.eu-central-1.amazonaws.com/epilot-logo.png
-             */
-            logo_thumbnail_url?: string | null;
-            /**
-             * Default email signature of organization
-             * example:
-             * <p>Thanks</p>
-             */
-            signature?: string | null;
-            /**
-             * example:
-             * false
-             */
-            is_unlicensed_org?: boolean | null;
-            /**
-             * Organization style setting (e.g. font setting)
-             */
-            style?: {
-                [name: string]: any;
-            } | null;
-            type?: "Vendor" | "Partner";
-            /**
-             * example:
-             * EPI
-             */
-            symbol?: string | null;
-            /**
-             * Deprecated - Please use pricing tier api
-             * example:
-             * professional
-             */
-            pricing_tier?: string | null;
-            /**
-             * example:
-             * 50
-             */
-            free_user_limit?: number | null;
-            /**
-             * Labels/tags associated with the organization for categorization and filtering.
-             * Used internally to classify organizations (e.g., "enterprise", "beta-tester", "test org").
-             *
-             */
-            tags?: string[] | null;
         }
         /**
          * Represents an epilot organization (tenant).
@@ -512,11 +242,12 @@ declare namespace Components {
                 street_number?: string | null;
             };
             /**
-             * Indicates whether this is a production or sandbox organization.
+             * Indicates whether this is a production, sandbox or preview organization.
              * Sandbox organizations are linked to a parent production organization for testing purposes.
+             * Preview organizations are temporary copies of a production organization.
              *
              */
-            organization_use?: "Production" | "Sandbox";
+            organization_use?: "Production" | "Sandbox" | "Preview";
             /**
              * The ID of the parent production organization.
              * Only set for sandbox organizations to link them to their production counterpart.
@@ -581,108 +312,11 @@ declare namespace Components {
             tags?: string[] | null;
         }
         /**
-         * Records the cleanup status reported by a specific service for an organization.
-         * Each service that stores organization data reports its cleanup operations here.
-         *
-         */
-        export interface OrganizationCleanupStatus {
-            org_id: /**
-             * Unique identifier for an organization (tenant) in the epilot platform
-             * example:
-             * 739224
-             */
-            OrganizationId;
-            /**
-             * Name of the service reporting its cleanup status
-             * example:
-             * organization-api
-             */
-            service_name: string;
-            /**
-             * List of cleanup operations performed by the service.
-             * Each operation describes what action was taken on which resource.
-             *
-             * example:
-             * [
-             *   {
-             *     "action": "Delete",
-             *     "resource": "OrgTable",
-             *     "extra_info": "pk: ORG#739224"
-             *   },
-             *   {
-             *     "action": "Archive",
-             *     "resource": "s3://my-bucket",
-             *     "extra_info": "my-bucket/my-key.txt"
-             *   }
-             * ]
-             */
-            operations?: {
-                [name: string]: any;
-                /**
-                 * The type of cleanup action performed.
-                 * Common values: Delete, Archive, Purge
-                 *
-                 * example:
-                 * Delete
-                 */
-                action?: string;
-                /**
-                 * The resource that was cleaned up.
-                 * Can be a table name, S3 bucket, or other resource identifier.
-                 *
-                 * example:
-                 * OrgTable
-                 */
-                resource?: string;
-                /**
-                 * Additional context about the cleanup operation
-                 */
-                extra_info?: /* Additional context about the cleanup operation */ string | number | boolean | {
-                    [name: string]: any;
-                }[] | {
-                    [name: string]: any;
-                };
-            }[];
-        }
-        /**
          * Unique identifier for an organization (tenant) in the epilot platform
          * example:
          * 739224
          */
         export type OrganizationId = string;
-        /**
-         * Represents an organization that has been marked for deletion and requires cleanup.
-         * Contains metadata about the deletion request.
-         *
-         */
-        export interface OrganizationToCleanup {
-            org_id: /**
-             * Unique identifier for an organization (tenant) in the epilot platform
-             * example:
-             * 739224
-             */
-            OrganizationId;
-            /**
-             * Timestamp when the organization was marked for deletion
-             * example:
-             * 2021-06-01T00:00:00Z
-             */
-            deleted_at: string; // date-time
-            /**
-             * User ID of the person who initiated the deletion
-             * example:
-             * 123456
-             */
-            deleted_by: string;
-        }
-        /**
-         * A unique key identifying an organization setting.
-         * Common setting keys include: double_opt_in, email_tracking, default_language, workflow_notifications
-         *
-         * example:
-         * double_opt_in
-         */
-        export type SettingKey = string;
         /**
          * A key-value map of all organization settings.
          * Keys are setting identifiers and values can be any valid JSON type.
@@ -734,7 +368,7 @@ declare namespace Components {
             /**
              * The rule type discriminator
              */
-            type: "always" | "never" | "advanced_mode" | "pricing_tier" | "feature_flag" | "permission" | "setting_enabled" | "flag_enabled" | "not" | "and" | "or";
+            type: "always" | "never" | "advanced_mode" | "pricing_tier" | "pricing_tier_class" | "production_org" | "feature_flag" | "permission" | "setting_enabled" | "flag_enabled" | "not" | "and" | "or";
             /**
              * Setting key for pricing_tier and setting_enabled rules
              */
@@ -743,6 +377,15 @@ declare namespace Components {
              * Flag name for feature_flag and flag_enabled rules
              */
             flag_name?: string;
+            /**
+             * Pricing tier class names matched (word-boundary, case-insensitive) for pricing_tier_class rules
+             * example:
+             * [
+             *   "enterprise",
+             *   "professional"
+             * ]
+             */
+            pricing_tier_classes?: string[];
             /**
              * Permission action for permission rules
              */
@@ -770,6 +413,33 @@ declare namespace Components {
     }
 }
 declare namespace Paths {
+    namespace AcknowledgeAnnouncement {
+        namespace Parameters {
+            export type AnnouncementId = string;
+        }
+        export interface PathParameters {
+            announcement_id: Parameters.AnnouncementId;
+        }
+        export interface RequestBody {
+            /**
+             * Portal the acknowledgement was given in
+             * example:
+             * 360
+             */
+            portal?: string;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.AnnouncementOrganizationStatus;
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+        }
+    }
     namespace DeleteSettingsValue {
         namespace Parameters {
             export type Key = string;
@@ -792,6 +462,13 @@ declare namespace Paths {
             export interface $403 {
             }
             export interface $404 {
+            }
+        }
+    }
+    namespace GetActiveAnnouncement {
+        namespace Responses {
+            export type $200 = Components.Schemas.ActiveAnnouncementResponse;
+            export interface $401 {
             }
         }
     }
@@ -889,6 +566,50 @@ declare namespace Paths {
             export interface $403 {
             }
             export interface $404 {
+            }
+        }
+    }
+    namespace NotifySettingsValueUpdated {
+        namespace Parameters {
+            export type Key = string;
+            export type OrgId = /**
+             * Unique identifier for an organization (tenant) in the epilot platform
+             * example:
+             * 739224
+             */
+            Components.Schemas.OrganizationId;
+        }
+        export interface PathParameters {
+            org_id: Parameters.OrgId;
+            key: Parameters.Key;
+        }
+        export interface RequestBody {
+            /**
+             * Email of the staff user who changed the setting
+             */
+            user_email?: string;
+            /**
+             * Organization display name
+             */
+            org_name?: string;
+            value?: /**
+             * The value of an organization setting.
+             * Can be any valid JSON type: string, number, boolean, array, or object.
+             *
+             * example:
+             * {
+             *   "enabled": true
+             * }
+             */
+            Components.Schemas.SettingsValue;
+        }
+        namespace Responses {
+            export interface $200 {
+                delivered?: boolean;
+            }
+            export interface $401 {
+            }
+            export interface $403 {
             }
         }
     }
@@ -1083,7 +804,19 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteSettingsValue.Responses.$200>
   /**
-   * getOrganizationFeatureSettings - Get organization feature settings
+   * notifySettingsValueUpdated - notifySettingsValueUpdated
+   * 
+   * Sends an internal notification that an organization setting was updated.
+   */
+  'notifySettingsValueUpdated'(
+    parameters?: Parameters<Paths.NotifySettingsValueUpdated.PathParameters> | null,
+    data?: Paths.NotifySettingsValueUpdated.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.NotifySettingsValueUpdated.Responses.$200>
+  /**
+   * getOrganizationFeatureSettings - getOrganizationFeatureSettings
+   * 
+   * Get organization feature settings.
    * 
    * Returns feature flag metadata for the organization UI.
    * 
@@ -1097,15 +830,51 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetOrganizationFeatureSettings.Responses.$200>
   /**
-   * getFeatureSettings - Get platform configuration metadata
+   * getFeatureSettings - getFeatureSettings
+   * 
+   * Get platform configuration metadata.
    * 
    * Deprecated: use /v2/organization/feature-settings instead.
+   * 
    */
   'getFeatureSettings'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFeatureSettings.Responses.$200>
+  /**
+   * getActiveAnnouncement - getActiveAnnouncement
+   * 
+   * Returns the announcement (e.g. a subprocessor change notice) to show as a portal banner for the
+   * caller's organization.
+   * 
+   * Only the newest published announcement whose acknowledgement window is still open is returned, and
+   * only if the organization is eligible (created before the announcement was published) and has not
+   * acknowledged it yet. Otherwise `announcement` is `null`.
+   * 
+   * `can_acknowledge` tells whether the caller may acknowledge (requires `organization:edit`).
+   * 
+   */
+  'getActiveAnnouncement'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetActiveAnnouncement.Responses.$200>
+  /**
+   * acknowledgeAnnouncement - acknowledgeAnnouncement
+   * 
+   * Acknowledges an announcement on behalf of the caller's organization. Only org admins
+   * (`organization:edit`) may acknowledge.
+   * 
+   * One acknowledgement per organization: the first acknowledgement wins. Acknowledging an already
+   * acknowledged announcement returns the existing record.
+   * 
+   */
+  'acknowledgeAnnouncement'(
+    parameters?: Parameters<Paths.AcknowledgeAnnouncement.PathParameters> | null,
+    data?: Paths.AcknowledgeAnnouncement.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AcknowledgeAnnouncement.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -1219,9 +988,23 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteSettingsValue.Responses.$200>
   }
+  ['/v2/organization/{org_id}/settings/{key}/notifications']: {
+    /**
+     * notifySettingsValueUpdated - notifySettingsValueUpdated
+     * 
+     * Sends an internal notification that an organization setting was updated.
+     */
+    'post'(
+      parameters?: Parameters<Paths.NotifySettingsValueUpdated.PathParameters> | null,
+      data?: Paths.NotifySettingsValueUpdated.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.NotifySettingsValueUpdated.Responses.$200>
+  }
   ['/v2/organization/feature-settings']: {
     /**
-     * getOrganizationFeatureSettings - Get organization feature settings
+     * getOrganizationFeatureSettings - getOrganizationFeatureSettings
+     * 
+     * Get organization feature settings.
      * 
      * Returns feature flag metadata for the organization UI.
      * 
@@ -1237,9 +1020,12 @@ export interface PathsDictionary {
   }
   ['/v2/feature-settings']: {
     /**
-     * getFeatureSettings - Get platform configuration metadata
+     * getFeatureSettings - getFeatureSettings
+     * 
+     * Get platform configuration metadata.
      * 
      * Deprecated: use /v2/organization/feature-settings instead.
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1247,26 +1033,59 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFeatureSettings.Responses.$200>
   }
+  ['/v2/organization/announcements/active']: {
+    /**
+     * getActiveAnnouncement - getActiveAnnouncement
+     * 
+     * Returns the announcement (e.g. a subprocessor change notice) to show as a portal banner for the
+     * caller's organization.
+     * 
+     * Only the newest published announcement whose acknowledgement window is still open is returned, and
+     * only if the organization is eligible (created before the announcement was published) and has not
+     * acknowledged it yet. Otherwise `announcement` is `null`.
+     * 
+     * `can_acknowledge` tells whether the caller may acknowledge (requires `organization:edit`).
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetActiveAnnouncement.Responses.$200>
+  }
+  ['/v2/organization/announcements/{announcement_id}/acknowledge']: {
+    /**
+     * acknowledgeAnnouncement - acknowledgeAnnouncement
+     * 
+     * Acknowledges an announcement on behalf of the caller's organization. Only org admins
+     * (`organization:edit`) may acknowledge.
+     * 
+     * One acknowledgement per organization: the first acknowledgement wins. Acknowledging an already
+     * acknowledged announcement returns the existing record.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.AcknowledgeAnnouncement.PathParameters> | null,
+      data?: Paths.AcknowledgeAnnouncement.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AcknowledgeAnnouncement.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
 
 
-export type CreateOrganizationRequest = Components.Schemas.CreateOrganizationRequest;
-export type DataPoint = Components.Schemas.DataPoint;
-export type DataPointsResponse = Components.Schemas.DataPointsResponse;
+export type ActiveAnnouncementResponse = Components.Schemas.ActiveAnnouncementResponse;
+export type Announcement = Components.Schemas.Announcement;
+export type AnnouncementMessage = Components.Schemas.AnnouncementMessage;
+export type AnnouncementOrganizationStatus = Components.Schemas.AnnouncementOrganizationStatus;
+export type AnnouncementOrganizationStatusValue = Components.Schemas.AnnouncementOrganizationStatusValue;
+export type AnnouncementType = Components.Schemas.AnnouncementType;
 export type FeatureFlagMetadata = Components.Schemas.FeatureFlagMetadata;
 export type FeatureSettings = Components.Schemas.FeatureSettings;
-export type HubspotCompaniesResponse = Components.Schemas.HubspotCompaniesResponse;
-export type HubspotCompany = Components.Schemas.HubspotCompany;
-export type HubspotOrganizationData = Components.Schemas.HubspotOrganizationData;
 export type I18nString = Components.Schemas.I18nString;
-export type InternalOrganization = Components.Schemas.InternalOrganization;
 export type Organization = Components.Schemas.Organization;
-export type OrganizationCleanupStatus = Components.Schemas.OrganizationCleanupStatus;
 export type OrganizationId = Components.Schemas.OrganizationId;
-export type OrganizationToCleanup = Components.Schemas.OrganizationToCleanup;
-export type SettingKey = Components.Schemas.SettingKey;
 export type Settings = Components.Schemas.Settings;
 export type SettingsValue = Components.Schemas.SettingsValue;
 export type VisibilityRule = Components.Schemas.VisibilityRule;
