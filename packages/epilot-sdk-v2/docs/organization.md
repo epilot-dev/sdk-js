@@ -633,24 +633,8 @@ type FeatureFlagMetadata = {
     flag_name?: string
     action?: string
     resource?: string
-    rule?: {
-      type: { ... }
-      setting_key?: { ... }
-      flag_name?: { ... }
-      action?: { ... }
-      resource?: { ... }
-      rule?: { ... }
-      rules?: { ... }
-    }
-    rules?: Array<{
-      type: { ... }
-      setting_key?: { ... }
-      flag_name?: { ... }
-      action?: { ... }
-      resource?: { ... }
-      rule?: { ... }
-      rules?: { ... }
-    }>
+    rule?: { ... }
+    rules?: { ... }[]
   }>
 }
 ```
@@ -679,55 +663,7 @@ type VisibilityRule = {
   flag_name?: string
   action?: string
   resource?: string
-  rule?: {
-    type: "always" | "never" | "advanced_mode" | "pricing_tier" | "feature_flag" | "permission" | "setting_enabled" | "flag_enabled" | "not" | "and" | "or"
-    setting_key?: string
-    flag_name?: string
-    action?: string
-    resource?: string
-    rule?: {
-      type: { ... }
-      setting_key?: { ... }
-      flag_name?: { ... }
-      action?: { ... }
-      resource?: { ... }
-      rule?: { ... }
-      rules?: { ... }
-    }
-    rules?: Array<{
-      type: { ... }
-      setting_key?: { ... }
-      flag_name?: { ... }
-      action?: { ... }
-      resource?: { ... }
-      rule?: { ... }
-      rules?: { ... }
-    }>
-  }
-  rules?: Array<{
-    type: "always" | "never" | "advanced_mode" | "pricing_tier" | "feature_flag" | "permission" | "setting_enabled" | "flag_enabled" | "not" | "and" | "or"
-    setting_key?: string
-    flag_name?: string
-    action?: string
-    resource?: string
-    rule?: {
-      type: { ... }
-      setting_key?: { ... }
-      flag_name?: { ... }
-      action?: { ... }
-      resource?: { ... }
-      rule?: { ... }
-      rules?: { ... }
-    }
-    rules?: Array<{
-      type: { ... }
-      setting_key?: { ... }
-      flag_name?: { ... }
-      action?: { ... }
-      resource?: { ... }
-      rule?: { ... }
-      rules?: { ... }
-    }>
-  }>
+  rule?: { ... }
+  rules?: { ... }[]
 }
 ```

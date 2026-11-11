@@ -457,6 +457,19 @@
         "responses": {}
       }
     },
+    "/v1/conditional-pricing/{slug}/conditions:usage": {
+      "get": {
+        "operationId": "$getConditionUsage",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/conditional-pricing/organization": {
       "get": {
         "operationId": "$getConditionalPricingOrganization",

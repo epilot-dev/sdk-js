@@ -192,6 +192,123 @@
         }
       }
     },
+    "/v1/calls/active": {
+      "get": {
+        "operationId": "getActiveCall",
+        "summary": "getActiveCall",
+        "description": "Whether the signed-in user is on a phone call right now, and which conversation it is. The\nanswer is about the caller only (the user of the bearer token).\n\nThe epilot 360 phone reports the call while it lasts (reportActiveCall); without a current\nreport the phone system's live state is asked instead, so a call taken outside the epilot 360\nphone is still found. `conversation_id` is the phone system's conversation id: every leg of a\ntransferred or conferenced call has the same one, and it is the `external_id` of the `call`\nentity created after the call (ingestCallArtifacts).\n\nTo relate what an agent does during a call to that call, put the id into the record as\n`phone_conversation_id`: the epilot 360 sidebar passes it in the context of a journey opened\nduring a call, so the submission holds `journey_context.phone_conversation_id`.\n",
+        "tags": [
+          "phone-integration"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The caller's active call, or `on_call` false",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActiveCall"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "put": {
+        "operationId": "reportActiveCall",
+        "summary": "reportActiveCall",
+        "description": "Reports the call the signed-in user is on. Sent by the epilot 360 phone when a call is\nanswered and again every 30 seconds while it lasts: a report is valid for 2 minutes\n(`expires_at`), so a phone that disappears mid-call does not leave the user on a call.\nOne call per user: a report for another conversation replaces the previous one.\nRequires `phone:use`.\n",
+        "tags": [
+          "phone-integration"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "x-epilot-permissions": [
+          "phone:use"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActiveCallReport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The call as it is now recorded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActiveCall"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "clearActiveCall",
+        "summary": "clearActiveCall",
+        "description": "Clears the signed-in user's reported call, when their part of it ended (hung up, or handed\nover to another agent). With `conversation_id`, only a report of that conversation is\ncleared, so a late \"call ended\" never clears the next call. Idempotent.\n",
+        "tags": [
+          "phone-integration"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "query",
+            "required": false,
+            "description": "Clear the report only when it is this conversation's",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No call is reported for the user (any more)"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
     "/v1/manager/status": {
       "get": {
         "operationId": "getManagerStatus",
@@ -566,7 +683,7 @@
       "put": {
         "operationId": "setAgentRouting",
         "summary": "setAgentRouting",
-        "description": "Sets an agent's skills and direct queue membership (full sets, not deltas), in this order:\n1. Skills: the agent's skills in the phone system are replaced by `skills`, so the phone system\n   routes on them right away. The phone system is the source of truth for phone skills; they are\n   independent of the skills in epilot's Access Management.\n2. Direct queue membership: each listed queue the agent is not yet named in gets the agent in its\n   epilot-managed routing step (created on first use, lowest precedence). Every other queue drops\n   the agent's direct entries from its epilot-managed step and, with `include_own_steps`, from\n   the organization's own enabled steps as well. Teams set up in the phone system are never\n   changed: a queue that reaches the agent through one keeps them (`locked`). Without\n   `include_own_steps` a queue whose own steps name the agent is not written either.\nIdempotent; a failure part-way answers `502` and repeating the call completes it. Requires\n`phone:manage`.\n",
+        "description": "Sets an agent's skills and direct queue membership (full sets, not deltas), in this order:\n1. Skills: the agent's skills in the phone system are replaced by `skills` (lowercased, see\n   `Skill`), so the phone system routes on them right away. The phone system is the source of\n   truth for phone skills; they are independent of the skills in epilot's Access Management.\n2. Direct queue membership: each listed queue the agent is not yet named in gets the agent in its\n   epilot-managed routing step (created on first use, lowest precedence). Every other queue drops\n   the agent's direct entries from its epilot-managed step and, with `include_own_steps`, from\n   the organization's own enabled steps as well. Teams set up in the phone system are never\n   changed: a queue that reaches the agent through one keeps them (`locked`). Without\n   `include_own_steps` a queue whose own steps name the agent is not written either.\nIdempotent; a failure part-way answers `502` and repeating the call completes it. Requires\n`phone:manage`.\n",
         "tags": [
           "manager"
         ],
@@ -1829,7 +1946,7 @@
       "get": {
         "operationId": "listSkills",
         "summary": "listSkills",
-        "description": "The organization's skill catalogue: the skills epilot keeps for it (created in the control\ncenter, `source: epilot`) together with every skill the phone system already uses on an agent or\nin a queue's routing step (`source: provider`), each once, sorted by skill. The phone system has\nno skill list of its own, so a skill nobody has yet exists only here. Requires `phone:manage`.\n",
+        "description": "The organization's skill catalogue: the skills epilot keeps for it (created in the control\ncenter, `source: epilot`) together with every skill the phone system already uses on an agent or\nin a queue's routing step (`source: provider`), each once, lowercased (see `Skill`), sorted by\nskill. The phone system has no skill list of its own, so a skill nobody has yet exists only here.\nRequires `phone:manage`.\n",
         "tags": [
           "manager"
         ],
@@ -1876,7 +1993,7 @@
       "post": {
         "operationId": "createSkill",
         "summary": "createSkill",
-        "description": "Adds a skill to the organization's catalogue (epilot only: nothing is written to the phone\nsystem until an agent gets the skill or a queue accepts it). The skill is trimmed and must then\nbe 1 to 100 characters. Requires `phone:manage`.\n",
+        "description": "Adds a skill to the organization's catalogue (epilot only: nothing is written to the phone\nsystem until an agent gets the skill or a queue accepts it). The skill is trimmed, must then be\n1 to 100 characters, and is stored lowercased (see `Skill`): `Mixed Case` creates and answers\n`mixed case`, and is `skill_exists` when `mixed case` exists in any letter case. Requires\n`phone:manage`.\n",
         "tags": [
           "manager"
         ],
@@ -1940,7 +2057,7 @@
           "name": "tag",
           "in": "path",
           "required": true,
-          "description": "The skill, URL-encoded (e.g. `language%3Agerman`)",
+          "description": "The skill, URL-encoded (e.g. `language%3Agerman`), in any letter case (see `Skill`)",
           "schema": {
             "type": "string",
             "minLength": 1,
@@ -1951,7 +2068,7 @@
       "delete": {
         "operationId": "deleteSkill",
         "summary": "deleteSkill",
-        "description": "Deletes a skill everywhere: it is taken from every agent that has it and from every routing step\nof every queue that accepts it in the phone system, then removed from the catalogue.\nIdempotent: a skill nobody has answers zero counts. On a phone-system failure the answer is 502\nand its message says how many agents and queues were already updated; deleting again completes\nit. Requires `phone:manage`.\n",
+        "description": "Deletes a skill everywhere (in any letter case, see `Skill`): it is taken from every agent that has it and from every routing step\nof every queue that accepts it in the phone system, then removed from the catalogue.\nIdempotent: a skill nobody has answers zero counts. On a phone-system failure the answer is 502\nand its message says how many agents and queues were already updated; deleting again completes\nit. Requires `phone:manage`.\n",
         "tags": [
           "manager"
         ],
@@ -2017,7 +2134,7 @@
           "name": "tag",
           "in": "path",
           "required": true,
-          "description": "The skill, URL-encoded (e.g. `language%3Agerman`)",
+          "description": "The skill, URL-encoded (e.g. `language%3Agerman`), in any letter case (see `Skill`)",
           "schema": {
             "type": "string",
             "minLength": 1,
@@ -2780,6 +2897,62 @@
           }
         }
       },
+      "ActiveCall": {
+        "type": "object",
+        "description": "The phone call a user is on right now.",
+        "required": [
+          "on_call"
+        ],
+        "properties": {
+          "on_call": {
+            "type": "boolean",
+            "description": "Whether the user is on an answered call. The other fields are present only when true."
+          },
+          "conversation_id": {
+            "type": "string",
+            "description": "The phone system's conversation id: the same on every leg of a transferred or conferenced\ncall, and the `external_id` of the `call` entity created after the call.\n",
+            "example": "01KW704DAM1PM5SDGKFDY9BNK0"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the user's part of the call started"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "softphone",
+              "provider"
+            ],
+            "description": "`softphone`: reported by the epilot 360 phone. `provider`: read from the phone system's\nlive state because no current report exists.\n"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Until when the report is valid unless renewed (`softphone` only)"
+          }
+        }
+      },
+      "ActiveCallReport": {
+        "type": "object",
+        "required": [
+          "conversation_id"
+        ],
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "The phone system's conversation id of the call (not the id of the user's own leg)",
+            "example": "01KW704DAM1PM5SDGKFDY9BNK0"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "When the user's part of the call started, as an ISO 8601 time. Without one (or with a\ntime that is not one, or lies in the future) it is the first report of the conversation.\n",
+            "example": "2026-11-10T10:00:00.000Z"
+          }
+        }
+      },
       "AgentState": {
         "type": "string",
         "description": "The agent's live line state as the provider reports it, plus `busy` for anyone who cannot take a\nqueue call for a reason other than a call: on a presence that takes no calls (e.g. Busy, Break),\nwithout a presence, or disabled at the provider; `busy` also covers the provider's busy line\nstate. `unknown` when the provider gives no state. `offline` is not reported for now: Babelforce\nparks a signed-out agent on its Busy presence and reports both alike, so signed-out agents show\nas `busy` until the phone system offers a sign-in signal. `in_call` covers ringing-to-bridged;\n`wrap_up` is the post-call time.\n",
@@ -2849,7 +3022,7 @@
       },
       "Skill": {
         "type": "string",
-        "description": "A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is\n`<skill category>:<label>` (e.g. `language:german`), which the control center shows as\n\"Category · Label\"; a skill without a colon has no category.\n",
+        "description": "A skill as the phone system holds it (Babelforce: an agent tag). epilot's convention for skills is\n`<skill category>:<label>` (e.g. `language:german`), which the control center shows as\n\"Category · Label\"; a skill without a colon has no category.\nSkills are case-insensitive and stored lowercased, in epilot's catalogue as in the phone system\n(Babelforce lowercases the tags it stores): a skill sent in any letter case (`Language:German`,\nin a body or a path) is the skill `language:german`, and every answer lists skills lowercased.\n",
         "minLength": 1,
         "maxLength": 100,
         "pattern": "^\\S(.*\\S)?$"
@@ -3572,7 +3745,7 @@
         "properties": {
           "tag": {
             "type": "string",
-            "description": "The skill as the phone system stores it (see `Skill`)"
+            "description": "The skill as the phone system stores it, lowercased (see `Skill`)"
           },
           "source": {
             "type": "string",
@@ -3616,7 +3789,7 @@
           "tag": {
             "type": "string",
             "minLength": 1,
-            "description": "The skill; trimmed, then 1 to 100 characters"
+            "description": "The skill; trimmed, then 1 to 100 characters, stored lowercased (see `Skill`)"
           }
         }
       },

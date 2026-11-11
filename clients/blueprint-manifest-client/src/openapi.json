@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "title": "Blueprint Manifest API",
-    "version": "4.9.0",
+    "version": "4.10.0",
     "description": "Service to create and install Blueprint Manifest files"
   },
   "tags": [
@@ -838,6 +838,9 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Blueprint ID already exists for an enabled or migrated Blueprint."
           }
         }
       }
@@ -1053,6 +1056,9 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Blueprint changed concurrently, creation is pending, or body ID differs from path ID."
           }
         }
       },
@@ -1088,6 +1094,389 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "Blueprint changed concurrently."
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases": {
+      "get": {
+        "operationId": "listBlueprintTestCases",
+        "summary": "listBlueprintTestCases",
+        "description": "Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestCasePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or cursor"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Feature unavailable, insufficient Blueprint permissions, or organization override denied"
+          },
+          "404": {
+            "description": "Blueprint or test case not found"
+          },
+          "409": {
+            "description": "Definition revision conflict"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Permissions service unavailable"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createBlueprintTestCase",
+        "summary": "createBlueprintTestCase",
+        "description": "Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintTestCaseInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestCase"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or cursor"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Feature unavailable, insufficient Blueprint permissions, or organization override denied"
+          },
+          "404": {
+            "description": "Blueprint or test case not found"
+          },
+          "409": {
+            "description": "Definition revision conflict"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Permissions service unavailable"
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}": {
+      "get": {
+        "operationId": "getBlueprintTestCase",
+        "summary": "getBlueprintTestCase",
+        "description": "Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "revision",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740990
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestCase"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or cursor"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Feature unavailable, insufficient Blueprint permissions, or organization override denied"
+          },
+          "404": {
+            "description": "Blueprint or test case not found"
+          },
+          "409": {
+            "description": "Definition revision conflict"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Permissions service unavailable"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateBlueprintTestCase",
+        "summary": "updateBlueprintTestCase",
+        "description": "Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintTestCaseUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestCase"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or cursor"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Feature unavailable, insufficient Blueprint permissions, or organization override denied"
+          },
+          "404": {
+            "description": "Blueprint or test case not found"
+          },
+          "409": {
+            "description": "Definition revision conflict"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Permissions service unavailable"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBlueprintTestCase",
+        "summary": "deleteBlueprintTestCase",
+        "description": "Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "expected_revision",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740990
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "description": "Invalid request or cursor"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Feature unavailable, insufficient Blueprint permissions, or organization override denied"
+          },
+          "404": {
+            "description": "Blueprint or test case not found"
+          },
+          "409": {
+            "description": "Definition revision conflict"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Permissions service unavailable"
           }
         }
       }
@@ -2885,6 +3274,431 @@
         }
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/assistant/messages": {
+      "post": {
+        "operationId": "sendBlueprintAssistantMessage",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "sendBlueprintAssistantMessage",
+        "description": "Sends a message to the blueprint assistant for a custom blueprint, starting a conversation when\n`conversation_id` is omitted. The answer is produced asynchronously: poll\n`getBlueprintAssistantConversation` until `status` is no longer `IN_PROGRESS`.\n\n`proposal_update` records that the user applied or dismissed a proposal from an earlier answer.\nThe assistant never changes the blueprint itself; proposals are applied by the client through the\nexisting resource and publish endpoints. Available when `blueprint-ai-assistant` is on; publish proposals also need `blueprint-marketplace-publishing`.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintAssistantMessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proposal update recorded; no answer was started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintAssistantConversation"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Message accepted; the answer is being produced",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintAssistantConversation"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The blueprint assistant is not enabled"
+          },
+          "409": {
+            "description": "The assistant is still answering, or the proposal was already resolved"
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/assistant/conversations": {
+      "get": {
+        "operationId": "listBlueprintAssistantConversations",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "listBlueprintAssistantConversations",
+        "description": "The blueprint's blueprint assistant conversations in this organization, most recently updated first\n(at most 20). Conversations expire 30 days after their last update.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "mine",
+            "description": "Only the conversations the calling user started",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The conversations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "results"
+                  ],
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintAssistantConversationSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The blueprint assistant is not enabled"
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/assistant/conversations/{conversation_id}": {
+      "get": {
+        "operationId": "getBlueprintAssistantConversation",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "getBlueprintAssistantConversation",
+        "description": "A blueprint assistant conversation, including the answer in progress.",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "conversation_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The conversation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintAssistantConversation"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The blueprint assistant is not enabled"
+          },
+          "404": {
+            "description": "Conversation not found"
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/assistant/skills": {
+      "get": {
+        "operationId": "listBlueprintAssistantSkills",
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "summary": "listBlueprintAssistantSkills",
+        "description": "The organization's blueprint assistant skills, the skills epilot ships (`defaults`; an organization\nskill with the same name replaces one), and the upload limits. Available when `blueprint-ai-assistant` is on.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "responses": {
+          "200": {
+            "description": "Skills of the organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintAssistantSkill"
+                      }
+                    },
+                    "defaults": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintAssistantDefaultSkill"
+                      }
+                    },
+                    "limits": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The blueprint assistant is not enabled"
+          }
+        }
+      },
+      "post": {
+        "operationId": "uploadBlueprintAssistantSkill",
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "summary": "uploadBlueprintAssistantSkill",
+        "description": "Uploads a skill for the organization's blueprint assistant, replacing the skill of the same name.\nThe file is a `SKILL.md` or a zip with `SKILL.md` and `references/*.md` (the format claude.ai exports;\na single top-level folder is stripped). `SKILL.md` starts with YAML front matter with `name` and\n`description`. Other files (scripts, assets) are ignored and listed in `ignored`. A new skill is enabled\nwhile the organization has fewer than the enabled limit.\n",
+        "tags": [
+          "Blueprints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintAssistantSkillUpload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The saved skill",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BlueprintAssistantSkill"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "ignored": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The file is not a valid skill or exceeds a limit"
+          },
+          "403": {
+            "description": "The blueprint assistant is not enabled"
+          },
+          "409": {
+            "description": "The organization has the maximum number of skills"
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/assistant/skills/{skill_name}": {
+      "get": {
+        "operationId": "getBlueprintAssistantSkill",
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "summary": "getBlueprintAssistantSkill",
+        "description": "A skill of the organization with the text of its files.",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BlueprintAssistantSkillName"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The skill",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/BlueprintAssistantSkill"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "contents": {
+                          "type": "object",
+                          "description": "File path to text, e.g. `SKILL.md`, `references/messart.md`.",
+                          "additionalProperties": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The blueprint assistant is not enabled"
+          },
+          "404": {
+            "description": "Skill not found"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateBlueprintAssistantSkill",
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "summary": "updateBlueprintAssistantSkill",
+        "description": "Enables or disables a skill. Conversations keep the skills they started with.",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BlueprintAssistantSkillName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "enabled"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated skill",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintAssistantSkill"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The blueprint assistant is not enabled"
+          },
+          "404": {
+            "description": "Skill not found"
+          },
+          "409": {
+            "description": "The maximum number of enabled skills is reached"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBlueprintAssistantSkill",
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "summary": "deleteBlueprintAssistantSkill",
+        "description": "Deletes a skill. Running conversations that offered it answer that it was removed.",
+        "tags": [
+          "Blueprints"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BlueprintAssistantSkillName"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Skill deleted"
+          },
+          "403": {
+            "description": "The blueprint assistant is not enabled"
+          },
+          "404": {
+            "description": "Skill not found"
+          }
+        }
+      }
+    },
     "/v3/blueprint-manifest/blueprints:pre-install": {
       "post": {
         "operationId": "preInstallBlueprintV3",
@@ -4540,10 +5354,4583 @@
           }
         }
       }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/source-operations/{run_id}": {
+      "get": {
+        "operationId": "getSourceTestOperation",
+        "summary": "getSourceTestOperation",
+        "description": "Read a source-only generation or manual run. Requires the blueprint-test-cases organization feature flag and the original caller's organization.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintSourceTestOperation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, test case or run not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, active run or session lifetime conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Organization run quota reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable or retryable storage conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/source-confirmed-runs": {
+      "post": {
+        "operationId": "createSourceConfirmedRun",
+        "summary": "createSourceConfirmedRun",
+        "description": "Evaluate previously confirmed checks against the source Blueprint only. Requires the blueprint-test-cases organization feature flag and the original caller's organization.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintTestRunInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, test case or run not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, active run or session lifetime conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Organization run quota reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable or retryable storage conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/runs": {
+      "post": {
+        "operationId": "createBlueprintTestRun",
+        "summary": "createBlueprintTestRun",
+        "description": "Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintTestRunInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, test case or run not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, active run or session lifetime conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Organization run quota reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable or retryable storage conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listBlueprintTestRuns",
+        "summary": "listBlueprintTestRuns",
+        "description": "Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, test case or run not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, active run or session lifetime conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Organization run quota reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable or retryable storage conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/runs/{run_id}": {
+      "get": {
+        "operationId": "getBlueprintTestRun",
+        "summary": "getBlueprintTestRun",
+        "description": "Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, test case or run not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Revision, active run or session lifetime conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Organization run quota reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable or retryable storage conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestRunError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite": {
+      "get": {
+        "operationId": "getBlueprintTestSuite",
+        "summary": "getBlueprintTestSuite",
+        "description": "The v2 test cases of the blueprint with their current latest suite result (stale results never count as passed) and a summary over all cases. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuite"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, run or generation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/runs": {
+      "post": {
+        "operationId": "createBlueprintTestSuiteRun",
+        "summary": "createBlueprintTestSuiteRun",
+        "description": "Run every v2 test case of the blueprint against one configuration snapshot. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Suite run queued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuiteRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, run or generation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A suite run is already active (active_suite_run) or the session expires too soon",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Organization run quota reached (org_run_limit); see retry-after",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/runs/{run_id}": {
+      "get": {
+        "operationId": "getBlueprintTestSuiteRun",
+        "summary": "getBlueprintTestSuiteRun",
+        "description": "Read a suite run. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuiteRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, run or generation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions": {
+      "post": {
+        "operationId": "createBlueprintGraphSuggestions",
+        "summary": "createBlueprintGraphSuggestions",
+        "description": "Generate engine-verified test suggestions from the blueprint configuration graph. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Generation started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintGraphSuggestionsStarted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, run or generation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A generation is already running for this blueprint (active_generation) or the session expires too soon",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}": {
+      "get": {
+        "operationId": "getBlueprintGraphSuggestions",
+        "summary": "getBlueprintGraphSuggestions",
+        "description": "Read a graph suggestion generation and a page of its suggestions. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "generation_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shape",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintTestCaseShape"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintGraphSuggestionPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, run or generation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/accept": {
+      "post": {
+        "operationId": "acceptBlueprintGraphSuggestions",
+        "summary": "acceptBlueprintGraphSuggestions",
+        "description": "Accept suggestions as v2 test cases. Idempotent per suggestion id. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "generation_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintGraphSuggestionAcceptInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintGraphSuggestionAcceptance"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, run or generation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Configuration or tests changed since the generation (suggestions_stale, with accepted_ids) or the acceptance changed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite:migrate-v1": {
+      "post": {
+        "operationId": "migrateBlueprintV1TestCases",
+        "summary": "migrateBlueprintV1TestCases",
+        "description": "Migrate v1 test cases to v2 clauses; cases that cannot be mapped are flagged needs_reinterpretation. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Migration outcome",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintV1TestCaseMigration"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, run or generation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not implemented yet (not_implemented)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations": {
+      "post": {
+        "operationId": "createBlueprintTestInterpretation",
+        "summary": "createBlueprintTestInterpretation",
+        "description": "Start interpreting an author's plain-language test against the blueprint configuration. With test_case_id the result rewrites that case. One active interpretation per author and blueprint. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintTestInterpretationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Interpretation started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestInterpretationStarted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, or the text is longer than 2000 characters (interpretation_input_too_large)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, interpretation or test case not found (an interpretation is visible only to its author)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "An interpretation is already running for this author (active_generation, with generation_id), the test case cannot be rewritten (conflict) or the session expires too soon",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations/{interpretation_id}": {
+      "get": {
+        "operationId": "getBlueprintTestInterpretation",
+        "summary": "getBlueprintTestInterpretation",
+        "description": "Read the caller's own text interpretation. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "interpretation_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestInterpretationResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, interpretation or test case not found (an interpretation is visible only to its author)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations/{interpretation_id}/confirm": {
+      "post": {
+        "operationId": "confirmBlueprintTestInterpretationV2",
+        "summary": "confirmBlueprintTestInterpretationV2",
+        "description": "Save the author's confirmed selection of a completed interpretation as a v2 test case (201), or as a new revision of the case it rewrites (200, needs expected_revision). Ambiguous parts need a chosen candidate, unsupported parts must be omitted; only engine-verified clauses are saved. An interpretation is confirmed at most once. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "interpretation_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintTestInterpretationConfirmInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The rewritten test case",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestInterpretationConfirmation"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The new test case",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestInterpretationConfirmation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint, interpretation or test case not found (an interpretation is visible only to its author)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Not completed yet (interpretation_not_ready), already confirmed (interpretation_used), a part unresolved (interpretation_incomplete), changed checks not confirmed (confirmation_required) or the test case changed (conflict)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "BlueprintTestSuiteError": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "code",
+          "retriable"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "invalid_request",
+              "unauthorized",
+              "forbidden",
+              "not_found",
+              "conflict",
+              "credential_invalid",
+              "permissions_unavailable",
+              "permission_denied",
+              "feature_unavailable",
+              "session_expiring",
+              "storage_conflict",
+              "suite_unavailable",
+              "v2_case",
+              "active_generation",
+              "active_suite_run",
+              "org_run_limit",
+              "suggestions_stale",
+              "unknown_suggestion",
+              "suggestion_acceptance_changed",
+              "suggestion_input_too_large",
+              "invalid_clauses",
+              "not_implemented",
+              "interpretation_input_too_large",
+              "interpretation_incomplete",
+              "interpretation_not_ready",
+              "interpretation_used",
+              "confirmation_required"
+            ]
+          },
+          "retriable": {
+            "type": "boolean",
+            "description": "Whether repeating the same request later can succeed."
+          },
+          "active_run_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "With active_suite_run."
+          },
+          "generation_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "With active_generation, when known. The generation or interpretation that is running."
+          },
+          "retry_after_seconds": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "With org_run_limit and storage_conflict; also sent as the retry-after header."
+          },
+          "accepted_ids": {
+            "type": "array",
+            "description": "With suggestions_stale. The requested suggestion ids that are test cases now.",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "With unknown_suggestion. How many requested ids the generation does not have."
+          }
+        }
+      },
+      "SentenceParamValue": {
+        "description": "A sentence parameter. Strings, lists and objects of parameters; never prose.",
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SentenceParamValue"
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SentenceParamValue"
+            }
+          }
+        ]
+      },
+      "Sentence": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A translation key and its parameters. The UI renders the text; the server never returns sentences.",
+        "required": [
+          "key",
+          "params"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SentenceParamValue"
+            }
+          }
+        }
+      },
+      "ClauseEvidenceView": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "node_id",
+          "resource_id",
+          "resource_type",
+          "label"
+        ],
+        "properties": {
+          "node_id": {
+            "type": "string"
+          },
+          "resource_id": {
+            "type": "string"
+          },
+          "resource_type": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "expected": {},
+          "actual": {}
+        }
+      },
+      "ClauseResultView": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "clause_id",
+          "verdict",
+          "sentence",
+          "evidence"
+        ],
+        "properties": {
+          "clause_id": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "PASSED",
+              "FAILED",
+              "CANNOT_VERIFY"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "description": "A reason code (for example an engine CANNOT_VERIFY reason, or stale)."
+          },
+          "sentence": {
+            "$ref": "#/components/schemas/Sentence"
+          },
+          "evidence": {
+            "type": "array",
+            "maxItems": 20,
+            "description": "Sorted by node id, then path.",
+            "items": {
+              "$ref": "#/components/schemas/ClauseEvidenceView"
+            }
+          },
+          "evidence_truncated": {
+            "type": "boolean"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BlueprintTestUnreadableResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "id",
+          "reason"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "reason": {
+            "type": "string",
+            "pattern": "^(empty_payload|invalid_payload|fetch_failed|http_\\d{3})$"
+          }
+        }
+      },
+      "SuiteRun": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "failed"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "digest": {
+            "type": "string"
+          },
+          "unreadable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintTestUnreadableResource"
+            }
+          },
+          "counts": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "passed",
+              "failed",
+              "cannot_verify",
+              "superseded"
+            ],
+            "properties": {
+              "passed": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "failed": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cannot_verify": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "superseded": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "skipped_v1": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "v1 cases the suite does not evaluate."
+          },
+          "membership_fingerprint": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]{1,64}$"
+          }
+        }
+      },
+      "CaseResultRow": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "case_id",
+          "case_revision",
+          "clauses_hash",
+          "membership_fingerprint",
+          "status",
+          "results"
+        ],
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "case_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "clauses_hash": {
+            "type": "string"
+          },
+          "membership_fingerprint": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "description": "stale means the result no longer describes the current case revision, clauses or blueprint membership; a stale result carries no verdicts.",
+            "enum": [
+              "PASSED",
+              "FAILED",
+              "CANNOT_VERIFY",
+              "stale"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "description": "no_clauses means the case has no clauses, so nothing was verified.",
+            "enum": [
+              "no_clauses"
+            ]
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClauseResultView"
+            }
+          },
+          "run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BlueprintTestSuiteSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Over all cases of the blueprint, not only the page. v1 cases count as needs_reinterpretation when migration flagged them, otherwise as never_run.",
+        "required": [
+          "passed",
+          "failed",
+          "cannot_verify",
+          "never_run",
+          "stale",
+          "needs_reinterpretation"
+        ],
+        "properties": {
+          "passed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "cannot_verify": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "never_run": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "stale": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "needs_reinterpretation": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "BlueprintTestSuite": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cases",
+          "summary"
+        ],
+        "properties": {
+          "cases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "case"
+              ],
+              "properties": {
+                "case": {
+                  "$ref": "#/components/schemas/BlueprintTestCase"
+                },
+                "latest": {
+                  "$ref": "#/components/schemas/CaseResultRow"
+                }
+              }
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/BlueprintTestSuiteSummary"
+          },
+          "active_run": {
+            "$ref": "#/components/schemas/SuiteRun"
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        }
+      },
+      "BlueprintTestCaseShape": {
+        "type": "string",
+        "enum": [
+          "journey_starts_workflow",
+          "event_sends_email",
+          "step_logic",
+          "answer_options",
+          "process_order",
+          "catalog_structure"
+        ]
+      },
+      "Suggestion": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "shape",
+          "subject",
+          "clauses",
+          "sentences"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "sha256 of the canonical clauses."
+          },
+          "shape": {
+            "$ref": "#/components/schemas/BlueprintTestCaseShape"
+          },
+          "subject": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "node_id",
+              "resource_id",
+              "resource_type",
+              "label"
+            ],
+            "properties": {
+              "node_id": {
+                "type": "string"
+              },
+              "resource_id": {
+                "type": "string"
+              },
+              "resource_type": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "The graph label of the subject."
+              }
+            }
+          },
+          "clauses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "sentences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Sentence"
+            }
+          }
+        }
+      },
+      "BlueprintGraphSuggestionsStarted": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "generation_id",
+          "status"
+        ],
+        "properties": {
+          "generation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending"
+            ]
+          }
+        }
+      },
+      "BlueprintTestInterpretationInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "The author's plain-language test. At most 2000 characters after trimming; longer text is rejected with 400 interpretation_input_too_large, empty text with 400 invalid_request."
+          },
+          "test_case_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Rewrite this case (a v2 interpretation case, or a v1 case flagged needs_reinterpretation)."
+          }
+        }
+      },
+      "BlueprintTestInterpretationStarted": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "interpretation_id",
+          "status"
+        ],
+        "properties": {
+          "interpretation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending"
+            ]
+          }
+        }
+      },
+      "BlueprintInterpretedCheck": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "hash",
+          "clause",
+          "sentence",
+          "result"
+        ],
+        "description": "An engine-verified check. Code-assigned id (p<i> or p<i>c<n>); the sentence is a key, never model text.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^p[0-9]+(c[0-9]+)?$"
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "clause": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "The engine's Clause."
+          },
+          "sentence": {
+            "$ref": "#/components/schemas/Sentence"
+          },
+          "result": {
+            "$ref": "#/components/schemas/ClauseResultView"
+          }
+        }
+      },
+      "BlueprintInterpretedPart": {
+        "description": "One part of the author's text in one of three states. span is an integer offset pair into the author's own text.",
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "index",
+              "state",
+              "check"
+            ],
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "span": {
+                "$ref": "#/components/schemas/BlueprintInterpretationSpan"
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "supported"
+                ]
+              },
+              "check": {
+                "$ref": "#/components/schemas/BlueprintInterpretedCheck"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "index",
+              "state",
+              "candidates"
+            ],
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "span": {
+                "$ref": "#/components/schemas/BlueprintInterpretationSpan"
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "ambiguous"
+                ]
+              },
+              "candidates": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 5,
+                "items": {
+                  "$ref": "#/components/schemas/BlueprintInterpretedCheck"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "index",
+              "state",
+              "reason",
+              "hint"
+            ],
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "span": {
+                "$ref": "#/components/schemas/BlueprintInterpretationSpan"
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "unsupported"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "runtime_behaviour",
+                  "document_content",
+                  "external_system",
+                  "legal_judgement",
+                  "generic_integrity",
+                  "no_matching_resource",
+                  "no_matching_field",
+                  "no_matching_value",
+                  "not_expressible",
+                  "cannot_bind",
+                  "too_vague"
+                ]
+              },
+              "hint": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "code",
+                  "params"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "name_the_resource",
+                      "name_the_field",
+                      "name_the_value",
+                      "split_statement",
+                      "describe_configuration",
+                      "use_health_check",
+                      "rephrase_as_check"
+                    ]
+                  },
+                  "params": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "description": "A node type present in the graph."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "BlueprintInterpretationSpan": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "description": "[start, end) character offsets into the author's text.",
+        "items": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "BlueprintTestInterpretationResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "created_at",
+          "text",
+          "parts",
+          "dropped",
+          "unreadable"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "running",
+              "completed",
+              "failed"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "text": {
+            "type": "string",
+            "description": "The author's own text, as submitted (trimmed)."
+          },
+          "test_case_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The case this interpretation rewrites."
+          },
+          "parts": {
+            "type": "array",
+            "maxItems": 12,
+            "items": {
+              "$ref": "#/components/schemas/BlueprintInterpretedPart"
+            }
+          },
+          "dropped": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Parts the model proposed beyond the caps or that could not be verified at all."
+          },
+          "unchanged": {
+            "type": "boolean",
+            "description": "With test_case_id. Every part is supported and the checks equal the case's confirmed checks."
+          },
+          "unreadable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintTestUnreadableResource"
+            }
+          },
+          "prompt_version": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "retriable"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "interpretation_too_complex",
+                  "model_unavailable",
+                  "timeout",
+                  "expired",
+                  "worker_failed",
+                  "not_authorized",
+                  "invoke_failed"
+                ]
+              },
+              "retriable": {
+                "type": "boolean"
+              }
+            }
+          },
+          "accepted_case_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Set once the interpretation was confirmed; the case it became."
+          }
+        }
+      },
+      "BlueprintTestInterpretationConfirmInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "choices",
+          "omit_parts",
+          "confirmed"
+        ],
+        "properties": {
+          "choices": {
+            "type": "array",
+            "maxItems": 100,
+            "description": "The chosen candidate of each ambiguous part.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "part_index",
+                "candidate_id"
+              ],
+              "properties": {
+                "part_index": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "candidate_id": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "omit_parts": {
+            "type": "array",
+            "maxItems": 100,
+            "description": "Indexes of parts the author leaves out. Every unsupported part must be omitted.",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "confirmed": {
+            "type": "boolean",
+            "description": "The author confirmed the checks. Required true unless the selection equals the case's confirmed checks."
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Required when the interpretation rewrites a case; the case revision the author saw."
+          }
+        }
+      },
+      "BlueprintTestInterpretationConfirmation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "test_case",
+          "confirmation_kept"
+        ],
+        "properties": {
+          "test_case": {
+            "$ref": "#/components/schemas/BlueprintTestCase"
+          },
+          "confirmation_kept": {
+            "type": "boolean",
+            "description": "The checks are unchanged, so the case keeps its prior confirmation."
+          }
+        }
+      },
+      "BlueprintTestCaseOrigin": {
+        "description": "Where a v2 case came from (BlueprintTestCase.origin).",
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "source",
+              "shape",
+              "suggestion_id",
+              "generation_id",
+              "prompt_version",
+              "model"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "suggestion"
+                ]
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "ai"
+                ]
+              },
+              "shape": {
+                "$ref": "#/components/schemas/BlueprintTestCaseShape"
+              },
+              "suggestion_id": {
+                "type": "string"
+              },
+              "generation_id": {
+                "type": "string"
+              },
+              "prompt_version": {
+                "type": "string"
+              },
+              "model": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "from_revision"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "migrated_v1"
+                ]
+              },
+              "from_revision": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "source",
+              "interpretation_id",
+              "prompt_version",
+              "model",
+              "confirmed_clauses_hash",
+              "confirmed_at",
+              "confirmed_by"
+            ],
+            "description": "Confirmed by the author from a text interpretation; confirmed_clauses_hash equals the case's clauses_hash.",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "interpretation"
+                ]
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "ai"
+                ]
+              },
+              "interpretation_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "prompt_version": {
+                "type": "string"
+              },
+              "model": {
+                "type": "string"
+              },
+              "confirmed_clauses_hash": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "confirmed_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "confirmed_by": {
+                "$ref": "#/components/schemas/CallerIdentity"
+              }
+            }
+          }
+        ]
+      },
+      "BlueprintGraphSuggestionPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "created_at",
+          "total",
+          "counts_by_shape",
+          "excluded",
+          "unreadable",
+          "incomplete_subjects",
+          "items"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "running",
+              "completed",
+              "failed"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "retriable"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "pattern": "^[a-z0-9_]{1,64}$"
+              },
+              "retriable": {
+                "type": "boolean"
+              }
+            }
+          },
+          "prompt_version": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "digest": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "counts_by_shape": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "journey_starts_workflow": {
+                "type": "integer"
+              },
+              "event_sends_email": {
+                "type": "integer"
+              },
+              "step_logic": {
+                "type": "integer"
+              },
+              "answer_options": {
+                "type": "integer"
+              },
+              "process_order": {
+                "type": "integer"
+              },
+              "catalog_structure": {
+                "type": "integer"
+              }
+            }
+          },
+          "excluded": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "reason",
+                "count"
+              ],
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "invalid",
+                    "unknown_subject",
+                    "shape_unknown",
+                    "not_passing",
+                    "cannot_verify",
+                    "trivial",
+                    "duplicate"
+                  ]
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "unreadable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintTestUnreadableResource"
+            }
+          },
+          "incomplete_subjects": {
+            "type": "array",
+            "description": "Identities only; labels come from the graph when presented.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "node_id",
+                "resource_id",
+                "resource_type",
+                "reason"
+              ],
+              "properties": {
+                "node_id": {
+                  "type": "string"
+                },
+                "resource_id": {
+                  "type": "string"
+                },
+                "resource_type": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "step_cap",
+                    "input_cap",
+                    "deadline",
+                    "model_error"
+                  ]
+                }
+              }
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Suggestion"
+            }
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        }
+      },
+      "BlueprintGraphSuggestionAcceptInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "suggestion_ids"
+        ],
+        "properties": {
+          "suggestion_ids": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        }
+      },
+      "BlueprintGraphSuggestionAcceptance": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "results",
+          "accepted_ids"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintTestCase"
+            }
+          },
+          "accepted_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        }
+      },
+      "BlueprintV1TestCaseMigration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "migrated",
+          "needs_reinterpretation",
+          "cases"
+        ],
+        "properties": {
+          "migrated": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "needs_reinterpretation": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "cases": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "case_id",
+                    "result",
+                    "clauses"
+                  ],
+                  "properties": {
+                    "case_id": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "string",
+                      "enum": [
+                        "migrated"
+                      ]
+                    },
+                    "clauses": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "case_id",
+                    "result",
+                    "reason"
+                  ],
+                  "properties": {
+                    "case_id": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "string",
+                      "enum": [
+                        "needs_reinterpretation"
+                      ]
+                    },
+                    "reason": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9_]{1,64}$"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "BlueprintTestCaseInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "expectation"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160,
+            "pattern": "\\S"
+          },
+          "expectation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12000,
+            "pattern": "\\S"
+          }
+        }
+      },
+      "BlueprintTestCaseUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "expectation",
+          "expected_revision"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160,
+            "pattern": "\\S"
+          },
+          "expectation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12000,
+            "pattern": "\\S"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740990
+          }
+        }
+      },
+      "BlueprintTestCase": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "blueprint_id",
+          "org_id",
+          "schema_version",
+          "revision",
+          "created_at",
+          "created_by",
+          "updated_at",
+          "updated_by"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "blueprint_id": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "org_id": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "schema_version": {
+            "type": "integer",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "expectation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12000
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Present only on an explicitly requested immutable deletion revision."
+          },
+          "confirmation": {
+            "$ref": "#/components/schemas/BlueprintTestCaseConfirmation"
+          },
+          "clauses": {
+            "type": "array",
+            "description": "Schema version 2 only. Id-based business clauses (the engine's Clause type).",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "clauses_hash": {
+            "type": "string",
+            "description": "Schema version 2 only. sha256 of the canonical clauses."
+          },
+          "title_key": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Schema version 2 only. A Sentence ({key, params}) the UI renders."
+          },
+          "origin": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Schema version 2 only. Where the case came from (an accepted suggestion, a migrated v1 case or a confirmed interpretation); see BlueprintTestCaseOrigin."
+          },
+          "needs_reinterpretation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "reason"
+            ],
+            "description": "Schema version 1 only. Set when the v1 case could not be migrated to v2 clauses.",
+            "properties": {
+              "reason": {
+                "type": "string",
+                "pattern": "^[a-z0-9_]{1,64}$"
+              }
+            }
+          }
+        }
+      },
+      "BlueprintTestPredicate": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "operator",
+              "target_key"
+            ],
+            "properties": {
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "resource_included"
+                ]
+              },
+              "target_key": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 330
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "operator",
+              "target_key",
+              "expected_target_key"
+            ],
+            "properties": {
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "resource_references"
+                ]
+              },
+              "target_key": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 330
+              },
+              "expected_target_key": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 330
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "operator",
+              "target_key"
+            ],
+            "properties": {
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "config_enabled"
+                ]
+              },
+              "target_key": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 330
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "operator",
+              "target_key",
+              "task_key"
+            ],
+            "properties": {
+              "operator": {
+                "type": "string",
+                "enum": [
+                  "workflow_task_required"
+                ]
+              },
+              "target_key": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 330
+              },
+              "task_key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              }
+            }
+          }
+        ]
+      },
+      "BlueprintTestInterpretation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "clauses"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "enum": [
+              "1"
+            ]
+          },
+          "clauses": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "source_text",
+                    "status",
+                    "assertions",
+                    "reason"
+                  ],
+                  "properties": {
+                    "source_text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "supported"
+                      ]
+                    },
+                    "assertions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintTestPredicate"
+                      },
+                      "minItems": 1,
+                      "description": "At most 64 items; enforced by the service boundary."
+                    },
+                    "reason": {
+                      "type": "string",
+                      "maxLength": 500
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "source_text",
+                    "status",
+                    "assertions",
+                    "reason"
+                  ],
+                  "properties": {
+                    "source_text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "unsupported",
+                        "ambiguous"
+                      ]
+                    },
+                    "assertions": {
+                      "type": "array",
+                      "maxItems": 0,
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintTestPredicate"
+                      }
+                    },
+                    "reason": {
+                      "type": "string",
+                      "maxLength": 500
+                    }
+                  }
+                }
+              ]
+            },
+            "description": "At most 32 items; enforced by the service boundary."
+          }
+        }
+      },
+      "BlueprintTestCatalogEntry": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "type",
+          "id",
+          "label",
+          "membership_state",
+          "capabilities"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 330
+          },
+          "type": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "membership_state": {
+            "type": "string",
+            "enum": [
+              "included",
+              "excluded",
+              "absent"
+            ]
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "resource_included",
+                "resource_references",
+                "config_enabled",
+                "workflow_task_required"
+              ]
+            },
+            "minItems": 0,
+            "description": "At most 4 items; enforced by the service boundary."
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "key",
+                "label",
+                "capabilities"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "capabilities": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "workflow_task_required"
+                    ]
+                  },
+                  "minItems": 0,
+                  "description": "At most 1 items; enforced by the service boundary."
+                }
+              }
+            },
+            "minItems": 0,
+            "description": "At most 1000 items; enforced by the service boundary."
+          }
+        }
+      },
+      "BlueprintTestInterpretationProposal": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "interpretation",
+          "catalog",
+          "proposal_hash",
+          "expectation_sha256",
+          "interpreter_version"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "enum": [
+              "1"
+            ]
+          },
+          "interpretation": {
+            "$ref": "#/components/schemas/BlueprintTestInterpretation"
+          },
+          "catalog": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintTestCatalogEntry"
+            },
+            "minItems": 0,
+            "description": "At most 1000 items; enforced by the service boundary."
+          },
+          "proposal_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "expectation_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "interpreter_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "interpreter_execution_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "BlueprintTestCaseConfirmation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "interpretation",
+          "catalog",
+          "proposal_hash",
+          "expectation_sha256",
+          "interpreter_version",
+          "confirmed_by",
+          "confirmed_at"
+        ],
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "enum": [
+              "1"
+            ]
+          },
+          "interpretation": {
+            "$ref": "#/components/schemas/BlueprintTestInterpretation"
+          },
+          "catalog": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintTestCatalogEntry"
+            },
+            "minItems": 0,
+            "description": "At most 1000 items; enforced by the service boundary."
+          },
+          "proposal_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "expectation_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "interpreter_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "confirmed_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "confirmed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "interpreter_execution_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "BlueprintTestResourceEvidence": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "id",
+          "key",
+          "membership_state",
+          "source_state",
+          "references",
+          "dependency_coverage",
+          "tasks"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "key": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 330
+          },
+          "membership_state": {
+            "type": "string",
+            "enum": [
+              "included",
+              "excluded",
+              "absent"
+            ]
+          },
+          "source_state": {
+            "type": "string",
+            "enum": [
+              "read",
+              "source_unreadable",
+              "unsupported",
+              "not_read"
+            ]
+          },
+          "checked_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fingerprint": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "target_key",
+                "path"
+              ],
+              "properties": {
+                "target_key": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 330
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                "candidate_target_keys": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 330
+                  },
+                  "minItems": 0,
+                  "description": "At most 1000 items; enforced by the service boundary."
+                }
+              }
+            },
+            "minItems": 0,
+            "description": "At most 10000 items; enforced by the service boundary."
+          },
+          "dependency_coverage": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "incomplete"
+            ]
+          },
+          "enabled": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "value"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "maxLength": 1024
+              },
+              "value": {
+                "type": "boolean"
+              }
+            }
+          },
+          "tasks_complete": {
+            "type": "boolean"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "key",
+                "path",
+                "manual"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "maxLength": 256
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "manual": {
+                  "type": "boolean"
+                },
+                "task_type": {
+                  "type": "string",
+                  "enum": [
+                    "MANUAL",
+                    "AUTOMATION",
+                    "DECISION",
+                    "AI_AGENT"
+                  ]
+                }
+              }
+            },
+            "minItems": 0,
+            "description": "At most 1000 items; enforced by the service boundary."
+          }
+        }
+      },
+      "BlueprintTestCheckResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "verdict",
+          "reason"
+        ],
+        "properties": {
+          "predicate": {
+            "$ref": "#/components/schemas/BlueprintTestPredicate"
+          },
+          "resource_key": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 330
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "PASSED",
+              "FAILED",
+              "CANNOT_VERIFY"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$"
+          },
+          "path": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "actual": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 330
+              }
+            ]
+          }
+        }
+      },
+      "BlueprintTestDependencyValidation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scope",
+          "verdict",
+          "checks",
+          "boundaries",
+          "omitted_count"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string",
+            "enum": [
+              "related_resources"
+            ]
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "PASSED",
+              "FAILED",
+              "CANNOT_VERIFY"
+            ]
+          },
+          "checks": {
+            "type": "array",
+            "minItems": 0,
+            "description": "At most 256 items; enforced by the service boundary.",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintTestCheckResult"
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "minItems": 0,
+            "description": "At most 256 items; enforced by the service boundary.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "reason"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 330
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                "reason": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,79}$"
+                }
+              }
+            }
+          },
+          "omitted_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          }
+        }
+      },
+      "BlueprintTestRunResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "verdict",
+          "checks",
+          "coverage",
+          "fingerprints",
+          "evaluator_version",
+          "checked_at",
+          "evidence_omitted_count"
+        ],
+        "properties": {
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "PASSED",
+              "FAILED",
+              "CANNOT_VERIFY"
+            ]
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintTestCheckResult"
+            },
+            "minItems": 0,
+            "description": "At most 10000 items; enforced by the service boundary."
+          },
+          "coverage": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "complete",
+              "boundaries",
+              "supported_clauses",
+              "total_clauses"
+            ],
+            "properties": {
+              "complete": {
+                "type": "boolean"
+              },
+              "boundaries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "reason"
+                  ],
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 330
+                    },
+                    "path": {
+                      "type": "string",
+                      "maxLength": 1024
+                    },
+                    "reason": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9_]{0,79}$"
+                    }
+                  }
+                },
+                "minItems": 0,
+                "description": "At most 10000 items; enforced by the service boundary."
+              },
+              "supported_clauses": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 32
+              },
+              "total_clauses": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 32
+              }
+            }
+          },
+          "fingerprints": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "evaluator_version": {
+            "type": "string",
+            "enum": [
+              "1"
+            ]
+          },
+          "checked_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintTestResourceEvidence"
+            },
+            "minItems": 0,
+            "description": "At most 1000 items; enforced by the service boundary."
+          },
+          "evidence_omitted_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "dependency_validation": {
+            "$ref": "#/components/schemas/BlueprintTestDependencyValidation"
+          },
+          "interpretation_proposal": {
+            "$ref": "#/components/schemas/BlueprintTestInterpretationProposal"
+          },
+          "requires_confirmation": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        }
+      },
+      "BlueprintSourceTestOperation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operation_kind",
+          "run"
+        ],
+        "properties": {
+          "operation_kind": {
+            "type": "string",
+            "enum": [
+              "generate",
+              "execute"
+            ]
+          },
+          "run": {
+            "$ref": "#/components/schemas/BlueprintTestRun"
+          }
+        }
+      },
+      "BlueprintTestRun": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "org_id",
+          "blueprint_id",
+          "incarnation_id",
+          "test_case_id",
+          "test_revision",
+          "expectation",
+          "title",
+          "created_by",
+          "created_at",
+          "expires_at",
+          "status",
+          "stale"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "org_id": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "blueprint_id": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "incarnation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "test_case_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "test_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "expectation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 12000
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "failed"
+            ]
+          },
+          "confirmation_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "membership_fingerprint": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "result": {
+            "$ref": "#/components/schemas/BlueprintTestRunResult"
+          },
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "expired",
+                  "timeout",
+                  "invoke_failed",
+                  "worker_failed"
+                ]
+              }
+            }
+          },
+          "superseded": {
+            "type": "boolean"
+          },
+          "stale": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BlueprintTestRunPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintTestRun"
+            },
+            "minItems": 0,
+            "description": "At most 50 items; pages may end early at a 2MiB JSON byte budget. Follow next_cursor to continue without skipped runs."
+          },
+          "next_cursor": {
+            "type": "string",
+            "maxLength": 2048
+          }
+        }
+      },
+      "BlueprintTestRunError": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "code"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "invalid_request",
+              "unauthorized",
+              "forbidden",
+              "not_found",
+              "conflict",
+              "checks_already_confirmed",
+              "confirmation_required",
+              "portable_test_unavailable",
+              "active_run",
+              "org_run_limit",
+              "session_expiring",
+              "credential_invalid",
+              "permissions_unavailable",
+              "permission_denied",
+              "feature_unavailable",
+              "run_unavailable",
+              "storage_conflict",
+              "v2_case"
+            ]
+          },
+          "retriable": {
+            "type": "boolean",
+            "description": "Sent with v2_case (false); a v2 case runs through the test suite."
+          },
+          "active_run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "retry_after_seconds": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "BlueprintTestRunInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expected_revision"
+        ],
+        "properties": {
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740990
+          }
+        }
+      },
+      "BlueprintTestCasePage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintTestCase"
+            }
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        }
+      },
+      "BlueprintAssistantMessageRequest": {
+        "type": "object",
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Continue this conversation. Omit to start a new one."
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "retry": {
+            "type": "boolean",
+            "description": "Run a failed answer of `conversation_id` again, without a new message. Only allowed while the\nconversation is `FAILED` (or its answer stopped updating).\n"
+          },
+          "proposal_update": {
+            "type": "object",
+            "required": [
+              "proposal_id",
+              "status"
+            ],
+            "properties": {
+              "proposal_id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "applied",
+                  "dismissed"
+                ]
+              },
+              "note": {
+                "type": "string",
+                "maxLength": 500
+              }
+            }
+          }
+        }
+      },
+      "BlueprintAssistantConversation": {
+        "type": "object",
+        "required": [
+          "id",
+          "blueprint_id",
+          "status",
+          "created_at",
+          "updated_at",
+          "messages"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "blueprint_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_PROGRESS",
+              "IDLE",
+              "FAILED"
+            ]
+          },
+          "error": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "created_by_name": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintAssistantMessage"
+            }
+          }
+        }
+      },
+      "BlueprintAssistantSkill": {
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "enabled",
+          "files",
+          "size",
+          "updated_at"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Offered to new conversations of the organization."
+          },
+          "files": {
+            "type": "array",
+            "description": "`SKILL.md` and the reference files, e.g. `references/messart.md`.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "size": {
+            "type": "integer",
+            "description": "Total size of the files in bytes."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_by": {
+            "type": "string"
+          },
+          "updated_by_name": {
+            "type": "string"
+          }
+        }
+      },
+      "BlueprintAssistantDefaultSkill": {
+        "type": "object",
+        "required": [
+          "name",
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "publishers"
+            ],
+            "description": "Only offered to users who may publish to the epilot Marketplace."
+          }
+        }
+      },
+      "BlueprintAssistantSkillUpload": {
+        "type": "object",
+        "required": [
+          "file_name",
+          "content_base64"
+        ],
+        "properties": {
+          "file_name": {
+            "type": "string",
+            "description": "Name of the uploaded file, e.g. `SKILL.md` or `wallbox-knowledge.zip`."
+          },
+          "content_base64": {
+            "type": "string",
+            "description": "The file, base64-encoded. At most 2 MB of text after unpacking."
+          }
+        }
+      },
+      "BlueprintAssistantConversationSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "status",
+          "created_at",
+          "updated_at",
+          "message_count"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "description": "The first message, shortened."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_PROGRESS",
+              "IDLE",
+              "FAILED"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "created_by_name": {
+            "type": "string"
+          },
+          "message_count": {
+            "type": "integer"
+          }
+        }
+      },
+      "BlueprintAssistantMessage": {
+        "type": "object",
+        "required": [
+          "id",
+          "role",
+          "created_at",
+          "parts"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintAssistantPart"
+            }
+          }
+        }
+      },
+      "BlueprintAssistantPart": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "description": "`text` parts carry `text`. `tool` parts carry the tool call and, once finished, its structured\n`result`, discriminated by `result.kind`: `overview`, `resources`, `inclusion`, `resource_content`,\n`audit`, `proposal_changes`, `proposal_add`, `proposal_blueprint`, `proposal_publish`, `skill` or `error`.\n",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "tool"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "tool_use_id": {
+            "type": "string"
+          },
+          "tool": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "running",
+              "done",
+              "error"
+            ]
+          },
+          "result": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "kind": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
       "UniquenessCriteriaResourceType": {
         "type": "string",
         "description": "Resource type for which custom uniqueness criteria can be configured.",
@@ -4676,6 +10063,9 @@
       "CommonBlueprintFields": {
         "type": "object",
         "properties": {
+          "source_drift": {
+            "$ref": "#/components/schemas/V3SourceDrift"
+          },
           "id": {
             "$ref": "#/components/schemas/BlueprintID"
           },
@@ -5585,6 +10975,9 @@
           {
             "type": "object",
             "properties": {
+              "source_drift": {
+                "$ref": "#/components/schemas/V3SourceDrift"
+              },
               "job_type": {
                 "type": "string",
                 "enum": [
@@ -6974,7 +12367,8 @@
           "family",
           "permission",
           "email_signature",
-          "shared_inbox"
+          "shared_inbox",
+          "event_catalog_event"
         ]
       },
       "PlanChanges": {
@@ -7499,8 +12893,86 @@
           "stale_blueprint",
           "workflow_quota_reached",
           "entity_mapping_journey_not_in_blueprint",
-          "missing_required_reference"
+          "missing_required_reference",
+          "source_resources_missing"
         ]
+      },
+      "V3SourceResource": {
+        "type": "object",
+        "required": [
+          "address",
+          "type",
+          "name",
+          "id"
+        ],
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Stored source blueprint resource address; use this value for resources_to_ignore."
+          },
+          "type": {
+            "$ref": "#/components/schemas/ResourceNodeType"
+          },
+          "name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "description": "Stored source identity, including composite ids such as schema:uuid or family:name."
+          }
+        }
+      },
+      "V3MissingSourceResource": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/V3SourceResource"
+          },
+          {
+            "type": "object",
+            "required": [
+              "referenced_by"
+            ],
+            "properties": {
+              "referenced_by": {
+                "type": "array",
+                "description": "Direct enabled referrer addresses after skippable gone-only cascades are removed.",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "V3SourceDrift": {
+        "type": "object",
+        "description": "V3 live-source plan capture only. Available on the install job and destination\nblueprint plan. Only confirmed owning-API NotFound/404 reads may be auto-skipped; null, permission,\ntransport, server errors and missing ids remain strict capture failures.\nComplete details are hydrated from durable storage on authenticated GETs.\nFor source_resources_missing, errors[].data contains missing_count,\nexclude_count and source_drift_s3_key only. Poll getBlueprintJob even if\nno destination blueprint was created. Exclude these by starting a new install\nwith the complete exclude_addresses list in options.resources_to_ignore;\nit includes gone resources and all transitive referrers. Refresh the SOURCE\nblueprint using syncDependencies, wait for that job, then start a new plan.\n",
+        "required": [
+          "removed"
+        ],
+        "properties": {
+          "removed": {
+            "type": "array",
+            "description": "Confirmed gone identities skipped automatically because no surviving enabled resource needs them.",
+            "items": {
+              "$ref": "#/components/schemas/V3SourceResource"
+            }
+          },
+          "missing": {
+            "type": "array",
+            "description": "Present on blocked plans; all non-excluded gone identities, including unreferenced entries with empty referenced_by.",
+            "items": {
+              "$ref": "#/components/schemas/V3MissingSourceResource"
+            }
+          },
+          "exclude_addresses": {
+            "type": "array",
+            "description": "Complete recovery scope including gone aliases and transitive referrers; send unchanged in options.resources_to_ignore on a new plan.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       },
       "FormattedErrorData": {
         "type": "object",
@@ -7535,6 +13007,18 @@
           "data": {
             "type": "object",
             "properties": {
+              "missing_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "exclude_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "source_drift_s3_key": {
+                "type": "string",
+                "description": "Durable details pointer; authenticated job GET hydrates source_drift with the complete lists."
+              },
               "formattedResource": {
                 "$ref": "#/components/schemas/FormattedErrorData"
               },
@@ -9155,6 +14639,16 @@
         "description": "ID of an import or export job",
         "schema": {
           "$ref": "#/components/schemas/JobID"
+        }
+      },
+      "BlueprintAssistantSkillName": {
+        "name": "skill_name",
+        "in": "path",
+        "required": true,
+        "description": "Skill name from the `name` front matter of its SKILL.md",
+        "schema": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
         }
       }
     },

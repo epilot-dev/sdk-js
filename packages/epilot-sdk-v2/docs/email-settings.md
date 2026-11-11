@@ -54,6 +54,7 @@ const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 - [`disconnectOutlookMailbox`](#disconnectoutlookmailbox)
 - [`startMailboxSync`](#startmailboxsync)
 - [`getMailboxSyncStatus`](#getmailboxsyncstatus)
+- [`getMailboxSyncEstimate`](#getmailboxsyncestimate)
 - [`retryMailboxSync`](#retrymailboxsync)
 - [`cancelMailboxSync`](#cancelmailboxsync)
 - [`getConnectedOutlookEmails`](#getconnectedoutlookemails)
@@ -94,6 +95,7 @@ const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 - [`MailboxSyncStatus`](#mailboxsyncstatus)
 - [`MailboxSyncStatuses`](#mailboxsyncstatuses)
 - [`MailboxSyncFolderStatuses`](#mailboxsyncfolderstatuses)
+- [`MailboxSyncEstimate`](#mailboxsyncestimate)
 - [`MailboxSyncTimeframePeriods`](#mailboxsynctimeframeperiods)
 - [`InboxBucketResponse`](#inboxbucketresponse)
 - [`ProvisionEpilotEmailAddressPayload`](#provisionepilotemailaddresspayload)
@@ -101,6 +103,7 @@ const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 - [`UpdateEmailAddressPayload`](#updateemailaddresspayload)
 - [`CreateEmailAddressPayload`](#createemailaddresspayload)
 - [`EmailAddressResponse`](#emailaddressresponse)
+- [`OutlookDisconnectError`](#outlookdisconnecterror)
 - [`ErrorResponse`](#errorresponse)
 - [`SettingMeta`](#settingmeta)
 - [`UpdateSharedInboxPayload`](#updatesharedinboxpayload)
@@ -164,7 +167,8 @@ const { data } = await client.provisionEpilotEmailAddress(
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
   "is_primary": false,
-  "is_epilot_email_address": false
+  "is_epilot_email_address": false,
+  "provider": "outlook"
 }
 ```
 
@@ -205,7 +209,8 @@ const { data } = await client.setEmailAddressPrimary(
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
   "is_primary": false,
-  "is_epilot_email_address": false
+  "is_epilot_email_address": false,
+  "provider": "outlook"
 }
 ```
 
@@ -243,7 +248,8 @@ const { data } = await client.getEmailAddress({
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
   "is_primary": false,
-  "is_epilot_email_address": false
+  "is_epilot_email_address": false,
+  "provider": "outlook"
 }
 ```
 
@@ -305,7 +311,8 @@ const { data } = await client.updateEmailAddress(
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
   "is_primary": false,
-  "is_epilot_email_address": false
+  "is_epilot_email_address": false,
+  "provider": "outlook"
 }
 ```
 
@@ -342,7 +349,8 @@ const { data } = await client.listEmailAddresses()
     "shared_inbox_id": "inbox-xyz",
     "is_active": true,
     "is_primary": false,
-    "is_epilot_email_address": false
+    "is_epilot_email_address": false,
+    "provider": "outlook"
   }
 ]
 ```
@@ -389,7 +397,8 @@ const { data } = await client.addEmailAddress(
   "shared_inbox_id": "inbox-xyz",
   "is_active": true,
   "is_primary": false,
-  "is_epilot_email_address": false
+  "is_epilot_email_address": false,
+  "provider": "outlook"
 }
 ```
 
@@ -878,7 +887,8 @@ const { data } = await client.connectOutlookMailbox(
     "shared_inbox_id": "inbox-xyz",
     "is_active": true,
     "is_primary": false,
-    "is_epilot_email_address": false
+    "is_epilot_email_address": false,
+    "provider": "outlook"
   },
   "outlook_email": "user@example.com",
   "tenant_id": "string",
@@ -928,7 +938,8 @@ const { data } = await client.startMailboxSync(
     email: 'example',
   },
   {
-    timeframe: '5m'
+    timeframe: '5m',
+    since: '1970-01-01T00:00:00.000Z'
   },
 )
 ```
@@ -955,6 +966,7 @@ const { data } = await client.getMailboxSyncStatus({
   "execution_id": "string",
   "status": "RUNNING",
   "timeframe": "5m",
+  "timeframe_start": "1970-01-01T00:00:00.000Z",
   "started_at": "1970-01-01T00:00:00.000Z",
   "completed_at": "1970-01-01T00:00:00.000Z",
   "inbox": {
@@ -969,6 +981,42 @@ const { data } = await client.getMailboxSyncStatus({
     "processed_messages": 0,
     "failed_messages": 0
   }
+}
+```
+
+</details>
+
+---
+
+### `getMailboxSyncEstimate`
+
+Estimate Mailbox Sync
+
+`GET /v2/outlook/mailbox/{email}/sync/estimate`
+
+```ts
+const { data } = await client.getMailboxSyncEstimate({
+  email: 'example',
+  timeframes: 'example',
+  since: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "estimates": [
+    {
+      "timeframe": "5m",
+      "since": "1970-01-01T00:00:00.000Z",
+      "inbox_messages": 0,
+      "sent_messages": 0,
+      "total_messages": 0,
+      "estimated_duration_seconds": 0
+    }
+  ]
 }
 ```
 
@@ -1362,7 +1410,8 @@ const { data } = await client.connectSmtpSender(
     "shared_inbox_id": "inbox-xyz",
     "is_active": true,
     "is_primary": false,
-    "is_epilot_email_address": false
+    "is_epilot_email_address": false,
+    "provider": "outlook"
   },
   "sender": {
     "email": "user@example.com",
@@ -1829,7 +1878,8 @@ type ConnectOutlookRequest = {
 type MailboxSyncStatus = {
   execution_id: string
   status: "RUNNING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "CANCELLED"
-  timeframe: "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y"
+  timeframe: "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y" | "custom"
+  timeframe_start?: string // date-time
   started_at: string // date-time
   completed_at?: string // date-time
   inbox?: {
@@ -1859,15 +1909,25 @@ type MailboxSyncStatuses = "RUNNING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "
 type MailboxSyncFolderStatuses = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" | "SKIPPED"
 ```
 
-### `MailboxSyncTimeframePeriods`
-
-Mailbox sync period. The long timeframes `3m`, `6m` and `1y` are only available to organizations
-with the `outlook-mailbox-sync-long-timeframes` feature enabled; connecting a mailbox, starting a sync,
-or retrying one of these syncs returns 403 otherwise.
-
+### `MailboxSyncEstimate`
 
 ```ts
-type MailboxSyncTimeframePeriods = "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y"
+type MailboxSyncEstimate = {
+  timeframe: "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y" | "custom"
+  since: string // date-time
+  inbox_messages: number
+  sent_messages: number
+  total_messages: number
+  estimated_duration_seconds: number
+}
+```
+
+### `MailboxSyncTimeframePeriods`
+
+Mailbox sync period. `custom` is a sync started with an explicit `since`.
+
+```ts
+type MailboxSyncTimeframePeriods = "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y" | "custom"
 ```
 
 ### `InboxBucketResponse`
@@ -1953,6 +2013,19 @@ type EmailAddressResponse = {
   is_active?: boolean
   is_primary?: boolean
   is_epilot_email_address?: boolean
+  provider?: "outlook" | "smtp"
+}
+```
+
+### `OutlookDisconnectError`
+
+Why an Outlook mailbox or connection was not disconnected. Nothing was removed.
+
+```ts
+type OutlookDisconnectError = {
+  error: "email_address_in_use" | "email_address_deletion_failed"
+  message: string
+  email_addresses?: string // email[]
 }
 ```
 

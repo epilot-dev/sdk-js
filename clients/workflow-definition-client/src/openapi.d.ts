@@ -8,10 +8,14 @@ import type {
 
 declare namespace Components {
     namespace Parameters {
+        export type ClientSupportsAdvLoopsParam = boolean;
         export type EnforceLimitsParam = boolean;
+        export type SkipHealParam = boolean;
     }
     export interface QueryParameters {
+        ClientSupportsAdvLoopsParam?: Parameters.ClientSupportsAdvLoopsParam;
         EnforceLimitsParam?: Parameters.EnforceLimitsParam;
+        SkipHealParam?: Parameters.SkipHealParam;
     }
     namespace Schemas {
         export type ActionSchedule = ImmediateSchedule | DelayedSchedule | RelativeSchedule;
@@ -35,7 +39,14 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
+            /**
+             * Fixed start date of the task (AL-3678): an ISO 8601 instant with an offset or `Z`. Until it is reached the running task is upcoming — visible, but no person may work on it. Only a manual task, an automation a person runs and a manual decision may carry either start date field; a template that sets one on any other kind is refused. A task with a delayed or relative schedule may carry neither: its timer runs it whatever the start date. `start_date_config` wins over it when both are set.
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            start_date?: string;
+            start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. `TASK_FINISHED` must name another task that comes before this one in the flow: one reached by following the edges back from it, never a loop back edge, where the edge leaving a phase stands for every task in the phase. A task after it, on a parallel branch or later in its own loop is refused. Only a manual task, an automation a person runs and a manual decision may carry one. */ StartDateConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -45,6 +56,10 @@ declare namespace Components {
              */
             required?: boolean;
             /**
+             * When true, only the task's assignees may change its status while the flow is running, or choose its branch on a manual decision: a user named in `assigned_to`, a member of a group or partner organisation named there, or a user a variable assignment resolves to. Everyone else, org admins included, can see and reassign the task but not change its status. A task left without an assignee keeps its status until someone is assigned. Only a manual task or a decision with `trigger_mode: manual` can carry it: a create or update that sets it on any other kind, or on a scheduled manual task, is rejected.
+             */
+            only_assignee_can_complete?: boolean;
+            /**
              * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) on every create, update and load — a client-supplied array is replaced. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins; an id occurring twice in one task is rejected. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate task completion while the flow is running.
              */
             subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
@@ -53,12 +68,26 @@ declare namespace Components {
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
             /**
+             * Order of the task's audience description tabs in the builder and during execution; the first tab shown opens by default. Keys not listed follow in the default order description, ecp, installer, partner, and audiences that are not enabled are skipped.
+             */
+            audience_order?: [
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?
+            ];
+            /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
             taxonomies?: string[];
             phase_id?: string;
             task_type: TaskType;
             agent_config?: /* Configuration for AI Agent to run */ AgentConfig;
+            input_context?: /**
+             * Optional. Source of the entity fed into this automation task. If omitted, the run's current main context is used.
+             *
+             */
+            AutomationInputContext;
             /**
              * How the agent run is started. `automatic` starts it as soon as the task becomes current; `manual` waits for a person to run it and to approve the result. An absent value is read as `manual` everywhere: the engine dispatches only an explicit `automatic`, the builder shows the task as manual, and the task may carry the skip gate and required subtasks.
              */
@@ -94,8 +123,12 @@ declare namespace Components {
         export interface AiPrefillMapping {
             source: string;
             block_id: string;
-            block_type: "text-input" | "number-input" | "personal-information" | "meter-reading";
+            block_type: "text-input" | "number-input" | "personal-information" | "meter-reading" | "contact" | "single-choice" | "date-input" | "binary-input" | "address" | "payment-method" | "multiple-choice" | "availability-check";
             block_field?: string;
+            /**
+             * The country an address or availability-check block is configured for, used when the extraction names none
+             */
+            country_code?: string;
         }
         /**
          * Configuration for automation execution to run
@@ -123,12 +156,12 @@ declare namespace Components {
                 };
             };
             /**
-             * Transient field. When present, the backend clones the automation flow referenced by this ID and assigns the new flow_id to the task. Used when duplicating an automation task to give it an independent automation. Stripped before storage.
+             * Transient field. When present, the backend clones the automation flow referenced by this ID and assigns the new flow_id to the task. Used when duplicating an automation task to give it an independent automation. When the referenced automation is not one the stored flow already uses (always the case on create, e.g. tasks copied from flows merged into a new flow), the clone is born like a new task automation of this flow (see keep_task_automations_in_sync) and without the source's disable_details, blueprint membership (_manifest), protection or run count; a copy within the flow keeps the source's state. Stripped before storage.
              *
              */
             duplicated_flow_id?: string;
             input_context?: /**
-             * Optional. Source of the entity fed into this automation task. If omitted, the entity of the trigger that started the run is used.
+             * Optional. Source of the entity fed into this automation task. If omitted, the run's current main context is used.
              *
              */
             AutomationInputContext;
@@ -152,24 +185,55 @@ declare namespace Components {
          */
         export type AutomationFailurePolicy = "stop" | "continue";
         /**
-         * Optional. Source of the entity fed into this automation task. If omitted, the entity of the trigger that started the run is used.
+         * Optional. Source of the entity fed into this automation task. If omitted, the run's current main context is used.
          *
          */
         export interface AutomationInputContext {
             /**
-             * `trigger` = the entity of the trigger that started the run, or of the specific configured trigger named by `trigger_id`. `task` = entity produced by an upstream task in the graph.
+             * `main_context` = the run's current main context (same as omitting `input_context`). It moves when a task promotes its output to main context. `task` = entity produced by an upstream task in the graph. `trigger` with `trigger_id` = that configured trigger's entity. The Flow Builder offers it while the task is in that one trigger's own sub-flow, before it merges with another trigger's path. Without `trigger_id` it is legacy and resolves like `main_context`.
              *
              */
-            source: "trigger" | "task";
+            source: "main_context" | "task" | "trigger";
             /**
              * Required when source is `task`. The id of the upstream task whose output entity should feed this task.
              */
             task_id?: string;
             /**
-             * Optional when source is `trigger`. Pins the input to one specific configured trigger (primary or additional) by its id. When absent, the trigger that started the run supplies the entity.
+             * Only read when source is `trigger`. Pins the input to one specific configured trigger (primary or additional) by its id. When absent, the input resolves like `main_context`.
              *
              */
             trigger_id?: string;
+            /**
+             * Whether the input entity brings its direct relations along. Every action honours it. When neither `with_relations` nor `also_pass` is set, the automation receives the legacy payload, unchanged.
+             *
+             */
+            with_relations?: boolean;
+            /**
+             * Extra entities passed to the automation alongside the input entity, combined into one list (in order, de-duplicated, without the input entity itself). When neither `with_relations` nor `also_pass` is set, the automation receives the legacy payload, unchanged. Only the start-workflow (trigger-workflow) action uses it in this version.
+             *
+             */
+            also_pass?: (/**
+             * One of the run's own entities. `main_context` = the run's current main context.
+             *
+             */
+            AutomationInputExtraContextRef | /* Every entity produced by an upstream task. */ AutomationInputExtraTaskRef)[];
+        }
+        /**
+         * One of the run's own entities. `main_context` = the run's current main context.
+         *
+         */
+        export interface AutomationInputExtraContextRef {
+            source: "main_context";
+        }
+        /**
+         * Every entity produced by an upstream task.
+         */
+        export interface AutomationInputExtraTaskRef {
+            source: "task";
+            /**
+             * The id of the upstream task whose output entities are passed along.
+             */
+            task_id: string;
         }
         /**
          * Optional. What happens to the entity produced by this automation task (the last successful entity-producing action of its automation).
@@ -197,7 +261,14 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
+            /**
+             * Fixed start date of the task (AL-3678): an ISO 8601 instant with an offset or `Z`. Until it is reached the running task is upcoming — visible, but no person may work on it. Only a manual task, an automation a person runs and a manual decision may carry either start date field; a template that sets one on any other kind is refused. A task with a delayed or relative schedule may carry neither: its timer runs it whatever the start date. `start_date_config` wins over it when both are set.
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            start_date?: string;
+            start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. `TASK_FINISHED` must name another task that comes before this one in the flow: one reached by following the edges back from it, never a loop back edge, where the edge leaving a phase stands for every task in the phase. A task after it, on a parallel branch or later in its own loop is refused. Only a manual task, an automation a person runs and a manual decision may carry one. */ StartDateConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -207,6 +278,10 @@ declare namespace Components {
              */
             required?: boolean;
             /**
+             * When true, only the task's assignees may change its status while the flow is running, or choose its branch on a manual decision: a user named in `assigned_to`, a member of a group or partner organisation named there, or a user a variable assignment resolves to. Everyone else, org admins included, can see and reassign the task but not change its status. A task left without an assignee keeps its status until someone is assigned. Only a manual task or a decision with `trigger_mode: manual` can carry it: a create or update that sets it on any other kind, or on a scheduled manual task, is rejected.
+             */
+            only_assignee_can_complete?: boolean;
+            /**
              * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) on every create, update and load — a client-supplied array is replaced. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins; an id occurring twice in one task is rejected. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate task completion while the flow is running.
              */
             subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
@@ -214,6 +289,15 @@ declare namespace Components {
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
+            /**
+             * Order of the task's audience description tabs in the builder and during execution; the first tab shown opens by default. Keys not listed follow in the default order description, ecp, installer, partner, and audiences that are not enabled are skipped.
+             */
+            audience_order?: [
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?
+            ];
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -258,6 +342,11 @@ declare namespace Components {
                     [name: string]: any;
                 };
             }[];
+            /**
+             * Transient field. Sent together with trigger_config on a trigger that has no automation yet: the backend creates the trigger's automation as a copy of the automation with this id (its trigger conditions, action conditions, schedules and trigger-workflow configuration), pointed at this flow, stamped with this trigger's id and with its triggers taken from trigger_config. When that automation no longer exists or is not a workflow trigger automation, a new automation is created from trigger_config. Ignored without trigger_config or when the trigger already has an automation. Used when flows are merged into a new flow. Stripped before storage.
+             *
+             */
+            duplicated_automation_id?: string;
         }
         export interface ChangeReasonStatusReq {
             status: ClosingReasonsStatus;
@@ -384,7 +473,7 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
@@ -461,9 +550,17 @@ declare namespace Components {
              */
             limit_warnings?: /* A configuration limit that the flow currently exceeds. Returned by the get-flow endpoint and by create/update responses so the UI can show a non-blocking banner. Size/count limit violations never cause a 400 — only structural errors do. The flow remains fully usable; users are encouraged to bring values within the limits. */ FlowLimitWarning[];
             /**
+             * Non-blocking warnings about the flow's structure. Returned on read (get-flow) and on create/update responses, whether or not the client sends `client_supports_adv_loops`. A flow with structural warnings is still accepted and stored; the warnings are reported here so the UI can point the user at the part of the flow to fix. Ignored on write and never stored.
+             */
+            structural_warnings?: /* A structural problem the flow has that does not block a save. Returned by the get-flow endpoint and by create/update responses. Today the only one is errors.loop_id_after_exit: a loop connection can be reached from its loop's exit branch, so leaving the loop leads back into it. */ FlowStructuralWarning[];
+            /**
              * Persisted preference for how the flow's task automations relate to the flow's `enabled` state. When `true`, task automations always mirror the flow: their enabled state is re-synced on every update and new task automations are created with the flow's current enabled state. When `false`, task automations are managed independently: updates never change their enabled state and new task automations are always created enabled, so a flow that is built or edited while disabled does not accumulate automations that stay off after the flow is re-enabled. When unset, legacy behavior applies: new task automations inherit the flow's enabled state and updates leave existing ones untouched. Safety: on updates that do NOT change `enabled`, the in-sync mode never re-enables automations that were disabled by the system (e.g. infinite-loop protection) — only a deliberate `enabled` flip on the flow re-arms those.
              */
             keep_task_automations_in_sync?: boolean;
+            /**
+             * If true, the flow is displayed in read-only mode in the UI
+             */
+            protected?: boolean;
         }
         export interface DecisionTask {
             id: string;
@@ -475,7 +572,14 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
+            /**
+             * Fixed start date of the task (AL-3678): an ISO 8601 instant with an offset or `Z`. Until it is reached the running task is upcoming — visible, but no person may work on it. Only a manual task, an automation a person runs and a manual decision may carry either start date field; a template that sets one on any other kind is refused. A task with a delayed or relative schedule may carry neither: its timer runs it whatever the start date. `start_date_config` wins over it when both are set.
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            start_date?: string;
+            start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. `TASK_FINISHED` must name another task that comes before this one in the flow: one reached by following the edges back from it, never a loop back edge, where the edge leaving a phase stands for every task in the phase. A task after it, on a parallel branch or later in its own loop is refused. Only a manual task, an automation a person runs and a manual decision may carry one. */ StartDateConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -485,6 +589,10 @@ declare namespace Components {
              */
             required?: boolean;
             /**
+             * When true, only the task's assignees may change its status while the flow is running, or choose its branch on a manual decision: a user named in `assigned_to`, a member of a group or partner organisation named there, or a user a variable assignment resolves to. Everyone else, org admins included, can see and reassign the task but not change its status. A task left without an assignee keeps its status until someone is assigned. Only a manual task or a decision with `trigger_mode: manual` can carry it: a create or update that sets it on any other kind, or on a scheduled manual task, is rejected.
+             */
+            only_assignee_can_complete?: boolean;
+            /**
              * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) on every create, update and load — a client-supplied array is replaced. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins; an id occurring twice in one task is rejected. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate task completion while the flow is running.
              */
             subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
@@ -492,6 +600,15 @@ declare namespace Components {
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
+            /**
+             * Order of the task's audience description tabs in the builder and during execution; the first tab shown opens by default. Keys not listed follow in the default order description, ecp, installer, partner, and audiences that are not enabled are skipped.
+             */
+            audience_order?: [
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?
+            ];
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -505,6 +622,15 @@ declare namespace Components {
              */
             allow_parallel_execution?: boolean;
             schedule?: DelayedSchedule | RelativeSchedule;
+            /**
+             * The loops this decision owns, keyed by loop id. A loop id is unique in the template. A decision owns at most one loop.
+             */
+            loops?: {
+                [name: string]: LoopDefinition;
+            };
+            /**
+             * Superseded by `loops`.
+             */
             loop_config?: {
                 /**
                  * The id of the branch that will be looped
@@ -537,12 +663,12 @@ declare namespace Components {
             unit: TimeUnit;
         }
         /**
-         * Set due date for the task based on a dynamic condition
+         * Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date.
          */
         export interface DueDateConfig {
             duration: number;
             unit: TimeUnit;
-            type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED";
+            type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "PHASE_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED" | "START_DATE";
             task_id?: string;
             phase_id?: string;
         }
@@ -584,6 +710,10 @@ declare namespace Components {
             from_id: string;
             to_id?: string | null;
             condition_id?: string;
+            /**
+             * The loop this edge loops back in. Set on loop back edges only.
+             */
+            loop_id?: string;
             /**
              * Indicates a default case for a decision task. Only decision task edges can have this field and the flow advances using this edge if no conditions are met.
              */
@@ -693,16 +823,21 @@ declare namespace Components {
         }
         export interface EvaluationSource {
             /**
-             * The id of the action or trigger
+             * The id of the action or trigger, or of the decision owning the loop a flow trait reads
              */
             id?: string;
-            origin?: "trigger" | "action";
+            /**
+             * Where the subject comes from: the run's trigger, an upstream action, or the running flow itself (`flow_runtime`, flow traits).
+             *
+             */
+            origin?: "trigger" | "action" | "flow_runtime";
             /**
              * `trigger_source` (with origin `trigger`) marks a "started by" statement: the run's fired trigger is compared against the configured trigger ids in `values` — no entity attribute is involved.
              * `main_context` (with origin `trigger`, no `id`) marks a statement evaluated against the run's PRIMARY context: the fired trigger's entity, re-bound by any completed task that promotes its output to main context (`output_context.set_as_primary`). `schema` carries the subject's schema for attribute selection only — resolution is by the primary flag, never by schema.
+             * `flow_trait` (with origin `flow_runtime`) marks a statement on a value of the running flow: `attribute` is the trait key, `id` and `attribute_sub_field` name its subject. `loop.iteration` is the lap a loop is in (1 on the first pass); `id` is the decision that owns the loop and `attribute_sub_field` the loop's id, a loop the evaluating decision is inside.
              *
              */
-            origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context";
+            origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait";
             schema?: string;
             attribute?: string;
             attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address";
@@ -737,7 +872,7 @@ declare namespace Components {
              */
             attributes_match?: "any" | "all";
             /**
-             * For complex attribute types, specifies which sub-field to extract (e.g., "address", "name", "email_type")
+             * For complex attribute types, specifies which sub-field to extract (e.g., "address", "name", "email_type"); for the flow trait `loop.iteration`, the loop id
              */
             attribute_sub_field?: string;
             /**
@@ -769,7 +904,7 @@ declare namespace Components {
             visibility?: "entity_views" | "background";
             main_context?: /**
              * Which of a flow's contexts owns the run: the entity conditions, automations and entity sync resolve against by default.
-             * ABSENT means the historical behaviour — the primary trigger's entity. That default exists because it describes every flow built so far, not because the primary trigger is special: a flow with several complementary triggers has no natural primary, which is exactly when stating it explicitly earns its place.
+             * ABSENT means the default — the primary trigger's entity. A flow has ONE main context, not one per trigger (STABLE360-13503): a run started by another trigger resolves the default among the starting entity's relations, first match, falling back to the starting entity — exactly as a configured schema would be. Setting it explicitly is for when the primary trigger's entity is not the one the flow is about.
              * This decides the STARTING main context only. A task with `output_context.set_as_primary` still moves it mid-run; the setting seeds the run and the graph moves it from there.
              *
              */
@@ -868,6 +1003,31 @@ declare namespace Components {
          */
         RuleAnchor;
         /**
+         * A structural problem the flow has that does not block a save. Returned by the get-flow endpoint and by create/update responses. Today the only one is errors.loop_id_after_exit: a loop connection can be reached from its loop's exit branch, so leaving the loop leads back into it.
+         */
+        export interface FlowStructuralWarning {
+            /**
+             * i18n key identifying the warning (e.g. errors.loop_id_after_exit).
+             */
+            i18nKey: string;
+            /**
+             * Human-readable description of the warning.
+             */
+            message: string;
+            /**
+             * ID of the task or phase the warning points at, when applicable.
+             */
+            node_id?: string;
+            /**
+             * ID of the edge the warning points at, when applicable.
+             */
+            edge_id?: string;
+            /**
+             * JSON path within the flow to the offending element.
+             */
+            path: any[];
+        }
+        /**
          * Base schema for V2 flow templates. A flow template defines the structure of a workflow
          * including phases, tasks, edges, triggers, and other configuration. Flow templates serve
          * as blueprints that can be instantiated as flow executions.
@@ -943,7 +1103,7 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
@@ -1020,9 +1180,17 @@ declare namespace Components {
              */
             limit_warnings?: /* A configuration limit that the flow currently exceeds. Returned by the get-flow endpoint and by create/update responses so the UI can show a non-blocking banner. Size/count limit violations never cause a 400 — only structural errors do. The flow remains fully usable; users are encouraged to bring values within the limits. */ FlowLimitWarning[];
             /**
+             * Non-blocking warnings about the flow's structure. Returned on read (get-flow) and on create/update responses, whether or not the client sends `client_supports_adv_loops`. A flow with structural warnings is still accepted and stored; the warnings are reported here so the UI can point the user at the part of the flow to fix. Ignored on write and never stored.
+             */
+            structural_warnings?: /* A structural problem the flow has that does not block a save. Returned by the get-flow endpoint and by create/update responses. Today the only one is errors.loop_id_after_exit: a loop connection can be reached from its loop's exit branch, so leaving the loop leads back into it. */ FlowStructuralWarning[];
+            /**
              * Persisted preference for how the flow's task automations relate to the flow's `enabled` state. When `true`, task automations always mirror the flow: their enabled state is re-synced on every update and new task automations are created with the flow's current enabled state. When `false`, task automations are managed independently: updates never change their enabled state and new task automations are always created enabled, so a flow that is built or edited while disabled does not accumulate automations that stay off after the flow is re-enabled. When unset, legacy behavior applies: new task automations inherit the flow's enabled state and updates leave existing ones untouched. Safety: on updates that do NOT change `enabled`, the in-sync mode never re-enables automations that were disabled by the system (e.g. infinite-loop protection) — only a deliberate `enabled` flip on the flow re-arms those.
              */
             keep_task_automations_in_sync?: boolean;
+            /**
+             * If true, the flow is displayed in read-only mode in the UI
+             */
+            protected?: boolean;
         }
         /**
          * Base schema for V2 flow templates. A flow template defines the structure of a workflow
@@ -1100,7 +1268,7 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             /**
              * Indicates whether this workflow is available for End Customer Portal or not. By default it's not.
@@ -1177,9 +1345,17 @@ declare namespace Components {
              */
             limit_warnings?: /* A configuration limit that the flow currently exceeds. Returned by the get-flow endpoint and by create/update responses so the UI can show a non-blocking banner. Size/count limit violations never cause a 400 — only structural errors do. The flow remains fully usable; users are encouraged to bring values within the limits. */ FlowLimitWarning[];
             /**
+             * Non-blocking warnings about the flow's structure. Returned on read (get-flow) and on create/update responses, whether or not the client sends `client_supports_adv_loops`. A flow with structural warnings is still accepted and stored; the warnings are reported here so the UI can point the user at the part of the flow to fix. Ignored on write and never stored.
+             */
+            structural_warnings?: /* A structural problem the flow has that does not block a save. Returned by the get-flow endpoint and by create/update responses. Today the only one is errors.loop_id_after_exit: a loop connection can be reached from its loop's exit branch, so leaving the loop leads back into it. */ FlowStructuralWarning[];
+            /**
              * Persisted preference for how the flow's task automations relate to the flow's `enabled` state. When `true`, task automations always mirror the flow: their enabled state is re-synced on every update and new task automations are created with the flow's current enabled state. When `false`, task automations are managed independently: updates never change their enabled state and new task automations are always created enabled, so a flow that is built or edited while disabled does not accumulate automations that stay off after the flow is re-enabled. When unset, legacy behavior applies: new task automations inherit the flow's enabled state and updates leave existing ones untouched. Safety: on updates that do NOT change `enabled`, the in-sync mode never re-enables automations that were disabled by the system (e.g. infinite-loop protection) — only a deliberate `enabled` flip on the flow re-arms those.
              */
             keep_task_automations_in_sync?: boolean;
+            /**
+             * If true, the flow is displayed in read-only mode in the UI
+             */
+            protected?: boolean;
         }
         /**
          * Short unique id (length 8) to identify the Flow Template.
@@ -1306,6 +1482,23 @@ declare namespace Components {
             journey_name?: string;
             automation_id?: string;
         }
+        export interface LoopDefinition {
+            /**
+             * The decision's branches that enter the loop. The first is the `loop_config` loop branch, the others follow in condition order.
+             */
+            entry_branch_ids: [
+                string,
+                ...string[]
+            ];
+            /**
+             * The decision's branch that exits the loop.
+             */
+            exit_branch_id: string;
+            /**
+             * Maximum number of iterations of the loop.
+             */
+            max_iterations: number;
+        }
         /**
          * The run's primary context, whatever it currently is.
          */
@@ -1314,7 +1507,7 @@ declare namespace Components {
         }
         /**
          * Which of a flow's contexts owns the run: the entity conditions, automations and entity sync resolve against by default.
-         * ABSENT means the historical behaviour — the primary trigger's entity. That default exists because it describes every flow built so far, not because the primary trigger is special: a flow with several complementary triggers has no natural primary, which is exactly when stating it explicitly earns its place.
+         * ABSENT means the default — the primary trigger's entity. A flow has ONE main context, not one per trigger (STABLE360-13503): a run started by another trigger resolves the default among the starting entity's relations, first match, falling back to the starting entity — exactly as a configured schema would be. Setting it explicitly is for when the primary trigger's entity is not the one the flow is about.
          * This decides the STARTING main context only. A task with `output_context.set_as_primary` still moves it mid-run; the setting seeds the run and the graph moves it from there.
          *
          */
@@ -1341,7 +1534,14 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
+            /**
+             * Fixed start date of the task (AL-3678): an ISO 8601 instant with an offset or `Z`. Until it is reached the running task is upcoming — visible, but no person may work on it. Only a manual task, an automation a person runs and a manual decision may carry either start date field; a template that sets one on any other kind is refused. A task with a delayed or relative schedule may carry neither: its timer runs it whatever the start date. `start_date_config` wins over it when both are set.
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            start_date?: string;
+            start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. `TASK_FINISHED` must name another task that comes before this one in the flow: one reached by following the edges back from it, never a loop back edge, where the edge leaving a phase stands for every task in the phase. A task after it, on a parallel branch or later in its own loop is refused. Only a manual task, an automation a person runs and a manual decision may carry one. */ StartDateConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -1351,6 +1551,10 @@ declare namespace Components {
              */
             required?: boolean;
             /**
+             * When true, only the task's assignees may change its status while the flow is running, or choose its branch on a manual decision: a user named in `assigned_to`, a member of a group or partner organisation named there, or a user a variable assignment resolves to. Everyone else, org admins included, can see and reassign the task but not change its status. A task left without an assignee keeps its status until someone is assigned. Only a manual task or a decision with `trigger_mode: manual` can carry it: a create or update that sets it on any other kind, or on a scheduled manual task, is rejected.
+             */
+            only_assignee_can_complete?: boolean;
+            /**
              * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) on every create, update and load — a client-supplied array is replaced. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins; an id occurring twice in one task is rejected. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate task completion while the flow is running.
              */
             subtasks?: /* One checklist item of a task, derived from the checklist markup in the party descriptions. Identity is the stable data-subtask-id the editor mints into the markup. */ Subtask[];
@@ -1358,6 +1562,15 @@ declare namespace Components {
             ecp?: /* Details regarding ECP for the workflow step */ ECPDetails;
             installer?: /* Details regarding ECP for the workflow step */ ECPDetails;
             partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
+            /**
+             * Order of the task's audience description tabs in the builder and during execution; the first tab shown opens by default. Keys not listed follow in the default order description, ecp, installer, partner, and audiences that are not enabled are skipped.
+             */
+            audience_order?: [
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?
+            ];
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -1391,7 +1604,7 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
             assigned_to?: (string | /* Represents a variable assignment with its expression and optional resolved value. Used for dynamic user assignments that get resolved during workflow execution. */ VariableAssignment)[];
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
@@ -1523,6 +1736,18 @@ declare namespace Components {
                 installer?: string;
             };
         }
+        /**
+         * Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. `TASK_FINISHED` must name another task that comes before this one in the flow: one reached by following the edges back from it, never a loop back edge, where the edge leaving a phase stands for every task in the phase. A task after it, on a parallel branch or later in its own loop is refused. Only a manual task, an automation a person runs and a manual decision may carry one.
+         */
+        export interface StartDateConfig {
+            duration: number;
+            unit: TimeUnit;
+            type: "WORKFLOW_STARTED" | "TASK_FINISHED" | "A_PRECEDING_TASK_COMPLETED" | "ALL_PRECEDING_TASKS_COMPLETED" | "THIS_TASK_LAST_COMPLETED";
+            /**
+             * The task whose completion `TASK_FINISHED` counts from; it must come before this task in the flow
+             */
+            task_id?: string;
+        }
         export interface Statement {
             id: string;
             source: EvaluationSource;
@@ -1607,7 +1832,7 @@ declare namespace Components {
              */
             journey_submission_required?: boolean;
             /**
-             * Values preset by the flow author for context parameters the journey declares in its contextSchema (String/Number parameters only, not entity-typed ones). Passed as journey context when the journey is launched from the task, overriding the default value of the parameter (e.g. `origin`).
+             * Values preset by the flow author for context parameters the journey declares in its contextSchema. A value is either a literal or an entity variable over the run's context, which the launcher resolves when the journey is opened from the task. Overrides the parameter's default value and the launcher's own entity ids.
              */
             context_parameters?: JourneyContextParameter[];
             ai_prefill?: /* AI extraction + prefill configuration for the attached journey (Flows v2 only) */ AiPrefillConfig;
@@ -1643,6 +1868,10 @@ declare namespace Components {
             required?: boolean;
         }
         export type Task = ManualTask | AutomationTask | DecisionTask | AiAgentTask;
+        /**
+         * A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners.
+         */
+        export type TaskAudience = "description" | "ecp" | "installer" | "partner";
         export interface TaskBase {
             id: string;
             name: string;
@@ -1653,7 +1882,14 @@ declare namespace Components {
              * 2021-04-27T12:00:00.000Z
              */
             due_date?: string;
-            due_date_config?: /* Set due date for the task based on a dynamic condition */ DueDateConfig;
+            due_date_config?: /* Set due date for the task based on a dynamic condition. `START_DATE` counts from the task's own start date (AL-3678) and is valid only on a task that has a start date. */ DueDateConfig;
+            /**
+             * Fixed start date of the task (AL-3678): an ISO 8601 instant with an offset or `Z`. Until it is reached the running task is upcoming — visible, but no person may work on it. Only a manual task, an automation a person runs and a manual decision may carry either start date field; a template that sets one on any other kind is refused. A task with a delayed or relative schedule may carry neither: its timer runs it whatever the start date. `start_date_config` wins over it when both are set.
+             * example:
+             * 2021-04-27T12:00:00.000Z
+             */
+            start_date?: string;
+            start_date_config?: /* Relative start date of a task (AL-3678): `duration` `unit` after the most recent occurrence of the reference event. `THIS_TASK_LAST_COMPLETED` is the task's own previous completion (a loop's earlier pass); there is no wait while the reference event has not happened. Durations are positive whole numbers and are added as exact calendar time (no business days); `years` is not accepted. `TASK_FINISHED` must name another task that comes before this one in the flow: one reached by following the edges back from it, never a loop back edge, where the edge leaving a phase stands for every task in the phase. A task after it, on a parallel branch or later in its own loop is refused. Only a manual task, an automation a person runs and a manual decision may carry one. */ StartDateConfig;
             /**
              * requirements that need to be fulfilled in order to enable the task while flow instances are running
              */
@@ -1662,6 +1898,10 @@ declare namespace Components {
              * When true, the task is required and users cannot skip it while the flow is running. Unrelated to `requirements`, which gate when a task becomes enabled. System-driven skips are unaffected — tasks on a not-taken decision branch, and automation tasks whose automation execution itself reports a skipped verdict (e.g. unmet trigger conditions). Only a manual task, or an automation or AI task whose `trigger_mode` is `manual` or absent, can carry it: on a decision or an automatic kind it is normalised to false on create, update and load.
              */
             required?: boolean;
+            /**
+             * When true, only the task's assignees may change its status while the flow is running, or choose its branch on a manual decision: a user named in `assigned_to`, a member of a group or partner organisation named there, or a user a variable assignment resolves to. Everyone else, org admins included, can see and reassign the task but not change its status. A task left without an assignee keeps its status until someone is assigned. Only a manual task or a decision with `trigger_mode: manual` can carry it: a create or update that sets it on any other kind, or on a scheduled manual task, is rejected.
+             */
+            only_assignee_can_complete?: boolean;
             /**
              * Checklist items from the task's party descriptions, derived by the server from the checklist markup (`ul[__lexicallisttype="check"] > li[data-subtask-id]`, nearest list ancestor) on every create, update and load — a client-supplied array is replaced. Parties are read in the order description, ecp, installer, partner and the first occurrence of an id wins; an id occurring twice in one task is rejected. An item is required only when it is marked `data-subtask-required="true"` in the markup, the task kind has a person action (a manual task, a decision with `trigger_mode: manual`, or an automation or AI task whose `trigger_mode` is `manual` or absent) and it lives in the co-worker or partner description. Required items gate task completion while the flow is running.
              */
@@ -1673,6 +1913,15 @@ declare namespace Components {
              * Partner-specific task details shown to partner org users viewing shared resources
              */
             partner?: /* Details regarding partner for the workflow step */ PartnerDetails;
+            /**
+             * Order of the task's audience description tabs in the builder and during execution; the first tab shown opens by default. Keys not listed follow in the default order description, ecp, installer, partner, and audiences that are not enabled are skipped.
+             */
+            audience_order?: [
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?,
+                /* A task audience, named after the task field holding its description: co-workers (description), end customers (ecp), installers and partners. */ TaskAudience?
+            ];
             /**
              * Taxonomy ids that are associated with this workflow and used for filtering
              */
@@ -1868,10 +2117,12 @@ declare namespace Paths {
     }
     namespace CreateFlowTemplate {
         namespace Parameters {
+            export type ClientSupportsAdvLoops = boolean;
             export type EnforceLimits = boolean;
         }
         export interface QueryParameters {
             enforce_limits?: Parameters.EnforceLimits;
+            client_supports_adv_loops?: Parameters.ClientSupportsAdvLoops;
         }
         export type RequestBody = /**
          * Base schema for V2 flow templates. A flow template defines the structure of a workflow
@@ -2067,9 +2318,13 @@ declare namespace Paths {
              * 7hj28akg
              */
             Components.Schemas.FlowTemplateId;
+            export type SkipHeal = boolean;
         }
         export interface PathParameters {
             flowId: Parameters.FlowId;
+        }
+        export interface QueryParameters {
+            skip_heal?: Parameters.SkipHeal;
         }
         namespace Responses {
             export type $200 = /**
@@ -2201,6 +2456,7 @@ declare namespace Paths {
     }
     namespace UpdateFlowTemplate {
         namespace Parameters {
+            export type ClientSupportsAdvLoops = boolean;
             export type EnforceLimits = boolean;
             export type FlowId = /**
              * Short unique id (length 8) to identify the Flow Template.
@@ -2214,6 +2470,7 @@ declare namespace Paths {
         }
         export interface QueryParameters {
             enforce_limits?: Parameters.EnforceLimits;
+            client_supports_adv_loops?: Parameters.ClientSupportsAdvLoops;
         }
         export type RequestBody = /**
          * Base schema for V2 flow templates. A flow template defines the structure of a workflow
@@ -2318,7 +2575,7 @@ export interface OperationMethods {
    * Retrieve a specific flow template by its unique identifier.
    */
   'getFlowTemplate'(
-    parameters?: Parameters<Paths.GetFlowTemplate.PathParameters> | null,
+    parameters?: Parameters<Paths.GetFlowTemplate.QueryParameters & Paths.GetFlowTemplate.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetFlowTemplate.Responses.$200>
@@ -2564,7 +2821,7 @@ export interface PathsDictionary {
      * Retrieve a specific flow template by its unique identifier.
      */
     'get'(
-      parameters?: Parameters<Paths.GetFlowTemplate.PathParameters> | null,
+      parameters?: Parameters<Paths.GetFlowTemplate.QueryParameters & Paths.GetFlowTemplate.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetFlowTemplate.Responses.$200>
@@ -2748,6 +3005,8 @@ export type AiPrefillMapping = Components.Schemas.AiPrefillMapping;
 export type AutomationConfig = Components.Schemas.AutomationConfig;
 export type AutomationFailurePolicy = Components.Schemas.AutomationFailurePolicy;
 export type AutomationInputContext = Components.Schemas.AutomationInputContext;
+export type AutomationInputExtraContextRef = Components.Schemas.AutomationInputExtraContextRef;
+export type AutomationInputExtraTaskRef = Components.Schemas.AutomationInputExtraTaskRef;
 export type AutomationOutputContext = Components.Schemas.AutomationOutputContext;
 export type AutomationTask = Components.Schemas.AutomationTask;
 export type AutomationTrigger = Components.Schemas.AutomationTrigger;
@@ -2776,6 +3035,7 @@ export type FlowContextSettings = Components.Schemas.FlowContextSettings;
 export type FlowDisplayRule = Components.Schemas.FlowDisplayRule;
 export type FlowLimitWarning = Components.Schemas.FlowLimitWarning;
 export type FlowRuleAnchor = Components.Schemas.FlowRuleAnchor;
+export type FlowStructuralWarning = Components.Schemas.FlowStructuralWarning;
 export type FlowTemplate = Components.Schemas.FlowTemplate;
 export type FlowTemplateBase = Components.Schemas.FlowTemplateBase;
 export type FlowTemplateId = Components.Schemas.FlowTemplateId;
@@ -2788,6 +3048,7 @@ export type JourneyContextUsage = Components.Schemas.JourneyContextUsage;
 export type JourneyContextUsagesReq = Components.Schemas.JourneyContextUsagesReq;
 export type JourneyContextUsagesResp = Components.Schemas.JourneyContextUsagesResp;
 export type JourneySubmissionTrigger = Components.Schemas.JourneySubmissionTrigger;
+export type LoopDefinition = Components.Schemas.LoopDefinition;
 export type MainContextAnchor = Components.Schemas.MainContextAnchor;
 export type MainContextSetting = Components.Schemas.MainContextSetting;
 export type ManualTask = Components.Schemas.ManualTask;
@@ -2801,6 +3062,7 @@ export type RuleAnchor = Components.Schemas.RuleAnchor;
 export type SearchFlowTemplates = Components.Schemas.SearchFlowTemplates;
 export type Section = Components.Schemas.Section;
 export type Stage = Components.Schemas.Stage;
+export type StartDateConfig = Components.Schemas.StartDateConfig;
 export type Statement = Components.Schemas.Statement;
 export type Step = Components.Schemas.Step;
 export type StepDescription = Components.Schemas.StepDescription;
@@ -2809,6 +3071,7 @@ export type StepRequirement = Components.Schemas.StepRequirement;
 export type StepType = Components.Schemas.StepType;
 export type Subtask = Components.Schemas.Subtask;
 export type Task = Components.Schemas.Task;
+export type TaskAudience = Components.Schemas.TaskAudience;
 export type TaskBase = Components.Schemas.TaskBase;
 export type TaskType = Components.Schemas.TaskType;
 export type TimeUnit = Components.Schemas.TimeUnit;

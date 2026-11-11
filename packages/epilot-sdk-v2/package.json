@@ -1,6 +1,6 @@
 {
   "name": "@epilot/sdk",
-  "version": "2.20.92",
+  "version": "2.20.101",
   "description": "JavaScript/TypeScript SDK for epilot APIs",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -153,6 +153,12 @@
       "require": "./dist/apis/entity-mapping.cjs"
     },
     "./entity-mapping/openapi.json": "./definitions/entity-mapping.json",
+    "./entity-ui": {
+      "types": "./dist/apis/entity-ui.d.ts",
+      "import": "./dist/apis/entity-ui.js",
+      "require": "./dist/apis/entity-ui.cjs"
+    },
+    "./entity-ui/openapi.json": "./definitions/entity-ui.json",
     "./environments": {
       "types": "./dist/apis/environments.d.ts",
       "import": "./dist/apis/environments.js",
@@ -463,6 +469,9 @@
       ],
       "entity-mapping": [
         "./dist/apis/entity-mapping.d.ts"
+      ],
+      "entity-ui": [
+        "./dist/apis/entity-ui.d.ts"
       ],
       "environments": [
         "./dist/apis/environments.d.ts"

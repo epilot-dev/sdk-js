@@ -1992,8 +1992,10 @@ export declare namespace Components {
              * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
              * `postal_code` and `city`.
              *
-             * A date-only `date` or `daterange` value is midnight of that day in the organization's
-             * timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.
+             * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
+             * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
+             * `until` is the last millisecond of that day: `2026-04-30` is stored as
+             * `2026-04-30T21:59:59.999Z`.
              *
              * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
@@ -4640,8 +4642,10 @@ export declare namespace Components {
              * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
              * `postal_code` and `city`.
              *
-             * A date-only `date` or `daterange` value is midnight of that day in the organization's
-             * timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.
+             * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
+             * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
+             * `until` is the last millisecond of that day: `2026-04-30` is stored as
+             * `2026-04-30T21:59:59.999Z`.
              *
              * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
@@ -11428,8 +11432,11 @@ export declare namespace Components {
             [name: string]: /* The computed price */ ComputedBasePrice;
         }
         /**
-         * The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and a date
-         * is midnight of that day in the organization's timezone. A bound that is absent, `null` or an
+         * The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and both
+         * are included. A date names the whole day in the organization's timezone: as `from` it starts
+         * at midnight, as `until` it runs to the day's last millisecond. So
+         * `{ "from": "2026-10-01", "until": "2026-10-31" }` is all of October, and a window may start
+         * and end on the same day. A date-time names one moment. A bound that is absent, `null` or an
          * empty string is an open end; stored, an open end is an empty string.
          *
          */
@@ -11441,7 +11448,7 @@ export declare namespace Components {
             from?: string | null;
             /**
              * example:
-             * 2027-01-01
+             * 2026-12-31
              */
             until?: string | null;
         }
@@ -11478,7 +11485,7 @@ export declare namespace Components {
              * - `string`: an arbitrary string, matched exactly and case-sensitively
              * - `number`: a numeric value
              * - `date`: a single date
-             * - `daterange`: a window with a from and an until timestamp; either end may be left open
+             * - `daterange`: a window from a `from` to an `until`, both included; either end may be left open
              * - `boolean`: a true/false value
              * - `select`: one of the values declared in `options`, which is always a closed vocabulary
              * - `location`: a geographic value, shaped by `format`
@@ -11511,6 +11518,17 @@ export declare namespace Components {
              * The value shape of a `location` condition. Absent for every other type.
              */
             format?: "postal_code" | "postal_code_city";
+        }
+        export interface ConditionOptionUsage {
+            /**
+             * example:
+             * private
+             */
+            value: string;
+            /**
+             * How many variants pin the value. Exact.
+             */
+            variants: number;
         }
         /**
          * A single-operator predicate.
@@ -11593,13 +11611,99 @@ export declare namespace Components {
          * - `string`: an arbitrary string, matched exactly and case-sensitively
          * - `number`: a numeric value
          * - `date`: a single date
-         * - `daterange`: a window with a from and an until timestamp; either end may be left open
+         * - `daterange`: a window from a `from` to an `until`, both included; either end may be left open
          * - `boolean`: a true/false value
          * - `select`: one of the values declared in `options`, which is always a closed vocabulary
          * - `location`: a geographic value, shaped by `format`
          *
          */
         export type ConditionType = "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location";
+        /**
+         * example:
+         * {
+         *   "total": {
+         *     "variants": 1252,
+         *     "entities": 38
+         *   },
+         *   "conditions": [
+         *     {
+         *       "name": "delivery_area",
+         *       "variants": 1240,
+         *       "entities": 37
+         *     },
+         *     {
+         *       "name": "customer_type",
+         *       "variants": 12,
+         *       "entities": 3,
+         *       "options": [
+         *         {
+         *           "value": "private",
+         *           "variants": 12
+         *         },
+         *         {
+         *           "value": "business",
+         *           "variants": 0
+         *         }
+         *       ],
+         *       "undeclared_options": []
+         *     },
+         *     {
+         *       "name": "offer_period",
+         *       "variants": 0,
+         *       "entities": 0
+         *     }
+         *   ],
+         *   "undeclared": [
+         *     {
+         *       "name": "legacy_customer_type",
+         *       "type": "select",
+         *       "variants": 1,
+         *       "entities": 1,
+         *       "options": [
+         *         {
+         *           "value": "private",
+         *           "variants": 1
+         *         }
+         *       ]
+         *     }
+         *   ]
+         * }
+         */
+        export interface ConditionUsage {
+            total: {
+                /**
+                 * The schema's variants in the search index.
+                 */
+                variants: number;
+                /**
+                 * The schema's entities flagged `is_conditional`, soft-deleted ones included, whether or
+                 * not the caller may read them.
+                 *
+                 */
+                entities: number;
+            };
+            /**
+             * One entry per condition the schema declares, in its order, zeros included.
+             */
+            conditions: /**
+             * A `select` condition always carries `options` and `undeclared_options`. A condition of any
+             * other type carries neither.
+             *
+             */
+            DeclaredConditionUsage[];
+            /**
+             * The conditions variants pin that the schema no longer declares, one entry per name and
+             * type, most pinned first, at most 100. Empty when there are none. Each entry carries what
+             * declaring the condition again needs, so that its variants resolve once more.
+             *
+             */
+            undeclared: /**
+             * A condition variants pin under this name and type that the schema does not declare. A name
+             * pinned under two types is listed once for each.
+             *
+             */
+            UndeclaredConditionUsage[];
+        }
         /**
          * Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route.
          */
@@ -13937,8 +14041,10 @@ export declare namespace Components {
              * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
              * `postal_code` and `city`.
              *
-             * A date-only `date` or `daterange` value is midnight of that day in the organization's
-             * timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.
+             * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
+             * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
+             * `until` is the last millisecond of that day: `2026-04-30` is stored as
+             * `2026-04-30T21:59:59.999Z`.
              *
              * `default` and names beginning with `_` are reserved; use the request's `default` flag.
              *
@@ -14092,6 +14198,38 @@ export declare namespace Components {
              */
             email?: string;
             phone?: string;
+        }
+        /**
+         * A `select` condition always carries `options` and `undeclared_options`. A condition of any
+         * other type carries neither.
+         *
+         */
+        export interface DeclaredConditionUsage {
+            /**
+             * example:
+             * customer_type
+             */
+            name: string;
+            /**
+             * How many variants pin the condition. Exact.
+             */
+            variants: number;
+            /**
+             * How many entities those variants belong to. Approximate above about 3,000, so it should
+             * not decide a lock.
+             *
+             */
+            entities: number;
+            /**
+             * One entry per option the condition declares, in its order, zeros included.
+             */
+            options?: ConditionOptionUsage[];
+            /**
+             * The values variants pin that the condition no longer declares, most pinned first, at
+             * most 100. Empty when there are none. Listing a value again makes its variants resolvable.
+             *
+             */
+            undeclared_options?: ConditionOptionUsage[];
         }
         export interface DeletedVariant {
             /**
@@ -16891,8 +17029,11 @@ export declare namespace Components {
          *
          */
         string | number | boolean | /**
-         * The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and a date
-         * is midnight of that day in the organization's timezone. A bound that is absent, `null` or an
+         * The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and both
+         * are included. A date names the whole day in the organization's timezone: as `from` it starts
+         * at midnight, as `until` it runs to the day's last millisecond. So
+         * `{ "from": "2026-10-01", "until": "2026-10-31" }` is all of October, and a window may start
+         * and end on the same day. A date-time names one moment. A bound that is absent, `null` or an
          * empty string is an open end; stored, an open end is an empty string.
          *
          */
@@ -16913,8 +17054,10 @@ export declare namespace Components {
          * `postal_code` the postal code itself and one of format `postal_code_city` an object carrying
          * `postal_code` and `city`.
          *
-         * A date-only `date` or `daterange` value is midnight of that day in the organization's
-         * timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`.
+         * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
+         * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
+         * `until` is the last millisecond of that day: `2026-04-30` is stored as
+         * `2026-04-30T21:59:59.999Z`.
          *
          * `default` and names beginning with `_` are reserved; use the request's `default` flag.
          *
@@ -21606,6 +21749,17 @@ export declare namespace Components {
              * The street number to search for providers
              */
             street_number?: string | null;
+            /**
+             * Which grids the search answers with, by whether they are closed distribution grids
+             * (geschlossene Verteilernetze), such as a railway's grid at a station.
+             *
+             * - `all`: every grid, closed distribution grids included.
+             * - `exclude_closed`: closed distribution grids are left out. An address inside one gets
+             *   no provider, the same answer as an address with no grid for that commodity.
+             * - `only_closed`: only closed distribution grids. An address outside one gets no provider.
+             *
+             */
+            grid_filter?: "all" | "exclude_closed" | "only_closed";
         }
         /**
          * The search providers payload
@@ -21909,6 +22063,50 @@ export declare namespace Components {
             };
         }
         export type TypeGetAg = "base_price" | "work_price";
+        /**
+         * A condition variants pin under this name and type that the schema does not declare. A name
+         * pinned under two types is listed once for each.
+         *
+         */
+        export interface UndeclaredConditionUsage {
+            /**
+             * example:
+             * legacy_customer_type
+             */
+            name: string;
+            type: /**
+             * The kind of value a condition holds, which decides how a pinned value is matched against a
+             * resolve context.
+             *
+             * - `string`: an arbitrary string, matched exactly and case-sensitively
+             * - `number`: a numeric value
+             * - `date`: a single date
+             * - `daterange`: a window from a `from` to an `until`, both included; either end may be left open
+             * - `boolean`: a true/false value
+             * - `select`: one of the values declared in `options`, which is always a closed vocabulary
+             * - `location`: a geographic value, shaped by `format`
+             *
+             */
+            ConditionType;
+            /**
+             * The format the variants pin a `location` in. Absent for every other type.
+             */
+            format?: "postal_code" | "postal_code_city";
+            /**
+             * How many variants pin the condition under this type.
+             */
+            variants: number;
+            /**
+             * How many entities those variants belong to. Approximate above about 3,000.
+             */
+            entities: number;
+            /**
+             * For a `select` only: the values variants pin, most pinned first, at most 100. Declaring
+             * them as the condition's options makes the variants pinning them resolvable.
+             *
+             */
+            options?: ConditionOptionUsage[];
+        }
         /**
          * The availability rule error
          */
@@ -23162,6 +23360,89 @@ export declare namespace Paths {
             export type $200 = Components.Schemas.ConditionSetCatalog;
             export type $400 = Components.Schemas.Error;
             export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+        }
+    }
+    namespace $GetConditionUsage {
+        namespace Parameters {
+            export type Slug = /* Schema slug of an entity type that can be conditional — the `{slug}` of every conditional-pricing route. */ Components.Schemas.ConditionalEntitySlug;
+        }
+        export interface PathParameters {
+            slug: Parameters.Slug;
+        }
+        namespace Responses {
+            export type $200 = /**
+             * example:
+             * {
+             *   "total": {
+             *     "variants": 1252,
+             *     "entities": 38
+             *   },
+             *   "conditions": [
+             *     {
+             *       "name": "delivery_area",
+             *       "variants": 1240,
+             *       "entities": 37
+             *     },
+             *     {
+             *       "name": "customer_type",
+             *       "variants": 12,
+             *       "entities": 3,
+             *       "options": [
+             *         {
+             *           "value": "private",
+             *           "variants": 12
+             *         },
+             *         {
+             *           "value": "business",
+             *           "variants": 0
+             *         }
+             *       ],
+             *       "undeclared_options": []
+             *     },
+             *     {
+             *       "name": "offer_period",
+             *       "variants": 0,
+             *       "entities": 0
+             *     }
+             *   ],
+             *   "undeclared": [
+             *     {
+             *       "name": "legacy_customer_type",
+             *       "type": "select",
+             *       "variants": 1,
+             *       "entities": 1,
+             *       "options": [
+             *         {
+             *           "value": "private",
+             *           "variants": 1
+             *         }
+             *       ]
+             *     }
+             *   ]
+             * }
+             */
+            Components.Schemas.ConditionUsage;
+            export type $400 = Components.Schemas.Error;
+            export type $403 = /**
+             * An error from a conditional-pricing operation, carrying a `code` plus the structured data
+             * that code explains. `details` is typed per code: narrow on `code` and the object under it
+             * declares exactly the fields that code sends.
+             *
+             * A request these schemas reject is answered by the request validator with a message and
+             * carries neither `code` nor `details` — the last member of the union.
+             *
+             */
+            Components.Schemas.ConditionalPricingError;
+            export type $404 = /**
              * An error from a conditional-pricing operation, carrying a `code` plus the structured data
              * that code explains. `details` is typed per code: narrow on `code` and the object under it
              * declares exactly the fields that code sends.
@@ -25519,6 +25800,32 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$GetConditionSets.Responses.$200>
   /**
+   * $getConditionUsage - $getConditionUsage
+   * 
+   * Returns, for each condition the schema declares and each option a `select` condition
+   * declares, how many variants pin it, and for the schema as a whole how many conditional
+   * entities and variants it has. An entity builder reads it when it loads a schema:
+   * 
+   * - **Remove condition** is unlocked when the condition's `variants` is 0.
+   * - Removing a `select` option is unlocked when that option's `variants` is 0.
+   * - Turning conditional pricing off for the schema is locked while `total.entities` or
+   *   `total.variants` is above 0.
+   * - A condition removed while variants still pin it is listed in `undeclared`. Declaring it
+   *   again with the same `name`, `type`, `format` and `options` makes those variants
+   *   resolvable once more. Labels are not known and are entered again.
+   * 
+   * Removing a condition or option that variants pin makes those variants unresolvable. The
+   * counts are of what the search index holds, which lags the stored variants by up to about 90
+   * seconds, and a variant can be written between this read and a schema save. A variant the
+   * index does not hold is not counted.
+   * 
+   */
+  '$getConditionUsage'(
+    parameters?: Parameters<Paths.$GetConditionUsage.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$GetConditionUsage.Responses.$200>
+  /**
    * $getConditionalPricingOrganization - $getConditionalPricingOrganization
    * 
    * Returns whether the calling organization has Conditional Pricing on, whether its search
@@ -26099,6 +26406,34 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$GetConditionSets.Responses.$200>
   }
+  ['/v1/conditional-pricing/{slug}/conditions:usage']: {
+    /**
+     * $getConditionUsage - $getConditionUsage
+     * 
+     * Returns, for each condition the schema declares and each option a `select` condition
+     * declares, how many variants pin it, and for the schema as a whole how many conditional
+     * entities and variants it has. An entity builder reads it when it loads a schema:
+     * 
+     * - **Remove condition** is unlocked when the condition's `variants` is 0.
+     * - Removing a `select` option is unlocked when that option's `variants` is 0.
+     * - Turning conditional pricing off for the schema is locked while `total.entities` or
+     *   `total.variants` is above 0.
+     * - A condition removed while variants still pin it is listed in `undeclared`. Declaring it
+     *   again with the same `name`, `type`, `format` and `options` makes those variants
+     *   resolvable once more. Labels are not known and are entered again.
+     * 
+     * Removing a condition or option that variants pin makes those variants unresolvable. The
+     * counts are of what the search index holds, which lags the stored variants by up to about 90
+     * seconds, and a variant can be written between this read and a schema save. A variant the
+     * index does not hold is not counted.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.$GetConditionUsage.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$GetConditionUsage.Responses.$200>
+  }
   ['/v1/conditional-pricing/organization']: {
     /**
      * $getConditionalPricingOrganization - $getConditionalPricingOrganization
@@ -26452,10 +26787,12 @@ export type ComputedPriceBreakdown = Components.Schemas.ComputedPriceBreakdown;
 export type ComputedPriceComponents = Components.Schemas.ComputedPriceComponents;
 export type ConditionDateRange = Components.Schemas.ConditionDateRange;
 export type ConditionDefinition = Components.Schemas.ConditionDefinition;
+export type ConditionOptionUsage = Components.Schemas.ConditionOptionUsage;
 export type ConditionPredicate = Components.Schemas.ConditionPredicate;
 export type ConditionSet = Components.Schemas.ConditionSet;
 export type ConditionSetCatalog = Components.Schemas.ConditionSetCatalog;
 export type ConditionType = Components.Schemas.ConditionType;
+export type ConditionUsage = Components.Schemas.ConditionUsage;
 export type ConditionalEntitySlug = Components.Schemas.ConditionalEntitySlug;
 export type ConditionalPricingError = Components.Schemas.ConditionalPricingError;
 export type ConditionalPricingErrorCode = Components.Schemas.ConditionalPricingErrorCode;
@@ -26471,6 +26808,7 @@ export type CreatedVariant = Components.Schemas.CreatedVariant;
 export type Currency = Components.Schemas.Currency;
 export type CustomContext = Components.Schemas.CustomContext;
 export type Customer = Components.Schemas.Customer;
+export type DeclaredConditionUsage = Components.Schemas.DeclaredConditionUsage;
 export type DeletedVariant = Components.Schemas.DeletedVariant;
 export type DeletedVariantVersion = Components.Schemas.DeletedVariantVersion;
 export type DiscountAmounts = Components.Schemas.DiscountAmounts;
@@ -26599,6 +26937,7 @@ export type TaxItem = Components.Schemas.TaxItem;
 export type TierDetails = Components.Schemas.TierDetails;
 export type TotalDetails = Components.Schemas.TotalDetails;
 export type TypeGetAg = Components.Schemas.TypeGetAg;
+export type UndeclaredConditionUsage = Components.Schemas.UndeclaredConditionUsage;
 export type ValidateAvailabilityFileError = Components.Schemas.ValidateAvailabilityFileError;
 export type ValidateAvailabilityFileResult = Components.Schemas.ValidateAvailabilityFileResult;
 export type VariantConditionFilter = Components.Schemas.VariantConditionFilter;

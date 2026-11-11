@@ -9,6 +9,9 @@ describe('Phone Integration client', () => {
     expect(client.defaults.baseURL).toBe('https://phone-integration-api.sls.epilot.io');
     expect(client.api.getOperations().map((operation) => operation.operationId)).toEqual([
       'batchSearchCustomers',
+      'getActiveCall',
+      'reportActiveCall',
+      'clearActiveCall',
       'getManagerStatus',
       'listPhoneAgents',
       'assignPhoneAgent',
@@ -82,6 +85,53 @@ describe('Phone Integration client', () => {
       'x-trace-id': 'trace-1',
     });
     expect(response.data).toEqual(result);
+  });
+
+  it('reads, reports and clears the active call on one path', async () => {
+    const client = createClient();
+    const onCall: Components.Schemas.ActiveCall = {
+      on_call: true,
+      conversation_id: '01KW704DAM1PM5SDGKFDY9BNK0',
+      started_at: '2026-11-10T10:00:00.000Z',
+      source: 'softphone',
+      expires_at: '2026-11-10T10:02:00.000Z',
+    };
+    const requests: Array<{ method?: string; url?: string; params?: unknown; data?: unknown }> = [];
+    client.defaults.adapter = async (config) => {
+      requests.push({ method: config.method, url: config.url, params: config.params, data: config.data });
+      return config.method === 'delete'
+        ? { config, data: '', status: 204, statusText: 'No Content', headers: {} }
+        : { config, data: onCall, status: 200, statusText: 'OK', headers: {} };
+    };
+
+    const reported = await client.reportActiveCall(null, {
+      conversation_id: '01KW704DAM1PM5SDGKFDY9BNK0',
+      started_at: '2026-11-10T10:00:00.000Z',
+    });
+    const read = await client.getActiveCall();
+    const cleared = await client.clearActiveCall({ conversation_id: '01KW704DAM1PM5SDGKFDY9BNK0' });
+
+    expect(reported.data).toEqual(onCall);
+    expect(read.data.conversation_id).toBe('01KW704DAM1PM5SDGKFDY9BNK0');
+    expect(cleared.status).toBe(204);
+    expect(requests).toEqual([
+      {
+        method: 'put',
+        url: '/v1/calls/active',
+        params: {},
+        data: JSON.stringify({
+          conversation_id: '01KW704DAM1PM5SDGKFDY9BNK0',
+          started_at: '2026-11-10T10:00:00.000Z',
+        }),
+      },
+      { method: 'get', url: '/v1/calls/active', params: {}, data: undefined },
+      {
+        method: 'delete',
+        url: '/v1/calls/active',
+        params: { conversation_id: '01KW704DAM1PM5SDGKFDY9BNK0' },
+        data: undefined,
+      },
+    ]);
   });
 
   it('caches getClient and keeps fresh client credentials isolated', () => {

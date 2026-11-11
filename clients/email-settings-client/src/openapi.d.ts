@@ -407,6 +407,12 @@ declare namespace Components {
              * false
              */
             is_epilot_email_address?: boolean;
+            /**
+             * The connection that registered the address, when epilot is not what receives its mail: an Outlook mailbox receives through Microsoft Graph, a custom-SMTP sender does not receive at all. Absent on addresses that receive through epilot. Such an address is not globally unique and never owns inbound mail.
+             * example:
+             * outlook
+             */
+            provider?: "outlook" | "smtp";
         }
         /**
          * Setting that allows to add an email address on the custom domain. For e.g; john@doe.com
@@ -450,17 +456,29 @@ declare namespace Components {
              */
             inbox_id: string;
         }
+        export interface MailboxSyncEstimate {
+            timeframe: /* Mailbox sync period. `custom` is a sync started with an explicit `since`. */ MailboxSyncTimeframePeriods;
+            /**
+             * Start of the timeframe; the sync imports messages from this point on.
+             */
+            since: string; // date-time
+            inbox_messages: number;
+            sent_messages: number;
+            total_messages: number;
+            /**
+             * Expected sync duration at the measured import rate per mailbox.
+             */
+            estimated_duration_seconds: number;
+        }
         export type MailboxSyncFolderStatuses = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" | "SKIPPED";
         export interface MailboxSyncStatus {
             execution_id: string;
             status: MailboxSyncStatuses;
-            timeframe: /**
-             * Mailbox sync period. The long timeframes `3m`, `6m` and `1y` are only available to organizations
-             * with the `outlook-mailbox-sync-long-timeframes` feature enabled; connecting a mailbox, starting a sync,
-             * or retrying one of these syncs returns 403 otherwise.
-             *
+            timeframe: /* Mailbox sync period. `custom` is a sync started with an explicit `since`. */ MailboxSyncTimeframePeriods;
+            /**
+             * Start of the range the sync covers; it imports messages from this point up to started_at.
              */
-            MailboxSyncTimeframePeriods;
+            timeframe_start?: string; // date-time
             started_at: string; // date-time
             completed_at?: string; // date-time
             inbox?: {
@@ -478,12 +496,9 @@ declare namespace Components {
         }
         export type MailboxSyncStatuses = "RUNNING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "CANCELLED";
         /**
-         * Mailbox sync period. The long timeframes `3m`, `6m` and `1y` are only available to organizations
-         * with the `outlook-mailbox-sync-long-timeframes` feature enabled; connecting a mailbox, starting a sync,
-         * or retrying one of these syncs returns 403 otherwise.
-         *
+         * Mailbox sync period. `custom` is a sync started with an explicit `since`.
          */
-        export type MailboxSyncTimeframePeriods = "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y";
+        export type MailboxSyncTimeframePeriods = "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y" | "custom";
         /**
          * Per-user calendar connection metadata, or null when the caller has
          * not connected their personal calendar yet.
@@ -593,6 +608,25 @@ declare namespace Components {
              * Whether the current token is still valid
              */
             is_token_valid?: boolean;
+        }
+        /**
+         * Why an Outlook mailbox or connection was not disconnected. Nothing was removed.
+         */
+        export interface OutlookDisconnectError {
+            /**
+             * `email_address_in_use`: the email address is the organization's primary sender.
+             * `email_address_deletion_failed`: deleting the email address failed.
+             *
+             */
+            error: "email_address_in_use" | "email_address_deletion_failed";
+            /**
+             * Human-readable explanation
+             */
+            message: string;
+            /**
+             * The email addresses that could not be deleted (connection disconnect only)
+             */
+            email_addresses?: string /* email */[];
         }
         /**
          * Request payload for provisioning an epilot-managed email address.
@@ -1147,6 +1181,7 @@ declare namespace Paths {
                 execution_id: string;
                 status: Components.Schemas.MailboxSyncStatuses;
             }
+            export type $403 = Components.Responses.Forbidden;
             export interface $404 {
             }
             export interface $500 {
@@ -1207,11 +1242,9 @@ declare namespace Paths {
             /**
              * Optional timeframe for initial mailbox sync. When provided, triggers an automatic
              * mailbox sync after connecting the mailbox, syncing emails from the specified period.
-             * `3m`, `6m` and `1y` require the `outlook-mailbox-sync-long-timeframes` feature for the
-             * organization; the request is rejected with 403 before anything is connected otherwise.
              *
              */
-            mailboxSyncTimeframe?: "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y";
+            mailboxSyncTimeframe?: "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y";
         }
         namespace Responses {
             export interface $201 {
@@ -1355,6 +1388,7 @@ declare namespace Paths {
             export interface $200 {
                 connected?: boolean;
             }
+            export type $403 = Components.Responses.Forbidden;
         }
     }
     namespace DisconnectMyCalendar {
@@ -1388,10 +1422,11 @@ declare namespace Paths {
             }
             export interface $400 {
             }
+            export type $403 = Components.Responses.Forbidden;
             export interface $404 {
             }
-            export interface $500 {
-            }
+            export type $409 = /* Why an Outlook mailbox or connection was not disconnected. Nothing was removed. */ Components.Schemas.OutlookDisconnectError;
+            export type $500 = /* Why an Outlook mailbox or connection was not disconnected. Nothing was removed. */ Components.Schemas.OutlookDisconnectError;
         }
     }
     namespace DisconnectOutlookMailbox {
@@ -1409,10 +1444,11 @@ declare namespace Paths {
                  */
                 email: string; // email
             }
+            export type $403 = Components.Responses.Forbidden;
             export interface $404 {
             }
-            export interface $500 {
-            }
+            export type $409 = /* Why an Outlook mailbox or connection was not disconnected. Nothing was removed. */ Components.Schemas.OutlookDisconnectError;
+            export type $500 = /* Why an Outlook mailbox or connection was not disconnected. Nothing was removed. */ Components.Schemas.OutlookDisconnectError;
         }
     }
     namespace DisconnectSmtpSender {
@@ -1474,6 +1510,39 @@ declare namespace Paths {
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetMailboxSyncEstimate {
+        namespace Parameters {
+            export type Email = string; // email
+            export type Since = string; // date-time
+            /**
+             * example:
+             * 1m,1y,2y
+             */
+            export type Timeframes = string;
+        }
+        export interface PathParameters {
+            email: Parameters.Email /* email */;
+        }
+        export interface QueryParameters {
+            timeframes?: /**
+             * example:
+             * 1m,1y,2y
+             */
+            Parameters.Timeframes;
+            since?: Parameters.Since /* date-time */;
+        }
+        namespace Responses {
+            export interface $200 {
+                estimates: Components.Schemas.MailboxSyncEstimate[];
+            }
+            export interface $400 {
+            }
+            export interface $404 {
+            }
+            export interface $500 {
+            }
         }
     }
     namespace GetMailboxSyncStatus {
@@ -1667,6 +1736,7 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Responses.ProvisionEpilotEmailAddressSuccessResponse;
             export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
             export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -1729,19 +1799,20 @@ declare namespace Paths {
         export interface PathParameters {
             email: Parameters.Email /* email */;
         }
+        /**
+         * Either `timeframe` or `since`.
+         */
         export interface RequestBody {
             /**
-             * Sync period:
-             * - 5m: last 5 minutes (quick sync)
-             * - 1w: 1 week
-             * - 2w: 2 weeks
-             * - 1m: 1 month
-             * - 3m: 3 months
-             * - 6m: 6 months
-             * - 1y: 1 year
+             * Sync period, up to now: 5m, 1d, 1w, 2w, 1m, 3m, 6m, 1y or 2y. `custom` is not accepted here; send `since` instead.
              *
              */
-            timeframe: "5m" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y";
+            timeframe?: "5m" | "1d" | "1w" | "2w" | "1m" | "3m" | "6m" | "1y" | "2y" | "custom";
+            /**
+             * Start of a custom period, up to now. At most 2 years back. The sync is recorded with timeframe `custom`.
+             *
+             */
+            since?: string; // date-time
         }
         namespace Responses {
             export interface $202 {
@@ -1750,13 +1821,7 @@ declare namespace Paths {
                  */
                 execution_id: string;
                 status: Components.Schemas.MailboxSyncStatuses;
-                timeframe: /**
-                 * Mailbox sync period. The long timeframes `3m`, `6m` and `1y` are only available to organizations
-                 * with the `outlook-mailbox-sync-long-timeframes` feature enabled; connecting a mailbox, starting a sync,
-                 * or retrying one of these syncs returns 403 otherwise.
-                 *
-                 */
-                Components.Schemas.MailboxSyncTimeframePeriods;
+                timeframe: /* Mailbox sync period. `custom` is a sync started with an explicit `since`. */ Components.Schemas.MailboxSyncTimeframePeriods;
             }
             export interface $400 {
             }
@@ -1828,7 +1893,7 @@ declare namespace Paths {
              * - **restrict_duplicates_within**: Uses `value` (time duration)
              * - **allowed_recipient_domains**: Uses `value` (recipient domain allowed for sandbox sends)
              * - **auto_link_identifier_attributes**: Uses `schemas` (entity schema slug → identifier attributes)
-         *   and `excluded_senders` (sender addresses or domains never auto-linked)
+             *   and `excluded_senders` (sender addresses or domains never auto-linked)
              *
              */
             Components.Schemas.Setting;
@@ -1936,6 +2001,9 @@ export interface OperationMethods {
    * will be automatically deactivated. Only one epilot email address can be active at a time.
    * 
    * Epilot email addresses use the `@epilot.cloud` domain and are fully managed by the platform.
+   * 
+   * Requires the `email_setting:create` permission, or `email_setting:edit` to reactivate an
+   * epilot email address the organization already has.
    * 
    */
   'provisionEpilotEmailAddress'(
@@ -2053,6 +2121,9 @@ export interface OperationMethods {
    * You can modify the inbox name, color, description, and team member assignments.
    * Changes take effect immediately for all associated email addresses.
    * 
+   * **Note**: The name and color of the default inbox cannot be changed. Its description
+   * and assignees can be updated like for any other inbox.
+   * 
    */
   'updateSharedInbox'(
     parameters?: Parameters<Paths.UpdateSharedInbox.PathParameters> | null,
@@ -2070,6 +2141,8 @@ export interface OperationMethods {
    * - The inbox's message history is preserved in the successor inbox
    * 
    * **Note**: The default inbox cannot be deleted.
+   * 
+   * Requires the `email_setting:delete` permission.
    * 
    */
   'deleteSharedInbox'(
@@ -2136,6 +2209,10 @@ export interface OperationMethods {
    * Requires the Professional pricing tier or higher, except when reconnecting an
    * existing connection (the org's connection, or the user's own calendar) for
    * features it already has.
+   * 
+   * Requires the `email_setting:create` permission, except for a calendar-only request
+   * (`calendar: true` without `mail`): that connects the user's own calendar, which every
+   * user may do.
    * 
    */
   'connectOutlook'(
@@ -2305,6 +2382,18 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMailboxSyncStatus.Responses.$200>
+  /**
+   * getMailboxSyncEstimate - Estimate Mailbox Sync
+   * 
+   * Counts the inbox and sent messages a mailbox sync would import for each timeframe, with the same date filter the
+   * sync uses, plus an estimated duration. Lets the sync dialog show real volumes before a sync is started.
+   * 
+   */
+  'getMailboxSyncEstimate'(
+    parameters?: Parameters<Paths.GetMailboxSyncEstimate.QueryParameters & Paths.GetMailboxSyncEstimate.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetMailboxSyncEstimate.Responses.$200>
   /**
    * retryMailboxSync - Retry Failed Messages
    * 
@@ -2497,6 +2586,10 @@ export interface OperationMethods {
    * - **allowed_recipient_domains**: Requires `value` (recipient domain, e.g. "partner-company.de")
    * - **auto_link_identifier_attributes**: Requires `schemas`. One setting per organization: posting again replaces it
    * 
+   * Requires the `email_setting:create` permission. The organization holds a single
+   * `restrict_duplicates_within` and a single `auto_link_identifier_attributes` value, so once
+   * it has one, adding it again changes it and requires `email_setting:edit` instead.
+   * 
    */
   'addSetting'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -2645,6 +2738,9 @@ export interface PathsDictionary {
      * 
      * Epilot email addresses use the `@epilot.cloud` domain and are fully managed by the platform.
      * 
+     * Requires the `email_setting:create` permission, or `email_setting:edit` to reactivate an
+     * epilot email address the organization already has.
+     * 
      */
     'put'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -2773,6 +2869,8 @@ export interface PathsDictionary {
      * 
      * **Note**: The default inbox cannot be deleted.
      * 
+     * Requires the `email_setting:delete` permission.
+     * 
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteSharedInbox.QueryParameters & Paths.DeleteSharedInbox.PathParameters> | null,
@@ -2786,6 +2884,9 @@ export interface PathsDictionary {
      * 
      * You can modify the inbox name, color, description, and team member assignments.
      * Changes take effect immediately for all associated email addresses.
+     * 
+     * **Note**: The name and color of the default inbox cannot be changed. Its description
+     * and assignees can be updated like for any other inbox.
      * 
      */
     'put'(
@@ -2858,6 +2959,10 @@ export interface PathsDictionary {
      * Requires the Professional pricing tier or higher, except when reconnecting an
      * existing connection (the org's connection, or the user's own calendar) for
      * features it already has.
+     * 
+     * Requires the `email_setting:create` permission, except for a calendar-only request
+     * (`calendar: true` without `mail`): that connects the user's own calendar, which every
+     * user may do.
      * 
      */
     'post'(
@@ -3049,6 +3154,20 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMailboxSyncStatus.Responses.$200>
+  }
+  ['/v2/outlook/mailbox/{email}/sync/estimate']: {
+    /**
+     * getMailboxSyncEstimate - Estimate Mailbox Sync
+     * 
+     * Counts the inbox and sent messages a mailbox sync would import for each timeframe, with the same date filter the
+     * sync uses, plus an estimated duration. Lets the sync dialog show real volumes before a sync is started.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetMailboxSyncEstimate.QueryParameters & Paths.GetMailboxSyncEstimate.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetMailboxSyncEstimate.Responses.$200>
   }
   ['/v2/outlook/mailbox/{email}/sync/retry']: {
     /**
@@ -3261,6 +3380,10 @@ export interface PathsDictionary {
      * - **allowed_recipient_domains**: Requires `value` (recipient domain, e.g. "partner-company.de")
      * - **auto_link_identifier_attributes**: Requires `schemas`. One setting per organization: posting again replaces it
      * 
+     * Requires the `email_setting:create` permission. The organization holds a single
+     * `restrict_duplicates_within` and a single `auto_link_identifier_attributes` value, so once
+     * it has one, adding it again changes it and requires `email_setting:edit` instead.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -3428,6 +3551,7 @@ export type EmailAddressSetting = Components.Schemas.EmailAddressSetting;
 export type EmailDomainSetting = Components.Schemas.EmailDomainSetting;
 export type ErrorResponse = Components.Schemas.ErrorResponse;
 export type InboxBucketResponse = Components.Schemas.InboxBucketResponse;
+export type MailboxSyncEstimate = Components.Schemas.MailboxSyncEstimate;
 export type MailboxSyncFolderStatuses = Components.Schemas.MailboxSyncFolderStatuses;
 export type MailboxSyncStatus = Components.Schemas.MailboxSyncStatus;
 export type MailboxSyncStatuses = Components.Schemas.MailboxSyncStatuses;
@@ -3435,6 +3559,7 @@ export type MailboxSyncTimeframePeriods = Components.Schemas.MailboxSyncTimefram
 export type MyCalendarConnectionResponse = Components.Schemas.MyCalendarConnectionResponse;
 export type OutlookConnectionError = Components.Schemas.OutlookConnectionError;
 export type OutlookConnectionStatus = Components.Schemas.OutlookConnectionStatus;
+export type OutlookDisconnectError = Components.Schemas.OutlookDisconnectError;
 export type ProvisionEpilotEmailAddressPayload = Components.Schemas.ProvisionEpilotEmailAddressPayload;
 export type RestrictDuplicatesWithinSetting = Components.Schemas.RestrictDuplicatesWithinSetting;
 export type SetEmailAddressPrimaryPayload = Components.Schemas.SetEmailAddressPrimaryPayload;

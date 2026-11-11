@@ -67,6 +67,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 
 **Conditional Pricing API**
 - [`$getConditionSets`](#$getconditionsets)
+- [`$getConditionUsage`](#$getconditionusage)
 - [`$getConditionalPricingOrganization`](#$getconditionalpricingorganization)
 - [`$resolveConditionalEntity`](#$resolveconditionalentity)
 - [`$createConditionalVariant`](#$createconditionalvariant)
@@ -93,6 +94,10 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`ConditionSet`](#conditionset)
 - [`ConditionSetCatalog`](#conditionsetcatalog)
 - [`ConditionalPricingOptIn`](#conditionalpricingoptin)
+- [`ConditionUsage`](#conditionusage)
+- [`DeclaredConditionUsage`](#declaredconditionusage)
+- [`UndeclaredConditionUsage`](#undeclaredconditionusage)
+- [`ConditionOptionUsage`](#conditionoptionusage)
 - [`ConditionalPricingOrganization`](#conditionalpricingorganization)
 - [`ConditionalPricingErrorCode`](#conditionalpricingerrorcode)
 - [`ResolveConditionalEntityRequest`](#resolveconditionalentityrequest)
@@ -1528,7 +1533,8 @@ const { data } = await client.$searchProviders(
     postal_code: 'string',
     city: 'string',
     street: 'string',
-    street_number: 'string'
+    street_number: 'string',
+    grid_filter: 'all'
   },
 )
 ```
@@ -2011,6 +2017,73 @@ const { data } = await client.$getConditionSets({
             }
           ],
           "format": "postal_code"
+        }
+      ]
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$getConditionUsage`
+
+Returns, for each condition the schema declares and each option a `select` condition
+declares, how many variants pin it, and for the schema as a whole how many conditional
+entities and variants it has
+
+`GET /v1/conditional-pricing/{slug}/conditions:usage`
+
+```ts
+const { data } = await client.$getConditionUsage({
+  slug: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "total": {
+    "variants": 1252,
+    "entities": 38
+  },
+  "conditions": [
+    {
+      "name": "delivery_area",
+      "variants": 1240,
+      "entities": 37
+    },
+    {
+      "name": "customer_type",
+      "variants": 12,
+      "entities": 3,
+      "options": [
+        {
+          "value": "private",
+          "variants": 12
+        },
+        {
+          "value": "business",
+          "variants": 0
+        }
+      ],
+      "undeclared_options": []
+    }
+  ],
+  "undeclared": [
+    {
+      "name": "legacy_customer_type",
+      "type": "select",
+      "variants": 1,
+      "entities": 1,
+      "options": [
+        {
+          "value": "private",
+          "variants": 1
         }
       ]
     }
@@ -2998,7 +3071,7 @@ resolve context.
 - `string`: an arbitrary string, matched exactly and case-sensitively
 - `number`: a numeric value
 - `date`: a single date
-- `daterange`: a window with a from and an until timestamp; either en
+- `daterange`: a window from a `from` to an `until`, both included; e
 
 ```ts
 type ConditionType = "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
@@ -3070,6 +3143,92 @@ type ConditionSetCatalog = {
 ```ts
 type ConditionalPricingOptIn = {
   status: "PROVISIONING" | "ACTIVE"
+}
+```
+
+### `ConditionUsage`
+
+```ts
+type ConditionUsage = {
+  total: {
+    variants: number
+    entities: number
+  }
+  conditions: Array<{
+    name: string
+    variants: number
+    entities: number
+    options?: Array<{
+      value: { ... }
+      variants: { ... }
+    }>
+    undeclared_options?: Array<{
+      value: { ... }
+      variants: { ... }
+    }>
+  }>
+  undeclared: Array<{
+    name: string
+    type: "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
+    format?: "postal_code" | "postal_code_city"
+    variants: number
+    entities: number
+    options?: Array<{
+      value: { ... }
+      variants: { ... }
+    }>
+  }>
+}
+```
+
+### `DeclaredConditionUsage`
+
+A `select` condition always carries `options` and `undeclared_options`. A condition of any
+other type carries neither.
+
+
+```ts
+type DeclaredConditionUsage = {
+  name: string
+  variants: number
+  entities: number
+  options?: Array<{
+    value: string
+    variants: number
+  }>
+  undeclared_options?: Array<{
+    value: string
+    variants: number
+  }>
+}
+```
+
+### `UndeclaredConditionUsage`
+
+A condition variants pin under this name and type that the schema does not declare. A name
+pinned under two types is listed once for each.
+
+
+```ts
+type UndeclaredConditionUsage = {
+  name: string
+  type: "string" | "number" | "date" | "daterange" | "boolean" | "select" | "location"
+  format?: "postal_code" | "postal_code_city"
+  variants: number
+  entities: number
+  options?: Array<{
+    value: string
+    variants: number
+  }>
+}
+```
+
+### `ConditionOptionUsage`
+
+```ts
+type ConditionOptionUsage = {
+  value: string
+  variants: number
 }
 ```
 
@@ -3364,10 +3523,10 @@ type PostalCodeFilter = {
 
 ### `ConditionDateRange`
 
-The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and a date
-is midnight of that day in the organization's timezone. A bound that is absent, `null` or an
-empty string is an open end; stored, an open end is an empty string.
-
+The value of a `daterange` condition. Each bound is an RFC 3339 date or date-time, and both
+are included. A date names the whole day in the organization's timezone: as `from` it starts
+at midnight, as `until` it runs to the day's last millisecond. So
+`{ "from": "2026-10-01", "until": "2026-10-31" }`
 
 ```ts
 type ConditionDateRange = {
@@ -5922,6 +6081,7 @@ type SearchProvidersParams = {
   city?: string
   street?: string
   street_number?: string
+  grid_filter?: "all" | "exclude_closed" | "only_closed"
 }
 ```
 
