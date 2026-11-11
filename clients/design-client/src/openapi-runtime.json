@@ -56,6 +56,11 @@
             "in": "path",
             "name": "designId",
             "required": true
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": false
           }
         ],
         "requestBody": {
@@ -83,6 +88,7 @@
     "/v1/designs/{designId}/parse": {
       "get": {
         "operationId": "getThemeFromDesign",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -100,6 +106,30 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v1/designs/generate": {
+      "post": {
+        "operationId": "generateDesign",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/designs/document/generate": {
+      "post": {
+        "operationId": "generateDesignDocument",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
@@ -132,20 +162,6 @@
         "responses": {}
       }
     },
-    "/v1/designs/limit": {
-      "get": {
-        "deprecated": true,
-        "operationId": "getLimit",
-        "responses": {}
-      }
-    },
-    "/v1/brands": {
-      "get": {
-        "deprecated": true,
-        "operationId": "getBrands",
-        "responses": {}
-      }
-    },
     "/v1/designs/consumer/{application}/{consumerId}": {
       "get": {
         "operationId": "getConsumerDesign",
@@ -167,6 +183,7 @@
     "/v1/designs/addConsumer/{application}/{designId}": {
       "put": {
         "operationId": "addConsumer",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
@@ -191,6 +208,7 @@
     "/v1/designs/removeConsumer/{application}/{designId}": {
       "put": {
         "operationId": "removeConsumer",
+        "deprecated": true,
         "parameters": [
           {
             "in": "path",
