@@ -130,6 +130,27 @@ describe('app-bridge', () => {
     it('should timeout if no response received', async () => {
       await expect(initialize({ timeout: 50 })).rejects.toThrow(AppBridgeTimeoutError);
     });
+
+    it('should retry the handshake when the parent listener attaches late', async () => {
+      const initPromise = initialize({ timeout: 50 });
+
+      // Parent only becomes ready after the first attempt timed out
+      setTimeout(() => {
+        simulateParentMessage('app-bridge:init', { token: 'late-token', lang: 'de' });
+      }, 80);
+
+      await expect(initPromise).resolves.toEqual({ token: 'late-token', lang: 'de' });
+      expect(postMessageMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should reject after exhausting retries and allow initializing again', async () => {
+      await expect(initialize({ timeout: 20, retries: 1 })).rejects.toThrow(AppBridgeTimeoutError);
+      expect(postMessageMock).toHaveBeenCalledTimes(2);
+
+      const again = initialize({ timeout: 50 });
+      setTimeout(() => simulateParentMessage('app-bridge:init', { token: 't', lang: 'en' }), 10);
+      await expect(again).resolves.toEqual({ token: 't', lang: 'en' });
+    });
   });
 
   describe('getSession', () => {
