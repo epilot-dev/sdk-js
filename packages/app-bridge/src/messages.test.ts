@@ -81,6 +81,18 @@ describe('messages', () => {
       expect(window.removeEventListener).toHaveBeenCalledWith('message', eventListener);
     });
 
+    it('should ignore parent messages without an event name for wildcard suffix subscriptions', () => {
+      const handler = vi.fn();
+      subscribeToParentMessages('prefix-*', handler);
+
+      const eventListener = (window.addEventListener as Mock).mock.calls[0][1];
+
+      expect(() =>
+        eventListener(new MessageEvent('message', { data: { foo: 'bar' }, source: window.parent })),
+      ).not.toThrow();
+      expect(handler).not.toHaveBeenCalled();
+    });
+
     it('should subscribe to all events with *', () => {
       const handler = vi.fn();
       const unsubscribe = subscribeToParentMessages('*', handler);
