@@ -348,6 +348,8 @@ declare namespace Components {
             flow_id?: string;
             job_id?: string;
             target?: BaseRelation;
+            product_recommendations?: BaseRelation;
+            type?: /* Use case of a campaign. Set by campaign setup. */ CampaignType;
         }
         /**
          * Lifecycle status of a campaign.
@@ -361,6 +363,10 @@ declare namespace Components {
          *
          */
         export type CampaignStatus = "draft" | "scheduled" | "activating" | "active" | "inactive";
+        /**
+         * Use case of a campaign. Set by campaign setup.
+         */
+        export type CampaignType = "tariff_change";
         /**
          * Describes the structure of a client error response, which can be one of several types:
          * 1. `MessageError`: Contains a 'message' field for general descriptive errors.
@@ -1789,6 +1795,9 @@ declare namespace Components {
          */
         SetupTariffChangeCampaignRequest;
         export interface SetupTariffChangeCampaignRequest {
+            /**
+             * The `CampaignType` of this variant.
+             */
             type: "tariff_change";
             product_recommendation: {
                 /**
@@ -1846,16 +1855,19 @@ declare namespace Components {
                 name: string;
                 goal?: string;
                 /**
-                 * List of target entity IDs to attach to the campaign. Today only a single
-                 * entry is supported (campaign.target is has_one) but the array shape is kept
-                 * for forward-compatibility — only `target_ids[0]` is used.
+                 * The campaign's audience as a list with exactly one target entity ID. A campaign has
+                 * exactly one audience (`campaign.target` is has_one); the array shape is kept for
+                 * compatibility. A request with no or more than one entry is rejected with 400 and
+                 * nothing is created; extra entries are never silently dropped.
                  *
                  */
-                target_ids: /**
-                 * example:
-                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                 */
-                BaseUUID /* uuid */[];
+                target_ids: [
+                    /**
+                     * example:
+                     * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                     */
+                    BaseUUID /* uuid */
+                ];
                 /**
                  * Optional start of the campaign. Launching the campaign before this time schedules it, and
                  * it starts on its own at this time. Without it, the campaign starts when it is launched.
@@ -1940,6 +1952,9 @@ declare namespace Components {
             };
         }
         export interface SetupTariffChangeCampaignResponse {
+            /**
+             * The `CampaignType` of this variant.
+             */
             type: "tariff_change";
             product_recommendation_id: /**
              * example:
@@ -2423,7 +2438,9 @@ export interface OperationMethods {
    * 
    * Only launching needs a target and a delivery method (an automation flow, a portal block or a valid
    * Next Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or
-   * `CAMPAIGN_HAS_NO_DELIVERY_METHOD`. Cancelling, stopping and resetting work without them.
+   * `CAMPAIGN_HAS_NO_DELIVERY_METHOD`. A `tariff_change` campaign also needs at least one linked product
+   * recommendation (409 `CAMPAIGN_HAS_NO_PRODUCT_RECOMMENDATIONS`), checked again when a scheduled campaign
+   * starts on its own. Cancelling, stopping and resetting work without them.
    * 
    * Status transition is accompanied by side effects, e.g., automation execution.
    * 
@@ -2484,6 +2501,10 @@ export interface OperationMethods {
    * launched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,
    * `CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and
    * nothing is created.
+   * 
+   * A campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.
+   * A request with no or more than one entry fails request validation with 400 (the error points at
+   * `/requestBody/campaign/target_ids`), and nothing is created.
    * 
    */
   'setupCampaign'(
@@ -2676,7 +2697,9 @@ export interface PathsDictionary {
      * 
      * Only launching needs a target and a delivery method (an automation flow, a portal block or a valid
      * Next Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or
-     * `CAMPAIGN_HAS_NO_DELIVERY_METHOD`. Cancelling, stopping and resetting work without them.
+     * `CAMPAIGN_HAS_NO_DELIVERY_METHOD`. A `tariff_change` campaign also needs at least one linked product
+     * recommendation (409 `CAMPAIGN_HAS_NO_PRODUCT_RECOMMENDATIONS`), checked again when a scheduled campaign
+     * starts on its own. Cancelling, stopping and resetting work without them.
      * 
      * Status transition is accompanied by side effects, e.g., automation execution.
      * 
@@ -2745,6 +2768,10 @@ export interface PathsDictionary {
      * launched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,
      * `CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and
      * nothing is created.
+     * 
+     * A campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.
+     * A request with no or more than one entry fails request validation with 400 (the error points at
+     * `/requestBody/campaign/target_ids`), and nothing is created.
      * 
      */
     'post'(
@@ -2960,6 +2987,7 @@ export type BaseTags = Components.Schemas.BaseTags;
 export type BaseUUID = Components.Schemas.BaseUUID;
 export type Campaign = Components.Schemas.Campaign;
 export type CampaignStatus = Components.Schemas.CampaignStatus;
+export type CampaignType = Components.Schemas.CampaignType;
 export type ClientError = Components.Schemas.ClientError;
 export type CreateRecipientPayload = Components.Schemas.CreateRecipientPayload;
 export type DiscoverCampaignsParams = Components.Schemas.DiscoverCampaignsParams;
