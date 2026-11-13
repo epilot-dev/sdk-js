@@ -65,6 +65,7 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`ExecutionSummaryItem`](#executionsummaryitem)
 - [`JobStatus`](#jobstatus)
 - [`Campaign`](#campaign)
+- [`CampaignType`](#campaigntype)
 - [`Target`](#target)
 - [`TargetEntityFilters`](#targetentityfilters)
 - [`TargetSortItem`](#targetsortitem)
@@ -144,7 +145,16 @@ const { data } = await client.changeCampaignStatus({
           "_tags": ["string"]
         }
       ]
-    }
+    },
+    "product_recommendations": {
+      "$relation": [
+        {
+          "entity_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+          "_tags": ["string"]
+        }
+      ]
+    },
+    "type": "tariff_change"
   }
 }
 ```
@@ -415,7 +425,16 @@ const { data } = await client.matchCampaigns(
               "_tags": ["string"]
             }
           ]
-        }
+        },
+        "product_recommendations": {
+          "$relation": [
+            {
+              "entity_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+              "_tags": ["string"]
+            }
+          ]
+        },
+        "type": "tariff_change"
       }
     }
   ]
@@ -1239,7 +1258,22 @@ type Campaign = {
       _tags?: { ... }
     }>
   }
+  product_recommendations?: {
+    $relation?: Array<{
+      entity_id?: { ... }
+      _tags?: { ... }
+    }>
+  }
+  type?: "tariff_change"
 }
+```
+
+### `CampaignType`
+
+Use case of a campaign. Set by campaign setup.
+
+```ts
+type CampaignType = "tariff_change"
 ```
 
 ### `Target`
