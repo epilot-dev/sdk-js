@@ -38,7 +38,7 @@
       "post": {
         "operationId": "changeCampaignStatus",
         "summary": "changeCampaignStatus",
-        "description": "Moves a campaign to its next status, depending on its current one:\n\n- `draft`: launches the campaign. With a `start_date` still in the future it becomes `scheduled` and\n  starts on its own at that time; otherwise it starts now (`activating`, then `active`). Rejected with\n  400 if the dates are invalid: `INVALID_CAMPAIGN_DATES` (unparsable), `CAMPAIGN_END_BEFORE_START`\n  or `CAMPAIGN_END_IN_PAST`.\n- `scheduled`: cancels the schedule; the campaign goes back to `draft` and keeps its dates.\n- `active`: stops the campaign (`inactive`) and sets `end_date` to now.\n- `inactive`: resets the campaign to `draft` and clears its `start_date` and `end_date`: they\n  recorded the previous run, and a past end date would block launching it again.\n\nOnly launching needs a target and a delivery method (an automation flow, a portal block or a valid\nNext Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or\n`CAMPAIGN_HAS_NO_DELIVERY_METHOD`. Cancelling, stopping and resetting work without them.\n\nStatus transition is accompanied by side effects, e.g., automation execution.\n",
+        "description": "Moves a campaign to its next status, depending on its current one:\n\n- `draft`: launches the campaign. With a `start_date` still in the future it becomes `scheduled` and\n  starts on its own at that time; otherwise it starts now (`activating`, then `active`). Rejected with\n  400 if the dates are invalid: `INVALID_CAMPAIGN_DATES` (unparsable), `CAMPAIGN_END_BEFORE_START`\n  or `CAMPAIGN_END_IN_PAST`.\n- `scheduled`: cancels the schedule; the campaign goes back to `draft` and keeps its dates.\n- `active`: stops the campaign (`inactive`) and sets `end_date` to now.\n- `inactive`: resets the campaign to `draft` and clears its `start_date` and `end_date`: they\n  recorded the previous run, and a past end date would block launching it again.\n\nOnly launching needs a target and a delivery method (an automation flow, a portal block or a valid\nNext Best Action); otherwise it is rejected with 409 `CAMPAIGN_HAS_NO_TARGET` or\n`CAMPAIGN_HAS_NO_DELIVERY_METHOD`. A `tariff_change` campaign also needs at least one linked product\nrecommendation (409 `CAMPAIGN_HAS_NO_PRODUCT_RECOMMENDATIONS`), checked again when a scheduled campaign\nstarts on its own. Cancelling, stopping and resetting work without them.\n\nStatus transition is accompanied by side effects, e.g., automation execution.\n",
         "tags": [
           "Campaign"
         ],
@@ -181,7 +181,7 @@
       "post": {
         "operationId": "setupCampaign",
         "summary": "setupCampaign",
-        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n\nThe campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is\nlaunched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,\n`CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and\nnothing is created.\n",
+        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n\nThe campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is\nlaunched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,\n`CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and\nnothing is created.\n\nA campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.\nA request with no or more than one entry fails request validation with 400 (the error points at\n`/requestBody/campaign/target_ids`), and nothing is created.\n",
         "tags": [
           "Campaign"
         ],
@@ -1032,9 +1032,22 @@
               },
               "target": {
                 "$ref": "#/components/schemas/BaseRelation"
+              },
+              "product_recommendations": {
+                "$ref": "#/components/schemas/BaseRelation"
+              },
+              "type": {
+                "$ref": "#/components/schemas/CampaignType"
               }
             }
           }
+        ]
+      },
+      "CampaignType": {
+        "type": "string",
+        "description": "Use case of a campaign. Set by campaign setup.",
+        "enum": [
+          "tariff_change"
         ]
       },
       "Target": {
@@ -1771,6 +1784,7 @@
         "properties": {
           "type": {
             "type": "string",
+            "description": "The `CampaignType` of this variant.",
             "enum": [
               "tariff_change"
             ]
@@ -1854,10 +1868,12 @@
               },
               "target_ids": {
                 "type": "array",
-                "description": "List of target entity IDs to attach to the campaign. Today only a single\nentry is supported (campaign.target is has_one) but the array shape is kept\nfor forward-compatibility — only `target_ids[0]` is used.\n",
+                "description": "The campaign's audience as a list with exactly one target entity ID. A campaign has\nexactly one audience (`campaign.target` is has_one); the array shape is kept for\ncompatibility. A request with no or more than one entry is rejected with 400 and\nnothing is created; extra entries are never silently dropped.\n",
                 "items": {
                   "$ref": "#/components/schemas/BaseUUID"
-                }
+                },
+                "minItems": 1,
+                "maxItems": 1
               },
               "start_date": {
                 "type": "string",
@@ -1944,6 +1960,7 @@
         "properties": {
           "type": {
             "type": "string",
+            "description": "The `CampaignType` of this variant.",
             "enum": [
               "tariff_change"
             ]
