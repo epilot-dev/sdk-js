@@ -1,6 +1,6 @@
 import type { Document } from 'openapi-client-axios';
 
-import { createApiClient } from '../client-factory';
+import { createApiClient, docsContent } from '../client-factory';
 import { expand } from '../compact';
 import type { CompactDefinition } from '../compact';
 import { createApiHandle } from '../proxy';
@@ -24,19 +24,23 @@ const loadDefinition = (): Document => {
   return _definition;
 };
 
-let _instance: Client | null = null;
+// help and openapi import by static path, so a bundler includes only this API's docs and spec.
+const help = async (): Promise<string> =>
+  docsContent('external-values.json', () => import('../docs/external-values.json'));
 
-const resolve = (): Client => {
-  if (!_instance) {
-    const def = loadDefinition();
-    _instance = createApiClient<Client>({ definition: def, apiName: 'externalValues' });
-  }
-  return _instance;
+// src/definitions holds no full spec for this API.
+const openapi = async (): Promise<Document> => {
+  throw new Error('Module not found in bundle: ./definitions/external-values.json');
 };
 
+const create = (): Client =>
+  createApiClient<Client>({ definition: loadDefinition(), apiName: 'externalValues', help, openapi });
+
+let _instance: Client | null = null;
+
 const _handle: ApiHandle<Client> = createApiHandle({
-  resolveClient: resolve,
-  createClient: () => createApiClient<Client>({ definition: loadDefinition(), apiName: 'externalValues' }),
+  resolveClient: () => (_instance ??= create()),
+  createClient: create,
   apiName: 'externalValues',
 });
 

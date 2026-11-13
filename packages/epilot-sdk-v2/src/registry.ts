@@ -2,7 +2,9 @@ import type { AxiosInstance } from 'axios';
 import type { Document } from 'openapi-client-axios';
 
 import { createApiClient } from './client-factory';
+import { help } from './help';
 import { applyLargeResponseInterceptor } from './large-response';
+import { openapi } from './openapi';
 import { applyRetryInterceptor } from './retry';
 import type { ApiEntry, SDKState } from './types';
 
@@ -52,6 +54,8 @@ export const resolveClient = (params: {
       token: state.token,
       headers: state.globalHeaders,
       apiName: name,
+      help,
+      openapi,
     });
 
     // Apply large response interceptor for S3-backed payloads

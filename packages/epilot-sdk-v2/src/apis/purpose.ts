@@ -1,6 +1,6 @@
 import type { Document } from 'openapi-client-axios';
 
-import { createApiClient } from '../client-factory';
+import { createApiClient, docsContent, jsonContent } from '../client-factory';
 import { expand } from '../compact';
 import type { CompactDefinition } from '../compact';
 import { createApiHandle } from '../proxy';
@@ -24,19 +24,19 @@ const loadDefinition = (): Document => {
   return _definition;
 };
 
+// help and openapi import by static path, so a bundler includes only this API's docs and spec.
+const help = async (): Promise<string> => docsContent('purpose.json', () => import('../docs/purpose.json'));
+
+const openapi = async (): Promise<Document> => jsonContent(await import('../definitions/purpose.json'));
+
+const create = (): Client =>
+  createApiClient<Client>({ definition: loadDefinition(), apiName: 'purpose', help, openapi });
+
 let _instance: Client | null = null;
 
-const resolve = (): Client => {
-  if (!_instance) {
-    const def = loadDefinition();
-    _instance = createApiClient<Client>({ definition: def, apiName: 'purpose' });
-  }
-  return _instance;
-};
-
 const _handle: ApiHandle<Client> = createApiHandle({
-  resolveClient: resolve,
-  createClient: () => createApiClient<Client>({ definition: loadDefinition(), apiName: 'purpose' }),
+  resolveClient: () => (_instance ??= create()),
+  createClient: create,
   apiName: 'purpose',
 });
 

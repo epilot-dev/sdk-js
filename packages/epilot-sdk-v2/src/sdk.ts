@@ -68,7 +68,7 @@ export const createSDK = (): EpilotSDK => {
 
     return createApiHandle({
       resolveClient: () => resolveClient({ registry, name, state }),
-      createClient: () => createApiClient({ definition: entry.loader(), apiName: name }),
+      createClient: () => createApiClient({ definition: entry.loader(), apiName: name, help, openapi }),
       apiName: name,
     });
   };

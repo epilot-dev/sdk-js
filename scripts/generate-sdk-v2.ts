@@ -376,11 +376,22 @@ const mockJsonExample = (schema: Schema): string | null => {
 
 const generateApiFile = (client: ClientInfo): string => {
   const clientType = client.hasTypes ? 'Client' : 'AxiosInstance';
+  const hasFullSpec = existsSync(resolve(DEFS_DIR, `${client.kebabName}.json`));
+  const openapi = hasFullSpec
+    ? [
+        `const openapi = async (): Promise<Document> => jsonContent(await import('../definitions/${client.kebabName}.json'))`,
+      ]
+    : [
+        `// src/definitions holds no full spec for this API.`,
+        `const openapi = async (): Promise<Document> => {`,
+        `  throw new Error('Module not found in bundle: ./definitions/${client.kebabName}.json')`,
+        `}`,
+      ];
 
   const lines = [
     `import type { Document } from 'openapi-client-axios'`,
     ``,
-    `import { createApiClient } from '../client-factory'`,
+    `import { createApiClient, docsContent${hasFullSpec ? ', jsonContent' : ''} } from '../client-factory'`,
     `import { expand } from '../compact'`,
     `import type { CompactDefinition } from '../compact'`,
     `import { createApiHandle } from '../proxy'`,
@@ -421,19 +432,18 @@ const generateApiFile = (client: ClientInfo): string => {
     `  return _definition`,
     `}`,
     ``,
+    `// help and openapi import by static path, so a bundler includes only this API's docs and spec.`,
+    `const help = async (): Promise<string> => docsContent('${client.kebabName}.json', () => import('../docs/${client.kebabName}.json'))`,
+    ``,
+    ...openapi,
+    ``,
+    `const create = (): ${clientType} => createApiClient<${clientType}>({ definition: loadDefinition(), apiName: '${client.apiName}', help, openapi })`,
+    ``,
     `let _instance: ${clientType} | null = null`,
     ``,
-    `const resolve = (): ${clientType} => {`,
-    `  if (!_instance) {`,
-    `    const def = loadDefinition()`,
-    `    _instance = createApiClient<${clientType}>({ definition: def, apiName: '${client.apiName}' })`,
-    `  }`,
-    `  return _instance`,
-    `}`,
-    ``,
     `const _handle: ApiHandle<${clientType}> = createApiHandle({`,
-    `  resolveClient: resolve,`,
-    `  createClient: () => createApiClient<${clientType}>({ definition: loadDefinition(), apiName: '${client.apiName}' }),`,
+    `  resolveClient: () => (_instance ??= create()),`,
+    `  createClient: create,`,
     `  apiName: '${client.apiName}',`,
     `})`,
     ``,
