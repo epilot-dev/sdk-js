@@ -376,10 +376,13 @@ const mockJsonExample = (schema: Schema): string | null => {
 
 const generateApiFile = (client: ClientInfo): string => {
   const clientType = client.hasTypes ? 'Client' : 'AxiosInstance';
+  // openapi() serves the full spec checked into src/definitions; not every API has one
+  const hasFullDefinition = existsSync(resolve(DEFS_DIR, `${client.kebabName}.json`));
 
   const lines = [
     `import type { Document } from 'openapi-client-axios'`,
     ``,
+    `import { lazyApiDocs } from '../api-docs'`,
     `import { createApiClient } from '../client-factory'`,
     `import { expand } from '../compact'`,
     `import type { CompactDefinition } from '../compact'`,
@@ -421,19 +424,26 @@ const generateApiFile = (client: ClientInfo): string => {
     `  return _definition`,
     `}`,
     ``,
+    `// Literal paths: a bundler emits lazy chunks for this API's docs only, not for every API.`,
+    `const docs = lazyApiDocs({`,
+    `  apiName: '${client.apiName}',`,
+    `  help: () => import('../docs/${client.kebabName}.json'),`,
+    ...(hasFullDefinition ? [`  openapi: () => import('../definitions/${client.kebabName}.json'),`] : []),
+    `})`,
+    ``,
     `let _instance: ${clientType} | null = null`,
     ``,
     `const resolve = (): ${clientType} => {`,
     `  if (!_instance) {`,
     `    const def = loadDefinition()`,
-    `    _instance = createApiClient<${clientType}>({ definition: def, apiName: '${client.apiName}' })`,
+    `    _instance = createApiClient<${clientType}>({ definition: def, docs })`,
     `  }`,
     `  return _instance`,
     `}`,
     ``,
     `const _handle: ApiHandle<${clientType}> = createApiHandle({`,
     `  resolveClient: resolve,`,
-    `  createClient: () => createApiClient<${clientType}>({ definition: loadDefinition(), apiName: '${client.apiName}' }),`,
+    `  createClient: () => createApiClient<${clientType}>({ definition: loadDefinition(), docs }),`,
     `  apiName: '${client.apiName}',`,
     `})`,
     ``,

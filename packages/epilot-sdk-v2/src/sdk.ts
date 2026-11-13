@@ -8,7 +8,7 @@ import { help } from './help';
 import { openapi } from './openapi';
 import { loadOverrides } from './overrides';
 import { createApiHandle } from './proxy';
-import { createRegistry, resetAllClients, resolveClient } from './registry';
+import { createRegistry, docsByName, resetAllClients, resolveClient } from './registry';
 import type { LargeResponseConfig } from './large-response';
 import type { RetryConfig } from './retry';
 import type { ApiHandle, ExtensionEntry, HeadersConfig, SDKState } from './types';
@@ -68,7 +68,7 @@ export const createSDK = (): EpilotSDK => {
 
     return createApiHandle({
       resolveClient: () => resolveClient({ registry, name, state }),
-      createClient: () => createApiClient({ definition: entry.loader(), apiName: name }),
+      createClient: () => createApiClient({ definition: entry.loader(), docs: docsByName(name) }),
       apiName: name,
     });
   };

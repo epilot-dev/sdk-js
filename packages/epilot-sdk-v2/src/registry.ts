@@ -1,12 +1,21 @@
 import type { AxiosInstance } from 'axios';
 import type { Document } from 'openapi-client-axios';
 
+import type { ApiDocs } from './api-docs';
 import { createApiClient } from './client-factory';
+import { help } from './help';
 import { applyLargeResponseInterceptor } from './large-response';
+import { openapi } from './openapi';
 import { applyRetryInterceptor } from './retry';
 import type { ApiEntry, SDKState } from './types';
 
 export const createRegistry = () => new Map<string, ApiEntry>();
+
+/** Docs looked up by API name, for clients the root SDK creates from its registry. */
+export const docsByName = (name: string): ApiDocs => ({
+  help: () => help(name),
+  openapi: () => openapi(name),
+});
 
 /**
  * Loads the definition once and returns the same object on every later call.
@@ -51,7 +60,7 @@ export const resolveClient = (params: {
       definition,
       token: state.token,
       headers: state.globalHeaders,
-      apiName: name,
+      docs: docsByName(name),
     });
 
     // Apply large response interceptor for S3-backed payloads

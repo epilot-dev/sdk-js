@@ -1,5 +1,6 @@
 import type { Document } from 'openapi-client-axios';
 
+import { lazyApiDocs } from '../api-docs';
 import { createApiClient } from '../client-factory';
 import { expand } from '../compact';
 import type { CompactDefinition } from '../compact';
@@ -25,19 +26,25 @@ const loadDefinition = (): Document => {
   return _definition;
 };
 
+// Literal paths: a bundler emits lazy chunks for this API's docs only, not for every API.
+const docs = lazyApiDocs({
+  apiName: 'integrationToolkit',
+  help: () => import('../docs/integration-toolkit.json'),
+});
+
 let _instance: Client | null = null;
 
 const resolve = (): Client => {
   if (!_instance) {
     const def = loadDefinition();
-    _instance = createApiClient<Client>({ definition: def, apiName: 'integrationToolkit' });
+    _instance = createApiClient<Client>({ definition: def, docs });
   }
   return _instance;
 };
 
 const _handle: ApiHandle<Client> = createApiHandle({
   resolveClient: resolve,
-  createClient: () => createApiClient<Client>({ definition: loadDefinition(), apiName: 'integrationToolkit' }),
+  createClient: () => createApiClient<Client>({ definition: loadDefinition(), docs }),
   apiName: 'integrationToolkit',
 });
 
