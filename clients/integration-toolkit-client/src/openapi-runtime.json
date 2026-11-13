@@ -227,6 +227,19 @@
         "responses": {}
       }
     },
+    "/v1/integrations/{integrationId}/config": {
+      "get": {
+        "operationId": "getIntegrationConfig",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/integrations/{integrationId}/events": {
       "post": {
         "operationId": "queryEvents",
@@ -1266,6 +1279,232 @@
         "parameters": [
           {
             "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/imports": {
+      "post": {
+        "operationId": "createImport",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listImports",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "template_id",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/imports/{importId}": {
+      "get": {
+        "operationId": "getImport",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteImport",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/imports/{importId}:validate": {
+      "post": {
+        "operationId": "validateImport",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/imports/{importId}:suggest-templates": {
+      "post": {
+        "operationId": "suggestImportTemplates",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/imports/{importId}:execute": {
+      "post": {
+        "operationId": "executeImport",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/imports/{importId}:abort": {
+      "post": {
+        "operationId": "abortImport",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/imports/{importId}/results": {
+      "get": {
+        "operationId": "getImportResults",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/imports/{importId}/download": {
+      "get": {
+        "operationId": "downloadImportFile",
+        "parameters": [
+          {
+            "name": "importId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/import-templates": {
+      "get": {
+        "operationId": "listImportTemplates",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createImportTemplate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/import-templates/{templateId}": {
+      "get": {
+        "operationId": "getImportTemplate",
+        "parameters": [
+          {
+            "name": "templateId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateImportTemplate",
+        "parameters": [
+          {
+            "name": "templateId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteImportTemplate",
+        "parameters": [
+          {
+            "name": "templateId",
             "in": "path",
             "required": true
           }
