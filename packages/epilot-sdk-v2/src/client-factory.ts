@@ -2,9 +2,8 @@ import type { AxiosInstance } from 'axios';
 import type { Document } from 'openapi-client-axios';
 import _OpenAPIClientAxios from 'openapi-client-axios';
 
+import type { ApiDocs } from './api-docs';
 import { authorize, type TokenArg } from './authorize';
-import { help as helpFn } from './help';
-import { openapi as openapiFn } from './openapi';
 
 // Handle CJS/ESM interop — when bundled as CJS, the default export may be nested under .default
 const OpenAPIClientAxios = (
@@ -17,9 +16,9 @@ export const createApiClient = <T extends AxiosInstance = AxiosInstance>(params:
   definition: Document;
   token?: TokenArg | null;
   headers?: Record<string, string>;
-  apiName?: string;
+  docs?: ApiDocs;
 }): T => {
-  const { definition, token, headers, apiName } = params;
+  const { definition, token, headers, docs } = params;
   const api = new OpenAPIClientAxios({ definition, quick: true });
   const client = api.initSync<T>();
 
@@ -34,9 +33,9 @@ export const createApiClient = <T extends AxiosInstance = AxiosInstance>(params:
     authorize(client, token);
   }
 
-  if (apiName) {
-    (client as Record<string, unknown>).help = () => helpFn(apiName);
-    (client as Record<string, unknown>).openapi = () => openapiFn(apiName);
+  if (docs) {
+    (client as Record<string, unknown>).help = docs.help;
+    (client as Record<string, unknown>).openapi = docs.openapi;
   }
 
   return client;
