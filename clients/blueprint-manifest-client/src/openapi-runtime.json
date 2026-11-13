@@ -1336,6 +1336,30 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/duplicate": {
+      "post": {
+        "operationId": "duplicateBlueprintTestCase",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/source-operations/{run_id}": {
       "get": {
         "operationId": "getSourceTestOperation",
