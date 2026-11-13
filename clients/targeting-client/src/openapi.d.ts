@@ -1653,6 +1653,37 @@ declare namespace Components {
             };
         }
         export type PortalStatus = "sent" | "seen" | "dismissed" | "clicked";
+        export interface ProductRecommendationOffer {
+            /**
+             * Optional per-offer target entity ID. An offer without a target is shown to everyone.
+             */
+            target_id?: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            /**
+             * Product/price pairs within this offer.
+             */
+            items: {
+                product_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                price_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                /**
+                 * Opaque per-item highlight/comparison config persisted as-is on the entity.
+                 */
+                highlight_config?: {
+                    [name: string]: any;
+                };
+            }[];
+        }
         export interface Recipient {
             entity_id?: /**
              * example:
@@ -1794,63 +1825,50 @@ declare namespace Components {
          *
          */
         SetupTariffChangeCampaignRequest;
+        /**
+         * Reuses an existing `product_recommendation` entity. It is linked, never modified.
+         */
+        export interface SetupExistingProductRecommendation {
+            product_recommendation_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+        }
+        /**
+         * Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and
+         * `source_price_id` it applies to customers on that tariff; without a source it is a general
+         * recommendation that applies to every customer of the campaign. The source product and price
+         * must be sent together.
+         *
+         */
+        export interface SetupNewProductRecommendation {
+            /**
+             * Optional name of the product recommendation. Defaults to the campaign name.
+             */
+            name?: string;
+            /**
+             * Source product entity ID. Requires `source_price_id`.
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            source_product_id?: string; // uuid
+            /**
+             * Source price entity ID. Requires `source_product_id`.
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            source_price_id?: string; // uuid
+            /**
+             * Offer blocks for the product_recommendation entity.
+             */
+            offers?: ProductRecommendationOffer[];
+        }
         export interface SetupTariffChangeCampaignRequest {
             /**
              * The `CampaignType` of this variant.
              */
             type: "tariff_change";
-            product_recommendation: {
-                /**
-                 * Optional name of the product recommendation. Defaults to the campaign name.
-                 */
-                name?: string;
-                /**
-                 * Optional source product entity ID for the recommendation.
-                 * example:
-                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                 */
-                source_product_id?: string; // uuid
-                /**
-                 * Optional source price entity ID for the recommendation.
-                 * example:
-                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                 */
-                source_price_id?: string; // uuid
-                /**
-                 * Offer blocks for the product_recommendation entity.
-                 */
-                offers?: {
-                    /**
-                     * Optional per-offer target entity ID.
-                     */
-                    target_id?: /**
-                     * example:
-                     * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                     */
-                    BaseUUID /* uuid */;
-                    /**
-                     * Product/price pairs within this offer.
-                     */
-                    items: {
-                        product_id: /**
-                         * example:
-                         * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                         */
-                        BaseUUID /* uuid */;
-                        price_id: /**
-                         * example:
-                         * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                         */
-                        BaseUUID /* uuid */;
-                        /**
-                         * Opaque per-item highlight/comparison config persisted as-is on the entity.
-                         */
-                        highlight_config?: {
-                            [name: string]: any;
-                        };
-                    }[];
-                }[];
-            };
             campaign: {
                 name: string;
                 goal?: string;
@@ -1881,6 +1899,31 @@ declare namespace Components {
                  */
                 end_date?: string; // date-time
             };
+            /**
+             * Product recommendations the campaign offers. Each item either reuses an existing
+             * `product_recommendation` entity (a recommendation can belong to many campaigns) or
+             * creates a new one. All of them are linked on the campaign's `product_recommendations`
+             * relation.
+             *
+             */
+            product_recommendations: [
+                (/* Reuses an existing `product_recommendation` entity. It is linked, never modified. */ SetupExistingProductRecommendation | /**
+                 * Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and
+                 * `source_price_id` it applies to customers on that tariff; without a source it is a general
+                 * recommendation that applies to every customer of the campaign. The source product and price
+                 * must be sent together.
+                 *
+                 */
+                SetupNewProductRecommendation),
+                ...(/* Reuses an existing `product_recommendation` entity. It is linked, never modified. */ SetupExistingProductRecommendation | /**
+                 * Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and
+                 * `source_price_id` it applies to customers on that tariff; without a source it is a general
+                 * recommendation that applies to every customer of the campaign. The source product and price
+                 * must be sent together.
+                 *
+                 */
+                SetupNewProductRecommendation)[]
+            ];
             /**
              * Optional journey configuration selected in the wizard. Only sent by the
              * consumer once a journey has been chosen.
@@ -1956,21 +1999,21 @@ declare namespace Components {
              * The `CampaignType` of this variant.
              */
             type: "tariff_change";
-            product_recommendation_id: /**
+            /**
+             * The created campaign.
              * example:
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
              */
-            BaseUUID /* uuid */;
-            campaign_id: /**
+            campaign_id: string; // uuid
+            /**
+             * All product recommendations linked to the campaign, created and reused, in request order.
+             *
+             */
+            product_recommendation_ids: /**
              * example:
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
              */
-            BaseUUID /* uuid */;
-            journey_id?: /**
-             * example:
-             * b8c01433-5556-4e2b-aad4-6f5348d1df84
-             */
-            BaseUUID /* uuid */;
+            BaseUUID /* uuid */[];
             portal_widget_id?: /**
              * example:
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
@@ -2505,6 +2548,7 @@ export interface OperationMethods {
    * A campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.
    * A request with no or more than one entry fails request validation with 400 (the error points at
    * `/requestBody/campaign/target_ids`), and nothing is created.
+   * Request validation errors (400) are returned before anything is created.
    * 
    */
   'setupCampaign'(
@@ -2772,6 +2816,7 @@ export interface PathsDictionary {
      * A campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.
      * A request with no or more than one entry fails request validation with 400 (the error points at
      * `/requestBody/campaign/target_ids`), and nothing is created.
+     * Request validation errors (400) are returned before anything is created.
      * 
      */
     'post'(
@@ -3003,11 +3048,14 @@ export type MatchTargetParams = Components.Schemas.MatchTargetParams;
 export type NextBestAction = Components.Schemas.NextBestAction;
 export type PortalRecipientPayload = Components.Schemas.PortalRecipientPayload;
 export type PortalStatus = Components.Schemas.PortalStatus;
+export type ProductRecommendationOffer = Components.Schemas.ProductRecommendationOffer;
 export type Recipient = Components.Schemas.Recipient;
 export type RetriggerAutomationsRequest = Components.Schemas.RetriggerAutomationsRequest;
 export type RetriggerAutomationsResult = Components.Schemas.RetriggerAutomationsResult;
 export type ServerError = Components.Schemas.ServerError;
 export type SetupCampaignRequest = Components.Schemas.SetupCampaignRequest;
+export type SetupExistingProductRecommendation = Components.Schemas.SetupExistingProductRecommendation;
+export type SetupNewProductRecommendation = Components.Schemas.SetupNewProductRecommendation;
 export type SetupTariffChangeCampaignRequest = Components.Schemas.SetupTariffChangeCampaignRequest;
 export type SetupTariffChangeCampaignResponse = Components.Schemas.SetupTariffChangeCampaignResponse;
 export type Target = Components.Schemas.Target;

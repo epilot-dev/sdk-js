@@ -181,7 +181,7 @@
       "post": {
         "operationId": "setupCampaign",
         "summary": "setupCampaign",
-        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n\nThe campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is\nlaunched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,\n`CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and\nnothing is created.\n\nA campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.\nA request with no or more than one entry fails request validation with 400 (the error points at\n`/requestBody/campaign/target_ids`), and nothing is created.\n",
+        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n\nThe campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is\nlaunched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,\n`CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and\nnothing is created.\n\nA campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.\nA request with no or more than one entry fails request validation with 400 (the error points at\n`/requestBody/campaign/target_ids`), and nothing is created.\nRequest validation errors (400) are returned before anything is created.\n",
         "tags": [
           "Campaign"
         ],
@@ -1789,74 +1789,6 @@
               "tariff_change"
             ]
           },
-          "product_recommendation": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "Optional name of the product recommendation. Defaults to the campaign name."
-              },
-              "source_product_id": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/BaseUUID"
-                  }
-                ],
-                "description": "Optional source product entity ID for the recommendation."
-              },
-              "source_price_id": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/BaseUUID"
-                  }
-                ],
-                "description": "Optional source price entity ID for the recommendation."
-              },
-              "offers": {
-                "type": "array",
-                "description": "Offer blocks for the product_recommendation entity.",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "target_id": {
-                      "$ref": "#/components/schemas/BaseUUID",
-                      "description": "Optional per-offer target entity ID."
-                    },
-                    "items": {
-                      "type": "array",
-                      "description": "Product/price pairs within this offer.",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "product_id": {
-                            "$ref": "#/components/schemas/BaseUUID"
-                          },
-                          "price_id": {
-                            "$ref": "#/components/schemas/BaseUUID"
-                          },
-                          "highlight_config": {
-                            "type": "object",
-                            "description": "Opaque per-item highlight/comparison config persisted as-is on the entity.",
-                            "additionalProperties": true
-                          }
-                        },
-                        "required": [
-                          "product_id",
-                          "price_id"
-                        ],
-                        "additionalProperties": false
-                      }
-                    }
-                  },
-                  "required": [
-                    "items"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            },
-            "additionalProperties": false
-          },
           "campaign": {
             "type": "object",
             "properties": {
@@ -1891,6 +1823,21 @@
               "target_ids"
             ],
             "additionalProperties": false
+          },
+          "product_recommendations": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Product recommendations the campaign offers. Each item either reuses an existing\n`product_recommendation` entity (a recommendation can belong to many campaigns) or\ncreates a new one. All of them are linked on the campaign's `product_recommendations`\nrelation.\n",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/SetupExistingProductRecommendation"
+                },
+                {
+                  "$ref": "#/components/schemas/SetupNewProductRecommendation"
+                }
+              ]
+            }
           },
           "journey": {
             "type": "object",
@@ -1950,8 +1897,93 @@
         },
         "required": [
           "type",
-          "product_recommendation",
-          "campaign"
+          "campaign",
+          "product_recommendations"
+        ],
+        "additionalProperties": false
+      },
+      "SetupExistingProductRecommendation": {
+        "type": "object",
+        "description": "Reuses an existing `product_recommendation` entity. It is linked, never modified.",
+        "properties": {
+          "product_recommendation_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          }
+        },
+        "required": [
+          "product_recommendation_id"
+        ],
+        "additionalProperties": false
+      },
+      "SetupNewProductRecommendation": {
+        "type": "object",
+        "description": "Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and\n`source_price_id` it applies to customers on that tariff; without a source it is a general\nrecommendation that applies to every customer of the campaign. The source product and price\nmust be sent together.\n",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Optional name of the product recommendation. Defaults to the campaign name."
+          },
+          "source_product_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BaseUUID"
+              }
+            ],
+            "description": "Source product entity ID. Requires `source_price_id`."
+          },
+          "source_price_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BaseUUID"
+              }
+            ],
+            "description": "Source price entity ID. Requires `source_product_id`."
+          },
+          "offers": {
+            "type": "array",
+            "description": "Offer blocks for the product_recommendation entity.",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecommendationOffer"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProductRecommendationOffer": {
+        "type": "object",
+        "properties": {
+          "target_id": {
+            "$ref": "#/components/schemas/BaseUUID",
+            "description": "Optional per-offer target entity ID. An offer without a target is shown to everyone."
+          },
+          "items": {
+            "type": "array",
+            "description": "Product/price pairs within this offer.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "price_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "highlight_config": {
+                  "type": "object",
+                  "description": "Opaque per-item highlight/comparison config persisted as-is on the entity.",
+                  "additionalProperties": true
+                }
+              },
+              "required": [
+                "product_id",
+                "price_id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "items"
         ],
         "additionalProperties": false
       },
@@ -1965,14 +1997,20 @@
               "tariff_change"
             ]
           },
-          "product_recommendation_id": {
-            "$ref": "#/components/schemas/BaseUUID"
-          },
           "campaign_id": {
-            "$ref": "#/components/schemas/BaseUUID"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BaseUUID"
+              }
+            ],
+            "description": "The created campaign."
           },
-          "journey_id": {
-            "$ref": "#/components/schemas/BaseUUID"
+          "product_recommendation_ids": {
+            "type": "array",
+            "description": "All product recommendations linked to the campaign, created and reused, in request order.\n",
+            "items": {
+              "$ref": "#/components/schemas/BaseUUID"
+            }
           },
           "portal_widget_id": {
             "$ref": "#/components/schemas/BaseUUID"
@@ -1980,8 +2018,8 @@
         },
         "required": [
           "type",
-          "product_recommendation_id",
-          "campaign_id"
+          "campaign_id",
+          "product_recommendation_ids"
         ],
         "additionalProperties": false
       }
