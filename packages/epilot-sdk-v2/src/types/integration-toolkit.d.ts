@@ -42,7 +42,7 @@ export declare namespace Components {
                  * Which processing lane carried the event. Present only alongside `interactive`.
                  *
                  */
-                lane?: "interactive" | "priority" | "default" | "deferred";
+                lane?: "interactive" | "priority" | "default" | "deferred" | "sandbox";
                 message?: string;
             }[];
         }
@@ -76,7 +76,7 @@ export declare namespace Components {
                  * Which processing lane carried the event. Present only alongside `interactive`.
                  *
                  */
-                lane?: "interactive" | "priority" | "default" | "deferred";
+                lane?: "interactive" | "priority" | "default" | "deferred" | "sandbox";
                 message?: string;
             }[];
         }
@@ -1766,6 +1766,27 @@ export declare namespace Components {
              */
             FileProxyUseCaseConfiguration;
         }
+        /**
+         * Register an already-uploaded file as an import. The import template is chosen later, via `:validate` — upload and interpretation are separate decisions.
+         */
+        export interface CreateImportRequest {
+            s3_reference: S3Reference;
+            /**
+             * Return a sample of the file's first rows in `preview`. Only controls whether the sample comes BACK — the head is read either way, because that read is how an unreadable file gets refused.
+             */
+            include_preview?: boolean;
+            /**
+             * Repoint an EXISTING import at this file instead of registering a new one — same row, same id, so iterating on which file to import leaves one entry in the history rather than one per attempt.
+             * Repointing is allowed exactly while the import has written nothing: from PENDING and READY, and from FAILED when `error.code` is one of `VALIDATION_BLOCKED`, `VALIDATE_TIMEOUT` or `FILE_FORMAT_UNSUPPORTED`. Anything else returns 409 with code `IMPORT_NOT_REPLACEABLE`. The repoint clears any verdict the import had.
+             * An id that names nothing returns 404. It never falls back to registering a new import: a stale id must fail loudly rather than quietly produce a second one.
+             */
+            import_id?: string;
+            suggestion?: /* A proposal for how to read the file, made for the client that finishes the import: e.g. an AI assistant's choice of entities, columns and identifiers, which Datastudio opens prefilled for the user to check. Set on `createImport` (with `import_id`, a given suggestion replaces the import's own; without one, it stays). Kept exactly as given and returned on the job; the toolkit never reads it, and validation and execution do not depend on it. At most 32 KB as JSON. */ ImportSuggestion;
+        }
+        export interface CreateImportResponse {
+            job: ImportJob;
+            preview?: /* Sample of the file's first rows, using the same parser as `:validate`. Registration refuses a file it cannot read, so a created job always includes this. */ ErpImportFilePreview;
+        }
         export interface CreateInboundUseCaseRequest {
             /**
              * Use case name
@@ -1818,10 +1839,10 @@ export declare namespace Components {
             IntegrationMap[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
-             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
+             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs. "file_import" backs an import template (see /v2/import-templates). These are managed through that API and left out of the integration lists.
              *
              */
-            integration_type?: "erp" | "connector";
+            integration_type?: "erp" | "connector" | "file_import";
             connector_config?: /* Shared configuration for connector-type integrations */ ConnectorConfig;
             /**
              * If true, integration is displayed in read-only mode in the UI to discourage changes
@@ -2477,7 +2498,7 @@ export declare namespace Components {
                     }[];
                 };
                 /**
-                 * Present when the entity mapping has a `sharing` block: each partner with its `enabled` evaluated against the payload.
+                 * Present when the entity mapping has a `sharing` block: each partner with its `enabled` evaluated against the payload, and each partner lookup with its unique ids evaluated (`lookups`). Lookups are resolved to partner orgs at runtime, not here.
                  */
                 sharing?: {
                     [name: string]: any;
@@ -3002,7 +3023,7 @@ export declare namespace Components {
                 }[];
             };
             /**
-             * Present when the entity mapping has a `sharing` block: each partner with its `enabled` evaluated against the payload.
+             * Present when the entity mapping has a `sharing` block: each partner with its `enabled` evaluated against the payload, and each partner lookup with its unique ids evaluated (`lookups`). Lookups are resolved to partner orgs at runtime, not here.
              */
             sharing?: {
                 [name: string]: any;
@@ -3388,6 +3409,10 @@ export declare namespace Components {
          * for some rows. Blocking, unlike a field: the import would skip every entry of that
          * target built in the same chunk, not one value; `attributes` names the list attribute.
          *
+         * `ENTITY_REF_INVALID` — a `resolve_refs` field produced a `<name>_ref` without unique id
+         * values for some rows, typically from a blank cell. Blocking: the import would fail the
+         * whole entity of such a row, not one value; `attributes` names the attribute.
+         *
          * `lines` points at up to five file lines an issue was seen on, as examples.
          *
          * The conditional codes describe a file that cannot be written as variants:
@@ -3428,7 +3453,7 @@ export declare namespace Components {
              * Enum of possible issue codes.
              *
              */
-            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "UNIQUE_ID_NOT_IN_SCHEMA" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED" | "VALID_FROM_NOT_MAPPED";
+            code: "UNIQUE_ID_COLUMN_MISSING" | "MAPPED_COLUMN_MISSING" | "MALFORMED_ROW" | "INVALID_ENCODING" | "EMPTY_FILE" | "TOO_MANY_ROWS" | "BLANK_ROWS_SKIPPED" | "TIER_ROWS_NOT_GROUPED" | "TIER_BANDS_CONFLICT" | "CONDITION_VALUE_MISSING" | "VARIANT_VALUE_CONFLICT" | "ATTRIBUTE_NOT_OVERRIDABLE" | "ATTRIBUTE_NOT_IN_SCHEMA" | "IS_CONDITIONAL_NOT_CONSTANT" | "SCHEMA_NOT_CONDITIONABLE" | "SCHEMA_NOT_FOUND" | "SCHEMA_DECLARES_NO_CONDITIONS" | "GROUPING_KEY_NOT_A_COLUMN" | "GROUPING_KEY_IS_SORT_COLUMN" | "CONDITIONAL_TARGET_MODE_UNSUPPORTED" | "UNIQUE_ID_NOT_IN_SCHEMA" | "VALUE_FORMAT_INVALID" | "MAPPING_EXPRESSION_FAILED" | "FROM_ROWS_EXPRESSION_FAILED" | "ENTITY_REF_INVALID" | "VALID_FROM_NOT_MAPPED";
             severity: "warning" | "blocking";
             /**
              * The columns this issue is about, at most one entry per column per entity.
@@ -3445,7 +3470,7 @@ export declare namespace Components {
                 entity?: string;
             }[];
             /**
-             * The mapping fields this issue is about, where the value is not a file column as it is: an expression builds it, or the expression fails. VALUE_FORMAT_INVALID (beside `columns`, which holds the values taken from a column as they are), MAPPING_EXPRESSION_FAILED and FROM_ROWS_EXPRESSION_FAILED; on UNIQUE_ID_NOT_IN_SCHEMA, the unique identifiers that are not attributes of their entity type; on VALID_FROM_NOT_MAPPED, `valid_from` for each conditional entity type that does not map it.
+             * The mapping fields this issue is about, where the value is not a file column as it is: an expression builds it, or the expression fails. VALUE_FORMAT_INVALID (beside `columns`, which holds the values taken from a column as they are), MAPPING_EXPRESSION_FAILED, FROM_ROWS_EXPRESSION_FAILED and ENTITY_REF_INVALID; on UNIQUE_ID_NOT_IN_SCHEMA, the unique identifiers that are not attributes of their entity type; on ATTRIBUTE_NOT_OVERRIDABLE and ATTRIBUTE_NOT_IN_SCHEMA, the attributes whose values `columns` holds; on VALID_FROM_NOT_MAPPED, `valid_from` for each conditional entity type that does not map it.
              */
             attributes?: {
                 /**
@@ -3453,12 +3478,12 @@ export declare namespace Components {
                  */
                 name: string;
                 /**
-                 * The entity type the attribute belongs to, where the issue spans several (UNIQUE_ID_NOT_IN_SCHEMA, VALID_FROM_NOT_MAPPED).
+                 * The entity type the attribute belongs to, where the issue spans several (UNIQUE_ID_NOT_IN_SCHEMA, VALID_FROM_NOT_MAPPED, ATTRIBUTE_NOT_OVERRIDABLE, ATTRIBUTE_NOT_IN_SCHEMA).
                  */
                 entity?: string;
             }[];
             /**
-             * Up to five lines of the file this issue was seen on, as examples rather than the full list. The header is line 1. BLANK_ROWS_SKIPPED, VALUE_FORMAT_INVALID, MAPPING_EXPRESSION_FAILED, FROM_ROWS_EXPRESSION_FAILED, TIER_ROWS_NOT_GROUPED (where a variant's rows start again), TIER_BANDS_CONFLICT and VARIANT_VALUE_CONFLICT (the row at odds with the first).
+             * Up to five lines of the file this issue was seen on, as examples rather than the full list. The header is line 1. BLANK_ROWS_SKIPPED, VALUE_FORMAT_INVALID, MAPPING_EXPRESSION_FAILED, FROM_ROWS_EXPRESSION_FAILED, ENTITY_REF_INVALID, TIER_ROWS_NOT_GROUPED (where a variant's rows start again), TIER_BANDS_CONFLICT and VARIANT_VALUE_CONFLICT (the row at odds with the first).
              */
             lines?: number[];
             /**
@@ -3471,8 +3496,7 @@ export declare namespace Components {
             row?: number;
             /**
              * The format the values should have had. VALUE_FORMAT_INVALID only.
-             * - `number` — a JSON number; the mapping produces text (wrap the column in `$number()`). - `text` — text; the mapping produces a number. - `decimal` — a plain number with a dot as text, like `12.50`. - `date` — a date like `2026-01-01`, optionally with a time and offset like
-             *   `2026-01-01T08:00:00Z`.
+             * - `number` — a JSON number; the mapping produces text (wrap the column in `$number()`). - `text` — text; the mapping produces a number. - `decimal` — a plain number with a dot as text, like `12.50`. - `date` — a calendar date like `2026-01-01`, with no time of day.
              */
             expected?: "number" | "text" | "decimal" | "date";
         }
@@ -3491,6 +3515,10 @@ export declare namespace Components {
              * The inbound use case whose mapping drives both phases. Absent until the first `:validate`, and MUTABLE — re-validating with a different use case replaces it.
              */
             use_case_slug?: string;
+            /**
+             * The import template's name when the job was validated with one (`/v2/imports`), so a listed job can show it without a read per row.
+             */
+            template_name?: string;
             format: "csv" | "xlsx";
             /**
              * PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. Only IMPORTED and CANCELLED are terminal. READY and FAILED both accept a further `:validate`, which is how a wrong use case is corrected without re-uploading the file.
@@ -3515,6 +3543,12 @@ export declare namespace Components {
              */
             ErpImportProgress;
             error?: /* Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`. */ ErpImportError;
+            writing?: /* How far the platform got writing the rows an import handed over. IMPORTED (or CANCELLED) only means the rows were handed over; they are written afterwards, possibly for a while, with retries. Present once rows were handed over. */ ImportWriting;
+            /**
+             * Whether the person who started the import is notified once it is written, as asked on `:execute`.
+             */
+            notify?: boolean;
+            suggestion?: /* A proposal for how to read the file, made for the client that finishes the import: e.g. an AI assistant's choice of entities, columns and identifiers, which Datastudio opens prefilled for the user to check. Set on `createImport` (with `import_id`, a given suggestion replaces the import's own; without one, it stays). Kept exactly as given and returned on the job; the toolkit never reads it, and validation and execution do not depend on it. At most 32 KB as JSON. */ ImportSuggestion;
             /**
              * Scopes this run in monitoring. Always equal to `import_id`.
              */
@@ -3587,6 +3621,19 @@ export declare namespace Components {
              */
             entity_details?: /* One entity instance the import will write, attributed to the mapping target that produces it. */ ErpImportEntityDetail[];
             /**
+             * The meter readings the file writes. Present only when the mapping has `meter_readings`; readings are not entities, so `entities` never counts them. A reading the write path would refuse (missing or non-ISO timestamp, non-numeric value, unknown source or reason) is a blocking `INVALID_METER_READING` and not counted here.
+             */
+            meter_readings?: {
+                /**
+                 * Readings written, one per reading a row yields.
+                 */
+                readings: number;
+                /**
+                 * Distinct meters the readings are for, by their unique ids.
+                 */
+                meters: number;
+            };
+            /**
              * Whole-file issues, at most one per `code`. Do not expect the length to match blocking + warnings: those also count per-row problems, which are recorded for support but never listed here. Warnings here are what `ack_warnings` on `:execute` acknowledges.
              */
             issues?: /**
@@ -3609,6 +3656,10 @@ export declare namespace Components {
              * `FROM_ROWS_EXPRESSION_FAILED` — an expression in a `conditional.from_rows` item failed
              * for some rows. Blocking, unlike a field: the import would skip every entry of that
              * target built in the same chunk, not one value; `attributes` names the list attribute.
+             *
+             * `ENTITY_REF_INVALID` — a `resolve_refs` field produced a `<name>_ref` without unique id
+             * values for some rows, typically from a blank cell. Blocking: the import would fail the
+             * whole entity of such a row, not one value; `attributes` names the attribute.
              *
              * `lines` points at up to five file lines an issue was seen on, as examples.
              *
@@ -3664,7 +3715,7 @@ export declare namespace Components {
             /**
              * Which processing lane carried the event.
              */
-            lane: "interactive" | "priority" | "default" | "deferred";
+            lane: "interactive" | "priority" | "default" | "deferred" | "sandbox";
             use_case_id?: string;
             use_case_slug?: string;
             /**
@@ -3953,6 +4004,23 @@ export declare namespace Components {
              * The caller has seen `validation.issues` and accepts them. Required when `validation.warnings` is greater than 0; ignored otherwise.
              */
             ack_warnings?: boolean;
+            /**
+             * Notify the person who started the import (email and in-app) once every row has a final result: what was written, what failed and why. Defaults to false.
+             */
+            notify?: boolean;
+        }
+        /**
+         * Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all.
+         */
+        export interface ExecuteImportRequest {
+            /**
+             * The caller has seen `validation.issues` and accepts them. Required when `validation.warnings` is greater than 0; ignored otherwise.
+             */
+            ack_warnings?: boolean;
+            /**
+             * Notify the person who started the import (email and in-app) once every row has a final result: what was written, what failed and why. Defaults to false.
+             */
+            notify?: boolean;
         }
         /**
          * A single monitoring span produced by an external system. `correlation_id`, `level`, `use_case_slug`, `occurred_at` and `message` are all required and `level` must be one of success|error|warning|info — but these are validated PER SPAN at ingest and reported in the per-item `results[]`, so one malformed span never fails the whole batch (the fields are intentionally not marked `required`/`enum` at the schema level to preserve that partial-acceptance behavior). The client does NOT send a `code` (server-assigned from `level`), a `source` (origin is the EXTERNAL_* code prefix), or span/event ids (the external system owns its own identity and dedup).
@@ -4372,10 +4440,15 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
-             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync. When an app or AI agent made the update (`changed_by_actor`), the user it acted on behalf of.
              *
              */
             changed_by?: string;
+            changed_by_actor?: /**
+             * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+             *
+             */
+            UseCaseChangeActor;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -4598,9 +4671,15 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
-             * User ID of the user who made the change that produced this history entry
+             * User ID of the user who made the change that produced this history entry. When an app or AI agent made the change (`changed_by_actor`), the user it acted on behalf of.
+             *
              */
             changed_by?: string;
+            changed_by_actor?: /**
+             * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+             *
+             */
+            UseCaseChangeActor;
             /**
              * ISO-8601 timestamp when the use case was originally created
              */
@@ -4863,6 +4942,206 @@ export declare namespace Components {
              */
             group_by?: "use_case_type" | "use_case";
         }
+        export interface ImportFailedRow {
+            /**
+             * The row's event id in monitoring.
+             */
+            event_id: string;
+            /**
+             * 0-based data row the failure belongs to. Absent when the row cannot be attributed, as for a group of rows written together.
+             */
+            row_index?: number;
+            /**
+             * Monitoring error code, when one was recorded.
+             */
+            code?: string;
+            message: string;
+            timestamp: string; // date-time
+        }
+        export interface ImportJob {
+            /**
+             * `imp_{ULID}` — time-ordered, also used as the job's correlation_id.
+             */
+            import_id: string;
+            org_id: string;
+            created_by?: string;
+            /**
+             * The import template whose mapping drives both phases. Absent until the first `:validate`, and MUTABLE — re-validating with a different template replaces it.
+             */
+            template_id?: string;
+            /**
+             * The template's name at the time of the last `:validate`.
+             */
+            template_name?: string;
+            format: "csv" | "xlsx";
+            /**
+             * PENDING → VALIDATING → READY → PROCESSING → IMPORTED, with FAILED reachable from any working status, and CANCELLING → CANCELLED reachable from VALIDATING or PROCESSING via :abort. Only IMPORTED and CANCELLED are terminal. READY and FAILED both accept a further `:validate`, which is how a wrong template is corrected without re-uploading the file.
+             * IMPORTED means every row was handed to the platform, not that the platform finished — per-row outcomes are read from GET /v2/imports/{importId}/results. A file that fails validation is FAILED with error.code = VALIDATION_BLOCKED.
+             * READY is legitimately idle for as long as the user takes to confirm, so it carries no running work and never goes stale.
+             * CANCELLING is transient and cooperative: the abort has been recorded but the worker only notices at its next batch boundary. Rows already published stay published — a stop is not a rollback.
+             */
+            status: "PENDING" | "VALIDATING" | "READY" | "PROCESSING" | "IMPORTED" | "FAILED" | "CANCELLING" | "CANCELLED";
+            s3_input_ref: S3Reference;
+            /**
+             * Size of the uploaded file, recorded at registration. Present on every job registered from version 1.17.0 onwards; absent on older rows, which were written before it was captured.
+             */
+            size_bytes?: number; // int64
+            /**
+             * How many effective columns the file's header yielded — the length of the `preview.columns` returned at registration, kept so a job loaded later can still describe its file. The preview ROWS are deliberately not stored: they are a sample for the person about to choose a mapping, not job state. Present on every job registered from version 1.17.0 onwards.
+             */
+            column_count?: number;
+            validation?: /* Validate-phase summary: what the file will create, and whether it may be confirmed. Absent until the validate phase completes. No per-row detail is kept — a rejected file is corrected and imported again. */ ErpImportValidation;
+            progress?: /**
+             * How far the currently running phase has got. Written at every batch boundary, so it advances during long runs rather than only at the end.
+             * `total_rows` is ABSENT during the validate phase until the file has been read to the end — there is deliberately no counting pass, since that would be a second unbounded read of the whole file. Render an indeterminate indicator while it is missing: dividing by a missing total yields a determinate bar pinned at 0%, which reads as a hung import.
+             */
+            ErpImportProgress;
+            error?: /* Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`. */ ErpImportError;
+            writing?: /* How far the platform got writing the rows an import handed over. IMPORTED (or CANCELLED) only means the rows were handed over; they are written afterwards, possibly for a while, with retries. Present once rows were handed over. */ ImportWriting;
+            /**
+             * Whether the person who started the import is notified once it is written, as asked on `:execute`.
+             */
+            notify?: boolean;
+            suggestion?: /* A proposal for how to read the file, made for the client that finishes the import: e.g. an AI assistant's choice of entities, columns and identifiers, which Datastudio opens prefilled for the user to check. Set on `createImport` (with `import_id`, a given suggestion replaces the import's own; without one, it stays). Kept exactly as given and returned on the job; the toolkit never reads it, and validation and execution do not depend on it. At most 32 KB as JSON. */ ImportSuggestion;
+            /**
+             * Scopes this run in monitoring. Always equal to `import_id`.
+             */
+            correlation_id?: string;
+            activity_id?: string;
+            created_at: string; // date-time
+            updated_at: string; // date-time
+        }
+        export interface ImportList {
+            results: ImportJob[];
+            /**
+             * Cursor for the next page, or null when there are no more rows.
+             */
+            next_cursor?: string | null;
+        }
+        export interface ImportResults {
+            summary: {
+                /**
+                 * Rows the platform processed without an error.
+                 */
+                succeeded: number;
+                /**
+                 * Rows with at least one error.
+                 */
+                failed: number;
+                /**
+                 * Data rows in the file, when validation counted them.
+                 */
+                total_rows?: number;
+            };
+            failed_rows: ImportFailedRow[];
+            /**
+             * Cursor for the next page of `failed_rows`, or null.
+             */
+            next_cursor?: string | null;
+        }
+        /**
+         * A proposal for how to read the file, made for the client that finishes the import: e.g. an AI assistant's choice of entities, columns and identifiers, which Datastudio opens prefilled for the user to check. Set on `createImport` (with `import_id`, a given suggestion replaces the import's own; without one, it stays). Kept exactly as given and returned on the job; the toolkit never reads it, and validation and execution do not depend on it. At most 32 KB as JSON.
+         */
+        export interface ImportSuggestion {
+            [name: string]: any;
+        }
+        /**
+         * A saved mapping from file columns to entities. `mapping.entities[].fields[].field` names a file column.
+         */
+        export interface ImportTemplate {
+            template_id: string;
+            name: string;
+            description?: string;
+            mapping: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
+            source_mapping?: /* What the mapping was made from, stored as given and returned unchanged: e.g. the column mapping and value transformations of the client that built `mapping`, so the template can be applied to a new raw file again. The import engine never reads it. */ ImportTemplateSourceMapping;
+            group_by_column?: /* A file column whose value groups rows: rows with the same value are written one after another, in file order, while rows of different groups are written in parallel. Rows that create or relate the same entity belong in one group, or two of them can each find no existing entity and both create it. A row with an empty cell is a group of its own. Without it, every row is a group of its own. Part of the version: changing it adds a version, like a changed mapping. */ ImportTemplateGroupByColumn;
+            /**
+             * The file columns the mapping is known to read, sorted. Columns read only inside a JSONata expression are included where they can be recognised.
+             */
+            mapped_columns: string[];
+            /**
+             * The distinct entity schemas the mapping writes, sorted.
+             */
+            entity_types: string[];
+            created_at: string; // date-time
+            updated_at: string; // date-time
+            created_by?: string;
+        }
+        /**
+         * A file column whose value groups rows: rows with the same value are written one after another, in file order, while rows of different groups are written in parallel. Rows that create or relate the same entity belong in one group, or two of them can each find no existing entity and both create it. A row with an empty cell is a group of its own. Without it, every row is a group of its own. Part of the version: changing it adds a version, like a changed mapping.
+         */
+        export type ImportTemplateGroupByColumn = string;
+        export interface ImportTemplateList {
+            results: /* A saved mapping from file columns to entities. `mapping.entities[].fields[].field` names a file column. */ ImportTemplate[];
+            /**
+             * Cursor for the next page, or null when there are no more templates.
+             */
+            next_cursor?: string | null;
+        }
+        /**
+         * What the mapping was made from, stored as given and returned unchanged: e.g. the column mapping and value transformations of the client that built `mapping`, so the template can be applied to a new raw file again. The import engine never reads it.
+         */
+        export interface ImportTemplateSourceMapping {
+            [name: string]: any;
+        }
+        export interface ImportTemplateSuggestion {
+            template_id: string;
+            name: string;
+            /**
+             * The FILE's columns this template reads, by exact trimmed name, in file order.
+             */
+            matched_columns: string[];
+            /**
+             * The distinct entity schemas this template's mapping writes.
+             */
+            entity_types: string[];
+        }
+        /**
+         * How far the platform got writing the rows an import handed over. IMPORTED (or CANCELLED) only means the rows were handed over; they are written afterwards, possibly for a while, with retries. Present once rows were handed over.
+         */
+        export interface ImportWriting {
+            /**
+             * WRITING while rows are still being written. DONE once every handed-over row has a final result, or no row has reported anything for so long that the rest never will (`unreported`).
+             */
+            status: "WRITING" | "DONE";
+            /**
+             * When the rows were handed over.
+             */
+            started_at: string; // date-time
+            finished_at?: string; // date-time
+            /**
+             * Events handed over. One per row, unless rows were written in groups (a price sheet's tariff, rows sharing a group key): then one per group.
+             */
+            events?: number;
+            /**
+             * Events written, with or without caveats.
+             */
+            succeeded?: number;
+            /**
+             * Of `succeeded`, events written with a caveat.
+             */
+            with_caveats?: number;
+            /**
+             * Events that failed for good.
+             */
+            failed?: number;
+            /**
+             * Events that never reported a result before the import was closed.
+             */
+            unreported?: number;
+            /**
+             * The final results by kind, e.g. 1,204 × ENTITY_CREATED on contact, 12 × METER_READING_UPSERTED, 38 × ENTITY_REFERENCE_NOT_FOUND. One event can write several things, so these add up to more than `events`. Codes are monitoring codes; a kind of write added later appears under its own code.
+             */
+            results?: {
+                code: string;
+                level: "success" | "error" | "warning" | "info";
+                /**
+                 * The entity type the result is about, where it is about one.
+                 */
+                entity_schema?: string;
+                count: number;
+            }[];
+        }
         /**
          * Configuration for inbound use cases (ERP to epilot)
          */
@@ -5010,10 +5289,15 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
-             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync. When an app or AI agent made the update (`changed_by_actor`), the user it acted on behalf of.
              *
              */
             changed_by?: string;
+            changed_by_actor?: /**
+             * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+             *
+             */
+            UseCaseChangeActor;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -5054,9 +5338,15 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
-             * User ID of the user who made the change that produced this history entry
+             * User ID of the user who made the change that produced this history entry. When an app or AI agent made the change (`changed_by_actor`), the user it acted on behalf of.
+             *
              */
             changed_by?: string;
+            changed_by_actor?: /**
+             * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+             *
+             */
+            UseCaseChangeActor;
             /**
              * ISO-8601 timestamp when the use case was originally created
              */
@@ -5654,10 +5944,10 @@ export declare namespace Components {
             IntegrationMap[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
-             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
+             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs. "file_import" backs an import template (see /v2/import-templates). These are managed through that API and left out of the integration lists.
              *
              */
-            integration_type?: "erp" | "connector";
+            integration_type?: "erp" | "connector" | "file_import";
             connector_config?: /* Shared configuration for connector-type integrations */ ConnectorConfig;
             /**
              * If true, integration is displayed in read-only mode in the UI to discourage changes
@@ -5673,6 +5963,36 @@ export declare namespace Components {
              * The integration ID this app/component is mapped to
              */
             integration_id: string; // uuid
+        }
+        /**
+         * The configuration of an integration, as served to its middleware
+         */
+        export interface IntegrationConfig {
+            /**
+             * The organization the integration belongs to
+             */
+            org_id: string;
+            integration_id: string; // uuid
+            /**
+             * The integration's lifecycle version. Increases with every lifecycle
+             * event (`CREATE`, `UPDATE`, `DELETE`); a middleware drops a response
+             * older than the event it handles.
+             *
+             */
+            version: number;
+            /**
+             * The values of the keys in the integration's `environment_config`,
+             * secrets included, by key. Keys without a value are left out.
+             *
+             * example:
+             * {
+             *   "tap.base_url": "https://example.com/api",
+             *   "tap.client_secret": "…"
+             * }
+             */
+            environment: {
+                [name: string]: string;
+            };
         }
         export interface IntegrationConfigurationV1 {
             /**
@@ -5734,10 +6054,10 @@ export declare namespace Components {
             IntegrationMap[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
-             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
+             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs. "file_import" backs an import template (see /v2/import-templates). These are managed through that API and left out of the integration lists.
              *
              */
-            integration_type?: "erp" | "connector";
+            integration_type?: "erp" | "connector" | "file_import";
             connector_config?: /* Shared configuration for connector-type integrations */ ConnectorConfig;
             /**
              * If true, integration is displayed in read-only mode in the UI to discourage changes
@@ -5792,7 +6112,7 @@ export declare namespace Components {
              */
             fields?: IntegrationEntityField[];
             conditional?: /* Conditional Pricing extras for this target, used when it writes a conditional entity (a Product, Price or Coupon carrying context-dependent variants). The conditions themselves are declared on the entity schema, not here. */ IntegrationEntityConditional;
-            sharing?: /* Keeps the mapped entity's sharing with partner organizations in sync. After the entity is written, it is shared with every listed partner whose `enabled` is true and unshared from every listed partner whose `enabled` is false. Changes are computed against the entity's current `_acl`, so a repeated event with the same outcome makes no sharing call. Each partner org needs an existing partnership; partners without one are skipped and reported as `SHARING_PARTNER_NOT_CONNECTED`. */ IntegrationEntitySharing;
+            sharing?: /* Keeps the mapped entity's sharing with partner organizations in sync. After the entity is written, it is shared with every listed partner whose `enabled` is true and unshared from every listed partner whose `enabled` is false. Changes are computed against the entity's current `_acl`, so a repeated event with the same outcome makes no sharing call. Each partner org needs an existing partnership; partners without one are skipped and reported as `SHARING_PARTNER_NOT_CONNECTED`. Partner orgs are listed in `partners`, found at runtime through `partner_lookups`, or both; at least one of the two is required. */ IntegrationEntitySharing;
         }
         /**
          * Conditional Pricing extras for this target, used when it writes a conditional entity (a Product, Price or Coupon carrying context-dependent variants). The conditions themselves are declared on the entity schema, not here.
@@ -5832,6 +6152,15 @@ export declare namespace Components {
              * Controls whether this field mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. Defaults to true if omitted.
              */
             enabled?: /* Controls whether this field mapping should be processed. Can be a boolean or a JSONata expression (string) that evaluates to a boolean. Defaults to true if omitted. */ boolean | string;
+            /**
+             * When true, every `<name>_ref` object in the field's value —
+             * `{ "unique_ids": { "<attribute>": "<value>" }, "entity_schema"?: "<schema>" }` — is looked up
+             * by its unique ids and replaced with `<name>_id` before the entity is written. The schema
+             * defaults to `<name>`. A ref matching no entity, or more than one, fails the update; the
+             * referenced entity is never created. Applies to `field`, `jsonataExpression` and `constant` values.
+             *
+             */
+            resolve_refs?: boolean;
             relations?: RelationConfig;
             relation_refs?: /**
              * Configuration for relation references ($relation_ref).
@@ -5891,13 +6220,21 @@ export declare namespace Components {
             };
         }
         /**
-         * Keeps the mapped entity's sharing with partner organizations in sync. After the entity is written, it is shared with every listed partner whose `enabled` is true and unshared from every listed partner whose `enabled` is false. Changes are computed against the entity's current `_acl`, so a repeated event with the same outcome makes no sharing call. Each partner org needs an existing partnership; partners without one are skipped and reported as `SHARING_PARTNER_NOT_CONNECTED`.
+         * Keeps the mapped entity's sharing with partner organizations in sync. After the entity is written, it is shared with every listed partner whose `enabled` is true and unshared from every listed partner whose `enabled` is false. Changes are computed against the entity's current `_acl`, so a repeated event with the same outcome makes no sharing call. Each partner org needs an existing partnership; partners without one are skipped and reported as `SHARING_PARTNER_NOT_CONNECTED`. Partner orgs are listed in `partners`, found at runtime through `partner_lookups`, or both; at least one of the two is required.
          */
         export interface IntegrationEntitySharing {
-            partners: [
+            partners?: [
                 IntegrationEntitySharingPartner,
                 ...IntegrationEntitySharingPartner[]
             ];
+            partner_lookups?: [
+                /* Finds the partner org at runtime: the entity matched by `unique_ids` holds the partner org id in `partner_org_id_attribute`. Partner orgs created later are shared with without a mapping change. An item whose `unique_ids` evaluate to nothing has no partner and is skipped. No match, or a match without a partner org id yet, leaves the sharing unchanged and is reported as `SHARING_PARTNER_NOT_PROVISIONED`. */ IntegrationEntitySharingPartnerLookup,
+                .../* Finds the partner org at runtime: the entity matched by `unique_ids` holds the partner org id in `partner_org_id_attribute`. Partner orgs created later are shared with without a mapping change. An item whose `unique_ids` evaluate to nothing has no partner and is skipped. No match, or a match without a partner org id yet, leaves the sharing unchanged and is reported as `SHARING_PARTNER_NOT_PROVISIONED`. */ IntegrationEntitySharingPartnerLookup[]
+            ];
+            /**
+             * When true, the entity is unshared from every partner org that this config does not enable, including shares made elsewhere (e.g. by hand in epilot). Use it when the payload decides the one partner an entity belongs to, so the entity follows when that partner changes.
+             */
+            exclusive?: boolean;
         }
         export interface IntegrationEntitySharingPartner {
             /**
@@ -5917,6 +6254,37 @@ export declare namespace Components {
              * salesPartner.number = 'SP-1001'
              */
             boolean | string;
+        }
+        /**
+         * Finds the partner org at runtime: the entity matched by `unique_ids` holds the partner org id in `partner_org_id_attribute`. Partner orgs created later are shared with without a mapping change. An item whose `unique_ids` evaluate to nothing has no partner and is skipped. No match, or a match without a partner org id yet, leaves the sharing unchanged and is reported as `SHARING_PARTNER_NOT_PROVISIONED`.
+         */
+        export interface IntegrationEntitySharingPartnerLookup {
+            /**
+             * Schema of the entity that holds the partner org id.
+             */
+            schema?: string;
+            /**
+             * How to find that entity from the payload item, like a relation's `unique_ids`.
+             * example:
+             * [
+             *   {
+             *     "attribute": "sales_partner_number",
+             *     "field": "salesPartner.number"
+             *   }
+             * ]
+             */
+            unique_ids: [
+                RelationUniqueIdField,
+                ...RelationUniqueIdField[]
+            ];
+            /**
+             * Attribute of the matched entity that holds the partner org id.
+             */
+            partner_org_id_attribute?: string;
+            /**
+             * Whether the entity should be shared with the found partner. A boolean, or a JSONata expression evaluated against the mapped payload item. Defaults to true. When false, the entity is unshared from the found partner.
+             */
+            enabled?: /* Whether the entity should be shared with the found partner. A boolean, or a JSONata expression evaluated against the mapped payload item. Defaults to true. When false, the entity is unshared from the found partner. */ boolean | string;
         }
         export interface IntegrationFieldV1 {
             /**
@@ -6100,10 +6468,10 @@ export declare namespace Components {
             IntegrationMap[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
-             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
+             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs. "file_import" backs an import template (see /v2/import-templates). These are managed through that API and left out of the integration lists.
              *
              */
-            integration_type?: "erp" | "connector";
+            integration_type?: "erp" | "connector" | "file_import";
             connector_config?: /* Shared configuration for connector-type integrations */ ConnectorConfig;
             /**
              * If true, integration is displayed in read-only mode in the UI to discourage changes
@@ -6298,10 +6666,15 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
-             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync. When an app or AI agent made the update (`changed_by_actor`), the user it acted on behalf of.
              *
              */
             changed_by?: string;
+            changed_by_actor?: /**
+             * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+             *
+             */
+            UseCaseChangeActor;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -6347,9 +6720,15 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
-             * User ID of the user who made the change that produced this history entry
+             * User ID of the user who made the change that produced this history entry. When an app or AI agent made the change (`changed_by_actor`), the user it acted on behalf of.
+             *
              */
             changed_by?: string;
+            changed_by_actor?: /**
+             * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+             *
+             */
+            UseCaseChangeActor;
             /**
              * ISO-8601 timestamp when the use case was originally created
              */
@@ -6556,7 +6935,7 @@ export declare namespace Components {
          * `monitoring-code-enum.test.ts`, which fails if the two diverge.
          *
          */
-        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED";
+        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SANDBOX_LANE" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_PARTNER_NOT_PROVISIONED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED";
         export interface MonitoringEventV2 {
             /**
              * Unique monitoring event ID
@@ -7510,10 +7889,15 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
-             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync. When an app or AI agent made the update (`changed_by_actor`), the user it acted on behalf of.
              *
              */
             changed_by?: string;
+            changed_by_actor?: /**
+             * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+             *
+             */
+            UseCaseChangeActor;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -7554,9 +7938,15 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
-             * User ID of the user who made the change that produced this history entry
+             * User ID of the user who made the change that produced this history entry. When an app or AI agent made the change (`changed_by_actor`), the user it acted on behalf of.
+             *
              */
             changed_by?: string;
+            changed_by_actor?: /**
+             * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+             *
+             */
+            UseCaseChangeActor;
             /**
              * ISO-8601 timestamp when the use case was originally created
              */
@@ -8610,10 +9000,15 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
-             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync. When an app or AI agent made the update (`changed_by_actor`), the user it acted on behalf of.
              *
              */
             changed_by?: string;
+            changed_by_actor?: /**
+             * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+             *
+             */
+            UseCaseChangeActor;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -8684,9 +9079,15 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
-             * User ID of the user who made the change that produced this history entry
+             * User ID of the user who made the change that produced this history entry. When an app or AI agent made the change (`changed_by_actor`), the user it acted on behalf of.
+             *
              */
             changed_by?: string;
+            changed_by_actor?: /**
+             * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+             *
+             */
+            UseCaseChangeActor;
             /**
              * ISO-8601 timestamp when the use case was originally created
              */
@@ -8830,6 +9231,13 @@ export declare namespace Components {
              */
             file_columns: number;
             suggestions: ErpImportUseCaseSuggestion[];
+        }
+        export interface SuggestImportTemplatesResponse {
+            /**
+             * The file's columns. Present even when `suggestions` is empty.
+             */
+            file_columns: string[];
+            suggestions: ImportTemplateSuggestion[];
         }
         export interface TestNotificationRequest {
             /**
@@ -9285,6 +9693,13 @@ export declare namespace Components {
              */
             content: string;
         }
+        export interface UpsertImportTemplateRequest {
+            name: string;
+            description?: string;
+            mapping: /* Configuration for inbound use cases (ERP to epilot) */ InboundIntegrationEventConfiguration;
+            source_mapping?: /* What the mapping was made from, stored as given and returned unchanged: e.g. the column mapping and value transformations of the client that built `mapping`, so the template can be applied to a new raw file again. The import engine never reads it. */ ImportTemplateSourceMapping;
+            group_by_column?: /* A file column whose value groups rows: rows with the same value are written one after another, in file order, while rows of different groups are written in parallel. Rows that create or relate the same entity belong in one group, or two of them can each find no existing entity and both create it. A row with an empty cell is a group of its own. Without it, every row is a group of its own. Part of the version: changing it adds a version, like a changed mapping. */ ImportTemplateGroupByColumn;
+        }
         /**
          * Request to create or update an integration with embedded use cases (upsert).
          * This is a declarative operation - the request represents the desired state.
@@ -9322,10 +9737,10 @@ export declare namespace Components {
             IntegrationMap[];
             settings?: /* Settings for the integration */ IntegrationSettings;
             /**
-             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs.
+             * Type of integration. "erp" is the ERP integration with inbound/outbound use cases. "connector" is for complex proxy integrations with external APIs. "file_import" backs an import template (see /v2/import-templates). These are managed through that API and left out of the integration lists.
              *
              */
-            integration_type?: "erp" | "connector";
+            integration_type?: "erp" | "connector" | "file_import";
             connector_config?: /* Shared configuration for connector-type integrations */ ConnectorConfig;
             /**
              * If true, integration is displayed in read-only mode in the UI to discourage changes
@@ -9374,10 +9789,15 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
-             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync.
+             * User ID recorded for the update that produced the current version. Absent when the update had no user context, e.g. an automated sync. When an app or AI agent made the update (`changed_by_actor`), the user it acted on behalf of.
              *
              */
             changed_by?: string;
+            changed_by_actor?: /**
+             * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+             *
+             */
+            UseCaseChangeActor;
             /**
              * ISO-8601 timestamp when the use case was created
              */
@@ -9386,6 +9806,25 @@ export declare namespace Components {
              * ISO-8601 timestamp when the use case was last updated
              */
             updated_at: string; // date-time
+        }
+        /**
+         * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+         *
+         */
+        export interface UseCaseChangeActor {
+            type: "app" | "agent";
+            /**
+             * ID of the installed app (type `app`)
+             */
+            app_id?: string;
+            /**
+             * ID of the AI agent (type `agent`)
+             */
+            agent_id?: string;
+            /**
+             * Display name the AI agent registered with (type `agent`); self-declared
+             */
+            agent_name?: string;
         }
         export type UseCaseHistoryEntry = InboundUseCaseHistoryEntry | OutboundUseCaseHistoryEntry | FileProxyUseCaseHistoryEntry | ManagedCallUseCaseHistoryEntry | SecureProxyUseCaseHistoryEntry;
         export interface UseCaseHistoryEntryBase {
@@ -9418,9 +9857,15 @@ export declare namespace Components {
              */
             change_description?: string;
             /**
-             * User ID of the user who made the change that produced this history entry
+             * User ID of the user who made the change that produced this history entry. When an app or AI agent made the change (`changed_by_actor`), the user it acted on behalf of.
+             *
              */
             changed_by?: string;
+            changed_by_actor?: /**
+             * The app or AI agent that made the change on behalf of the user in `changed_by`, taken from the `actor` claim of its access token. Absent when a user made the change directly.
+             *
+             */
+            UseCaseChangeActor;
             /**
              * ISO-8601 timestamp when the use case was originally created
              */
@@ -9450,6 +9895,12 @@ export declare namespace Components {
              * An inbound use case's slug, unique within its integration.
              */
             use_case_slug: string;
+        }
+        export interface ValidateImportRequest {
+            /**
+             * The import template whose mapping reads this file.
+             */
+            template_id: string;
         }
         /**
          * Push delivery of the transformed event to a webhook via svc-webhooks
@@ -9498,6 +9949,21 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $202 = Components.Schemas.ErpImportJob;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace AbortImport {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export type $202 = Components.Schemas.ImportJob;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $409 = Components.Responses.Conflict;
@@ -9567,6 +10033,27 @@ export declare namespace Paths {
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreateImport {
+        export type RequestBody = /* Register an already-uploaded file as an import. The import template is chosen later, via `:validate` — upload and interpretation are separate decisions. */ Components.Schemas.CreateImportRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.CreateImportResponse;
+            export type $201 = Components.Schemas.CreateImportResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace CreateImportTemplate {
+        export type RequestBody = Components.Schemas.UpsertImportTemplateRequest;
+        namespace Responses {
+            export type $201 = /* A saved mapping from file columns to entities. `mapping.entities[].fields[].field` names a file column. */ Components.Schemas.ImportTemplate;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -9642,6 +10129,37 @@ export declare namespace Paths {
             }
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DeleteImport {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DeleteImportTemplate {
+        namespace Parameters {
+            export type TemplateId = string;
+        }
+        export interface PathParameters {
+            templateId: Parameters.TemplateId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -9731,6 +10249,20 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace DownloadImportFile {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ErpImportDownload;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Schemas.ErrorResponseBase;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace ExecuteErpImport {
         namespace Parameters {
             export type ImportId = string;
@@ -9741,6 +10273,23 @@ export declare namespace Paths {
         export type RequestBody = /* Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all. */ Components.Schemas.ExecuteErpImportRequest;
         namespace Responses {
             export type $202 = Components.Schemas.ErpImportJob;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Schemas.ErrorResponseBase;
+            export type $422 = Components.Schemas.ErrorResponseBase;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ExecuteImport {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        export type RequestBody = /* Confirmation options. Required only when the verdict carries warnings — a clean import needs no body at all. */ Components.Schemas.ExecuteImportRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.ImportJob;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $409 = Components.Schemas.ErrorResponseBase;
@@ -9875,6 +10424,55 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetImport {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ImportJob;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetImportResults {
+        namespace Parameters {
+            export type Cursor = string;
+            export type ImportId = string;
+            export type Limit = number;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ImportResults;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetImportTemplate {
+        namespace Parameters {
+            export type TemplateId = string;
+        }
+        export interface PathParameters {
+            templateId: Parameters.TemplateId;
+        }
+        namespace Responses {
+            export type $200 = /* A saved mapping from file columns to entities. `mapping.entities[].fields[].field` names a file column. */ Components.Schemas.ImportTemplate;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetIntegration {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -9887,6 +10485,21 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export interface $404 {
             }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetIntegrationConfig {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = /* The configuration of an integration, as served to its middleware */ Components.Schemas.IntegrationConfig;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -10146,6 +10759,40 @@ export declare namespace Paths {
             export type $200 = Components.Schemas.CorrelationStatusList;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListImportTemplates {
+        namespace Parameters {
+            export type Cursor = string;
+            export type Limit = number;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ImportTemplateList;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ListImports {
+        namespace Parameters {
+            export type Cursor = string;
+            export type Limit = number;
+            export type TemplateId = string;
+        }
+        export interface QueryParameters {
+            limit?: Parameters.Limit;
+            cursor?: Parameters.Cursor;
+            template_id?: Parameters.TemplateId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ImportList;
+            export type $400 = Components.Responses.BadRequest;
             export type $403 = Components.Responses.Forbidden;
             export type $500 = Components.Responses.InternalServerError;
         }
@@ -10652,6 +11299,21 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace SuggestImportTemplates {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.SuggestImportTemplatesResponse;
+            export type $400 = Components.Responses.BadRequest;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace TestSendNotification {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -10694,6 +11356,22 @@ export declare namespace Paths {
             export type $200 = Components.Schemas.UnblockOutboundStreamResponse;
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace UpdateImportTemplate {
+        namespace Parameters {
+            export type TemplateId = string;
+        }
+        export interface PathParameters {
+            templateId: Parameters.TemplateId;
+        }
+        export type RequestBody = Components.Schemas.UpsertImportTemplateRequest;
+        namespace Responses {
+            export type $200 = /* A saved mapping from file columns to entities. `mapping.entities[].fields[].field` names a file column. */ Components.Schemas.ImportTemplate;
+            export type $400 = Components.Responses.BadRequest;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
@@ -10824,6 +11502,23 @@ export declare namespace Paths {
             export type $202 = Components.Schemas.ErpImportJob;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $422 = Components.Schemas.ErrorResponseBase;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace ValidateImport {
+        namespace Parameters {
+            export type ImportId = string;
+        }
+        export interface PathParameters {
+            importId: Parameters.ImportId;
+        }
+        export type RequestBody = Components.Schemas.ValidateImportRequest;
+        namespace Responses {
+            export type $202 = Components.Schemas.ImportJob;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Schemas.ErrorResponseBase;
             export type $409 = Components.Responses.Conflict;
             export type $422 = Components.Schemas.ErrorResponseBase;
             export type $500 = Components.Responses.InternalServerError;
@@ -11116,7 +11811,7 @@ export interface OperationMethods {
   /**
    * listIntegrations - listIntegrations
    * 
-   * Retrieve all integrations for the authenticated organization
+   * Retrieve all integrations for the authenticated organization. Integrations backing import templates (`integration_type: file_import`) are not listed.
    */
   'listIntegrations'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -11163,6 +11858,25 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteIntegration.Responses.$200>
+  /**
+   * getIntegrationConfig - getIntegrationConfig
+   * 
+   * The configuration of an integration for its middleware: the org's
+   * environment variables named in the integration's `environment_config`,
+   * **secrets included**.
+   * 
+   * Only the integration's own apiKey may call it, the access token issued
+   * and bound by epilot when the integration is bootstrapped. Any other
+   * token gets `403`, whatever its roles. The middleware keeps the response
+   * in memory for `Cache-Control: max-age` and fetches it again after an
+   * `UPDATE` lifecycle event.
+   * 
+   */
+  'getIntegrationConfig'(
+    parameters?: Parameters<Paths.GetIntegrationConfig.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetIntegrationConfig.Responses.$200>
   /**
    * queryEvents - queryEvents
    * 
@@ -11296,7 +12010,7 @@ export interface OperationMethods {
   /**
    * listIntegrationsV2 - listIntegrationsV2
    * 
-   * Retrieve all integrations with embedded use cases for the authenticated organization
+   * Retrieve all integrations with embedded use cases for the authenticated organization. Integrations backing import templates (`integration_type: file_import`) are not listed.
    */
   'listIntegrationsV2'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -12039,6 +12753,172 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AbortErpImport.Responses.$202>
+  /**
+   * listImports - listImports
+   * 
+   * List recent file import jobs for the org, newest first.
+   * 
+   * Pass `next_cursor` back as `cursor` for the next page. A page can be
+   * shorter than `limit` and still have more behind it (always so when
+   * filtering by `template_id`), so stop on `next_cursor: null`.
+   * 
+   */
+  'listImports'(
+    parameters?: Parameters<Paths.ListImports.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListImports.Responses.$200>
+  /**
+   * createImport - createImport
+   * 
+   * Register an already-uploaded file (S3 ref) as a file import job. Returns the job and a file preview. Nothing runs yet: no import template is chosen and no validation starts here. Optionally rank templates with POST /v2/imports/{importId}:suggest-templates, then start validation with POST /v2/imports/{importId}:validate.
+   * Pass `import_id` to repoint an existing import at a different file instead, keeping its id and its place in the history — allowed while the import has written nothing.
+   */
+  'createImport'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateImport.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateImport.Responses.$200 | Paths.CreateImport.Responses.$201>
+  /**
+   * getImport - getImport
+   * 
+   * Get a file import job (status, counts, progress). This is the endpoint to poll.
+   */
+  'getImport'(
+    parameters?: Parameters<Paths.GetImport.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetImport.Responses.$200>
+  /**
+   * deleteImport - deleteImport
+   * 
+   * Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.
+   */
+  'deleteImport'(
+    parameters?: Parameters<Paths.DeleteImport.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteImport.Responses.$204>
+  /**
+   * validateImport - validateImport
+   * 
+   * Choose the import template to read this file with, and start the validate phase.
+   * Callable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different template, rather than re-uploading. Each call replaces any previous verdict. Any other status returns 409.
+   */
+  'validateImport'(
+    parameters?: Parameters<Paths.ValidateImport.PathParameters> | null,
+    data?: Paths.ValidateImport.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ValidateImport.Responses.$202>
+  /**
+   * suggestImportTemplates - suggestImportTemplates
+   * 
+   * Rank the org's import templates against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Optional: skip this and call `:validate` directly when the template is already known. Reads only the file's first row, not its data.
+   * Every template is returned, including ones matching nothing: the "nothing fits, pick anyway" view needs the full list. Highest match first.
+   * CSV only — an xlsx import fails with 400 rather than silently returning zero matches, which would look identical to "we checked and nothing matches".
+   */
+  'suggestImportTemplates'(
+    parameters?: Parameters<Paths.SuggestImportTemplates.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SuggestImportTemplates.Responses.$200>
+  /**
+   * executeImport - executeImport
+   * 
+   * Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.
+   * The verdict is re-checked against live inputs first: if the mapping or an entity schema changed since the check, this returns 409 `VALIDATION_STALE` and leaves the verdict untouched for `:validate` to re-form.
+   */
+  'executeImport'(
+    parameters?: Parameters<Paths.ExecuteImport.PathParameters> | null,
+    data?: Paths.ExecuteImport.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ExecuteImport.Responses.$202>
+  /**
+   * abortImport - abortImport
+   * 
+   * Ask a running import to stop. Valid while the job is VALIDATING or PROCESSING; any other status returns 409.
+   * The stop is cooperative: the job passes through CANCELLING and typically reaches CANCELLED within seconds.
+   * Rows already published to the platform are **kept**: this is a stop, not a rollback. Aborting during VALIDATING has published nothing, so it is always clean; aborting during PROCESSING leaves a partial import, and the rows that landed are listed by GET /v2/imports/{importId}/results.
+   */
+  'abortImport'(
+    parameters?: Parameters<Paths.AbortImport.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AbortImport.Responses.$202>
+  /**
+   * getImportResults - getImportResults
+   * 
+   * Per-row outcomes of an executed import, from monitoring. `summary` counts the rows the platform has reported on so far — it keeps growing for a while after the job reaches IMPORTED, since rows are processed asynchronously. `failed_rows` lists one entry per failed row, newest first, paged with `cursor`.
+   * An import that never ran its write phase returns zero counts and no rows.
+   */
+  'getImportResults'(
+    parameters?: Parameters<Paths.GetImportResults.QueryParameters & Paths.GetImportResults.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetImportResults.Responses.$200>
+  /**
+   * downloadImportFile - downloadImportFile
+   * 
+   * A short-lived presigned URL that downloads the file this import was registered with — the import's own copy, so exactly what `:validate` and `:execute` read. The URL serves the file as an attachment under its original filename, and a portal page may fetch it.
+   */
+  'downloadImportFile'(
+    parameters?: Parameters<Paths.DownloadImportFile.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DownloadImportFile.Responses.$200>
+  /**
+   * listImportTemplates - listImportTemplates
+   * 
+   * List the org's import templates, sorted by name.
+   * 
+   * Pass `next_cursor` back as `cursor` for the next page; stop on `next_cursor: null`.
+   * 
+   */
+  'listImportTemplates'(
+    parameters?: Parameters<Paths.ListImportTemplates.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListImportTemplates.Responses.$200>
+  /**
+   * createImportTemplate - createImportTemplate
+   * 
+   * Save a mapping as a reusable import template. The mapping is checked like any inbound mapping: an invalid configuration, or a `unique_ids` entry that is not an indexed attribute of its entity schema, returns 400.
+   */
+  'createImportTemplate'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateImportTemplate.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateImportTemplate.Responses.$201>
+  /**
+   * getImportTemplate - getImportTemplate
+   * 
+   * Get one import template.
+   */
+  'getImportTemplate'(
+    parameters?: Parameters<Paths.GetImportTemplate.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetImportTemplate.Responses.$200>
+  /**
+   * updateImportTemplate - updateImportTemplate
+   * 
+   * Replace an import template's name, description, mapping and source mapping. A changed mapping becomes a new version of the template: imports validated before keep the mapping they were checked against, including their rows still waiting to be written. New validations use the new mapping.
+   */
+  'updateImportTemplate'(
+    parameters?: Parameters<Paths.UpdateImportTemplate.PathParameters> | null,
+    data?: Paths.UpdateImportTemplate.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateImportTemplate.Responses.$200>
+  /**
+   * deleteImportTemplate - deleteImportTemplate
+   * 
+   * Delete an import template. Past imports keep their `template_id`, and their results stay readable; imports not yet executed can no longer be executed with it. Refused with `409` (`IMPORT_TEMPLATE_IN_USE`) while an import is still running with it, or ended less than a day ago, since its rows may still be waiting to be written.
+   */
+  'deleteImportTemplate'(
+    parameters?: Parameters<Paths.DeleteImportTemplate.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteImportTemplate.Responses.$204>
 }
 
 export interface PathsDictionary {
@@ -12346,7 +13226,7 @@ export interface PathsDictionary {
     /**
      * listIntegrations - listIntegrations
      * 
-     * Retrieve all integrations for the authenticated organization
+     * Retrieve all integrations for the authenticated organization. Integrations backing import templates (`integration_type: file_import`) are not listed.
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -12395,6 +13275,27 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteIntegration.Responses.$200>
+  }
+  ['/v1/integrations/{integrationId}/config']: {
+    /**
+     * getIntegrationConfig - getIntegrationConfig
+     * 
+     * The configuration of an integration for its middleware: the org's
+     * environment variables named in the integration's `environment_config`,
+     * **secrets included**.
+     * 
+     * Only the integration's own apiKey may call it, the access token issued
+     * and bound by epilot when the integration is bootstrapped. Any other
+     * token gets `403`, whatever its roles. The middleware keeps the response
+     * in memory for `Cache-Control: max-age` and fetches it again after an
+     * `UPDATE` lifecycle event.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetIntegrationConfig.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetIntegrationConfig.Responses.$200>
   }
   ['/v1/integrations/{integrationId}/events']: {
     /**
@@ -12544,7 +13445,7 @@ export interface PathsDictionary {
     /**
      * listIntegrationsV2 - listIntegrationsV2
      * 
-     * Retrieve all integrations with embedded use cases for the authenticated organization
+     * Retrieve all integrations with embedded use cases for the authenticated organization. Integrations backing import templates (`integration_type: file_import`) are not listed.
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -13370,6 +14271,192 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AbortErpImport.Responses.$202>
   }
+  ['/v2/imports']: {
+    /**
+     * createImport - createImport
+     * 
+     * Register an already-uploaded file (S3 ref) as a file import job. Returns the job and a file preview. Nothing runs yet: no import template is chosen and no validation starts here. Optionally rank templates with POST /v2/imports/{importId}:suggest-templates, then start validation with POST /v2/imports/{importId}:validate.
+     * Pass `import_id` to repoint an existing import at a different file instead, keeping its id and its place in the history — allowed while the import has written nothing.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateImport.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateImport.Responses.$200 | Paths.CreateImport.Responses.$201>
+    /**
+     * listImports - listImports
+     * 
+     * List recent file import jobs for the org, newest first.
+     * 
+     * Pass `next_cursor` back as `cursor` for the next page. A page can be
+     * shorter than `limit` and still have more behind it (always so when
+     * filtering by `template_id`), so stop on `next_cursor: null`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListImports.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListImports.Responses.$200>
+  }
+  ['/v2/imports/{importId}']: {
+    /**
+     * getImport - getImport
+     * 
+     * Get a file import job (status, counts, progress). This is the endpoint to poll.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetImport.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetImport.Responses.$200>
+    /**
+     * deleteImport - deleteImport
+     * 
+     * Remove an import and the file it owns. Allowed from any status: an import whose run is still in flight is stopped by the deletion, and rows it already wrote stay written.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteImport.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteImport.Responses.$204>
+  }
+  ['/v2/imports/{importId}:validate']: {
+    /**
+     * validateImport - validateImport
+     * 
+     * Choose the import template to read this file with, and start the validate phase.
+     * Callable from PENDING, READY and FAILED — so a wrong choice is corrected by calling this again with a different template, rather than re-uploading. Each call replaces any previous verdict. Any other status returns 409.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ValidateImport.PathParameters> | null,
+      data?: Paths.ValidateImport.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ValidateImport.Responses.$202>
+  }
+  ['/v2/imports/{importId}:suggest-templates']: {
+    /**
+     * suggestImportTemplates - suggestImportTemplates
+     * 
+     * Rank the org's import templates against this file's columns — the input to the ranked picker ("matches 6 of your 7 columns"). Optional: skip this and call `:validate` directly when the template is already known. Reads only the file's first row, not its data.
+     * Every template is returned, including ones matching nothing: the "nothing fits, pick anyway" view needs the full list. Highest match first.
+     * CSV only — an xlsx import fails with 400 rather than silently returning zero matches, which would look identical to "we checked and nothing matches".
+     */
+    'post'(
+      parameters?: Parameters<Paths.SuggestImportTemplates.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SuggestImportTemplates.Responses.$200>
+  }
+  ['/v2/imports/{importId}:execute']: {
+    /**
+     * executeImport - executeImport
+     * 
+     * Confirm and run the write phase of a validated import. Only a READY job may be executed; any other status returns 409.
+     * The verdict is re-checked against live inputs first: if the mapping or an entity schema changed since the check, this returns 409 `VALIDATION_STALE` and leaves the verdict untouched for `:validate` to re-form.
+     */
+    'post'(
+      parameters?: Parameters<Paths.ExecuteImport.PathParameters> | null,
+      data?: Paths.ExecuteImport.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ExecuteImport.Responses.$202>
+  }
+  ['/v2/imports/{importId}:abort']: {
+    /**
+     * abortImport - abortImport
+     * 
+     * Ask a running import to stop. Valid while the job is VALIDATING or PROCESSING; any other status returns 409.
+     * The stop is cooperative: the job passes through CANCELLING and typically reaches CANCELLED within seconds.
+     * Rows already published to the platform are **kept**: this is a stop, not a rollback. Aborting during VALIDATING has published nothing, so it is always clean; aborting during PROCESSING leaves a partial import, and the rows that landed are listed by GET /v2/imports/{importId}/results.
+     */
+    'post'(
+      parameters?: Parameters<Paths.AbortImport.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AbortImport.Responses.$202>
+  }
+  ['/v2/imports/{importId}/results']: {
+    /**
+     * getImportResults - getImportResults
+     * 
+     * Per-row outcomes of an executed import, from monitoring. `summary` counts the rows the platform has reported on so far — it keeps growing for a while after the job reaches IMPORTED, since rows are processed asynchronously. `failed_rows` lists one entry per failed row, newest first, paged with `cursor`.
+     * An import that never ran its write phase returns zero counts and no rows.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetImportResults.QueryParameters & Paths.GetImportResults.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetImportResults.Responses.$200>
+  }
+  ['/v2/imports/{importId}/download']: {
+    /**
+     * downloadImportFile - downloadImportFile
+     * 
+     * A short-lived presigned URL that downloads the file this import was registered with — the import's own copy, so exactly what `:validate` and `:execute` read. The URL serves the file as an attachment under its original filename, and a portal page may fetch it.
+     */
+    'get'(
+      parameters?: Parameters<Paths.DownloadImportFile.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DownloadImportFile.Responses.$200>
+  }
+  ['/v2/import-templates']: {
+    /**
+     * listImportTemplates - listImportTemplates
+     * 
+     * List the org's import templates, sorted by name.
+     * 
+     * Pass `next_cursor` back as `cursor` for the next page; stop on `next_cursor: null`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListImportTemplates.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListImportTemplates.Responses.$200>
+    /**
+     * createImportTemplate - createImportTemplate
+     * 
+     * Save a mapping as a reusable import template. The mapping is checked like any inbound mapping: an invalid configuration, or a `unique_ids` entry that is not an indexed attribute of its entity schema, returns 400.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateImportTemplate.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateImportTemplate.Responses.$201>
+  }
+  ['/v2/import-templates/{templateId}']: {
+    /**
+     * getImportTemplate - getImportTemplate
+     * 
+     * Get one import template.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetImportTemplate.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetImportTemplate.Responses.$200>
+    /**
+     * updateImportTemplate - updateImportTemplate
+     * 
+     * Replace an import template's name, description, mapping and source mapping. A changed mapping becomes a new version of the template: imports validated before keep the mapping they were checked against, including their rows still waiting to be written. New validations use the new mapping.
+     */
+    'put'(
+      parameters?: Parameters<Paths.UpdateImportTemplate.PathParameters> | null,
+      data?: Paths.UpdateImportTemplate.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateImportTemplate.Responses.$200>
+    /**
+     * deleteImportTemplate - deleteImportTemplate
+     * 
+     * Delete an import template. Past imports keep their `template_id`, and their results stay readable; imports not yet executed can no longer be executed with it. Refused with `409` (`IMPORT_TEMPLATE_IN_USE`) while an import is still running with it, or ended less than a day ago, since its rows may still be waiting to be written.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteImportTemplate.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteImportTemplate.Responses.$204>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -13392,6 +14479,8 @@ export type CorrelationWaitResult = Components.Schemas.CorrelationWaitResult;
 export type CreateErpImportRequest = Components.Schemas.CreateErpImportRequest;
 export type CreateErpImportResponse = Components.Schemas.CreateErpImportResponse;
 export type CreateFileProxyUseCaseRequest = Components.Schemas.CreateFileProxyUseCaseRequest;
+export type CreateImportRequest = Components.Schemas.CreateImportRequest;
+export type CreateImportResponse = Components.Schemas.CreateImportResponse;
 export type CreateInboundUseCaseRequest = Components.Schemas.CreateInboundUseCaseRequest;
 export type CreateIntegrationRequest = Components.Schemas.CreateIntegrationRequest;
 export type CreateManagedCallUseCaseRequest = Components.Schemas.CreateManagedCallUseCaseRequest;
@@ -13445,6 +14534,7 @@ export type ErpUpdatesEventsV2Request = Components.Schemas.ErpUpdatesEventsV2Req
 export type ErpUpdatesEventsV3Request = Components.Schemas.ErpUpdatesEventsV3Request;
 export type ErrorResponseBase = Components.Schemas.ErrorResponseBase;
 export type ExecuteErpImportRequest = Components.Schemas.ExecuteErpImportRequest;
+export type ExecuteImportRequest = Components.Schemas.ExecuteImportRequest;
 export type ExternalMonitoringSpan = Components.Schemas.ExternalMonitoringSpan;
 export type FileProxyAuth = Components.Schemas.FileProxyAuth;
 export type FileProxyDeliveryConfig = Components.Schemas.FileProxyDeliveryConfig;
@@ -13468,6 +14558,17 @@ export type GetMonitoringStatsRequest = Components.Schemas.GetMonitoringStatsReq
 export type GetMonitoringStatsV2Request = Components.Schemas.GetMonitoringStatsV2Request;
 export type GetMonitoringTimeSeriesRequest = Components.Schemas.GetMonitoringTimeSeriesRequest;
 export type GetMonitoringTimeSeriesV2Request = Components.Schemas.GetMonitoringTimeSeriesV2Request;
+export type ImportFailedRow = Components.Schemas.ImportFailedRow;
+export type ImportJob = Components.Schemas.ImportJob;
+export type ImportList = Components.Schemas.ImportList;
+export type ImportResults = Components.Schemas.ImportResults;
+export type ImportSuggestion = Components.Schemas.ImportSuggestion;
+export type ImportTemplate = Components.Schemas.ImportTemplate;
+export type ImportTemplateGroupByColumn = Components.Schemas.ImportTemplateGroupByColumn;
+export type ImportTemplateList = Components.Schemas.ImportTemplateList;
+export type ImportTemplateSourceMapping = Components.Schemas.ImportTemplateSourceMapping;
+export type ImportTemplateSuggestion = Components.Schemas.ImportTemplateSuggestion;
+export type ImportWriting = Components.Schemas.ImportWriting;
 export type InboundIntegrationEventConfiguration = Components.Schemas.InboundIntegrationEventConfiguration;
 export type InboundMonitoringEvent = Components.Schemas.InboundMonitoringEvent;
 export type InboundUseCase = Components.Schemas.InboundUseCase;
@@ -13476,6 +14577,7 @@ export type IngestExternalMonitoringEventsRequest = Components.Schemas.IngestExt
 export type IngestExternalMonitoringEventsResponse = Components.Schemas.IngestExternalMonitoringEventsResponse;
 export type Integration = Components.Schemas.Integration;
 export type IntegrationAppMapping = Components.Schemas.IntegrationAppMapping;
+export type IntegrationConfig = Components.Schemas.IntegrationConfig;
 export type IntegrationConfigurationV1 = Components.Schemas.IntegrationConfigurationV1;
 export type IntegrationConfigurationV2 = Components.Schemas.IntegrationConfigurationV2;
 export type IntegrationEditableFields = Components.Schemas.IntegrationEditableFields;
@@ -13485,6 +14587,7 @@ export type IntegrationEntityField = Components.Schemas.IntegrationEntityField;
 export type IntegrationEntityFromRows = Components.Schemas.IntegrationEntityFromRows;
 export type IntegrationEntitySharing = Components.Schemas.IntegrationEntitySharing;
 export type IntegrationEntitySharingPartner = Components.Schemas.IntegrationEntitySharingPartner;
+export type IntegrationEntitySharingPartnerLookup = Components.Schemas.IntegrationEntitySharingPartnerLookup;
 export type IntegrationFieldV1 = Components.Schemas.IntegrationFieldV1;
 export type IntegrationMap = Components.Schemas.IntegrationMap;
 export type IntegrationMeterReading = Components.Schemas.IntegrationMeterReading;
@@ -13578,6 +14681,7 @@ export type SetIntegrationAppMappingRequest = Components.Schemas.SetIntegrationA
 export type SimulateOutboundMappingRequest = Components.Schemas.SimulateOutboundMappingRequest;
 export type SimulateOutboundMappingResponse = Components.Schemas.SimulateOutboundMappingResponse;
 export type SuggestErpImportUseCasesResponse = Components.Schemas.SuggestErpImportUseCasesResponse;
+export type SuggestImportTemplatesResponse = Components.Schemas.SuggestImportTemplatesResponse;
 export type TestNotificationRequest = Components.Schemas.TestNotificationRequest;
 export type TestNotificationResponse = Components.Schemas.TestNotificationResponse;
 export type TimeSeriesBreakdownItemV2 = Components.Schemas.TimeSeriesBreakdownItemV2;
@@ -13598,12 +14702,15 @@ export type UpdateSecureProxyUseCaseRequest = Components.Schemas.UpdateSecurePro
 export type UpdateUseCaseRequest = Components.Schemas.UpdateUseCaseRequest;
 export type UpdateUseCaseRequestBase = Components.Schemas.UpdateUseCaseRequestBase;
 export type UpsertDocumentationPageRequest = Components.Schemas.UpsertDocumentationPageRequest;
+export type UpsertImportTemplateRequest = Components.Schemas.UpsertImportTemplateRequest;
 export type UpsertIntegrationWithUseCasesRequest = Components.Schemas.UpsertIntegrationWithUseCasesRequest;
 export type UseCase = Components.Schemas.UseCase;
 export type UseCaseBase = Components.Schemas.UseCaseBase;
+export type UseCaseChangeActor = Components.Schemas.UseCaseChangeActor;
 export type UseCaseHistoryEntry = Components.Schemas.UseCaseHistoryEntry;
 export type UseCaseHistoryEntryBase = Components.Schemas.UseCaseHistoryEntryBase;
 export type UseCaseTypePreview = Components.Schemas.UseCaseTypePreview;
 export type ValidateErpImportRequest = Components.Schemas.ValidateErpImportRequest;
+export type ValidateImportRequest = Components.Schemas.ValidateImportRequest;
 export type WebhookDeliveryConfig = Components.Schemas.WebhookDeliveryConfig;
 export type WebhookStatus = Components.Schemas.WebhookStatus;
