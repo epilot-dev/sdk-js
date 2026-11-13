@@ -357,6 +357,10 @@ declare namespace Components {
              * Only offered to users who may publish to the epilot Marketplace.
              */
             audience?: "publishers";
+            /**
+             * Whether the organization uses this skill. Switch it with the skill update, by name.
+             */
+            enabled?: boolean;
         }
         export interface BlueprintAssistantMessage {
             id: string;
@@ -365,7 +369,7 @@ declare namespace Components {
             parts: /**
              * `text` parts carry `text`. `tool` parts carry the tool call and, once finished, its structured
              * `result`, discriminated by `result.kind`: `overview`, `resources`, `inclusion`, `resource_content`,
-             * `audit`, `proposal_changes`, `proposal_add`, `proposal_blueprint`, `proposal_publish`, `skill` or `error`.
+             * `audit`, `proposal_changes`, `proposal_add`, `proposal_blueprint`, `proposal_publish`, `skill` or `error`. Applied change and add proposals carry `excluded_ids`: the resources the user unchecked.
              *
              */
             BlueprintAssistantPart[];
@@ -386,12 +390,217 @@ declare namespace Components {
                 proposal_id: string;
                 status: "applied" | "dismissed";
                 note?: string;
+                /**
+                 * Resources of a change or add proposal the user unchecked before applying it. Stored on the proposal as `excluded_ids`.
+                 */
+                excluded_ids?: [
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?,
+                    string?
+                ];
             };
         }
         /**
          * `text` parts carry `text`. `tool` parts carry the tool call and, once finished, its structured
          * `result`, discriminated by `result.kind`: `overview`, `resources`, `inclusion`, `resource_content`,
-         * `audit`, `proposal_changes`, `proposal_add`, `proposal_blueprint`, `proposal_publish`, `skill` or `error`.
+         * `audit`, `proposal_changes`, `proposal_add`, `proposal_blueprint`, `proposal_publish`, `skill` or `error`. Applied change and add proposals carry `excluded_ids`: the resources the user unchecked.
          *
          */
         export interface BlueprintAssistantPart {
@@ -1057,6 +1266,10 @@ declare namespace Components {
              */
             clauses_hash?: string;
             /**
+             * Schema version 2 only. The revision at which `clauses` last changed
+             */
+            clauses_revision?: number;
+            /**
              * Schema version 2 only. A Sentence ({key, params}) the UI renders.
              */
             title_key?: {
@@ -1116,15 +1329,22 @@ declare namespace Components {
             confirmed_clauses_hash: string; // ^[0-9a-f]{64}$
             confirmed_at: string; // date-time
             confirmed_by: CallerIdentity;
+        } | {
+            kind: "duplicate";
+            source_case_id: string; // uuid
+            source_revision: number;
         };
         export interface BlueprintTestCasePage {
             results: BlueprintTestCase[];
             next_cursor?: string;
         }
         export type BlueprintTestCaseShape = "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure";
+        /**
+         * `expectation` is required for schema version 1 and must be absent for schema version 2 (title-only rename).
+         */
         export interface BlueprintTestCaseUpdate {
             title: string; // \S
-            expectation: string; // \S
+            expectation?: string; // \S
             expected_revision: number;
         }
         export interface BlueprintTestCatalogEntry {
@@ -1156,6 +1376,15 @@ declare namespace Components {
             reason: string; // ^[a-z][a-z0-9_]{0,79}$
             path?: string;
             actual?: boolean | string;
+        }
+        export interface BlueprintTestCoverage {
+            covered: number;
+            total: number;
+            untested: {
+                resource_type: string;
+                resource_id: string;
+                name: string;
+            }[];
         }
         export interface BlueprintTestDependencyValidation {
             scope: "related_resources";
@@ -1817,6 +2046,11 @@ declare namespace Components {
             interpretation_id: string; // uuid
             status: "pending";
         }
+        export interface BlueprintTestMainResource {
+            type: string;
+            id: string;
+            name: string;
+        }
         export type BlueprintTestPredicate = {
             operator: "resource_included";
             target_key: string;
@@ -1947,9 +2181,25 @@ declare namespace Components {
             cases: {
                 case: BlueprintTestCase;
                 latest?: CaseResultRow;
+                main_resource?: BlueprintTestMainResource;
+                resource_types?: string[];
+                resource_count?: number;
             }[];
             summary: /* Over all cases of the blueprint, not only the page. v1 cases count as needs_reinterpretation when migration flagged them, otherwise as never_run. */ BlueprintTestSuiteSummary;
             active_run?: SuiteRun;
+            last_run?: SuiteRun;
+            /**
+             * The blueprint's newest suggestion generation (current incarnation). `running` while queued or generating,
+             * `finished` once completed (read it via the suggestions endpoint). Omitted when there is none, or the newest
+             * one failed, expired or belongs to an older incarnation.
+             *
+             */
+            latest_suggestions?: {
+                generation_id: string; // uuid
+                status: "running" | "finished";
+                created_at: string; // date-time
+            };
+            coverage?: BlueprintTestCoverage;
             next_cursor?: string;
         }
         export interface BlueprintTestSuiteError {
@@ -3939,6 +4189,10 @@ declare namespace Components {
                 formattedResource?: FormattedErrorData;
                 resource?: string;
                 resourceDependency?: string;
+                /**
+                 * Another resource that already holds the id the reported resource needs (custom_schema_id_conflict)
+                 */
+                conflictingResource?: FormattedErrorData;
                 resources?: string[];
                 addresses?: string[];
                 originalError?: string;
@@ -3956,7 +4210,7 @@ declare namespace Components {
                 planned?: number;
             };
         }
-        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing";
+        export type FormattedErrorCodes = "dependency_extraction" | "resource_not_found" | "resource_fetch_api_error" | "resource_fetch_unknown_error" | "terraform_cli_process_error" | "terraform_import_block_process_error" | "terraform_init_error" | "terraform_validate_error" | "terraform_plan_error" | "terraform_apply_error" | "terraform_show_error" | "generic_error" | "bad_request" | "forbidden" | "conflict" | "not_found" | "undeclared_resource" | "invalid_readonly_attribute" | "invalid_attribute_value" | "unsupported_attribute" | "self_referential_block" | "circular_dependency" | "state_mismatch" | "import_nonexistent_object" | "provider_install_error" | "stale_blueprint" | "workflow_quota_reached" | "entity_mapping_journey_not_in_blueprint" | "missing_required_reference" | "source_resources_missing" | "custom_schema_id_conflict" | "custom_schema_check_unavailable";
         export interface FormattedErrorData {
             id?: string;
             name?: string;
@@ -5723,9 +5977,30 @@ declare namespace Components {
                 [name: string]: any;
             }[];
             sentences: /* A translation key and its parameters. The UI renders the text; the server never returns sentences. */ Sentence[];
+            /**
+             * An existing v2 test case that already holds every clause of this suggestion.
+             */
+            covered_by?: {
+                case_id: string; // uuid
+                title?: string;
+            };
+            /**
+             * Always set on GET, not stored.
+             */
+            why_code?: "untested_resource" | "new_check";
+            main_resource?: BlueprintTestMainResource;
+            /**
+             * Always set on GET, not stored.
+             */
+            resource_types?: string[];
         }
         export interface SuiteRun {
             id: string; // uuid
+            created_by?: CallerIdentity;
+            /**
+             * The v2 test cases this run covered. Absent when the run covered every v2 test case.
+             */
+            case_ids?: string /* uuid */[];
             status: "queued" | "running" | "completed" | "failed";
             created_at: string; // date-time
             finished_at?: string; // date-time
@@ -6271,6 +6546,111 @@ declare namespace Paths {
             blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
         }
         export interface RequestBody {
+            /**
+             * Run only these v2 test cases. Omit to run every v2 test case.
+             */
+            case_ids?: [
+                string,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
         }
         namespace Responses {
             export type $202 = Components.Schemas.SuiteRun;
@@ -6641,6 +7021,28 @@ declare namespace Paths {
             export type $200 = /* Summary of an update merge plan. */ Components.Schemas.MergePlanReview;
             export type $404 = Components.Schemas.MergePlanError;
             export type $409 = Components.Schemas.MergePlanError;
+        }
+    }
+    namespace DuplicateBlueprintTestCase {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type TestCaseId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            test_case_id: Parameters.TestCaseId /* uuid */;
+        }
+        export interface RequestBody {
+            title?: string; // \S
+        }
+        namespace Responses {
+            export type $201 = Components.Schemas.BlueprintTestCase;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
         }
     }
     namespace ExportManifest {
@@ -8220,7 +8622,7 @@ declare namespace Paths {
             blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
             test_case_id: Parameters.TestCaseId /* uuid */;
         }
-        export type RequestBody = Components.Schemas.BlueprintTestCaseUpdate;
+        export type RequestBody = /* `expectation` is required for schema version 1 and must be absent for schema version 2 (title-only rename). */ Components.Schemas.BlueprintTestCaseUpdate;
         namespace Responses {
             export type $200 = Components.Schemas.BlueprintTestCase;
             export interface $400 {
@@ -8415,324 +8817,324 @@ declare namespace Paths {
 export interface OperationMethods {
   /**
    * getJob - getJob
-   *
+   * 
    * Get the current status of a blueprint (export or import)
    */
   'getJob'(
     parameters?: Parameters<Paths.GetJob.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetJob.Responses.$200>
   /**
    * createExport - createExport
-   *
+   * 
    * Creates a new Export Job with a list of available resources to export from the passed root resource.
-   *
+   * 
    * Multiple root resources can be added by calling this multiple times with the same jobId
-   *
+   * 
    */
   'createExport'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateExport.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateExport.Responses.$200>
   /**
    * exportManifest - exportManifest
-   *
+   * 
    * Triggers exporting a manifest file using selected resoruce ids for a job created with `createExportJob`
    */
   'exportManifest'(
     parameters?: Parameters<Paths.ExportManifest.PathParameters> | null,
     data?: Paths.ExportManifest.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ExportManifest.Responses.$200>
   /**
    * uploadManifest - uploadManifest
-   *
+   * 
    * Create pre-signed S3 URL to upload a manifest file.
-   *
+   * 
    */
   'uploadManifest'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.UploadManifest.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UploadManifest.Responses.$201>
   /**
    * createPlan - createPlan
-   *
+   * 
    * Creates a new import job from an uploaded manifest file and returns the plan.
-   *
+   * 
    * Creates an updated plan for an installed manifest when `manifest_id` is passed
-   *
+   * 
    */
   'createPlan'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreatePlan.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreatePlan.Responses.$200>
   /**
    * applyPlan - applyPlan
-   *
+   * 
    * Apply a plan returned by `createPlan`.
    */
   'applyPlan'(
     parameters?: Parameters<Paths.ApplyPlan.PathParameters> | null,
     data?: Paths.ApplyPlan.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ApplyPlan.Responses.$200>
   /**
    * listInstalledManifests - listInstalledManifests
-   *
+   * 
    * List Blueprint Manifests installed to the organization
    */
   'listInstalledManifests'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListInstalledManifests.Responses.$200>
   /**
    * getManifest - getManifest
-   *
+   * 
    * Get installed Manifest by ID
    */
   'getManifest'(
     parameters?: Parameters<Paths.GetManifest.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetManifest.Responses.$200>
   /**
    * updateManifest - updateManifest
-   *
+   * 
    * Update an installed manifest
-   *
+   * 
    */
   'updateManifest'(
     parameters?: Parameters<Paths.UpdateManifest.PathParameters> | null,
     data?: Paths.UpdateManifest.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateManifest.Responses.$200>
   /**
    * deleteManifest - deleteManifest
-   *
+   * 
    * Remove installed manifest from the org
-   *
+   * 
    * Note that this does not delete the installed resources of the Manifest!
-   *
+   * 
    */
   'deleteManifest'(
     parameters?: Parameters<Paths.DeleteManifest.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteManifest.Responses.$200>
   /**
    * listBlueprints - listBlueprints
-   *
+   * 
    * List Custom and Installed Blueprints
    */
   'listBlueprints'(
     parameters?: Parameters<Paths.ListBlueprints.QueryParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBlueprints.Responses.$200>
   /**
    * createBlueprint - createBlueprint
-   *
+   * 
    * Create a Blueprint
    */
   'createBlueprint'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateBlueprint.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBlueprint.Responses.$200>
   /**
    * listInstalledMarketplaceBlueprints - listInstalledMarketplaceBlueprints
-   *
+   * 
    * List installed Marketplace Blueprints for the organization.
    * When multiple blueprints have the same slug, returns only the most recently created one.
-   *
+   * 
    */
   'listInstalledMarketplaceBlueprints'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListInstalledMarketplaceBlueprints.Responses.$200>
   /**
    * preInstallBlueprint - preInstallBlueprint
-   *
+   * 
    * Pre-install a Blueprint based on a blueprint file. Format-agnostic: the engine is detected from the uploaded archive, so this endpoint accepts both Terraform exports and signed V3 packages. The returned preview's `sync_engine` says which install endpoint to call next. An archive that is neither a Terraform export nor a validly signed V3 package is rejected with 400.
    */
   'preInstallBlueprint'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.PreInstallBlueprint.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PreInstallBlueprint.Responses.$200>
   /**
    * getBlueprintPreview - getBlueprintPreview
-   *
+   * 
    * Get Blueprint Preview by ID
    */
   'getBlueprintPreview'(
     parameters?: Parameters<Paths.GetBlueprintPreview.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintPreview.Responses.$200>
   /**
    * getBlueprint - getBlueprint
-   *
+   * 
    * Get Blueprint by ID
    */
   'getBlueprint'(
     parameters?: Parameters<Paths.GetBlueprint.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprint.Responses.$200>
   /**
    * updateBlueprint - updateBlueprint
-   *
+   * 
    * Update a Blueprint
    */
   'updateBlueprint'(
     parameters?: Parameters<Paths.UpdateBlueprint.PathParameters> | null,
     data?: Paths.UpdateBlueprint.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateBlueprint.Responses.$200>
   /**
    * deleteBlueprint - deleteBlueprint
-   *
+   * 
    * Delete a Blueprint
    */
   'deleteBlueprint'(
     parameters?: Parameters<Paths.DeleteBlueprint.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBlueprint.Responses.$200>
   /**
    * listBlueprintTestCases - listBlueprintTestCases
-   *
+   * 
    * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
    */
   'listBlueprintTestCases'(
     parameters?: Parameters<Paths.ListBlueprintTestCases.QueryParameters & Paths.ListBlueprintTestCases.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBlueprintTestCases.Responses.$200>
   /**
    * createBlueprintTestCase - createBlueprintTestCase
-   *
+   * 
    * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
    */
   'createBlueprintTestCase'(
     parameters?: Parameters<Paths.CreateBlueprintTestCase.PathParameters> | null,
     data?: Paths.CreateBlueprintTestCase.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBlueprintTestCase.Responses.$201>
   /**
    * getBlueprintTestCase - getBlueprintTestCase
-   *
+   * 
    * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
    */
   'getBlueprintTestCase'(
     parameters?: Parameters<Paths.GetBlueprintTestCase.QueryParameters & Paths.GetBlueprintTestCase.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintTestCase.Responses.$200>
   /**
    * updateBlueprintTestCase - updateBlueprintTestCase
-   *
+   * 
    * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
    */
   'updateBlueprintTestCase'(
     parameters?: Parameters<Paths.UpdateBlueprintTestCase.PathParameters> | null,
     data?: Paths.UpdateBlueprintTestCase.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateBlueprintTestCase.Responses.$200>
   /**
    * deleteBlueprintTestCase - deleteBlueprintTestCase
-   *
+   * 
    * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
    */
   'deleteBlueprintTestCase'(
     parameters?: Parameters<Paths.DeleteBlueprintTestCase.QueryParameters & Paths.DeleteBlueprintTestCase.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBlueprintTestCase.Responses.$204>
   /**
    * addBlueprintNote - addBlueprintNote
-   *
+   * 
    * Append an internal note to a blueprint. `id`, `created_at` and `created_by`
    * are stamped server-side from the caller, so notes cannot be backdated or
    * attributed to someone else. Existing notes are never modified.
-   *
+   * 
    */
   'addBlueprintNote'(
     parameters?: Parameters<Paths.AddBlueprintNote.PathParameters> | null,
     data?: Paths.AddBlueprintNote.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddBlueprintNote.Responses.$201>
   /**
    * updateBlueprintNote - updateBlueprintNote
-   *
+   * 
    * Rewrite the text of an existing internal note. The note keeps its position in
    * the list along with `created_at` and `created_by`, so an edit cannot reassign
    * authorship; `updated_at` is stamped server-side.
-   *
+   * 
    */
   'updateBlueprintNote'(
     parameters?: Parameters<Paths.UpdateBlueprintNote.PathParameters> | null,
     data?: Paths.UpdateBlueprintNote.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateBlueprintNote.Responses.$200>
   /**
    * deleteBlueprintNote - deleteBlueprintNote
-   *
+   * 
    * Remove a single internal note from a blueprint.
    */
   'deleteBlueprintNote'(
     parameters?: Parameters<Paths.DeleteBlueprintNote.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBlueprintNote.Responses.$200>
   /**
    * verifyBlueprint - verifyBlueprint
-   *
+   * 
    * Start a blueprint verification job. Compares resource configurations between a source org
    * and a destination org to verify that a sync/install was successful.
    * Returns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, summary, and resource_results.
-   *
+   * 
    */
   'verifyBlueprint'(
     parameters?: Parameters<Paths.VerifyBlueprint.PathParameters> | null,
     data?: Paths.VerifyBlueprint.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.VerifyBlueprint.Responses.$202>
   /**
    * listMarketplaceSlugs - listMarketplaceSlugs
-   *
+   * 
    * List all available marketplace blueprint slugs from Webflow CMS.
    * Returns cached results when available.
-   *
+   * 
    */
   'listMarketplaceSlugs'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListMarketplaceSlugs.Responses.$200>
   /**
    * formatBlueprintDescription - formatBlueprintDescription
-   *
+   * 
    * Format a blueprint description as markdown using AI.
-   *
+   * 
    */
   'formatBlueprintDescription'(
     parameters?: Parameters<Paths.FormatBlueprintDescription.PathParameters> | null,
     data?: Paths.FormatBlueprintDescription.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.FormatBlueprintDescription.Responses.$200>
   /**
    * suggestBlueprintResources - suggestBlueprintResources
-   *
+   * 
    * Suggest resources to add to a blueprint based on a natural-language prompt.
-   *
+   * 
    * Walks anchor resource types in priority order (journey > workflow_definition >
    * automation_flow > schema > entity-backed types) and returns matches per
    * anchor using each upstream API's text search. Suggestions are marked
@@ -8740,122 +9142,122 @@ export interface OperationMethods {
    * bulkAddBlueprintResources and have transitive dependencies resolved
    * server-side — which means a single matched journey can stand in for its
    * full product/schema/template bundle.
-   *
+   * 
    * No side effects on the blueprint — the caller persists the chosen resources
    * via the existing create/bulk-add endpoints.
-   *
+   * 
    */
   'suggestBlueprintResources'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.SuggestBlueprintResources.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SuggestBlueprintResources.Responses.$200>
   /**
    * addBlueprintResource - addBlueprintResource
-   *
+   * 
    * Add a resource to a Blueprint
    */
   'addBlueprintResource'(
     parameters?: Parameters<Paths.AddBlueprintResource.QueryParameters & Paths.AddBlueprintResource.PathParameters> | null,
     data?: Paths.AddBlueprintResource.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AddBlueprintResource.Responses.$200>
   /**
    * syncDependencies - syncDependencies
-   *
+   * 
    * Sync dependencies of all root resources in a Blueprint
    */
   'syncDependencies'(
     parameters?: Parameters<Paths.SyncDependencies.QueryParameters & Paths.SyncDependencies.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SyncDependencies.Responses.$202>
   /**
    * bulkUpdateBlueprintResources - bulkUpdateBlueprintResources
-   *
+   * 
    * Bulk update resources in a Blueprint
    */
   'bulkUpdateBlueprintResources'(
     parameters?: Parameters<Paths.BulkUpdateBlueprintResources.PathParameters> | null,
     data?: Paths.BulkUpdateBlueprintResources.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.BulkUpdateBlueprintResources.Responses.$200>
   /**
    * bulkAddBlueprintResources - bulkAddBlueprintResources
-   *
+   * 
    * Bulk Add resources in a Blueprint
    */
   'bulkAddBlueprintResources'(
     parameters?: Parameters<Paths.BulkAddBlueprintResources.QueryParameters & Paths.BulkAddBlueprintResources.PathParameters> | null,
     data?: Paths.BulkAddBlueprintResources.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.BulkAddBlueprintResources.Responses.$200>
   /**
    * bulkDeleteBlueprintResources - bulkDeleteBlueprintResources
-   *
+   * 
    * Bulk delete resources in a Blueprint
    */
   'bulkDeleteBlueprintResources'(
     parameters?: Parameters<Paths.BulkDeleteBlueprintResources.PathParameters> | null,
     data?: Paths.BulkDeleteBlueprintResources.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.BulkDeleteBlueprintResources.Responses.$200>
   /**
    * updateBlueprintResource - updateBlueprintResource
-   *
+   * 
    * Update a resource in a Blueprint
    */
   'updateBlueprintResource'(
     parameters?: Parameters<Paths.UpdateBlueprintResource.PathParameters> | null,
     data?: Paths.UpdateBlueprintResource.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateBlueprintResource.Responses.$200>
   /**
    * deleteBlueprintResource - deleteBlueprintResource
-   *
+   * 
    * Delete a resource from a Blueprint
    */
   'deleteBlueprintResource'(
     parameters?: Parameters<Paths.DeleteBlueprintResource.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBlueprintResource.Responses.$200>
   /**
    * listBlueprintJobs - listBlueprintJobs
-   *
+   * 
    * List all blueprint jobs
    */
   'listBlueprintJobs'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBlueprintJobs.Responses.$200>
   /**
    * getBlueprintJob - getBlueprintJob
-   *
+   * 
    * Poll the current state of a job. Serves both Terraform (v2) and V3-engine jobs —
    * check `sync_engine` (`terraform` | `v3`) to tell them apart. V3 jobs additionally
    * expose live `resource_progress[]`. V3 single-install and bulk-install child jobs
    * are polled here.
-   *
+   * 
    */
   'getBlueprintJob'(
     parameters?: Parameters<Paths.GetBlueprintJob.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintJob.Responses.$200>
   /**
    * continueInstallationJob - continueInstallationJob
-   *
+   * 
    * Resume an installation job that is paused at `status: "WAITING_USER_ACTION"` after
    * planning. Works for both Terraform and V3 jobs. Not needed for V3 installs created
    * with `auto_apply: true` (including all bulk-install child jobs), which apply
    * without pausing.
-   *
+   * 
    * This call applies the plan. Callers acting for a user — AI agents in particular —
    * must show the user the job's `resource_progress[]` (`impact_on_install` and
    * `impact_on_install_reason`) and call it only once the user has approved.
-   *
+   * 
    * Also resumes a V3 install paused at `status: "REAUTH_REQUIRED"`, where the
    * caller's credentials could not safely cover another run. The job keeps its
    * `job_id`, so resuming continues from the operation-log checkpoint rather than
@@ -8863,16 +9265,16 @@ export interface OperationMethods {
    * credential; for a cross-org install whose SOURCE credential also expired, send a
    * freshly scoped source token as `source_auth_token` — the destination bearer is not
    * a valid substitute for it.
-   *
+   * 
    */
   'continueInstallationJob'(
     parameters?: Parameters<Paths.ContinueInstallationJob.PathParameters> | null,
     data?: Paths.ContinueInstallationJob.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ContinueInstallationJob.Responses.$200>
   /**
    * retryInstallationJob - retryInstallationJob
-   *
+   * 
    * Retry a finished V3 installation job whose status is `FAILED` or
    * `PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same
    * source/destination and `auto_apply: true` — no `:continue` call is needed.
@@ -8880,347 +9282,347 @@ export interface OperationMethods {
    * (`WAITING_USER_ACTION`) for the user to approve via `:continue`.
    * The plan phase re-resolves every resource: already-synced resources no-op,
    * so effectively only the failed resources are re-applied.
-   *
+   * 
    * Must be called by a user of the destination org (where the job lives); the
    * caller's bearer token is used as the destination token. The plan reuses the
    * manifest persisted by the original install, so no source-org access is
    * required. The original job's `options` (ignored resources, sync_notes) are
    * reused when present; older jobs without persisted options fall back to the
    * destination blueprint's `ignored_resource_addresses`.
-   *
+   * 
    */
   'retryInstallationJob'(
     parameters?: Parameters<Paths.RetryInstallationJob.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RetryInstallationJob.Responses.$202>
   /**
    * cancelBlueprintJob - cancelBlueprintJob
-   *
+   * 
    * Cancel a blueprint job if it is still running.
    */
   'cancelBlueprintJob'(
     parameters?: Parameters<Paths.CancelBlueprintJob.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CancelBlueprintJob.Responses.$200>
   /**
    * getMarketplaceListing - getMarketplaceListing
-   *
+   * 
    * Get marketplace listing for a blueprint including all versions
    */
   'getMarketplaceListing'(
     parameters?: Parameters<Paths.GetMarketplaceListing.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMarketplaceListing.Responses.$200>
   /**
    * createMarketplaceListing - createMarketplaceListing
-   *
+   * 
    * Create a marketplace listing for a blueprint. Returns 409 if one already exists.
    */
   'createMarketplaceListing'(
     parameters?: Parameters<Paths.CreateMarketplaceListing.PathParameters> | null,
     data?: Paths.CreateMarketplaceListing.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMarketplaceListing.Responses.$201>
   /**
    * listMarketplaceListings - listMarketplaceListings
-   *
+   * 
    * List all marketplace listings for the authenticated organization
    */
   'listMarketplaceListings'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListMarketplaceListings.Responses.$200>
   /**
    * getMarketplaceListingById - getMarketplaceListingById
-   *
+   * 
    * Get marketplace listing by listing ID including all versions
    */
   'getMarketplaceListingById'(
     parameters?: Parameters<Paths.GetMarketplaceListingById.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetMarketplaceListingById.Responses.$200>
   /**
    * updateMarketplaceListing - updateMarketplaceListing
-   *
+   * 
    * Update listing-level fields
    */
   'updateMarketplaceListing'(
     parameters?: Parameters<Paths.UpdateMarketplaceListing.PathParameters> | null,
     data?: Paths.UpdateMarketplaceListing.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateMarketplaceListing.Responses.$200>
   /**
    * deleteMarketplaceListing - deleteMarketplaceListing
-   *
+   * 
    * Delete listing and all versions
    */
   'deleteMarketplaceListing'(
     parameters?: Parameters<Paths.DeleteMarketplaceListing.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteMarketplaceListing.Responses.$204>
   /**
    * listMarketplaceListingVersions - listMarketplaceListingVersions
-   *
+   * 
    * List all versions for a listing, newest first
    */
   'listMarketplaceListingVersions'(
     parameters?: Parameters<Paths.ListMarketplaceListingVersions.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListMarketplaceListingVersions.Responses.$200>
   /**
    * createMarketplaceListingVersion - createMarketplaceListingVersion
-   *
+   * 
    * Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint
    */
   'createMarketplaceListingVersion'(
     parameters?: Parameters<Paths.CreateMarketplaceListingVersion.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMarketplaceListingVersion.Responses.$201>
   /**
    * updateMarketplaceListingVersion - updateMarketplaceListingVersion
-   *
+   * 
    * Update updateNote, requiredFeatures, or recommendedApps on a draft version
    */
   'updateMarketplaceListingVersion'(
     parameters?: Parameters<Paths.UpdateMarketplaceListingVersion.PathParameters> | null,
     data?: Paths.UpdateMarketplaceListingVersion.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateMarketplaceListingVersion.Responses.$200>
   /**
    * publishMarketplaceListingVersion - publishMarketplaceListingVersion
-   *
+   * 
    * Publish a draft version; archives the previous live version
    */
   'publishMarketplaceListingVersion'(
     parameters?: Parameters<Paths.PublishMarketplaceListingVersion.PathParameters> | null,
     data?: Paths.PublishMarketplaceListingVersion.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
   /**
    * publishBlueprintV3 - publishBlueprintV3
-   *
+   * 
    * Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.
-   *
+   * 
    * By default this only builds the package and stores it privately for download. Creating or
    * overwriting the public marketplace listing is opt-in via `publish_to_marketplace`.
-   *
+   * 
    */
   'publishBlueprintV3'(
     parameters?: Parameters<Paths.PublishBlueprintV3.PathParameters> | null,
     data?: Paths.PublishBlueprintV3.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublishBlueprintV3.Responses.$202>
   /**
    * sendBlueprintAssistantMessage - sendBlueprintAssistantMessage
-   *
+   * 
    * Sends a message to the blueprint assistant for a custom blueprint, starting a conversation when
    * `conversation_id` is omitted. The answer is produced asynchronously: poll
    * `getBlueprintAssistantConversation` until `status` is no longer `IN_PROGRESS`.
-   *
+   * 
    * `proposal_update` records that the user applied or dismissed a proposal from an earlier answer.
    * The assistant never changes the blueprint itself; proposals are applied by the client through the
    * existing resource and publish endpoints. Available when `blueprint-ai-assistant` is on; publish proposals also need `blueprint-marketplace-publishing`.
-   *
+   * 
    */
   'sendBlueprintAssistantMessage'(
     parameters?: Parameters<Paths.SendBlueprintAssistantMessage.PathParameters> | null,
     data?: Paths.SendBlueprintAssistantMessage.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SendBlueprintAssistantMessage.Responses.$200 | Paths.SendBlueprintAssistantMessage.Responses.$202>
   /**
    * listBlueprintAssistantConversations - listBlueprintAssistantConversations
-   *
+   * 
    * The blueprint's blueprint assistant conversations in this organization, most recently updated first
    * (at most 20). Conversations expire 30 days after their last update.
-   *
+   * 
    */
   'listBlueprintAssistantConversations'(
     parameters?: Parameters<Paths.ListBlueprintAssistantConversations.QueryParameters & Paths.ListBlueprintAssistantConversations.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBlueprintAssistantConversations.Responses.$200>
   /**
    * getBlueprintAssistantConversation - getBlueprintAssistantConversation
-   *
+   * 
    * A blueprint assistant conversation, including the answer in progress.
    */
   'getBlueprintAssistantConversation'(
     parameters?: Parameters<Paths.GetBlueprintAssistantConversation.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintAssistantConversation.Responses.$200>
   /**
    * listBlueprintAssistantSkills - listBlueprintAssistantSkills
-   *
+   * 
    * The organization's blueprint assistant skills, the skills epilot ships (`defaults`; an organization
    * skill with the same name replaces one), and the upload limits. Available when `blueprint-ai-assistant` is on.
-   *
+   * 
    */
   'listBlueprintAssistantSkills'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBlueprintAssistantSkills.Responses.$200>
   /**
    * uploadBlueprintAssistantSkill - uploadBlueprintAssistantSkill
-   *
+   * 
    * Uploads a skill for the organization's blueprint assistant, replacing the skill of the same name.
    * The file is a `SKILL.md` or a zip with `SKILL.md` and `references/*.md` (the format claude.ai exports;
    * a single top-level folder is stripped). `SKILL.md` starts with YAML front matter with `name` and
    * `description`. Other files (scripts, assets) are ignored and listed in `ignored`. A new skill is enabled
    * while the organization has fewer than the enabled limit.
-   *
+   * 
    */
   'uploadBlueprintAssistantSkill'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.UploadBlueprintAssistantSkill.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UploadBlueprintAssistantSkill.Responses.$200>
   /**
    * getBlueprintAssistantSkill - getBlueprintAssistantSkill
-   *
+   * 
    * A skill of the organization with the text of its files.
    */
   'getBlueprintAssistantSkill'(
     parameters?: Parameters<Paths.GetBlueprintAssistantSkill.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintAssistantSkill.Responses.$200>
   /**
    * updateBlueprintAssistantSkill - updateBlueprintAssistantSkill
-   *
+   * 
    * Enables or disables a skill. Conversations keep the skills they started with.
    */
   'updateBlueprintAssistantSkill'(
     parameters?: Parameters<Paths.UpdateBlueprintAssistantSkill.PathParameters> | null,
     data?: Paths.UpdateBlueprintAssistantSkill.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateBlueprintAssistantSkill.Responses.$200>
   /**
    * deleteBlueprintAssistantSkill - deleteBlueprintAssistantSkill
-   *
+   * 
    * Deletes a skill. Running conversations that offered it answer that it was removed.
    */
   'deleteBlueprintAssistantSkill'(
     parameters?: Parameters<Paths.DeleteBlueprintAssistantSkill.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteBlueprintAssistantSkill.Responses.$200>
   /**
    * preInstallBlueprintV3 - preInstallBlueprintV3
-   *
+   * 
    * Validates a signed V3 package and returns the destination-specific resource plan used by the install UI.
    */
   'preInstallBlueprintV3'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.PreInstallBlueprintV3.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PreInstallBlueprintV3.Responses.$200>
   /**
    * getBlueprintMergePlan - getBlueprintMergePlan
-   *
+   * 
    * Summary of an update merge plan, with counts, warnings and the revision to send back.
    */
   'getBlueprintMergePlan'(
     parameters?: Parameters<Paths.GetBlueprintMergePlan.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintMergePlan.Responses.$200>
   /**
    * listBlueprintMergePlanResources - listBlueprintMergePlanResources
-   *
+   * 
    * Journeys of the plan, one page at a time. A cursor is valid only for the revision it was issued for.
    */
   'listBlueprintMergePlanResources'(
     parameters?: Parameters<Paths.ListBlueprintMergePlanResources.QueryParameters & Paths.ListBlueprintMergePlanResources.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBlueprintMergePlanResources.Responses.$200>
   /**
    * getBlueprintMergePlanResource - getBlueprintMergePlanResource
-   *
+   * 
    * One journey of the plan with its decision groups and warnings.
    */
   'getBlueprintMergePlanResource'(
     parameters?: Parameters<Paths.GetBlueprintMergePlanResource.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintMergePlanResource.Responses.$200>
   /**
    * updateBlueprintMergePlanResolutions - updateBlueprintMergePlanResolutions
-   *
+   * 
    * Saves choices for decision groups. Each submitted choice replaces the saved choice of the same group. Allowed while the plan waits for review.
    */
   'updateBlueprintMergePlanResolutions'(
     parameters?: Parameters<Paths.UpdateBlueprintMergePlanResolutions.PathParameters> | null,
     data?: Paths.UpdateBlueprintMergePlanResolutions.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateBlueprintMergePlanResolutions.Responses.$200>
   /**
    * discardBlueprintMergePlan - discardBlueprintMergePlan
-   *
+   * 
    * Discards a plan waiting for review and ends its job. Nothing is written.
    */
   'discardBlueprintMergePlan'(
     parameters?: Parameters<Paths.DiscardBlueprintMergePlan.PathParameters> | null,
     data?: Paths.DiscardBlueprintMergePlan.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DiscardBlueprintMergePlan.Responses.$200>
   /**
    * replanBlueprintMergePlan - replanBlueprintMergePlan
-   *
+   * 
    * Starts a new update job whose plan is prefilled with this plan's saved choices. A plan still waiting for review, or expired, becomes `superseded`.
    */
   'replanBlueprintMergePlan'(
     parameters?: Parameters<Paths.ReplanBlueprintMergePlan.PathParameters> | null,
     data?: Paths.ReplanBlueprintMergePlan.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ReplanBlueprintMergePlan.Responses.$202>
   /**
    * applyBlueprintMergePlan - applyBlueprintMergePlan
-   *
+   * 
    * Approves the plan at `expected_plan_revision` with its current choices and resumes the parked update job with the caller's token. Only a `ready` plan whose job waits for this review can be applied. Replaying the same `idempotency_key` returns the approved plan without applying it twice.
    */
   'applyBlueprintMergePlan'(
     parameters?: Parameters<Paths.ApplyBlueprintMergePlan.PathParameters> | null,
     data?: Paths.ApplyBlueprintMergePlan.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ApplyBlueprintMergePlan.Responses.$202>
   /**
    * previewBlueprintMergeRevert - previewBlueprintMergeRevert
-   *
+   * 
    * Lists what the update wrote, from its own journal, and what reverting each resource would do. Resources changed since the update need an explicit choice (`requires_choice`); `not_restorable` ones can only be kept. The preview is immutable: a new call returns a new `revert_preview_id`. Only an `applied` or `partially_applied` plan inside its revert window has a preview, and only while no later update owns any of its resources.
    */
   'previewBlueprintMergeRevert'(
     parameters?: Parameters<Paths.PreviewBlueprintMergeRevert.PathParameters> | null,
     data?: Paths.PreviewBlueprintMergeRevert.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PreviewBlueprintMergeRevert.Responses.$200>
   /**
    * applyBlueprintMergeRevert - applyBlueprintMergeRevert
-   *
+   * 
    * Reverts the update as the preview describes it, with an explicit `action` for every preview entry. Starts a `restore` job and moves the plan to `reverting`; the job ends it `reverted`, or `revert_partial` when a resource changed meanwhile or failed. Replaying the same `idempotency_key` returns the same job.
    */
   'applyBlueprintMergeRevert'(
     parameters?: Parameters<Paths.ApplyBlueprintMergeRevert.PathParameters> | null,
     data?: Paths.ApplyBlueprintMergeRevert.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ApplyBlueprintMergeRevert.Responses.$202>
   /**
    * installBlueprintV3 - installBlueprintV3
-   *
+   * 
    * Install a blueprint into a single destination org using the V3 engine (direct API
    * calls, no Terraform). Creates resources in topological order with global ID
    * replacement and supports checkpoint-based resume on failure.
-   *
+   * 
    * **Lifecycle (how to drive an install to completion):**
    * 1. `POST /v3/blueprint-manifest/blueprint:install` returns `{ job_id }` (202).
    * 2. Poll the job with `GET /v2/blueprint-manifest/jobs/{job_id}` — V3 jobs are
@@ -9234,11 +9636,11 @@ export interface OperationMethods {
    * 4. If `auto_apply` is `true`, the engine applies automatically after plan +
    *    snapshot — no `:continue` call is needed. This is what the bulk-install worker
    *    uses; to install into many orgs at once prefer `POST .../bulk-installs`.
-   *
+   * 
    * **AI agents** (tokens such as "Connect ChatGPT to epilot") cannot use
    * `auto_apply` (403). Install without it, show the user the plan, and call
    * `:continue` only after the user approves it.
-   *
+   * 
    * **The plan fails instead of pausing** (`status: "FAILED"`, error code
    * `missing_required_reference`) when a resource references something that is
    * neither in the blueprint nor in the destination org and the destination API
@@ -9250,21 +9652,21 @@ export interface OperationMethods {
    * and removing it leaves everything that references it pointing at an id the
    * destination does not have. Alternatively pass the blocked addresses in
    * `options.resources_to_ignore` to install the rest.
-   *
+   * 
    * For cross-org installs, pass `destination_auth_token` (the destination org's
    * token); reads use the caller's bearer token, writes use that token.
-   *
+   * 
    */
   'installBlueprintV3'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.InstallBlueprintV3.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.InstallBlueprintV3.Responses.$202>
   /**
    * restoreBlueprintDeploymentV3 - restoreBlueprintDeploymentV3
-   *
+   * 
    * Roll a deployment back to its pre-install state. Two phases:
-   *
+   * 
    *   1. Upsert — re-applies the captured payloads via snapshot-api's
    *      `:restore` (server-side; runs config-engine.apply with captured
    *      target ids pre-seeded). Skipped for pure-create deployments
@@ -9274,12 +9676,12 @@ export interface OperationMethods {
    *      resource via the type's adapter. Co-ownership / drift /
    *      no-delete-capability skip the entry with the corresponding
    *      reason.
-   *
+   * 
    * Resolves `(blueprint_id, job_id)` to the entry in
    * `Blueprint.deployments[]` and reads its `snapshot_id` and
    * `destination_blueprint_id` — the caller never needs to handle
    * snapshot ids directly.
-   *
+   * 
    * Async — returns 202 with a job id. Poll the job to track progress.
    * The restore holds its own per-instance lock (`active_restore_job_id`),
    * separate from `installation_status`. Starting a restore is rejected with
@@ -9289,69 +9691,69 @@ export interface OperationMethods {
    * restore never overwrites `installation_status`, which keeps reflecting
    * the actual install outcome (and drives the install badge in the
    * Blueprints overview) throughout the revert.
-   *
+   * 
    */
   'restoreBlueprintDeploymentV3'(
     parameters?: Parameters<Paths.RestoreBlueprintDeploymentV3.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RestoreBlueprintDeploymentV3.Responses.$202>
   /**
    * getRestorePreview - getRestorePreview
-   *
+   * 
    * Computes what would happen if the user triggered a restore on this
    * deployment, without performing any writes. The forecast uses the
    * snapshot's captured resources (when present) plus the current lineage
    * state plus per-adapter gates (co-ownership, no-delete-capability,
    * heuristic-match, drift when wired).
-   *
+   * 
    * Idempotent and side-effect free. Safe to call repeatedly. The result
    * may shift between calls if operators edit destination resources or
    * another blueprint adopts a shared resource in the meantime.
-   *
+   * 
    */
   'getRestorePreview'(
     parameters?: Parameters<Paths.GetRestorePreview.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRestorePreview.Responses.$200>
   /**
    * triggerRestorePreview - triggerRestorePreview
-   *
+   * 
    * Starts computing the same forecast as `getRestorePreview` in the
    * background. Large deployments take longer than the API Gateway
    * timeout to forecast inline, so clients should prefer this endpoint.
-   *
+   * 
    * Async: returns 202 immediately with a `running` report. Poll the
    * `Location` URL until `status` is `completed` or `failed`. Never
    * mutates any resource.
-   *
+   * 
    */
   'triggerRestorePreview'(
     parameters?: Parameters<Paths.TriggerRestorePreview.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TriggerRestorePreview.Responses.$202>
   /**
    * getRestorePreviewReport - getRestorePreviewReport
-   *
+   * 
    * Returns a restore preview started by `triggerRestorePreview`. The
    * `outcome` is present once `status` is `completed`. A preview whose
    * worker stopped without reporting is returned as `failed`.
-   *
+   * 
    */
   'getRestorePreviewReport'(
     parameters?: Parameters<Paths.GetRestorePreviewReport.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRestorePreviewReport.Responses.$200>
   /**
    * triggerDeploymentHealthCheckV3 - triggerDeploymentHealthCheckV3
-   *
+   * 
    * Starts a read-only health scan of the resources this deployment's
    * blueprint instance tracks in the destination org (see
    * docs/rfcs/RFC-org-health-check.md, Phase 0). Checks:
-   *
+   * 
    *   - live readability — every lineage-tracked resource is read back
    *     via its adapter; tracked-but-unreadable resources are flagged.
    *   - referential integrity — destination payloads containing
@@ -9359,297 +9761,307 @@ export interface OperationMethods {
    *     that are not readable.
    *   - install completeness — install operations whose final attempt
    *     ended `failed` or `skipped`, with their rejection reasons.
-   *
+   * 
    * Async — returns 202 immediately with a `running` report stub. Poll
    * the health-report endpoint until `status` is `completed` or
    * `failed`. Never mutates any resource.
-   *
+   * 
    */
   'triggerDeploymentHealthCheckV3'(
     parameters?: Parameters<Paths.TriggerDeploymentHealthCheckV3.PathParameters> | null,
     data?: Paths.TriggerDeploymentHealthCheckV3.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.TriggerDeploymentHealthCheckV3.Responses.$202>
   /**
    * getDeploymentHealthReportV3 - getDeploymentHealthReportV3
-   *
+   * 
    * Returns the most recent health report produced for this deployment
    * by the `:health-check` endpoint. Idempotent and side-effect free.
-   *
+   * 
    */
   'getDeploymentHealthReportV3'(
     parameters?: Parameters<Paths.GetDeploymentHealthReportV3.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetDeploymentHealthReportV3.Responses.$200>
   /**
    * getBlueprintLineageV3 - getBlueprintLineageV3
-   *
+   * 
    * Returns the lineage registry entries for a blueprint's resources in the current org.
    * Shows the mapping between source lineage IDs and target resource IDs.
-   *
+   * 
    */
   'getBlueprintLineageV3'(
     parameters?: Parameters<Paths.GetBlueprintLineageV3.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintLineageV3.Responses.$200>
   /**
    * createBulkInstallV3 - createBulkInstallV3
-   *
+   * 
    * Install one source blueprint into many destination organizations in a single
    * request. The server schedules child V3 installs with `auto_apply=true` and caps
    * active installs at `max_concurrency`. Not available to AI-agent callers (403),
    * since no child install pauses for the user to approve its plan. Per-target failures are isolated and
    * retryable; they do not stop the remaining targets.
-   *
+   * 
    * Each target carries its own write-only `destination_auth_token` (org-scoped).
    * Tokens are passed to the worker via Step Functions input only — they are never
    * persisted in DynamoDB nor returned by any endpoint.
-   *
+   * 
    */
   'createBulkInstallV3'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: Paths.CreateBulkInstallV3.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBulkInstallV3.Responses.$202>
   /**
    * getBulkInstallV3 - getBulkInstallV3
-   *
+   * 
    * Returns the bulk install parent with aggregate status and counts. Scoped by the
    * caller org as `source_org_id`. Target rows are not included — use the targets
    * endpoint to page through them.
-   *
+   * 
    */
   'getBulkInstallV3'(
     parameters?: Parameters<Paths.GetBulkInstallV3.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBulkInstallV3.Responses.$200>
   /**
    * listBulkInstallTargetsV3 - listBulkInstallTargetsV3
-   *
+   * 
    * Pages through the bulk install's target rows. Each row hydrates its latest child
    * install job (`job_ids.at(-1)`) with the standard V3 job shape (`events[]`,
    * `resource_progress[]`) so callers can inspect per-resource progress and errors.
-   *
+   * 
    */
   'listBulkInstallTargetsV3'(
     parameters?: Parameters<Paths.ListBulkInstallTargetsV3.QueryParameters & Paths.ListBulkInstallTargetsV3.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBulkInstallTargetsV3.Responses.$200>
   /**
    * retryBulkInstallTargetV3 - retryBulkInstallTargetV3
-   *
+   * 
    * Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`
    * targets. Starts a new child install with `auto_apply=true`, appends its job id to
    * `job_ids`, and reuses the same target row. Only the destination auth token may be
    * supplied for the new attempt; source/destination identifiers are immutable.
    * Not available to AI-agent callers (403).
-   *
+   * 
    */
   'retryBulkInstallTargetV3'(
     parameters?: Parameters<Paths.RetryBulkInstallTargetV3.PathParameters> | null,
     data?: Paths.RetryBulkInstallTargetV3.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.RetryBulkInstallTargetV3.Responses.$200>
   /**
    * listUniquenessCriteria - listUniquenessCriteria
-   *
+   * 
    * List all custom uniqueness criteria configured for the caller's organization.
    * These overrides are applied during install (V2 and V3) when matching incoming
    * resources against existing ones in the destination org, replacing the default
    * per-resource-type field set with the caller's chosen fields (AND-combined).
-   *
+   * 
    */
   'listUniquenessCriteria'(
     parameters?: Parameters<UnknownParamsObject> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListUniquenessCriteria.Responses.$200>
   /**
    * getUniquenessCriteria - getUniquenessCriteria
-   *
+   * 
    * Get the configured uniqueness criteria for a specific resource type, if any.
    */
   'getUniquenessCriteria'(
     parameters?: Parameters<Paths.V1BlueprintManifestUniquenessCriteria$ResourceType.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetUniquenessCriteria.Responses.$200>
   /**
    * putUniquenessCriteria - putUniquenessCriteria
-   *
+   * 
    * Set or replace the uniqueness criteria for a resource type. The provided fields
    * must be valid attributes on the resource's schema (the UI typically loads the
    * schema to populate options). All listed fields are AND-combined during matching.
-   *
+   * 
    */
   'putUniquenessCriteria'(
     parameters?: Parameters<Paths.V1BlueprintManifestUniquenessCriteria$ResourceType.PathParameters> | null,
     data?: Paths.PutUniquenessCriteria.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PutUniquenessCriteria.Responses.$200>
   /**
    * deleteUniquenessCriteria - deleteUniquenessCriteria
-   *
+   * 
    * Remove the custom criteria for a resource type, reverting to the default fields.
    */
   'deleteUniquenessCriteria'(
     parameters?: Parameters<Paths.V1BlueprintManifestUniquenessCriteria$ResourceType.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteUniquenessCriteria.Responses.$204>
   /**
+   * duplicateBlueprintTestCase - duplicateBlueprintTestCase
+   * 
+   * Copy a v2 test case of the blueprint into a new test case that keeps the source's clauses. Requires the blueprint-test-cases organization feature flag.
+   */
+  'duplicateBlueprintTestCase'(
+    parameters?: Parameters<Paths.DuplicateBlueprintTestCase.PathParameters> | null,
+    data?: Paths.DuplicateBlueprintTestCase.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DuplicateBlueprintTestCase.Responses.$201>
+  /**
    * getSourceTestOperation - getSourceTestOperation
-   *
+   * 
    * Read a source-only generation or manual run. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
    */
   'getSourceTestOperation'(
     parameters?: Parameters<Paths.GetSourceTestOperation.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSourceTestOperation.Responses.$200>
   /**
    * createSourceConfirmedRun - createSourceConfirmedRun
-   *
+   * 
    * Evaluate previously confirmed checks against the source Blueprint only. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
    */
   'createSourceConfirmedRun'(
     parameters?: Parameters<Paths.CreateSourceConfirmedRun.PathParameters> | null,
     data?: Paths.CreateSourceConfirmedRun.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateSourceConfirmedRun.Responses.$202>
   /**
    * listBlueprintTestRuns - listBlueprintTestRuns
-   *
+   * 
    * Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
    */
   'listBlueprintTestRuns'(
     parameters?: Parameters<Paths.ListBlueprintTestRuns.QueryParameters & Paths.ListBlueprintTestRuns.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ListBlueprintTestRuns.Responses.$200>
   /**
    * createBlueprintTestRun - createBlueprintTestRun
-   *
+   * 
    * Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
    */
   'createBlueprintTestRun'(
     parameters?: Parameters<Paths.CreateBlueprintTestRun.PathParameters> | null,
     data?: Paths.CreateBlueprintTestRun.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBlueprintTestRun.Responses.$202>
   /**
    * getBlueprintTestRun - getBlueprintTestRun
-   *
+   * 
    * Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
    */
   'getBlueprintTestRun'(
     parameters?: Parameters<Paths.GetBlueprintTestRun.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintTestRun.Responses.$200>
   /**
    * getBlueprintTestSuite - getBlueprintTestSuite
-   *
+   * 
    * The v2 test cases of the blueprint with their current latest suite result (stale results never count as passed) and a summary over all cases. Requires the blueprint-test-cases organization feature flag.
    */
   'getBlueprintTestSuite'(
     parameters?: Parameters<Paths.GetBlueprintTestSuite.QueryParameters & Paths.GetBlueprintTestSuite.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintTestSuite.Responses.$200>
   /**
    * createBlueprintTestSuiteRun - createBlueprintTestSuiteRun
-   *
+   * 
    * Run every v2 test case of the blueprint against one configuration snapshot. Requires the blueprint-test-cases organization feature flag.
    */
   'createBlueprintTestSuiteRun'(
     parameters?: Parameters<Paths.CreateBlueprintTestSuiteRun.PathParameters> | null,
     data?: Paths.CreateBlueprintTestSuiteRun.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBlueprintTestSuiteRun.Responses.$202>
   /**
    * getBlueprintTestSuiteRun - getBlueprintTestSuiteRun
-   *
+   * 
    * Read a suite run. Requires the blueprint-test-cases organization feature flag.
    */
   'getBlueprintTestSuiteRun'(
     parameters?: Parameters<Paths.GetBlueprintTestSuiteRun.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintTestSuiteRun.Responses.$200>
   /**
    * createBlueprintGraphSuggestions - createBlueprintGraphSuggestions
-   *
+   * 
    * Generate engine-verified test suggestions from the blueprint configuration graph. Requires the blueprint-test-cases organization feature flag.
    */
   'createBlueprintGraphSuggestions'(
     parameters?: Parameters<Paths.CreateBlueprintGraphSuggestions.PathParameters> | null,
     data?: Paths.CreateBlueprintGraphSuggestions.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBlueprintGraphSuggestions.Responses.$202>
   /**
    * getBlueprintGraphSuggestions - getBlueprintGraphSuggestions
-   *
+   * 
    * Read a graph suggestion generation and a page of its suggestions. Requires the blueprint-test-cases organization feature flag.
    */
   'getBlueprintGraphSuggestions'(
     parameters?: Parameters<Paths.GetBlueprintGraphSuggestions.QueryParameters & Paths.GetBlueprintGraphSuggestions.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintGraphSuggestions.Responses.$200>
   /**
    * acceptBlueprintGraphSuggestions - acceptBlueprintGraphSuggestions
-   *
+   * 
    * Accept suggestions as v2 test cases. Idempotent per suggestion id. Requires the blueprint-test-cases organization feature flag.
    */
   'acceptBlueprintGraphSuggestions'(
     parameters?: Parameters<Paths.AcceptBlueprintGraphSuggestions.PathParameters> | null,
     data?: Paths.AcceptBlueprintGraphSuggestions.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AcceptBlueprintGraphSuggestions.Responses.$200>
   /**
    * migrateBlueprintV1TestCases - migrateBlueprintV1TestCases
-   *
+   * 
    * Migrate v1 test cases to v2 clauses; cases that cannot be mapped are flagged needs_reinterpretation. Requires the blueprint-test-cases organization feature flag.
    */
   'migrateBlueprintV1TestCases'(
     parameters?: Parameters<Paths.MigrateBlueprintV1TestCases.PathParameters> | null,
     data?: Paths.MigrateBlueprintV1TestCases.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MigrateBlueprintV1TestCases.Responses.$200>
   /**
    * createBlueprintTestInterpretation - createBlueprintTestInterpretation
-   *
+   * 
    * Start interpreting an author's plain-language test against the blueprint configuration. With test_case_id the result rewrites that case. One active interpretation per author and blueprint. Requires the blueprint-test-cases organization feature flag.
    */
   'createBlueprintTestInterpretation'(
     parameters?: Parameters<Paths.CreateBlueprintTestInterpretation.PathParameters> | null,
     data?: Paths.CreateBlueprintTestInterpretation.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateBlueprintTestInterpretation.Responses.$202>
   /**
    * getBlueprintTestInterpretation - getBlueprintTestInterpretation
-   *
+   * 
    * Read the caller's own text interpretation. Requires the blueprint-test-cases organization feature flag.
    */
   'getBlueprintTestInterpretation'(
     parameters?: Parameters<Paths.GetBlueprintTestInterpretation.PathParameters> | null,
     data?: any,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetBlueprintTestInterpretation.Responses.$200>
   /**
    * confirmBlueprintTestInterpretationV2 - confirmBlueprintTestInterpretationV2
-   *
+   * 
    * Save the author's confirmed selection of a completed interpretation as a v2 test case (201), or as a new revision of the case it rewrites (200, needs expected_revision). Ambiguous parts need a chosen candidate, unsupported parts must be omitted; only engine-verified clauses are saved. An interpretation is confirmed at most once. Requires the blueprint-test-cases organization feature flag.
    */
   'confirmBlueprintTestInterpretationV2'(
     parameters?: Parameters<Paths.ConfirmBlueprintTestInterpretationV2.PathParameters> | null,
     data?: Paths.ConfirmBlueprintTestInterpretationV2.RequestBody,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ConfirmBlueprintTestInterpretationV2.Responses.$200 | Paths.ConfirmBlueprintTestInterpretationV2.Responses.$201>
 }
 
@@ -9657,364 +10069,364 @@ export interface PathsDictionary {
   ['/v1/blueprint-manifest/jobs/{job_id}']: {
     /**
      * getJob - getJob
-     *
+     * 
      * Get the current status of a blueprint (export or import)
      */
     'get'(
       parameters?: Parameters<Paths.GetJob.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetJob.Responses.$200>
   }
   ['/v1/blueprint-manifest/jobs:createExport']: {
     /**
      * createExport - createExport
-     *
+     * 
      * Creates a new Export Job with a list of available resources to export from the passed root resource.
-     *
+     * 
      * Multiple root resources can be added by calling this multiple times with the same jobId
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateExport.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateExport.Responses.$200>
   }
   ['/v1/blueprint-manifest/jobs/{job_id}:exportManifest']: {
     /**
      * exportManifest - exportManifest
-     *
+     * 
      * Triggers exporting a manifest file using selected resoruce ids for a job created with `createExportJob`
      */
     'post'(
       parameters?: Parameters<Paths.ExportManifest.PathParameters> | null,
       data?: Paths.ExportManifest.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ExportManifest.Responses.$200>
   }
   ['/v1/blueprint-manifest:uploadManifest']: {
     /**
      * uploadManifest - uploadManifest
-     *
+     * 
      * Create pre-signed S3 URL to upload a manifest file.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.UploadManifest.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UploadManifest.Responses.$201>
   }
   ['/v1/blueprint-manifest/jobs:createPlan']: {
     /**
      * createPlan - createPlan
-     *
+     * 
      * Creates a new import job from an uploaded manifest file and returns the plan.
-     *
+     * 
      * Creates an updated plan for an installed manifest when `manifest_id` is passed
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreatePlan.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreatePlan.Responses.$200>
   }
   ['/v1/blueprint-manifest/jobs/{job_id}:applyPlan']: {
     /**
      * applyPlan - applyPlan
-     *
+     * 
      * Apply a plan returned by `createPlan`.
      */
     'post'(
       parameters?: Parameters<Paths.ApplyPlan.PathParameters> | null,
       data?: Paths.ApplyPlan.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ApplyPlan.Responses.$200>
   }
   ['/v1/blueprint-manifest/manifests']: {
     /**
      * listInstalledManifests - listInstalledManifests
-     *
+     * 
      * List Blueprint Manifests installed to the organization
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListInstalledManifests.Responses.$200>
   }
   ['/v1/blueprint-manifest/manifests/{manifest_id}']: {
     /**
      * getManifest - getManifest
-     *
+     * 
      * Get installed Manifest by ID
      */
     'get'(
       parameters?: Parameters<Paths.GetManifest.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetManifest.Responses.$200>
     /**
      * updateManifest - updateManifest
-     *
+     * 
      * Update an installed manifest
-     *
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.UpdateManifest.PathParameters> | null,
       data?: Paths.UpdateManifest.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateManifest.Responses.$200>
     /**
      * deleteManifest - deleteManifest
-     *
+     * 
      * Remove installed manifest from the org
-     *
+     * 
      * Note that this does not delete the installed resources of the Manifest!
-     *
+     * 
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteManifest.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteManifest.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints']: {
     /**
      * listBlueprints - listBlueprints
-     *
+     * 
      * List Custom and Installed Blueprints
      */
     'get'(
       parameters?: Parameters<Paths.ListBlueprints.QueryParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListBlueprints.Responses.$200>
     /**
      * createBlueprint - createBlueprint
-     *
+     * 
      * Create a Blueprint
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateBlueprint.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateBlueprint.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints:marketplace']: {
     /**
      * listInstalledMarketplaceBlueprints - listInstalledMarketplaceBlueprints
-     *
+     * 
      * List installed Marketplace Blueprints for the organization.
      * When multiple blueprints have the same slug, returns only the most recently created one.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListInstalledMarketplaceBlueprints.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints:pre-install']: {
     /**
      * preInstallBlueprint - preInstallBlueprint
-     *
+     * 
      * Pre-install a Blueprint based on a blueprint file. Format-agnostic: the engine is detected from the uploaded archive, so this endpoint accepts both Terraform exports and signed V3 packages. The returned preview's `sync_engine` says which install endpoint to call next. An archive that is neither a Terraform export nor a validly signed V3 package is rejected with 400.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.PreInstallBlueprint.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PreInstallBlueprint.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints:preview/{preview_id}']: {
     /**
      * getBlueprintPreview - getBlueprintPreview
-     *
+     * 
      * Get Blueprint Preview by ID
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintPreview.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintPreview.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}']: {
     /**
      * getBlueprint - getBlueprint
-     *
+     * 
      * Get Blueprint by ID
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprint.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprint.Responses.$200>
     /**
      * updateBlueprint - updateBlueprint
-     *
+     * 
      * Update a Blueprint
      */
     'put'(
       parameters?: Parameters<Paths.UpdateBlueprint.PathParameters> | null,
       data?: Paths.UpdateBlueprint.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateBlueprint.Responses.$200>
     /**
      * deleteBlueprint - deleteBlueprint
-     *
+     * 
      * Delete a Blueprint
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteBlueprint.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBlueprint.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases']: {
     /**
      * listBlueprintTestCases - listBlueprintTestCases
-     *
+     * 
      * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
      */
     'get'(
       parameters?: Parameters<Paths.ListBlueprintTestCases.QueryParameters & Paths.ListBlueprintTestCases.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListBlueprintTestCases.Responses.$200>
     /**
      * createBlueprintTestCase - createBlueprintTestCase
-     *
+     * 
      * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
      */
     'post'(
       parameters?: Parameters<Paths.CreateBlueprintTestCase.PathParameters> | null,
       data?: Paths.CreateBlueprintTestCase.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateBlueprintTestCase.Responses.$201>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}']: {
     /**
      * getBlueprintTestCase - getBlueprintTestCase
-     *
+     * 
      * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintTestCase.QueryParameters & Paths.GetBlueprintTestCase.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintTestCase.Responses.$200>
     /**
      * updateBlueprintTestCase - updateBlueprintTestCase
-     *
+     * 
      * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
      */
     'put'(
       parameters?: Parameters<Paths.UpdateBlueprintTestCase.PathParameters> | null,
       data?: Paths.UpdateBlueprintTestCase.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateBlueprintTestCase.Responses.$200>
     /**
      * deleteBlueprintTestCase - deleteBlueprintTestCase
-     *
+     * 
      * Author versioned plain-language expectations. Requires the blueprint-test-cases organization feature flag.
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteBlueprintTestCase.QueryParameters & Paths.DeleteBlueprintTestCase.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBlueprintTestCase.Responses.$204>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/notes']: {
     /**
      * addBlueprintNote - addBlueprintNote
-     *
+     * 
      * Append an internal note to a blueprint. `id`, `created_at` and `created_by`
      * are stamped server-side from the caller, so notes cannot be backdated or
      * attributed to someone else. Existing notes are never modified.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.AddBlueprintNote.PathParameters> | null,
       data?: Paths.AddBlueprintNote.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddBlueprintNote.Responses.$201>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/notes/{note_id}']: {
     /**
      * updateBlueprintNote - updateBlueprintNote
-     *
+     * 
      * Rewrite the text of an existing internal note. The note keeps its position in
      * the list along with `created_at` and `created_by`, so an edit cannot reassign
      * authorship; `updated_at` is stamped server-side.
-     *
+     * 
      */
     'patch'(
       parameters?: Parameters<Paths.UpdateBlueprintNote.PathParameters> | null,
       data?: Paths.UpdateBlueprintNote.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateBlueprintNote.Responses.$200>
     /**
      * deleteBlueprintNote - deleteBlueprintNote
-     *
+     * 
      * Remove a single internal note from a blueprint.
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteBlueprintNote.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBlueprintNote.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}:verify']: {
     /**
      * verifyBlueprint - verifyBlueprint
-     *
+     * 
      * Start a blueprint verification job. Compares resource configurations between a source org
      * and a destination org to verify that a sync/install was successful.
      * Returns 202 Accepted with job_id. Poll GET /jobs/{job_id} for status, summary, and resource_results.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.VerifyBlueprint.PathParameters> | null,
       data?: Paths.VerifyBlueprint.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.VerifyBlueprint.Responses.$202>
   }
   ['/v2/blueprint-manifest/marketplace/slugs']: {
     /**
      * listMarketplaceSlugs - listMarketplaceSlugs
-     *
+     * 
      * List all available marketplace blueprint slugs from Webflow CMS.
      * Returns cached results when available.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListMarketplaceSlugs.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}:format-description']: {
     /**
      * formatBlueprintDescription - formatBlueprintDescription
-     *
+     * 
      * Format a blueprint description as markdown using AI.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.FormatBlueprintDescription.PathParameters> | null,
       data?: Paths.FormatBlueprintDescription.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.FormatBlueprintDescription.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints:suggest-resources']: {
     /**
      * suggestBlueprintResources - suggestBlueprintResources
-     *
+     * 
      * Suggest resources to add to a blueprint based on a natural-language prompt.
-     *
+     * 
      * Walks anchor resource types in priority order (journey > workflow_definition >
      * automation_flow > schema > entity-backed types) and returns matches per
      * anchor using each upstream API's text search. Suggestions are marked
@@ -10022,136 +10434,136 @@ export interface PathsDictionary {
      * bulkAddBlueprintResources and have transitive dependencies resolved
      * server-side — which means a single matched journey can stand in for its
      * full product/schema/template bundle.
-     *
+     * 
      * No side effects on the blueprint — the caller persists the chosen resources
      * via the existing create/bulk-add endpoints.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.SuggestBlueprintResources.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SuggestBlueprintResources.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources']: {
     /**
      * addBlueprintResource - addBlueprintResource
-     *
+     * 
      * Add a resource to a Blueprint
      */
     'post'(
       parameters?: Parameters<Paths.AddBlueprintResource.QueryParameters & Paths.AddBlueprintResource.PathParameters> | null,
       data?: Paths.AddBlueprintResource.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AddBlueprintResource.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources:syncDependencies']: {
     /**
      * syncDependencies - syncDependencies
-     *
+     * 
      * Sync dependencies of all root resources in a Blueprint
      */
     'post'(
       parameters?: Parameters<Paths.SyncDependencies.QueryParameters & Paths.SyncDependencies.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SyncDependencies.Responses.$202>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/bulk']: {
     /**
      * bulkAddBlueprintResources - bulkAddBlueprintResources
-     *
+     * 
      * Bulk Add resources in a Blueprint
      */
     'post'(
       parameters?: Parameters<Paths.BulkAddBlueprintResources.QueryParameters & Paths.BulkAddBlueprintResources.PathParameters> | null,
       data?: Paths.BulkAddBlueprintResources.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.BulkAddBlueprintResources.Responses.$200>
     /**
      * bulkUpdateBlueprintResources - bulkUpdateBlueprintResources
-     *
+     * 
      * Bulk update resources in a Blueprint
      */
     'put'(
       parameters?: Parameters<Paths.BulkUpdateBlueprintResources.PathParameters> | null,
       data?: Paths.BulkUpdateBlueprintResources.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.BulkUpdateBlueprintResources.Responses.$200>
     /**
      * bulkDeleteBlueprintResources - bulkDeleteBlueprintResources
-     *
+     * 
      * Bulk delete resources in a Blueprint
      */
     'delete'(
       parameters?: Parameters<Paths.BulkDeleteBlueprintResources.PathParameters> | null,
       data?: Paths.BulkDeleteBlueprintResources.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.BulkDeleteBlueprintResources.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/resources/{resource_id}']: {
     /**
      * updateBlueprintResource - updateBlueprintResource
-     *
+     * 
      * Update a resource in a Blueprint
      */
     'put'(
       parameters?: Parameters<Paths.UpdateBlueprintResource.PathParameters> | null,
       data?: Paths.UpdateBlueprintResource.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateBlueprintResource.Responses.$200>
     /**
      * deleteBlueprintResource - deleteBlueprintResource
-     *
+     * 
      * Delete a resource from a Blueprint
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteBlueprintResource.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBlueprintResource.Responses.$200>
   }
   ['/v2/blueprint-manifest/jobs']: {
     /**
      * listBlueprintJobs - listBlueprintJobs
-     *
+     * 
      * List all blueprint jobs
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListBlueprintJobs.Responses.$200>
   }
   ['/v2/blueprint-manifest/jobs/{job_id}']: {
     /**
      * getBlueprintJob - getBlueprintJob
-     *
+     * 
      * Poll the current state of a job. Serves both Terraform (v2) and V3-engine jobs —
      * check `sync_engine` (`terraform` | `v3`) to tell them apart. V3 jobs additionally
      * expose live `resource_progress[]`. V3 single-install and bulk-install child jobs
      * are polled here.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintJob.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintJob.Responses.$200>
   }
   ['/v2/blueprint-manifest/jobs/{job_id}:continue']: {
     /**
      * continueInstallationJob - continueInstallationJob
-     *
+     * 
      * Resume an installation job that is paused at `status: "WAITING_USER_ACTION"` after
      * planning. Works for both Terraform and V3 jobs. Not needed for V3 installs created
      * with `auto_apply: true` (including all bulk-install child jobs), which apply
      * without pausing.
-     *
+     * 
      * This call applies the plan. Callers acting for a user — AI agents in particular —
      * must show the user the job's `resource_progress[]` (`impact_on_install` and
      * `impact_on_install_reason`) and call it only once the user has approved.
-     *
+     * 
      * Also resumes a V3 install paused at `status: "REAUTH_REQUIRED"`, where the
      * caller's credentials could not safely cover another run. The job keeps its
      * `job_id`, so resuming continues from the operation-log checkpoint rather than
@@ -10159,18 +10571,18 @@ export interface PathsDictionary {
      * credential; for a cross-org install whose SOURCE credential also expired, send a
      * freshly scoped source token as `source_auth_token` — the destination bearer is not
      * a valid substitute for it.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.ContinueInstallationJob.PathParameters> | null,
       data?: Paths.ContinueInstallationJob.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ContinueInstallationJob.Responses.$200>
   }
   ['/v2/blueprint-manifest/jobs/{job_id}:retry']: {
     /**
      * retryInstallationJob - retryInstallationJob
-     *
+     * 
      * Retry a finished V3 installation job whose status is `FAILED` or
      * `PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same
      * source/destination and `auto_apply: true` — no `:continue` call is needed.
@@ -10178,395 +10590,395 @@ export interface PathsDictionary {
      * (`WAITING_USER_ACTION`) for the user to approve via `:continue`.
      * The plan phase re-resolves every resource: already-synced resources no-op,
      * so effectively only the failed resources are re-applied.
-     *
+     * 
      * Must be called by a user of the destination org (where the job lives); the
      * caller's bearer token is used as the destination token. The plan reuses the
      * manifest persisted by the original install, so no source-org access is
      * required. The original job's `options` (ignored resources, sync_notes) are
      * reused when present; older jobs without persisted options fall back to the
      * destination blueprint's `ignored_resource_addresses`.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.RetryInstallationJob.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RetryInstallationJob.Responses.$202>
   }
   ['/v2/blueprint-manifest/jobs/{job_id}:cancel']: {
     /**
      * cancelBlueprintJob - cancelBlueprintJob
-     *
+     * 
      * Cancel a blueprint job if it is still running.
      */
     'post'(
       parameters?: Parameters<Paths.CancelBlueprintJob.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CancelBlueprintJob.Responses.$200>
   }
   ['/v1/blueprints/{blueprint_id}/marketplace-listing']: {
     /**
      * createMarketplaceListing - createMarketplaceListing
-     *
+     * 
      * Create a marketplace listing for a blueprint. Returns 409 if one already exists.
      */
     'post'(
       parameters?: Parameters<Paths.CreateMarketplaceListing.PathParameters> | null,
       data?: Paths.CreateMarketplaceListing.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateMarketplaceListing.Responses.$201>
     /**
      * getMarketplaceListing - getMarketplaceListing
-     *
+     * 
      * Get marketplace listing for a blueprint including all versions
      */
     'get'(
       parameters?: Parameters<Paths.GetMarketplaceListing.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMarketplaceListing.Responses.$200>
   }
   ['/v1/marketplace-listings']: {
     /**
      * listMarketplaceListings - listMarketplaceListings
-     *
+     * 
      * List all marketplace listings for the authenticated organization
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListMarketplaceListings.Responses.$200>
   }
   ['/v1/marketplace-listings/{listing_id}']: {
     /**
      * getMarketplaceListingById - getMarketplaceListingById
-     *
+     * 
      * Get marketplace listing by listing ID including all versions
      */
     'get'(
       parameters?: Parameters<Paths.GetMarketplaceListingById.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetMarketplaceListingById.Responses.$200>
     /**
      * updateMarketplaceListing - updateMarketplaceListing
-     *
+     * 
      * Update listing-level fields
      */
     'patch'(
       parameters?: Parameters<Paths.UpdateMarketplaceListing.PathParameters> | null,
       data?: Paths.UpdateMarketplaceListing.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateMarketplaceListing.Responses.$200>
     /**
      * deleteMarketplaceListing - deleteMarketplaceListing
-     *
+     * 
      * Delete listing and all versions
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteMarketplaceListing.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteMarketplaceListing.Responses.$204>
   }
   ['/v1/marketplace-listings/{listing_id}/versions']: {
     /**
      * createMarketplaceListingVersion - createMarketplaceListingVersion
-     *
+     * 
      * Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint
      */
     'post'(
       parameters?: Parameters<Paths.CreateMarketplaceListingVersion.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateMarketplaceListingVersion.Responses.$201>
     /**
      * listMarketplaceListingVersions - listMarketplaceListingVersions
-     *
+     * 
      * List all versions for a listing, newest first
      */
     'get'(
       parameters?: Parameters<Paths.ListMarketplaceListingVersions.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListMarketplaceListingVersions.Responses.$200>
   }
   ['/v1/marketplace-listings/{listing_id}/versions/{version_id}']: {
     /**
      * updateMarketplaceListingVersion - updateMarketplaceListingVersion
-     *
+     * 
      * Update updateNote, requiredFeatures, or recommendedApps on a draft version
      */
     'patch'(
       parameters?: Parameters<Paths.UpdateMarketplaceListingVersion.PathParameters> | null,
       data?: Paths.UpdateMarketplaceListingVersion.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateMarketplaceListingVersion.Responses.$200>
   }
   ['/v1/marketplace-listings/{listing_id}/versions/{version_id}/publish']: {
     /**
      * publishMarketplaceListingVersion - publishMarketplaceListingVersion
-     *
+     * 
      * Publish a draft version; archives the previous live version
      */
     'post'(
       parameters?: Parameters<Paths.PublishMarketplaceListingVersion.PathParameters> | null,
       data?: Paths.PublishMarketplaceListingVersion.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}:publish']: {
     /**
      * publishBlueprintV3 - publishBlueprintV3
-     *
+     * 
      * Starts an asynchronous V3 publication. The result is a signed, portable package; poll the existing blueprint job endpoint for completion.
-     *
+     * 
      * By default this only builds the package and stores it privately for download. Creating or
      * overwriting the public marketplace listing is opt-in via `publish_to_marketplace`.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.PublishBlueprintV3.PathParameters> | null,
       data?: Paths.PublishBlueprintV3.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublishBlueprintV3.Responses.$202>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/assistant/messages']: {
     /**
      * sendBlueprintAssistantMessage - sendBlueprintAssistantMessage
-     *
+     * 
      * Sends a message to the blueprint assistant for a custom blueprint, starting a conversation when
      * `conversation_id` is omitted. The answer is produced asynchronously: poll
      * `getBlueprintAssistantConversation` until `status` is no longer `IN_PROGRESS`.
-     *
+     * 
      * `proposal_update` records that the user applied or dismissed a proposal from an earlier answer.
      * The assistant never changes the blueprint itself; proposals are applied by the client through the
      * existing resource and publish endpoints. Available when `blueprint-ai-assistant` is on; publish proposals also need `blueprint-marketplace-publishing`.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.SendBlueprintAssistantMessage.PathParameters> | null,
       data?: Paths.SendBlueprintAssistantMessage.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SendBlueprintAssistantMessage.Responses.$200 | Paths.SendBlueprintAssistantMessage.Responses.$202>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/assistant/conversations']: {
     /**
      * listBlueprintAssistantConversations - listBlueprintAssistantConversations
-     *
+     * 
      * The blueprint's blueprint assistant conversations in this organization, most recently updated first
      * (at most 20). Conversations expire 30 days after their last update.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.ListBlueprintAssistantConversations.QueryParameters & Paths.ListBlueprintAssistantConversations.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListBlueprintAssistantConversations.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/assistant/conversations/{conversation_id}']: {
     /**
      * getBlueprintAssistantConversation - getBlueprintAssistantConversation
-     *
+     * 
      * A blueprint assistant conversation, including the answer in progress.
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintAssistantConversation.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintAssistantConversation.Responses.$200>
   }
   ['/v2/blueprint-manifest/assistant/skills']: {
     /**
      * listBlueprintAssistantSkills - listBlueprintAssistantSkills
-     *
+     * 
      * The organization's blueprint assistant skills, the skills epilot ships (`defaults`; an organization
      * skill with the same name replaces one), and the upload limits. Available when `blueprint-ai-assistant` is on.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListBlueprintAssistantSkills.Responses.$200>
     /**
      * uploadBlueprintAssistantSkill - uploadBlueprintAssistantSkill
-     *
+     * 
      * Uploads a skill for the organization's blueprint assistant, replacing the skill of the same name.
      * The file is a `SKILL.md` or a zip with `SKILL.md` and `references/*.md` (the format claude.ai exports;
      * a single top-level folder is stripped). `SKILL.md` starts with YAML front matter with `name` and
      * `description`. Other files (scripts, assets) are ignored and listed in `ignored`. A new skill is enabled
      * while the organization has fewer than the enabled limit.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.UploadBlueprintAssistantSkill.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UploadBlueprintAssistantSkill.Responses.$200>
   }
   ['/v2/blueprint-manifest/assistant/skills/{skill_name}']: {
     /**
      * getBlueprintAssistantSkill - getBlueprintAssistantSkill
-     *
+     * 
      * A skill of the organization with the text of its files.
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintAssistantSkill.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintAssistantSkill.Responses.$200>
     /**
      * updateBlueprintAssistantSkill - updateBlueprintAssistantSkill
-     *
+     * 
      * Enables or disables a skill. Conversations keep the skills they started with.
      */
     'patch'(
       parameters?: Parameters<Paths.UpdateBlueprintAssistantSkill.PathParameters> | null,
       data?: Paths.UpdateBlueprintAssistantSkill.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateBlueprintAssistantSkill.Responses.$200>
     /**
      * deleteBlueprintAssistantSkill - deleteBlueprintAssistantSkill
-     *
+     * 
      * Deletes a skill. Running conversations that offered it answer that it was removed.
      */
     'delete'(
       parameters?: Parameters<Paths.DeleteBlueprintAssistantSkill.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteBlueprintAssistantSkill.Responses.$200>
   }
   ['/v3/blueprint-manifest/blueprints:pre-install']: {
     /**
      * preInstallBlueprintV3 - preInstallBlueprintV3
-     *
+     * 
      * Validates a signed V3 package and returns the destination-specific resource plan used by the install UI.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.PreInstallBlueprintV3.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PreInstallBlueprintV3.Responses.$200>
   }
   ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}']: {
     /**
      * getBlueprintMergePlan - getBlueprintMergePlan
-     *
+     * 
      * Summary of an update merge plan, with counts, warnings and the revision to send back.
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintMergePlan.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintMergePlan.Responses.$200>
   }
   ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}/resources']: {
     /**
      * listBlueprintMergePlanResources - listBlueprintMergePlanResources
-     *
+     * 
      * Journeys of the plan, one page at a time. A cursor is valid only for the revision it was issued for.
      */
     'get'(
       parameters?: Parameters<Paths.ListBlueprintMergePlanResources.QueryParameters & Paths.ListBlueprintMergePlanResources.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListBlueprintMergePlanResources.Responses.$200>
   }
   ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}/resources/{resource_key}']: {
     /**
      * getBlueprintMergePlanResource - getBlueprintMergePlanResource
-     *
+     * 
      * One journey of the plan with its decision groups and warnings.
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintMergePlanResource.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintMergePlanResource.Responses.$200>
   }
   ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}/resolutions']: {
     /**
      * updateBlueprintMergePlanResolutions - updateBlueprintMergePlanResolutions
-     *
+     * 
      * Saves choices for decision groups. Each submitted choice replaces the saved choice of the same group. Allowed while the plan waits for review.
      */
     'put'(
       parameters?: Parameters<Paths.UpdateBlueprintMergePlanResolutions.PathParameters> | null,
       data?: Paths.UpdateBlueprintMergePlanResolutions.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateBlueprintMergePlanResolutions.Responses.$200>
   }
   ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}:discard']: {
     /**
      * discardBlueprintMergePlan - discardBlueprintMergePlan
-     *
+     * 
      * Discards a plan waiting for review and ends its job. Nothing is written.
      */
     'post'(
       parameters?: Parameters<Paths.DiscardBlueprintMergePlan.PathParameters> | null,
       data?: Paths.DiscardBlueprintMergePlan.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DiscardBlueprintMergePlan.Responses.$200>
   }
   ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}:replan']: {
     /**
      * replanBlueprintMergePlan - replanBlueprintMergePlan
-     *
+     * 
      * Starts a new update job whose plan is prefilled with this plan's saved choices. A plan still waiting for review, or expired, becomes `superseded`.
      */
     'post'(
       parameters?: Parameters<Paths.ReplanBlueprintMergePlan.PathParameters> | null,
       data?: Paths.ReplanBlueprintMergePlan.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ReplanBlueprintMergePlan.Responses.$202>
   }
   ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}:apply']: {
     /**
      * applyBlueprintMergePlan - applyBlueprintMergePlan
-     *
+     * 
      * Approves the plan at `expected_plan_revision` with its current choices and resumes the parked update job with the caller's token. Only a `ready` plan whose job waits for this review can be applied. Replaying the same `idempotency_key` returns the approved plan without applying it twice.
      */
     'post'(
       parameters?: Parameters<Paths.ApplyBlueprintMergePlan.PathParameters> | null,
       data?: Paths.ApplyBlueprintMergePlan.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ApplyBlueprintMergePlan.Responses.$202>
   }
   ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}:preview-revert']: {
     /**
      * previewBlueprintMergeRevert - previewBlueprintMergeRevert
-     *
+     * 
      * Lists what the update wrote, from its own journal, and what reverting each resource would do. Resources changed since the update need an explicit choice (`requires_choice`); `not_restorable` ones can only be kept. The preview is immutable: a new call returns a new `revert_preview_id`. Only an `applied` or `partially_applied` plan inside its revert window has a preview, and only while no later update owns any of its resources.
      */
     'post'(
       parameters?: Parameters<Paths.PreviewBlueprintMergeRevert.PathParameters> | null,
       data?: Paths.PreviewBlueprintMergeRevert.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PreviewBlueprintMergeRevert.Responses.$200>
   }
   ['/v3/blueprint-manifest/merge-plans/{merge_plan_id}:revert']: {
     /**
      * applyBlueprintMergeRevert - applyBlueprintMergeRevert
-     *
+     * 
      * Reverts the update as the preview describes it, with an explicit `action` for every preview entry. Starts a `restore` job and moves the plan to `reverting`; the job ends it `reverted`, or `revert_partial` when a resource changed meanwhile or failed. Replaying the same `idempotency_key` returns the same job.
      */
     'post'(
       parameters?: Parameters<Paths.ApplyBlueprintMergeRevert.PathParameters> | null,
       data?: Paths.ApplyBlueprintMergeRevert.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ApplyBlueprintMergeRevert.Responses.$202>
   }
   ['/v3/blueprint-manifest/blueprint:install']: {
     /**
      * installBlueprintV3 - installBlueprintV3
-     *
+     * 
      * Install a blueprint into a single destination org using the V3 engine (direct API
      * calls, no Terraform). Creates resources in topological order with global ID
      * replacement and supports checkpoint-based resume on failure.
-     *
+     * 
      * **Lifecycle (how to drive an install to completion):**
      * 1. `POST /v3/blueprint-manifest/blueprint:install` returns `{ job_id }` (202).
      * 2. Poll the job with `GET /v2/blueprint-manifest/jobs/{job_id}` — V3 jobs are
@@ -10580,11 +10992,11 @@ export interface PathsDictionary {
      * 4. If `auto_apply` is `true`, the engine applies automatically after plan +
      *    snapshot — no `:continue` call is needed. This is what the bulk-install worker
      *    uses; to install into many orgs at once prefer `POST .../bulk-installs`.
-     *
+     * 
      * **AI agents** (tokens such as "Connect ChatGPT to epilot") cannot use
      * `auto_apply` (403). Install without it, show the user the plan, and call
      * `:continue` only after the user approves it.
-     *
+     * 
      * **The plan fails instead of pausing** (`status: "FAILED"`, error code
      * `missing_required_reference`) when a resource references something that is
      * neither in the blueprint nor in the destination org and the destination API
@@ -10596,23 +11008,23 @@ export interface PathsDictionary {
      * and removing it leaves everything that references it pointing at an id the
      * destination does not have. Alternatively pass the blocked addresses in
      * `options.resources_to_ignore` to install the rest.
-     *
+     * 
      * For cross-org installs, pass `destination_auth_token` (the destination org's
      * token); reads use the caller's bearer token, writes use that token.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.InstallBlueprintV3.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.InstallBlueprintV3.Responses.$202>
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore']: {
     /**
      * restoreBlueprintDeploymentV3 - restoreBlueprintDeploymentV3
-     *
+     * 
      * Roll a deployment back to its pre-install state. Two phases:
-     *
+     * 
      *   1. Upsert — re-applies the captured payloads via snapshot-api's
      *      `:restore` (server-side; runs config-engine.apply with captured
      *      target ids pre-seeded). Skipped for pure-create deployments
@@ -10622,12 +11034,12 @@ export interface PathsDictionary {
      *      resource via the type's adapter. Co-ownership / drift /
      *      no-delete-capability skip the entry with the corresponding
      *      reason.
-     *
+     * 
      * Resolves `(blueprint_id, job_id)` to the entry in
      * `Blueprint.deployments[]` and reads its `snapshot_id` and
      * `destination_blueprint_id` — the caller never needs to handle
      * snapshot ids directly.
-     *
+     * 
      * Async — returns 202 with a job id. Poll the job to track progress.
      * The restore holds its own per-instance lock (`active_restore_job_id`),
      * separate from `installation_status`. Starting a restore is rejected with
@@ -10637,77 +11049,77 @@ export interface PathsDictionary {
      * restore never overwrites `installation_status`, which keeps reflecting
      * the actual install outcome (and drives the install badge in the
      * Blueprints overview) throughout the revert.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.RestoreBlueprintDeploymentV3.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RestoreBlueprintDeploymentV3.Responses.$202>
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview']: {
     /**
      * getRestorePreview - getRestorePreview
-     *
+     * 
      * Computes what would happen if the user triggered a restore on this
      * deployment, without performing any writes. The forecast uses the
      * snapshot's captured resources (when present) plus the current lineage
      * state plus per-adapter gates (co-ownership, no-delete-capability,
      * heuristic-match, drift when wired).
-     *
+     * 
      * Idempotent and side-effect free. Safe to call repeatedly. The result
      * may shift between calls if operators edit destination resources or
      * another blueprint adopts a shared resource in the meantime.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetRestorePreview.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRestorePreview.Responses.$200>
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:restore-preview']: {
     /**
      * triggerRestorePreview - triggerRestorePreview
-     *
+     * 
      * Starts computing the same forecast as `getRestorePreview` in the
      * background. Large deployments take longer than the API Gateway
      * timeout to forecast inline, so clients should prefer this endpoint.
-     *
+     * 
      * Async: returns 202 immediately with a `running` report. Poll the
      * `Location` URL until `status` is `completed` or `failed`. Never
      * mutates any resource.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.TriggerRestorePreview.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TriggerRestorePreview.Responses.$202>
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/restore-preview/{preview_id}']: {
     /**
      * getRestorePreviewReport - getRestorePreviewReport
-     *
+     * 
      * Returns a restore preview started by `triggerRestorePreview`. The
      * `outcome` is present once `status` is `completed`. A preview whose
      * worker stopped without reporting is returned as `failed`.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetRestorePreviewReport.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRestorePreviewReport.Responses.$200>
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}:health-check']: {
     /**
      * triggerDeploymentHealthCheckV3 - triggerDeploymentHealthCheckV3
-     *
+     * 
      * Starts a read-only health scan of the resources this deployment's
      * blueprint instance tracks in the destination org (see
      * docs/rfcs/RFC-org-health-check.md, Phase 0). Checks:
-     *
+     * 
      *   - live readability — every lineage-tracked resource is read back
      *     via its adapter; tracked-but-unreadable resources are flagged.
      *   - referential integrity — destination payloads containing
@@ -10715,341 +11127,353 @@ export interface PathsDictionary {
      *     that are not readable.
      *   - install completeness — install operations whose final attempt
      *     ended `failed` or `skipped`, with their rejection reasons.
-     *
+     * 
      * Async — returns 202 immediately with a `running` report stub. Poll
      * the health-report endpoint until `status` is `completed` or
      * `failed`. Never mutates any resource.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.TriggerDeploymentHealthCheckV3.PathParameters> | null,
       data?: Paths.TriggerDeploymentHealthCheckV3.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.TriggerDeploymentHealthCheckV3.Responses.$202>
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/deployments/{job_id}/health-report']: {
     /**
      * getDeploymentHealthReportV3 - getDeploymentHealthReportV3
-     *
+     * 
      * Returns the most recent health report produced for this deployment
      * by the `:health-check` endpoint. Idempotent and side-effect free.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetDeploymentHealthReportV3.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetDeploymentHealthReportV3.Responses.$200>
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}/lineage']: {
     /**
      * getBlueprintLineageV3 - getBlueprintLineageV3
-     *
+     * 
      * Returns the lineage registry entries for a blueprint's resources in the current org.
      * Shows the mapping between source lineage IDs and target resource IDs.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintLineageV3.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintLineageV3.Responses.$200>
   }
   ['/v3/blueprint-manifest/bulk-installs']: {
     /**
      * createBulkInstallV3 - createBulkInstallV3
-     *
+     * 
      * Install one source blueprint into many destination organizations in a single
      * request. The server schedules child V3 installs with `auto_apply=true` and caps
      * active installs at `max_concurrency`. Not available to AI-agent callers (403),
      * since no child install pauses for the user to approve its plan. Per-target failures are isolated and
      * retryable; they do not stop the remaining targets.
-     *
+     * 
      * Each target carries its own write-only `destination_auth_token` (org-scoped).
      * Tokens are passed to the worker via Step Functions input only — they are never
      * persisted in DynamoDB nor returned by any endpoint.
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: Paths.CreateBulkInstallV3.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateBulkInstallV3.Responses.$202>
   }
   ['/v3/blueprint-manifest/bulk-installs/{bulk_job_id}']: {
     /**
      * getBulkInstallV3 - getBulkInstallV3
-     *
+     * 
      * Returns the bulk install parent with aggregate status and counts. Scoped by the
      * caller org as `source_org_id`. Target rows are not included — use the targets
      * endpoint to page through them.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.GetBulkInstallV3.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBulkInstallV3.Responses.$200>
   }
   ['/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets']: {
     /**
      * listBulkInstallTargetsV3 - listBulkInstallTargetsV3
-     *
+     * 
      * Pages through the bulk install's target rows. Each row hydrates its latest child
      * install job (`job_ids.at(-1)`) with the standard V3 job shape (`events[]`,
      * `resource_progress[]`) so callers can inspect per-resource progress and errors.
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<Paths.ListBulkInstallTargetsV3.QueryParameters & Paths.ListBulkInstallTargetsV3.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListBulkInstallTargetsV3.Responses.$200>
   }
   ['/v3/blueprint-manifest/bulk-installs/{bulk_job_id}/targets/{destination_org_id}:retry']: {
     /**
      * retryBulkInstallTargetV3 - retryBulkInstallTargetV3
-     *
+     * 
      * Retries a single failed target. Allowed only for `FAILED` and `PARTIAL_SUCCESS`
      * targets. Starts a new child install with `auto_apply=true`, appends its job id to
      * `job_ids`, and reuses the same target row. Only the destination auth token may be
      * supplied for the new attempt; source/destination identifiers are immutable.
      * Not available to AI-agent callers (403).
-     *
+     * 
      */
     'post'(
       parameters?: Parameters<Paths.RetryBulkInstallTargetV3.PathParameters> | null,
       data?: Paths.RetryBulkInstallTargetV3.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.RetryBulkInstallTargetV3.Responses.$200>
   }
   ['/v1/blueprint-manifest/uniqueness-criteria']: {
     /**
      * listUniquenessCriteria - listUniquenessCriteria
-     *
+     * 
      * List all custom uniqueness criteria configured for the caller's organization.
      * These overrides are applied during install (V2 and V3) when matching incoming
      * resources against existing ones in the destination org, replacing the default
      * per-resource-type field set with the caller's chosen fields (AND-combined).
-     *
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListUniquenessCriteria.Responses.$200>
   }
   ['/v1/blueprint-manifest/uniqueness-criteria/{resource_type}']: {
     /**
      * getUniquenessCriteria - getUniquenessCriteria
-     *
+     * 
      * Get the configured uniqueness criteria for a specific resource type, if any.
      */
     'get'(
       parameters?: Parameters<Paths.V1BlueprintManifestUniquenessCriteria$ResourceType.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetUniquenessCriteria.Responses.$200>
     /**
      * putUniquenessCriteria - putUniquenessCriteria
-     *
+     * 
      * Set or replace the uniqueness criteria for a resource type. The provided fields
      * must be valid attributes on the resource's schema (the UI typically loads the
      * schema to populate options). All listed fields are AND-combined during matching.
-     *
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.V1BlueprintManifestUniquenessCriteria$ResourceType.PathParameters> | null,
       data?: Paths.PutUniquenessCriteria.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PutUniquenessCriteria.Responses.$200>
     /**
      * deleteUniquenessCriteria - deleteUniquenessCriteria
-     *
+     * 
      * Remove the custom criteria for a resource type, reverting to the default fields.
      */
     'delete'(
       parameters?: Parameters<Paths.V1BlueprintManifestUniquenessCriteria$ResourceType.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteUniquenessCriteria.Responses.$204>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/duplicate']: {
+    /**
+     * duplicateBlueprintTestCase - duplicateBlueprintTestCase
+     * 
+     * Copy a v2 test case of the blueprint into a new test case that keeps the source's clauses. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.DuplicateBlueprintTestCase.PathParameters> | null,
+      data?: Paths.DuplicateBlueprintTestCase.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DuplicateBlueprintTestCase.Responses.$201>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/source-operations/{run_id}']: {
     /**
      * getSourceTestOperation - getSourceTestOperation
-     *
+     * 
      * Read a source-only generation or manual run. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
      */
     'get'(
       parameters?: Parameters<Paths.GetSourceTestOperation.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSourceTestOperation.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/source-confirmed-runs']: {
     /**
      * createSourceConfirmedRun - createSourceConfirmedRun
-     *
+     * 
      * Evaluate previously confirmed checks against the source Blueprint only. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
      */
     'post'(
       parameters?: Parameters<Paths.CreateSourceConfirmedRun.PathParameters> | null,
       data?: Paths.CreateSourceConfirmedRun.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateSourceConfirmedRun.Responses.$202>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/runs']: {
     /**
      * createBlueprintTestRun - createBlueprintTestRun
-     *
+     * 
      * Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
      */
     'post'(
       parameters?: Parameters<Paths.CreateBlueprintTestRun.PathParameters> | null,
       data?: Paths.CreateBlueprintTestRun.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateBlueprintTestRun.Responses.$202>
     /**
      * listBlueprintTestRuns - listBlueprintTestRuns
-     *
+     * 
      * Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
      */
     'get'(
       parameters?: Parameters<Paths.ListBlueprintTestRuns.QueryParameters & Paths.ListBlueprintTestRuns.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ListBlueprintTestRuns.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/runs/{run_id}']: {
     /**
      * getBlueprintTestRun - getBlueprintTestRun
-     *
+     * 
      * Run read-only configuration acceptance checks or review their interpretation. Requires the blueprint-test-cases organization feature flag and the original caller's organization.
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintTestRun.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintTestRun.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite']: {
     /**
      * getBlueprintTestSuite - getBlueprintTestSuite
-     *
+     * 
      * The v2 test cases of the blueprint with their current latest suite result (stale results never count as passed) and a summary over all cases. Requires the blueprint-test-cases organization feature flag.
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintTestSuite.QueryParameters & Paths.GetBlueprintTestSuite.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintTestSuite.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/runs']: {
     /**
      * createBlueprintTestSuiteRun - createBlueprintTestSuiteRun
-     *
+     * 
      * Run every v2 test case of the blueprint against one configuration snapshot. Requires the blueprint-test-cases organization feature flag.
      */
     'post'(
       parameters?: Parameters<Paths.CreateBlueprintTestSuiteRun.PathParameters> | null,
       data?: Paths.CreateBlueprintTestSuiteRun.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateBlueprintTestSuiteRun.Responses.$202>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/runs/{run_id}']: {
     /**
      * getBlueprintTestSuiteRun - getBlueprintTestSuiteRun
-     *
+     * 
      * Read a suite run. Requires the blueprint-test-cases organization feature flag.
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintTestSuiteRun.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintTestSuiteRun.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions']: {
     /**
      * createBlueprintGraphSuggestions - createBlueprintGraphSuggestions
-     *
+     * 
      * Generate engine-verified test suggestions from the blueprint configuration graph. Requires the blueprint-test-cases organization feature flag.
      */
     'post'(
       parameters?: Parameters<Paths.CreateBlueprintGraphSuggestions.PathParameters> | null,
       data?: Paths.CreateBlueprintGraphSuggestions.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateBlueprintGraphSuggestions.Responses.$202>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}']: {
     /**
      * getBlueprintGraphSuggestions - getBlueprintGraphSuggestions
-     *
+     * 
      * Read a graph suggestion generation and a page of its suggestions. Requires the blueprint-test-cases organization feature flag.
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintGraphSuggestions.QueryParameters & Paths.GetBlueprintGraphSuggestions.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintGraphSuggestions.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/accept']: {
     /**
      * acceptBlueprintGraphSuggestions - acceptBlueprintGraphSuggestions
-     *
+     * 
      * Accept suggestions as v2 test cases. Idempotent per suggestion id. Requires the blueprint-test-cases organization feature flag.
      */
     'post'(
       parameters?: Parameters<Paths.AcceptBlueprintGraphSuggestions.PathParameters> | null,
       data?: Paths.AcceptBlueprintGraphSuggestions.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AcceptBlueprintGraphSuggestions.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite:migrate-v1']: {
     /**
      * migrateBlueprintV1TestCases - migrateBlueprintV1TestCases
-     *
+     * 
      * Migrate v1 test cases to v2 clauses; cases that cannot be mapped are flagged needs_reinterpretation. Requires the blueprint-test-cases organization feature flag.
      */
     'post'(
       parameters?: Parameters<Paths.MigrateBlueprintV1TestCases.PathParameters> | null,
       data?: Paths.MigrateBlueprintV1TestCases.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MigrateBlueprintV1TestCases.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations']: {
     /**
      * createBlueprintTestInterpretation - createBlueprintTestInterpretation
-     *
+     * 
      * Start interpreting an author's plain-language test against the blueprint configuration. With test_case_id the result rewrites that case. One active interpretation per author and blueprint. Requires the blueprint-test-cases organization feature flag.
      */
     'post'(
       parameters?: Parameters<Paths.CreateBlueprintTestInterpretation.PathParameters> | null,
       data?: Paths.CreateBlueprintTestInterpretation.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateBlueprintTestInterpretation.Responses.$202>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations/{interpretation_id}']: {
     /**
      * getBlueprintTestInterpretation - getBlueprintTestInterpretation
-     *
+     * 
      * Read the caller's own text interpretation. Requires the blueprint-test-cases organization feature flag.
      */
     'get'(
       parameters?: Parameters<Paths.GetBlueprintTestInterpretation.PathParameters> | null,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetBlueprintTestInterpretation.Responses.$200>
   }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/interpretations/{interpretation_id}/confirm']: {
     /**
      * confirmBlueprintTestInterpretationV2 - confirmBlueprintTestInterpretationV2
-     *
+     * 
      * Save the author's confirmed selection of a completed interpretation as a v2 test case (201), or as a new revision of the case it rewrites (200, needs expected_revision). Ambiguous parts need a chosen candidate, unsupported parts must be omitted; only engine-verified clauses are saved. An interpretation is confirmed at most once. Requires the blueprint-test-cases organization feature flag.
      */
     'post'(
       parameters?: Parameters<Paths.ConfirmBlueprintTestInterpretationV2.PathParameters> | null,
       data?: Paths.ConfirmBlueprintTestInterpretationV2.RequestBody,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ConfirmBlueprintTestInterpretationV2.Responses.$200 | Paths.ConfirmBlueprintTestInterpretationV2.Responses.$201>
   }
 }
@@ -11098,6 +11522,7 @@ export type BlueprintTestCaseShape = Components.Schemas.BlueprintTestCaseShape;
 export type BlueprintTestCaseUpdate = Components.Schemas.BlueprintTestCaseUpdate;
 export type BlueprintTestCatalogEntry = Components.Schemas.BlueprintTestCatalogEntry;
 export type BlueprintTestCheckResult = Components.Schemas.BlueprintTestCheckResult;
+export type BlueprintTestCoverage = Components.Schemas.BlueprintTestCoverage;
 export type BlueprintTestDependencyValidation = Components.Schemas.BlueprintTestDependencyValidation;
 export type BlueprintTestInterpretation = Components.Schemas.BlueprintTestInterpretation;
 export type BlueprintTestInterpretationConfirmInput = Components.Schemas.BlueprintTestInterpretationConfirmInput;
@@ -11106,6 +11531,7 @@ export type BlueprintTestInterpretationInput = Components.Schemas.BlueprintTestI
 export type BlueprintTestInterpretationProposal = Components.Schemas.BlueprintTestInterpretationProposal;
 export type BlueprintTestInterpretationResult = Components.Schemas.BlueprintTestInterpretationResult;
 export type BlueprintTestInterpretationStarted = Components.Schemas.BlueprintTestInterpretationStarted;
+export type BlueprintTestMainResource = Components.Schemas.BlueprintTestMainResource;
 export type BlueprintTestPredicate = Components.Schemas.BlueprintTestPredicate;
 export type BlueprintTestResourceEvidence = Components.Schemas.BlueprintTestResourceEvidence;
 export type BlueprintTestRun = Components.Schemas.BlueprintTestRun;

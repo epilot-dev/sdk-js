@@ -5355,6 +5355,134 @@
         }
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/duplicate": {
+      "post": {
+        "operationId": "duplicateBlueprintTestCase",
+        "summary": "duplicateBlueprintTestCase",
+        "description": "Copy a v2 test case of the blueprint into a new test case that keeps the source's clauses. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "test_case_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160,
+                    "pattern": "\\S"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Test case duplicated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestCase"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Original caller authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint or test case not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The source is not a v2 test case",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/source-operations/{run_id}": {
       "get": {
         "operationId": "getSourceTestOperation",
@@ -6147,7 +6275,20 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "additionalProperties": false
+                "additionalProperties": false,
+                "properties": {
+                  "case_ids": {
+                    "type": "array",
+                    "description": "Run only these v2 test cases. Omit to run every v2 test case.",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
               }
             }
           }
@@ -7384,6 +7525,17 @@
             "type": "string",
             "format": "uuid"
           },
+          "created_by": {
+            "$ref": "#/components/schemas/CallerIdentity"
+          },
+          "case_ids": {
+            "type": "array",
+            "description": "The v2 test cases this run covered. Absent when the run covered every v2 test case.",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -7572,6 +7724,19 @@
                 },
                 "latest": {
                   "$ref": "#/components/schemas/CaseResultRow"
+                },
+                "main_resource": {
+                  "$ref": "#/components/schemas/BlueprintTestMainResource"
+                },
+                "resource_types": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "resource_count": {
+                  "type": "integer",
+                  "minimum": 0
                 }
               }
             }
@@ -7582,8 +7747,103 @@
           "active_run": {
             "$ref": "#/components/schemas/SuiteRun"
           },
+          "last_run": {
+            "$ref": "#/components/schemas/SuiteRun"
+          },
+          "latest_suggestions": {
+            "description": "The blueprint's newest suggestion generation (current incarnation). `running` while queued or generating,\n`finished` once completed (read it via the suggestions endpoint). Omitted when there is none, or the newest\none failed, expired or belongs to an older incarnation.\n",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "generation_id",
+              "status",
+              "created_at"
+            ],
+            "properties": {
+              "generation_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "running",
+                  "finished"
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/BlueprintTestCoverage"
+          },
           "next_cursor": {
             "type": "string"
+          }
+        }
+      },
+      "BlueprintTestMainResource": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "id",
+          "name"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "BlueprintTestCoverage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "covered",
+          "total",
+          "untested"
+        ],
+        "properties": {
+          "covered": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "untested": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "resource_type",
+                "resource_id",
+                "name"
+              ],
+              "properties": {
+                "resource_type": {
+                  "type": "string"
+                },
+                "resource_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       },
@@ -7653,6 +7913,41 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Sentence"
+            }
+          },
+          "covered_by": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "case_id"
+            ],
+            "description": "An existing v2 test case that already holds every clause of this suggestion.",
+            "properties": {
+              "case_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "title": {
+                "type": "string"
+              }
+            }
+          },
+          "why_code": {
+            "type": "string",
+            "enum": [
+              "untested_resource",
+              "new_check"
+            ],
+            "description": "Always set on GET, not stored."
+          },
+          "main_resource": {
+            "$ref": "#/components/schemas/BlueprintTestMainResource"
+          },
+          "resource_types": {
+            "type": "array",
+            "description": "Always set on GET, not stored.",
+            "items": {
+              "type": "string"
             }
           }
         }
@@ -8176,6 +8471,32 @@
                 "$ref": "#/components/schemas/CallerIdentity"
               }
             }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "source_case_id",
+              "source_revision"
+            ],
+            "description": "Copied from another v2 case of the same blueprint.",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "duplicate"
+                ]
+              },
+              "source_case_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "source_revision": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
           }
         ]
       },
@@ -8490,9 +8811,9 @@
         "additionalProperties": false,
         "required": [
           "title",
-          "expectation",
           "expected_revision"
         ],
+        "description": "`expectation` is required for schema version 1 and must be absent for schema version 2 (title-only rename).",
         "properties": {
           "title": {
             "type": "string",
@@ -8594,6 +8915,11 @@
           "clauses_hash": {
             "type": "string",
             "description": "Schema version 2 only. sha256 of the canonical clauses."
+          },
+          "clauses_revision": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Schema version 2 only. The revision at which `clauses` last changed"
           },
           "title_key": {
             "type": "object",
@@ -9672,6 +9998,14 @@
               "note": {
                 "type": "string",
                 "maxLength": 500
+              },
+              "excluded_ids": {
+                "type": "array",
+                "maxItems": 200,
+                "description": "Resources of a change or add proposal the user unchecked before applying it. Stored on the proposal as `excluded_ids`.",
+                "items": {
+                  "type": "string"
+                }
               }
             }
           }
@@ -9790,6 +10124,10 @@
               "publishers"
             ],
             "description": "Only offered to users who may publish to the epilot Marketplace."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the organization uses this skill. Switch it with the skill update, by name."
           }
         }
       },
@@ -9891,7 +10229,7 @@
         "required": [
           "type"
         ],
-        "description": "`text` parts carry `text`. `tool` parts carry the tool call and, once finished, its structured\n`result`, discriminated by `result.kind`: `overview`, `resources`, `inclusion`, `resource_content`,\n`audit`, `proposal_changes`, `proposal_add`, `proposal_blueprint`, `proposal_publish`, `skill` or `error`.\n",
+        "description": "`text` parts carry `text`. `tool` parts carry the tool call and, once finished, its structured\n`result`, discriminated by `result.kind`: `overview`, `resources`, `inclusion`, `resource_content`,\n`audit`, `proposal_changes`, `proposal_add`, `proposal_blueprint`, `proposal_publish`, `skill` or `error`. Applied change and add proposals carry `excluded_ids`: the resources the user unchecked.\n",
         "properties": {
           "type": {
             "type": "string",
@@ -12894,7 +13232,9 @@
           "workflow_quota_reached",
           "entity_mapping_journey_not_in_blueprint",
           "missing_required_reference",
-          "source_resources_missing"
+          "source_resources_missing",
+          "custom_schema_id_conflict",
+          "custom_schema_check_unavailable"
         ]
       },
       "V3SourceResource": {
@@ -13027,6 +13367,10 @@
               },
               "resourceDependency": {
                 "type": "string"
+              },
+              "conflictingResource": {
+                "$ref": "#/components/schemas/FormattedErrorData",
+                "description": "Another resource that already holds the id the reported resource needs (custom_schema_id_conflict)"
               },
               "resources": {
                 "type": "array",
