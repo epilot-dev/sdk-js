@@ -43,6 +43,18 @@
         "responses": {}
       }
     },
+    "/v1/campaigns:summary": {
+      "post": {
+        "operationId": "getCampaignsSummary",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/campaign/{campaign_id}/automations:retrigger": {
       "post": {
         "operationId": "retriggerCampaignAutomations",
@@ -334,6 +346,11 @@
         }
       },
       "CampaignPortalsResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "CampaignsSummaryResponse": {
         "content": {
           "application/json": {}
         }

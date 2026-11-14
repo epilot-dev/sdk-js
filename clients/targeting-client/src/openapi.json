@@ -133,6 +133,42 @@
         }
       }
     },
+    "/v1/campaigns:summary": {
+      "post": {
+        "operationId": "getCampaignsSummary",
+        "summary": "getCampaignsSummary",
+        "description": "Returns the automation job progress and portal usage of up to 100 campaigns in one call.\n\n- `job` is `null` when the campaign has no automation job or its job could not be loaded.\n- `portal_blocks` and `portals` are `null` when the portal configurations could not be loaded.\n\nCampaigns that do not exist in the organization (or are deleted) are left out of `results`.\n",
+        "tags": [
+          "Campaign"
+        ],
+        "security": [
+          {
+            "EpilotAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampaignsSummaryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/CampaignsSummaryResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          }
+        }
+      }
+    },
     "/v1/campaign/{campaign_id}/automations:retrigger": {
       "post": {
         "operationId": "retriggerCampaignAutomations",
@@ -974,20 +1010,23 @@
           }
         }
       },
+      "BulkJobStatus": {
+        "type": "string",
+        "description": "The status of the automation job",
+        "enum": [
+          "queued",
+          "processing",
+          "finished",
+          "failed",
+          "cancelled",
+          "send_report"
+        ]
+      },
       "JobStatus": {
         "type": "object",
         "properties": {
           "status": {
-            "type": "string",
-            "description": "The status of the automation job",
-            "enum": [
-              "queued",
-              "processing",
-              "finished",
-              "failed",
-              "cancelled",
-              "send_report"
-            ]
+            "$ref": "#/components/schemas/BulkJobStatus"
           },
           "execution_summary": {
             "type": "array",
@@ -995,6 +1034,107 @@
               "$ref": "#/components/schemas/ExecutionSummaryItem"
             }
           }
+        }
+      },
+      "CampaignsSummaryRequest": {
+        "type": "object",
+        "properties": {
+          "campaign_ids": {
+            "type": "array",
+            "description": "IDs of the campaigns to summarize.",
+            "items": {
+              "$ref": "#/components/schemas/BaseUUID"
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "campaign_ids"
+        ]
+      },
+      "CampaignSummary": {
+        "type": "object",
+        "properties": {
+          "campaign_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "job": {
+            "description": "The campaign's automation job. `null` when it has none or it could not be loaded.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CampaignJobSummary"
+              }
+            ]
+          },
+          "portal_blocks": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Number of portal page blocks showing the campaign, across all portals of the organization.\n`null` when the portal configurations could not be loaded.\n",
+            "example": 3
+          },
+          "portals": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Number of portals with at least one block showing the campaign.\n`null` when the portal configurations could not be loaded.\n",
+            "example": 2
+          }
+        },
+        "required": [
+          "campaign_id",
+          "job",
+          "portal_blocks",
+          "portals"
+        ]
+      },
+      "CampaignJobSummary": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BulkJobStatus"
+          },
+          "execution_stats": {
+            "$ref": "#/components/schemas/CampaignJobExecutionStats"
+          },
+          "last_error": {
+            "type": "string",
+            "description": "Error that moved the job into the `failed` status."
+          },
+          "report_file_entity_id": {
+            "type": "string",
+            "description": "Entity ID of the job's report file."
+          }
+        },
+        "required": [
+          "job_id",
+          "status",
+          "execution_stats"
+        ]
+      },
+      "CampaignJobExecutionStats": {
+        "type": "object",
+        "description": "Number of the job's automation executions in total and per execution status\n(e.g. `success`, `failed`, `in_progress`, `pending`). Statuses without executions may be left out.\n",
+        "properties": {
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "additionalProperties": {
+          "type": "integer"
+        },
+        "example": {
+          "total": 4820,
+          "success": 3046,
+          "failed": 14,
+          "in_progress": 10
         }
       },
       "Campaign": {
@@ -1583,6 +1723,11 @@
                 }
               }
             }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the entity became a recipient of the campaign: at launch, when it first saw the\ncampaign in a portal or as a Next Best Action, or when the daily recipient check added it\n(campaigns with `auto_add_recipients` on).\n"
           },
           "updated_at": {
             "type": "string",
@@ -2389,6 +2534,27 @@
                   "widgets"
                 ]
               }
+            }
+          }
+        }
+      },
+      "CampaignsSummaryResponse": {
+        "description": "Automation job progress and portal usage per campaign",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CampaignSummary"
+                  }
+                }
+              },
+              "required": [
+                "results"
+              ]
             }
           }
         }
