@@ -50,6 +50,7 @@
   "submission": "submission",
   "targeting": "targeting",
   "templateVariables": "template-variables",
+  "translation": "translation",
   "user": "user",
   "validationRules": "validation-rules",
   "webhooks": "webhooks",

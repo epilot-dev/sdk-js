@@ -321,6 +321,12 @@
       "require": "./dist/apis/template-variables.cjs"
     },
     "./template-variables/openapi.json": "./definitions/template-variables.json",
+    "./translation": {
+      "types": "./dist/apis/translation.d.ts",
+      "import": "./dist/apis/translation.js",
+      "require": "./dist/apis/translation.cjs"
+    },
+    "./translation/openapi.json": "./definitions/translation.json",
     "./user": {
       "types": "./dist/apis/user.d.ts",
       "import": "./dist/apis/user.js",
@@ -553,6 +559,9 @@
       ],
       "template-variables": [
         "./dist/apis/template-variables.d.ts"
+      ],
+      "translation": [
+        "./dist/apis/translation.d.ts"
       ],
       "user": [
         "./dist/apis/user.d.ts"

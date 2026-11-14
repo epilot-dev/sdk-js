@@ -267,6 +267,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'translation',
+    loader: () => expandDef(require('../definitions/translation-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'user',
     loader: () => expandDef(require('../definitions/user-runtime.json')),
   });

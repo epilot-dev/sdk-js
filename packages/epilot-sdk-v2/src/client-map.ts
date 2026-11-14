@@ -49,6 +49,7 @@ import type { Client as SnapshotClient } from './types/snapshot';
 import type { Client as SubmissionClient } from './types/submission';
 import type { Client as TargetingClient } from './types/targeting';
 import type { Client as TemplateVariablesClient } from './types/template-variables';
+import type { Client as TranslationClient } from './types/translation';
 import type { Client as UserClient } from './types/user';
 import type { Client as ValidationRulesClient } from './types/validation-rules';
 import type { Client as WebhooksClient } from './types/webhooks';
@@ -107,6 +108,7 @@ export type SDKClientMap = {
   submission: SubmissionClient;
   targeting: TargetingClient;
   templateVariables: TemplateVariablesClient;
+  translation: TranslationClient;
   user: UserClient;
   validationRules: ValidationRulesClient;
   webhooks: WebhooksClient;

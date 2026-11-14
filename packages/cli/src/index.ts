@@ -74,6 +74,7 @@ export const main = defineCommand({
     submission: () => import('./commands/apis/submission.js').then((m) => m.default),
     targeting: () => import('./commands/apis/targeting.js').then((m) => m.default),
     'template-variables': () => import('./commands/apis/template-variables.js').then((m) => m.default),
+    translation: () => import('./commands/apis/translation.js').then((m) => m.default),
     user: () => import('./commands/apis/user.js').then((m) => m.default),
     'validation-rules': () => import('./commands/apis/validation-rules.js').then((m) => m.default),
     webhooks: () => import('./commands/apis/webhooks.js').then((m) => m.default),

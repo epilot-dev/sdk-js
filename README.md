@@ -100,6 +100,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.submission` | `@epilot/sdk/submission` | [docs](./packages/epilot-sdk-v2/docs/submission.md) |
 | `epilot.targeting` | `@epilot/sdk/targeting` | [docs](./packages/epilot-sdk-v2/docs/targeting.md) |
 | `epilot.templateVariables` | `@epilot/sdk/template-variables` | [docs](./packages/epilot-sdk-v2/docs/template-variables.md) |
+| `epilot.translation` | `@epilot/sdk/translation` | [docs](./packages/epilot-sdk-v2/docs/translation.md) |
 | `epilot.user` | `@epilot/sdk/user` | [docs](./packages/epilot-sdk-v2/docs/user.md) |
 | `epilot.validationRules` | `@epilot/sdk/validation-rules` | [docs](./packages/epilot-sdk-v2/docs/validation-rules.md) |
 | `epilot.webhooks` | `@epilot/sdk/webhooks` | [docs](./packages/epilot-sdk-v2/docs/webhooks.md) |

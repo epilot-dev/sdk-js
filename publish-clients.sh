@@ -44,6 +44,7 @@ CLIENTS=(
   "submission-client"
   "targeting-client"
   "template-variables-client"
+  "translation-client"
   "user-client"
   "validation-rules-client"
   "webhooks-client"
