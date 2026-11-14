@@ -63,6 +63,11 @@ epilot workflow-definition getMaxAllowedLimit
 - [`updateClosingReason`](#updateclosingreason) — Update an existing closing reason
 - [`deleteClosingReason`](#deleteclosingreason) — Permanently delete a closing reason (Using INACTIVE status is recommended instead)
 - [`changeReasonStatus`](#changereasonstatus) — Change the status of a Closing Reason (eg. ACTIVE to INACTIVE).
+- [`getAllClosingReasonCategories`](#getallclosingreasoncategories) — Get all closing reason categories defined in the organization.
+- [`createClosingReasonCategory`](#createclosingreasoncategory) — Create a category that closing reasons can be grouped under. Titles are unique per organization, ignoring case and surro
+- [`getClosingReasonCategory`](#getclosingreasoncategory) — Get a closing reason category by id.
+- [`updateClosingReasonCategory`](#updateclosingreasoncategory) — Rename a closing reason category. Running flows keep the title they started with.
+- [`deleteClosingReasonCategory`](#deleteclosingreasoncategory) — Delete a closing reason category. Its reasons are kept and lose their category.
 
 ### `getMaxAllowedLimit`
 
@@ -370,6 +375,7 @@ epilot workflow-definition listFlowTemplates --jsonata 'results[0]'
       "org_id": "string",
       "name": "string",
       "description": "string",
+      "portal_titles": {},
       "trigger": {},
       "enabled": true,
       "version": 2,
@@ -381,6 +387,7 @@ epilot workflow-definition listFlowTemplates --jsonata 'results[0]'
       "available_in_ecp": true,
       "additional_triggers": [],
       "phases": [],
+      "stages": [],
       "tasks": [],
       "edges": [],
       "closing_reasons": [],
@@ -389,7 +396,11 @@ epilot workflow-definition listFlowTemplates --jsonata 'results[0]'
       "singleClosingReasonSelection": true,
       "_manifest": ["string"],
       "linear": true,
-      "limit_warnings": []
+      "context_settings": {},
+      "limit_warnings": [],
+      "structural_warnings": [],
+      "keep_task_automations_in_sync": true,
+      "protected": true
     }
   ]
 }
@@ -410,6 +421,7 @@ Create a new Flow Template (V2 workflow definition).
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `enforce_limits` | query | boolean | No | When true, size/count limit violations (max incoming edges per task, max branches, max entity-sync rules, ...) are enforced as 400 errors. Used by the flow-builder UI for interactive authoring. On upd |
+| `client_supports_adv_loops` | query | boolean | No | When true, the client writes `loops` on decision tasks and `loop_id` on loop back edges, and invalid ones are rejected. When false or absent, the server rebuilds both from `loop_config`. |
 
 **Request Body** (required)
 
@@ -428,6 +440,10 @@ epilot workflow-definition createFlowTemplate \
   "org_id": "string",
   "name": "string",
   "description": "string",
+  "portal_titles": {
+    "ecp": "string",
+    "installer": "string"
+  },
   "trigger": {
     "type": "automation",
     "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
@@ -457,7 +473,8 @@ epilot workflow-definition createFlowTemplate \
       "type": "automation",
       "automation_id": "string",
       "input_entity": "thread",
-      "trigger_config": []
+      "trigger_config": [],
+      "duplicated_automation_id": "string"
     }
   ],
   "phases": [
@@ -470,6 +487,18 @@ epilot workflow-definition createFlowTemplate \
       "taxonomies": ["string"]
     }
   ],
+  "stages": [
+    {
+      "id": "string",
+      "name": "string",
+      "description": "string",
+      "entry_node_id": "string",
+      "cut_edge_ids": ["string"],
+      "color": "string",
+      "portal_names": {},
+      "portal_descriptions": {}
+    }
+  ],
   "tasks": [
     {
       "id": "string",
@@ -478,11 +507,17 @@ epilot workflow-definition createFlowTemplate \
       "journey": {},
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
+      "start_date": "2021-04-27T12:00:00.000Z",
+      "start_date_config": {},
       "requirements": [],
+      "required": false,
+      "only_assignee_can_complete": true,
+      "subtasks": [],
       "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
       "partner": {},
+      "audience_order": ["description"],
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL"
@@ -494,15 +529,22 @@ epilot workflow-definition createFlowTemplate \
       "journey": {},
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
+      "start_date": "2021-04-27T12:00:00.000Z",
+      "start_date_config": {},
       "requirements": [],
+      "required": false,
+      "only_assignee_can_complete": true,
+      "subtasks": [],
       "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
       "partner": {},
+      "audience_order": ["description"],
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
       "automation_config": {},
+      "on_failure": "stop",
       "trigger_mode": "manual",
       "schedule": {},
       "created_automatically": false
@@ -514,6 +556,7 @@ epilot workflow-definition createFlowTemplate \
       "from_id": "string",
       "to_id": "string",
       "condition_id": "string",
+      "loop_id": "string",
       "none_met": true
     }
   ],
@@ -522,6 +565,8 @@ epilot workflow-definition createFlowTemplate \
       "id": "string",
       "title": "string",
       "status": "ACTIVE",
+      "categoryId": "c9wq81x",
+      "category": {},
       "lastUpdateTime": "string",
       "creationTime": "string"
     }
@@ -537,6 +582,16 @@ epilot workflow-definition createFlowTemplate \
   "singleClosingReasonSelection": true,
   "_manifest": ["string"],
   "linear": true,
+  "context_settings": {
+    "visibility": "entity_views",
+    "main_context": {
+      "schema": "string",
+      "relation_labels": ["string"]
+    },
+    "displays": [
+      {}
+    ]
+  },
   "limit_warnings": [
     {
       "i18nKey": "string",
@@ -549,7 +604,18 @@ epilot workflow-definition createFlowTemplate \
       "param_name": "string",
       "path": []
     }
-  ]
+  ],
+  "structural_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "node_id": "string",
+      "edge_id": "string",
+      "path": []
+    }
+  ],
+  "keep_task_automations_in_sync": true,
+  "protected": true
 }'
 ```
 
@@ -574,6 +640,10 @@ epilot workflow-definition createFlowTemplate --jsonata '$'
   "org_id": "string",
   "name": "string",
   "description": "string",
+  "portal_titles": {
+    "ecp": "string",
+    "installer": "string"
+  },
   "trigger": {
     "type": "automation",
     "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
@@ -603,7 +673,8 @@ epilot workflow-definition createFlowTemplate --jsonata '$'
       "type": "automation",
       "automation_id": "string",
       "input_entity": "thread",
-      "trigger_config": []
+      "trigger_config": [],
+      "duplicated_automation_id": "string"
     }
   ],
   "phases": [
@@ -616,6 +687,18 @@ epilot workflow-definition createFlowTemplate --jsonata '$'
       "taxonomies": ["string"]
     }
   ],
+  "stages": [
+    {
+      "id": "string",
+      "name": "string",
+      "description": "string",
+      "entry_node_id": "string",
+      "cut_edge_ids": ["string"],
+      "color": "string",
+      "portal_names": {},
+      "portal_descriptions": {}
+    }
+  ],
   "tasks": [
     {
       "id": "string",
@@ -624,11 +707,17 @@ epilot workflow-definition createFlowTemplate --jsonata '$'
       "journey": {},
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
+      "start_date": "2021-04-27T12:00:00.000Z",
+      "start_date_config": {},
       "requirements": [],
+      "required": false,
+      "only_assignee_can_complete": true,
+      "subtasks": [],
       "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
       "partner": {},
+      "audience_order": ["description"],
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL"
@@ -640,15 +729,22 @@ epilot workflow-definition createFlowTemplate --jsonata '$'
       "journey": {},
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
+      "start_date": "2021-04-27T12:00:00.000Z",
+      "start_date_config": {},
       "requirements": [],
+      "required": false,
+      "only_assignee_can_complete": true,
+      "subtasks": [],
       "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
       "partner": {},
+      "audience_order": ["description"],
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
       "automation_config": {},
+      "on_failure": "stop",
       "trigger_mode": "manual",
       "schedule": {},
       "created_automatically": false
@@ -660,6 +756,7 @@ epilot workflow-definition createFlowTemplate --jsonata '$'
       "from_id": "string",
       "to_id": "string",
       "condition_id": "string",
+      "loop_id": "string",
       "none_met": true
     }
   ],
@@ -668,6 +765,8 @@ epilot workflow-definition createFlowTemplate --jsonata '$'
       "id": "string",
       "title": "string",
       "status": "ACTIVE",
+      "categoryId": "c9wq81x",
+      "category": {},
       "lastUpdateTime": "string",
       "creationTime": "string"
     }
@@ -683,6 +782,16 @@ epilot workflow-definition createFlowTemplate --jsonata '$'
   "singleClosingReasonSelection": true,
   "_manifest": ["string"],
   "linear": true,
+  "context_settings": {
+    "visibility": "entity_views",
+    "main_context": {
+      "schema": "string",
+      "relation_labels": ["string"]
+    },
+    "displays": [
+      {}
+    ]
+  },
   "limit_warnings": [
     {
       "i18nKey": "string",
@@ -695,7 +804,18 @@ epilot workflow-definition createFlowTemplate --jsonata '$'
       "param_name": "string",
       "path": []
     }
-  ]
+  ],
+  "structural_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "node_id": "string",
+      "edge_id": "string",
+      "path": []
+    }
+  ],
+  "keep_task_automations_in_sync": true,
+  "protected": true
 }
 ```
 
@@ -757,6 +877,7 @@ epilot workflow-definition searchFlowTemplates --jsonata 'results[0]'
       "org_id": "string",
       "name": "string",
       "description": "string",
+      "portal_titles": {},
       "trigger": {},
       "enabled": true,
       "version": 2,
@@ -768,6 +889,7 @@ epilot workflow-definition searchFlowTemplates --jsonata 'results[0]'
       "available_in_ecp": true,
       "additional_triggers": [],
       "phases": [],
+      "stages": [],
       "tasks": [],
       "edges": [],
       "closing_reasons": [],
@@ -776,7 +898,11 @@ epilot workflow-definition searchFlowTemplates --jsonata 'results[0]'
       "singleClosingReasonSelection": true,
       "_manifest": ["string"],
       "linear": true,
-      "limit_warnings": []
+      "context_settings": {},
+      "limit_warnings": [],
+      "structural_warnings": [],
+      "keep_task_automations_in_sync": true,
+      "protected": true
     }
   ]
 }
@@ -797,6 +923,7 @@ Retrieve a specific flow template by its unique identifier.
 | Name | In | Type | Required | Description |
 | ---- | -- | ---- | -------- | ----------- |
 | `flowId` | path | string | Yes | Unique identifier of the flow template to retrieve. |
+| `skip_heal` | query | boolean | No | When true, the template is not healed and nothing is written back. The response is otherwise the same as without it. |
 
 **Sample Call**
 
@@ -826,6 +953,10 @@ epilot workflow-definition getFlowTemplate -p flowId=7hj28akg --jsonata '$'
   "org_id": "string",
   "name": "string",
   "description": "string",
+  "portal_titles": {
+    "ecp": "string",
+    "installer": "string"
+  },
   "trigger": {
     "type": "automation",
     "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
@@ -855,7 +986,8 @@ epilot workflow-definition getFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "type": "automation",
       "automation_id": "string",
       "input_entity": "thread",
-      "trigger_config": []
+      "trigger_config": [],
+      "duplicated_automation_id": "string"
     }
   ],
   "phases": [
@@ -868,6 +1000,18 @@ epilot workflow-definition getFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "taxonomies": ["string"]
     }
   ],
+  "stages": [
+    {
+      "id": "string",
+      "name": "string",
+      "description": "string",
+      "entry_node_id": "string",
+      "cut_edge_ids": ["string"],
+      "color": "string",
+      "portal_names": {},
+      "portal_descriptions": {}
+    }
+  ],
   "tasks": [
     {
       "id": "string",
@@ -876,11 +1020,17 @@ epilot workflow-definition getFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "journey": {},
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
+      "start_date": "2021-04-27T12:00:00.000Z",
+      "start_date_config": {},
       "requirements": [],
+      "required": false,
+      "only_assignee_can_complete": true,
+      "subtasks": [],
       "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
       "partner": {},
+      "audience_order": ["description"],
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL"
@@ -892,15 +1042,22 @@ epilot workflow-definition getFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "journey": {},
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
+      "start_date": "2021-04-27T12:00:00.000Z",
+      "start_date_config": {},
       "requirements": [],
+      "required": false,
+      "only_assignee_can_complete": true,
+      "subtasks": [],
       "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
       "partner": {},
+      "audience_order": ["description"],
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
       "automation_config": {},
+      "on_failure": "stop",
       "trigger_mode": "manual",
       "schedule": {},
       "created_automatically": false
@@ -912,6 +1069,7 @@ epilot workflow-definition getFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "from_id": "string",
       "to_id": "string",
       "condition_id": "string",
+      "loop_id": "string",
       "none_met": true
     }
   ],
@@ -920,6 +1078,8 @@ epilot workflow-definition getFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "id": "string",
       "title": "string",
       "status": "ACTIVE",
+      "categoryId": "c9wq81x",
+      "category": {},
       "lastUpdateTime": "string",
       "creationTime": "string"
     }
@@ -935,6 +1095,16 @@ epilot workflow-definition getFlowTemplate -p flowId=7hj28akg --jsonata '$'
   "singleClosingReasonSelection": true,
   "_manifest": ["string"],
   "linear": true,
+  "context_settings": {
+    "visibility": "entity_views",
+    "main_context": {
+      "schema": "string",
+      "relation_labels": ["string"]
+    },
+    "displays": [
+      {}
+    ]
+  },
   "limit_warnings": [
     {
       "i18nKey": "string",
@@ -947,7 +1117,18 @@ epilot workflow-definition getFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "param_name": "string",
       "path": []
     }
-  ]
+  ],
+  "structural_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "node_id": "string",
+      "edge_id": "string",
+      "path": []
+    }
+  ],
+  "keep_task_automations_in_sync": true,
+  "protected": true
 }
 ```
 
@@ -967,6 +1148,7 @@ Update Flow Template.
 | ---- | -- | ---- | -------- | ----------- |
 | `flowId` | path | string | Yes | Unique identifier of the flow template to update. |
 | `enforce_limits` | query | boolean | No | When true, size/count limit violations (max incoming edges per task, max branches, max entity-sync rules, ...) are enforced as 400 errors. Used by the flow-builder UI for interactive authoring. On upd |
+| `client_supports_adv_loops` | query | boolean | No | When true, the client writes `loops` on decision tasks and `loop_id` on loop back edges, and invalid ones are rejected. When false or absent, the server rebuilds both from `loop_config`. |
 
 **Request Body** (required)
 
@@ -987,6 +1169,10 @@ epilot workflow-definition updateFlowTemplate \
   "org_id": "string",
   "name": "string",
   "description": "string",
+  "portal_titles": {
+    "ecp": "string",
+    "installer": "string"
+  },
   "trigger": {
     "type": "automation",
     "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
@@ -1016,7 +1202,8 @@ epilot workflow-definition updateFlowTemplate \
       "type": "automation",
       "automation_id": "string",
       "input_entity": "thread",
-      "trigger_config": []
+      "trigger_config": [],
+      "duplicated_automation_id": "string"
     }
   ],
   "phases": [
@@ -1029,6 +1216,18 @@ epilot workflow-definition updateFlowTemplate \
       "taxonomies": ["string"]
     }
   ],
+  "stages": [
+    {
+      "id": "string",
+      "name": "string",
+      "description": "string",
+      "entry_node_id": "string",
+      "cut_edge_ids": ["string"],
+      "color": "string",
+      "portal_names": {},
+      "portal_descriptions": {}
+    }
+  ],
   "tasks": [
     {
       "id": "string",
@@ -1037,11 +1236,17 @@ epilot workflow-definition updateFlowTemplate \
       "journey": {},
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
+      "start_date": "2021-04-27T12:00:00.000Z",
+      "start_date_config": {},
       "requirements": [],
+      "required": false,
+      "only_assignee_can_complete": true,
+      "subtasks": [],
       "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
       "partner": {},
+      "audience_order": ["description"],
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL"
@@ -1053,15 +1258,22 @@ epilot workflow-definition updateFlowTemplate \
       "journey": {},
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
+      "start_date": "2021-04-27T12:00:00.000Z",
+      "start_date_config": {},
       "requirements": [],
+      "required": false,
+      "only_assignee_can_complete": true,
+      "subtasks": [],
       "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
       "partner": {},
+      "audience_order": ["description"],
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
       "automation_config": {},
+      "on_failure": "stop",
       "trigger_mode": "manual",
       "schedule": {},
       "created_automatically": false
@@ -1073,6 +1285,7 @@ epilot workflow-definition updateFlowTemplate \
       "from_id": "string",
       "to_id": "string",
       "condition_id": "string",
+      "loop_id": "string",
       "none_met": true
     }
   ],
@@ -1081,6 +1294,8 @@ epilot workflow-definition updateFlowTemplate \
       "id": "string",
       "title": "string",
       "status": "ACTIVE",
+      "categoryId": "c9wq81x",
+      "category": {},
       "lastUpdateTime": "string",
       "creationTime": "string"
     }
@@ -1096,6 +1311,16 @@ epilot workflow-definition updateFlowTemplate \
   "singleClosingReasonSelection": true,
   "_manifest": ["string"],
   "linear": true,
+  "context_settings": {
+    "visibility": "entity_views",
+    "main_context": {
+      "schema": "string",
+      "relation_labels": ["string"]
+    },
+    "displays": [
+      {}
+    ]
+  },
   "limit_warnings": [
     {
       "i18nKey": "string",
@@ -1108,7 +1333,18 @@ epilot workflow-definition updateFlowTemplate \
       "param_name": "string",
       "path": []
     }
-  ]
+  ],
+  "structural_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "node_id": "string",
+      "edge_id": "string",
+      "path": []
+    }
+  ],
+  "keep_task_automations_in_sync": true,
+  "protected": true
 }'
 ```
 
@@ -1139,6 +1375,10 @@ epilot workflow-definition updateFlowTemplate -p flowId=7hj28akg --jsonata '$'
   "org_id": "string",
   "name": "string",
   "description": "string",
+  "portal_titles": {
+    "ecp": "string",
+    "installer": "string"
+  },
   "trigger": {
     "type": "automation",
     "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
@@ -1168,7 +1408,8 @@ epilot workflow-definition updateFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "type": "automation",
       "automation_id": "string",
       "input_entity": "thread",
-      "trigger_config": []
+      "trigger_config": [],
+      "duplicated_automation_id": "string"
     }
   ],
   "phases": [
@@ -1181,6 +1422,18 @@ epilot workflow-definition updateFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "taxonomies": ["string"]
     }
   ],
+  "stages": [
+    {
+      "id": "string",
+      "name": "string",
+      "description": "string",
+      "entry_node_id": "string",
+      "cut_edge_ids": ["string"],
+      "color": "string",
+      "portal_names": {},
+      "portal_descriptions": {}
+    }
+  ],
   "tasks": [
     {
       "id": "string",
@@ -1189,11 +1442,17 @@ epilot workflow-definition updateFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "journey": {},
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
+      "start_date": "2021-04-27T12:00:00.000Z",
+      "start_date_config": {},
       "requirements": [],
+      "required": false,
+      "only_assignee_can_complete": true,
+      "subtasks": [],
       "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
       "partner": {},
+      "audience_order": ["description"],
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL"
@@ -1205,15 +1464,22 @@ epilot workflow-definition updateFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "journey": {},
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
+      "start_date": "2021-04-27T12:00:00.000Z",
+      "start_date_config": {},
       "requirements": [],
+      "required": false,
+      "only_assignee_can_complete": true,
+      "subtasks": [],
       "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
       "partner": {},
+      "audience_order": ["description"],
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
       "automation_config": {},
+      "on_failure": "stop",
       "trigger_mode": "manual",
       "schedule": {},
       "created_automatically": false
@@ -1225,6 +1491,7 @@ epilot workflow-definition updateFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "from_id": "string",
       "to_id": "string",
       "condition_id": "string",
+      "loop_id": "string",
       "none_met": true
     }
   ],
@@ -1233,6 +1500,8 @@ epilot workflow-definition updateFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "id": "string",
       "title": "string",
       "status": "ACTIVE",
+      "categoryId": "c9wq81x",
+      "category": {},
       "lastUpdateTime": "string",
       "creationTime": "string"
     }
@@ -1248,6 +1517,16 @@ epilot workflow-definition updateFlowTemplate -p flowId=7hj28akg --jsonata '$'
   "singleClosingReasonSelection": true,
   "_manifest": ["string"],
   "linear": true,
+  "context_settings": {
+    "visibility": "entity_views",
+    "main_context": {
+      "schema": "string",
+      "relation_labels": ["string"]
+    },
+    "displays": [
+      {}
+    ]
+  },
   "limit_warnings": [
     {
       "i18nKey": "string",
@@ -1260,7 +1539,18 @@ epilot workflow-definition updateFlowTemplate -p flowId=7hj28akg --jsonata '$'
       "param_name": "string",
       "path": []
     }
-  ]
+  ],
+  "structural_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "node_id": "string",
+      "edge_id": "string",
+      "path": []
+    }
+  ],
+  "keep_task_automations_in_sync": true,
+  "protected": true
 }
 ```
 
@@ -1341,6 +1631,10 @@ epilot workflow-definition duplicateFlowTemplate -p flowId=7hj28akg --jsonata '$
   "org_id": "string",
   "name": "string",
   "description": "string",
+  "portal_titles": {
+    "ecp": "string",
+    "installer": "string"
+  },
   "trigger": {
     "type": "automation",
     "automation_id": "g92j2-sg9ug92hjt1gh-9s9gajgs-a979gg"
@@ -1370,7 +1664,8 @@ epilot workflow-definition duplicateFlowTemplate -p flowId=7hj28akg --jsonata '$
       "type": "automation",
       "automation_id": "string",
       "input_entity": "thread",
-      "trigger_config": []
+      "trigger_config": [],
+      "duplicated_automation_id": "string"
     }
   ],
   "phases": [
@@ -1383,6 +1678,18 @@ epilot workflow-definition duplicateFlowTemplate -p flowId=7hj28akg --jsonata '$
       "taxonomies": ["string"]
     }
   ],
+  "stages": [
+    {
+      "id": "string",
+      "name": "string",
+      "description": "string",
+      "entry_node_id": "string",
+      "cut_edge_ids": ["string"],
+      "color": "string",
+      "portal_names": {},
+      "portal_descriptions": {}
+    }
+  ],
   "tasks": [
     {
       "id": "string",
@@ -1391,11 +1698,17 @@ epilot workflow-definition duplicateFlowTemplate -p flowId=7hj28akg --jsonata '$
       "journey": {},
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
+      "start_date": "2021-04-27T12:00:00.000Z",
+      "start_date_config": {},
       "requirements": [],
+      "required": false,
+      "only_assignee_can_complete": true,
+      "subtasks": [],
       "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
       "partner": {},
+      "audience_order": ["description"],
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL"
@@ -1407,15 +1720,22 @@ epilot workflow-definition duplicateFlowTemplate -p flowId=7hj28akg --jsonata '$
       "journey": {},
       "due_date": "2021-04-27T12:00:00.000Z",
       "due_date_config": {},
+      "start_date": "2021-04-27T12:00:00.000Z",
+      "start_date_config": {},
       "requirements": [],
+      "required": false,
+      "only_assignee_can_complete": true,
+      "subtasks": [],
       "assigned_to": ["string"],
       "ecp": {},
       "installer": {},
       "partner": {},
+      "audience_order": ["description"],
       "taxonomies": ["string"],
       "phase_id": "string",
       "task_type": "MANUAL",
       "automation_config": {},
+      "on_failure": "stop",
       "trigger_mode": "manual",
       "schedule": {},
       "created_automatically": false
@@ -1427,6 +1747,7 @@ epilot workflow-definition duplicateFlowTemplate -p flowId=7hj28akg --jsonata '$
       "from_id": "string",
       "to_id": "string",
       "condition_id": "string",
+      "loop_id": "string",
       "none_met": true
     }
   ],
@@ -1435,6 +1756,8 @@ epilot workflow-definition duplicateFlowTemplate -p flowId=7hj28akg --jsonata '$
       "id": "string",
       "title": "string",
       "status": "ACTIVE",
+      "categoryId": "c9wq81x",
+      "category": {},
       "lastUpdateTime": "string",
       "creationTime": "string"
     }
@@ -1450,6 +1773,16 @@ epilot workflow-definition duplicateFlowTemplate -p flowId=7hj28akg --jsonata '$
   "singleClosingReasonSelection": true,
   "_manifest": ["string"],
   "linear": true,
+  "context_settings": {
+    "visibility": "entity_views",
+    "main_context": {
+      "schema": "string",
+      "relation_labels": ["string"]
+    },
+    "displays": [
+      {}
+    ]
+  },
   "limit_warnings": [
     {
       "i18nKey": "string",
@@ -1462,7 +1795,18 @@ epilot workflow-definition duplicateFlowTemplate -p flowId=7hj28akg --jsonata '$
       "param_name": "string",
       "path": []
     }
-  ]
+  ],
+  "structural_warnings": [
+    {
+      "i18nKey": "string",
+      "message": "string",
+      "node_id": "string",
+      "edge_id": "string",
+      "path": []
+    }
+  ],
+  "keep_task_automations_in_sync": true,
+  "protected": true
 }
 ```
 
@@ -1829,6 +2173,11 @@ epilot workflow-definition getAllClosingReasons --jsonata 'reasons'
       "id": "string",
       "title": "string",
       "status": "ACTIVE",
+      "categoryId": "c9wq81x",
+      "category": {
+        "id": "string",
+        "title": "string"
+      },
       "lastUpdateTime": "string",
       "creationTime": "string"
     }
@@ -1851,8 +2200,25 @@ A created Closing Reason is stored for the organization and will be displayed in
 **Sample Call**
 
 ```bash
+epilot workflow-definition createClosingReason
+```
+
+With request body:
+
+```bash
 epilot workflow-definition createClosingReason \
-  -d '{"id":"string","title":"string","status":"ACTIVE","lastUpdateTime":"string","creationTime":"string"}'
+  -d '{
+  "id": "string",
+  "title": "string",
+  "status": "ACTIVE",
+  "categoryId": "c9wq81x",
+  "category": {
+    "id": "string",
+    "title": "string"
+  },
+  "lastUpdateTime": "string",
+  "creationTime": "string"
+}'
 ```
 
 Using stdin pipe:
@@ -1875,6 +2241,11 @@ epilot workflow-definition createClosingReason --jsonata 'id'
   "id": "string",
   "title": "string",
   "status": "ACTIVE",
+  "categoryId": "c9wq81x",
+  "category": {
+    "id": "string",
+    "title": "string"
+  },
   "lastUpdateTime": "string",
   "creationTime": "string"
 }
@@ -1923,6 +2294,11 @@ epilot workflow-definition getClosingReason -p reasonId=x739cew --jsonata 'id'
   "id": "string",
   "title": "string",
   "status": "ACTIVE",
+  "categoryId": "c9wq81x",
+  "category": {
+    "id": "string",
+    "title": "string"
+  },
   "lastUpdateTime": "string",
   "creationTime": "string"
 }
@@ -1950,8 +2326,26 @@ Update an existing closing reason
 
 ```bash
 epilot workflow-definition updateClosingReason \
+  -p reasonId=x739cew
+```
+
+With request body:
+
+```bash
+epilot workflow-definition updateClosingReason \
   -p reasonId=x739cew \
-  -d '{"id":"string","title":"string","status":"ACTIVE","lastUpdateTime":"string","creationTime":"string"}'
+  -d '{
+  "id": "string",
+  "title": "string",
+  "status": "ACTIVE",
+  "categoryId": "c9wq81x",
+  "category": {
+    "id": "string",
+    "title": "string"
+  },
+  "lastUpdateTime": "string",
+  "creationTime": "string"
+}'
 ```
 
 Using positional args for path parameters:
@@ -1980,6 +2374,11 @@ epilot workflow-definition updateClosingReason -p reasonId=x739cew --jsonata 'id
   "id": "string",
   "title": "string",
   "status": "ACTIVE",
+  "categoryId": "c9wq81x",
+  "category": {
+    "id": "string",
+    "title": "string"
+  },
   "lastUpdateTime": "string",
   "creationTime": "string"
 }
@@ -2060,6 +2459,223 @@ With JSONata filter:
 
 ```bash
 epilot workflow-definition changeReasonStatus -p reasonId=123e4567-e89b-12d3-a456-426614174000 --jsonata '$'
+```
+
+---
+
+### `getAllClosingReasonCategories`
+
+Get all closing reason categories defined in the organization.
+
+`GET /v1/workflows/closing-reason-categories`
+
+**Sample Call**
+
+```bash
+epilot workflow-definition getAllClosingReasonCategories
+```
+
+With JSONata filter:
+
+```bash
+epilot workflow-definition getAllClosingReasonCategories --jsonata 'categories'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "categories": [
+    {
+      "id": "string",
+      "title": "Wirtschaftlichkeit",
+      "lastUpdateTime": "string",
+      "creationTime": "string"
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `createClosingReasonCategory`
+
+Create a category that closing reasons can be grouped under. Titles are unique per organization, ignoring case and surro
+
+`POST /v1/workflows/closing-reason-categories`
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot workflow-definition createClosingReasonCategory \
+  -d '{"title":"Wirtschaftlichkeit"}'
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot workflow-definition createClosingReasonCategory
+```
+
+With JSONata filter:
+
+```bash
+epilot workflow-definition createClosingReasonCategory --jsonata 'id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "string",
+  "title": "Wirtschaftlichkeit",
+  "lastUpdateTime": "string",
+  "creationTime": "string"
+}
+```
+
+</details>
+
+---
+
+### `getClosingReasonCategory`
+
+Get a closing reason category by id.
+
+`GET /v1/workflows/closing-reason-categories/{categoryId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `categoryId` | path | string | Yes | unique id to identify the closing reason category. |
+
+**Sample Call**
+
+```bash
+epilot workflow-definition getClosingReasonCategory \
+  -p categoryId=c9wq81x
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot workflow-definition getClosingReasonCategory c9wq81x
+```
+
+With JSONata filter:
+
+```bash
+epilot workflow-definition getClosingReasonCategory -p categoryId=c9wq81x --jsonata 'id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "string",
+  "title": "Wirtschaftlichkeit",
+  "lastUpdateTime": "string",
+  "creationTime": "string"
+}
+```
+
+</details>
+
+---
+
+### `updateClosingReasonCategory`
+
+Rename a closing reason category. Running flows keep the title they started with.
+
+`PATCH /v1/workflows/closing-reason-categories/{categoryId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `categoryId` | path | string | Yes | unique id to identify the closing reason category. |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot workflow-definition updateClosingReasonCategory \
+  -p categoryId=c9wq81x \
+  -d '{"title":"Wirtschaftlichkeit"}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot workflow-definition updateClosingReasonCategory c9wq81x
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot workflow-definition updateClosingReasonCategory -p categoryId=c9wq81x
+```
+
+With JSONata filter:
+
+```bash
+epilot workflow-definition updateClosingReasonCategory -p categoryId=c9wq81x --jsonata 'id'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "id": "string",
+  "title": "Wirtschaftlichkeit",
+  "lastUpdateTime": "string",
+  "creationTime": "string"
+}
+```
+
+</details>
+
+---
+
+### `deleteClosingReasonCategory`
+
+Delete a closing reason category. Its reasons are kept and lose their category.
+
+`DELETE /v1/workflows/closing-reason-categories/{categoryId}`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `categoryId` | path | string | Yes | unique id to identify the closing reason category. |
+
+**Sample Call**
+
+```bash
+epilot workflow-definition deleteClosingReasonCategory \
+  -p categoryId=c9wq81x
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot workflow-definition deleteClosingReasonCategory c9wq81x
+```
+
+With JSONata filter:
+
+```bash
+epilot workflow-definition deleteClosingReasonCategory -p categoryId=c9wq81x --jsonata '$'
 ```
 
 ---

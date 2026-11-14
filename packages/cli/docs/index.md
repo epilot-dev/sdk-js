@@ -65,7 +65,7 @@ npx epilot auth login
 | Validation Rules API | `epilot validation-rules` | 7 | [validation-rules.md](./validation-rules.md) |
 | Webhooks | `epilot webhooks` | 15 | [webhooks.md](./webhooks.md) |
 | Workflows Executions | `epilot workflow` | 25 | [workflow.md](./workflow.md) |
-| Workflows Definitions | `epilot workflow-definition` | 22 | [workflow-definition.md](./workflow-definition.md) |
+| Workflows Definitions | `epilot workflow-definition` | 27 | [workflow-definition.md](./workflow-definition.md) |
 
 ## Global Flags
 
