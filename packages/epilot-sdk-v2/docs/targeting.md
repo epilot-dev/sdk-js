@@ -28,6 +28,7 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`changeCampaignStatus`](#changecampaignstatus)
 - [`getCampaignJobStatus`](#getcampaignjobstatus)
 - [`getCampaignPortals`](#getcampaignportals)
+- [`getCampaignsSummary`](#getcampaignssummary)
 - [`setupCampaign`](#setupcampaign)
 - [`matchCampaigns`](#matchcampaigns)
 - [`discoverCampaigns`](#discovercampaigns)
@@ -63,7 +64,12 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`BaseSystemFieldsRequired`](#basesystemfieldsrequired)
 - [`CampaignStatus`](#campaignstatus)
 - [`ExecutionSummaryItem`](#executionsummaryitem)
+- [`BulkJobStatus`](#bulkjobstatus)
 - [`JobStatus`](#jobstatus)
+- [`CampaignsSummaryRequest`](#campaignssummaryrequest)
+- [`CampaignSummary`](#campaignsummary)
+- [`CampaignJobSummary`](#campaignjobsummary)
+- [`CampaignJobExecutionStats`](#campaignjobexecutionstats)
 - [`Campaign`](#campaign)
 - [`CampaignType`](#campaigntype)
 - [`Target`](#target)
@@ -93,6 +99,9 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`UpdateEntityUiStatusRequest`](#updateentityuistatusrequest)
 - [`SetupCampaignRequest`](#setupcampaignrequest)
 - [`SetupTariffChangeCampaignRequest`](#setuptariffchangecampaignrequest)
+- [`SetupExistingProductRecommendation`](#setupexistingproductrecommendation)
+- [`SetupNewProductRecommendation`](#setupnewproductrecommendation)
+- [`ProductRecommendationOffer`](#productrecommendationoffer)
 - [`SetupTariffChangeCampaignResponse`](#setuptariffchangecampaignresponse)
 
 ### `changeCampaignStatus`
@@ -234,6 +243,52 @@ const { data } = await client.getCampaignPortals({
 
 ---
 
+### `getCampaignsSummary`
+
+Returns the automation job progress and portal usage of up to 100 campaigns in one call.
+
+`POST /v1/campaigns:summary`
+
+```ts
+const { data } = await client.getCampaignsSummary(
+  null,
+  {
+    campaign_ids: ['b8c01433-5556-4e2b-aad4-6f5348d1df84']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "campaign_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+      "job": {
+        "job_id": "string",
+        "status": "queued",
+        "execution_stats": {
+          "total": 4820,
+          "success": 3046,
+          "failed": 14,
+          "in_progress": 10
+        },
+        "last_error": "string",
+        "report_file_entity_id": "string"
+      },
+      "portal_blocks": 3,
+      "portals": 2
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `retriggerCampaignAutomations`
 
 Retrigger automation executions for specific campaign recipients that have failed.
@@ -284,23 +339,6 @@ const { data } = await client.setupCampaign(
   null,
   {
     type: 'tariff_change',
-    product_recommendation: {
-      name: 'string',
-      source_product_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
-      source_price_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
-      offers: [
-        {
-          target_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
-          items: [
-            {
-              product_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
-              price_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84',
-              highlight_config: {}
-            }
-          ]
-        }
-      ]
-    },
     campaign: {
       name: 'string',
       goal: 'string',
@@ -308,6 +346,11 @@ const { data } = await client.setupCampaign(
       start_date: '1970-01-01T00:00:00.000Z',
       end_date: '1970-01-01T00:00:00.000Z'
     },
+    product_recommendations: [
+      {
+        product_recommendation_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
+      }
+    ],
     journey: {
       journey_id: 'b8c01433-5556-4e2b-aad4-6f5348d1df84'
     },
@@ -352,9 +395,8 @@ const { data } = await client.setupCampaign(
 ```json
 {
   "type": "tariff_change",
-  "product_recommendation_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
   "campaign_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
-  "journey_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84",
+  "product_recommendation_ids": ["b8c01433-5556-4e2b-aad4-6f5348d1df84"],
   "portal_widget_id": "b8c01433-5556-4e2b-aad4-6f5348d1df84"
 }
 ```
@@ -696,6 +738,7 @@ const { data } = await client.createRecipient(
       "clicked_at": "1970-01-01T00:00:00.000Z"
     }
   ],
+  "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -761,6 +804,7 @@ const { data } = await client.updateRecipient(
       "clicked_at": "1970-01-01T00:00:00.000Z"
     }
   ],
+  "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -824,6 +868,7 @@ const { data } = await client.updateRecipientPortalStatus(
       "clicked_at": "1970-01-01T00:00:00.000Z"
     }
   ],
+  "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -887,6 +932,7 @@ const { data } = await client.updateRecipientEntityUiStatus(
       "clicked_at": "1970-01-01T00:00:00.000Z"
     }
   ],
+  "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -944,6 +990,7 @@ const { data } = await client.restoreRecipientEntityUiStatus({
       "clicked_at": "1970-01-01T00:00:00.000Z"
     }
   ],
+  "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z"
 }
 ```
@@ -1009,6 +1056,7 @@ const { data } = await client.getRecipients({
           "clicked_at": "1970-01-01T00:00:00.000Z"
         }
       ],
+      "created_at": "1970-01-01T00:00:00.000Z",
       "updated_at": "1970-01-01T00:00:00.000Z"
     }
   ],
@@ -1213,6 +1261,14 @@ type ExecutionSummaryItem = {
 }
 ```
 
+### `BulkJobStatus`
+
+The status of the automation job
+
+```ts
+type BulkJobStatus = "queued" | "processing" | "finished" | "failed" | "cancelled" | "send_report"
+```
+
 ### `JobStatus`
 
 ```ts
@@ -1222,6 +1278,59 @@ type JobStatus = {
     execution_id?: string
     execution_status?: string
   }>
+}
+```
+
+### `CampaignsSummaryRequest`
+
+```ts
+type CampaignsSummaryRequest = {
+  campaign_ids: string // uuid[]
+}
+```
+
+### `CampaignSummary`
+
+```ts
+type CampaignSummary = {
+  campaign_id: string // uuid
+  job: {
+    job_id: string
+    status: "queued" | "processing" | "finished" | "failed" | "cancelled" | "send_report"
+    execution_stats: {
+      total: { ... }
+    }
+    last_error?: string
+    report_file_entity_id?: string
+  }
+  portal_blocks: number
+  portals: number
+}
+```
+
+### `CampaignJobSummary`
+
+```ts
+type CampaignJobSummary = {
+  job_id: string
+  status: "queued" | "processing" | "finished" | "failed" | "cancelled" | "send_report"
+  execution_stats: {
+    total: number
+  }
+  last_error?: string
+  report_file_entity_id?: string
+}
+```
+
+### `CampaignJobExecutionStats`
+
+Number of the job's automation executions in total and per execution status
+(e.g. `success`, `failed`, `in_progress`, `pending`). Statuses without executions may be left out.
+
+
+```ts
+type CampaignJobExecutionStats = {
+  total: number
 }
 ```
 
@@ -1523,6 +1632,7 @@ type Recipient = {
     url: string
     clicked_at: string // date-time
   }>
+  created_at?: string // date-time
   updated_at?: string // date-time
 }
 ```
@@ -1633,15 +1743,6 @@ new variants are added by introducing a new schema and extending the `oneOf` lis
 ```ts
 type SetupCampaignRequest = {
   type: "tariff_change"
-  product_recommendation: {
-    name?: string
-    source_product_id?: string // uuid
-    source_price_id?: string // uuid
-    offers?: Array<{
-      target_id?: { ... }
-      items: { ... }
-    }>
-  }
   campaign: {
     name: string
     goal?: string
@@ -1649,6 +1750,17 @@ type SetupCampaignRequest = {
     start_date?: string // date-time
     end_date?: string // date-time
   }
+  product_recommendations: Array<{
+    product_recommendation_id: string // uuid
+  } | {
+    name?: string
+    source_product_id?: string // uuid
+    source_price_id?: string // uuid
+    offers?: Array<{
+      target_id?: { ... }
+      items: { ... }
+    }>
+  }>
   journey?: {
     journey_id: string // uuid
   }
@@ -1679,15 +1791,6 @@ type SetupCampaignRequest = {
 ```ts
 type SetupTariffChangeCampaignRequest = {
   type: "tariff_change"
-  product_recommendation: {
-    name?: string
-    source_product_id?: string // uuid
-    source_price_id?: string // uuid
-    offers?: Array<{
-      target_id?: { ... }
-      items: { ... }
-    }>
-  }
   campaign: {
     name: string
     goal?: string
@@ -1695,6 +1798,17 @@ type SetupTariffChangeCampaignRequest = {
     start_date?: string // date-time
     end_date?: string // date-time
   }
+  product_recommendations: Array<{
+    product_recommendation_id: string // uuid
+  } | {
+    name?: string
+    source_product_id?: string // uuid
+    source_price_id?: string // uuid
+    offers?: Array<{
+      target_id?: { ... }
+      items: { ... }
+    }>
+  }>
   journey?: {
     journey_id: string // uuid
   }
@@ -1720,14 +1834,60 @@ type SetupTariffChangeCampaignRequest = {
 }
 ```
 
+### `SetupExistingProductRecommendation`
+
+Reuses an existing `product_recommendation` entity. It is linked, never modified.
+
+```ts
+type SetupExistingProductRecommendation = {
+  product_recommendation_id: string // uuid
+}
+```
+
+### `SetupNewProductRecommendation`
+
+Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and
+`source_price_id` it applies to customers on that tariff; without a source it is a general
+recommendation that applies to every customer of the campaign. The source product and price
+must be sent together.
+
+
+```ts
+type SetupNewProductRecommendation = {
+  name?: string
+  source_product_id?: string // uuid
+  source_price_id?: string // uuid
+  offers?: Array<{
+    target_id?: string // uuid
+    items: Array<{
+      product_id: { ... }
+      price_id: { ... }
+      highlight_config?: { ... }
+    }>
+  }>
+}
+```
+
+### `ProductRecommendationOffer`
+
+```ts
+type ProductRecommendationOffer = {
+  target_id?: string // uuid
+  items: Array<{
+    product_id: string // uuid
+    price_id: string // uuid
+    highlight_config?: Record<string, unknown>
+  }>
+}
+```
+
 ### `SetupTariffChangeCampaignResponse`
 
 ```ts
 type SetupTariffChangeCampaignResponse = {
   type: "tariff_change"
-  product_recommendation_id: string // uuid
   campaign_id: string // uuid
-  journey_id?: string // uuid
+  product_recommendation_ids: string // uuid[]
   portal_widget_id?: string // uuid
 }
 ```

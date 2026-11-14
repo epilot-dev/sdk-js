@@ -60,6 +60,9 @@ export declare namespace Components {
         export interface CampaignResponse {
             campaign?: Schemas.Campaign;
         }
+        export interface CampaignsSummaryResponse {
+            results: Schemas.CampaignSummary[];
+        }
         export type ClientErrorResponse = /**
          * Describes the structure of a client error response, which can be one of several types:
          * 1. `MessageError`: Contains a 'message' field for general descriptive errors.
@@ -296,6 +299,10 @@ export declare namespace Components {
          * b8c01433-5556-4e2b-aad4-6f5348d1df84
          */
         export type BaseUUID = string; // uuid
+        /**
+         * The status of the automation job
+         */
+        export type BulkJobStatus = "queued" | "processing" | "finished" | "failed" | "cancelled" | "send_report";
         export interface Campaign {
             _id?: /**
              * example:
@@ -353,6 +360,47 @@ export declare namespace Components {
             type?: /* Use case of a campaign. Set by campaign setup. */ CampaignType;
         }
         /**
+         * Number of the job's automation executions in total and per execution status
+         * (e.g. `success`, `failed`, `in_progress`, `pending`). Statuses without executions may be left out.
+         *
+         * example:
+         * {
+         *   "total": 4820,
+         *   "success": 3046,
+         *   "failed": 14,
+         *   "in_progress": 10
+         * }
+         */
+        export interface CampaignJobExecutionStats {
+            [name: string]: number;
+            total: number;
+        }
+        export interface CampaignJobSummary {
+            job_id: string;
+            status: /* The status of the automation job */ BulkJobStatus;
+            execution_stats: /**
+             * Number of the job's automation executions in total and per execution status
+             * (e.g. `success`, `failed`, `in_progress`, `pending`). Statuses without executions may be left out.
+             *
+             * example:
+             * {
+             *   "total": 4820,
+             *   "success": 3046,
+             *   "failed": 14,
+             *   "in_progress": 10
+             * }
+             */
+            CampaignJobExecutionStats;
+            /**
+             * Error that moved the job into the `failed` status.
+             */
+            last_error?: string;
+            /**
+             * Entity ID of the job's report file.
+             */
+            report_file_entity_id?: string;
+        }
+        /**
          * Lifecycle status of a campaign.
          *
          * - `draft`: not launched yet.
@@ -364,10 +412,568 @@ export declare namespace Components {
          *
          */
         export type CampaignStatus = "draft" | "scheduled" | "activating" | "active" | "inactive";
+        export interface CampaignSummary {
+            campaign_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            /**
+             * The campaign's automation job. `null` when it has none or it could not be loaded.
+             */
+            job: {
+                job_id: string;
+                status: /* The status of the automation job */ BulkJobStatus;
+                execution_stats: /**
+                 * Number of the job's automation executions in total and per execution status
+                 * (e.g. `success`, `failed`, `in_progress`, `pending`). Statuses without executions may be left out.
+                 *
+                 * example:
+                 * {
+                 *   "total": 4820,
+                 *   "success": 3046,
+                 *   "failed": 14,
+                 *   "in_progress": 10
+                 * }
+                 */
+                CampaignJobExecutionStats;
+                /**
+                 * Error that moved the job into the `failed` status.
+                 */
+                last_error?: string;
+                /**
+                 * Entity ID of the job's report file.
+                 */
+                report_file_entity_id?: string;
+            } | null;
+            /**
+             * Number of portal page blocks showing the campaign, across all portals of the organization.
+             * `null` when the portal configurations could not be loaded.
+             *
+             * example:
+             * 3
+             */
+            portal_blocks: number | null;
+            /**
+             * Number of portals with at least one block showing the campaign.
+             * `null` when the portal configurations could not be loaded.
+             *
+             * example:
+             * 2
+             */
+            portals: number | null;
+        }
         /**
          * Use case of a campaign. Set by campaign setup.
          */
         export type CampaignType = "tariff_change";
+        export interface CampaignsSummaryRequest {
+            /**
+             * IDs of the campaigns to summarize.
+             */
+            campaign_ids: [
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?,
+                /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */?
+            ];
+        }
         /**
          * Describes the structure of a client error response, which can be one of several types:
          * 1. `MessageError`: Contains a 'message' field for general descriptive errors.
@@ -536,10 +1142,7 @@ export declare namespace Components {
             ];
         }
         export interface JobStatus {
-            /**
-             * The status of the automation job
-             */
-            status?: "queued" | "processing" | "finished" | "failed" | "cancelled" | "send_report";
+            status?: /* The status of the automation job */ BulkJobStatus;
             execution_summary?: ExecutionSummaryItem[];
         }
         export interface MatchCampaignParams {
@@ -1654,6 +2257,37 @@ export declare namespace Components {
             };
         }
         export type PortalStatus = "sent" | "seen" | "dismissed" | "clicked";
+        export interface ProductRecommendationOffer {
+            /**
+             * Optional per-offer target entity ID. An offer without a target is shown to everyone.
+             */
+            target_id?: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            /**
+             * Product/price pairs within this offer.
+             */
+            items: {
+                product_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                price_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                /**
+                 * Opaque per-item highlight/comparison config persisted as-is on the entity.
+                 */
+                highlight_config?: {
+                    [name: string]: any;
+                };
+            }[];
+        }
         export interface Recipient {
             entity_id?: /**
              * example:
@@ -1757,6 +2391,13 @@ export declare namespace Components {
                 url: string;
                 clicked_at: string; // date-time
             }[];
+            /**
+             * When the entity became a recipient of the campaign: at launch, when it first saw the
+             * campaign in a portal or as a Next Best Action, or when the daily recipient check added it
+             * (campaigns with `auto_add_recipients` on).
+             *
+             */
+            created_at?: string; // date-time
             updated_at?: string; // date-time
         }
         export interface RetriggerAutomationsRequest {
@@ -1795,63 +2436,50 @@ export declare namespace Components {
          *
          */
         SetupTariffChangeCampaignRequest;
+        /**
+         * Reuses an existing `product_recommendation` entity. It is linked, never modified.
+         */
+        export interface SetupExistingProductRecommendation {
+            product_recommendation_id: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+        }
+        /**
+         * Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and
+         * `source_price_id` it applies to customers on that tariff; without a source it is a general
+         * recommendation that applies to every customer of the campaign. The source product and price
+         * must be sent together.
+         *
+         */
+        export interface SetupNewProductRecommendation {
+            /**
+             * Optional name of the product recommendation. Defaults to the campaign name.
+             */
+            name?: string;
+            /**
+             * Source product entity ID. Requires `source_price_id`.
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            source_product_id?: string; // uuid
+            /**
+             * Source price entity ID. Requires `source_product_id`.
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            source_price_id?: string; // uuid
+            /**
+             * Offer blocks for the product_recommendation entity.
+             */
+            offers?: ProductRecommendationOffer[];
+        }
         export interface SetupTariffChangeCampaignRequest {
             /**
              * The `CampaignType` of this variant.
              */
             type: "tariff_change";
-            product_recommendation: {
-                /**
-                 * Optional name of the product recommendation. Defaults to the campaign name.
-                 */
-                name?: string;
-                /**
-                 * Optional source product entity ID for the recommendation.
-                 * example:
-                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                 */
-                source_product_id?: string; // uuid
-                /**
-                 * Optional source price entity ID for the recommendation.
-                 * example:
-                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                 */
-                source_price_id?: string; // uuid
-                /**
-                 * Offer blocks for the product_recommendation entity.
-                 */
-                offers?: {
-                    /**
-                     * Optional per-offer target entity ID.
-                     */
-                    target_id?: /**
-                     * example:
-                     * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                     */
-                    BaseUUID /* uuid */;
-                    /**
-                     * Product/price pairs within this offer.
-                     */
-                    items: {
-                        product_id: /**
-                         * example:
-                         * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                         */
-                        BaseUUID /* uuid */;
-                        price_id: /**
-                         * example:
-                         * b8c01433-5556-4e2b-aad4-6f5348d1df84
-                         */
-                        BaseUUID /* uuid */;
-                        /**
-                         * Opaque per-item highlight/comparison config persisted as-is on the entity.
-                         */
-                        highlight_config?: {
-                            [name: string]: any;
-                        };
-                    }[];
-                }[];
-            };
             campaign: {
                 name: string;
                 goal?: string;
@@ -1882,6 +2510,31 @@ export declare namespace Components {
                  */
                 end_date?: string; // date-time
             };
+            /**
+             * Product recommendations the campaign offers. Each item either reuses an existing
+             * `product_recommendation` entity (a recommendation can belong to many campaigns) or
+             * creates a new one. All of them are linked on the campaign's `product_recommendations`
+             * relation.
+             *
+             */
+            product_recommendations: [
+                (/* Reuses an existing `product_recommendation` entity. It is linked, never modified. */ SetupExistingProductRecommendation | /**
+                 * Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and
+                 * `source_price_id` it applies to customers on that tariff; without a source it is a general
+                 * recommendation that applies to every customer of the campaign. The source product and price
+                 * must be sent together.
+                 *
+                 */
+                SetupNewProductRecommendation),
+                ...(/* Reuses an existing `product_recommendation` entity. It is linked, never modified. */ SetupExistingProductRecommendation | /**
+                 * Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and
+                 * `source_price_id` it applies to customers on that tariff; without a source it is a general
+                 * recommendation that applies to every customer of the campaign. The source product and price
+                 * must be sent together.
+                 *
+                 */
+                SetupNewProductRecommendation)[]
+            ];
             /**
              * Optional journey configuration selected in the wizard. Only sent by the
              * consumer once a journey has been chosen.
@@ -1957,21 +2610,21 @@ export declare namespace Components {
              * The `CampaignType` of this variant.
              */
             type: "tariff_change";
-            product_recommendation_id: /**
+            /**
+             * The created campaign.
              * example:
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
              */
-            BaseUUID /* uuid */;
-            campaign_id: /**
+            campaign_id: string; // uuid
+            /**
+             * All product recommendations linked to the campaign, created and reused, in request order.
+             *
+             */
+            product_recommendation_ids: /**
              * example:
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
              */
-            BaseUUID /* uuid */;
-            journey_id?: /**
-             * example:
-             * b8c01433-5556-4e2b-aad4-6f5348d1df84
-             */
-            BaseUUID /* uuid */;
+            BaseUUID /* uuid */[];
             portal_widget_id?: /**
              * example:
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
@@ -2193,6 +2846,14 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Responses.CampaignPortalsResponse;
+            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $500 = Components.Responses.ServerErrorResponse;
+        }
+    }
+    namespace GetCampaignsSummary {
+        export type RequestBody = Components.Schemas.CampaignsSummaryRequest;
+        namespace Responses {
+            export type $200 = Components.Responses.CampaignsSummaryResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
         }
@@ -2473,6 +3134,22 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCampaignPortals.Responses.$200>
   /**
+   * getCampaignsSummary - getCampaignsSummary
+   * 
+   * Returns the automation job progress and portal usage of up to 100 campaigns in one call.
+   * 
+   * - `job` is `null` when the campaign has no automation job or its job could not be loaded.
+   * - `portal_blocks` and `portals` are `null` when the portal configurations could not be loaded.
+   * 
+   * Campaigns that do not exist in the organization (or are deleted) are left out of `results`.
+   * 
+   */
+  'getCampaignsSummary'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.GetCampaignsSummary.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCampaignsSummary.Responses.$200>
+  /**
    * retriggerCampaignAutomations - retriggerCampaignAutomations
    * 
    * Retrigger automation executions for specific campaign recipients that have failed.
@@ -2506,6 +3183,7 @@ export interface OperationMethods {
    * A campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.
    * A request with no or more than one entry fails request validation with 400 (the error points at
    * `/requestBody/campaign/target_ids`), and nothing is created.
+   * Request validation errors (400) are returned before anything is created.
    * 
    */
   'setupCampaign'(
@@ -2736,6 +3414,24 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCampaignPortals.Responses.$200>
   }
+  ['/v1/campaigns:summary']: {
+    /**
+     * getCampaignsSummary - getCampaignsSummary
+     * 
+     * Returns the automation job progress and portal usage of up to 100 campaigns in one call.
+     * 
+     * - `job` is `null` when the campaign has no automation job or its job could not be loaded.
+     * - `portal_blocks` and `portals` are `null` when the portal configurations could not be loaded.
+     * 
+     * Campaigns that do not exist in the organization (or are deleted) are left out of `results`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.GetCampaignsSummary.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCampaignsSummary.Responses.$200>
+  }
   ['/v1/campaign/{campaign_id}/automations:retrigger']: {
     /**
      * retriggerCampaignAutomations - retriggerCampaignAutomations
@@ -2773,6 +3469,7 @@ export interface PathsDictionary {
      * A campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.
      * A request with no or more than one entry fails request validation with 400 (the error points at
      * `/requestBody/campaign/target_ids`), and nothing is created.
+     * Request validation errors (400) are returned before anything is created.
      * 
      */
     'post'(
@@ -2986,9 +3683,14 @@ export type BaseSystemFieldsRequired = Components.Schemas.BaseSystemFieldsRequir
 export type BaseSystemId = Components.Schemas.BaseSystemId;
 export type BaseTags = Components.Schemas.BaseTags;
 export type BaseUUID = Components.Schemas.BaseUUID;
+export type BulkJobStatus = Components.Schemas.BulkJobStatus;
 export type Campaign = Components.Schemas.Campaign;
+export type CampaignJobExecutionStats = Components.Schemas.CampaignJobExecutionStats;
+export type CampaignJobSummary = Components.Schemas.CampaignJobSummary;
 export type CampaignStatus = Components.Schemas.CampaignStatus;
+export type CampaignSummary = Components.Schemas.CampaignSummary;
 export type CampaignType = Components.Schemas.CampaignType;
+export type CampaignsSummaryRequest = Components.Schemas.CampaignsSummaryRequest;
 export type ClientError = Components.Schemas.ClientError;
 export type CreateRecipientPayload = Components.Schemas.CreateRecipientPayload;
 export type DiscoverCampaignsParams = Components.Schemas.DiscoverCampaignsParams;
@@ -3004,11 +3706,14 @@ export type MatchTargetParams = Components.Schemas.MatchTargetParams;
 export type NextBestAction = Components.Schemas.NextBestAction;
 export type PortalRecipientPayload = Components.Schemas.PortalRecipientPayload;
 export type PortalStatus = Components.Schemas.PortalStatus;
+export type ProductRecommendationOffer = Components.Schemas.ProductRecommendationOffer;
 export type Recipient = Components.Schemas.Recipient;
 export type RetriggerAutomationsRequest = Components.Schemas.RetriggerAutomationsRequest;
 export type RetriggerAutomationsResult = Components.Schemas.RetriggerAutomationsResult;
 export type ServerError = Components.Schemas.ServerError;
 export type SetupCampaignRequest = Components.Schemas.SetupCampaignRequest;
+export type SetupExistingProductRecommendation = Components.Schemas.SetupExistingProductRecommendation;
+export type SetupNewProductRecommendation = Components.Schemas.SetupNewProductRecommendation;
 export type SetupTariffChangeCampaignRequest = Components.Schemas.SetupTariffChangeCampaignRequest;
 export type SetupTariffChangeCampaignResponse = Components.Schemas.SetupTariffChangeCampaignResponse;
 export type Target = Components.Schemas.Target;
