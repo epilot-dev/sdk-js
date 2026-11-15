@@ -164,7 +164,11 @@ epilot auth logout
 ### Open the portal with the CLI session
 
 `epilot auth browser` prints a portal URL that signs the browser in with the CLI's token, and offers to open it
-in interactive shells:
+in interactive shells. The portal shows who the session belongs to and the verification code to compare with the
+terminal before switching:
+
+<img src="docs/assets/auth-browser-approval.png" alt="Portal approval page for epilot auth browser" width="360">
+
 
 ```bash
 epilot auth browser                       # print URL, ask to open the browser
