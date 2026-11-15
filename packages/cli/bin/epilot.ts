@@ -119,6 +119,7 @@ function printRootHelp() {
   w(`  ${CYAN}auth token${R}              Store an API token directly\n`);
   w(`  ${CYAN}auth status${R}             Show authentication status\n`);
   w(`  ${CYAN}auth logout${R}             Remove stored credentials\n`);
+  w(`  ${CYAN}auth browser${R}            Open the portal in your browser, signed in with the CLI token\n`);
   w(`  ${CYAN}profile${R}                 Manage named profiles\n`);
   w(`  ${CYAN}config${R}                  Manage CLI configuration\n`);
   w(`  ${CYAN}completion${R}              Generate shell completion scripts\n`);

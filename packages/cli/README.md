@@ -57,6 +57,7 @@ COMMANDS
   auth token              Store an API token directly
   auth status             Show authentication status
   auth logout             Remove stored credentials
+  auth browser            Open the portal in your browser, signed in with the CLI token
   profile                 Manage named profiles
   completion              Generate shell completion scripts
 
@@ -159,6 +160,26 @@ epilot auth status
 # Logout
 epilot auth logout
 ```
+
+### Open the portal with the CLI session
+
+`epilot auth browser` prints a portal URL that signs the browser in with the CLI's token, and offers to open it
+in interactive shells:
+
+```bash
+epilot auth browser                       # print URL, ask to open the browser
+epilot auth browser /app/entity/contact   # land on a specific page
+epilot auth browser --open                # open without asking
+epilot auth browser --no-open             # only print the URL (stdout), e.g. for scripts
+epilot auth browser --json                # {"url": "...", "expires_at": "..."}
+```
+
+- The browser session uses the token as-is: read-only and anonymized logins stay read-only and anonymized, and
+  the session ends when the token expires (1 hour for `epilot auth login`). Nothing refreshes it.
+- The portal asks for confirmation before replacing the browser's current session.
+- The token travels in the URL fragment (`/cli-session#token=…`), which never reaches a server; the portal removes
+  it from the address bar. Still, treat the URL like a password.
+- Needs a user token: API tokens and agent tokens (`auth login --agent`) have no user to sign in as.
 
 Token resolution order:
 1. `--token` flag
