@@ -31,6 +31,7 @@ import {
   saveAgentRecord,
 } from '../lib/agent-auth.js';
 import { saveCredentials } from '../lib/auth-store.js';
+import { resolveTokenArg } from '../lib/token-input.js';
 import { type Environment, getPortalUrl, resolveEnvironment } from '../lib/environment.js';
 import { isInteractive } from '../lib/interactive.js';
 import { BOLD, RESET, GREEN, RED, DIM, YELLOW, CYAN } from '../lib/utils.js';
@@ -41,7 +42,10 @@ export const AGENT_FLAG_DESCRIPTION =
 export default defineCommand({
   meta: { name: 'login', description: 'Authenticate with epilot' },
   args: {
-    token: { type: 'string', description: 'Manually provide a token instead of browser login' },
+    token: {
+      type: 'string',
+      description: 'Manually provide a token instead of browser login ("-" reads it from stdin)',
+    },
     profile: { type: 'string', description: 'Save credentials to this profile' },
     readonly: { type: 'boolean', description: 'Generate a read-only token (cannot perform write actions)' },
     anonymize: {
@@ -78,8 +82,14 @@ export default defineCommand({
 
     // Manual token input
     if (args.token) {
+      const token = await resolveTokenArg(args.token);
+      if (!token) {
+        process.stderr.write(`${RED}No token provided.${RESET}\n`);
+        process.exit(1);
+        return;
+      }
       await forgetAgentForProfile(profileName);
-      saveCredentials({ token: args.token }, profileName);
+      saveCredentials({ token }, profileName);
       const suffix = profileName ? ` to profile "${profileName}"` : '';
       process.stdout.write(`${GREEN}Token saved${suffix}.${RESET}\n`);
       return;

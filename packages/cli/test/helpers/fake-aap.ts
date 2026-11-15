@@ -10,6 +10,7 @@ import { ACCESS_PROFILE_INFO, type AccessProfile, isAccessProfile, mostPermissiv
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { mkdtempSync, rmSync } from 'node:fs';
+import { Readable } from 'node:stream';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -370,3 +371,10 @@ export const captureOutput = () => {
 };
 
 export const stripAnsi = (s: string) => s.replace(new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g'), '');
+
+/** Replace process.stdin with a pipe that yields `input` (not a TTY), e.g. `printf '%s' "$TOKEN" | epilot …`. */
+export const pipeStdin = (input: string) => {
+  const original = Object.getOwnPropertyDescriptor(process, 'stdin')!;
+  Object.defineProperty(process, 'stdin', { value: Readable.from([input]), configurable: true });
+  return { restore: () => Object.defineProperty(process, 'stdin', original) };
+};

@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { saveCredentials } from '../src/lib/auth-store.js';
+import { pipeStdin } from './helpers/fake-aap.js';
 
 // Mock auth-store
-vi.mock('../src/lib/auth-store.js', () => ({
+vi.mock('../src/lib/auth-store.js', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../src/lib/auth-store.js')>()),
   saveCredentials: vi.fn(),
 }));
 
@@ -54,6 +56,19 @@ describe('auth token command', () => {
 
     expect(saveCredentials).toHaveBeenCalledWith({ token: 'tok-456' }, 'staging');
     expect(mockStdout).toContain('profile "staging"');
+    expect(mockStdout).toContain('epilot --profile staging <api> <operation>');
+  });
+
+  it('confirms the org and expiry decoded from a JWT, never the token', async () => {
+    const exp = Math.floor(Date.UTC(2026, 10, 15, 12, 0, 0) / 1000);
+    const payload = Buffer.from(JSON.stringify({ org_id: '911210', exp })).toString('base64url');
+    const jwt = `eyJhbGciOiJIUzI1NiJ9.${payload}.c2ln`;
+    const mod = await import('../src/commands/auth-token.js');
+
+    await mod.default.run!({ args: { token: jwt, profile: 'agent-911' } } as any);
+
+    expect(mockStdout).toContain('org 911210, expires 2026-11-15T12:00:00.000Z');
+    expect(mockStdout).not.toContain(payload);
   });
 
   it('prompts for token interactively when not provided', async () => {
@@ -101,5 +116,30 @@ describe('auth token command', () => {
         process.env.EPILOT_PROFILE = origEnv;
       }
     }
+  });
+
+  it('reads the token from stdin with "-" and never prints it', async () => {
+    const stdin = pipeStdin('  piped-token-789\n');
+    try {
+      const mod = await import('../src/commands/auth-token.js');
+      await mod.default.run!({ args: { token: '-', profile: 'agent-911' } } as any);
+    } finally {
+      stdin.restore();
+    }
+    expect(saveCredentials).toHaveBeenCalledWith({ token: 'piped-token-789' }, 'agent-911');
+    expect(mockStdout).toContain('Token saved to profile "agent-911"');
+    expect(mockStdout).not.toContain('piped-token-789');
+  });
+
+  it('exits with error when stdin is empty', async () => {
+    const stdin = pipeStdin('');
+    try {
+      const mod = await import('../src/commands/auth-token.js');
+      await mod.default.run!({ args: { token: '-', profile: 'agent-911' } } as any);
+    } finally {
+      stdin.restore();
+    }
+    expect(mockStderr).toContain('No token provided');
+    expect(mockExit).toHaveBeenCalledWith(1);
   });
 });

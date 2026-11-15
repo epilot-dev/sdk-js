@@ -163,9 +163,44 @@ epilot auth logout
 Token resolution order:
 1. `--token` flag
 2. `EPILOT_TOKEN` environment variable
-3. Active profile token
+3. Profile token (`--profile`, `EPILOT_PROFILE` or `epilot profile use`; a named profile that does not exist is an error)
 4. Stored credentials (`~/.config/epilot/credentials.json`)
 5. Interactive prompt (if TTY)
+
+### Using a pre-minted token
+
+Short-lived tokens minted for you (e.g. a scoped agent token for one organization) belong in a named
+profile, so they never replace your own login. Pass `--profile` on every call (agents can't rely on env vars
+persisting between shell calls):
+
+```bash
+# Store the token in its own profile, read from stdin (org, user and expiry are read from the token)
+printf '%s' "$TOKEN" | epilot profile create agent-911 --token -
+
+# Use it
+epilot --profile agent-911 entity listSchemas
+
+# Check which token is used and its claims (org, user, read-only, anonymized, actor, expiry) — never prints the token
+epilot auth status --profile agent-911
+
+# Remove it again (your default login stays)
+epilot profile delete agent-911
+```
+
+Pass the token as `-` to read it from stdin (`profile create <name> --token -`, `auth token --profile <name> -`,
+`auth login --profile <name> --token -`): a token on the command line is visible in `ps` and lands in your shell
+history. On a terminal, `-` prompts with masked input instead.
+
+Storing a token in a named profile (`--profile` or `EPILOT_PROFILE`) leaves `~/.config/epilot/credentials.json`
+untouched, and a named profile does not fall back to it:
+
+- A profile that does not exist fails with `Profile "…" not found. Create it with: epilot profile create … --token …`
+  (`--token` / `EPILOT_TOKEN` still win over any profile).
+- Once the token has expired, commands fail with `Token of profile "…" expired at … — request a new one`.
+
+`epilot auth logout --profile <name>` clears the token but keeps the profile (and e.g. its `--server`), and a
+profile without a token still uses your default login. Remove a token-only profile with
+`epilot profile delete <name>` instead, so later calls with it fail.
 
 ### Agent mode (optional)
 

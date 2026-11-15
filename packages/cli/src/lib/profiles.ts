@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import { RED, RESET } from './utils.js';
 
 export type Profile = {
   /** Display name */
@@ -39,6 +40,10 @@ export const getConfigDir = (): string => {
 
 const getProfilesPath = (): string => join(getConfigDir(), 'profiles.json');
 
+/** Where the Agent Auth agent of a profile is stored (`agent-auth/agents/<profile>.json`). */
+export const agentRecordPath = (profileKey: string): string =>
+  join(getConfigDir(), 'agent-auth', 'agents', `${profileKey}.json`);
+
 export const loadProfiles = (): ProfileConfig => {
   const path = getProfilesPath();
   if (!existsSync(path)) return { profiles: {} };
@@ -71,6 +76,38 @@ export const resolveProfileName = (flagProfile?: string): string | null => {
   if (config.active) return config.active;
   if (config.profiles.default) return 'default';
   return null;
+};
+
+/** The profile named explicitly with --profile or EPILOT_PROFILE (not the active or default one). */
+export const explicitProfileName = (flagProfile?: string): string | undefined =>
+  flagProfile || process.env.EPILOT_PROFILE || undefined;
+
+/**
+ * True when the profile is in profiles.json, or an Agent Auth agent is stored for it
+ * (an `auth login --agent --profile` whose organization is not chosen yet).
+ */
+export const profileExists = (name: string): boolean =>
+  Boolean(loadProfiles().profiles[name]) || existsSync(agentRecordPath(name));
+
+export class ProfileNotFoundError extends Error {
+  constructor(readonly profileName: string) {
+    super(`Profile "${profileName}" not found. Create it with: epilot profile create ${profileName} --token …`);
+    this.name = 'ProfileNotFoundError';
+  }
+}
+
+/**
+ * Exit 1 when a profile is named explicitly (--profile / EPILOT_PROFILE) but does not exist, so a
+ * command never falls back to another token (e.g. the default login in credentials.json, possibly
+ * another organization). Throws ProfileNotFoundError should `process.exit` return (stubbed in tests).
+ */
+export const ensureExplicitProfileExists = (flagProfile?: string): void => {
+  const name = explicitProfileName(flagProfile);
+  if (!name || profileExists(name)) return;
+  const error = new ProfileNotFoundError(name);
+  process.stderr.write(`${RED}${error.message}${RESET}\n`);
+  process.exit(1);
+  throw error;
 };
 
 /**
