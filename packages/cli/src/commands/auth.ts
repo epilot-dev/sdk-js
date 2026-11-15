@@ -20,6 +20,7 @@ export default defineCommand({
   subCommands: {
     login: () => import('./auth-login.js').then((m) => m.default),
     token: () => import('./auth-token.js').then((m) => m.default),
+    browser: () => import('./auth-browser.js').then((m) => m.default),
     logout: defineCommand({
       meta: { name: 'logout', description: 'Remove stored credentials' },
       args: {

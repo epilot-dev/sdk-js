@@ -32,6 +32,9 @@
     "/v2/users/public/signup": {
       "post": {
         "operationId": "signUpUser",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "signUpUser",
         "security": [],
         "parameters": [
@@ -82,8 +85,9 @@
     "/v2/users/me": {
       "get": {
         "operationId": "getMeV2",
+        "x-epilot-permissions": [],
         "summary": "getMeV2",
-        "description": "Get currently logged in user",
+        "description": "Get currently logged in user.\n\nFor an AI agent token, the user the agent acts on behalf of (with `actor` describing the\nagent). For an API token, a stand-in for the token (`id` = token id, `actor.type: api_token`).\n",
         "tags": [
           "User V2"
         ],
@@ -104,6 +108,7 @@
     "/v2/users/me/settings": {
       "get": {
         "operationId": "listUserSettings",
+        "x-epilot-permissions": [],
         "summary": "listUserSettings",
         "description": "List all setting scopes and keys available for the currently logged in user. Does not return setting values.",
         "tags": [
@@ -126,6 +131,7 @@
     "/v2/users/me/settings/{scope}": {
       "get": {
         "operationId": "getUserSettingsScope",
+        "x-epilot-permissions": [],
         "summary": "getUserSettingsScope",
         "description": "Get all setting values for one scope for the currently logged in user.",
         "tags": [
@@ -159,6 +165,7 @@
     "/v2/users/me/settings/{scope}/{key}": {
       "get": {
         "operationId": "getUserSetting",
+        "x-epilot-permissions": [],
         "summary": "getUserSetting",
         "description": "Get one setting value by scope and key for the currently logged in user.",
         "tags": [
@@ -202,6 +209,7 @@
       },
       "put": {
         "operationId": "putUserSetting",
+        "x-epilot-permissions": [],
         "summary": "putUserSetting",
         "description": "Create or replace one setting value for the currently logged in user.",
         "tags": [
@@ -252,6 +260,7 @@
       },
       "delete": {
         "operationId": "deleteUserSetting",
+        "x-epilot-permissions": [],
         "summary": "deleteUserSetting",
         "description": "Delete one setting value for the currently logged in user.",
         "tags": [
@@ -287,6 +296,12 @@
     "/v2/users": {
       "get": {
         "operationId": "listUsersV2",
+        "x-epilot-permissions": [
+          {
+            "action": "user:view",
+            "filter": true
+          }
+        ],
         "summary": "listUsersV2",
         "parameters": [
           {
@@ -346,6 +361,12 @@
     "/v2/users/{id}": {
       "get": {
         "operationId": "getUserV2",
+        "x-epilot-permissions": [
+          {
+            "action": "user:view",
+            "resource": "{id}"
+          }
+        ],
         "summary": "getUserV2",
         "description": "Get user details by user id",
         "tags": [
@@ -377,8 +398,17 @@
       },
       "patch": {
         "operationId": "updateUserV2",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
+        "x-epilot-permissions": [
+          {
+            "action": "user:edit",
+            "resource": "{id}"
+          }
+        ],
         "summary": "updateUserV2",
-        "description": "Update user details",
+        "description": "Update user details.\n\nRequires `user:edit` on the user, or the caller updating their own user (self-service).\n`id`, `organization_id`, `email`, `token` and password-reset fields are never taken from the request body.\n`status` can only be changed with `user:edit`; `draft_email` (email change) only by the user themselves.\nChanging `draft_email`, `mfa_enabled`, `totp_enabled` or `phone_verified` requires the user's own login\nsession: API, agent and assumed (CLI) tokens get a 403 (values sent unchanged are ignored).\n",
         "tags": [
           "User V2"
         ],
@@ -417,8 +447,14 @@
       },
       "delete": {
         "operationId": "deleteUserV2",
+        "x-epilot-permissions": [
+          {
+            "action": "user:delete",
+            "resource": "{id}"
+          }
+        ],
         "summary": "deleteUserV2",
-        "description": "Delete user by user id",
+        "description": "Delete user by user id.\n\nRejects with 409 when the user is the last remaining owner of the organization (internal callers are exempt).\n",
         "tags": [
           "User V2"
         ],
@@ -450,8 +486,16 @@
     "/v2/users/invite": {
       "post": {
         "operationId": "inviteUser",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
+        "x-epilot-permissions": [
+          {
+            "action": "user:invite"
+          }
+        ],
         "summary": "inviteUser",
-        "description": "Creates a new user in the caller's organization and sends an invite email to activate the user\n",
+        "description": "Creates a new user in the caller's organization and sends an invite email to activate the user.\n\nThe caller can only invite users with roles they could assign themselves: their own roles, or other\norg roles with `role:assign`. Only an organization owner can invite a user with the `owner` role (403 otherwise).\n\n`invitation_type: preview_org_ready` sends a \"Your preview org is ready\" email instead of the default\ninvitation (same invite link). It is reserved for internal epilot services (internal-auth tokens);\nany other caller gets 403.\n",
         "tags": [
           "User V2"
         ],
@@ -477,6 +521,9 @@
           },
           "400": {
             "description": "Unable to invite the above email address."
+          },
+          "403": {
+            "description": "Not allowed to invite users, to assign the requested roles, or to use the requested invitation_type."
           }
         }
       }
@@ -484,6 +531,11 @@
     "/v2/users/invite:resendEmail": {
       "post": {
         "operationId": "resendUserInvitation",
+        "x-epilot-permissions": [
+          {
+            "action": "user:invite"
+          }
+        ],
         "summary": "resendUserInvitation",
         "description": "Resend user invitation email",
         "tags": [
@@ -503,11 +555,8 @@
                   "language": {
                     "type": "string",
                     "description": "Language for user invitation email",
-                    "enum": [
-                      "en",
-                      "de"
-                    ],
-                    "default": "en"
+                    "default": "en",
+                    "example": "en"
                   }
                 }
               }
@@ -534,6 +583,14 @@
     "/v2/users:sendPasswordReset": {
       "post": {
         "operationId": "sendUserPasswordReset",
+        "x-epilot-agent": {
+          "expose": false
+        },
+        "x-epilot-permissions": [
+          {
+            "action": "user:edit"
+          }
+        ],
         "summary": "sendUserPasswordReset",
         "description": "Send a password reset email to a user in your organization.\nRequires `user:edit` on the target user.\n",
         "tags": [
@@ -591,6 +648,11 @@
     "/v2/users/{id}/groups": {
       "get": {
         "operationId": "getGroupsForUser",
+        "x-epilot-permissions": [
+          {
+            "action": "group:view"
+          }
+        ],
         "summary": "getGroupsForUser",
         "description": "Get groups of a user",
         "tags": [
@@ -627,6 +689,11 @@
     "/v1/groups": {
       "get": {
         "operationId": "getGroups",
+        "x-epilot-permissions": [
+          {
+            "action": "group:view"
+          }
+        ],
         "summary": "getGroups",
         "description": "Lists groups in organizations you have access to",
         "tags": [
@@ -697,6 +764,11 @@
       },
       "post": {
         "operationId": "createGroup",
+        "x-epilot-permissions": [
+          {
+            "action": "group:create"
+          }
+        ],
         "summary": "createGroup",
         "description": "Create a new group",
         "tags": [
@@ -728,6 +800,12 @@
     "/v1/groups/{id}": {
       "get": {
         "operationId": "getGroup",
+        "x-epilot-permissions": [
+          {
+            "action": "group:view",
+            "resource": "{id}"
+          }
+        ],
         "summary": "getGroup",
         "description": "Get group by id",
         "tags": [
@@ -771,6 +849,12 @@
       },
       "patch": {
         "operationId": "updateGroup",
+        "x-epilot-permissions": [
+          {
+            "action": "group:edit",
+            "resource": "{id}"
+          }
+        ],
         "summary": "updateGroup",
         "description": "Update group by id",
         "tags": [
@@ -814,6 +898,12 @@
       },
       "delete": {
         "operationId": "deleteGroup",
+        "x-epilot-permissions": [
+          {
+            "action": "group:delete",
+            "resource": "{id}"
+          }
+        ],
         "summary": "deleteGroup",
         "description": "Delete group by id",
         "tags": [
@@ -840,6 +930,12 @@
     "/v1/groups/{id}/user:next": {
       "post": {
         "operationId": "advanceUserAssignment",
+        "x-epilot-permissions": [
+          {
+            "action": "group:edit",
+            "resource": "{id}"
+          }
+        ],
         "summary": "advanceUserAssignment",
         "description": "Advance user assignment to next user in line",
         "tags": [
@@ -879,6 +975,7 @@
     "/v2/user/navigations": {
       "post": {
         "operationId": "createNavigation",
+        "x-epilot-permissions": [],
         "summary": "createNavigation",
         "description": "Create a new navigation configuration. Navigations are immutable and globally accessible across organizations.\nEach creation generates a new id. To update a navigation, create a new one.\n",
         "tags": [
@@ -910,6 +1007,7 @@
     "/v2/user/navigations/{id}": {
       "get": {
         "operationId": "getNavigation",
+        "x-epilot-permissions": [],
         "summary": "getNavigation",
         "description": "Get a navigation configuration by ID",
         "tags": [
@@ -946,6 +1044,9 @@
     "/v2/users/public/verifyEmail": {
       "post": {
         "operationId": "verifyEmailWithToken",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "verifyEmailWithToken",
         "description": "Update new email using an verification token",
         "security": [],
@@ -994,6 +1095,9 @@
     "/v2/users/public/requestPasswordReset": {
       "post": {
         "operationId": "requestPasswordReset",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "requestPasswordReset",
         "description": "Request a password reset email for the given email address. Always\nreturns a success response whether or not an account exists with that\nemail.\n",
         "security": [],
@@ -1049,6 +1153,9 @@
     "/v2/users/public/resetPassword": {
       "post": {
         "operationId": "resetPassword",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "resetPassword",
         "description": "Set a new password using a reset token from the password reset email.\nThe token is single-use and time-limited.\n",
         "security": [],
@@ -1141,7 +1248,8 @@
                           "missing_lowercase",
                           "missing_uppercase",
                           "missing_number",
-                          "missing_symbol"
+                          "missing_symbol",
+                          "leading_or_trailing_whitespace"
                         ]
                       },
                       "example": [
@@ -1160,6 +1268,9 @@
     "/v2/users/public/checkToken": {
       "get": {
         "operationId": "checkInviteToken",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "checkInviteToken",
         "description": "Check an invite token",
         "security": [],
@@ -1208,6 +1319,28 @@
                     "invitee_primary_org_id": {
                       "type": "string",
                       "description": "Organization ID of the primary organization of the user (when inviting an existing epilot user)"
+                    },
+                    "login_methods": {
+                      "type": "object",
+                      "description": "Login methods offered by the inviting organization. When the organization does not offer password login, or signs its users in via SSO, the invited user does not have to choose a password during activation.",
+                      "properties": {
+                        "password": {
+                          "type": "boolean",
+                          "description": "Username + password login is enabled"
+                        },
+                        "passwordless": {
+                          "type": "boolean",
+                          "description": "Passwordless (email link) login is enabled"
+                        },
+                        "sso": {
+                          "type": "boolean",
+                          "description": "Single sign-on is enabled"
+                        },
+                        "passkey": {
+                          "type": "boolean",
+                          "description": "Passkey (WebAuthn) login is enabled"
+                        }
+                      }
                     }
                   },
                   "required": [
@@ -1228,6 +1361,9 @@
     "/v2/users/public/activate": {
       "post": {
         "operationId": "activateUser",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "activateUser",
         "description": "Activate user using an invite token",
         "security": [],
@@ -1256,7 +1392,27 @@
         },
         "responses": {
           "200": {
-            "description": "Activated successfully"
+            "description": "Activated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "email": {
+                      "type": "string",
+                      "description": "Email address of the activated user"
+                    },
+                    "login_token": {
+                      "type": "string",
+                      "description": "Short-lived token answering the Cognito CUSTOM_AUTH challenge, so the activated user can be signed in directly instead of being sent back to the login screen. Same shape and lifetime as a magic-link token."
+                    }
+                  }
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid payload"
@@ -1270,6 +1426,9 @@
     "/v2/users/public/reject": {
       "delete": {
         "operationId": "rejectInvite",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "rejectInvite",
         "description": "Reject an invite",
         "security": [],
@@ -1313,6 +1472,9 @@
     "/v2/users/public/username/{username}:getLoginParameters": {
       "get": {
         "operationId": "getUserLoginParametersV2",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "getUserLoginParametersV2",
         "description": "Get user organization login parameters by username\n\nThe first item in the list corresponds to the user's primary organization and must be used for initial login.\n",
         "security": [],
@@ -1355,6 +1517,9 @@
     "/v2/users/public/passkeys:authenticateBegin": {
       "post": {
         "operationId": "beginPasskeyAuthentication",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "beginPasskeyAuthentication",
         "description": "Begin passkey authentication flow. Returns WebAuthn options and a signed challenge token.",
         "security": [],
@@ -1399,6 +1564,9 @@
     "/v2/users/public/passkeys:authenticateBeginDiscoverable": {
       "post": {
         "operationId": "beginDiscoverablePasskeyAuthentication",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "beginDiscoverablePasskeyAuthentication",
         "description": "Begin discoverable passkey authentication flow (no email required). Returns WebAuthn options with empty allowCredentials for the browser credential picker.",
         "security": [],
@@ -1422,6 +1590,9 @@
     "/v2/users/public/passkeys:resolveCredential": {
       "post": {
         "operationId": "resolveDiscoverableCredential",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "resolveDiscoverableCredential",
         "description": "Resolve user identity from a discoverable passkey assertion. Returns the user's email and login parameters.",
         "security": [],
@@ -1480,6 +1651,9 @@
               }
             }
           },
+          "401": {
+            "description": "Challenge token expired or assertion verification failed"
+          },
           "404": {
             "description": "Credential not found"
           }
@@ -1489,8 +1663,12 @@
     "/v2/users/me/passkeys:registerBegin": {
       "post": {
         "operationId": "beginPasskeyRegistration",
+        "x-epilot-agent": {
+          "expose": false
+        },
+        "x-epilot-permissions": [],
         "summary": "beginPasskeyRegistration",
-        "description": "Begin passkey registration flow for the authenticated user.",
+        "description": "Begin passkey registration flow for the authenticated user.\nRequires the user's own login session; API, agent and assumed (CLI) tokens are refused.\n",
         "tags": [
           "User V2"
         ],
@@ -1519,6 +1697,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Changing login credentials requires a user login session (not an API, agent or assumed token)"
           }
         }
       }
@@ -1526,8 +1707,12 @@
     "/v2/users/me/passkeys:registerComplete": {
       "post": {
         "operationId": "completePasskeyRegistration",
+        "x-epilot-agent": {
+          "expose": false
+        },
+        "x-epilot-permissions": [],
         "summary": "completePasskeyRegistration",
-        "description": "Complete passkey registration by verifying the attestation response.",
+        "description": "Complete passkey registration by verifying the attestation response.\nRequires the user's own login session; API, agent and assumed (CLI) tokens are refused.\n",
         "tags": [
           "User V2"
         ],
@@ -1550,6 +1735,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Changing login credentials requires a user login session (not an API, agent or assumed token)"
           }
         }
       }
@@ -1557,6 +1745,7 @@
     "/v2/users/me/passkeys": {
       "get": {
         "operationId": "listPasskeys",
+        "x-epilot-permissions": [],
         "summary": "listPasskeys",
         "description": "List all passkeys registered for the authenticated user.",
         "tags": [
@@ -1587,8 +1776,12 @@
     "/v2/users/me/passkeys/{credentialId}": {
       "delete": {
         "operationId": "deletePasskey",
+        "x-epilot-agent": {
+          "expose": false
+        },
+        "x-epilot-permissions": [],
         "summary": "deletePasskey",
-        "description": "Delete a passkey by credential ID.",
+        "description": "Delete a passkey by credential ID.\nRequires the user's own login session; API, agent and assumed (CLI) tokens are refused.\n",
         "tags": [
           "User V2"
         ],
@@ -1606,6 +1799,9 @@
           "204": {
             "description": "Passkey deleted successfully"
           },
+          "403": {
+            "description": "Changing login credentials requires a user login session (not an API, agent or assumed token)"
+          },
           "404": {
             "description": "Passkey not found"
           }
@@ -1615,6 +1811,10 @@
     "/v2/users/switchOrganization": {
       "post": {
         "operationId": "switchOrganization",
+        "x-epilot-agent": {
+          "expose": false
+        },
+        "x-epilot-permissions": [],
         "summary": "switchOrganization",
         "description": "Switch to another organization the user is part of",
         "tags": [
@@ -1663,6 +1863,7 @@
     "/v1/users/me": {
       "get": {
         "operationId": "getMe",
+        "x-epilot-permissions": [],
         "summary": "getMe",
         "description": "Get currently logged in user",
         "tags": [
@@ -1685,6 +1886,12 @@
     "/v1/users": {
       "get": {
         "operationId": "listUsers",
+        "x-epilot-permissions": [
+          {
+            "action": "user:view",
+            "filter": true
+          }
+        ],
         "summary": "listUsers",
         "description": "Lists users in organizations you have access to",
         "parameters": [
@@ -1757,6 +1964,12 @@
     "/v1/users/{id}": {
       "get": {
         "operationId": "getUser",
+        "x-epilot-permissions": [
+          {
+            "action": "user:view",
+            "resource": "{id}"
+          }
+        ],
         "summary": "getUser",
         "description": "Get user by id",
         "parameters": [
@@ -1790,6 +2003,9 @@
     "/v1/users/username/{username}:getLoginParameters": {
       "get": {
         "operationId": "getUserLoginParameters",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "getUserLoginParameters",
         "description": "Get user organization login parameters by username",
         "security": [],
@@ -2019,11 +2235,8 @@
           "language": {
             "type": "string",
             "description": "Language for user invitation email",
-            "enum": [
-              "en",
-              "de"
-            ],
-            "default": "en"
+            "default": "en",
+            "example": "en"
           },
           "roles": {
             "type": "array",
@@ -2031,6 +2244,32 @@
               "type": "string",
               "description": "Role IDs for the user",
               "example": "123:owner"
+            }
+          },
+          "invitation_type": {
+            "type": "string",
+            "description": "Which invitation email to send. `default` sends the regular \"You've been invited to join epilot\" email.\n`preview_org_ready` tells a user that a preview org (a temporary copy of a production org) is ready;\nonly internal epilot services (internal-auth tokens) may use it, other callers get 403.\n",
+            "enum": [
+              "default",
+              "preview_org_ready"
+            ],
+            "default": "default",
+            "example": "default"
+          },
+          "invitation_context": {
+            "type": "object",
+            "description": "Values interpolated into the invitation email. Only used for `invitation_type` `preview_org_ready`.",
+            "properties": {
+              "preview_org_name": {
+                "type": "string",
+                "description": "Name of the preview org the user is invited to",
+                "example": "epilot GmbH (Preview)"
+              },
+              "source_org_name": {
+                "type": "string",
+                "description": "Name of the production org the preview was copied from",
+                "example": "epilot GmbH"
+              }
             }
           }
         }
@@ -2063,6 +2302,46 @@
       "UserV2": {
         "type": "object",
         "properties": {
+          "actor": {
+            "readOnly": true,
+            "description": "Only in getMeV2, when the caller is not a person's own login. With an AI agent token\n(`type: agent`) the response is the user the agent acts on behalf of; with an API token\n(`type: api_token`) it is a stand-in for the token itself (`id` = token id, `display_name` =\ntoken name, no personal data). UIs show who is really acting from this.\n",
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "agent",
+                  "api_token"
+                ]
+              },
+              "token_id": {
+                "type": "string",
+                "description": "Id of the access token making the request"
+              },
+              "token_name": {
+                "type": "string"
+              },
+              "agent_id": {
+                "type": "string",
+                "description": "Agent Auth agent id (agent only)"
+              },
+              "agent_name": {
+                "type": "string",
+                "description": "Self-declared agent name (agent only); show it as an AI agent, never as a person"
+              },
+              "host_name": {
+                "type": "string",
+                "description": "Host the agent runs on, e.g. `epilot MCP (Claude)` (agent only)"
+              },
+              "client": {
+                "type": "string",
+                "description": "Self-declared client kind, e.g. `epilot-mcp` (agent only)"
+              }
+            }
+          },
           "id": {
             "$ref": "#/components/schemas/UserId"
           },
@@ -2084,12 +2363,24 @@
           },
           "status": {
             "type": "string",
+            "description": "`Deactivated` users can't log in and free their seat from the next billing month on (a user\ndeactivated during a month is billed for that month). Only `Active` users can be deactivated, and\nonly by someone else with `user:edit`; reactivation (`Deactivated` → `Active`) is possible at any time.\n",
             "enum": [
               "Active",
               "Pending",
               "Deactivated",
               "Deleted"
             ]
+          },
+          "deactivated_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "description": "When the user was deactivated. Set by the API while the user is `Deactivated`."
+          },
+          "deactivated_by": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Id of the user who deactivated this user."
           },
           "email": {
             "description": "User's email address",
@@ -2122,6 +2413,11 @@
             "format": "date-time",
             "readOnly": true
           },
+          "sso_required": {
+            "type": "boolean",
+            "default": false,
+            "description": "When true the user may only sign in through the organization's SSO identity provider. Local\npassword, epilot MFA, passkey, e-mail login link and password reset are rejected for this user.\nLeave unset for break-glass and external accounts that must keep signing in locally.\nCan only be changed by callers with `user:edit`; a user cannot change it on their own record.\n"
+          },
           "department": {
             "type": "string",
             "description": "User's department",
@@ -2142,6 +2438,11 @@
           },
           "mfa_enabled": {
             "description": "User's multi-factor authentication status",
+            "type": "boolean",
+            "example": false
+          },
+          "totp_enabled": {
+            "description": "Whether the user has TOTP (authenticator app) MFA enabled",
             "type": "boolean",
             "example": false
           },
@@ -2406,7 +2707,14 @@
           },
           "organization_use": {
             "type": "string",
+            "description": "How the organization is used. One of `Production`, `Sandbox` or `Preview`\n(a temporary copy of a Production org for reviewing configuration changes).\n",
             "example": "Production"
+          },
+          "parent_production_org_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "For a Sandbox or Preview org, the id of its Production parent (its brand);\nnull/absent for Production orgs. Lets the org switcher group a\nsandbox or preview under its brand without relying on list order.\n",
+            "example": "123"
           },
           "cognito_region": {
             "type": "string",
@@ -2641,11 +2949,8 @@
           "language": {
             "type": "string",
             "description": "Language for user invitation email",
-            "enum": [
-              "en",
-              "de"
-            ],
-            "default": "en"
+            "default": "en",
+            "example": "en"
           }
         }
       },
@@ -2833,6 +3138,692 @@
           }
         }
       },
+      "OrgActivity": {
+        "type": "object",
+        "description": "Internal-only activity overview of an organization",
+        "required": [
+          "org_id",
+          "generated_at",
+          "granularity",
+          "from",
+          "to",
+          "summary",
+          "series",
+          "top_users",
+          "attention"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "example": "739224"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-09-24T10:00:00.000Z"
+          },
+          "granularity": {
+            "type": "string",
+            "enum": [
+              "day",
+              "week",
+              "month"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "format": "date",
+            "description": "Resolved start day (inclusive)",
+            "example": "2026-03-30"
+          },
+          "to": {
+            "type": "string",
+            "format": "date",
+            "description": "Resolved end day (inclusive)",
+            "example": "2026-09-24"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/OrgActivitySummary"
+          },
+          "series": {
+            "type": "array",
+            "description": "Distinct active users per period, one entry per period (missing periods filled with 0)",
+            "items": {
+              "type": "object",
+              "required": [
+                "period_start",
+                "active_users"
+              ],
+              "properties": {
+                "period_start": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "First day of the period (Monday for weeks, 1st for months)",
+                  "example": "2026-09-21"
+                },
+                "active_users": {
+                  "type": "integer",
+                  "example": 42
+                }
+              }
+            }
+          },
+          "top_users": {
+            "type": "array",
+            "description": "Most active users within from..to, ordered by active days desc, last seen desc",
+            "items": {
+              "type": "object",
+              "required": [
+                "user_id",
+                "name",
+                "email",
+                "active_days",
+                "last_seen_at"
+              ],
+              "properties": {
+                "user_id": {
+                  "type": "string",
+                  "example": "10001"
+                },
+                "name": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "email": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "active_days": {
+                  "type": "integer",
+                  "example": 21
+                },
+                "last_seen_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "attention": {
+            "type": "array",
+            "description": "Active members without activity in the last 30 days (max 100)",
+            "items": {
+              "type": "object",
+              "required": [
+                "user_id",
+                "name",
+                "email",
+                "status",
+                "created_at",
+                "last_login_at",
+                "last_seen_at",
+                "reason"
+              ],
+              "properties": {
+                "user_id": {
+                  "type": "string",
+                  "example": "10002"
+                },
+                "name": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "email": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "status": {
+                  "type": "string",
+                  "nullable": true,
+                  "example": "Active"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "nullable": true
+                },
+                "last_login_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "nullable": true
+                },
+                "last_seen_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "nullable": true
+                },
+                "reason": {
+                  "type": "string",
+                  "enum": [
+                    "dormant",
+                    "never_seen"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "OrgActivitySummary": {
+        "type": "object",
+        "description": "Internal-only activity counters of an organization. Windows are calendar days in Europe/Berlin ending today.",
+        "required": [
+          "members",
+          "billable_members",
+          "active_now",
+          "active_today",
+          "active_7d",
+          "active_prev_7d",
+          "active_30d",
+          "active_prev_30d",
+          "dormant_30d",
+          "never_seen",
+          "included_seats",
+          "included_seats_source",
+          "seats",
+          "paid_seats",
+          "activation_rate_30d",
+          "member_activation_rate_30d"
+        ],
+        "properties": {
+          "members": {
+            "type": "integer",
+            "description": "Active (non-deleted) members of the organization"
+          },
+          "billable_members": {
+            "type": "integer",
+            "description": "Active (non-deleted) members without the `non-billable` tag"
+          },
+          "deactivated_members": {
+            "type": "integer",
+            "description": "Temporarily deactivated (non-deleted) members. They hold no seat and are not part of `members`."
+          },
+          "included_seats": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Seats included in the org's pricing tier (free user quota; the org override wins over the tier default), null if unknown",
+            "example": 25
+          },
+          "included_seats_source": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "override",
+              "tier",
+              null
+            ],
+            "description": "Where included_seats comes from (org-specific pricing tier override or the tier default), null if unknown",
+            "example": "tier"
+          },
+          "seats": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Seats activation is measured against, max(included_seats, billable_members). Null only if both are unknown.",
+            "example": 30
+          },
+          "paid_seats": {
+            "type": "integer",
+            "nullable": true,
+            "deprecated": true,
+            "description": "Deprecated: alias of `seats`, will be removed. Use `seats`.",
+            "example": 30
+          },
+          "activation_rate_30d": {
+            "type": "number",
+            "nullable": true,
+            "description": "active_30d / seats (3 decimals), null without seats. Not clamped, can exceed 1.",
+            "example": 0.72
+          },
+          "member_activation_rate_30d": {
+            "type": "number",
+            "nullable": true,
+            "description": "active_30d / members (3 decimals), null without members",
+            "example": 0.64
+          },
+          "active_now": {
+            "type": "integer",
+            "description": "Users seen within the last 15 minutes"
+          },
+          "active_today": {
+            "type": "integer"
+          },
+          "active_7d": {
+            "type": "integer",
+            "description": "Distinct active users in the last 7 days (incl. today)"
+          },
+          "active_prev_7d": {
+            "type": "integer",
+            "description": "Distinct active users in the 7 days before that"
+          },
+          "active_30d": {
+            "type": "integer",
+            "description": "Distinct active users in the last 30 days (incl. today)"
+          },
+          "active_prev_30d": {
+            "type": "integer",
+            "description": "Distinct active users in the 30 days before that"
+          },
+          "dormant_30d": {
+            "type": "integer",
+            "description": "Members whose last activity is older than 30 days"
+          },
+          "never_seen": {
+            "type": "integer",
+            "description": "Members without any recorded activity"
+          }
+        }
+      },
+      "OrgActivityHeatmap": {
+        "type": "object",
+        "description": "Internal-only daily activity heatmap. Only days with value > 0 are included.",
+        "required": [
+          "org_id",
+          "user_id",
+          "from",
+          "to",
+          "days"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "example": "739224"
+          },
+          "user_id": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "from": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-09-25"
+          },
+          "to": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-09-24"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "day",
+                "value"
+              ],
+              "properties": {
+                "day": {
+                  "type": "string",
+                  "format": "date",
+                  "example": "2026-09-23"
+                },
+                "value": {
+                  "type": "integer",
+                  "description": "Distinct active users (org) or 1 = active (single user)",
+                  "example": 12
+                }
+              }
+            }
+          }
+        }
+      },
+      "LoginAsAuditPage": {
+        "type": "object",
+        "description": "Internal-only page of \"login as\" audit events, newest first.",
+        "required": [
+          "org_id",
+          "events"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "example": "739224"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LoginAsAuditEvent"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Pass as `cursor` to get the next page. Absent on the last page.",
+            "example": "01JB2Z3Q4R5S6T7V8W9XAYBZC0"
+          }
+        }
+      },
+      "LoginAsAuditEvent": {
+        "type": "object",
+        "required": [
+          "id",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "01JB2Z3Q4R5S6T7V8W9XAYBZC0"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "admin_email": {
+            "type": "string",
+            "description": "epilot staff member who logged in as the user",
+            "example": "admin@epilot.cloud"
+          },
+          "user_email": {
+            "type": "string",
+            "description": "Impersonated user",
+            "example": "customer@example.com"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "example": "CUSTOMER_SUPPORT"
+              },
+              "description": {
+                "type": "string",
+                "example": "Incident #144 Cleanup: Fixing corrupted entities for customer."
+              }
+            }
+          }
+        }
+      },
+      "OrgActivityByHour": {
+        "type": "object",
+        "description": "Internal-only average active users by weekday and hour (Europe/Berlin). Only non-zero cells are included.",
+        "required": [
+          "org_id",
+          "from",
+          "to",
+          "cells"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "example": "739224"
+          },
+          "from": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-08-27"
+          },
+          "to": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-09-23"
+          },
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "weekday",
+                "hour",
+                "avg_active_users"
+              ],
+              "properties": {
+                "weekday": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 7,
+                  "description": "ISO weekday (1 = Monday ... 7 = Sunday)"
+                },
+                "hour": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 23
+                },
+                "avg_active_users": {
+                  "type": "number",
+                  "description": "Average distinct active users, rounded to 1 decimal",
+                  "example": 3.5
+                }
+              }
+            }
+          }
+        }
+      },
+      "PlatformActivitySummary": {
+        "type": "object",
+        "description": "Internal-only platform-wide activity summary",
+        "required": [
+          "generated_at",
+          "granularity",
+          "from",
+          "to",
+          "summary",
+          "series",
+          "orgs"
+        ],
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "granularity": {
+            "type": "string",
+            "enum": [
+              "day",
+              "week",
+              "month"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "summary": {
+            "type": "object",
+            "required": [
+              "dau",
+              "dau_prev",
+              "wau",
+              "wau_prev",
+              "mau",
+              "mau_prev",
+              "active_now",
+              "active_orgs_30d"
+            ],
+            "properties": {
+              "dau": {
+                "type": "integer",
+                "description": "Distinct active users today (Europe/Berlin)"
+              },
+              "dau_prev": {
+                "type": "integer",
+                "description": "Distinct active users yesterday"
+              },
+              "wau": {
+                "type": "integer",
+                "description": "Distinct active users in the last 7 days (incl. today)"
+              },
+              "wau_prev": {
+                "type": "integer"
+              },
+              "mau": {
+                "type": "integer",
+                "description": "Distinct active users in the last 30 days (incl. today)"
+              },
+              "mau_prev": {
+                "type": "integer"
+              },
+              "active_now": {
+                "type": "integer",
+                "description": "Users seen within the last 15 minutes"
+              },
+              "active_orgs_30d": {
+                "type": "integer",
+                "description": "Organizations with at least one active user in the last 30 days"
+              }
+            }
+          },
+          "series": {
+            "type": "array",
+            "description": "Distinct active users and organizations per period (missing periods filled with 0)",
+            "items": {
+              "type": "object",
+              "required": [
+                "period_start",
+                "active_users",
+                "active_orgs"
+              ],
+              "properties": {
+                "period_start": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "active_users": {
+                  "type": "integer"
+                },
+                "active_orgs": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "orgs_total": {
+            "type": "integer",
+            "description": "Organizations matching org_search (all organizations without it), before org_limit"
+          },
+          "orgs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "org_id",
+                "name",
+                "mau",
+                "wau",
+                "members",
+                "billable_members",
+                "included_seats",
+                "included_seats_source",
+                "seats",
+                "paid_seats",
+                "activation_rate_30d"
+              ],
+              "properties": {
+                "org_id": {
+                  "type": "string",
+                  "example": "739224"
+                },
+                "name": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "mau": {
+                  "type": "integer"
+                },
+                "wau": {
+                  "type": "integer"
+                },
+                "members": {
+                  "type": "integer",
+                  "description": "Active (non-deleted) members"
+                },
+                "billable_members": {
+                  "type": "integer",
+                  "description": "Active (non-deleted) members without the `non-billable` tag"
+                },
+                "deactivated_members": {
+                  "type": "integer",
+                  "description": "Temporarily deactivated (non-deleted) members. They hold no seat and are not part of `members`."
+                },
+                "included_seats": {
+                  "type": "integer",
+                  "nullable": true,
+                  "description": "Seats included in the org's pricing tier (free user quota; the org override wins over the tier default), null if unknown",
+                  "example": 25
+                },
+                "included_seats_source": {
+                  "type": "string",
+                  "nullable": true,
+                  "enum": [
+                    "override",
+                    "tier",
+                    null
+                  ],
+                  "description": "Where included_seats comes from (org-specific pricing tier override or the tier default), null if unknown",
+                  "example": "tier"
+                },
+                "seats": {
+                  "type": "integer",
+                  "nullable": true,
+                  "description": "Seats activation is measured against, max(included_seats, billable_members). Null only if both are unknown.",
+                  "example": 30
+                },
+                "paid_seats": {
+                  "type": "integer",
+                  "nullable": true,
+                  "deprecated": true,
+                  "description": "Deprecated: alias of `seats`, will be removed. Use `seats`.",
+                  "example": 30
+                },
+                "activation_rate_30d": {
+                  "type": "number",
+                  "nullable": true,
+                  "description": "mau / seats (3 decimals), null without seats. Not clamped, can exceed 1.",
+                  "example": 0.72
+                }
+              }
+            }
+          }
+        }
+      },
+      "UserActivity": {
+        "type": "object",
+        "description": "Internal-only login / activity signals of a user in an organization",
+        "required": [
+          "org_id",
+          "user_id",
+          "first_seen_at",
+          "last_login_at",
+          "last_seen_at"
+        ],
+        "properties": {
+          "org_id": {
+            "type": "string",
+            "example": "739224"
+          },
+          "user_id": {
+            "type": "string",
+            "example": "10001"
+          },
+          "first_seen_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "First recorded activity (ISO-8601 UTC), null if never seen",
+            "example": "2026-01-12T08:15:00.000Z"
+          },
+          "last_login_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Last login (ISO-8601 UTC), null if never logged in",
+            "example": "2026-09-23T07:31:12.000Z"
+          },
+          "last_seen_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Last recorded activity, e.g. token refresh (ISO-8601 UTC), null if never seen",
+            "example": "2026-09-24T10:02:45.000Z"
+          }
+        }
+      },
       "DataPointsResponse": {
         "type": "array",
         "items": {
@@ -2853,20 +3844,47 @@
             "example": 10
           },
           "max_users_last_month": {
-            "description": "Max user last month",
+            "description": "Users billed for last month: active users created before its end, users deleted during it (except users\nalready deactivated before it started and not reactivated since), and users deactivated during or after it\n(a user deactivated during a month is billed for that month).\n",
             "type": "number",
             "example": 10
           },
           "non_billable_users_last_month": {
-            "description": "Max non-billable user last month",
+            "description": "Users tagged `non-billable` among `max_users_last_month` (excluding deleted users)",
             "type": "number",
             "example": 10
+          },
+          "deactivated_users_last_month": {
+            "description": "Users deactivated during or after last month. Already included in `max_users_last_month`.",
+            "type": "number",
+            "example": 1
+          },
+          "deactivated_users": {
+            "description": "Users currently deactivated (seat free from the next billing month on)",
+            "type": "number",
+            "example": 2
+          },
+          "free_user_quota": {
+            "description": "Free users included in the org's pricing tier (org override first, else tier default), null if unknown",
+            "type": "integer",
+            "nullable": true,
+            "example": 25
+          },
+          "free_user_quota_source": {
+            "description": "Where free_user_quota comes from, null if unknown",
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "override",
+              "tier",
+              null
+            ],
+            "example": "tier"
           }
         }
       },
       "UserSettingScope": {
         "type": "string",
-        "description": "User setting scope. Values are limited to 64 characters.",
+        "description": "User setting scope. Values are limited to 64 characters.\n\nSettings are per org membership, except the login-wide `account` scope: it is stored\non the user's primary org record (like their login and MFA) and so is the same in every\norg the user belongs to, e.g. `account` / `org_order` for the org switcher order.\n",
         "minLength": 1,
         "maxLength": 64,
         "example": "calendar"

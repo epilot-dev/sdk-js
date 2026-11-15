@@ -57,6 +57,7 @@ COMMANDS
   auth token              Store an API token directly
   auth status             Show authentication status
   auth logout             Remove stored credentials
+  auth browser            Open the portal in your browser, signed in with the CLI token
   profile                 Manage named profiles
   completion              Generate shell completion scripts
 
@@ -159,6 +160,39 @@ epilot auth status
 # Logout
 epilot auth logout
 ```
+
+### Open the portal with the CLI session
+
+`epilot auth browser` prints a portal URL that signs the browser in with the CLI's token, and offers to open it
+in interactive shells. The portal shows who the session belongs to and the verification code to compare with the
+terminal before switching:
+
+<img src="docs/assets/auth-browser-approval.png" alt="Portal approval page for epilot auth browser" width="360">
+
+
+```bash
+epilot auth browser                       # print URL, ask to open the browser
+epilot auth browser /app/entity/contact   # land on a specific page
+epilot auth browser --open                # open without asking
+epilot auth browser --no-open             # only print the URL (stdout)
+epilot auth browser --print-url           # print the full URL even when stdout is not a terminal
+epilot auth browser --json                # {"url": "...", "code": "XXXX-XXXX", "expires_at": "..."}
+```
+
+- The CLI prints a confirmation code (`XXXX-XXXX`) in the terminal and the portal shows it before switching the
+  browser's session: only approve if both match, so a link someone else sends is recognisable.
+- The URL contains your token. When stdout is not a terminal (AI agents, CI, scripts) it is printed with the token
+  hidden; use `--open` to open it on this machine or `--print-url` to print it anyway.
+
+- The browser session uses the token as-is: read-only and anonymized logins stay read-only and anonymized, and
+  the session ends when the token expires (1 hour for `epilot auth login`), at most after 8 hours. Nothing
+  refreshes it.
+- The portal asks for confirmation before replacing the browser's current session.
+- The token travels in the URL fragment (`/cli-session#token=…`), which never reaches a server; the portal removes
+  it from the address bar. Still, treat the URL like a password.
+- Works with user logins, API tokens and agent tokens (`auth login --agent`). An agent session acts as the agent
+  on behalf of the user who approved it; an API token session acts as the token. Portal, journey and preview
+  tokens are rejected.
 
 Token resolution order:
 1. `--token` flag
