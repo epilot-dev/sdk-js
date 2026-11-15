@@ -37,7 +37,7 @@ epilot user signUpUser
 
 **User V2**
 - [`signUpUser`](#signupuser) — POST /v2/users/public/signup
-- [`getMeV2`](#getmev2) — Get currently logged in user
+- [`getMeV2`](#getmev2) — Get currently logged in user.
 - [`listUserSettings`](#listusersettings) — List all setting scopes and keys available for the currently logged in user. Does not return setting values.
 - [`getUserSettingsScope`](#getusersettingsscope) — Get all setting values for one scope for the currently logged in user.
 - [`getUserSetting`](#getusersetting) — Get one setting value by scope and key for the currently logged in user.
@@ -45,9 +45,9 @@ epilot user signUpUser
 - [`deleteUserSetting`](#deleteusersetting) — Delete one setting value for the currently logged in user.
 - [`listUsersV2`](#listusersv2) — Get the list of organization users
 - [`getUserV2`](#getuserv2) — Get user details by user id
-- [`updateUserV2`](#updateuserv2) — Update user details
-- [`deleteUserV2`](#deleteuserv2) — Delete user by user id
-- [`inviteUser`](#inviteuser) — Creates a new user in the caller's organization and sends an invite email to activate the user
+- [`updateUserV2`](#updateuserv2) — Update user details.
+- [`deleteUserV2`](#deleteuserv2) — Delete user by user id.
+- [`inviteUser`](#inviteuser) — Creates a new user in the caller's organization and sends an invite email to activate the user.
 - [`resendUserInvitation`](#resenduserinvitation) — Resend user invitation email
 - [`sendUserPasswordReset`](#senduserpasswordreset) — Send a password reset email to a user in your organization.
 - [`getGroupsForUser`](#getgroupsforuser) — Get groups of a user
@@ -201,7 +201,7 @@ epilot user signUpUser --jsonata 'user'
 
 ### `getMeV2`
 
-Get currently logged in user
+Get currently logged in user.
 
 `GET /v2/users/me`
 
@@ -222,21 +222,34 @@ epilot user getMeV2 --jsonata 'id'
 
 ```json
 {
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
   "id": "string",
   "organization_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "activated_at": "1970-01-01T00:00:00.000Z",
   "display_name": "Example User",
   "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
   "password_reset_token_hash": "string",
   "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
   "mfa_enabled": false,
+  "totp_enabled": false,
   "has_passkeys": false,
   "phone_verified": true,
   "token": "string",
@@ -556,21 +569,26 @@ epilot user listUsersV2 --jsonata 'results[0]'
 {
   "results": [
     {
+      "actor": {},
       "id": "string",
       "organization_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "activated_at": "1970-01-01T00:00:00.000Z",
       "display_name": "Example User",
       "status": "Active",
+      "deactivated_at": "1970-01-01T00:00:00.000Z",
+      "deactivated_by": "string",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
       "password_reset_token_hash": "string",
       "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+      "sso_required": false,
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
       "mfa_enabled": false,
+      "totp_enabled": false,
       "has_passkeys": false,
       "phone_verified": true,
       "token": "string",
@@ -580,46 +598,12 @@ epilot user listUsersV2 --jsonata 'results[0]'
       "custom_start_page": "/app/dashboard",
       "custom_navigation": "5gbe4nkp6jsfq",
       "override_release_channel": "canary",
-      "feature_preferences": {
-        "feature_name": true
-      },
-      "image_uri": {
-        "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
-        "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
-      },
-      "favorites": {
-        "entity_views": {
-          "opportunity": "891a5409850abf8b92bd2cb7bdd2844d32ce6bec",
-          "order": "628aee91-7c2f-4047-ab0d-433582a19c49"
-        },
-        "dashboard": "751ff121-9ac2-4511-a2e6-851f11287380"
-      },
-      "email_notification_setting": {
-        "added_participant_opportunity": true,
-        "assigned_opportunity": true,
-        "assigned_task": true,
-        "comment_opportunity": true,
-        "deleted_task": true,
-        "escalated_task": true,
-        "message_receive_opportunity": true,
-        "message_send_opportunity": true,
-        "created_task": true,
-        "created_opportunity_manual": true,
-        "created_opportunity_auto": true,
-        "deleted_opportunity": true
-      },
-      "in_app_notification_setting": {
-        "integration_critical_error": true,
-        "integration_error_threshold": true,
-        "assigned_opportunity": true,
-        "assigned_task": true
-      },
-      "properties": [
-        {
-          "name": "profileImageName",
-          "value": "avatar.png"
-        }
-      ],
+      "feature_preferences": {},
+      "image_uri": {},
+      "favorites": {},
+      "email_notification_setting": {},
+      "in_app_notification_setting": {},
+      "properties": [],
       "tags": ["non-billable"]
     }
   ]
@@ -666,21 +650,34 @@ epilot user getUserV2 -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
 
 ```json
 {
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
   "id": "string",
   "organization_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "activated_at": "1970-01-01T00:00:00.000Z",
   "display_name": "Example User",
   "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
   "password_reset_token_hash": "string",
   "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
   "mfa_enabled": false,
+  "totp_enabled": false,
   "has_passkeys": false,
   "phone_verified": true,
   "token": "string",
@@ -740,7 +737,7 @@ epilot user getUserV2 -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
 
 ### `updateUserV2`
 
-Update user details
+Update user details.
 
 `PATCH /v2/users/{id}`
 
@@ -765,21 +762,34 @@ With request body:
 epilot user updateUserV2 \
   -p id=123e4567-e89b-12d3-a456-426614174000 \
   -d '{
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
   "id": "string",
   "organization_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "activated_at": "1970-01-01T00:00:00.000Z",
   "display_name": "Example User",
   "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
   "password_reset_token_hash": "string",
   "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
   "mfa_enabled": false,
+  "totp_enabled": false,
   "has_passkeys": false,
   "phone_verified": true,
   "token": "string",
@@ -856,21 +866,34 @@ epilot user updateUserV2 -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'i
 
 ```json
 {
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
   "id": "string",
   "organization_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "activated_at": "1970-01-01T00:00:00.000Z",
   "display_name": "Example User",
   "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
   "password_reset_token_hash": "string",
   "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
   "mfa_enabled": false,
+  "totp_enabled": false,
   "has_passkeys": false,
   "phone_verified": true,
   "token": "string",
@@ -930,7 +953,7 @@ epilot user updateUserV2 -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'i
 
 ### `deleteUserV2`
 
-Delete user by user id
+Delete user by user id.
 
 `DELETE /v2/users/{id}`
 
@@ -992,7 +1015,7 @@ epilot user deleteUserV2 -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'i
 
 ### `inviteUser`
 
-Creates a new user in the caller's organization and sends an invite email to activate the user
+Creates a new user in the caller's organization and sends an invite email to activate the user.
 
 `POST /v2/users/invite`
 
@@ -1001,8 +1024,23 @@ Creates a new user in the caller's organization and sends an invite email to act
 **Sample Call**
 
 ```bash
+epilot user inviteUser
+```
+
+With request body:
+
+```bash
 epilot user inviteUser \
-  -d '{"email":"test@example.com","language":"en","roles":["123:owner"]}'
+  -d '{
+  "email": "test@example.com",
+  "language": "en",
+  "roles": ["123:owner"],
+  "invitation_type": "default",
+  "invitation_context": {
+    "preview_org_name": "epilot GmbH (Preview)",
+    "source_org_name": "epilot GmbH"
+  }
+}'
 ```
 
 Using stdin pipe:
@@ -1022,21 +1060,34 @@ epilot user inviteUser --jsonata 'id'
 
 ```json
 {
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
   "id": "string",
   "organization_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "activated_at": "1970-01-01T00:00:00.000Z",
   "display_name": "Example User",
   "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
   "password_reset_token_hash": "string",
   "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
   "mfa_enabled": false,
+  "totp_enabled": false,
   "has_passkeys": false,
   "phone_verified": true,
   "token": "string",
@@ -1126,21 +1177,34 @@ epilot user resendUserInvitation --jsonata 'id'
 
 ```json
 {
+  "actor": {
+    "type": "agent",
+    "token_id": "string",
+    "token_name": "string",
+    "agent_id": "string",
+    "agent_name": "string",
+    "host_name": "string",
+    "client": "string"
+  },
   "id": "string",
   "organization_id": "string",
   "created_at": "1970-01-01T00:00:00.000Z",
   "activated_at": "1970-01-01T00:00:00.000Z",
   "display_name": "Example User",
   "status": "Active",
+  "deactivated_at": "1970-01-01T00:00:00.000Z",
+  "deactivated_by": "string",
   "email": "user@example.com",
   "draft_email": "user@example.com",
   "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
   "password_reset_token_hash": "string",
   "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+  "sso_required": false,
   "department": "Sales",
   "phone": 1234567890,
   "secondary_phone": 1234567890,
   "mfa_enabled": false,
+  "totp_enabled": false,
   "has_passkeys": false,
   "phone_verified": true,
   "token": "string",
@@ -1282,21 +1346,26 @@ epilot user getGroupsForUser -p id=123e4567-e89b-12d3-a456-426614174000 --jsonat
     "updated_at": "2024-02-08T04:44:32.246Z",
     "created_by": "123",
     "crt_assignee": {
+      "actor": {},
       "id": "string",
       "organization_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "activated_at": "1970-01-01T00:00:00.000Z",
       "display_name": "Example User",
       "status": "Active",
+      "deactivated_at": "1970-01-01T00:00:00.000Z",
+      "deactivated_by": "string",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
       "password_reset_token_hash": "string",
       "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+      "sso_required": false,
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
       "mfa_enabled": false,
+      "totp_enabled": false,
       "has_passkeys": false,
       "phone_verified": true,
       "token": "string",
@@ -1423,21 +1492,34 @@ epilot user createGroup --jsonata 'id'
   "updated_at": "2024-02-08T04:44:32.246Z",
   "created_by": "123",
   "crt_assignee": {
+    "actor": {
+      "type": "agent",
+      "token_id": "string",
+      "token_name": "string",
+      "agent_id": "string",
+      "agent_name": "string",
+      "host_name": "string",
+      "client": "string"
+    },
     "id": "string",
     "organization_id": "string",
     "created_at": "1970-01-01T00:00:00.000Z",
     "activated_at": "1970-01-01T00:00:00.000Z",
     "display_name": "Example User",
     "status": "Active",
+    "deactivated_at": "1970-01-01T00:00:00.000Z",
+    "deactivated_by": "string",
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
     "password_reset_token_hash": "string",
     "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+    "sso_required": false,
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
     "mfa_enabled": false,
+    "totp_enabled": false,
     "has_passkeys": false,
     "phone_verified": true,
     "token": "string",
@@ -1486,21 +1568,26 @@ epilot user createGroup --jsonata 'id'
   },
   "users": [
     {
+      "actor": {},
       "id": "string",
       "organization_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "activated_at": "1970-01-01T00:00:00.000Z",
       "display_name": "Example User",
       "status": "Active",
+      "deactivated_at": "1970-01-01T00:00:00.000Z",
+      "deactivated_by": "string",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
       "password_reset_token_hash": "string",
       "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+      "sso_required": false,
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
       "mfa_enabled": false,
+      "totp_enabled": false,
       "has_passkeys": false,
       "phone_verified": true,
       "token": "string",
@@ -1574,21 +1661,34 @@ epilot user getGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
   "updated_at": "2024-02-08T04:44:32.246Z",
   "created_by": "123",
   "crt_assignee": {
+    "actor": {
+      "type": "agent",
+      "token_id": "string",
+      "token_name": "string",
+      "agent_id": "string",
+      "agent_name": "string",
+      "host_name": "string",
+      "client": "string"
+    },
     "id": "string",
     "organization_id": "string",
     "created_at": "1970-01-01T00:00:00.000Z",
     "activated_at": "1970-01-01T00:00:00.000Z",
     "display_name": "Example User",
     "status": "Active",
+    "deactivated_at": "1970-01-01T00:00:00.000Z",
+    "deactivated_by": "string",
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
     "password_reset_token_hash": "string",
     "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+    "sso_required": false,
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
     "mfa_enabled": false,
+    "totp_enabled": false,
     "has_passkeys": false,
     "phone_verified": true,
     "token": "string",
@@ -1637,21 +1737,26 @@ epilot user getGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id'
   },
   "users": [
     {
+      "actor": {},
       "id": "string",
       "organization_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "activated_at": "1970-01-01T00:00:00.000Z",
       "display_name": "Example User",
       "status": "Active",
+      "deactivated_at": "1970-01-01T00:00:00.000Z",
+      "deactivated_by": "string",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
       "password_reset_token_hash": "string",
       "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+      "sso_required": false,
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
       "mfa_enabled": false,
+      "totp_enabled": false,
       "has_passkeys": false,
       "phone_verified": true,
       "token": "string",
@@ -1733,21 +1838,34 @@ epilot user updateGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id
   "updated_at": "2024-02-08T04:44:32.246Z",
   "created_by": "123",
   "crt_assignee": {
+    "actor": {
+      "type": "agent",
+      "token_id": "string",
+      "token_name": "string",
+      "agent_id": "string",
+      "agent_name": "string",
+      "host_name": "string",
+      "client": "string"
+    },
     "id": "string",
     "organization_id": "string",
     "created_at": "1970-01-01T00:00:00.000Z",
     "activated_at": "1970-01-01T00:00:00.000Z",
     "display_name": "Example User",
     "status": "Active",
+    "deactivated_at": "1970-01-01T00:00:00.000Z",
+    "deactivated_by": "string",
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
     "password_reset_token_hash": "string",
     "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+    "sso_required": false,
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
     "mfa_enabled": false,
+    "totp_enabled": false,
     "has_passkeys": false,
     "phone_verified": true,
     "token": "string",
@@ -1796,21 +1914,26 @@ epilot user updateGroup -p id=123e4567-e89b-12d3-a456-426614174000 --jsonata 'id
   },
   "users": [
     {
+      "actor": {},
       "id": "string",
       "organization_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "activated_at": "1970-01-01T00:00:00.000Z",
       "display_name": "Example User",
       "status": "Active",
+      "deactivated_at": "1970-01-01T00:00:00.000Z",
+      "deactivated_by": "string",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
       "password_reset_token_hash": "string",
       "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+      "sso_required": false,
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
       "mfa_enabled": false,
+      "totp_enabled": false,
       "has_passkeys": false,
       "phone_verified": true,
       "token": "string",
@@ -1916,21 +2039,34 @@ epilot user advanceUserAssignment -p id=123e4567-e89b-12d3-a456-426614174000 --j
   "updated_at": "2024-02-08T04:44:32.246Z",
   "created_by": "123",
   "crt_assignee": {
+    "actor": {
+      "type": "agent",
+      "token_id": "string",
+      "token_name": "string",
+      "agent_id": "string",
+      "agent_name": "string",
+      "host_name": "string",
+      "client": "string"
+    },
     "id": "string",
     "organization_id": "string",
     "created_at": "1970-01-01T00:00:00.000Z",
     "activated_at": "1970-01-01T00:00:00.000Z",
     "display_name": "Example User",
     "status": "Active",
+    "deactivated_at": "1970-01-01T00:00:00.000Z",
+    "deactivated_by": "string",
     "email": "user@example.com",
     "draft_email": "user@example.com",
     "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
     "password_reset_token_hash": "string",
     "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+    "sso_required": false,
     "department": "Sales",
     "phone": 1234567890,
     "secondary_phone": 1234567890,
     "mfa_enabled": false,
+    "totp_enabled": false,
     "has_passkeys": false,
     "phone_verified": true,
     "token": "string",
@@ -1979,21 +2115,26 @@ epilot user advanceUserAssignment -p id=123e4567-e89b-12d3-a456-426614174000 --j
   },
   "users": [
     {
+      "actor": {},
       "id": "string",
       "organization_id": "string",
       "created_at": "1970-01-01T00:00:00.000Z",
       "activated_at": "1970-01-01T00:00:00.000Z",
       "display_name": "Example User",
       "status": "Active",
+      "deactivated_at": "1970-01-01T00:00:00.000Z",
+      "deactivated_by": "string",
       "email": "user@example.com",
       "draft_email": "user@example.com",
       "draft_email_expires_at": "1970-01-01T00:00:00.000Z",
       "password_reset_token_hash": "string",
       "password_reset_token_expires_at": "1970-01-01T00:00:00.000Z",
+      "sso_required": false,
       "department": "Sales",
       "phone": 1234567890,
       "secondary_phone": 1234567890,
       "mfa_enabled": false,
+      "totp_enabled": false,
       "has_passkeys": false,
       "phone_verified": true,
       "token": "string",
@@ -2346,7 +2487,13 @@ epilot user checkInviteToken -p token=example --jsonata 'invitation_org_id'
   "invitation_org_logo_url": "string",
   "invitation_org_logo_thumbnail_url": "string",
   "invitee_user_id": "string",
-  "invitee_primary_org_id": "string"
+  "invitee_primary_org_id": "string",
+  "login_methods": {
+    "password": true,
+    "passwordless": true,
+    "sso": true,
+    "passkey": true
+  }
 }
 ```
 
@@ -2385,8 +2532,41 @@ cat body.json | epilot user activateUser -p token=example
 With JSONata filter:
 
 ```bash
-epilot user activateUser -p token=example --jsonata '$'
+epilot user activateUser -p token=example --jsonata 'email'
 ```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "user": {
+    "id": "string",
+    "organization_id": "string",
+    "email": "user@example.com",
+    "display_name": "Example user",
+    "name": "Example user",
+    "preferred_language": "de",
+    "signature": "<p>Thanks</p>",
+    "custom_navigation": "5gbe4nkp6jsfq",
+    "roles": ["Owner"],
+    "image_uri": {
+      "original": "https://account-profile-images.epilot.cloud/1/avatar.png",
+      "thumbnail_32": "https://account-profile-images.epilot.cloud/1/avatar_32x32.png"
+    },
+    "properties": [
+      {
+        "name": "profileImageName",
+        "value": "avatar.png"
+      }
+    ]
+  },
+  "email": "string",
+  "login_token": "string"
+}
+```
+
+</details>
 
 ---
 
@@ -2470,6 +2650,7 @@ epilot user getUserLoginParametersV2 -p username=example --jsonata 'login_parame
       "organization_name": "epilot GmbH",
       "organization_type": "Vendor",
       "organization_use": "Production",
+      "parent_production_org_id": "123",
       "cognito_region": "eu-central-1",
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
@@ -2601,6 +2782,7 @@ epilot user resolveDiscoverableCredential --jsonata 'email'
       "organization_name": "epilot GmbH",
       "organization_type": "Vendor",
       "organization_use": "Production",
+      "parent_production_org_id": "123",
       "cognito_region": "eu-central-1",
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
@@ -3030,6 +3212,7 @@ epilot user getUserLoginParameters -p username=example --jsonata 'login_paramete
       "organization_name": "epilot GmbH",
       "organization_type": "Vendor",
       "organization_use": "Production",
+      "parent_production_org_id": "123",
       "cognito_region": "eu-central-1",
       "cognito_user_pool_id": "eu-central-sample",
       "cognito_user_pool_client_id": "asbkh213ehkquwhdi",
