@@ -170,9 +170,15 @@ in interactive shells:
 epilot auth browser                       # print URL, ask to open the browser
 epilot auth browser /app/entity/contact   # land on a specific page
 epilot auth browser --open                # open without asking
-epilot auth browser --no-open             # only print the URL (stdout), e.g. for scripts
-epilot auth browser --json                # {"url": "...", "expires_at": "..."}
+epilot auth browser --no-open             # only print the URL (stdout)
+epilot auth browser --print-url           # print the full URL even when stdout is not a terminal
+epilot auth browser --json                # {"url": "...", "code": "XXXX-XXXX", "expires_at": "..."}
 ```
+
+- The CLI prints a confirmation code (`XXXX-XXXX`) in the terminal; the portal asks for it before switching the
+  browser's session, so a link someone else sends cannot switch it with a click.
+- The URL contains your token. When stdout is not a terminal (AI agents, CI, scripts) it is printed with the token
+  hidden; use `--open` to open it on this machine or `--print-url` to print it anyway.
 
 - The browser session uses the token as-is: read-only and anonymized logins stay read-only and anonymized, and
   the session ends when the token expires (1 hour for `epilot auth login`), at most after 8 hours. Nothing

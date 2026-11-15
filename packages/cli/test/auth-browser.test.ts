@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { saveCredentials } from '../src/lib/auth-store.js';
 import { setStage } from '../src/lib/profiles.js';
@@ -13,7 +14,10 @@ const {
   BROWSER_SESSION_MAX_MS,
   buildBrowserSessionUrl,
   checkBrowserSessionToken,
+  confirmationCheck,
   describeSessionPrincipal,
+  formatConfirmationCode,
+  generateConfirmationCode,
   normalizePortalPath,
 } = await import('../src/commands/auth-browser.js');
 const command = (await import('../src/commands/auth-browser.js')).default;
@@ -99,7 +103,9 @@ describe('checkBrowserSessionToken', () => {
 
 describe('buildBrowserSessionUrl', () => {
   it('puts token and landing path in the URL fragment', () => {
-    const url = new URL(buildBrowserSessionUrl('https://portal.epilot.cloud', 'a.b.c', '/app/entity/contact'));
+    const url = new URL(
+      buildBrowserSessionUrl('https://portal.epilot.cloud', 'a.b.c', 'K7QM2XPA', '/app/entity/contact'),
+    );
 
     expect(url.origin).toBe('https://portal.epilot.cloud');
     expect(url.pathname).toBe('/cli-session');
@@ -107,6 +113,23 @@ describe('buildBrowserSessionUrl', () => {
     const fragment = new URLSearchParams(url.hash.slice(1));
     expect(fragment.get('token')).toBe('a.b.c');
     expect(fragment.get('redirect')).toBe('/app/entity/contact');
+    expect(fragment.get('check')).toBe(confirmationCheck('K7QM2XPA', 'a.b.c'));
+  });
+
+  it('check = base64url(SHA-256("<CODE>.<token>")), as epilot360-login verifies it', () => {
+    // Same vector as the portal's verifyCliSessionCode tests compute with WebCrypto.
+    expect(confirmationCheck('K7QM2XPA', 'a.b.c')).toBe(
+      createHash('sha256').update('K7QM2XPA.a.b.c').digest('base64url'),
+    );
+    expect(confirmationCheck('K7QM2XPA', 'a.b.c')).not.toBe(confirmationCheck('K7QM2XPB', 'a.b.c'));
+  });
+
+  it('generates unambiguous 8-character codes', () => {
+    const codes = new Set(Array.from({ length: 50 }, () => generateConfirmationCode()));
+
+    expect(codes.size).toBeGreaterThan(45);
+    for (const code of codes) expect(code).toMatch(/^[A-HJKMNP-Z2-9]{8}$/);
+    expect(formatConfirmationCode('K7QM2XPA')).toBe('K7QM-2XPA');
   });
 
   it.each([
@@ -151,18 +174,42 @@ describe('epilot auth browser', () => {
     process.stderr.isTTY = tty.stderr;
   });
 
-  it('prints only the URL on stdout and does not open the browser when not interactive', async () => {
+  it('hides the token when stdout is not a terminal, and does not open the browser', async () => {
     setTty(false);
     const token = cognitoToken();
     saveCredentials({ token });
 
     await run();
 
-    const url = output.out.stdout.trim();
-    expect(url).toBe(`https://portal.epilot.cloud/cli-session#token=${token}`);
-    expect(stripAnsi(output.out.stderr)).toContain('Treat it like a password');
+    expect(output.out.stdout.trim()).toBe('https://portal.epilot.cloud/cli-session#token=<hidden>');
+    expect(output.out.stdout).not.toContain(token);
+    expect(stripAnsi(output.out.stderr)).not.toContain(token);
+    expect(stripAnsi(output.out.stderr)).toContain('--print-url');
+    expect(stripAnsi(output.out.stderr)).toMatch(/Confirmation code: [A-Z0-9]{4}-[A-Z0-9]{4}/);
     expect(confirmMock).not.toHaveBeenCalled();
     expect(openMock).not.toHaveBeenCalled();
+  });
+
+  it('--print-url prints the full URL even when stdout is not a terminal', async () => {
+    setTty(false);
+    const token = cognitoToken();
+    saveCredentials({ token });
+
+    await run({ 'print-url': true });
+
+    const url = new URL(output.out.stdout.trim());
+    expect(new URLSearchParams(url.hash.slice(1)).get('token')).toBe(token);
+  });
+
+  it('--open opens the full URL without printing it when stdout is not a terminal', async () => {
+    setTty(false);
+    const token = cognitoToken();
+    saveCredentials({ token });
+
+    await run({ open: true });
+
+    expect(output.out.stdout).not.toContain(token);
+    expect(openMock.mock.calls[0][0]).toContain(`#token=${token}`);
   });
 
   it('offers to open the browser in interactive shells', async () => {
@@ -215,15 +262,22 @@ describe('epilot auth browser', () => {
     expect(output.out.stdout).toContain('https://portal.dev.epilot.cloud/cli-session#');
   });
 
-  it('--json prints url and expiry', async () => {
+  it('--json prints url, code and expiry (url hidden unless --print-url)', async () => {
     setTty(false);
     saveCredentials({ token: cognitoToken() });
 
     await run({ json: true });
 
     const parsed = JSON.parse(output.out.stdout);
-    expect(parsed.url).toMatch(/^https:\/\/portal\.epilot\.cloud\/cli-session#token=/);
+    expect(parsed.url).toBe('https://portal.epilot.cloud/cli-session#token=<hidden>');
+    expect(parsed.code).toMatch(/^[A-Z0-9]{4}-[A-Z0-9]{4}$/);
     expect(new Date(parsed.expires_at).getTime()).toBeGreaterThan(Date.now());
+
+    output.out.stdout = '';
+    await run({ json: true, 'print-url': true });
+    const full = JSON.parse(output.out.stdout);
+    const fragment = new URLSearchParams(new URL(full.url).hash.slice(1));
+    expect(fragment.get('check')).toBe(confirmationCheck(full.code.replace('-', ''), fragment.get('token')!));
   });
 
   it('opens a session for an agent token and says who acts', async () => {
@@ -232,7 +286,7 @@ describe('epilot auth browser', () => {
     await run({ token: agentToken() });
 
     expect(exitSpy).not.toHaveBeenCalled();
-    expect(output.out.stdout).toMatch(/^https:\/\/portal\.epilot\.cloud\/cli-session#token=/);
+    expect(output.out.stdout).toMatch(/^https:\/\/portal\.epilot\.cloud\/cli-session#token=<hidden>/);
     expect(stripAnsi(output.out.stderr)).toContain('as the AI agent Claude (epilot MCP (Claude)) on your behalf');
   });
 
