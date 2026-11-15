@@ -1,6 +1,7 @@
 import { defineCommand } from 'citty';
 import { listProfiles, upsertProfile, deleteProfile, setActiveProfile, loadProfiles } from '../lib/profiles.js';
 import { credentialsFromToken } from '../lib/auth-store.js';
+import { resolveTokenArg } from '../lib/token-input.js';
 import { BOLD, RESET, GREEN, RED, DIM } from '../lib/utils.js';
 
 export default defineCommand({
@@ -33,15 +34,25 @@ export default defineCommand({
       args: {
         name: { type: 'positional', description: 'Profile name', required: true },
         server: { type: 'string', alias: 's', description: 'Server base URL' },
-        token: { type: 'string', alias: 't', description: 'Bearer token' },
+        token: {
+          type: 'string',
+          alias: 't',
+          description: 'Bearer token ("-" reads it from stdin, keeping it out of ps and shell history)',
+        },
       },
-      run: ({ args }) => {
+      run: async ({ args }) => {
+        const token = await resolveTokenArg(args.token);
+        if (args.token !== undefined && !token) {
+          process.stderr.write(`${RED}No token provided.${RESET}\n`);
+          process.exit(1);
+          return;
+        }
         upsertProfile(args.name, {
           name: args.name,
           server: args.server,
-          token: args.token,
+          token,
           // Org, user and expiry from the token's JWT claims (replacing those of a previous token)
-          ...(args.token ? metadataFromToken(args.token) : {}),
+          ...(token ? metadataFromToken(token) : {}),
         });
         process.stdout.write(`${GREEN}Profile "${args.name}" saved.${RESET}\n`);
       },

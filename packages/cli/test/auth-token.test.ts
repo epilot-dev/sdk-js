@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { saveCredentials } from '../src/lib/auth-store.js';
+import { pipeStdin } from './helpers/fake-aap.js';
 
 // Mock auth-store
 vi.mock('../src/lib/auth-store.js', async (importOriginal) => ({
@@ -115,5 +116,30 @@ describe('auth token command', () => {
         process.env.EPILOT_PROFILE = origEnv;
       }
     }
+  });
+
+  it('reads the token from stdin with "-" and never prints it', async () => {
+    const stdin = pipeStdin('  piped-token-789\n');
+    try {
+      const mod = await import('../src/commands/auth-token.js');
+      await mod.default.run!({ args: { token: '-', profile: 'loginas-911' } } as any);
+    } finally {
+      stdin.restore();
+    }
+    expect(saveCredentials).toHaveBeenCalledWith({ token: 'piped-token-789' }, 'loginas-911');
+    expect(mockStdout).toContain('Token saved to profile "loginas-911"');
+    expect(mockStdout).not.toContain('piped-token-789');
+  });
+
+  it('exits with error when stdin is empty', async () => {
+    const stdin = pipeStdin('');
+    try {
+      const mod = await import('../src/commands/auth-token.js');
+      await mod.default.run!({ args: { token: '-', profile: 'loginas-911' } } as any);
+    } finally {
+      stdin.restore();
+    }
+    expect(mockStderr).toContain('No token provided');
+    expect(mockExit).toHaveBeenCalledWith(1);
   });
 });

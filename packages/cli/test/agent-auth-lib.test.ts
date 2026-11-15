@@ -16,7 +16,7 @@ import {
   resolveAgentAuthIssuer,
   saveAgentRecord,
 } from '../src/lib/agent-auth.js';
-import { resolveTokenAsync } from '../src/lib/auth-store.js';
+import { loadCredentials, resolveTokenAsync, saveCredentials } from '../src/lib/auth-store.js';
 import { loadProfiles, upsertProfile, setActiveProfile } from '../src/lib/profiles.js';
 import {
   ISSUER,
@@ -184,6 +184,15 @@ describe('token issuance and refresh', () => {
     expect(loadAgentRecord('work')).toMatchObject({ org_id: '739224', read_only: true, anonymize: true });
     expect(await refreshTokenIfNeeded('work')).toBe('tok_739224_1');
     expect(state.executions).toHaveLength(1);
+  });
+
+  it('a named profile with an agent but no token never borrows the default login', async () => {
+    saveCredentials({ token: 'my-own-login', org_id: '1', expires_at: new Date(Date.now() + 3600_000).toISOString() });
+    ensureHostKey();
+    saveAgentRecord(sampleRecord({ org_id: '739224' }), 'work'); // org selection still pending: no profile entry yet
+    expect(await resolveTokenAsync(undefined, 'work')).toBe('tok_739224_1');
+    expect(state.executions.at(-1)?.body.arguments).toMatchObject({ organization_id: '739224' });
+    expect(loadCredentials()?.token).toBe('my-own-login');
   });
 
   it('refreshTokenIfNeeded keeps a valid token and re-issues an expiring one', async () => {

@@ -10,6 +10,7 @@ import {
   startFakeAap,
   useTempConfigDir,
   captureOutput,
+  pipeStdin,
   stripAnsi,
   type FakeState,
 } from './helpers/fake-aap.js';
@@ -65,6 +66,17 @@ describe('epilot auth login (plain, default)', () => {
     expect(output.out.stdout).toContain('Token saved');
     expect(state.registrations).toHaveLength(0);
     expect(existsSync(join(tmp.configDir, 'agent-auth'))).toBe(false);
+  });
+
+  it('--token - reads the token from stdin', async () => {
+    const stdin = pipeStdin('piped-token\n');
+    try {
+      await run({ token: '-', profile: 'p1' });
+    } finally {
+      stdin.restore();
+    }
+    expect(loadProfiles().profiles.p1.token).toBe('piped-token');
+    expect(output.out.stdout).not.toContain('piped-token');
   });
 
   it('opens the browser callback flow and does not register an agent', async () => {

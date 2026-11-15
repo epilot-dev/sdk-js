@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { getResolvedProfile, upsertProfile, resolveProfileName } from './profiles.js';
+import { ensureExplicitProfileExists, getResolvedProfile, upsertProfile, resolveProfileName } from './profiles.js';
 
 export type Credentials = {
   token: string;
@@ -136,12 +136,17 @@ export type ResolvedToken = {
  * 2. EPILOT_TOKEN env var
  * 3. Active/selected profile token
  * 4. Legacy credentials.json
+ *
+ * A profile named with --profile / EPILOT_PROFILE that does not exist exits 1 ("Profile … not found")
+ * instead of falling back to credentials.json.
  */
 export const resolveTokenSource = (flagToken?: string, flagProfile?: string): ResolvedToken | null => {
   if (flagToken) return { source: 'flag', creds: { token: flagToken } };
 
   const envToken = process.env.EPILOT_TOKEN;
   if (envToken) return { source: 'env', creds: { token: envToken } };
+
+  ensureExplicitProfileExists(flagProfile);
 
   // Check profile (resolves from --profile flag, EPILOT_PROFILE env, or active)
   const profile = getResolvedProfile(flagProfile);
@@ -199,6 +204,7 @@ export const describeExpiredToken = (flagToken?: string, flagProfile?: string): 
 export const resolveTokenAsync = async (flagToken?: string, flagProfile?: string): Promise<string | null> => {
   if (flagToken) return flagToken;
   if (process.env.EPILOT_TOKEN) return process.env.EPILOT_TOKEN;
+  ensureExplicitProfileExists(flagProfile);
 
   const { refreshTokenIfNeeded, isAgentGoneError, printLoginAgainHint } = await import('./agent-auth.js');
   try {

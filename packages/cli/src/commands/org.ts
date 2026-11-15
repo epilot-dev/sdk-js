@@ -17,7 +17,7 @@ import {
 import { type LoadedAgentIdentity, formatExpiresIn, issueTokenForOrg, loadAgentIdentity } from '../lib/agent-auth.js';
 import { loadCredentials } from '../lib/auth-store.js';
 import { isInteractive } from '../lib/interactive.js';
-import { getResolvedProfile } from '../lib/profiles.js';
+import { explicitProfileName, getResolvedProfile } from '../lib/profiles.js';
 import { BOLD, RESET, GREEN, RED, DIM, YELLOW, CYAN } from '../lib/utils.js';
 import { describeAccess, openBrowser, parseAccessProfile, printApproval, resolveReason } from './auth-login.js';
 
@@ -68,9 +68,14 @@ export const requireAgent = (profileName?: string, json?: boolean): LoadedAgentI
   return loaded;
 };
 
-/** Organization the current credentials belong to (profile first, then credentials.json, then the agent record). */
+/**
+ * Organization the current credentials belong to (profile first, then credentials.json, then the agent record).
+ * A named profile (--profile / EPILOT_PROFILE) never reads credentials.json, the default login.
+ */
 export const currentOrgId = (loaded: LoadedAgentIdentity | null, profileName?: string): string | undefined =>
-  getResolvedProfile(profileName)?.org_id ?? loadCredentials()?.org_id ?? loaded?.record.org_id;
+  getResolvedProfile(profileName)?.org_id ??
+  (explicitProfileName(profileName) ? undefined : loadCredentials()?.org_id) ??
+  loaded?.record.org_id;
 
 const accessCell = (o: EpilotOrganization): string => {
   if (o.access?.granted) {
