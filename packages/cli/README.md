@@ -175,8 +175,8 @@ epilot auth browser --print-url           # print the full URL even when stdout 
 epilot auth browser --json                # {"url": "...", "code": "XXXX-XXXX", "expires_at": "..."}
 ```
 
-- The CLI prints a confirmation code (`XXXX-XXXX`) in the terminal; the portal asks for it before switching the
-  browser's session, so a link someone else sends cannot switch it with a click.
+- The CLI prints a confirmation code (`XXXX-XXXX`) in the terminal and the portal shows it before switching the
+  browser's session: only approve if both match, so a link someone else sends is recognisable.
 - The URL contains your token. When stdout is not a terminal (AI agents, CI, scripts) it is printed with the token
   hidden; use `--open` to open it on this machine or `--print-url` to print it anyway.
 

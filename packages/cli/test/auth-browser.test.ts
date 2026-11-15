@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { saveCredentials } from '../src/lib/auth-store.js';
 import { setStage } from '../src/lib/profiles.js';
@@ -14,7 +13,6 @@ const {
   BROWSER_SESSION_MAX_MS,
   buildBrowserSessionUrl,
   checkBrowserSessionToken,
-  confirmationCheck,
   describeSessionPrincipal,
   formatConfirmationCode,
   generateConfirmationCode,
@@ -113,15 +111,7 @@ describe('buildBrowserSessionUrl', () => {
     const fragment = new URLSearchParams(url.hash.slice(1));
     expect(fragment.get('token')).toBe('a.b.c');
     expect(fragment.get('redirect')).toBe('/app/entity/contact');
-    expect(fragment.get('check')).toBe(confirmationCheck('K7QM2XPA', 'a.b.c'));
-  });
-
-  it('check = base64url(SHA-256("<CODE>.<token>")), as epilot360-login verifies it', () => {
-    // Same vector as the portal's verifyCliSessionCode tests compute with WebCrypto.
-    expect(confirmationCheck('K7QM2XPA', 'a.b.c')).toBe(
-      createHash('sha256').update('K7QM2XPA.a.b.c').digest('base64url'),
-    );
-    expect(confirmationCheck('K7QM2XPA', 'a.b.c')).not.toBe(confirmationCheck('K7QM2XPB', 'a.b.c'));
+    expect(fragment.get('code')).toBe('K7QM2XPA');
   });
 
   it('generates unambiguous 8-character codes', () => {
@@ -277,7 +267,7 @@ describe('epilot auth browser', () => {
     await run({ json: true, 'print-url': true });
     const full = JSON.parse(output.out.stdout);
     const fragment = new URLSearchParams(new URL(full.url).hash.slice(1));
-    expect(fragment.get('check')).toBe(confirmationCheck(full.code.replace('-', ''), fragment.get('token')!));
+    expect(fragment.get('code')).toBe(full.code.replace('-', ''));
   });
 
   it('opens a session for an agent token and says who acts', async () => {

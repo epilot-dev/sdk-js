@@ -1,5 +1,5 @@
 import { defineCommand } from 'citty';
-import { createHash, randomInt } from 'node:crypto';
+import { randomInt } from 'node:crypto';
 import { resolveTokenAsync } from '../lib/auth-store.js';
 import { type Environment, getPortalUrl } from '../lib/environment.js';
 import { isInteractive } from '../lib/interactive.js';
@@ -94,16 +94,10 @@ export const generateConfirmationCode = (): string =>
 
 export const formatConfirmationCode = (code: string): string => `${code.slice(0, 4)}-${code.slice(4)}`;
 
-/**
- * Binds the link to the code shown in the terminal: base64url(SHA-256(`<CODE>.<token>`)). The portal
- * (epilot360-login `/cli-session`) only switches the browser's session after the user types the code, so a link
- * someone else sends cannot do it with one click.
- */
-export const confirmationCheck = (code: string, token: string): string =>
-  createHash('sha256').update(`${code}.${token}`).digest('base64url');
-
 export const buildBrowserSessionUrl = (portalUrl: string, token: string, code: string, path?: string): string => {
-  const fragment = new URLSearchParams({ token, check: confirmationCheck(code, token) });
+  // The portal (epilot360-login `/cli-session`) shows `code` and asks the user to continue only if it matches the
+  // terminal, so a link someone else sends is recognisable.
+  const fragment = new URLSearchParams({ token, code });
   const redirect = normalizePortalPath(path);
   if (redirect) fragment.set('redirect', redirect);
   return `${portalUrl}${CLI_SESSION_PATH}#${fragment.toString()}`;
@@ -219,7 +213,7 @@ export default defineCommand({
       `${DIM}The browser session ends at ${sessionEndsAt.toISOString()} (in ${formatRemaining(sessionEndsAt)}).${RESET}\n`,
     );
     process.stderr.write(
-      `\n  Confirmation code: ${BOLD}${formatConfirmationCode(code)}${RESET}  ${DIM}(the portal asks for it before switching)${RESET}\n`,
+      `\n  Confirmation code: ${BOLD}${formatConfirmationCode(code)}${RESET}  ${DIM}(only approve in the browser if it shows the same code)${RESET}\n`,
     );
     if (!showUrl) {
       process.stderr.write(
