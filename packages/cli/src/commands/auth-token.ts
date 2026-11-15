@@ -1,6 +1,6 @@
 import { defineCommand } from 'citty';
-import { saveCredentials } from '../lib/auth-store.js';
-import { BOLD, RESET, GREEN, RED } from '../lib/utils.js';
+import { credentialsFromToken, saveCredentials } from '../lib/auth-store.js';
+import { BOLD, RESET, GREEN, RED, DIM } from '../lib/utils.js';
 
 export default defineCommand({
   meta: { name: 'token', description: 'Store an API token directly' },
@@ -28,6 +28,13 @@ export default defineCommand({
 
     saveCredentials({ token }, profileName);
     const suffix = profileName ? ` to profile "${profileName}"` : '';
-    process.stdout.write(`${GREEN}${BOLD}Token saved${suffix}.${RESET}\n`);
+    const { org_id, expires_at } = credentialsFromToken(token);
+    const details = [org_id && `org ${org_id}`, expires_at && `expires ${expires_at}`].filter(Boolean).join(', ');
+    process.stdout.write(
+      `${GREEN}${BOLD}Token saved${suffix}.${RESET}${details ? ` ${DIM}(${details})${RESET}` : ''}\n`,
+    );
+    if (profileName) {
+      process.stdout.write(`Use it with: ${BOLD}epilot --profile ${profileName} <api> <operation>${RESET}\n`);
+    }
   },
 });

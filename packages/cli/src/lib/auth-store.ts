@@ -23,32 +23,76 @@ const getCredentialsPath = (): string => {
   return join(getConfigDir(), 'credentials.json');
 };
 
-export const loadCredentials = (): Credentials | null => {
+/** Read credentials.json without the expiry filter. */
+const readStoredCredentials = (): Credentials | null => {
   const path = getCredentialsPath();
   if (!existsSync(path)) return null;
-
   try {
-    const raw = readFileSync(path, 'utf-8');
-    const creds = JSON.parse(raw) as Credentials;
-
-    if (creds.expires_at) {
-      const expiry = new Date(creds.expires_at);
-      if (expiry < new Date()) return null;
-    }
-
-    return creds;
+    return JSON.parse(readFileSync(path, 'utf-8')) as Credentials;
   } catch {
     return null;
   }
 };
 
+/** True when `expiresAt` is a valid timestamp in the past. */
+export const isTokenExpired = (expiresAt?: string): boolean =>
+  Boolean(expiresAt) && new Date(expiresAt as string).getTime() < Date.now();
+
+export const loadCredentials = (): Credentials | null => {
+  const creds = readStoredCredentials();
+  return creds && !isTokenExpired(creds.expires_at) ? creds : null;
+};
+
 /**
- * Save credentials. If a profile is active, store into the profile.
- * Also saves to legacy credentials.json for backwards compat.
+ * Decode a JWT payload without verifying the signature.
+ * Returns null if the token is not a JWT.
  */
-export const saveCredentials = (creds: Credentials, profileName?: string): void => {
-  // Save to profile if one is specified or active
-  const targetProfile = profileName || resolveProfileName();
+export const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf-8'));
+    return payload && typeof payload === 'object' ? payload : null;
+  } catch {
+    return null;
+  }
+};
+
+const claimString = (value: unknown): string | undefined =>
+  typeof value === 'string' || typeof value === 'number' ? String(value) : undefined;
+
+/**
+ * Non-secret metadata read from the token's JWT claims (not verified): org, user and expiry.
+ * Fields are undefined for opaque tokens or missing claims.
+ */
+export const credentialsFromToken = (token: string): Credentials => {
+  const claims = decodeJwtPayload(token);
+  return {
+    token,
+    org_id: claimString(claims?.org_id ?? claims?.['custom:ivy_org_id']),
+    user_id: claimString(claims?.user_id ?? claims?.['custom:ivy_user_id']),
+    expires_at: typeof claims?.exp === 'number' ? new Date(claims.exp * 1000).toISOString() : undefined,
+  };
+};
+
+/**
+ * Save credentials. Org, user and expiry not passed explicitly are taken from the token's JWT claims.
+ *
+ * - Named profile (`profileName` or EPILOT_PROFILE): stored only in that profile. The default login in
+ *   credentials.json is left untouched, so e.g. a short-lived "login as" token never replaces your own login.
+ * - Otherwise: stored in the active profile (if any) and in the legacy credentials.json.
+ */
+export const saveCredentials = (input: Credentials, profileName?: string): void => {
+  const fromToken = credentialsFromToken(input.token);
+  const creds: Credentials = {
+    ...input,
+    org_id: input.org_id ?? fromToken.org_id,
+    user_id: input.user_id ?? fromToken.user_id,
+    expires_at: input.expires_at ?? fromToken.expires_at,
+  };
+
+  const namedProfile = profileName || process.env.EPILOT_PROFILE;
+  const targetProfile = namedProfile || resolveProfileName();
   if (targetProfile) {
     upsertProfile(targetProfile, {
       token: creds.token,
@@ -58,8 +102,9 @@ export const saveCredentials = (creds: Credentials, profileName?: string): void 
       access_profile: creds.access_profile,
     });
   }
+  if (namedProfile) return;
 
-  // Also save to legacy credentials.json
+  // Default login: also save to legacy credentials.json
   const dir = getConfigDir();
   mkdirSync(dir, { recursive: true });
   writeFileSync(getCredentialsPath(), JSON.stringify(creds, null, 2), { mode: 0o600 });
@@ -72,8 +117,19 @@ export const removeCredentials = (): boolean => {
   return true;
 };
 
+export type TokenSource = 'flag' | 'env' | 'profile' | 'credentials';
+
+export type ResolvedToken = {
+  source: TokenSource;
+  /** Profile the token is stored in (source "profile"). */
+  profileName?: string;
+  /** Stored credentials, including expired ones. Flag/env tokens only carry the token. */
+  creds: Credentials;
+};
+
 /**
- * Resolve token from multiple sources.
+ * Find the token a command would use and where it comes from, without filtering
+ * expired stored tokens (see `resolveToken`).
  *
  * Priority:
  * 1. --token flag
@@ -81,26 +137,57 @@ export const removeCredentials = (): boolean => {
  * 3. Active/selected profile token
  * 4. Legacy credentials.json
  */
-export const resolveToken = (flagToken?: string, flagProfile?: string): string | null => {
-  if (flagToken) return flagToken;
+export const resolveTokenSource = (flagToken?: string, flagProfile?: string): ResolvedToken | null => {
+  if (flagToken) return { source: 'flag', creds: { token: flagToken } };
 
   const envToken = process.env.EPILOT_TOKEN;
-  if (envToken) return envToken;
+  if (envToken) return { source: 'env', creds: { token: envToken } };
 
   // Check profile (resolves from --profile flag, EPILOT_PROFILE env, or active)
   const profile = getResolvedProfile(flagProfile);
   if (profile?.token) {
-    // Check profile token expiry
-    if (profile.expires_at) {
-      const expiry = new Date(profile.expires_at);
-      if (expiry < new Date()) return null;
-    }
-    return profile.token;
+    return {
+      source: 'profile',
+      profileName: resolveProfileName(flagProfile) ?? profile.name,
+      creds: {
+        token: profile.token,
+        org_id: profile.org_id,
+        user_id: profile.user_id,
+        expires_at: profile.expires_at,
+        access_profile: profile.access_profile,
+      },
+    };
   }
 
   // Fallback to legacy credentials
-  const creds = loadCredentials();
-  return creds?.token ?? null;
+  const creds = readStoredCredentials();
+  return creds?.token ? { source: 'credentials', creds } : null;
+};
+
+/**
+ * Resolve token from multiple sources (see `resolveTokenSource`).
+ * An expired stored token resolves to null; it never falls through to another source.
+ */
+export const resolveToken = (flagToken?: string, flagProfile?: string): string | null => {
+  const resolved = resolveTokenSource(flagToken, flagProfile);
+  if (!resolved || isTokenExpired(resolved.creds.expires_at)) return null;
+  return resolved.creds.token;
+};
+
+/**
+ * When the token a command would use is stored and expired, a message saying so and
+ * how to get going again. Null otherwise.
+ */
+export const describeExpiredToken = (flagToken?: string, flagProfile?: string): string | null => {
+  const resolved = resolveTokenSource(flagToken, flagProfile);
+  if (!resolved || !isTokenExpired(resolved.creds.expires_at)) return null;
+  if (resolved.source === 'profile') {
+    return (
+      `Token of profile "${resolved.profileName}" expired at ${resolved.creds.expires_at} — request a new one ` +
+      `and store it with: epilot auth token --profile ${resolved.profileName} <token>`
+    );
+  }
+  return `Stored token expired at ${resolved.creds.expires_at} — request a new one or run: epilot auth login`;
 };
 
 /**

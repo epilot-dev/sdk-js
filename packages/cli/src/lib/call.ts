@@ -7,7 +7,7 @@ const OpenAPIClientAxios =
   OpenAPIClientAxiosModule;
 
 import { loadDefinition } from './definition-loader.js';
-import { resolveTokenAsync } from './auth-store.js';
+import { describeExpiredToken, resolveTokenAsync } from './auth-store.js';
 import { getResolvedProfile, getStage } from './profiles.js';
 import { collectParams, getOperationParams, getMissingRequired } from './param-collector.js';
 import { resolveBody, getRequestBodyInfo } from './body-handler.js';
@@ -432,6 +432,11 @@ export const callApi = async (apiName: string, args: CallArgs): Promise<void> =>
   // Resolve auth (--token > EPILOT_TOKEN > profile > credentials.json > interactive prompt)
   let token = await resolveTokenAsync(args.token, args.profile);
   if (!token) {
+    const expired = describeExpiredToken(args.token, args.profile);
+    if (expired) {
+      process.stderr.write(`${RED}${expired}${RESET}\n`);
+      process.exit(1);
+    }
     if (isInteractive({ interactive: args.interactive })) {
       const { promptToken } = await import('./interactive.js');
       token = await promptToken();

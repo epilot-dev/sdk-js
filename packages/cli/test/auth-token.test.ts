@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { saveCredentials } from '../src/lib/auth-store.js';
 
 // Mock auth-store
-vi.mock('../src/lib/auth-store.js', () => ({
+vi.mock('../src/lib/auth-store.js', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../src/lib/auth-store.js')>()),
   saveCredentials: vi.fn(),
 }));
 
@@ -54,6 +55,19 @@ describe('auth token command', () => {
 
     expect(saveCredentials).toHaveBeenCalledWith({ token: 'tok-456' }, 'staging');
     expect(mockStdout).toContain('profile "staging"');
+    expect(mockStdout).toContain('epilot --profile staging <api> <operation>');
+  });
+
+  it('confirms the org and expiry decoded from a JWT, never the token', async () => {
+    const exp = Math.floor(Date.UTC(2026, 10, 15, 12, 0, 0) / 1000);
+    const payload = Buffer.from(JSON.stringify({ org_id: '911210', exp })).toString('base64url');
+    const jwt = `eyJhbGciOiJIUzI1NiJ9.${payload}.c2ln`;
+    const mod = await import('../src/commands/auth-token.js');
+
+    await mod.default.run!({ args: { token: jwt, profile: 'loginas-911' } } as any);
+
+    expect(mockStdout).toContain('org 911210, expires 2026-11-15T12:00:00.000Z');
+    expect(mockStdout).not.toContain(payload);
   });
 
   it('prompts for token interactively when not provided', async () => {

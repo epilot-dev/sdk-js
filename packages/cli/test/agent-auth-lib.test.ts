@@ -1,4 +1,4 @@
-import { readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -145,12 +145,12 @@ describe('issuer resolution', () => {
 });
 
 describe('token issuance and refresh', () => {
-  it('issueTokenForOrg stores token, org, user and expiry in credentials.json and the profile', async () => {
+  it('issueTokenForOrg stores token, org, user and expiry in credentials.json', async () => {
     ensureHostKey();
-    saveAgentRecord(sampleRecord(), 'work');
-    const loaded = loadAgentIdentity('work')!;
+    saveAgentRecord(sampleRecord());
+    const loaded = loadAgentIdentity()!;
 
-    const issued = await issueTokenForOrg(loaded, '739224', { readOnly: true, anonymize: true, profileName: 'work' });
+    const issued = await issueTokenForOrg(loaded, '739224', { readOnly: true, anonymize: true });
     expect(issued.token).toBe('tok_739224_1');
     expect(state.executions.at(-1)?.body).toEqual({
       capability: 'epilot.access_token.issue',
@@ -165,8 +165,25 @@ describe('token issuance and refresh', () => {
       name: 'dev@epilot.cloud',
     });
     expect(creds.expires_at).toBe(issued.expires_at);
-    expect(loadProfiles().profiles.work).toMatchObject({ token: 'tok_739224_1', org_id: '739224', user_id: 'user_1' });
+    expect(loadAgentRecord()).toMatchObject({ org_id: '739224', read_only: true, anonymize: true });
+  });
+
+  it('issueTokenForOrg on a named profile stores into that profile only', async () => {
+    ensureHostKey();
+    saveAgentRecord(sampleRecord(), 'work');
+    const loaded = loadAgentIdentity('work')!;
+
+    const issued = await issueTokenForOrg(loaded, '739224', { readOnly: true, anonymize: true, profileName: 'work' });
+    expect(loadProfiles().profiles.work).toMatchObject({
+      token: 'tok_739224_1',
+      org_id: '739224',
+      user_id: 'user_1',
+      expires_at: issued.expires_at,
+    });
+    expect(existsSync(join(tmp.configDir, 'credentials.json'))).toBe(false);
     expect(loadAgentRecord('work')).toMatchObject({ org_id: '739224', read_only: true, anonymize: true });
+    expect(await refreshTokenIfNeeded('work')).toBe('tok_739224_1');
+    expect(state.executions).toHaveLength(1);
   });
 
   it('refreshTokenIfNeeded keeps a valid token and re-issues an expiring one', async () => {

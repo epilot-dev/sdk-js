@@ -136,17 +136,92 @@ describe('epilot auth status', () => {
   });
 });
 
+const loginAsJwt = (claims: Record<string, unknown>) =>
+  `eyJhbGciOiJSUzI1NiJ9.${Buffer.from(JSON.stringify(claims)).toString('base64url')}.c2lnbmF0dXJl`;
+
+const LOGIN_AS_CLAIMS = {
+  token_type: 'api',
+  org_id: '911210',
+  user_id: 'user_42',
+  token_id: 'agent_tok_1',
+  read_only: true,
+  anonymize: true,
+  actor: { type: 'agent', client: 'epilot-admin-mcp', user_id: 'admin_1', approval_id: 'appr_7' },
+};
+
+describe('epilot auth status: effective token', () => {
+  afterEach(() => {
+    delete process.env.EPILOT_TOKEN;
+  });
+
+  it('reports a named profile as the source and decodes the login-as claims, never the token', async () => {
+    saveCredentials({ token: 'my-own-login' });
+    const token = loginAsJwt({ ...LOGIN_AS_CLAIMS, exp: Math.floor((Date.now() + 2 * HOUR) / 1000) });
+    saveCredentials({ token }, 'loginas-911');
+
+    await (await authSub('status')).run({ args: { profile: 'loginas-911' } });
+    const plain = stripAnsi(output.out.stdout);
+    expect(plain).toContain('Authenticated (API Token)');
+    expect(plain).toContain('Org:     911210');
+    expect(plain).toContain('User:    user_42');
+    expect(plain).toContain('Token ID: agent_tok_1');
+    expect(plain).toContain('Access:  read-only');
+    expect(plain).toContain('Data:    anonymized');
+    expect(plain).toContain('Actor:   agent via epilot-admin-mcp (approval appr_7)');
+    expect(plain).toMatch(/Expires: \S+ \(1h 59m\)/);
+    expect(plain).toContain('Source:  profile "loginas-911"');
+    expect(plain).not.toContain(token.slice(0, 20));
+  });
+
+  it('reports --token and EPILOT_TOKEN over stored credentials', async () => {
+    saveCredentials({ token: 'my-own-login', org_id: '1' });
+    const token = loginAsJwt(LOGIN_AS_CLAIMS);
+
+    await (await authSub('status')).run({ args: { token } });
+    expect(stripAnsi(output.out.stdout)).toContain('Source:  --token flag');
+    expect(stripAnsi(output.out.stdout)).toContain('Org:     911210');
+
+    output.out.stdout = '';
+    process.env.EPILOT_TOKEN = token;
+    await (await authSub('status')).run({ args: {} });
+    expect(stripAnsi(output.out.stdout)).toContain('Source:  EPILOT_TOKEN env var');
+
+    output.out.stdout = '';
+    delete process.env.EPILOT_TOKEN;
+    await (await authSub('status')).run({ args: {} });
+    expect(stripAnsi(output.out.stdout)).toContain('Source:  credentials.json (default login)');
+    expect(stripAnsi(output.out.stdout)).toContain('Org:     1');
+  });
+
+  it('shows an expired profile token as expired', async () => {
+    const exp = Math.floor((Date.now() - HOUR) / 1000);
+    saveCredentials({ token: loginAsJwt({ ...LOGIN_AS_CLAIMS, exp }) }, 'loginas-911');
+
+    await (await authSub('status')).run({ args: { profile: 'loginas-911' } });
+    const plain = stripAnsi(output.out.stdout);
+    expect(plain).toContain('Token expired (API Token) — request a new one');
+    expect(plain).toContain(`Expires: ${new Date(exp * 1000).toISOString()} (expired)`);
+  });
+});
+
 describe('epilot auth logout', () => {
   it('plain login: removes credentials without contacting Agent Auth', async () => {
-    saveCredentials({ token: 'manual-token' }, 'work');
-    await (await authSub('logout')).run({ args: { profile: 'work' } });
-    expect(output.out.stdout).toContain('Logged out successfully');
-    expect(output.out.stdout).not.toContain('revoked');
+    saveCredentials({ token: 'manual-token' });
+    await (await authSub('logout')).run({ args: {} });
     expect(state.revoked).toEqual([]);
     expect(loadCredentials()).toBeNull();
-    // Same as before Agent Auth: only credentials.json is removed, named profiles keep their token.
-    expect(loadProfiles().profiles.work.token).toBe('manual-token');
     expect(stripAnsi(output.out.stdout)).toBe('Logged out successfully.\n');
+  });
+
+  it('named profile: clears that profile and keeps the default login', async () => {
+    saveCredentials({ token: 'my-own-login' });
+    saveCredentials({ token: 'manual-token', org_id: '911210' }, 'work');
+    await (await authSub('logout')).run({ args: { profile: 'work' } });
+    expect(stripAnsi(output.out.stdout)).toBe('Logged out successfully.\n');
+    expect(state.revoked).toEqual([]);
+    expect(loadProfiles().profiles.work.token).toBeUndefined();
+    expect(loadProfiles().profiles.work.org_id).toBeUndefined();
+    expect(loadCredentials()?.token).toBe('my-own-login');
   });
 
   it('agent login: revokes the agent, forgets it and clears the profile', async () => {

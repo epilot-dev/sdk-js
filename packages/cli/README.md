@@ -167,6 +167,30 @@ Token resolution order:
 4. Stored credentials (`~/.config/epilot/credentials.json`)
 5. Interactive prompt (if TTY)
 
+### Using a pre-minted token (e.g. from the epilot Admin MCP)
+
+Short-lived tokens minted for you — such as a "login as" token from the epilot Admin MCP — belong in a named
+profile, so they never replace your own login. Pass `--profile` on every call (agents can't rely on env vars
+persisting between shell calls):
+
+```bash
+# Store the token in its own profile (org, user and expiry are read from the token)
+epilot auth token --profile loginas-911 <token>
+
+# Use it
+epilot --profile loginas-911 entity listSchemas
+
+# Check which token is used and its claims (org, user, read-only, anonymized, actor, expiry) — never prints the token
+epilot auth status --profile loginas-911
+
+# Remove it again (your default login stays)
+epilot auth logout --profile loginas-911
+```
+
+Storing a token in a named profile (`--profile` or `EPILOT_PROFILE`) leaves `~/.config/epilot/credentials.json`
+untouched. Once the token has expired, commands fail with `Token of profile "…" expired at … — request a new one`
+instead of falling back to another login.
+
 ### Agent mode (optional)
 
 `epilot auth login --agent` registers the CLI through the

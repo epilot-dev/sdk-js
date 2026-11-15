@@ -1,5 +1,6 @@
 import { defineCommand } from 'citty';
 import { listProfiles, upsertProfile, deleteProfile, setActiveProfile, loadProfiles } from '../lib/profiles.js';
+import { credentialsFromToken } from '../lib/auth-store.js';
 import { BOLD, RESET, GREEN, RED, DIM } from '../lib/utils.js';
 
 export default defineCommand({
@@ -39,6 +40,8 @@ export default defineCommand({
           name: args.name,
           server: args.server,
           token: args.token,
+          // Org, user and expiry from the token's JWT claims (replacing those of a previous token)
+          ...(args.token ? metadataFromToken(args.token) : {}),
         });
         process.stdout.write(`${GREEN}Profile "${args.name}" saved.${RESET}\n`);
       },
@@ -103,3 +106,8 @@ export default defineCommand({
     }),
   },
 });
+
+const metadataFromToken = (token: string) => {
+  const { org_id, user_id, expires_at } = credentialsFromToken(token);
+  return { org_id, user_id, expires_at, access_profile: undefined };
+};
