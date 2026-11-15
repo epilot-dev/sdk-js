@@ -2,6 +2,7 @@ import { runMain } from 'citty';
 import { main } from '../src/index.js';
 import { API_LIST } from '../src/generated/api-list.js';
 import { hoistFlagsAfterSubcommand } from '../src/lib/reorder-args.js';
+import { BOLD, CYAN, DIM, GREEN, RESET, YELLOW } from '../src/lib/utils.js';
 
 // Gracefully handle EPIPE (e.g. piping to `head` or `jq` that closes early)
 process.stdout.on('error', (err) => {
@@ -80,12 +81,7 @@ if (hasHelp) {
 runMain(main);
 
 function printRootHelp() {
-  const DIM = '\x1b[2m';
-  const BOLD = '\x1b[1m';
-  const CYAN = '\x1b[36m';
-  const GREEN = '\x1b[32m';
-  const YELLOW = '\x1b[33m';
-  const R = '\x1b[0m';
+  const R = RESET;
 
   const w = (s: string) => process.stdout.write(s);
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isValidJson, parseKeyValue, parseHeader, parseParamValue } from '../src/lib/utils.js';
+import { colorEnabled, isValidJson, parseKeyValue, parseHeader, parseParamValue } from '../src/lib/utils.js';
 
 describe('isValidJson', () => {
   it('returns true for valid JSON', () => {
@@ -53,5 +53,28 @@ describe('parseParamValue', () => {
 
   it('parses null', () => {
     expect(parseParamValue('null')).toBe(null);
+  });
+});
+
+describe('colorEnabled', () => {
+  const tty = { stdout: { isTTY: true }, stderr: { isTTY: true } };
+  const piped = { stdout: { isTTY: false }, stderr: { isTTY: true } };
+
+  it('colours only when both stdout and stderr are terminals', () => {
+    expect(colorEnabled({}, tty)).toBe(true);
+    expect(colorEnabled({}, piped)).toBe(false);
+    expect(colorEnabled({}, { stdout: {}, stderr: {} })).toBe(false);
+  });
+
+  it('honours NO_COLOR and TERM=dumb', () => {
+    expect(colorEnabled({ NO_COLOR: '1' }, tty)).toBe(false);
+    expect(colorEnabled({ NO_COLOR: '' }, tty)).toBe(true);
+    expect(colorEnabled({ TERM: 'dumb' }, tty)).toBe(false);
+  });
+
+  it('FORCE_COLOR wins in both directions', () => {
+    expect(colorEnabled({ FORCE_COLOR: '1', NO_COLOR: '1' }, piped)).toBe(true);
+    expect(colorEnabled({ FORCE_COLOR: '0' }, tty)).toBe(false);
+    expect(colorEnabled({ FORCE_COLOR: 'false' }, tty)).toBe(false);
   });
 });

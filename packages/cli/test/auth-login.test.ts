@@ -162,7 +162,7 @@ describe('epilot auth login --agent', () => {
 
     // Approval UX: code + URL shown, browser opened, polled until active
     expect(output.out.stdout).toContain('agent mode');
-    expect(output.out.stdout).toContain('Verification code: \x1b[1mWDJB-MJHT');
+    expect(stripAnsi(output.out.stdout)).toContain('Verification code: WDJB-MJHT');
     expect(output.out.stdout).toContain('agent_approval=WDJB-MJHT');
     expect(open).toHaveBeenCalledWith(expect.stringContaining('agent_approval=WDJB-MJHT'));
     expect(state.polls).toBeGreaterThanOrEqual(2);
