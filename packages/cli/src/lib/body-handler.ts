@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { isValidJson } from './utils.js';
+import { isValidJson, RED, RESET } from './utils.js';
 
 interface ResolveBodyOptions {
   dataFlag: string | undefined;
@@ -74,7 +74,7 @@ export const resolveBody = async (opts: ResolveBodyOptions): Promise<unknown | n
 
       // Show parse error and wait for user before re-opening editor
       const parseError = getJsonParseError(trimmed);
-      process.stderr.write(`\x1b[31mInvalid JSON: ${parseError}\x1b[0m\n`);
+      process.stderr.write(`${RED}Invalid JSON: ${parseError}${RESET}\n`);
 
       if (attempt < MAX_RETRIES - 1) {
         const { input } = await import('@inquirer/prompts');
