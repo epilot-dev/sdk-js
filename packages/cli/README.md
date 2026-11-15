@@ -175,11 +175,14 @@ epilot auth browser --json                # {"url": "...", "expires_at": "..."}
 ```
 
 - The browser session uses the token as-is: read-only and anonymized logins stay read-only and anonymized, and
-  the session ends when the token expires (1 hour for `epilot auth login`). Nothing refreshes it.
+  the session ends when the token expires (1 hour for `epilot auth login`), at most after 8 hours. Nothing
+  refreshes it.
 - The portal asks for confirmation before replacing the browser's current session.
 - The token travels in the URL fragment (`/cli-session#token=…`), which never reaches a server; the portal removes
   it from the address bar. Still, treat the URL like a password.
-- Needs a user token: API tokens and agent tokens (`auth login --agent`) have no user to sign in as.
+- Works with user logins, API tokens and agent tokens (`auth login --agent`). An agent session acts as the agent
+  on behalf of the user who approved it; an API token session acts as the token. Portal, journey and preview
+  tokens are rejected.
 
 Token resolution order:
 1. `--token` flag

@@ -9,10 +9,14 @@ import { BOLD, CYAN, DIM, RED, RESET, YELLOW } from '../lib/utils.js';
 export const CLI_SESSION_PATH = '/cli-session';
 
 /**
- * Token types without a person behind them. `api` covers user-created API tokens and Agent Auth tokens:
- * their user id is the token id, so the portal cannot load a user for them.
+ * Token types that can back a portal session (mirrors auth-service): Cognito tokens have no `token_type`,
+ * `assume` tokens are a user's own restricted token, `api` covers API tokens and Agent Auth tokens. Customer-facing
+ * and preview tokens (portal, journey, portal_preview, contact_identification, app) never.
  */
-const NON_PERSON_TOKEN_TYPES = new Set(['api', 'journey', 'portal', 'portal_preview', 'contact_identification']);
+const SESSION_TOKEN_TYPES = new Set(['assume', 'api']);
+
+/** Mirrors auth-service TOKEN_SESSION_MAX_SECONDS: a browser session never outlasts this, whatever the token. */
+export const BROWSER_SESSION_MAX_MS = 8 * 60 * 60 * 1000;
 
 type Claims = {
   exp?: number;
@@ -21,6 +25,8 @@ type Claims = {
   user_id?: string;
   org_id?: string;
   email?: string;
+  token_name?: string;
+  actor?: { type?: string; agent_name?: string; host_name?: string };
   read_only?: boolean;
   anonymize?: boolean;
   'custom:ivy_user_id'?: string;
@@ -28,8 +34,8 @@ type Claims = {
 };
 
 export type BrowserSessionTokenCheck =
-  | { ok: true; claims: Claims; expiresAt?: Date }
-  | { ok: false; reason: 'invalid' | 'expired' | 'no_user' };
+  | { ok: true; claims: Claims; expiresAt?: Date; sessionEndsAt: Date }
+  | { ok: false; reason: 'invalid' | 'expired' | 'no_user' | 'unsupported' };
 
 const decodeClaims = (token: string): Claims | null => {
   try {
@@ -42,7 +48,7 @@ const decodeClaims = (token: string): Claims | null => {
   }
 };
 
-/** Mirrors auth-service's `parseTokenSessionClaims`: only person-bound, unexpired JWTs can back a portal session. */
+/** Mirrors auth-service's `parseTokenSessionClaims`: unexpired user, assume, API and agent tokens with user + org. */
 export const checkBrowserSessionToken = (token: string, now: number = Date.now()): BrowserSessionTokenCheck => {
   const claims = decodeClaims(token);
   if (!claims) return { ok: false, reason: 'invalid' };
@@ -52,11 +58,15 @@ export const checkBrowserSessionToken = (token: string, now: number = Date.now()
 
   const userId = claims['custom:ivy_user_id'] ?? claims.user_id;
   const orgId = claims['custom:ivy_org_id'] ?? claims.org_id;
-  if (!userId || !orgId || (claims.token_type && NON_PERSON_TOKEN_TYPES.has(claims.token_type))) {
-    return { ok: false, reason: 'no_user' };
+  if (claims.token_type !== undefined && !SESSION_TOKEN_TYPES.has(claims.token_type)) {
+    return { ok: false, reason: 'unsupported' };
   }
+  if (!userId || !orgId) return { ok: false, reason: 'no_user' };
 
-  return { ok: true, claims, expiresAt };
+  const sessionEndsAt = new Date(
+    Math.min(expiresAt?.getTime() ?? Number.POSITIVE_INFINITY, now + BROWSER_SESSION_MAX_MS),
+  );
+  return { ok: true, claims, expiresAt, sessionEndsAt };
 };
 
 /**
@@ -96,11 +106,23 @@ const formatRemaining = (expiresAt: Date, now: number = Date.now()): string => {
   return `${Math.floor(minutes / 1440)} days`;
 };
 
-const REASON_MESSAGES: Record<'invalid' | 'expired' | 'no_user', string> = {
+/** Who the browser session acts as, for the terminal note. */
+export const describeSessionPrincipal = (claims: Claims): string => {
+  if (claims.token_type === 'api' && claims.actor?.type === 'agent') {
+    const agent = [claims.actor.agent_name, claims.actor.host_name && `(${claims.actor.host_name})`]
+      .filter(Boolean)
+      .join(' ');
+    return `as the AI agent ${agent || claims.token_name || ''} on your behalf`.replace(/\s+/g, ' ');
+  }
+  if (claims.token_type === 'api') return `as the API token${claims.token_name ? ` "${claims.token_name}"` : ''}`;
+  return 'as you';
+};
+
+const REASON_MESSAGES: Record<'invalid' | 'expired' | 'no_user' | 'unsupported', string> = {
   invalid: 'The stored token is not a valid JWT.',
   expired: 'The stored token has expired.',
-  no_user:
-    'This token is not bound to a user (API and agent tokens cannot open a portal session). Log in with your user account first.',
+  no_user: 'The token has no user or organization.',
+  unsupported: 'This kind of token (portal, journey, preview or app token) cannot open a 360 portal session.',
 };
 
 export default defineCommand({
@@ -139,7 +161,7 @@ export default defineCommand({
     const check = checkBrowserSessionToken(token);
     if (!check.ok) {
       process.stderr.write(`${RED}Cannot open a browser session: ${REASON_MESSAGES[check.reason]}${RESET}\n`);
-      process.stderr.write(`Run ${BOLD}epilot auth login${RESET} to get a user token.\n`);
+      process.stderr.write(`Run ${BOLD}epilot auth login${RESET} for a fresh token.\n`);
       process.exit(1);
       return;
     }
@@ -148,23 +170,21 @@ export default defineCommand({
     const url = buildBrowserSessionUrl(portalUrl, token, args.path as string | undefined);
 
     if (args.json) {
-      process.stdout.write(`${JSON.stringify({ url, expires_at: check.expiresAt?.toISOString() ?? null })}\n`);
+      process.stdout.write(`${JSON.stringify({ url, expires_at: check.sessionEndsAt.toISOString() })}\n`);
     } else {
       // The URL is the only thing on stdout, so `epilot auth browser | pbcopy` and `$(epilot auth browser)` work.
       process.stdout.write(`${url}\n`);
     }
 
     // Everything for humans goes to stderr.
-    const { claims, expiresAt } = check;
+    const { claims, sessionEndsAt } = check;
     const modes = [claims.read_only && 'read-only', claims.anonymize && 'anonymized'].filter(Boolean);
     process.stderr.write(
-      `\n${YELLOW}This URL signs the browser in as you${modes.length ? ` (${modes.join(', ')})` : ''}. Treat it like a password: do not share or paste it.${RESET}\n`,
+      `\n${YELLOW}This URL signs the browser in ${describeSessionPrincipal(claims)}${modes.length ? ` (${modes.join(', ')})` : ''}. Treat it like a password: do not share or paste it.${RESET}\n`,
     );
-    if (expiresAt) {
-      process.stderr.write(
-        `${DIM}The browser session ends with the CLI token at ${expiresAt.toISOString()} (in ${formatRemaining(expiresAt)}).${RESET}\n`,
-      );
-    }
+    process.stderr.write(
+      `${DIM}The browser session ends at ${sessionEndsAt.toISOString()} (in ${formatRemaining(sessionEndsAt)}).${RESET}\n`,
+    );
 
     const canPrompt =
       isInteractive({ interactive: args.interactive }) && !!process.stdin.isTTY && !!process.stderr.isTTY;

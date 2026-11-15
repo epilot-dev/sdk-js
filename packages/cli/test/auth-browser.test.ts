@@ -9,9 +9,13 @@ const confirmMock = vi.fn();
 vi.mock('open', () => ({ default: (...args: unknown[]) => openMock(...args) }));
 vi.mock('@inquirer/prompts', () => ({ confirm: (...args: unknown[]) => confirmMock(...args) }));
 
-const { buildBrowserSessionUrl, checkBrowserSessionToken, normalizePortalPath } = await import(
-  '../src/commands/auth-browser.js'
-);
+const {
+  BROWSER_SESSION_MAX_MS,
+  buildBrowserSessionUrl,
+  checkBrowserSessionToken,
+  describeSessionPrincipal,
+  normalizePortalPath,
+} = await import('../src/commands/auth-browser.js');
 const command = (await import('../src/commands/auth-browser.js')).default;
 
 const b64 = (obj: unknown) => Buffer.from(JSON.stringify(obj)).toString('base64url');
@@ -36,18 +40,57 @@ const assumeToken = (extra: Record<string, unknown> = {}) =>
     ...extra,
   });
 
+const apiToken = (extra: Record<string, unknown> = {}) =>
+  makeToken({
+    token_type: 'api',
+    token_id: 'api_tok',
+    token_name: 'ERP sync',
+    user_id: 'api_tok',
+    org_id: 'org-1',
+    exp: inOneHour(),
+    ...extra,
+  });
+
+const agentToken = () =>
+  apiToken({
+    token_id: 'agent_tok',
+    token_name: 'Agent: Claude',
+    user_id: 'agent_tok',
+    actor: { type: 'agent', agent_name: 'Claude', host_name: 'epilot MCP (Claude)', user_id: 'user-1' },
+  });
+
 describe('checkBrowserSessionToken', () => {
-  it('accepts Cognito id tokens and assume tokens', () => {
+  it('accepts Cognito id, assume, API and agent tokens', () => {
     expect(checkBrowserSessionToken(cognitoToken()).ok).toBe(true);
     expect(checkBrowserSessionToken(assumeToken({ read_only: true })).ok).toBe(true);
+    expect(checkBrowserSessionToken(apiToken()).ok).toBe(true);
+    expect(checkBrowserSessionToken(agentToken()).ok).toBe(true);
+  });
+
+  it('caps the session at 8 hours, also for tokens without expiry', () => {
+    const now = Date.now();
+    const check = checkBrowserSessionToken(apiToken({ exp: undefined }), now);
+
+    expect(check.ok && check.sessionEndsAt.getTime()).toBe(now + BROWSER_SESSION_MAX_MS);
+  });
+
+  it('describes who the browser acts as', () => {
+    const principal = (token: string) => {
+      const check = checkBrowserSessionToken(token);
+      return check.ok ? describeSessionPrincipal(check.claims) : null;
+    };
+
+    expect(principal(cognitoToken())).toBe('as you');
+    expect(principal(apiToken())).toBe('as the API token "ERP sync"');
+    expect(principal(agentToken())).toBe('as the AI agent Claude (epilot MCP (Claude)) on your behalf');
   });
 
   it.each([
     ['garbage', 'not-a-jwt', 'invalid'],
     ['expired tokens', assumeToken({ exp: 1 }), 'expired'],
-    ['API tokens', makeToken({ token_type: 'api', user_id: 'api_x', org_id: 'org-1' }), 'no_user'],
-    ['agent tokens', makeToken({ token_type: 'api', user_id: 'agent_x', org_id: 'org-1', actor: {} }), 'no_user'],
-    ['portal tokens', makeToken({ token_type: 'portal', user_id: 'u', org_id: 'o' }), 'no_user'],
+    ['portal tokens', makeToken({ token_type: 'portal', user_id: 'u', org_id: 'o' }), 'unsupported'],
+    ['journey tokens', makeToken({ token_type: 'journey', user_id: 'u', org_id: 'o' }), 'unsupported'],
+    ['app tokens', makeToken({ token_type: 'app', user_id: 'u', org_id: 'o' }), 'unsupported'],
     ['tokens without org', makeToken({ user_id: 'u' }), 'no_user'],
   ])('rejects %s', (_label, token, reason) => {
     expect(checkBrowserSessionToken(token)).toEqual({ ok: false, reason });
@@ -183,14 +226,24 @@ describe('epilot auth browser', () => {
     expect(new Date(parsed.expires_at).getTime()).toBeGreaterThan(Date.now());
   });
 
-  it('refuses API tokens with a hint', async () => {
+  it('opens a session for an agent token and says who acts', async () => {
     setTty(false);
 
-    await run({ token: makeToken({ token_type: 'api', user_id: 'api_1', org_id: 'org-1' }) });
+    await run({ token: agentToken() });
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(output.out.stdout).toMatch(/^https:\/\/portal\.epilot\.cloud\/cli-session#token=/);
+    expect(stripAnsi(output.out.stderr)).toContain('as the AI agent Claude (epilot MCP (Claude)) on your behalf');
+  });
+
+  it('refuses customer-facing tokens with a hint', async () => {
+    setTty(false);
+
+    await run({ token: makeToken({ token_type: 'portal', user_id: 'u', org_id: 'org-1' }) });
 
     expect(exitSpy).toHaveBeenCalledWith(1);
     expect(output.out.stdout).toBe('');
-    expect(stripAnsi(output.out.stderr)).toContain('not bound to a user');
+    expect(stripAnsi(output.out.stderr)).toContain('cannot open a 360 portal session');
   });
 
   it('asks to log in without a token', async () => {
