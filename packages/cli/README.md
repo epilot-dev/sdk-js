@@ -167,24 +167,24 @@ Token resolution order:
 4. Stored credentials (`~/.config/epilot/credentials.json`)
 5. Interactive prompt (if TTY)
 
-### Using a pre-minted token (e.g. from the epilot Admin MCP)
+### Using a pre-minted token
 
-Short-lived tokens minted for you — such as a "login as" token from the epilot Admin MCP — belong in a named
+Short-lived tokens minted for you (e.g. a scoped agent token for one organization) belong in a named
 profile, so they never replace your own login. Pass `--profile` on every call (agents can't rely on env vars
 persisting between shell calls):
 
 ```bash
 # Store the token in its own profile, read from stdin (org, user and expiry are read from the token)
-printf '%s' "$TOKEN" | epilot profile create loginas-911 --token -
+printf '%s' "$TOKEN" | epilot profile create agent-911 --token -
 
 # Use it
-epilot --profile loginas-911 entity listSchemas
+epilot --profile agent-911 entity listSchemas
 
 # Check which token is used and its claims (org, user, read-only, anonymized, actor, expiry) — never prints the token
-epilot auth status --profile loginas-911
+epilot auth status --profile agent-911
 
 # Remove it again (your default login stays)
-epilot profile delete loginas-911
+epilot profile delete agent-911
 ```
 
 Pass the token as `-` to read it from stdin (`profile create <name> --token -`, `auth token --profile <name> -`,

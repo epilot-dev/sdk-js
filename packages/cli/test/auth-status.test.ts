@@ -136,17 +136,17 @@ describe('epilot auth status', () => {
   });
 });
 
-const loginAsJwt = (claims: Record<string, unknown>) =>
+const preMintedJwt = (claims: Record<string, unknown>) =>
   `eyJhbGciOiJSUzI1NiJ9.${Buffer.from(JSON.stringify(claims)).toString('base64url')}.c2lnbmF0dXJl`;
 
-const LOGIN_AS_CLAIMS = {
+const PRE_MINTED_CLAIMS = {
   token_type: 'api',
   org_id: '911210',
   user_id: 'user_42',
   token_id: 'agent_tok_1',
   read_only: true,
   anonymize: true,
-  actor: { type: 'agent', client: 'epilot-admin-mcp', user_id: 'admin_1', approval_id: 'appr_7' },
+  actor: { type: 'agent', client: 'support-agent', user_id: 'admin_1', approval_id: 'appr_7' },
 };
 
 describe('epilot auth status: effective token', () => {
@@ -154,12 +154,12 @@ describe('epilot auth status: effective token', () => {
     delete process.env.EPILOT_TOKEN;
   });
 
-  it('reports a named profile as the source and decodes the login-as claims, never the token', async () => {
+  it('reports a named profile as the source and decodes the pre-minted claims, never the token', async () => {
     saveCredentials({ token: 'my-own-login' });
-    const token = loginAsJwt({ ...LOGIN_AS_CLAIMS, exp: Math.floor((Date.now() + 2 * HOUR) / 1000) });
-    saveCredentials({ token }, 'loginas-911');
+    const token = preMintedJwt({ ...PRE_MINTED_CLAIMS, exp: Math.floor((Date.now() + 2 * HOUR) / 1000) });
+    saveCredentials({ token }, 'agent-911');
 
-    await (await authSub('status')).run({ args: { profile: 'loginas-911' } });
+    await (await authSub('status')).run({ args: { profile: 'agent-911' } });
     const plain = stripAnsi(output.out.stdout);
     expect(plain).toContain('Authenticated (API Token)');
     expect(plain).toContain('Org:     911210');
@@ -167,15 +167,15 @@ describe('epilot auth status: effective token', () => {
     expect(plain).toContain('Token ID: agent_tok_1');
     expect(plain).toContain('Access:  read-only');
     expect(plain).toContain('Data:    anonymized');
-    expect(plain).toContain('Actor:   agent via epilot-admin-mcp (approval appr_7)');
+    expect(plain).toContain('Actor:   agent via support-agent (approval appr_7)');
     expect(plain).toMatch(/Expires: \S+ \(1h 59m\)/);
-    expect(plain).toContain('Source:  profile "loginas-911"');
+    expect(plain).toContain('Source:  profile "agent-911"');
     expect(plain).not.toContain(token.slice(0, 20));
   });
 
   it('reports --token and EPILOT_TOKEN over stored credentials', async () => {
     saveCredentials({ token: 'my-own-login', org_id: '1' });
-    const token = loginAsJwt(LOGIN_AS_CLAIMS);
+    const token = preMintedJwt(PRE_MINTED_CLAIMS);
 
     await (await authSub('status')).run({ args: { token } });
     expect(stripAnsi(output.out.stdout)).toContain('Source:  --token flag');
@@ -195,9 +195,9 @@ describe('epilot auth status: effective token', () => {
 
   it('shows an expired profile token as expired', async () => {
     const exp = Math.floor((Date.now() - HOUR) / 1000);
-    saveCredentials({ token: loginAsJwt({ ...LOGIN_AS_CLAIMS, exp }) }, 'loginas-911');
+    saveCredentials({ token: preMintedJwt({ ...PRE_MINTED_CLAIMS, exp }) }, 'agent-911');
 
-    await (await authSub('status')).run({ args: { profile: 'loginas-911' } });
+    await (await authSub('status')).run({ args: { profile: 'agent-911' } });
     const plain = stripAnsi(output.out.stdout);
     expect(plain).toContain('Token expired (API Token) — request a new one');
     expect(plain).toContain(`Expires: ${new Date(exp * 1000).toISOString()} (expired)`);

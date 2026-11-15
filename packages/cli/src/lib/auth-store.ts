@@ -79,7 +79,7 @@ export const credentialsFromToken = (token: string): Credentials => {
  * Save credentials. Org, user and expiry not passed explicitly are taken from the token's JWT claims.
  *
  * - Named profile (`profileName` or EPILOT_PROFILE): stored only in that profile. The default login in
- *   credentials.json is left untouched, so e.g. a short-lived "login as" token never replaces your own login.
+ *   credentials.json is left untouched, so e.g. a short-lived pre-minted token never replaces your own login.
  * - Otherwise: stored in the active profile (if any) and in the legacy credentials.json.
  */
 export const saveCredentials = (input: Credentials, profileName?: string): void => {

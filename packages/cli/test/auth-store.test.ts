@@ -34,22 +34,22 @@ const anHourAgo = () => Math.floor((Date.now() - 3600_000) / 1000);
 describe('saveCredentials', () => {
   it('stores a token for a named profile without touching the default login', () => {
     saveCredentials({ token: 'my-own-login', org_id: '1' });
-    saveCredentials({ token: jwt({ org_id: '911210', exp: inOneHour() }) }, 'loginas-911');
+    saveCredentials({ token: jwt({ org_id: '911210', exp: inOneHour() }) }, 'agent-911');
 
     expect(loadCredentials()).toMatchObject({ token: 'my-own-login', org_id: '1' });
     expect(resolveToken()).toBe('my-own-login');
-    expect(resolveTokenSource(undefined, 'loginas-911')).toMatchObject({
+    expect(resolveTokenSource(undefined, 'agent-911')).toMatchObject({
       source: 'profile',
-      profileName: 'loginas-911',
+      profileName: 'agent-911',
       creds: { org_id: '911210' },
     });
   });
 
   it('treats EPILOT_PROFILE as a named profile', () => {
-    process.env.EPILOT_PROFILE = 'loginas-911';
-    saveCredentials({ token: 'login-as' });
+    process.env.EPILOT_PROFILE = 'agent-911';
+    saveCredentials({ token: 'pre-minted' });
     expect(existsSync(join(tmp.configDir, 'credentials.json'))).toBe(false);
-    expect(loadProfiles().profiles['loginas-911'].token).toBe('login-as');
+    expect(loadProfiles().profiles['agent-911'].token).toBe('pre-minted');
   });
 
   it('without a profile, still writes the legacy credentials.json', () => {
@@ -87,13 +87,13 @@ describe('expired tokens', () => {
   it('does not fall back to the default login and explains how to recover', () => {
     saveCredentials({ token: 'my-own-login' });
     const exp = anHourAgo();
-    saveCredentials({ token: jwt({ org_id: '911210', exp }) }, 'loginas-911');
+    saveCredentials({ token: jwt({ org_id: '911210', exp }) }, 'agent-911');
 
-    expect(resolveToken(undefined, 'loginas-911')).toBeNull();
-    expect(describeExpiredToken(undefined, 'loginas-911')).toBe(
-      `Token of profile "loginas-911" expired at ${new Date(exp * 1000).toISOString()} — request a new one and store it with: epilot auth token --profile loginas-911 <token>`,
+    expect(resolveToken(undefined, 'agent-911')).toBeNull();
+    expect(describeExpiredToken(undefined, 'agent-911')).toBe(
+      `Token of profile "agent-911" expired at ${new Date(exp * 1000).toISOString()} — request a new one and store it with: epilot auth token --profile agent-911 <token>`,
     );
-    expect(describeExpiredToken('flag-token', 'loginas-911')).toBeNull();
+    expect(describeExpiredToken('flag-token', 'agent-911')).toBeNull();
     expect(describeExpiredToken()).toBeNull();
   });
 
@@ -111,8 +111,8 @@ describe('epilot profile create --token', () => {
       const exp = inOneHour();
       const cmd = (await import('../src/commands/profile.js')).default;
       const create = (cmd.subCommands as any).create as { run: (ctx: any) => Promise<void> };
-      await create.run({ args: { name: 'loginas-911', token: jwt({ org_id: '911210', exp }) } });
-      expect(loadProfiles().profiles['loginas-911']).toMatchObject({
+      await create.run({ args: { name: 'agent-911', token: jwt({ org_id: '911210', exp }) } });
+      expect(loadProfiles().profiles['agent-911']).toMatchObject({
         org_id: '911210',
         expires_at: new Date(exp * 1000).toISOString(),
       });
@@ -124,7 +124,7 @@ describe('epilot profile create --token', () => {
 });
 
 describe('a profile named explicitly that does not exist', () => {
-  const NOT_FOUND = 'Profile "loginas-911" not found. Create it with: epilot profile create loginas-911 --token …';
+  const NOT_FOUND = 'Profile "agent-911" not found. Create it with: epilot profile create agent-911 --token …';
   let output: ReturnType<typeof captureOutput>;
   let exitSpy: ReturnType<typeof vi.spyOn>;
 
@@ -139,26 +139,26 @@ describe('a profile named explicitly that does not exist', () => {
   });
 
   it('--profile: exits 1 instead of falling back to the default login', async () => {
-    expect(() => resolveToken(undefined, 'loginas-911')).toThrow(ProfileNotFoundError);
-    expect(() => resolveTokenSource(undefined, 'loginas-911')).toThrow(NOT_FOUND);
-    expect(() => describeExpiredToken(undefined, 'loginas-911')).toThrow(ProfileNotFoundError);
-    await expect(resolveTokenAsync(undefined, 'loginas-911')).rejects.toThrow(ProfileNotFoundError);
+    expect(() => resolveToken(undefined, 'agent-911')).toThrow(ProfileNotFoundError);
+    expect(() => resolveTokenSource(undefined, 'agent-911')).toThrow(NOT_FOUND);
+    expect(() => describeExpiredToken(undefined, 'agent-911')).toThrow(ProfileNotFoundError);
+    await expect(resolveTokenAsync(undefined, 'agent-911')).rejects.toThrow(ProfileNotFoundError);
     expect(exitSpy).toHaveBeenCalledWith(1);
     expect(stripAnsi(output.out.stderr)).toContain(`${NOT_FOUND}\n`);
   });
 
   it('EPILOT_PROFILE: exits 1 as well', async () => {
-    process.env.EPILOT_PROFILE = 'loginas-911';
+    process.env.EPILOT_PROFILE = 'agent-911';
     expect(() => resolveToken()).toThrow(NOT_FOUND);
     await expect(resolveTokenAsync()).rejects.toThrow(NOT_FOUND);
     expect(exitSpy).toHaveBeenCalledWith(1);
   });
 
   it('--token and EPILOT_TOKEN still win over the profile', async () => {
-    expect(resolveToken('flag-token', 'loginas-911')).toBe('flag-token');
+    expect(resolveToken('flag-token', 'agent-911')).toBe('flag-token');
     process.env.EPILOT_TOKEN = 'env-token';
-    expect(resolveToken(undefined, 'loginas-911')).toBe('env-token');
-    expect(await resolveTokenAsync(undefined, 'loginas-911')).toBe('env-token');
+    expect(resolveToken(undefined, 'agent-911')).toBe('env-token');
+    expect(await resolveTokenAsync(undefined, 'agent-911')).toBe('env-token');
     expect(exitSpy).not.toHaveBeenCalled();
   });
 
@@ -179,8 +179,8 @@ describe('a profile named explicitly that does not exist', () => {
     delete process.env.EPILOT_PROFILE;
 
     const authToken = (await import('../src/commands/auth-token.js')).default;
-    await authToken.run!({ args: { token: 'stored', profile: 'loginas-911' } } as any);
-    expect(resolveToken(undefined, 'loginas-911')).toBe('stored');
+    await authToken.run!({ args: { token: 'stored', profile: 'agent-911' } } as any);
+    expect(resolveToken(undefined, 'agent-911')).toBe('stored');
     expect(loadCredentials()?.token).toBe('my-own-login');
     expect(exitSpy).not.toHaveBeenCalled();
   });
@@ -188,7 +188,7 @@ describe('a profile named explicitly that does not exist', () => {
   it('epilot auth status --profile exits 1', async () => {
     const auth = (await import('../src/commands/auth.js')).default;
     const status = (auth.subCommands as any).status as { run: (ctx: any) => Promise<void> };
-    await expect(status.run({ args: { profile: 'loginas-911' } })).rejects.toThrow(ProfileNotFoundError);
+    await expect(status.run({ args: { profile: 'agent-911' } })).rejects.toThrow(ProfileNotFoundError);
     expect(stripAnsi(output.out.stderr)).toContain(NOT_FOUND);
     expect(output.out.stdout).not.toContain('Authenticated');
   });
@@ -206,9 +206,9 @@ describe('reading the token from stdin', () => {
     try {
       const cmd = (await import('../src/commands/profile.js')).default;
       await ((cmd.subCommands as any).create as { run: (ctx: any) => Promise<void> }).run({
-        args: { name: 'loginas-911', token: '-' },
+        args: { name: 'agent-911', token: '-' },
       });
-      const stored = loadProfiles().profiles['loginas-911'];
+      const stored = loadProfiles().profiles['agent-911'];
       expect(stored).toMatchObject({ token, org_id: '911210' });
       expect(output.out.stdout).not.toContain(token.slice(0, 20));
     } finally {
@@ -224,11 +224,11 @@ describe('reading the token from stdin', () => {
     try {
       const cmd = (await import('../src/commands/profile.js')).default;
       await ((cmd.subCommands as any).create as { run: (ctx: any) => Promise<void> }).run({
-        args: { name: 'loginas-911', token: '-' },
+        args: { name: 'agent-911', token: '-' },
       });
       expect(exitSpy).toHaveBeenCalledWith(1);
       expect(output.out.stderr).toContain('No token provided');
-      expect(loadProfiles().profiles['loginas-911']).toBeUndefined();
+      expect(loadProfiles().profiles['agent-911']).toBeUndefined();
     } finally {
       exitSpy.mockRestore();
       stdin.restore();

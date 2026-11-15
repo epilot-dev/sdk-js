@@ -65,7 +65,7 @@ describe('auth token command', () => {
     const jwt = `eyJhbGciOiJIUzI1NiJ9.${payload}.c2ln`;
     const mod = await import('../src/commands/auth-token.js');
 
-    await mod.default.run!({ args: { token: jwt, profile: 'loginas-911' } } as any);
+    await mod.default.run!({ args: { token: jwt, profile: 'agent-911' } } as any);
 
     expect(mockStdout).toContain('org 911210, expires 2026-11-15T12:00:00.000Z');
     expect(mockStdout).not.toContain(payload);
@@ -122,12 +122,12 @@ describe('auth token command', () => {
     const stdin = pipeStdin('  piped-token-789\n');
     try {
       const mod = await import('../src/commands/auth-token.js');
-      await mod.default.run!({ args: { token: '-', profile: 'loginas-911' } } as any);
+      await mod.default.run!({ args: { token: '-', profile: 'agent-911' } } as any);
     } finally {
       stdin.restore();
     }
-    expect(saveCredentials).toHaveBeenCalledWith({ token: 'piped-token-789' }, 'loginas-911');
-    expect(mockStdout).toContain('Token saved to profile "loginas-911"');
+    expect(saveCredentials).toHaveBeenCalledWith({ token: 'piped-token-789' }, 'agent-911');
+    expect(mockStdout).toContain('Token saved to profile "agent-911"');
     expect(mockStdout).not.toContain('piped-token-789');
   });
 
@@ -135,7 +135,7 @@ describe('auth token command', () => {
     const stdin = pipeStdin('');
     try {
       const mod = await import('../src/commands/auth-token.js');
-      await mod.default.run!({ args: { token: '-', profile: 'loginas-911' } } as any);
+      await mod.default.run!({ args: { token: '-', profile: 'agent-911' } } as any);
     } finally {
       stdin.restore();
     }
