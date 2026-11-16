@@ -13,11 +13,29 @@
  * Session data received after app-bridge initialization.
  * Contains authentication token and user locale preferences.
  */
+/**
+ * Option values delivered to the app, keyed by option key.
+ *
+ * The value shape follows the option declaration: a primitive for
+ * `text`/`number`/`boolean`, an object for `type: object`, and an array of
+ * entries when the option is `repeatable`.
+ */
+export type AppOptions = Record<string, unknown>;
+
 export interface AppBridgeSession {
   /** OAuth access token for epilot API calls */
   token: string;
   /** User's language preference (e.g., 'en', 'de') */
   lang: string;
+  /**
+   * Non-sensitive option values of the app's installation, keyed by option key.
+   *
+   * These are the values an admin configured for the app (manifest `options`).
+   * Secrets and options declared `sensitive` are never included — they stay
+   * server-side. Absent when the host does not provide options (older epilot
+   * hosts) or could not read them; prefer `getOptions()`, which handles that.
+   */
+  options?: AppOptions;
 }
 
 /**
@@ -214,6 +232,7 @@ export interface InitPayload {
 export interface InitResponsePayload {
   token: string;
   lang: string;
+  options?: AppOptions;
 }
 
 /**

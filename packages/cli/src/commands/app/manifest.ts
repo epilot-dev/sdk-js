@@ -496,13 +496,14 @@ export function createAppApiClient(opts: ApiClientOptions) {
       });
       return roleId;
     },
-    async cloneVersion(appId: string, sourceVersion: string, targetVersion?: string) {
+    async cloneVersion(appId: string, sourceVersion: string, targetVersion?: string, changelog?: string) {
       const target = targetVersion ?? bumpPatchVersion(sourceVersion);
       await request(
         baseUrl,
         getToken(),
         'POST',
         `/v1/app-configurations/${appId}/versions/${sourceVersion}/clone-to/${target}`,
+        changelog ? { changelog } : undefined,
       );
       return { version: target };
     },

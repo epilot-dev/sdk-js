@@ -98,7 +98,7 @@ export { sendMessageToParent, subscribeToParentMessages, APP_BRIDGE_SOURCE } fro
 // =============================================================================
 
 // Initialization
-export { initialize, getSession, isInitialized } from './app-bridge';
+export { initialize, getSession, getOptions, isInitialized } from './app-bridge';
 
 // Entity surface API
 export { getEntityContext, updateContentHeight, onVisibilityChange } from './app-bridge';
@@ -123,6 +123,7 @@ export type { AuthorizableClient } from './app-bridge';
 export type {
   // Session types
   AppBridgeSession,
+  AppOptions,
   InitOptions,
   RequestOptions,
   UpdateConfigOptions,

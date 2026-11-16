@@ -5,6 +5,7 @@ import {
   getEntityContext,
   getPageContext,
   getSession,
+  getOptions,
   initialize,
   isInitialized,
   navigate,
@@ -169,6 +170,44 @@ describe('app-bridge', () => {
 
       const session = getSession();
       expect(session).toEqual({ token: 'test-token', lang: 'de' });
+    });
+  });
+
+  describe('getOptions', () => {
+    it('should throw if not initialized', () => {
+      expect(() => getOptions()).toThrow(AppBridgeNotInitializedError);
+    });
+
+    it('should return the options delivered with the init handshake', async () => {
+      const initPromise = initialize();
+
+      setTimeout(() => {
+        simulateParentMessage('app-bridge:init', {
+          token: 'test-token',
+          lang: 'de',
+          options: { wms_host: 'example.com', max_zoom: 18 },
+        });
+      }, 10);
+
+      const session = await initPromise;
+
+      expect(session.options).toEqual({ wms_host: 'example.com', max_zoom: 18 });
+      expect(getOptions<{ wms_host: string; max_zoom: number }>()).toEqual({
+        wms_host: 'example.com',
+        max_zoom: 18,
+      });
+    });
+
+    it('should return an empty object when the host provides no options', async () => {
+      const initPromise = initialize();
+
+      setTimeout(() => {
+        simulateParentMessage('app-bridge:init', { token: 'test-token', lang: 'de' });
+      }, 10);
+
+      await initPromise;
+
+      expect(getOptions()).toEqual({});
     });
   });
 

@@ -18,6 +18,12 @@ export default defineCommand({
   args: {
     path: { type: 'positional', description: 'Path to manifest.json', required: false },
     'new-version': { type: 'boolean', description: 'Create a new version' },
+    changelog: {
+      type: 'string',
+      alias: 'm',
+      description:
+        'Optional short description of the new version (max 250 chars, applies when a new version is created)',
+    },
     'dry-run': { type: 'boolean', description: 'Show what would change without applying' },
     token: { type: 'string', alias: 't', description: 'Bearer token' },
     server: { type: 'string', alias: 's', description: 'Override server base URL' },
@@ -86,9 +92,12 @@ export default defineCommand({
           log.info(`[dry-run] Would create new version (cloned from ${targetVersion})`);
         } else {
           try {
-            const result = await client.cloneVersion(appId!, targetVersion);
+            const result = await client.cloneVersion(appId!, targetVersion, undefined, args.changelog);
             targetVersion = result.version;
             log.success(`Created version ${targetVersion}`);
+            if (!args.changelog) {
+              log.dim('  Tip: describe the changeset with --changelog "<what changed>" (optional)');
+            }
           } catch (err) {
             if (err instanceof Error && err.message.includes('disable dev mode')) {
               log.error('Cannot create a new version while development mode is enabled.');

@@ -9,6 +9,7 @@ import { sendMessageToParent, subscribeToParentMessages } from './messages';
 import { AppBridgeTimeoutError, AppBridgeNotInitializedError } from './errors';
 import type {
   AppBridgeSession,
+  AppOptions,
   InitOptions,
   RequestOptions,
   UpdateConfigOptions,
@@ -175,6 +176,34 @@ export function getSession(): AppBridgeSession {
     throw new AppBridgeNotInitializedError();
   }
   return session;
+}
+
+/**
+ * Get the option values an admin configured for this app's installation.
+ *
+ * The parent app delivers them with the init handshake, so no App API call is
+ * needed. Only non-sensitive options are included — secrets and options
+ * declared `sensitive` stay server-side (use an API proxy or an app function
+ * for anything that needs them).
+ *
+ * Returns an empty object when the host provided no options, e.g. an older
+ * epilot host or a user who may not read the installation.
+ *
+ * @template T - Shape of the app's options
+ * @throws {AppBridgeNotInitializedError} If called before initialize()
+ * @returns Option values keyed by option key
+ *
+ * @example
+ * ```typescript
+ * import { initialize, getOptions } from '@epilot/app-bridge';
+ *
+ * await initialize();
+ *
+ * const { api_region } = getOptions<{ api_region?: string }>();
+ * ```
+ */
+export function getOptions<T extends AppOptions = AppOptions>(): Partial<T> {
+  return (getSession().options ?? {}) as Partial<T>;
 }
 
 /**
