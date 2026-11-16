@@ -90,6 +90,7 @@ Full API documentation: [https://docs.epilot.io/api](https://docs.epilot.io/api)
 | `epilot.partnerDirectory` | `@epilot/sdk/partner-directory` | [docs](./packages/epilot-sdk-v2/docs/partner-directory.md) |
 | `epilot.permissions` | `@epilot/sdk/permissions` | [docs](./packages/epilot-sdk-v2/docs/permissions.md) |
 | `epilot.phoneIntegration` | `@epilot/sdk/phone-integration` | [docs](./packages/epilot-sdk-v2/docs/phone-integration.md) |
+| `epilot.presence` | `@epilot/sdk/presence` | [docs](./packages/epilot-sdk-v2/docs/presence.md) |
 | `epilot.pricing` | `@epilot/sdk/pricing` | [docs](./packages/epilot-sdk-v2/docs/pricing.md) |
 | `epilot.pricingTier` | `@epilot/sdk/pricing-tier` | [docs](./packages/epilot-sdk-v2/docs/pricing-tier.md) |
 | `epilot.purpose` | `@epilot/sdk/purpose` | [docs](./packages/epilot-sdk-v2/docs/purpose.md) |
