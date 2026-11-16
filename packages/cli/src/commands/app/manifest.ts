@@ -25,22 +25,58 @@ export interface AppManifest {
   functions?: ManifestFunction[];
   /** App-level options: settings the installing org fills in once for the whole app */
   options?: ManifestOption[];
+  /** Sections the configuration UI groups app-level options under, in display order */
+  option_groups?: ManifestOptionGroup[];
   components: ManifestComponent[];
+}
+
+/** A plain string, or translations with German required */
+export type LocalizedText = string | { de: string; en?: string | null };
+
+export interface ManifestOptionGroup {
+  key: string;
+  label: LocalizedText;
+  description?: LocalizedText;
 }
 
 export interface ManifestOption {
   key: string;
-  label?: string;
+  label?: LocalizedText;
   type: 'text' | 'number' | 'boolean' | 'secret' | 'object';
   required?: boolean;
-  description?: string;
+  description?: LocalizedText;
+  /** Example shown in the empty input field (text, number, secret) */
+  placeholder?: LocalizedText;
+  /** Value used while the installing org has not set one (text, number, boolean) */
+  default?: string | number | boolean;
+  /** Fixed set of accepted values, rendered as a selection (text, number) */
+  choices?: { value: string | number; label?: LocalizedText }[];
+  /** Well-known shape the value must have (text) */
+  format?: 'hostname' | 'url' | 'email';
+  /** Regular expression the whole value must match (text, secret) */
+  pattern?: string;
+  /** Shown when the value does not match `pattern` */
+  pattern_message?: LocalizedText;
+  /** Smallest / largest accepted value (number) */
+  min?: number;
+  max?: number;
+  /** Key of the `option_groups` entry the option is shown under */
+  group?: string;
   /** Value is a list of entries instead of a single value */
   repeatable?: boolean;
   /** Write-only, server-side only value (app-level options only). Always true for secrets. */
   sensitive?: boolean;
   /** Sub-fields of a `type: object` option (primitives only, no nesting) */
   fields?: { key: string; label?: string; description?: string; required?: boolean; type: string }[];
+  /**
+   * Show the option only while other app-level options have these values
+   * (`{ auth_mode: "basic" }` or `{ auth_mode: ["basic", "bearer"] }`). A hidden
+   * required option does not keep the installation from being enabled.
+   */
+  visible_if?: Record<string, OptionConditionValue | OptionConditionValue[]>;
 }
+
+type OptionConditionValue = string | number | boolean;
 
 /**
  * App-level options that can be set on the version BEFORE components are synced.
@@ -173,6 +209,7 @@ export function validateManifest(data: unknown): { valid: boolean; errors: Valid
       errors.push({ path: '/options', message: 'Must be an array' });
     } else {
       validateAppOptions(obj.options, Array.isArray(obj.components) ? obj.components : [], errors);
+      validateOptionRules(obj.options as Record<string, unknown>[], obj.option_groups, errors);
     }
   }
 
@@ -245,7 +282,241 @@ function validateFunctions(functions: unknown[], errors: ValidationError[]): voi
 const OPTION_TYPES = ['text', 'number', 'boolean', 'secret', 'object'];
 const OPTION_FIELD_TYPES = ['text', 'number', 'boolean', 'secret'];
 
+const FORMATS = ['hostname', 'url', 'email'];
+
+/** A translated text needs its German entry; a plain string must not be blank */
+const isMissingText = (text: unknown): boolean =>
+  typeof text === 'string'
+    ? text.trim() === ''
+    : typeof text === 'object' && text !== null
+      ? !(text as { de?: unknown }).de || String((text as { de?: unknown }).de).trim() === ''
+      : true;
+
+const isLocalizedText = (text: unknown): boolean =>
+  typeof text === 'string' || (typeof text === 'object' && text !== null && !Array.isArray(text));
+
+/**
+ * Local check of `choices`, `default`, `format`, `pattern`, `min`, `max`,
+ * `placeholder`, translated texts and `option_groups`, so `app validate`
+ * reports mistakes before a deploy does. The App API validates the same rules.
+ */
+function validateOptionRules(options: Record<string, unknown>[], groups: unknown, errors: ValidationError[]): void {
+  const groupKeys = new Set<string>();
+
+  if (groups !== undefined) {
+    if (!Array.isArray(groups)) {
+      errors.push({ path: '/option_groups', message: 'Must be an array' });
+    } else {
+      groups.forEach((group: Record<string, unknown>, i) => {
+        const path = `/option_groups/${i}`;
+        if (!group || typeof group.key !== 'string' || group.key.length === 0) {
+          errors.push({ path: `${path}/key`, message: 'Required string' });
+          return;
+        }
+        if (groupKeys.has(group.key)) {
+          errors.push({ path: `${path}/key`, message: `Duplicate option group key "${group.key}"` });
+        }
+        groupKeys.add(group.key);
+        if (isMissingText(group.label)) {
+          errors.push({ path: `${path}/label`, message: 'Required: a string or translations with "de"' });
+        }
+        if (group.description !== undefined && isMissingText(group.description)) {
+          errors.push({ path: `${path}/description`, message: 'Must be a string or translations with "de"' });
+        }
+      });
+    }
+  }
+
+  options.forEach((opt, i) => {
+    if (!opt || typeof opt !== 'object') return;
+    const path = `/options/${i}`;
+    const isText = opt.type === 'text';
+    const isNumber = opt.type === 'number';
+    const isSecret = opt.type === 'secret';
+
+    for (const field of ['label', 'description', 'placeholder', 'pattern_message']) {
+      const text = opt[field];
+      if (text === undefined) continue;
+      if (!isLocalizedText(text)) {
+        errors.push({ path: `${path}/${field}`, message: 'Must be a string or translations ({ de, en })' });
+      } else if (typeof text === 'object' && isMissingText(text)) {
+        errors.push({ path: `${path}/${field}`, message: 'Translations need a German ("de") text' });
+      }
+    }
+
+    if (opt.placeholder !== undefined && !isText && !isNumber && !isSecret) {
+      errors.push({ path: `${path}/placeholder`, message: 'Only supported for text, number and secret options' });
+    }
+
+    const choiceValues = new Set<string>();
+    if (opt.choices !== undefined) {
+      if (!isText && !isNumber) {
+        errors.push({ path: `${path}/choices`, message: 'Only supported for text and number options' });
+      } else if (!Array.isArray(opt.choices) || opt.choices.length === 0) {
+        errors.push({ path: `${path}/choices`, message: 'Must be a non-empty array of { value, label? }' });
+      } else {
+        const expectedType = isNumber ? 'number' : 'string';
+        opt.choices.forEach((choice: Record<string, unknown>, ci: number) => {
+          const choicePath = `${path}/choices/${ci}`;
+          if (!choice || typeof choice.value !== expectedType || choice.value === '') {
+            errors.push({
+              path: `${choicePath}/value`,
+              message: `Must be a non-empty ${expectedType} for a ${opt.type} option`,
+            });
+            return;
+          }
+          const id = String(choice.value);
+          if (choiceValues.has(id)) {
+            errors.push({ path: `${choicePath}/value`, message: `Choice "${id}" is listed more than once` });
+          }
+          choiceValues.add(id);
+          if (choice.label !== undefined && isMissingText(choice.label)) {
+            errors.push({
+              path: `${choicePath}/label`,
+              message: 'Must be a non-empty string or translations with "de"',
+            });
+          }
+        });
+      }
+    }
+
+    if (opt.format !== undefined) {
+      if (!isText) {
+        errors.push({ path: `${path}/format`, message: 'Only supported for text options' });
+      } else if (!FORMATS.includes(opt.format as string)) {
+        errors.push({ path: `${path}/format`, message: `Must be one of: ${FORMATS.join(', ')}` });
+      }
+    }
+
+    if (opt.pattern !== undefined) {
+      if (!isText && !isSecret) {
+        errors.push({ path: `${path}/pattern`, message: 'Only supported for text and secret options' });
+      } else if (typeof opt.pattern !== 'string' || opt.pattern.length > 200) {
+        errors.push({ path: `${path}/pattern`, message: 'Must be a string of at most 200 characters' });
+      } else {
+        try {
+          new RegExp(`^(?:${opt.pattern})$`, 'u');
+        } catch {
+          errors.push({ path: `${path}/pattern`, message: 'Not a valid regular expression' });
+        }
+      }
+    }
+    if (opt.pattern_message !== undefined && opt.pattern === undefined) {
+      errors.push({ path: `${path}/pattern_message`, message: 'Requires a pattern' });
+    }
+
+    for (const bound of ['min', 'max']) {
+      if (opt[bound] === undefined) continue;
+      if (!isNumber) {
+        errors.push({ path: `${path}/${bound}`, message: 'Only supported for number options' });
+      } else if (typeof opt[bound] !== 'number' || !Number.isFinite(opt[bound])) {
+        errors.push({ path: `${path}/${bound}`, message: 'Must be a number' });
+      }
+    }
+    if (typeof opt.min === 'number' && typeof opt.max === 'number' && opt.min > opt.max) {
+      errors.push({ path: `${path}/min`, message: 'Must not be greater than max' });
+    }
+
+    if (opt.default !== undefined) {
+      const expectedType = isNumber ? 'number' : opt.type === 'boolean' ? 'boolean' : 'string';
+      const touchesSecret =
+        isSecret || (Array.isArray(opt.fields) && (opt.fields as { type?: string }[]).some((f) => f.type === 'secret'));
+      if (!isText && !isNumber && opt.type !== 'boolean') {
+        errors.push({ path: `${path}/default`, message: 'Only supported for text, number and boolean options' });
+      } else if (opt.repeatable) {
+        errors.push({ path: `${path}/default`, message: 'Not supported for repeatable options' });
+      } else if (opt.sensitive === true || touchesSecret) {
+        errors.push({
+          path: `${path}/default`,
+          message: 'Not supported for sensitive options — it would be readable in the manifest',
+        });
+      } else if (typeof opt.default !== expectedType || opt.default === '') {
+        errors.push({
+          path: `${path}/default`,
+          message: `Must be a non-empty ${expectedType} for a ${opt.type} option`,
+        });
+      } else {
+        if (choiceValues.size > 0 && !choiceValues.has(String(opt.default))) {
+          errors.push({
+            path: `${path}/default`,
+            message: `Must be one of the choices: ${[...choiceValues].join(', ')}`,
+          });
+        }
+        if (typeof opt.default === 'number') {
+          if (typeof opt.min === 'number' && opt.default < opt.min) {
+            errors.push({ path: `${path}/default`, message: `Must be at least ${opt.min}` });
+          }
+          if (typeof opt.max === 'number' && opt.default > opt.max) {
+            errors.push({ path: `${path}/default`, message: `Must be at most ${opt.max}` });
+          }
+        }
+      }
+    }
+
+    if (opt.group !== undefined && (typeof opt.group !== 'string' || !groupKeys.has(opt.group))) {
+      errors.push({ path: `${path}/group`, message: `Group "${String(opt.group)}" is not declared in option_groups` });
+    }
+  });
+}
+
 /** Mirrors the App API's deploy-time rules for app-level options. */
+const isConditionValue = (value: unknown) => ['string', 'number', 'boolean'].includes(typeof value);
+
+/**
+ * Local check of `visible_if`, so `app validate` reports mistakes before a
+ * deploy does. The App API validates the same rules (and dependency cycles).
+ */
+function validateVisibilityConditions(options: Record<string, unknown>[], errors: ValidationError[]): void {
+  const byKey = new Map(options.filter((o) => o && typeof o.key === 'string').map((o) => [o.key as string, o]));
+
+  options.forEach((opt, i) => {
+    if (!opt || opt.visible_if === undefined) return;
+    const path = `/options/${i}/visible_if`;
+
+    if (typeof opt.visible_if !== 'object' || opt.visible_if === null || Array.isArray(opt.visible_if)) {
+      errors.push({ path, message: 'Must be an object mapping option keys to the value(s) that show this option' });
+      return;
+    }
+
+    for (const [controllingKey, expected] of Object.entries(opt.visible_if)) {
+      const conditionPath = `${path}/${controllingKey}`;
+      const validValue = Array.isArray(expected)
+        ? expected.length > 0 && expected.every(isConditionValue)
+        : isConditionValue(expected);
+      if (!validValue) {
+        errors.push({
+          path: conditionPath,
+          message: 'Must be a string, number or boolean, or a non-empty list of those',
+        });
+      }
+
+      const controlling = byKey.get(controllingKey);
+      if (controllingKey === opt.key) {
+        errors.push({ path: conditionPath, message: `Option "${opt.key}" must not refer to itself` });
+      } else if (!controlling) {
+        errors.push({ path: conditionPath, message: `"${controllingKey}" is not an app-level option` });
+      } else {
+        const fields = controlling.fields as { type?: string }[] | undefined;
+        const sensitive =
+          controlling.type === 'secret' ||
+          controlling.sensitive === true ||
+          (Array.isArray(fields) && fields.some((f) => f.type === 'secret'));
+        if (sensitive) {
+          errors.push({
+            path: conditionPath,
+            message: `"${controllingKey}" is sensitive — its value cannot be read to evaluate the condition`,
+          });
+        } else if (!['text', 'number', 'boolean'].includes(controlling.type as string) || controlling.repeatable) {
+          errors.push({
+            path: conditionPath,
+            message: `"${controllingKey}" must be a non-repeatable text, number or boolean option`,
+          });
+        }
+      }
+    }
+  });
+}
+
 function validateAppOptions(options: unknown[], components: unknown[], errors: ValidationError[]): void {
   const seen = new Set<string>();
 
@@ -294,6 +565,8 @@ function validateAppOptions(options: unknown[], components: unknown[], errors: V
       });
     }
   }
+
+  validateVisibilityConditions(options as Record<string, unknown>[], errors);
 
   // The app level is the single source of truth once it is used
   components.forEach((comp, ci) => {
@@ -673,12 +946,25 @@ export function formatFileSize(bytes: number): string {
 /** Keep the declaration only — drops configured values and read-only API fields. */
 function toOptionDeclaration(opt: Record<string, unknown>): ManifestOption {
   const option: ManifestOption = { key: opt.key as string, type: opt.type as ManifestOption['type'] };
-  if (opt.label) option.label = opt.label as string;
+  if (opt.label) option.label = opt.label as LocalizedText;
   if (opt.required) option.required = true;
-  if (opt.description) option.description = opt.description as string;
+  if (opt.description) option.description = opt.description as LocalizedText;
+  if (opt.placeholder) option.placeholder = opt.placeholder as LocalizedText;
+  // `false` and `0` are meaningful defaults
+  if (opt.default !== undefined && opt.default !== null) option.default = opt.default as ManifestOption['default'];
+  if (Array.isArray(opt.choices) && opt.choices.length > 0) option.choices = opt.choices as ManifestOption['choices'];
+  if (opt.format) option.format = opt.format as ManifestOption['format'];
+  if (opt.pattern) option.pattern = opt.pattern as string;
+  if (opt.pattern_message) option.pattern_message = opt.pattern_message as LocalizedText;
+  if (typeof opt.min === 'number') option.min = opt.min;
+  if (typeof opt.max === 'number') option.max = opt.max;
+  if (opt.group) option.group = opt.group as string;
   if (opt.repeatable) option.repeatable = true;
   if (opt.sensitive) option.sensitive = true;
   if (Array.isArray(opt.fields) && opt.fields.length > 0) option.fields = opt.fields as ManifestOption['fields'];
+  if (opt.visible_if && typeof opt.visible_if === 'object' && Object.keys(opt.visible_if).length > 0) {
+    option.visible_if = opt.visible_if as ManifestOption['visible_if'];
+  }
   return option;
 }
 
@@ -718,6 +1004,14 @@ export function toManifest(config: Record<string, unknown>, version: Record<stri
 
   if (Array.isArray(version.options) && version.options.length > 0) {
     manifest.options = version.options.map((opt: Record<string, unknown>) => toOptionDeclaration(opt));
+  }
+
+  if (Array.isArray(version.option_groups) && version.option_groups.length > 0) {
+    manifest.option_groups = (version.option_groups as Record<string, unknown>[]).map((group) => ({
+      key: group.key as string,
+      label: group.label as LocalizedText,
+      ...(group.description ? { description: group.description as LocalizedText } : {}),
+    }));
   }
 
   const components = (version.components ?? []) as Record<string, unknown>[];
