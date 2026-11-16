@@ -1667,6 +1667,255 @@
         }
       }
     },
+    "/v1/workflows/closing-reason-categories": {
+      "get": {
+        "operationId": "getAllClosingReasonCategories",
+        "summary": "getAllClosingReasonCategories",
+        "description": "Get all closing reason categories defined in the organization.",
+        "tags": [
+          "Closing Reason"
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns every closing reason category of the organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonCategories"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createClosingReasonCategory",
+        "summary": "createClosingReasonCategory",
+        "description": "Create a category that closing reasons can be grouped under. Titles are unique per organization, ignoring case and surrounding whitespace.",
+        "tags": [
+          "Closing Reason"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClosingReasonCategoryPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The category was created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonCategory"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A category with the same title already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/workflows/closing-reason-categories/{categoryId}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "categoryId",
+          "schema": {
+            "type": "string",
+            "example": "c9wq81x"
+          },
+          "required": true,
+          "description": "unique id to identify the closing reason category."
+        }
+      ],
+      "get": {
+        "operationId": "getClosingReasonCategory",
+        "summary": "getClosingReasonCategory",
+        "description": "Get a closing reason category by id.",
+        "tags": [
+          "Closing Reason"
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonCategory"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonCategoryNotFoundResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateClosingReasonCategory",
+        "summary": "updateClosingReasonCategory",
+        "description": "Rename a closing reason category. Running flows keep the title they started with.",
+        "tags": [
+          "Closing Reason"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClosingReasonCategoryPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The category was updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonCategory"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonCategoryNotFoundResp"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Another category with the same title already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteClosingReasonCategory",
+        "summary": "deleteClosingReasonCategory",
+        "description": "Delete a closing reason category. Its reasons are kept and lose their category.",
+        "tags": [
+          "Closing Reason"
+        ],
+        "responses": {
+          "204": {
+            "description": "The category was deleted"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingReasonCategoryNotFoundResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/workflows/definitions/{definitionId}/closing-reasons": {
       "get": {
         "operationId": "getWorkflowClosingReasons",
@@ -4097,6 +4346,15 @@
           "status": {
             "$ref": "#/components/schemas/ClosingReasonsStatus"
           },
+          "categoryId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Id of the category the reason is grouped under. Omit or send null for a reason without a category.",
+            "example": "c9wq81x"
+          },
+          "category": {
+            "$ref": "#/components/schemas/ClosingReasonCategoryRef"
+          },
           "lastUpdateTime": {
             "type": "string",
             "readOnly": true
@@ -4104,6 +4362,82 @@
           "creationTime": {
             "type": "string",
             "readOnly": true
+          }
+        }
+      },
+      "ClosingReasonCategoryRef": {
+        "type": "object",
+        "readOnly": true,
+        "description": "The reason's category, resolved when a flow template is read. Ignored on writes.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ]
+      },
+      "ClosingReasonCategories": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingReasonCategory"
+            }
+          }
+        },
+        "required": [
+          "categories"
+        ]
+      },
+      "ClosingReasonCategory": {
+        "type": "object",
+        "description": "A category that groups closing reasons, e.g. \"Wirtschaftlichkeit\" for several economic reasons",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "title": {
+            "type": "string",
+            "example": "Wirtschaftlichkeit"
+          },
+          "lastUpdateTime": {
+            "type": "string",
+            "readOnly": true
+          },
+          "creationTime": {
+            "type": "string",
+            "readOnly": true
+          }
+        }
+      },
+      "ClosingReasonCategoryPayload": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "example": "Wirtschaftlichkeit"
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "ClosingReasonCategoryNotFoundResp": {
+        "type": "object",
+        "description": "Error response returned when a closing reason category is not found.",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Closing reason category not found"
           }
         }
       },

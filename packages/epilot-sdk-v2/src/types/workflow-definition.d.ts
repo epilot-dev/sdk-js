@@ -359,8 +359,55 @@ export declare namespace Components {
             id?: string;
             title?: string;
             status?: ClosingReasonsStatus;
+            /**
+             * Id of the category the reason is grouped under. Omit or send null for a reason without a category.
+             * example:
+             * c9wq81x
+             */
+            categoryId?: string | null;
+            category?: /* The reason's category, resolved when a flow template is read. Ignored on writes. */ ClosingReasonCategoryRef;
             lastUpdateTime?: string;
             creationTime?: string;
+        }
+        export interface ClosingReasonCategories {
+            categories: /* A category that groups closing reasons, e.g. "Wirtschaftlichkeit" for several economic reasons */ ClosingReasonCategory[];
+        }
+        /**
+         * A category that groups closing reasons, e.g. "Wirtschaftlichkeit" for several economic reasons
+         */
+        export interface ClosingReasonCategory {
+            id?: string;
+            /**
+             * example:
+             * Wirtschaftlichkeit
+             */
+            title?: string;
+            lastUpdateTime?: string;
+            creationTime?: string;
+        }
+        /**
+         * Error response returned when a closing reason category is not found.
+         */
+        export interface ClosingReasonCategoryNotFoundResp {
+            /**
+             * example:
+             * Closing reason category not found
+             */
+            message?: string;
+        }
+        export interface ClosingReasonCategoryPayload {
+            /**
+             * example:
+             * Wirtschaftlichkeit
+             */
+            title: string;
+        }
+        /**
+         * The reason's category, resolved when a flow template is read. Ignored on writes.
+         */
+        export interface ClosingReasonCategoryRef {
+            id: string;
+            title: string;
         }
         export interface ClosingReasonId {
             /**
@@ -2092,6 +2139,15 @@ export declare namespace Paths {
             export type $201 = /* One Closing reason for a workflow */ Components.Schemas.ClosingReason;
         }
     }
+    namespace CreateClosingReasonCategory {
+        export type RequestBody = Components.Schemas.ClosingReasonCategoryPayload;
+        namespace Responses {
+            export type $201 = /* A category that groups closing reasons, e.g. "Wirtschaftlichkeit" for several economic reasons */ Components.Schemas.ClosingReasonCategory;
+            export type $400 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $403 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $409 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+        }
+    }
     namespace CreateDefinition {
         export type RequestBody = /**
          * V1 workflow definition schema. Defines a linear workflow structure with sections
@@ -2167,6 +2223,14 @@ export declare namespace Paths {
             export type $404 = /* Error response returned when a closing reason is not found. */ Components.Schemas.ClosingReasonNotFoundResp;
         }
     }
+    namespace DeleteClosingReasonCategory {
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $403 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $404 = /* Error response returned when a closing reason category is not found. */ Components.Schemas.ClosingReasonCategoryNotFoundResp;
+        }
+    }
     namespace DeleteDefinition {
         namespace Parameters {
             export type DefinitionId = string;
@@ -2228,6 +2292,12 @@ export declare namespace Paths {
             export type $500 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
         }
     }
+    namespace GetAllClosingReasonCategories {
+        namespace Responses {
+            export type $200 = Components.Schemas.ClosingReasonCategories;
+            export type $403 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+        }
+    }
     namespace GetAllClosingReasons {
         namespace Parameters {
             export type IncludeInactive = boolean;
@@ -2259,6 +2329,13 @@ export declare namespace Paths {
             export type $400 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
             export type $403 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
             export type $404 = /* Error response returned when a closing reason is not found. */ Components.Schemas.ClosingReasonNotFoundResp;
+        }
+    }
+    namespace GetClosingReasonCategory {
+        namespace Responses {
+            export type $200 = /* A category that groups closing reasons, e.g. "Wirtschaftlichkeit" for several economic reasons */ Components.Schemas.ClosingReasonCategory;
+            export type $403 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $404 = /* Error response returned when a closing reason category is not found. */ Components.Schemas.ClosingReasonCategoryNotFoundResp;
         }
     }
     namespace GetClosingReasonV1 {
@@ -2426,6 +2503,16 @@ export declare namespace Paths {
             export type $404 = /* Error response returned when a closing reason is not found. */ Components.Schemas.ClosingReasonNotFoundResp;
         }
     }
+    namespace UpdateClosingReasonCategory {
+        export type RequestBody = Components.Schemas.ClosingReasonCategoryPayload;
+        namespace Responses {
+            export type $200 = /* A category that groups closing reasons, e.g. "Wirtschaftlichkeit" for several economic reasons */ Components.Schemas.ClosingReasonCategory;
+            export type $400 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $403 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+            export type $404 = /* Error response returned when a closing reason category is not found. */ Components.Schemas.ClosingReasonCategoryNotFoundResp;
+            export type $409 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+        }
+    }
     namespace UpdateDefinition {
         namespace Parameters {
             export type DefinitionId = string;
@@ -2493,6 +2580,22 @@ export declare namespace Paths {
             export type $404 = /* Error response returned when a workflow definition or flow template is not found. */ Components.Schemas.DefinitionNotFoundResp;
             export type $409 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
             export type $500 = /* Standard error response returned when an API request fails. */ Components.Schemas.ErrorResp;
+        }
+    }
+    namespace V1WorkflowsClosingReasonCategories$CategoryId {
+        namespace Parameters {
+            /**
+             * example:
+             * c9wq81x
+             */
+            export type CategoryId = string;
+        }
+        export interface PathParameters {
+            categoryId: /**
+             * example:
+             * c9wq81x
+             */
+            Parameters.CategoryId;
         }
     }
 }
@@ -2713,6 +2816,56 @@ export interface OperationMethods {
     data?: Paths.ChangeReasonStatus.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ChangeReasonStatus.Responses.$202>
+  /**
+   * getAllClosingReasonCategories - getAllClosingReasonCategories
+   * 
+   * Get all closing reason categories defined in the organization.
+   */
+  'getAllClosingReasonCategories'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetAllClosingReasonCategories.Responses.$200>
+  /**
+   * createClosingReasonCategory - createClosingReasonCategory
+   * 
+   * Create a category that closing reasons can be grouped under. Titles are unique per organization, ignoring case and surrounding whitespace.
+   */
+  'createClosingReasonCategory'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateClosingReasonCategory.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateClosingReasonCategory.Responses.$201>
+  /**
+   * getClosingReasonCategory - getClosingReasonCategory
+   * 
+   * Get a closing reason category by id.
+   */
+  'getClosingReasonCategory'(
+    parameters?: Parameters<Paths.V1WorkflowsClosingReasonCategories$CategoryId.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetClosingReasonCategory.Responses.$200>
+  /**
+   * updateClosingReasonCategory - updateClosingReasonCategory
+   * 
+   * Rename a closing reason category. Running flows keep the title they started with.
+   */
+  'updateClosingReasonCategory'(
+    parameters?: Parameters<Paths.V1WorkflowsClosingReasonCategories$CategoryId.PathParameters> | null,
+    data?: Paths.UpdateClosingReasonCategory.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateClosingReasonCategory.Responses.$200>
+  /**
+   * deleteClosingReasonCategory - deleteClosingReasonCategory
+   * 
+   * Delete a closing reason category. Its reasons are kept and lose their category.
+   */
+  'deleteClosingReasonCategory'(
+    parameters?: Parameters<Paths.V1WorkflowsClosingReasonCategories$CategoryId.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteClosingReasonCategory.Responses.$204>
   /**
    * getWorkflowClosingReasons - getWorkflowClosingReasons
    * 
@@ -2970,6 +3123,60 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ChangeReasonStatus.Responses.$202>
   }
+  ['/v1/workflows/closing-reason-categories']: {
+    /**
+     * getAllClosingReasonCategories - getAllClosingReasonCategories
+     * 
+     * Get all closing reason categories defined in the organization.
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetAllClosingReasonCategories.Responses.$200>
+    /**
+     * createClosingReasonCategory - createClosingReasonCategory
+     * 
+     * Create a category that closing reasons can be grouped under. Titles are unique per organization, ignoring case and surrounding whitespace.
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateClosingReasonCategory.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateClosingReasonCategory.Responses.$201>
+  }
+  ['/v1/workflows/closing-reason-categories/{categoryId}']: {
+    /**
+     * getClosingReasonCategory - getClosingReasonCategory
+     * 
+     * Get a closing reason category by id.
+     */
+    'get'(
+      parameters?: Parameters<Paths.V1WorkflowsClosingReasonCategories$CategoryId.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetClosingReasonCategory.Responses.$200>
+    /**
+     * updateClosingReasonCategory - updateClosingReasonCategory
+     * 
+     * Rename a closing reason category. Running flows keep the title they started with.
+     */
+    'patch'(
+      parameters?: Parameters<Paths.V1WorkflowsClosingReasonCategories$CategoryId.PathParameters> | null,
+      data?: Paths.UpdateClosingReasonCategory.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateClosingReasonCategory.Responses.$200>
+    /**
+     * deleteClosingReasonCategory - deleteClosingReasonCategory
+     * 
+     * Delete a closing reason category. Its reasons are kept and lose their category.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.V1WorkflowsClosingReasonCategories$CategoryId.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteClosingReasonCategory.Responses.$204>
+  }
   ['/v1/workflows/definitions/{definitionId}/closing-reasons']: {
     /**
      * getWorkflowClosingReasons - getWorkflowClosingReasons
@@ -3013,6 +3220,11 @@ export type AutomationTask = Components.Schemas.AutomationTask;
 export type AutomationTrigger = Components.Schemas.AutomationTrigger;
 export type ChangeReasonStatusReq = Components.Schemas.ChangeReasonStatusReq;
 export type ClosingReason = Components.Schemas.ClosingReason;
+export type ClosingReasonCategories = Components.Schemas.ClosingReasonCategories;
+export type ClosingReasonCategory = Components.Schemas.ClosingReasonCategory;
+export type ClosingReasonCategoryNotFoundResp = Components.Schemas.ClosingReasonCategoryNotFoundResp;
+export type ClosingReasonCategoryPayload = Components.Schemas.ClosingReasonCategoryPayload;
+export type ClosingReasonCategoryRef = Components.Schemas.ClosingReasonCategoryRef;
 export type ClosingReasonId = Components.Schemas.ClosingReasonId;
 export type ClosingReasonNotFoundResp = Components.Schemas.ClosingReasonNotFoundResp;
 export type ClosingReasons = Components.Schemas.ClosingReasons;
