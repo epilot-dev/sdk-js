@@ -1,0 +1,27 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://translation.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/translation:translate": {
+      "post": {
+        "operationId": "translateTexts",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {}
+}

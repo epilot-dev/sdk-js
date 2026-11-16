@@ -118,6 +118,7 @@ APIs
   submission           Submission API
   targeting            Targeting API
   template-variables   Template Variables API
+  translation          Translation API
   user                 User API
   validation-rules     Validation Rules API
   webhooks             Webhooks
@@ -524,6 +525,7 @@ Full documentation with sample calls and responses for all APIs:
 | Submission API | `epilot submission` | [docs](./docs/submission.md) |
 | Targeting API | `epilot targeting` | [docs](./docs/targeting.md) |
 | Template Variables API | `epilot template-variables` | [docs](./docs/template-variables.md) |
+| Translation API | `epilot translation` | [docs](./docs/translation.md) |
 | User API | `epilot user` | [docs](./docs/user.md) |
 | Validation Rules API | `epilot validation-rules` | [docs](./docs/validation-rules.md) |
 | Webhooks | `epilot webhooks` | [docs](./docs/webhooks.md) |

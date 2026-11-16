@@ -1,6 +1,6 @@
 # epilot CLI — API Reference
 
-All 54 epilot APIs available via the CLI.
+All 55 epilot APIs available via the CLI.
 
 ## Setup
 
@@ -61,6 +61,7 @@ npx epilot auth login
 | Submission API | `epilot submission` | 2 | [submission.md](./submission.md) |
 | Targeting API | `epilot targeting` | 16 | [targeting.md](./targeting.md) |
 | Template Variables API | `epilot template-variables` | 12 | [template-variables.md](./template-variables.md) |
+| Translation API | `epilot translation` | 1 | [translation.md](./translation.md) |
 | User API | `epilot user` | 42 | [user.md](./user.md) |
 | Validation Rules API | `epilot validation-rules` | 7 | [validation-rules.md](./validation-rules.md) |
 | Webhooks | `epilot webhooks` | 15 | [webhooks.md](./webhooks.md) |
