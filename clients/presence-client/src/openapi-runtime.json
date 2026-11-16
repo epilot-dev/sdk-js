@@ -1,0 +1,96 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "https://presence.sls.epilot.io"
+    }
+  ],
+  "paths": {
+    "/v1/presence/{resource_type}/{resource_id}/heartbeat": {
+      "post": {
+        "operationId": "heartbeatPresence",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceType"
+          },
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          },
+          {
+            "$ref": "#/components/parameters/OrgId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/presence/{resource_type}/{resource_id}/leave": {
+      "post": {
+        "operationId": "leavePresence",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceType"
+          },
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          },
+          {
+            "$ref": "#/components/parameters/OrgId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "ResourceType": {
+        "in": "path",
+        "name": "resource_type",
+        "required": true
+      },
+      "ResourceId": {
+        "in": "path",
+        "name": "resource_id",
+        "required": true
+      },
+      "OrgId": {
+        "in": "header",
+        "name": "x-epilot-org-id",
+        "required": false
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  }
+}

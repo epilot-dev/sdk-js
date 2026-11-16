@@ -1,0 +1,397 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Presence API",
+    "version": "1.0.0",
+    "description": "Shows who else has a resource open in an epilot builder, such as a journey, a portal or a flow,\nand whether they are viewing it or editing it.\n\nPresence is short-lived: a session counts as present for `ttl_seconds` after its last heartbeat\nand is then discarded. No history of who was present is kept.\n\nThere is no read-only operation. Seeing who is on a resource means announcing yourself there,\nso nobody can see colleagues without being seen.\n"
+  },
+  "servers": [
+    {
+      "url": "https://presence.sls.epilot.io"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Presence",
+      "description": "Who else has a resource open"
+    }
+  ],
+  "security": [
+    {
+      "EpilotAuth": []
+    }
+  ],
+  "paths": {
+    "/v1/presence/{resource_type}/{resource_id}/heartbeat": {
+      "post": {
+        "operationId": "heartbeatPresence",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "entity:view",
+                "resource": "journey:*"
+              },
+              {
+                "action": "customer_portal:view"
+              },
+              {
+                "action": "installer_portal:view"
+              },
+              {
+                "action": "workflow:definition:view"
+              }
+            ]
+          }
+        ],
+        "summary": "heartbeatPresence",
+        "description": "Announces the caller on a resource, or refreshes their presence there, and returns everyone\ncurrently present.\n\nSend a heartbeat when the resource is opened, every `heartbeat_interval_seconds` while it stays\nopen, and right away when the state changes between `viewing` and `editing`.\n\nRequires view permission on the resource itself (see `resource_type`). The caller is always\nidentified by the access token.\n",
+        "tags": [
+          "Presence"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceType"
+          },
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          },
+          {
+            "$ref": "#/components/parameters/OrgId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresenceHeartbeat"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Everyone currently present on the resource, including the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresenceRoster"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/presence/{resource_type}/{resource_id}/leave": {
+      "post": {
+        "operationId": "leavePresence",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "entity:view",
+                "resource": "journey:*"
+              },
+              {
+                "action": "customer_portal:view"
+              },
+              {
+                "action": "installer_portal:view"
+              },
+              {
+                "action": "workflow:definition:view"
+              }
+            ]
+          }
+        ],
+        "summary": "leavePresence",
+        "description": "Removes the caller's session from the resource at once, for example when the tab closes or the\nuser navigates away.\n\nA reload that heartbeats again within a few seconds keeps the user's place in the member order.\nLeaving is best effort: a session that never leaves is discarded after `ttl_seconds` anyway.\n",
+        "tags": [
+          "Presence"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceType"
+          },
+          {
+            "$ref": "#/components/parameters/ResourceId"
+          },
+          {
+            "$ref": "#/components/parameters/OrgId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresenceLeave"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The session has left the resource, or was already gone."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "ResourceType": {
+        "in": "path",
+        "name": "resource_type",
+        "required": true,
+        "description": "Kind of resource.",
+        "schema": {
+          "$ref": "#/components/schemas/PresenceResourceType"
+        }
+      },
+      "ResourceId": {
+        "in": "path",
+        "name": "resource_id",
+        "required": true,
+        "description": "ID of the resource.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]+$",
+          "maxLength": 128,
+          "example": "5da0a718-c822-403d-9f5d-20d4584e0528"
+        }
+      },
+      "OrgId": {
+        "in": "header",
+        "name": "x-epilot-org-id",
+        "required": false,
+        "description": "Organization that owns the resource, when the resource is shared with the caller's organization\n(for example a flow shared with a partner). Permissions are then checked in that organization.\n",
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9]+$",
+          "maxLength": 32,
+          "example": "123"
+        }
+      }
+    },
+    "securitySchemes": {
+      "EpilotAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization header with epilot OAuth2 bearer token",
+        "bearerFormat": "JWT"
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "The request is invalid, for example an unknown resource type or a malformed session id.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "The access token is missing or invalid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "The caller has no view permission on the resource, or the token does not identify a user.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "PresenceResourceType": {
+        "type": "string",
+        "description": "Kind of resource, and the permission needed to see who is present on it:\n- `journey`: `entity:view` on the journey. The resource ID is the journey's entity ID.\n- `customer_portal`: `customer_portal:view` on the portal\n- `installer_portal`: `installer_portal:view` on the portal\n- `flow`: `workflow:definition:view` on the flow\n",
+        "enum": [
+          "journey",
+          "customer_portal",
+          "installer_portal",
+          "flow"
+        ],
+        "example": "journey"
+      },
+      "PresenceState": {
+        "type": "string",
+        "description": "`viewing`: the resource is open. `editing`: it is open with unsaved changes.",
+        "enum": [
+          "viewing",
+          "editing"
+        ],
+        "example": "editing"
+      },
+      "SessionId": {
+        "type": "string",
+        "description": "Generated by the client, one per browser tab. A user can be present with several tabs.",
+        "pattern": "^[A-Za-z0-9_-]+$",
+        "minLength": 8,
+        "maxLength": 64,
+        "example": "f7c1b2a0-3e4d-4c8e-9a1b-2d3e4f5a6b7c"
+      },
+      "InstanceId": {
+        "type": "string",
+        "description": "Optional. Generated by the client each time it starts sending heartbeats in a tab. A leave that\ncarries it only takes effect while that instance sent the session's latest heartbeat, so a late\nleave from an earlier instance in the same tab cannot remove the session.\n",
+        "pattern": "^[A-Za-z0-9_-]+$",
+        "minLength": 8,
+        "maxLength": 64,
+        "example": "b1f0c2d3e4"
+      },
+      "PresenceHeartbeat": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "session_id": {
+            "$ref": "#/components/schemas/SessionId"
+          },
+          "instance_id": {
+            "$ref": "#/components/schemas/InstanceId"
+          },
+          "state": {
+            "$ref": "#/components/schemas/PresenceState"
+          }
+        }
+      },
+      "PresenceLeave": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "session_id": {
+            "$ref": "#/components/schemas/SessionId"
+          },
+          "instance_id": {
+            "$ref": "#/components/schemas/InstanceId"
+          }
+        }
+      },
+      "PresenceMember": {
+        "type": "object",
+        "description": "A user present on the resource. Several tabs of the same user count as one member.",
+        "required": [
+          "user_id",
+          "state",
+          "last_seen_at",
+          "is_self"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "epilot user ID. Names and avatars come from the User API.",
+            "example": "123456"
+          },
+          "user_org": {
+            "type": "string",
+            "description": "Organization of the user. On a shared resource it can differ from the owning organization.",
+            "example": "123"
+          },
+          "state": {
+            "$ref": "#/components/schemas/PresenceState"
+          },
+          "last_seen_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of the user's latest heartbeat on the resource."
+          },
+          "is_self": {
+            "type": "boolean",
+            "description": "True for the caller."
+          }
+        }
+      },
+      "PresenceRoster": {
+        "type": "object",
+        "required": [
+          "members",
+          "ttl_seconds",
+          "heartbeat_interval_seconds"
+        ],
+        "properties": {
+          "members": {
+            "type": "array",
+            "description": "Everyone present, in order of arrival. The order stays stable between heartbeats. On a\nshared resource, a partner organization sees the owning organization's users and its own.\n",
+            "items": {
+              "$ref": "#/components/schemas/PresenceMember"
+            }
+          },
+          "ttl_seconds": {
+            "type": "integer",
+            "description": "Seconds after its last heartbeat that a session stops counting as present.",
+            "example": 60
+          },
+          "heartbeat_interval_seconds": {
+            "type": "integer",
+            "description": "How often clients should send a heartbeat, in seconds.",
+            "example": 20
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "True when more users are present than one response lists; `members` is then incomplete."
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code",
+            "example": 403
+          },
+          "error": {
+            "description": "Error message, or the list of validation errors for a 400.",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            ],
+            "example": "Forbidden"
+          }
+        }
+      }
+    }
+  }
+}

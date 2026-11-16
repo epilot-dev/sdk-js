@@ -217,6 +217,11 @@ export const registerBuiltinApis = (registry: Map<string, ApiEntry>) => {
   });
   registerApi({
     registry,
+    name: 'presence',
+    loader: () => expandDef(require('../definitions/presence-runtime.json')),
+  });
+  registerApi({
+    registry,
     name: 'pricing',
     loader: () => expandDef(require('../definitions/pricing-runtime.json')),
   });

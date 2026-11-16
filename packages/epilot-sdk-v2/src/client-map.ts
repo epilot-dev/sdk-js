@@ -39,6 +39,7 @@ import type { Client as OrganizationClient } from './types/organization';
 import type { Client as PartnerDirectoryClient } from './types/partner-directory';
 import type { Client as PermissionsClient } from './types/permissions';
 import type { Client as PhoneIntegrationClient } from './types/phone-integration';
+import type { Client as PresenceClient } from './types/presence';
 import type { Client as PricingClient } from './types/pricing';
 import type { Client as PricingTierClient } from './types/pricing-tier';
 import type { Client as PurposeClient } from './types/purpose';
@@ -97,6 +98,7 @@ export type SDKClientMap = {
   partnerDirectory: PartnerDirectoryClient;
   permissions: PermissionsClient;
   phoneIntegration: PhoneIntegrationClient;
+  presence: PresenceClient;
   pricing: PricingClient;
   pricingTier: PricingTierClient;
   purpose: PurposeClient;

@@ -261,6 +261,12 @@
       "require": "./dist/apis/phone-integration.cjs"
     },
     "./phone-integration/openapi.json": "./definitions/phone-integration.json",
+    "./presence": {
+      "types": "./dist/apis/presence.d.ts",
+      "import": "./dist/apis/presence.js",
+      "require": "./dist/apis/presence.cjs"
+    },
+    "./presence/openapi.json": "./definitions/presence.json",
     "./pricing": {
       "types": "./dist/apis/pricing.d.ts",
       "import": "./dist/apis/pricing.js",
@@ -523,6 +529,9 @@
       ],
       "phone-integration": [
         "./dist/apis/phone-integration.d.ts"
+      ],
+      "presence": [
+        "./dist/apis/presence.d.ts"
       ],
       "pricing": [
         "./dist/apis/pricing.d.ts"
