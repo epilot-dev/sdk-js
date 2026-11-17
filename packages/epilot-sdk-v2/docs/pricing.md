@@ -9776,7 +9776,7 @@ type OfferHighlightConfig = {
   unique_selling_point_icon?: string
   total?: {
     enabled?: boolean
-    format?: "absolute" | "relative"
+    format?: "absolute" | "percentage"
     only_if_better?: boolean
   }
 }
