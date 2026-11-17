@@ -15915,7 +15915,12 @@ declare namespace Components {
             unique_selling_point_icon?: string;
             total?: {
                 enabled?: boolean;
-                format?: "absolute" | "relative";
+                /**
+                 * How the price difference to the current item is shown: as a percentage (e.g. "12.5%") or as an
+                 * absolute amount (e.g. "€12.00").
+                 *
+                 */
+                format?: "absolute" | "percentage";
                 only_if_better?: boolean;
             };
         }
