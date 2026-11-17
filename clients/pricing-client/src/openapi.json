@@ -3,7 +3,7 @@
   "info": {
     "title": "Pricing API",
     "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### Spot Market API\nProvides endpoints to fetch (historic) spot market price data.\n\n### External Integrations API\nProvides endpoints for external integrations. E.g. GetAG.\n\n### External Catalog API\nProvides endpoints for external catalog.\n\n### Product Recommendations API\nProvides endpoints for product recommendations.\n\n### Conditional Pricing API\nProvides endpoints for resolving conditional Products, Prices and Coupons, and for authoring the conditions they vary by.\n\nConditional Pricing reads every date in the organization's timezone, and reports every `as_of`\nin that timezone's offset. Organizations have no timezone setting yet, so every organization\nuses `Europe/Berlin`.\n",
-    "version": "1.2.3",
+    "version": "1.2.4",
     "termsOfService": "https://epilot.cloud/agb",
     "contact": {
       "name": "Support",
@@ -16305,6 +16305,77 @@
           }
         }
       },
+      "ProductRecommendationRuleSource": {
+        "type": "object",
+        "description": "The source tariff (product + price) of a product recommendation rule.",
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "description": "The product of the source tariff"
+          },
+          "price_id": {
+            "type": "string",
+            "description": "The price of the source tariff"
+          }
+        },
+        "required": [
+          "product_id",
+          "price_id"
+        ]
+      },
+      "ProductRecommendationOfferGroup": {
+        "description": "A group of offers within a product recommendation rule: an `Offer` with an `id` and required `items`.\nWithout `target_id`, the offers of the group are for everyone on the rule's source tariff;\nwith `target_id`, only for members of that target group.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Offer"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique id of the offer group within its rule"
+              }
+            },
+            "required": [
+              "id",
+              "items"
+            ]
+          }
+        ]
+      },
+      "ProductRecommendationRule": {
+        "type": "object",
+        "description": "A row of the rule table of a product recommendation: customers whose contract is on the `source`\ntariff are offered the items of the rule's `offer_groups`.\n\nThere is at most one rule per source tariff.\n",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique id of the rule within its product recommendation"
+          },
+          "source": {
+            "description": "The source tariff (product + price) this rule applies to.\n\n`null` marks the fallback rule (\"any other product\"): it applies only when no rule matches\nthe contract's current tariff. A product recommendation has at most one fallback rule.\n",
+            "type": "object",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductRecommendationRuleSource"
+              }
+            ]
+          },
+          "offer_groups": {
+            "type": "array",
+            "description": "The offers of the rule, grouped by target group",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecommendationOfferGroup"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "offer_groups"
+        ]
+      },
       "ProductRecommendation": {
         "allOf": [
           {
@@ -16348,8 +16419,64 @@
           },
           "offers": {
             "type": "array",
+            "description": "Legacy single-source offers; tariff change campaigns use `rules`.",
             "items": {
               "$ref": "#/components/schemas/Offer"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "description": "The rule table of the product recommendation: one rule per source tariff, plus at most one\nfallback rule (`source: null`) that applies only when no rule matches the contract's current tariff.\n",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecommendationRule"
+            }
+          },
+          "source_products": {
+            "type": "object",
+            "description": "Products of all rule sources. Derived from `rules`; kept in sync by whoever saves the recommendation.\n",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
+          "source_prices": {
+            "type": "object",
+            "description": "Prices of all rule sources. Derived from `rules`; kept in sync by whoever saves the recommendation.\n",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
+          "offer_products": {
+            "type": "object",
+            "description": "Products of all offer items in the rules. Derived from `rules`; kept in sync by whoever saves the recommendation.\n",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
+            }
+          },
+          "offer_prices": {
+            "type": "object",
+            "description": "Prices of all offer items in the rules. Derived from `rules`; kept in sync by whoever saves the recommendation.\n",
+            "properties": {
+              "$relation": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EntityRelation"
+                }
+              }
             }
           }
         }
