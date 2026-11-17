@@ -883,12 +883,13 @@ export declare namespace Components {
              * `trigger_source` (with origin `trigger`) marks a "started by" statement: the run's fired trigger is compared against the configured trigger ids in `values` — no entity attribute is involved.
              * `main_context` (with origin `trigger`, no `id`) marks a statement evaluated against the run's PRIMARY context: the fired trigger's entity, re-bound by any completed task that promotes its output to main context (`output_context.set_as_primary`). `schema` carries the subject's schema for attribute selection only — resolution is by the primary flag, never by schema.
              * `flow_trait` (with origin `flow_runtime`) marks a statement on a value of the running flow: `attribute` is the trait key, `id` and `attribute_sub_field` name its subject. `loop.iteration` is the lap a loop is in (1 on the first pass); `id` is the decision that owns the loop and `attribute_sub_field` the loop's id, a loop the evaluating decision is inside.
+             * `linked_entity` (with origin `trigger`) marks a statement on an entity the flow's Contexts settings find by relation: `id` is a display rule the workflow uses (`context_settings.displays[].id` with `attach_to_contexts`) and `schema` its `entity_schema`. The engine resolves the rule from the run's main context when the decision runs. A rule matching no entity, or several, leaves the statement without an entity; it never falls back to the main context.
              *
              */
-            origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait";
+            origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait" | "linked_entity";
             schema?: string;
             attribute?: string;
-            attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address";
+            attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address" | "consent";
             attribute_repeatable?: boolean;
             attribute_operation?: "all" | "updated" | "added" | "deleted";
             /**

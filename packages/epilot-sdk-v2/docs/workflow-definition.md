@@ -3990,10 +3990,10 @@ type Statement = {
   source: {
     id?: string
     origin?: "trigger" | "action" | "flow_runtime"
-    origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait"
+    origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait" | "linked_entity"
     schema?: string
     attribute?: string
-    attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address"
+    attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address" | "consent"
     attribute_repeatable?: boolean
     attribute_operation?: "all" | "updated" | "added" | "deleted"
     attributes?: string[]
@@ -4016,10 +4016,10 @@ type Statement = {
 type EvaluationSource = {
   id?: string
   origin?: "trigger" | "action" | "flow_runtime"
-  origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait"
+  origin_type?: "entity" | "workflow" | "journey_block" | "trigger_source" | "main_context" | "flow_trait" | "linked_entity"
   schema?: string
   attribute?: string
-  attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address"
+  attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "product" | "price" | "status" | "relation" | "multiselect" | "select" | "radio" | "relation_user" | "purpose" | "label" | "message_email_address" | "consent"
   attribute_repeatable?: boolean
   attribute_operation?: "all" | "updated" | "added" | "deleted"
   attributes?: string[]
