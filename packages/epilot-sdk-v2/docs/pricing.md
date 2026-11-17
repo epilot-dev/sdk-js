@@ -320,6 +320,9 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`ProductRecommendationResponse`](#productrecommendationresponse)
 - [`OfferHighlightConfig`](#offerhighlightconfig)
 - [`Offer`](#offer)
+- [`ProductRecommendationRuleSource`](#productrecommendationrulesource)
+- [`ProductRecommendationOfferGroup`](#productrecommendationoffergroup)
+- [`ProductRecommendationRule`](#productrecommendationrule)
 - [`ProductRecommendation`](#productrecommendation)
 
 ### `$calculatePricingDetails`
@@ -9795,6 +9798,67 @@ type Offer = {
       unique_selling_point_icon?: { ... }
       total?: { ... }
     }
+  }>
+}
+```
+
+### `ProductRecommendationRuleSource`
+
+The source tariff (product + price) of a product recommendation rule.
+
+```ts
+type ProductRecommendationRuleSource = {
+  product_id: string
+  price_id: string
+}
+```
+
+### `ProductRecommendationOfferGroup`
+
+A group of offers within a product recommendation rule: an `Offer` with an `id` and required `items`.
+Without `target_id`, the offers of the group are for everyone on the rule's source tariff;
+with `target_id`, only for members of that target group.
+
+
+```ts
+type ProductRecommendationOfferGroup = {
+  target_id?: string
+  items: Array<{
+    price_id: string
+    product_id: string
+    highlight_config?: {
+      unique_selling_point?: { ... }
+      unique_selling_point_icon?: { ... }
+      total?: { ... }
+    }
+  }>
+  id: string
+}
+```
+
+### `ProductRecommendationRule`
+
+A row of the rule table of a product recommendation: customers whose contract is on the `source`
+tariff are offered the items of the rule's `offer_groups`.
+
+There is at most one rule per source tariff.
+
+
+```ts
+type ProductRecommendationRule = {
+  id: string
+  source: {
+    product_id: string
+    price_id: string
+  }
+  offer_groups: Array<{
+    target_id?: string
+    items: Array<{
+      price_id: { ... }
+      product_id: { ... }
+      highlight_config?: { ... }
+    }>
+    id: string
   }>
 }
 ```

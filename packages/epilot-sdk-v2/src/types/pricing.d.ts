@@ -19767,7 +19767,69 @@ export declare namespace Components {
              * Type of product recommendation
              */
             type?: "change" | "cross-sell" | "up-sell";
+            /**
+             * Legacy single-source offers; tariff change campaigns use `rules`.
+             */
             offers?: Offer[];
+            /**
+             * The rule table of the product recommendation: one rule per source tariff, plus at most one
+             * fallback rule (`source: null`) that applies only when no rule matches the contract's current tariff.
+             *
+             */
+            rules?: /**
+             * A row of the rule table of a product recommendation: customers whose contract is on the `source`
+             * tariff are offered the items of the rule's `offer_groups`.
+             *
+             * There is at most one rule per source tariff.
+             *
+             */
+            ProductRecommendationRule[];
+            /**
+             * Products of all rule sources. Derived from `rules`; kept in sync by whoever saves the recommendation.
+             *
+             */
+            source_products?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * Prices of all rule sources. Derived from `rules`; kept in sync by whoever saves the recommendation.
+             *
+             */
+            source_prices?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * Products of all offer items in the rules. Derived from `rules`; kept in sync by whoever saves the recommendation.
+             *
+             */
+            offer_products?: {
+                $relation?: EntityRelation[];
+            };
+            /**
+             * Prices of all offer items in the rules. Derived from `rules`; kept in sync by whoever saves the recommendation.
+             *
+             */
+            offer_prices?: {
+                $relation?: EntityRelation[];
+            };
+        }
+        /**
+         * A group of offers within a product recommendation rule: an `Offer` with an `id` and required `items`.
+         * Without `target_id`, the offers of the group are for everyone on the rule's source tariff;
+         * with `target_id`, only for members of that target group.
+         *
+         */
+        export interface ProductRecommendationOfferGroup {
+            target_id?: string;
+            items: {
+                price_id: string;
+                product_id: string;
+                highlight_config?: OfferHighlightConfig;
+            }[];
+            /**
+             * Unique id of the offer group within its rule
+             */
+            id: string;
         }
         /**
          * Product recommendations request payload
@@ -20025,6 +20087,59 @@ export declare namespace Components {
                  */
                 CompositePriceItem;
             };
+        }
+        /**
+         * A row of the rule table of a product recommendation: customers whose contract is on the `source`
+         * tariff are offered the items of the rule's `offer_groups`.
+         *
+         * There is at most one rule per source tariff.
+         *
+         */
+        export interface ProductRecommendationRule {
+            /**
+             * Unique id of the rule within its product recommendation
+             */
+            id: string;
+            /**
+             * The source tariff (product + price) this rule applies to.
+             *
+             * `null` marks the fallback rule ("any other product"): it applies only when no rule matches
+             * the contract's current tariff. A product recommendation has at most one fallback rule.
+             *
+             */
+            source: {
+                /**
+                 * The product of the source tariff
+                 */
+                product_id: string;
+                /**
+                 * The price of the source tariff
+                 */
+                price_id: string;
+            } | null;
+            /**
+             * The offers of the rule, grouped by target group
+             */
+            offer_groups: /**
+             * A group of offers within a product recommendation rule: an `Offer` with an `id` and required `items`.
+             * Without `target_id`, the offers of the group are for everyone on the rule's source tariff;
+             * with `target_id`, only for members of that target group.
+             *
+             */
+            ProductRecommendationOfferGroup[];
+        }
+        /**
+         * The source tariff (product + price) of a product recommendation rule.
+         */
+        export interface ProductRecommendationRuleSource {
+            /**
+             * The product of the source tariff
+             */
+            product_id: string;
+            /**
+             * The price of the source tariff
+             */
+            price_id: string;
         }
         /**
          * Product recommendations request payload
@@ -26992,7 +27107,10 @@ export type PricingModel = Components.Schemas.PricingModel;
 export type Product = Components.Schemas.Product;
 export type ProductCategory = Components.Schemas.ProductCategory;
 export type ProductRecommendation = Components.Schemas.ProductRecommendation;
+export type ProductRecommendationOfferGroup = Components.Schemas.ProductRecommendationOfferGroup;
 export type ProductRecommendationResponse = Components.Schemas.ProductRecommendationResponse;
+export type ProductRecommendationRule = Components.Schemas.ProductRecommendationRule;
+export type ProductRecommendationRuleSource = Components.Schemas.ProductRecommendationRuleSource;
 export type ProductRecommendationSearch = Components.Schemas.ProductRecommendationSearch;
 export type PromoCode = Components.Schemas.PromoCode;
 export type PromoCodeValidationResponse = Components.Schemas.PromoCodeValidationResponse;
