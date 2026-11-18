@@ -31,13 +31,20 @@ const { data } = await designClient.getAllDesigns(...)
 - [`deleteDesign`](#deletedesign)
 - [`updateDesign`](#updatedesign)
 - [`duplicateDesign`](#duplicatedesign)
+- [`duplicateDesignAsV1`](#duplicatedesignasv1)
+- [`getDesignVariables`](#getdesignvariables)
 - [`generateDesign`](#generatedesign)
 - [`generateDesignDocument`](#generatedesigndocument)
+- [`createDesignDocumentJob`](#createdesigndocumentjob)
+- [`getDesignDocumentJob`](#getdesigndocumentjob)
 - [`uploadFile`](#uploadfile)
 - [`getFiles`](#getfiles)
 - [`getConsumerDesign`](#getconsumerdesign)
 
 **Schemas**
+- [`DuplicateDesignAsV1Req`](#duplicatedesignasv1req)
+- [`JourneyChoice`](#journeychoice)
+- [`DuplicateDesignAsV1Plan`](#duplicatedesignasv1plan)
 - [`UploadFileReq`](#uploadfilereq)
 - [`UploadFileRes`](#uploadfileres)
 - [`GetFilesRes`](#getfilesres)
@@ -45,7 +52,9 @@ const { data } = await designClient.getAllDesigns(...)
 - [`AddDesignReq`](#adddesignreq)
 - [`AddDesignRes`](#adddesignres)
 - [`GetDesignRes`](#getdesignres)
+- [`GetDesignVariablesRes`](#getdesignvariablesres)
 - [`UpdateDesignReq`](#updatedesignreq)
+- [`Journey_Write`](#journey_write)
 - [`ItemMetada`](#itemmetada)
 - [`AddConsumerReq`](#addconsumerreq)
 - [`RemoveConsumerReq`](#removeconsumerreq)
@@ -72,6 +81,13 @@ const { data } = await designClient.getAllDesigns(...)
 - [`FindingDetail`](#findingdetail)
 - [`DesignFinding`](#designfinding)
 - [`GenerateDesignDocumentRes`](#generatedesigndocumentres)
+- [`CreateDesignDocumentJobReq`](#createdesigndocumentjobreq)
+- [`BrandGuidelineAttachment`](#brandguidelineattachment)
+- [`GeneratedDesignDocument`](#generateddesigndocument)
+- [`ReviewChange`](#reviewchange)
+- [`ReviewScreenshot`](#reviewscreenshot)
+- [`ReviewedDesignDocument`](#revieweddesigndocument)
+- [`DesignDocumentJob`](#designdocumentjob)
 - [`GeneratedDesign`](#generateddesign)
 - [`ErrorResp`](#errorresp)
 - [`FileData`](#filedata)
@@ -591,6 +607,12 @@ const { data } = await client.updateDesign(
         widgets: [ /* ... */ ],
         customer_portals: [ /* ... */ ]
       }
+    },
+    journey_write: {
+      primary_color: 'keep',
+      font: 'keep',
+      border_radius: 'keep',
+      logo: 'keep'
     }
   },
 )
@@ -713,6 +735,116 @@ const { data } = await client.duplicateDesign({
       "widgets": [],
       "customer_portals": []
     }
+  }
+}
+```
+
+</details>
+
+---
+
+### `duplicateDesignAsV1`
+
+Duplicate a classic design (no version) as a v1 design document. The original stays as it is. The copy is named "``<name>`` (v1)", starts with no journeys or portals and keeps the original's journey field
+
+`POST /v1/designs/{designId}/duplicate-as-v1`
+
+```ts
+const { data } = await client.duplicateDesignAsV1(
+  {
+    designId: 'example',
+  },
+  {
+    dry_run: true,
+    answers: {
+      assets: {
+        logo: 0,
+        favicon: 0
+      },
+      journeys: {
+        primary_color: 'sync',
+        font: 'sync',
+        border_radius: 'sync',
+        logo: 'sync'
+      }
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "message": "string",
+  "conversion": {
+    "name": "string",
+    "asset_questions": [
+      {
+        "kind": "logo",
+        "options": [
+          {
+            "asset": {},
+            "sources": [
+              {
+                "portal_id": "string",
+                "portal_name": "string",
+                "page": "string"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "journey_questions": [
+      {
+        "leaf": "primary_color",
+        "journeys": {},
+        "design": {},
+        "adoptable": true
+      }
+    ],
+    "open": {
+      "assets": ["string"],
+      "journeys": ["string"]
+    },
+    "unmapped": {},
+    "radius_adjusted": {},
+    "hex_normalized": {},
+    "notes": ["string"],
+    "invalid": ["string"]
+  }
+}
+```
+
+</details>
+
+---
+
+### `getDesignVariables`
+
+The design as flat `design.*` template variables (e.g. `design.colors.primary`, `design.assets.logo.url`), for consumers that render designs into text templates such as email templates. Classic design
+
+`GET /v1/designs/{designId}/variables`
+
+```ts
+const { data } = await client.getDesignVariables({
+  designId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "design_id": "string",
+  "variables": {
+    "design.name": "Stadtwerke Blau",
+    "design.colors.primary": "#0054A6",
+    "design.shape.radius": "8",
+    "design.assets.logo.url": "https://go.epilot.cloud/designs/org/logo/logo.png"
   }
 }
 ```
@@ -858,6 +990,267 @@ const { data } = await client.generateDesignDocument(
   ],
   "site_name": "Stadtwerke Musterstadt",
   "cached": true
+}
+```
+
+</details>
+
+---
+
+### `createDesignDocumentJob`
+
+Generates a v1 design document from a public website like `generateDesignDocument`, returns it
+right away as `baseline`, and starts an AI review of it in the background. The review looks at the
+websit
+
+`POST /v1/designs/document/generate/jobs`
+
+```ts
+const { data } = await client.createDesignDocumentJob(
+  null,
+  {
+    url: 'https://www.stadtwerke-musterstadt.de',
+    language: 'de',
+    attachments: [
+      {
+        s3ref: {
+          bucket: 'string',
+          key: 'string'
+        },
+        mime_type: 'application/pdf',
+        filename: 'string'
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "job_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "running",
+  "steps": ["string"],
+  "screenshots": [
+    {
+      "index": 0,
+      "label": "string",
+      "kind": "string",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "page_url": "string",
+      "tool": "string",
+      "taken_at": "string",
+      "data_url": "string"
+    }
+  ],
+  "baseline": {
+    "document": {
+      "version": 1,
+      "colors": {},
+      "typography": {},
+      "shape": {},
+      "components": {},
+      "assets": {},
+      "consumer": {
+        "widgets": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ],
+        "customer_portals": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ]
+      }
+    },
+    "findings": [
+      {
+        "id": "primary_color",
+        "status": "found",
+        "detail": {
+          "family": "string"
+        }
+      }
+    ],
+    "site_name": "string"
+  },
+  "result": {
+    "document": {
+      "version": 1,
+      "colors": {},
+      "typography": {},
+      "shape": {},
+      "components": {},
+      "assets": {},
+      "consumer": {
+        "widgets": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ],
+        "customer_portals": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ]
+      }
+    },
+    "findings": [
+      {
+        "id": "primary_color",
+        "status": "found",
+        "detail": {
+          "family": "string"
+        }
+      }
+    ],
+    "site_name": "string",
+    "notes": "string",
+    "changes": [
+      {
+        "id": "primary_color",
+        "change": "confirmed",
+        "origin": "guidelines",
+        "source": "string"
+      }
+    ]
+  }
+}
+```
+
+</details>
+
+---
+
+### `getDesignDocumentJob`
+
+The state of a design document review started with `createDesignDocumentJob`. While it runs,
+`steps` lists the browser tools used so far. When it completes, `result` holds the reviewed design
+document
+
+`GET /v1/designs/document/generate/jobs/{jobId}`
+
+```ts
+const { data } = await client.getDesignDocumentJob({
+  jobId: 'example',
+  screenshots_after: 1,
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "job_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": "running",
+  "steps": ["string"],
+  "screenshots": [
+    {
+      "index": 0,
+      "label": "string",
+      "kind": "string",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "page_url": "string",
+      "tool": "string",
+      "taken_at": "string",
+      "data_url": "string"
+    }
+  ],
+  "baseline": {
+    "document": {
+      "version": 1,
+      "colors": {},
+      "typography": {},
+      "shape": {},
+      "components": {},
+      "assets": {},
+      "consumer": {
+        "widgets": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ],
+        "customer_portals": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ]
+      }
+    },
+    "findings": [
+      {
+        "id": "primary_color",
+        "status": "found",
+        "detail": {
+          "family": "string"
+        }
+      }
+    ],
+    "site_name": "string"
+  },
+  "result": {
+    "document": {
+      "version": 1,
+      "colors": {},
+      "typography": {},
+      "shape": {},
+      "components": {},
+      "assets": {},
+      "consumer": {
+        "widgets": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ],
+        "customer_portals": [
+          {
+            "id": "string",
+            "name": "string"
+          }
+        ]
+      }
+    },
+    "findings": [
+      {
+        "id": "primary_color",
+        "status": "found",
+        "detail": {
+          "family": "string"
+        }
+      }
+    ],
+    "site_name": "string",
+    "notes": "string",
+    "changes": [
+      {
+        "id": "primary_color",
+        "change": "confirmed",
+        "origin": "guidelines",
+        "source": "string"
+      }
+    ]
+  }
 }
 ```
 
@@ -1050,6 +1443,62 @@ const { data } = await client.getConsumerDesign({
 ---
 
 ## Schemas
+
+### `DuplicateDesignAsV1Req`
+
+```ts
+type DuplicateDesignAsV1Req = {
+  dry_run?: boolean
+  answers?: {
+    assets?: {
+      logo?: { ... }
+      favicon?: { ... }
+    }
+    journeys?: {
+      primary_color?: { ... }
+      font?: { ... }
+      border_radius?: { ... }
+      logo?: { ... }
+    }
+  }
+}
+```
+
+### `JourneyChoice`
+
+```ts
+type JourneyChoice = "sync" | "design" | "keep"
+```
+
+### `DuplicateDesignAsV1Plan`
+
+```ts
+type DuplicateDesignAsV1Plan = {
+  message?: string
+  conversion?: {
+    name?: string
+    asset_questions?: Array<{
+      kind?: { ... }
+      options?: { ... }
+    }>
+    journey_questions?: Array<{
+      leaf?: { ... }
+      journeys?: { ... }
+      design?: { ... }
+      adoptable?: { ... }
+    }>
+    open?: {
+      assets?: { ... }
+      journeys?: { ... }
+    }
+    unmapped?: Record<string, unknown>
+    radius_adjusted?: Record<string, unknown>
+    hex_normalized?: Record<string, string>
+    notes?: string[]
+    invalid?: string[]
+  }
+}
+```
 
 ### `UploadFileReq`
 
@@ -1510,6 +1959,15 @@ type GetDesignRes = {
 }
 ```
 
+### `GetDesignVariablesRes`
+
+```ts
+type GetDesignVariablesRes = {
+  design_id: string
+  variables: Record<string, string>
+}
+```
+
 ### `UpdateDesignReq`
 
 ```ts
@@ -1608,7 +2066,19 @@ type UpdateDesignReq = {
       customer_portals: { ... }
     }
   }
+  journey_write?: {
+    primary_color?: "keep" | "sync"
+    font?: "keep" | "sync"
+    border_radius?: "keep" | "sync"
+    logo?: "keep" | "sync"
+  // ...
 }
+```
+
+### `Journey_Write`
+
+```ts
+type Journey_Write = "keep" | "sync"
 ```
 
 ### `ItemMetada`
@@ -2111,6 +2581,194 @@ type GenerateDesignDocumentRes = {
   }>
   site_name: string
   cached: boolean
+}
+```
+
+### `CreateDesignDocumentJobReq`
+
+```ts
+type CreateDesignDocumentJobReq = {
+  url: string // uri
+  language?: "de" | "en"
+  attachments?: Array<{
+    s3ref: {
+      bucket: { ... }
+      key: { ... }
+    }
+    mime_type: "application/pdf" | "image/png" | "image/jpeg" | "image/webp"
+    filename?: string
+  }>
+}
+```
+
+### `BrandGuidelineAttachment`
+
+```ts
+type BrandGuidelineAttachment = {
+  s3ref: {
+    bucket: string
+    key: string
+  }
+  mime_type: "application/pdf" | "image/png" | "image/jpeg" | "image/webp"
+  filename?: string
+}
+```
+
+### `GeneratedDesignDocument`
+
+```ts
+type GeneratedDesignDocument = {
+  document: {
+    version?: 1
+    colors?: Record<string, unknown>
+    typography?: Record<string, unknown>
+    shape?: Record<string, unknown>
+    components?: Record<string, unknown>
+    assets?: Record<string, unknown>
+    consumer?: {
+      widgets: { ... }
+      customer_portals: { ... }
+    }
+  }
+  findings: Array<{
+    id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo" | "favicon"
+    status: "found" | "not_found" | "not_available"
+    detail?: {
+      family: { ... }
+    }
+  }>
+  site_name: string
+}
+```
+
+### `ReviewChange`
+
+```ts
+type ReviewChange = {
+  id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo"
+  change: "confirmed" | "changed" | "added" | "removed"
+  origin?: "guidelines" | "website"
+  source?: string
+}
+```
+
+### `ReviewScreenshot`
+
+```ts
+type ReviewScreenshot = {
+  index: number
+  label: string
+  kind?: string
+  box?: {
+    x?: number
+    y?: number
+    width?: number
+    height?: number
+  }
+  page_url: string
+  tool?: string
+  taken_at?: string
+  data_url: string
+}
+```
+
+### `ReviewedDesignDocument`
+
+```ts
+type ReviewedDesignDocument = {
+  document: {
+    version?: 1
+    colors?: Record<string, unknown>
+    typography?: Record<string, unknown>
+    shape?: Record<string, unknown>
+    components?: Record<string, unknown>
+    assets?: Record<string, unknown>
+    consumer?: {
+      widgets: { ... }
+      customer_portals: { ... }
+    }
+  }
+  findings: Array<{
+    id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo" | "favicon"
+    status: "found" | "not_found" | "not_available"
+    detail?: {
+      family: { ... }
+    }
+  }>
+  site_name: string
+  notes: string
+  changes: Array<{
+    id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo"
+    change: "confirmed" | "changed" | "added" | "removed"
+    origin?: "guidelines" | "website"
+    source?: string
+  }>
+}
+```
+
+### `DesignDocumentJob`
+
+```ts
+type DesignDocumentJob = {
+  job_id: string // uuid
+  status: "running" | "completed" | "failed" | "skipped"
+  steps: string[]
+  screenshots?: Array<{
+    index: number
+    label: string
+    kind?: string
+    box?: {
+      x?: { ... }
+      y?: { ... }
+      width?: { ... }
+      height?: { ... }
+    }
+    page_url: string
+    tool?: string
+    taken_at?: string
+    data_url: string
+  }>
+  baseline: {
+    document: {
+      version?: { ... }
+      colors?: { ... }
+      typography?: { ... }
+      shape?: { ... }
+      components?: { ... }
+      assets?: { ... }
+      consumer?: { ... }
+    }
+    findings: Array<{
+      id: { ... }
+      status: { ... }
+      detail?: { ... }
+    }>
+    site_name: string
+  }
+  result?: {
+    document: {
+      version?: { ... }
+      colors?: { ... }
+      typography?: { ... }
+      shape?: { ... }
+      components?: { ... }
+      assets?: { ... }
+      consumer?: { ... }
+    }
+    findings: Array<{
+      id: { ... }
+      status: { ... }
+      detail?: { ... }
+    }>
+    site_name: string
+    notes: string
+    changes: Array<{
+      id: { ... }
+      change: { ... }
+      origin?: { ... }
+      source?: { ... }
+    }>
+  }
 }
 ```
 

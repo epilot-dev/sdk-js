@@ -96,6 +96,7 @@ const { data } = await client.getValidationRules()
     {
       "title": "string",
       "placeholder": "string",
+      "description": "string",
       "used_by": [
         {
           "type": "journey",
@@ -162,6 +163,7 @@ const { data } = await client.createValidationRule(
   {
     title: 'string',
     placeholder: 'string',
+    description: 'string',
     used_by: [
       {
         type: 'journey',
@@ -211,6 +213,7 @@ const { data } = await client.createValidationRule(
 {
   "title": "string",
   "placeholder": "string",
+  "description": "string",
   "used_by": [
     {
       "type": "journey",
@@ -282,6 +285,7 @@ const { data } = await client.getValidationRuleById({
 {
   "title": "string",
   "placeholder": "string",
+  "description": "string",
   "used_by": [
     {
       "type": "journey",
@@ -348,6 +352,7 @@ const { data } = await client.updateValidationRule(
   {
     title: 'string',
     placeholder: 'string',
+    description: 'string',
     used_by: [
       {
         type: 'journey',
@@ -397,6 +402,7 @@ const { data } = await client.updateValidationRule(
 {
   "title": "string",
   "placeholder": "string",
+  "description": "string",
   "used_by": [
     {
       "type": "journey",
@@ -488,6 +494,7 @@ const { data } = await client.addUsedByReference(
 {
   "title": "string",
   "placeholder": "string",
+  "description": "string",
   "used_by": [
     {
       "type": "journey",
@@ -565,6 +572,7 @@ const { data } = await client.removeUsedByReference(
 {
   "title": "string",
   "placeholder": "string",
+  "description": "string",
   "used_by": [
     {
       "type": "journey",
@@ -649,6 +657,7 @@ type CreateValidationRuleRequest = object
 type UpdateValidationRuleRequest = {
   title?: string
   placeholder?: string
+  description?: string
   used_by?: Array<{
     type: "journey" | "entity" | "portal"
     schema_slug?: string
@@ -716,6 +725,7 @@ type UpdateValidationRuleRequest = {
 type ValidationRuleBase = {
   title?: string
   placeholder?: string
+  description?: string
   used_by?: Array<{
     type: "journey" | "entity" | "portal"
     schema_slug?: string
