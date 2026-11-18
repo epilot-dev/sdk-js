@@ -436,6 +436,166 @@
         }
       }
     },
+    "/v1/designs/{designId}/duplicate-as-v1": {
+      "post": {
+        "operationId": "duplicateDesignAsV1",
+        "x-epilot-permissions": [
+          {
+            "action": "design:create"
+          }
+        ],
+        "summary": "duplicateDesignAsV1",
+        "description": "Duplicate a classic design (no version) as a v1 design document. The original stays as it is. The copy is named \"<name> (v1)\", starts with no journeys or portals and keeps the original's journey fields, so a journey switched to it later paints the same. Where the conversion needs a decision, the questions come back first: which logo and favicon the portal pages using the design show, and, for every value journeys paint differently from the design (primary colour, font, radius, logo), whether journeys take the design's value (sync), the design takes the journeys' value (design) or both stay (keep). Send `dry_run` to get the questions, then the answers to create the copy. Needs the design-document-v1 feature flag.",
+        "tags": [
+          "design-builder"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DesignId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuplicateDesignAsV1Req"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dry run - the conversion and its questions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DuplicateDesignAsV1Plan"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Success - the v1 copy was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddDesignRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid answers, a v1 design, an invalid conversion or the feature flag is off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No design found"
+          },
+          "409": {
+            "description": "A question is still unanswered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DuplicateDesignAsV1Plan"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The portals using the design could not be read",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/designs/{designId}/variables": {
+      "get": {
+        "operationId": "getDesignVariables",
+        "x-epilot-permissions": [
+          {
+            "action": "design:view"
+          }
+        ],
+        "summary": "getDesignVariables",
+        "description": "The design as flat `design.*` template variables (e.g. `design.colors.primary`, `design.assets.logo.url`), for consumers that render designs into text templates such as email templates. Classic designs are converted to design document v1 first, unset values take the defaults of `@epilot/design-document`, and every value is validated for use in HTML attributes and CSS (hex colors, `https:` URLs, numbers, font family lists). Values are not HTML-escaped; consumers escape them where they insert them.",
+        "tags": [
+          "design-builder"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DesignId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - design variables resolved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDesignVariablesRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No design found"
+          },
+          "500": {
+            "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/designs/{designId}/parse": {
       "get": {
         "operationId": "getThemeFromDesign",
@@ -740,6 +900,201 @@
           },
           "504": {
             "description": "The 27 second budget ran out (`timeout`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/designs/document/generate/jobs": {
+      "post": {
+        "operationId": "createDesignDocumentJob",
+        "x-epilot-permissions": [
+          {
+            "action": "design:create"
+          }
+        ],
+        "summary": "createDesignDocumentJob",
+        "description": "Generates a v1 design document from a public website like `generateDesignDocument`, returns it\nright away as `baseline`, and starts an AI review of it in the background. The review looks at the\nwebsite in a real browser and reads the optional brand guideline files, then confirms or corrects\nthe baseline (primary color, fonts, corners, primary button, logo). Poll `getDesignDocumentJob`\nfor the reviewed document.\n\nEach call counts toward the 20 generations per organization and UTC day. Reviews have their own\nlimit of 5 per organization and UTC day; past it, or when the review can't start, the response is\n201 with `review.status: skipped` and the baseline is the result. When the deterministic generation\nfinds nothing, the review builds the document on its own and `baseline` is null.\n\nBrand guideline files are uploaded with file-api `uploadFileV2` first and referenced by `s3ref`.\n",
+        "tags": [
+          "design-builder"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDesignDocumentJobReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The baseline design document; no review runs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DesignDocumentJob"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "The baseline design document; the review is running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DesignDocumentJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The URL is not a valid http(s) URL (`invalid_url`), points to a private network (`blocked_url`), or an attachment is not accepted (`invalid_attachment`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller does not have design:create",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The website could not be fetched (`fetch_failed`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The organization has used today's generation limit (`rate_limited`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Nothing could be generated and no review could run (`generation_failed`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "The website took too long (`timeout`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/designs/document/generate/jobs/{jobId}": {
+      "get": {
+        "operationId": "getDesignDocumentJob",
+        "x-epilot-permissions": [
+          {
+            "action": "design:create"
+          }
+        ],
+        "summary": "getDesignDocumentJob",
+        "description": "The state of a design document review started with `createDesignDocumentJob`. While it runs,\n`steps` lists the browser tools used so far. When it completes, `result` holds the reviewed design\ndocument, the reviewer's note and how each finding changed. A failed review keeps the baseline.\nJobs are kept for one day.\n",
+        "tags": [
+          "design-builder"
+        ],
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "screenshots_after",
+            "in": "query",
+            "required": false,
+            "description": "Return only the review's screenshots from this index on (the number the caller already has)",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DesignDocumentJob"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication Errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller does not have design:create",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such job for this organization, or it expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1190,6 +1545,188 @@
       }
     },
     "schemas": {
+      "DuplicateDesignAsV1Req": {
+        "type": "object",
+        "properties": {
+          "dry_run": {
+            "type": "boolean"
+          },
+          "answers": {
+            "type": "object",
+            "properties": {
+              "assets": {
+                "type": "object",
+                "description": "Index of the chosen option per asset kind, null keeps the converted one",
+                "properties": {
+                  "logo": {
+                    "type": "integer",
+                    "nullable": true
+                  },
+                  "favicon": {
+                    "type": "integer",
+                    "nullable": true
+                  }
+                }
+              },
+              "journeys": {
+                "type": "object",
+                "properties": {
+                  "primary_color": {
+                    "$ref": "#/components/schemas/JourneyChoice"
+                  },
+                  "font": {
+                    "$ref": "#/components/schemas/JourneyChoice"
+                  },
+                  "border_radius": {
+                    "$ref": "#/components/schemas/JourneyChoice"
+                  },
+                  "logo": {
+                    "$ref": "#/components/schemas/JourneyChoice"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "JourneyChoice": {
+        "type": "string",
+        "enum": [
+          "sync",
+          "design",
+          "keep"
+        ]
+      },
+      "DuplicateDesignAsV1Plan": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "conversion": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "asset_questions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "logo",
+                        "favicon"
+                      ]
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "asset": {
+                            "type": "object",
+                            "additionalProperties": true
+                          },
+                          "sources": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "portal_id": {
+                                  "type": "string"
+                                },
+                                "portal_name": {
+                                  "type": "string"
+                                },
+                                "page": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "journey_questions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "leaf": {
+                      "type": "string",
+                      "enum": [
+                        "primary_color",
+                        "font",
+                        "border_radius",
+                        "logo"
+                      ]
+                    },
+                    "journeys": {
+                      "description": "The value journeys paint; null when they paint Concorde's fallback"
+                    },
+                    "design": {
+                      "description": "The value of the converted design"
+                    },
+                    "adoptable": {
+                      "type": "boolean",
+                      "description": "Whether the design can take the journeys' value"
+                    }
+                  }
+                }
+              },
+              "open": {
+                "type": "object",
+                "properties": {
+                  "assets": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "journeys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "unmapped": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "radius_adjusted": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "hex_normalized": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "notes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "invalid": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
       "UploadFileReq": {
         "type": "object",
         "properties": {
@@ -1335,6 +1872,31 @@
           }
         }
       },
+      "GetDesignVariablesRes": {
+        "type": "object",
+        "required": [
+          "design_id",
+          "variables"
+        ],
+        "properties": {
+          "design_id": {
+            "type": "string"
+          },
+          "variables": {
+            "type": "object",
+            "description": "`design.name`, `design.colors.primary | background | neutral`, `design.colors.custom.<id>`, `design.typography.heading | body.family | url`, `design.shape.radius`, `design.buttons.primary | secondary | tertiary.color` and `design.assets.logo.url`. Unset values without a default are left out.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "design.name": "Stadtwerke Blau",
+              "design.colors.primary": "#0054A6",
+              "design.shape.radius": "8",
+              "design.assets.logo.url": "https://go.epilot.cloud/designs/org/logo/logo.png"
+            }
+          }
+        }
+      },
       "UpdateDesignReq": {
         "type": "object",
         "properties": {
@@ -1353,10 +1915,36 @@
                 "$ref": "#/components/schemas/Design_Document_V1"
               }
             ]
+          },
+          "journey_write": {
+            "type": "object",
+            "description": "Only with a version 1 body. Per journey leaf, overrides the default write-through: `keep` does not write a changed leaf into the journey fields, `sync` writes the design's value even when it did not change (nothing when the design has no value). Not stored.",
+            "properties": {
+              "primary_color": {
+                "$ref": "#/components/schemas/Journey_Write"
+              },
+              "font": {
+                "$ref": "#/components/schemas/Journey_Write"
+              },
+              "border_radius": {
+                "$ref": "#/components/schemas/Journey_Write"
+              },
+              "logo": {
+                "$ref": "#/components/schemas/Journey_Write"
+              }
+            },
+            "additionalProperties": false
           }
         },
         "required": [
           "design"
+        ]
+      },
+      "Journey_Write": {
+        "type": "string",
+        "enum": [
+          "keep",
+          "sync"
         ]
       },
       "ItemMetada": {
@@ -1486,7 +2074,7 @@
       },
       "Design_Document_V1": {
         "type": "object",
-        "description": "Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.",
+        "description": "Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme`. A v1 update writes each changed primary colour, font, radius and logo into `style` (`palette.primary`, `typography.font`, `shape.border_radius`, `logo.main`) and deletes the matching `custom_theme` key, so journeys paint the edit. It also writes a set one whose journey field is missing and has no `custom_theme` key, which a journey paints as the fallback. A v1 create does the same when it sends no journey fields. Other groups never reach journeys. A v1 update may carry the `journey` group.",
         "properties": {
           "version": {
             "type": "integer",
@@ -2131,6 +2719,265 @@
           "findings",
           "site_name",
           "cached"
+        ]
+      },
+      "CreateDesignDocumentJobReq": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Public website to read the design from",
+            "example": "https://www.stadtwerke-musterstadt.de"
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "de",
+              "en"
+            ],
+            "description": "Language of the design builder; the review writes its note for the user in it"
+          },
+          "attachments": {
+            "type": "array",
+            "description": "Brand guideline files for the review, uploaded with file-api `uploadFileV2`. At most 5.",
+            "items": {
+              "$ref": "#/components/schemas/BrandGuidelineAttachment"
+            }
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "BrandGuidelineAttachment": {
+        "type": "object",
+        "properties": {
+          "s3ref": {
+            "type": "object",
+            "properties": {
+              "bucket": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string",
+                "description": "Must start with the organization id, as file-api upload keys do"
+              }
+            },
+            "required": [
+              "bucket",
+              "key"
+            ]
+          },
+          "mime_type": {
+            "type": "string",
+            "enum": [
+              "application/pdf",
+              "image/png",
+              "image/jpeg",
+              "image/webp"
+            ]
+          },
+          "filename": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "s3ref",
+          "mime_type"
+        ]
+      },
+      "GeneratedDesignDocument": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "$ref": "#/components/schemas/Design_Document_V1"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DesignFinding"
+            }
+          },
+          "site_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "document",
+          "findings",
+          "site_name"
+        ]
+      },
+      "ReviewChange": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "primary_color",
+              "fonts",
+              "corners",
+              "primary_button",
+              "logo"
+            ]
+          },
+          "change": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "changed",
+              "added",
+              "removed"
+            ]
+          },
+          "origin": {
+            "type": "string",
+            "enum": [
+              "guidelines",
+              "website"
+            ],
+            "description": "Where the reviewed value comes from"
+          },
+          "source": {
+            "type": "string",
+            "description": "Where the review saw the value, in its own words, e.g. \"background of the hero CTA\""
+          }
+        },
+        "required": [
+          "id",
+          "change"
+        ]
+      },
+      "ReviewScreenshot": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer"
+          },
+          "label": {
+            "type": "string",
+            "description": "What it shows, e.g. \"desktop, first screen\""
+          },
+          "kind": {
+            "type": "string",
+            "description": "`page`, or a close-up of the element a token is read from: `cta`, `logo`, `heading`"
+          },
+          "box": {
+            "type": "object",
+            "description": "Where a close-up sits on the page, in CSS pixels (the desktop first screen starts at 0,0)",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "width": {
+                "type": "number"
+              },
+              "height": {
+                "type": "number"
+              }
+            }
+          },
+          "page_url": {
+            "type": "string"
+          },
+          "tool": {
+            "type": "string"
+          },
+          "taken_at": {
+            "type": "string"
+          },
+          "data_url": {
+            "type": "string",
+            "description": "JPEG as a data URL"
+          }
+        },
+        "required": [
+          "index",
+          "label",
+          "page_url",
+          "data_url"
+        ]
+      },
+      "ReviewedDesignDocument": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/GeneratedDesignDocument"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "notes": {
+                "type": "string",
+                "description": "The reviewer's note for the person checking the design, in the website's language"
+              },
+              "changes": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ReviewChange"
+                }
+              }
+            },
+            "required": [
+              "notes",
+              "changes"
+            ]
+          }
+        ]
+      },
+      "DesignDocumentJob": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Null when no review runs"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "running",
+              "completed",
+              "failed",
+              "skipped"
+            ],
+            "description": "`skipped`: no review runs (daily review limit, or it could not start); the baseline is the result"
+          },
+          "steps": {
+            "type": "array",
+            "description": "Browser tools the review used so far",
+            "items": {
+              "type": "string"
+            }
+          },
+          "screenshots": {
+            "type": "array",
+            "description": "Screenshots the review took, from `screenshots_after` on, oldest first",
+            "items": {
+              "$ref": "#/components/schemas/ReviewScreenshot"
+            }
+          },
+          "baseline": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/GeneratedDesignDocument"
+              }
+            ],
+            "nullable": true
+          },
+          "result": {
+            "$ref": "#/components/schemas/ReviewedDesignDocument"
+          }
+        },
+        "required": [
+          "job_id",
+          "status",
+          "steps",
+          "baseline"
         ]
       },
       "GeneratedDesign": {
