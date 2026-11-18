@@ -1055,7 +1055,11 @@
               },
               "placeholder": {
                 "type": "string",
-                "description": "Placeholder for the validation rule."
+                "description": "Placeholder shown to end customers in the input field the rule is applied to."
+              },
+              "description": {
+                "type": "string",
+                "description": "Internal note describing the rule. Only shown to users configuring rules, never to end customers."
               },
               "used_by": {
                 "type": "array",

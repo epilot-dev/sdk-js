@@ -217,9 +217,13 @@ declare namespace Components {
              */
             title: string;
             /**
-             * Placeholder for the validation rule.
+             * Placeholder shown to end customers in the input field the rule is applied to.
              */
             placeholder?: string;
+            /**
+             * Internal note describing the rule. Only shown to users configuring rules, never to end customers.
+             */
+            description?: string;
             /**
              * Describes where and how a validation rule is applied.
              */
@@ -1019,9 +1023,13 @@ declare namespace Components {
              */
             title?: string;
             /**
-             * Placeholder for the validation rule.
+             * Placeholder shown to end customers in the input field the rule is applied to.
              */
             placeholder?: string;
+            /**
+             * Internal note describing the rule. Only shown to users configuring rules, never to end customers.
+             */
+            description?: string;
             /**
              * Describes where and how a validation rule is applied.
              */
@@ -1109,9 +1117,13 @@ declare namespace Components {
              */
             title: string;
             /**
-             * Placeholder for the validation rule.
+             * Placeholder shown to end customers in the input field the rule is applied to.
              */
             placeholder?: string;
+            /**
+             * Internal note describing the rule. Only shown to users configuring rules, never to end customers.
+             */
+            description?: string;
             /**
              * Describes where and how a validation rule is applied.
              */
@@ -1194,9 +1206,13 @@ declare namespace Components {
              */
             title?: string;
             /**
-             * Placeholder for the validation rule.
+             * Placeholder shown to end customers in the input field the rule is applied to.
              */
             placeholder?: string;
+            /**
+             * Internal note describing the rule. Only shown to users configuring rules, never to end customers.
+             */
+            description?: string;
             /**
              * Describes where and how a validation rule is applied.
              */
