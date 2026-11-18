@@ -112,6 +112,30 @@
         "responses": {}
       }
     },
+    "/v1/mappings:validate": {
+      "post": {
+        "operationId": "validateMapping",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/mappings:validate-flow": {
+      "post": {
+        "operationId": "validateMappingFlow",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/mappings:search": {
       "post": {
         "operationId": "searchConfigs",
@@ -120,32 +144,6 @@
             "application/json": {}
           }
         },
-        "responses": {}
-      }
-    },
-    "/v1/mappings/history": {
-      "get": {
-        "operationId": "queryMappingHistory",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "to",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "targetEntityId"
-          },
-          {
-            "in": "query",
-            "name": "sourceEntityId"
-          }
-        ],
         "responses": {}
       }
     },
@@ -190,7 +188,25 @@
       }
     }
   },
-  "components": {},
+  "components": {
+    "responses": {
+      "MappingCheckUnauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "MappingCheckForbidden": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "MappingCheckTooLarge": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://entity-mapping.sls.epilot.io"
