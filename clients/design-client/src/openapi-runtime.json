@@ -85,6 +85,38 @@
         "responses": {}
       }
     },
+    "/v1/designs/{designId}/duplicate-as-v1": {
+      "post": {
+        "operationId": "duplicateDesignAsV1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/designs/{designId}/variables": {
+      "get": {
+        "operationId": "getDesignVariables",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "designId",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/designs/{designId}/parse": {
       "get": {
         "operationId": "getThemeFromDesign",
@@ -130,6 +162,36 @@
             "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v1/designs/document/generate/jobs": {
+      "post": {
+        "operationId": "createDesignDocumentJob",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/designs/document/generate/jobs/{jobId}": {
+      "get": {
+        "operationId": "getDesignDocumentJob",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "screenshots_after",
+            "in": "query",
+            "required": false
+          }
+        ],
         "responses": {}
       }
     },

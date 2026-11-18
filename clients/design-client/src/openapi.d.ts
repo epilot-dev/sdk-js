@@ -19,7 +19,7 @@ declare namespace Components {
         }
         export interface AddDesignReq {
             /**
-             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.
+             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme`. A v1 update writes each changed primary colour, font, radius and logo into `style` (`palette.primary`, `typography.font`, `shape.border_radius`, `logo.main`) and deletes the matching `custom_theme` key, so journeys paint the edit. It also writes a set one whose journey field is missing and has no `custom_theme` key, which a journey paints as the fallback. A v1 create does the same when it sends no journey fields. Other groups never reach journeys. A v1 update may carry the `journey` group.
              */
             design: {
                 brand_id?: string;
@@ -302,7 +302,7 @@ declare namespace Components {
         }
         export interface AddDesignRes {
             /**
-             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.
+             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme`. A v1 update writes each changed primary colour, font, radius and logo into `style` (`palette.primary`, `typography.font`, `shape.border_radius`, `logo.main`) and deletes the matching `custom_theme` key, so journeys paint the edit. It also writes a set one whose journey field is missing and has no `custom_theme` key, which a journey paints as the fallback. A v1 create does the same when it sends no journey fields. Other groups never reach journeys. A v1 update may carry the `journey` group.
              */
             design?: {
                 id?: string;
@@ -599,9 +599,36 @@ declare namespace Components {
          * journey
          */
         export type Application = string;
+        export interface BrandGuidelineAttachment {
+            s3ref: {
+                bucket: string;
+                /**
+                 * Must start with the organization id, as file-api upload keys do
+                 */
+                key: string;
+            };
+            mime_type: "application/pdf" | "image/png" | "image/jpeg" | "image/webp";
+            filename?: string;
+        }
         export interface ConsumerData {
             widgets: (WidgetData)[];
             customer_portals: (CustomerPortalData)[];
+        }
+        export interface CreateDesignDocumentJobReq {
+            /**
+             * Public website to read the design from
+             * example:
+             * https://www.stadtwerke-musterstadt.de
+             */
+            url: string; // uri
+            /**
+             * Language of the design builder; the review writes its note for the user in it
+             */
+            language?: "de" | "en";
+            /**
+             * Brand guideline files for the review, uploaded with file-api `uploadFileV2`. At most 5.
+             */
+            attachments?: BrandGuidelineAttachment[];
         }
         export interface CustomStyle {
             custom_theme?: string;
@@ -611,8 +638,32 @@ declare namespace Components {
             id: string;
             name: string;
         }
+        export interface DesignDocumentJob {
+            /**
+             * Null when no review runs
+             */
+            job_id: string | null; // uuid
+            /**
+             * `skipped`: no review runs (daily review limit, or it could not start); the baseline is the result
+             */
+            status: "running" | "completed" | "failed" | "skipped";
+            /**
+             * Browser tools the review used so far
+             */
+            steps: string[];
+            /**
+             * Screenshots the review took, from `screenshots_after` on, oldest first
+             */
+            screenshots?: ReviewScreenshot[];
+            baseline: {
+                document: /* Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme`. A v1 update writes each changed primary colour, font, radius and logo into `style` (`palette.primary`, `typography.font`, `shape.border_radius`, `logo.main`) and deletes the matching `custom_theme` key, so journeys paint the edit. It also writes a set one whose journey field is missing and has no `custom_theme` key, which a journey paints as the fallback. A v1 create does the same when it sends no journey fields. Other groups never reach journeys. A v1 update may carry the `journey` group. */ DesignDocumentV1;
+                findings: DesignFinding[];
+                site_name: string;
+            } | null;
+            result?: ReviewedDesignDocument;
+        }
         /**
-         * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.
+         * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme`. A v1 update writes each changed primary colour, font, radius and logo into `style` (`palette.primary`, `typography.font`, `shape.border_radius`, `logo.main`) and deletes the matching `custom_theme` key, so journeys paint the edit. It also writes a set one whose journey field is missing and has no `custom_theme` key, which a journey paints as the fallback. A v1 create does the same when it sends no journey fields. Other groups never reach journeys. A v1 update may carry the `journey` group.
          */
         export interface DesignDocumentV1 {
             version?: 1;
@@ -687,6 +738,73 @@ declare namespace Components {
              */
             Application;
         }
+        export interface DuplicateDesignAsV1Plan {
+            message?: string;
+            conversion?: {
+                name?: string;
+                asset_questions?: {
+                    kind?: "logo" | "favicon";
+                    options?: {
+                        asset?: {
+                            [name: string]: any;
+                        };
+                        sources?: {
+                            portal_id?: string;
+                            portal_name?: string;
+                            page?: string;
+                        }[];
+                    }[];
+                }[];
+                journey_questions?: {
+                    leaf?: "primary_color" | "font" | "border_radius" | "logo";
+                    /**
+                     * The value journeys paint; null when they paint Concorde's fallback
+                     */
+                    journeys?: any;
+                    /**
+                     * The value of the converted design
+                     */
+                    design?: any;
+                    /**
+                     * Whether the design can take the journeys' value
+                     */
+                    adoptable?: boolean;
+                }[];
+                open?: {
+                    assets?: string[];
+                    journeys?: string[];
+                };
+                unmapped?: {
+                    [name: string]: any;
+                };
+                radius_adjusted?: {
+                    [name: string]: any;
+                };
+                hex_normalized?: {
+                    [name: string]: string;
+                };
+                notes?: string[];
+                invalid?: string[];
+            };
+        }
+        export interface DuplicateDesignAsV1Req {
+            dry_run?: boolean;
+            answers?: {
+                /**
+                 * Index of the chosen option per asset kind, null keeps the converted one
+                 */
+                assets?: {
+                    logo?: number | null;
+                    favicon?: number | null;
+                };
+                journeys?: {
+                    primary_color?: JourneyChoice;
+                    font?: JourneyChoice;
+                    border_radius?: JourneyChoice;
+                    logo?: JourneyChoice;
+                };
+            };
+        }
         export interface ErrorResp {
             message?: string;
             /**
@@ -738,7 +856,7 @@ declare namespace Components {
             url: string; // uri
         }
         export interface GenerateDesignDocumentRes {
-            document: /* Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet. */ DesignDocumentV1;
+            document: /* Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme`. A v1 update writes each changed primary colour, font, radius and logo into `style` (`palette.primary`, `typography.font`, `shape.border_radius`, `logo.main`) and deletes the matching `custom_theme` key, so journeys paint the edit. It also writes a set one whose journey field is missing and has no `custom_theme` key, which a journey paints as the fallback. A v1 create does the same when it sends no journey fields. Other groups never reach journeys. A v1 update may carry the `journey` group. */ DesignDocumentV1;
             findings: [
                 DesignFinding,
                 DesignFinding,
@@ -790,6 +908,11 @@ declare namespace Components {
                     borderRadius: string;
                 };
             };
+        }
+        export interface GeneratedDesignDocument {
+            document: /* Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme`. A v1 update writes each changed primary colour, font, radius and logo into `style` (`palette.primary`, `typography.font`, `shape.border_radius`, `logo.main`) and deletes the matching `custom_theme` key, so journeys paint the edit. It also writes a set one whose journey field is missing and has no `custom_theme` key, which a journey paints as the fallback. A v1 create does the same when it sends no journey fields. Other groups never reach journeys. A v1 update may carry the `journey` group. */ DesignDocumentV1;
+            findings: DesignFinding[];
+            site_name: string;
         }
         export interface GetAllDesignsRes {
             designs?: {
@@ -1083,7 +1206,7 @@ declare namespace Components {
         }
         export interface GetDesignRes {
             /**
-             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.
+             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme`. A v1 update writes each changed primary colour, font, radius and logo into `style` (`palette.primary`, `typography.font`, `shape.border_radius`, `logo.main`) and deletes the matching `custom_theme` key, so journeys paint the edit. It also writes a set one whose journey field is missing and has no `custom_theme` key, which a journey paints as the fallback. A v1 create does the same when it sends no journey fields. Other groups never reach journeys. A v1 update may carry the `journey` group.
              */
             design?: {
                 id?: string;
@@ -1374,6 +1497,22 @@ declare namespace Components {
                 consumer?: ConsumerData;
             };
         }
+        export interface GetDesignVariablesRes {
+            design_id: string;
+            /**
+             * `design.name`, `design.colors.primary | background | neutral`, `design.colors.custom.<id>`, `design.typography.heading | body.family | url`, `design.shape.radius`, `design.buttons.primary | secondary | tertiary.color` and `design.assets.logo.url`. Unset values without a default are left out.
+             * example:
+             * {
+             *   "design.name": "Stadtwerke Blau",
+             *   "design.colors.primary": "#0054A6",
+             *   "design.shape.radius": "8",
+             *   "design.assets.logo.url": "https://go.epilot.cloud/designs/org/logo/logo.png"
+             * }
+             */
+            variables: {
+                [name: string]: string;
+            };
+        }
         export type GetFilesRes = {
             name: string;
             display_name?: string;
@@ -1635,6 +1774,8 @@ declare namespace Components {
                 chip_hover_text_color?: string;
             };
         }
+        export type JourneyChoice = "sync" | "design" | "keep";
+        export type JourneyWrite = "keep" | "sync";
         export interface LogoData {
             main?: FileData;
         }
@@ -1703,6 +1844,55 @@ declare namespace Components {
              */
             DesignId;
         }
+        export interface ReviewChange {
+            id: "primary_color" | "fonts" | "corners" | "primary_button" | "logo";
+            change: "confirmed" | "changed" | "added" | "removed";
+            /**
+             * Where the reviewed value comes from
+             */
+            origin?: "guidelines" | "website";
+            /**
+             * Where the review saw the value, in its own words, e.g. "background of the hero CTA"
+             */
+            source?: string;
+        }
+        export interface ReviewScreenshot {
+            index: number;
+            /**
+             * What it shows, e.g. "desktop, first screen"
+             */
+            label: string;
+            /**
+             * `page`, or a close-up of the element a token is read from: `cta`, `logo`, `heading`
+             */
+            kind?: string;
+            /**
+             * Where a close-up sits on the page, in CSS pixels (the desktop first screen starts at 0,0)
+             */
+            box?: {
+                x?: number;
+                y?: number;
+                width?: number;
+                height?: number;
+            };
+            page_url: string;
+            tool?: string;
+            taken_at?: string;
+            /**
+             * JPEG as a data URL
+             */
+            data_url: string;
+        }
+        export interface ReviewedDesignDocument {
+            document: /* Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme`. A v1 update writes each changed primary colour, font, radius and logo into `style` (`palette.primary`, `typography.font`, `shape.border_radius`, `logo.main`) and deletes the matching `custom_theme` key, so journeys paint the edit. It also writes a set one whose journey field is missing and has no `custom_theme` key, which a journey paints as the fallback. A v1 create does the same when it sends no journey fields. Other groups never reach journeys. A v1 update may carry the `journey` group. */ DesignDocumentV1;
+            findings: DesignFinding[];
+            site_name: string;
+            /**
+             * The reviewer's note for the person checking the design, in the website's language
+             */
+            notes: string;
+            changes: ReviewChange[];
+        }
         export interface ShapeData {
             border_radius?: number;
         }
@@ -1720,7 +1910,7 @@ declare namespace Components {
         export interface UpdateDesignConflict {
             message?: string;
             /**
-             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.
+             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme`. A v1 update writes each changed primary colour, font, radius and logo into `style` (`palette.primary`, `typography.font`, `shape.border_radius`, `logo.main`) and deletes the matching `custom_theme` key, so journeys paint the edit. It also writes a set one whose journey field is missing and has no `custom_theme` key, which a journey paints as the fallback. A v1 create does the same when it sends no journey fields. Other groups never reach journeys. A v1 update may carry the `journey` group.
              */
             design?: {
                 id?: string;
@@ -2013,7 +2203,7 @@ declare namespace Components {
         }
         export interface UpdateDesignReq {
             /**
-             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme` as stored. The `journey` group is not accepted yet.
+             * Groups of the design document v1. A design is v1 when `version` is 1, otherwise it is the old shape (`style`, `design_tokens`, `custom_theme`). The authoritative contract for the groups is the schema exported by @epilot/design-document. A v1 design keeps `style`, `design_tokens`, `custom_theme` and `use_custom_theme`. A v1 update writes each changed primary colour, font, radius and logo into `style` (`palette.primary`, `typography.font`, `shape.border_radius`, `logo.main`) and deletes the matching `custom_theme` key, so journeys paint the edit. It also writes a set one whose journey field is missing and has no `custom_theme` key, which a journey paints as the fallback. A v1 create does the same when it sends no journey fields. Other groups never reach journeys. A v1 update may carry the `journey` group.
              */
             design: {
                 brand_id?: string;
@@ -2293,6 +2483,15 @@ declare namespace Components {
                 };
                 consumer?: ConsumerData;
             };
+            /**
+             * Only with a version 1 body. Per journey leaf, overrides the default write-through: `keep` does not write a changed leaf into the journey fields, `sync` writes the design's value even when it did not change (nothing when the design has no value). Not stored.
+             */
+            journey_write?: {
+                primary_color?: JourneyWrite;
+                font?: JourneyWrite;
+                border_radius?: JourneyWrite;
+                logo?: JourneyWrite;
+            };
         }
         export interface UploadFileReq {
             file_type: "LOGO" | "FONT" | "IMAGE";
@@ -2356,6 +2555,20 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorResp;
         }
     }
+    namespace CreateDesignDocumentJob {
+        export type RequestBody = Components.Schemas.CreateDesignDocumentJobReq;
+        namespace Responses {
+            export type $201 = Components.Schemas.DesignDocumentJob;
+            export type $202 = Components.Schemas.DesignDocumentJob;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $403 = Components.Schemas.ErrorResp;
+            export type $422 = Components.Schemas.ErrorResp;
+            export type $429 = Components.Schemas.ErrorResp;
+            export type $502 = Components.Schemas.ErrorResp;
+            export type $504 = Components.Schemas.ErrorResp;
+        }
+    }
     namespace DeleteDesign {
         namespace Parameters {
             export type DesignId = /**
@@ -2399,6 +2612,29 @@ declare namespace Paths {
             export interface $404 {
             }
             export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
+    namespace DuplicateDesignAsV1 {
+        namespace Parameters {
+            export type DesignId = /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            Components.Schemas.DesignId;
+        }
+        export interface PathParameters {
+            designId: Parameters.DesignId;
+        }
+        export type RequestBody = Components.Schemas.DuplicateDesignAsV1Req;
+        namespace Responses {
+            export type $200 = Components.Schemas.DuplicateDesignAsV1Plan;
+            export type $201 = Components.Schemas.AddDesignRes;
+            export type $400 = Components.Schemas.ErrorResp;
+            export interface $404 {
+            }
+            export type $409 = Components.Schemas.DuplicateDesignAsV1Plan;
+            export type $502 = Components.Schemas.ErrorResp;
         }
     }
     namespace GenerateDesign {
@@ -2476,6 +2712,45 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.GetDesignRes;
+            export type $400 = Components.Schemas.ErrorResp;
+            export type $401 = Components.Schemas.ErrorResp;
+            export interface $404 {
+            }
+            export type $500 = Components.Schemas.ErrorResp;
+        }
+    }
+    namespace GetDesignDocumentJob {
+        namespace Parameters {
+            export type JobId = string; // uuid
+            export type ScreenshotsAfter = number;
+        }
+        export interface PathParameters {
+            jobId: Parameters.JobId /* uuid */;
+        }
+        export interface QueryParameters {
+            screenshots_after?: Parameters.ScreenshotsAfter;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.DesignDocumentJob;
+            export type $401 = Components.Schemas.ErrorResp;
+            export type $403 = Components.Schemas.ErrorResp;
+            export type $404 = Components.Schemas.ErrorResp;
+        }
+    }
+    namespace GetDesignVariables {
+        namespace Parameters {
+            export type DesignId = /**
+             * Id of the design
+             * example:
+             * 4a062990-a6a3-11eb-9828-4f3da7d4935a
+             */
+            Components.Schemas.DesignId;
+        }
+        export interface PathParameters {
+            designId: Parameters.DesignId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.GetDesignVariablesRes;
             export type $400 = Components.Schemas.ErrorResp;
             export type $401 = Components.Schemas.ErrorResp;
             export interface $404 {
@@ -2656,6 +2931,26 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DuplicateDesign.Responses.$201>
   /**
+   * duplicateDesignAsV1 - duplicateDesignAsV1
+   * 
+   * Duplicate a classic design (no version) as a v1 design document. The original stays as it is. The copy is named "<name> (v1)", starts with no journeys or portals and keeps the original's journey fields, so a journey switched to it later paints the same. Where the conversion needs a decision, the questions come back first: which logo and favicon the portal pages using the design show, and, for every value journeys paint differently from the design (primary colour, font, radius, logo), whether journeys take the design's value (sync), the design takes the journeys' value (design) or both stay (keep). Send `dry_run` to get the questions, then the answers to create the copy. Needs the design-document-v1 feature flag.
+   */
+  'duplicateDesignAsV1'(
+    parameters?: Parameters<Paths.DuplicateDesignAsV1.PathParameters> | null,
+    data?: Paths.DuplicateDesignAsV1.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DuplicateDesignAsV1.Responses.$200 | Paths.DuplicateDesignAsV1.Responses.$201>
+  /**
+   * getDesignVariables - getDesignVariables
+   * 
+   * The design as flat `design.*` template variables (e.g. `design.colors.primary`, `design.assets.logo.url`), for consumers that render designs into text templates such as email templates. Classic designs are converted to design document v1 first, unset values take the defaults of `@epilot/design-document`, and every value is validated for use in HTML attributes and CSS (hex colors, `https:` URLs, numbers, font family lists). Values are not HTML-escaped; consumers escape them where they insert them.
+   */
+  'getDesignVariables'(
+    parameters?: Parameters<Paths.GetDesignVariables.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetDesignVariables.Responses.$200>
+  /**
    * getThemeFromDesign - getThemeFromDesign
    * 
    * Search for a especific design owned by user organization and parse them to a new or old theme. Deprecated: kept for old readers only. For a v1 design the response carries the v1 groups and the derived `journey` group next to the stored old fields and the theme built from them; new runtimes read the v1 groups.
@@ -2694,6 +2989,42 @@ export interface OperationMethods {
     data?: Paths.GenerateDesignDocument.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GenerateDesignDocument.Responses.$200 | Paths.GenerateDesignDocument.Responses.$201>
+  /**
+   * createDesignDocumentJob - createDesignDocumentJob
+   * 
+   * Generates a v1 design document from a public website like `generateDesignDocument`, returns it
+   * right away as `baseline`, and starts an AI review of it in the background. The review looks at the
+   * website in a real browser and reads the optional brand guideline files, then confirms or corrects
+   * the baseline (primary color, fonts, corners, primary button, logo). Poll `getDesignDocumentJob`
+   * for the reviewed document.
+   * 
+   * Each call counts toward the 20 generations per organization and UTC day. Reviews have their own
+   * limit of 5 per organization and UTC day; past it, or when the review can't start, the response is
+   * 201 with `review.status: skipped` and the baseline is the result. When the deterministic generation
+   * finds nothing, the review builds the document on its own and `baseline` is null.
+   * 
+   * Brand guideline files are uploaded with file-api `uploadFileV2` first and referenced by `s3ref`.
+   * 
+   */
+  'createDesignDocumentJob'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateDesignDocumentJob.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateDesignDocumentJob.Responses.$201 | Paths.CreateDesignDocumentJob.Responses.$202>
+  /**
+   * getDesignDocumentJob - getDesignDocumentJob
+   * 
+   * The state of a design document review started with `createDesignDocumentJob`. While it runs,
+   * `steps` lists the browser tools used so far. When it completes, `result` holds the reviewed design
+   * document, the reviewer's note and how each finding changed. A failed review keeps the baseline.
+   * Jobs are kept for one day.
+   * 
+   */
+  'getDesignDocumentJob'(
+    parameters?: Parameters<Paths.GetDesignDocumentJob.QueryParameters & Paths.GetDesignDocumentJob.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetDesignDocumentJob.Responses.$200>
   /**
    * getFiles - getFiles
    * 
@@ -2813,6 +3144,30 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DuplicateDesign.Responses.$201>
   }
+  ['/v1/designs/{designId}/duplicate-as-v1']: {
+    /**
+     * duplicateDesignAsV1 - duplicateDesignAsV1
+     * 
+     * Duplicate a classic design (no version) as a v1 design document. The original stays as it is. The copy is named "<name> (v1)", starts with no journeys or portals and keeps the original's journey fields, so a journey switched to it later paints the same. Where the conversion needs a decision, the questions come back first: which logo and favicon the portal pages using the design show, and, for every value journeys paint differently from the design (primary colour, font, radius, logo), whether journeys take the design's value (sync), the design takes the journeys' value (design) or both stay (keep). Send `dry_run` to get the questions, then the answers to create the copy. Needs the design-document-v1 feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.DuplicateDesignAsV1.PathParameters> | null,
+      data?: Paths.DuplicateDesignAsV1.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DuplicateDesignAsV1.Responses.$200 | Paths.DuplicateDesignAsV1.Responses.$201>
+  }
+  ['/v1/designs/{designId}/variables']: {
+    /**
+     * getDesignVariables - getDesignVariables
+     * 
+     * The design as flat `design.*` template variables (e.g. `design.colors.primary`, `design.assets.logo.url`), for consumers that render designs into text templates such as email templates. Classic designs are converted to design document v1 first, unset values take the defaults of `@epilot/design-document`, and every value is validated for use in HTML attributes and CSS (hex colors, `https:` URLs, numbers, font family lists). Values are not HTML-escaped; consumers escape them where they insert them.
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetDesignVariables.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetDesignVariables.Responses.$200>
+  }
   ['/v1/designs/{designId}/parse']: {
     /**
      * getThemeFromDesign - getThemeFromDesign
@@ -2857,6 +3212,46 @@ export interface PathsDictionary {
       data?: Paths.GenerateDesignDocument.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GenerateDesignDocument.Responses.$200 | Paths.GenerateDesignDocument.Responses.$201>
+  }
+  ['/v1/designs/document/generate/jobs']: {
+    /**
+     * createDesignDocumentJob - createDesignDocumentJob
+     * 
+     * Generates a v1 design document from a public website like `generateDesignDocument`, returns it
+     * right away as `baseline`, and starts an AI review of it in the background. The review looks at the
+     * website in a real browser and reads the optional brand guideline files, then confirms or corrects
+     * the baseline (primary color, fonts, corners, primary button, logo). Poll `getDesignDocumentJob`
+     * for the reviewed document.
+     * 
+     * Each call counts toward the 20 generations per organization and UTC day. Reviews have their own
+     * limit of 5 per organization and UTC day; past it, or when the review can't start, the response is
+     * 201 with `review.status: skipped` and the baseline is the result. When the deterministic generation
+     * finds nothing, the review builds the document on its own and `baseline` is null.
+     * 
+     * Brand guideline files are uploaded with file-api `uploadFileV2` first and referenced by `s3ref`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateDesignDocumentJob.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateDesignDocumentJob.Responses.$201 | Paths.CreateDesignDocumentJob.Responses.$202>
+  }
+  ['/v1/designs/document/generate/jobs/{jobId}']: {
+    /**
+     * getDesignDocumentJob - getDesignDocumentJob
+     * 
+     * The state of a design document review started with `createDesignDocumentJob`. While it runs,
+     * `steps` lists the browser tools used so far. When it completes, `result` holds the reviewed design
+     * document, the reviewer's note and how each finding changed. A failed review keeps the baseline.
+     * Jobs are kept for one day.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetDesignDocumentJob.QueryParameters & Paths.GetDesignDocumentJob.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetDesignDocumentJob.Responses.$200>
   }
   ['/v1/designs/files']: {
     /**
@@ -2925,14 +3320,19 @@ export type AddConsumerReq = Components.Schemas.AddConsumerReq;
 export type AddDesignReq = Components.Schemas.AddDesignReq;
 export type AddDesignRes = Components.Schemas.AddDesignRes;
 export type Application = Components.Schemas.Application;
+export type BrandGuidelineAttachment = Components.Schemas.BrandGuidelineAttachment;
 export type ConsumerData = Components.Schemas.ConsumerData;
+export type CreateDesignDocumentJobReq = Components.Schemas.CreateDesignDocumentJobReq;
 export type Custom_Style = Components.Schemas.CustomStyle;
 export type CustomerPortalData = Components.Schemas.CustomerPortalData;
+export type DesignDocumentJob = Components.Schemas.DesignDocumentJob;
 export type Design_Document_V1 = Components.Schemas.DesignDocumentV1;
 export type DesignFinding = Components.Schemas.DesignFinding;
 export type DesignId = Components.Schemas.DesignId;
 export type DesignItem = Components.Schemas.DesignItem;
 export type DesignParameters = Components.Schemas.DesignParameters;
+export type DuplicateDesignAsV1Plan = Components.Schemas.DuplicateDesignAsV1Plan;
+export type DuplicateDesignAsV1Req = Components.Schemas.DuplicateDesignAsV1Req;
 export type ErrorResp = Components.Schemas.ErrorResp;
 export type FileData = Components.Schemas.FileData;
 export type FindingDetail = Components.Schemas.FindingDetail;
@@ -2945,15 +3345,22 @@ export type GenerateDesignDocumentRes = Components.Schemas.GenerateDesignDocumen
 export type GenerateDesignReq = Components.Schemas.GenerateDesignReq;
 export type GenerateDesignRes = Components.Schemas.GenerateDesignRes;
 export type GeneratedDesign = Components.Schemas.GeneratedDesign;
+export type GeneratedDesignDocument = Components.Schemas.GeneratedDesignDocument;
 export type GetAllDesignsRes = Components.Schemas.GetAllDesignsRes;
 export type GetDesignRes = Components.Schemas.GetDesignRes;
+export type GetDesignVariablesRes = Components.Schemas.GetDesignVariablesRes;
 export type GetFilesRes = Components.Schemas.GetFilesRes;
 export type ItemMetada = Components.Schemas.ItemMetada;
 export type Journey = Components.Schemas.Journey;
+export type JourneyChoice = Components.Schemas.JourneyChoice;
+export type Journey_Write = Components.Schemas.JourneyWrite;
 export type LogoData = Components.Schemas.LogoData;
 export type PaletteData = Components.Schemas.PaletteData;
 export type ParseThemeFromDesignResp = Components.Schemas.ParseThemeFromDesignResp;
 export type RemoveConsumerReq = Components.Schemas.RemoveConsumerReq;
+export type ReviewChange = Components.Schemas.ReviewChange;
+export type ReviewScreenshot = Components.Schemas.ReviewScreenshot;
+export type ReviewedDesignDocument = Components.Schemas.ReviewedDesignDocument;
 export type ShapeData = Components.Schemas.ShapeData;
 export type Theme = Components.Schemas.Theme;
 export type TypographyData = Components.Schemas.TypographyData;
