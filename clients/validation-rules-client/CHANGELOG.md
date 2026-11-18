@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0
+
+### Minor Changes
+
+- `ValidationRule.description`: optional internal note about the rule, kept apart from the customer-facing `placeholder`
+
 ## 1.6.0
 
 ### Minor Changes
