@@ -63,6 +63,7 @@ epilot email-settings provisionEpilotEmailAddress
 - [`disconnectOutlook`](#disconnectoutlook) — Removes the Microsoft 365 / Outlook connection for a specific tenant.
 - [`connectOutlookMailbox`](#connectoutlookmailbox) — Connects an Outlook mailbox:
 - [`disconnectOutlookMailbox`](#disconnectoutlookmailbox) — Disconnects a single Outlook mailbox by email address.
+- [`updateOutlookMailboxSyncOptions`](#updateoutlookmailboxsyncoptions) — Replaces the sync options of an already connected Outlook mailbox. The body replaces the stored
 - [`startMailboxSync`](#startmailboxsync) — Triggers an Outlook mailbox sync for the specified email address.
 - [`getMailboxSyncStatus`](#getmailboxsyncstatus) — Returns the current or latest sync status for the specified mailbox.
 - [`getMailboxSyncEstimate`](#getmailboxsyncestimate) — Counts the inbox and sent messages a mailbox sync would import for each timeframe, with the same date filter the
@@ -1151,7 +1152,11 @@ epilot email-settings connectOutlookMailbox \
   "user_ids": ["string"],
   "group_ids": ["string"],
   "default_signature_id": "string",
-  "mailboxSyncTimeframe": "5m"
+  "mailboxSyncTimeframe": "5m",
+  "sync_options": {
+    "deletion_policy": "mirror",
+    "recent_window_days": 1
+  }
 }'
 ```
 
@@ -1237,6 +1242,67 @@ epilot email-settings disconnectOutlookMailbox -p email=user@example.com --jsona
 {
   "success": true,
   "email": "user@example.com"
+}
+```
+
+</details>
+
+---
+
+### `updateOutlookMailboxSyncOptions`
+
+Replaces the sync options of an already connected Outlook mailbox. The body replaces the stored
+
+`PUT /v2/outlook/mailbox/{email}/sync-options`
+
+**Parameters**
+
+| Name | In | Type | Required | Description |
+| ---- | -- | ---- | -------- | ----------- |
+| `email` | path | string (email) | Yes | Email address of the connected Outlook mailbox |
+
+**Request Body** (required)
+
+**Sample Call**
+
+```bash
+epilot email-settings updateOutlookMailboxSyncOptions \
+  -p email=user@example.com \
+  -d '{"deletion_policy":"mirror","recent_window_days":1}'
+```
+
+Using positional args for path parameters:
+
+```bash
+epilot email-settings updateOutlookMailboxSyncOptions user@example.com
+```
+
+Using stdin pipe:
+
+```bash
+cat body.json | epilot email-settings updateOutlookMailboxSyncOptions -p email=user@example.com
+```
+
+With JSONata filter:
+
+```bash
+epilot email-settings updateOutlookMailboxSyncOptions -p email=user@example.com --jsonata 'outlook_email'
+```
+
+<details>
+<summary>Sample Response</summary>
+
+```json
+{
+  "outlook_email": "user@example.com",
+  "tenant_id": "string",
+  "provider": "outlook",
+  "connected_at": "1970-01-01T00:00:00.000Z",
+  "connected_by_user_id": "string",
+  "sync_options": {
+    "deletion_policy": "mirror",
+    "recent_window_days": 1
+  }
 }
 ```
 
@@ -1518,7 +1584,11 @@ epilot email-settings getConnectedOutlookEmails --jsonata 'outlook_emails'
       "tenant_id": "string",
       "provider": "outlook",
       "connected_at": "1970-01-01T00:00:00.000Z",
-      "connected_by_user_id": "string"
+      "connected_by_user_id": "string",
+      "sync_options": {
+        "deletion_policy": "mirror",
+        "recent_window_days": 1
+      }
     }
   ],
   "count": 0

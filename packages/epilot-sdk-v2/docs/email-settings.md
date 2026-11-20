@@ -52,6 +52,7 @@ const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 - [`disconnectOutlook`](#disconnectoutlook)
 - [`connectOutlookMailbox`](#connectoutlookmailbox)
 - [`disconnectOutlookMailbox`](#disconnectoutlookmailbox)
+- [`updateOutlookMailboxSyncOptions`](#updateoutlookmailboxsyncoptions)
 - [`startMailboxSync`](#startmailboxsync)
 - [`getMailboxSyncStatus`](#getmailboxsyncstatus)
 - [`getMailboxSyncEstimate`](#getmailboxsyncestimate)
@@ -110,6 +111,7 @@ const { data } = await emailSettingsClient.provisionEpilotEmailAddress(...)
 - [`CreateSharedInboxPayload`](#createsharedinboxpayload)
 - [`SharedInboxResponse`](#sharedinboxresponse)
 - [`SettingsResponse`](#settingsresponse)
+- [`OutlookMailboxSyncOptions`](#outlookmailboxsyncoptions)
 - [`ConnectedOutlookEmail`](#connectedoutlookemail)
 - [`OutlookConnectionError`](#outlookconnectionerror)
 - [`CalendarAdminConsentStatus`](#calendaradminconsentstatus)
@@ -863,7 +865,11 @@ const { data } = await client.connectOutlookMailbox(
     user_ids: ['string'],
     group_ids: ['string'],
     default_signature_id: 'string',
-    mailboxSyncTimeframe: '5m'
+    mailboxSyncTimeframe: '5m',
+    sync_options: {
+      deletion_policy: 'mirror',
+      recent_window_days: 1
+    }
   },
 )
 ```
@@ -919,6 +925,45 @@ const { data } = await client.disconnectOutlookMailbox({
 {
   "success": true,
   "email": "user@example.com"
+}
+```
+
+</details>
+
+---
+
+### `updateOutlookMailboxSyncOptions`
+
+Update Outlook Mailbox Sync Options
+
+`PUT /v2/outlook/mailbox/{email}/sync-options`
+
+```ts
+const { data } = await client.updateOutlookMailboxSyncOptions(
+  {
+    email: 'example',
+  },
+  {
+    deletion_policy: 'mirror',
+    recent_window_days: 1
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "outlook_email": "user@example.com",
+  "tenant_id": "string",
+  "provider": "outlook",
+  "connected_at": "1970-01-01T00:00:00.000Z",
+  "connected_by_user_id": "string",
+  "sync_options": {
+    "deletion_policy": "mirror",
+    "recent_window_days": 1
+  }
 }
 ```
 
@@ -1092,7 +1137,11 @@ const { data } = await client.getConnectedOutlookEmails()
       "tenant_id": "string",
       "provider": "outlook",
       "connected_at": "1970-01-01T00:00:00.000Z",
-      "connected_by_user_id": "string"
+      "connected_by_user_id": "string",
+      "sync_options": {
+        "deletion_policy": "mirror",
+        "recent_window_days": 1
+      }
     }
   ],
   "count": 0
@@ -2140,6 +2189,18 @@ type SettingsResponse = Array<{
 }
 ```
 
+### `OutlookMailboxSyncOptions`
+
+Per-mailbox options for what happens in epilot when a mail is deleted in Outlook.
+
+
+```ts
+type OutlookMailboxSyncOptions = {
+  deletion_policy: "mirror" | "mirror_recent" | "keep"
+  recent_window_days?: number
+}
+```
+
 ### `ConnectedOutlookEmail`
 
 Mapping between an Outlook email and its Outlook Connection.
@@ -2153,6 +2214,10 @@ type ConnectedOutlookEmail = {
   provider?: "outlook"
   connected_at?: string // date-time
   connected_by_user_id?: string
+  sync_options?: {
+    deletion_policy: "mirror" | "mirror_recent" | "keep"
+    recent_window_days?: number
+  }
 }
 ```
 
