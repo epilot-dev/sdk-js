@@ -59,6 +59,9 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`getIntegrationV2`](#getintegrationv2)
 - [`updateIntegrationV2`](#updateintegrationv2)
 - [`deleteIntegrationV2`](#deleteintegrationv2)
+- [`bootstrapIntegrationLifecycle`](#bootstrapintegrationlifecycle)
+- [`notifyIntegrationConfigChanged`](#notifyintegrationconfigchanged)
+- [`getIntegrationLifecycle`](#getintegrationlifecycle)
 - [`listNotificationHistory`](#listnotificationhistory)
 - [`testSendNotification`](#testsendnotification)
 - [`getNotificationStatus`](#getnotificationstatus)
@@ -124,6 +127,11 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`getImportTemplate`](#getimporttemplate)
 - [`updateImportTemplate`](#updateimporttemplate)
 - [`deleteImportTemplate`](#deleteimporttemplate)
+
+**bulk-imports**
+- [`getBulkImportWindow`](#getbulkimportwindow)
+- [`putBulkImportWindow`](#putbulkimportwindow)
+- [`deleteBulkImportWindow`](#deletebulkimportwindow)
 
 **Schemas**
 - [`CreateImportRequest`](#createimportrequest)
@@ -192,6 +200,8 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`IntegrationMap`](#integrationmap)
 - [`EnvironmentFieldConfig`](#environmentfieldconfig)
 - [`IntegrationConfig`](#integrationconfig)
+- [`IntegrationLifecycleDelivery`](#integrationlifecycledelivery)
+- [`IntegrationLifecycle`](#integrationlifecycle)
 - [`IntegrationSettings`](#integrationsettings)
 - [`AutoRefreshSettings`](#autorefreshsettings)
 - [`IntegrationNotificationConfig`](#integrationnotificationconfig)
@@ -378,6 +388,12 @@ const { data } = await integrationToolkitClient.acknowledgeTracking(...)
 - [`DocumentationPageSummary`](#documentationpagesummary)
 - [`DocumentationPage`](#documentationpage)
 - [`UpsertDocumentationPageRequest`](#upsertdocumentationpagerequest)
+- [`BulkImportWindowRequest`](#bulkimportwindowrequest)
+- [`BulkImportWindow`](#bulkimportwindow)
+- [`BulkImportLane`](#bulkimportlane)
+- [`BulkImportWindowLimits`](#bulkimportwindowlimits)
+- [`BulkImportWindowStatus`](#bulkimportwindowstatus)
+- [`BulkImportWindowRefusal`](#bulkimportwindowrefusal)
 
 ### `acknowledgeTracking`
 
@@ -481,6 +497,8 @@ const { data } = await client.processErpUpdatesEventsV3(
 
 ```json
 {
+  "code": "REQUEST_TOO_WIDE",
+  "message": "string",
   "correlation_id": "string",
   "correlation_close": {
     "outcome": "applied",
@@ -493,7 +511,8 @@ const { data } = await client.processErpUpdatesEventsV3(
       "status": "success",
       "interactive": true,
       "lane": "interactive",
-      "message": "string"
+      "message": "string",
+      "code": "EVENT_TOO_WIDE"
     }
   ]
 }
@@ -2521,6 +2540,104 @@ const { data } = await client.deleteIntegrationV2({
 
 ---
 
+### `bootstrapIntegrationLifecycle`
+
+Bootstraps the integration's middleware, or re-bootstraps it: issues a
+new apiKey with the org role the integration names (the previous key is
+revoked), a new signing secret and a new lifecycle versio
+
+`POST /v2/integrations/{integrationId}:bootstrap`
+
+```ts
+const { data } = await client.bootstrapIntegrationLifecycle({
+  integrationId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "action": "CREATE",
+  "version": 1,
+  "status_code": 0,
+  "response": "string",
+  "delivered_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `notifyIntegrationConfigChanged`
+
+Tells the integration's middleware that its configuration changed: sends
+the lifecycle webhook `UPDATE`, signed with the integration's signing
+secret (Standard Webhooks `v1`) and with a new lifecycle 
+
+`POST /v2/integrations/{integrationId}:config-changed`
+
+```ts
+const { data } = await client.notifyIntegrationConfigChanged({
+  integrationId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "action": "CREATE",
+  "version": 1,
+  "status_code": 0,
+  "response": "string",
+  "delivered_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `getIntegrationLifecycle`
+
+The integration's bootstrap status: whether lifecycle webhooks are
+enabled for the org, whether the middleware is bootstrapped, the current
+lifecycle version and the last delivery (without its body).
+
+`GET /v2/integrations/{integrationId}/lifecycle`
+
+```ts
+const { data } = await client.getIntegrationLifecycle({
+  integrationId: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "enabled": true,
+  "bootstrapped": true,
+  "version": 0,
+  "last_delivery": {
+    "action": "CREATE",
+    "version": 1,
+    "status_code": 0,
+    "response": "string",
+    "delivered_at": "1970-01-01T00:00:00.000Z"
+  }
+}
+```
+
+</details>
+
+---
+
 ### `listNotificationHistory`
 
 Returns the cursor-paginated, newest-first notification history for an
@@ -3846,48 +3963,15 @@ const { data } = await client.createErpImport(
       "blocking": 0,
       "warnings": 0,
       "entities": {},
-      "entity_details": [
-        {
-          "mapping_index": 0,
-          "entity_schema": "string",
-          "business_key": {},
-          "variants": 0,
-          "versions": 0,
-          "condition_attributes": ["grid_area"],
-          "version_attribute": "valid_from"
-        }
-      ],
-      "meter_readings": {
-        "readings": 0,
-        "meters": 0
-      },
-      "issues": [
-        {
-          "code": "UNIQUE_ID_COLUMN_MISSING",
-          "severity": "warning",
-          "columns": [
-            {
-              "name": "string",
-              "entity": "string"
-            }
-          ],
-          "attributes": [
-            {
-              "name": "string",
-              "entity": "string"
-            }
-          ],
-          "lines": [0],
-          "subject": "string",
-          "row": 0,
-          "expected": "number"
-        }
-      ]
+      "entity_details": [],
+      "meter_readings": {},
+      "issues": []
     },
     "progress": {
       "processed_rows": 0,
       "total_rows": 0,
-      "events_published": 0
+      "events_published": 0,
+      "waiting_for_capacity": {}
     },
     "error": {
       "code": "VALIDATION_BLOCKED",
@@ -3902,14 +3986,7 @@ const { data } = await client.createErpImport(
       "with_caveats": 0,
       "failed": 0,
       "unreported": 0,
-      "results": [
-        {
-          "code": "string",
-          "level": "success",
-          "entity_schema": "string",
-          "count": 0
-        }
-      ]
+      "results": []
     },
     "notify": true,
     "suggestion": {},
@@ -3959,82 +4036,13 @@ const { data } = await client.listErpImports({
       "template_name": "string",
       "format": "csv",
       "status": "PENDING",
-      "s3_input_ref": {
-        "bucket": "string",
-        "key": "string"
-      },
+      "s3_input_ref": {},
       "size_bytes": 0,
       "column_count": 0,
-      "validation": {
-        "total_rows": 0,
-        "blocking": 0,
-        "warnings": 0,
-        "entities": {},
-        "entity_details": [
-          {
-            "mapping_index": 0,
-            "entity_schema": "string",
-            "business_key": {},
-            "variants": 0,
-            "versions": 0,
-            "condition_attributes": ["grid_area"],
-            "version_attribute": "valid_from"
-          }
-        ],
-        "meter_readings": {
-          "readings": 0,
-          "meters": 0
-        },
-        "issues": [
-          {
-            "code": "UNIQUE_ID_COLUMN_MISSING",
-            "severity": "warning",
-            "columns": [
-              {
-                "name": "string",
-                "entity": "string"
-              }
-            ],
-            "attributes": [
-              {
-                "name": "string",
-                "entity": "string"
-              }
-            ],
-            "lines": [0],
-            "subject": "string",
-            "row": 0,
-            "expected": "number"
-          }
-        ]
-      },
-      "progress": {
-        "processed_rows": 0,
-        "total_rows": 0,
-        "events_published": 0
-      },
-      "error": {
-        "code": "VALIDATION_BLOCKED",
-        "message": "string"
-      },
-      "writing": {
-        "status": "WRITING",
-        "started_at": "1970-01-01T00:00:00.000Z",
-        "finished_at": "1970-01-01T00:00:00.000Z",
-        "events": 0,
-        "succeeded": 0,
-        "with_caveats": 0,
-        "failed": 0,
-        "unreported": 0,
-        "results": [
-          {
-            "code": "string",
-            "level": "success",
-            "entity_schema": "string",
-            "count": 0
-          }
-        ]
-      },
+      "validation": {},
+      "progress": {},
+      "error": {},
+      "writing": {},
       "notify": true,
       "suggestion": {},
       "correlation_id": "string",
@@ -4128,7 +4136,12 @@ const { data } = await client.getErpImport({
   "progress": {
     "processed_rows": 0,
     "total_rows": 0,
-    "events_published": 0
+    "events_published": 0,
+    "waiting_for_capacity": {
+      "since": "1970-01-01T00:00:00.000Z",
+      "retry_at": "1970-01-01T00:00:00.000Z",
+      "gives_up_at": "1970-01-01T00:00:00.000Z"
+    }
   },
   "error": {
     "code": "VALIDATION_BLOCKED",
@@ -4371,48 +4384,15 @@ const { data } = await client.createImport(
       "blocking": 0,
       "warnings": 0,
       "entities": {},
-      "entity_details": [
-        {
-          "mapping_index": 0,
-          "entity_schema": "string",
-          "business_key": {},
-          "variants": 0,
-          "versions": 0,
-          "condition_attributes": ["grid_area"],
-          "version_attribute": "valid_from"
-        }
-      ],
-      "meter_readings": {
-        "readings": 0,
-        "meters": 0
-      },
-      "issues": [
-        {
-          "code": "UNIQUE_ID_COLUMN_MISSING",
-          "severity": "warning",
-          "columns": [
-            {
-              "name": "string",
-              "entity": "string"
-            }
-          ],
-          "attributes": [
-            {
-              "name": "string",
-              "entity": "string"
-            }
-          ],
-          "lines": [0],
-          "subject": "string",
-          "row": 0,
-          "expected": "number"
-        }
-      ]
+      "entity_details": [],
+      "meter_readings": {},
+      "issues": []
     },
     "progress": {
       "processed_rows": 0,
       "total_rows": 0,
-      "events_published": 0
+      "events_published": 0,
+      "waiting_for_capacity": {}
     },
     "error": {
       "code": "VALIDATION_BLOCKED",
@@ -4427,14 +4407,7 @@ const { data } = await client.createImport(
       "with_caveats": 0,
       "failed": 0,
       "unreported": 0,
-      "results": [
-        {
-          "code": "string",
-          "level": "success",
-          "entity_schema": "string",
-          "count": 0
-        }
-      ]
+      "results": []
     },
     "notify": true,
     "suggestion": {},
@@ -4484,82 +4457,13 @@ const { data } = await client.listImports({
       "template_name": "string",
       "format": "csv",
       "status": "PENDING",
-      "s3_input_ref": {
-        "bucket": "string",
-        "key": "string"
-      },
+      "s3_input_ref": {},
       "size_bytes": 0,
       "column_count": 0,
-      "validation": {
-        "total_rows": 0,
-        "blocking": 0,
-        "warnings": 0,
-        "entities": {},
-        "entity_details": [
-          {
-            "mapping_index": 0,
-            "entity_schema": "string",
-            "business_key": {},
-            "variants": 0,
-            "versions": 0,
-            "condition_attributes": ["grid_area"],
-            "version_attribute": "valid_from"
-          }
-        ],
-        "meter_readings": {
-          "readings": 0,
-          "meters": 0
-        },
-        "issues": [
-          {
-            "code": "UNIQUE_ID_COLUMN_MISSING",
-            "severity": "warning",
-            "columns": [
-              {
-                "name": "string",
-                "entity": "string"
-              }
-            ],
-            "attributes": [
-              {
-                "name": "string",
-                "entity": "string"
-              }
-            ],
-            "lines": [0],
-            "subject": "string",
-            "row": 0,
-            "expected": "number"
-          }
-        ]
-      },
-      "progress": {
-        "processed_rows": 0,
-        "total_rows": 0,
-        "events_published": 0
-      },
-      "error": {
-        "code": "VALIDATION_BLOCKED",
-        "message": "string"
-      },
-      "writing": {
-        "status": "WRITING",
-        "started_at": "1970-01-01T00:00:00.000Z",
-        "finished_at": "1970-01-01T00:00:00.000Z",
-        "events": 0,
-        "succeeded": 0,
-        "with_caveats": 0,
-        "failed": 0,
-        "unreported": 0,
-        "results": [
-          {
-            "code": "string",
-            "level": "success",
-            "entity_schema": "string",
-            "count": 0
-          }
-        ]
-      },
+      "validation": {},
+      "progress": {},
+      "error": {},
+      "writing": {},
       "notify": true,
       "suggestion": {},
       "correlation_id": "string",
@@ -4652,7 +4556,12 @@ const { data } = await client.getImport({
   "progress": {
     "processed_rows": 0,
     "total_rows": 0,
-    "events_published": 0
+    "events_published": 0,
+    "waiting_for_capacity": {
+      "since": "1970-01-01T00:00:00.000Z",
+      "retry_at": "1970-01-01T00:00:00.000Z",
+      "gives_up_at": "1970-01-01T00:00:00.000Z"
+    }
   },
   "error": {
     "code": "VALIDATION_BLOCKED",
@@ -5081,6 +4990,104 @@ const { data } = await client.deleteImportTemplate({
 
 ---
 
+### `getBulkImportWindow`
+
+The bulk import window of the caller's organisation, if one is booked, and
+the lane its inbound updates run on right now. During a window the
+organisation's updates run on their own lane, so a large i
+
+`GET /v1/bulk-imports/window`
+
+```ts
+const { data } = await client.getBulkImportWindow()
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "enabled": true,
+  "window": {
+    "starts_at": "1970-01-01T00:00:00.000Z",
+    "ends_at": "1970-01-01T00:00:00.000Z",
+    "note": "string",
+    "created_at": "1970-01-01T00:00:00.000Z",
+    "created_by": "string",
+    "status": "scheduled",
+    "started_at": "1970-01-01T00:00:00.000Z"
+  },
+  "lane": {
+    "status": "shared",
+    "since": "1970-01-01T00:00:00.000Z",
+    "backlog": 0,
+    "estimate": "empty",
+    "estimated_finish_at": "1970-01-01T00:00:00.000Z"
+  },
+  "limits": {
+    "max_duration_hours": 24,
+    "max_lead_days": 30,
+    "note_max_length": 500
+  }
+}
+```
+
+</details>
+
+---
+
+### `putBulkImportWindow`
+
+Books the bulk import window of the caller's organisation. A window that
+has not started yet is replaced; one that is active is refused
+(`window-active`). A window lasts at most 24 hours and starts at
+
+`PUT /v1/bulk-imports/window`
+
+```ts
+const { data } = await client.putBulkImportWindow(
+  null,
+  {
+    starts_at: '2026-11-24T06:00:00Z',
+    ends_at: '2026-11-24T18:00:00Z',
+    note: 'Migration of all contracts from SAP'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "starts_at": "1970-01-01T00:00:00.000Z",
+  "ends_at": "1970-01-01T00:00:00.000Z",
+  "note": "string",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": "string",
+  "status": "scheduled",
+  "started_at": "1970-01-01T00:00:00.000Z"
+}
+```
+
+</details>
+
+---
+
+### `deleteBulkImportWindow`
+
+Cancels the bulk import window of the caller's organisation. An active
+window may be cancelled too: its own lane is then given back by the
+normal rules, once the updates already on it are done.
+
+`DELETE /v1/bulk-imports/window`
+
+```ts
+const { data } = await client.deleteBulkImportWindow()
+```
+
+---
+
 ## Schemas
 
 ### `CreateImportRequest`
@@ -5130,6 +5137,7 @@ type CreateImportResponse = {
       processed_rows: { ... }
       total_rows?: { ... }
       events_published?: { ... }
+      waiting_for_capacity?: { ... }
     }
     error?: {
       code: { ... }
@@ -5221,9 +5229,14 @@ type ImportJob = {
     processed_rows: number
     total_rows?: number
     events_published?: number
+    waiting_for_capacity?: {
+      since: { ... }
+      retry_at?: { ... }
+      gives_up_at?: { ... }
+    }
   }
   error?: {
-    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "INTERNAL_ERROR"
+    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "BULK_CAPACITY_EXHAUSTED" | "INTERNAL_ERROR"
     message: string
   }
   writing?: {
@@ -5282,6 +5295,7 @@ type ImportList = {
       processed_rows: { ... }
       total_rows?: { ... }
       events_published?: { ... }
+      waiting_for_capacity?: { ... }
     }
     error?: {
       code: { ... }
@@ -5694,16 +5708,22 @@ type ErpImportProgress = {
   processed_rows: number
   total_rows?: number
   events_published?: number
+  waiting_for_capacity?: {
+    since: string // date-time
+    retry_at?: string // date-time
+    gives_up_at?: string // date-time
+  }
 }
 ```
 
 ### `ErpImportError`
 
 Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.
+`BULK_CAPACITY_EXHAUSTED` is retryable: the capacity for large data loads stayed in use for the whole waiting time. The import does not fail at onc
 
 ```ts
 type ErpImportError = {
-  code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "INTERNAL_ERROR"
+  code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "BULK_CAPACITY_EXHAUSTED" | "INTERNAL_ERROR"
   message: string
 }
 ```
@@ -5761,6 +5781,7 @@ type CreateErpImportResponse = {
       processed_rows: { ... }
       total_rows?: { ... }
       events_published?: { ... }
+      waiting_for_capacity?: { ... }
     }
     error?: {
       code: { ... }
@@ -5842,9 +5863,14 @@ type ErpImportJob = {
     processed_rows: number
     total_rows?: number
     events_published?: number
+    waiting_for_capacity?: {
+      since: { ... }
+      retry_at?: { ... }
+      gives_up_at?: { ... }
+    }
   }
   error?: {
-    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "INTERNAL_ERROR"
+    code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "BULK_CAPACITY_EXHAUSTED" | "INTERNAL_ERROR"
     message: string
   }
   writing?: {
@@ -5904,6 +5930,7 @@ type ErpImportList = {
       processed_rows: { ... }
       total_rows?: { ... }
       events_published?: { ... }
+      waiting_for_capacity?: { ... }
     }
     error?: {
       code: { ... }
@@ -6784,6 +6811,39 @@ type IntegrationConfig = {
   integration_id: string // uuid
   version: number
   environment: Record<string, string>
+}
+```
+
+### `IntegrationLifecycleDelivery`
+
+One lifecycle webhook delivery, without its body
+
+```ts
+type IntegrationLifecycleDelivery = {
+  action: "CREATE" | "UPDATE" | "DELETE"
+  version: number
+  status_code: number
+  response: string
+  delivered_at: string // date-time
+}
+```
+
+### `IntegrationLifecycle`
+
+The bootstrap status of an integration's middleware
+
+```ts
+type IntegrationLifecycle = {
+  enabled: boolean
+  bootstrapped: boolean
+  version: number
+  last_delivery?: {
+    action: "CREATE" | "UPDATE" | "DELETE"
+    version: number
+    status_code: number
+    response: string
+    delivered_at: string // date-time
+  }
 }
 ```
 
@@ -11417,7 +11477,7 @@ type MonitoringTraceResponse = {
     use_case_id?: string
     use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | ""
     level: "success" | "error" | "info" | "warning"
-    code?: "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SANDBOX_LANE" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_PARTNER_NOT_PROVISIONED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED" | string
+    code?: "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EVENT_TOO_WIDE" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SANDBOX_LANE" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_PARTNER_NOT_PROVISIONED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED" | string
     message?: string
     detail?: Record<string, unknown>
     created_at: string // date-time
@@ -11436,7 +11496,7 @@ This schema exists so consumers can import the union as a type. It never
 constrains
 
 ```ts
-type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SANDBOX_LANE" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_PARTNER_NOT_PROVISIONED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED"
+type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EVENT_TOO_WIDE" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SANDBOX_LANE" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_PARTNER_NOT_PROVISIONED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED"
 ```
 
 ### `MonitoringEventV2`
@@ -11451,7 +11511,7 @@ type MonitoringEventV2 = {
   use_case_id?: string
   use_case_type: "inbound" | "outbound" | "file_proxy" | "managed_call" | "secure_proxy" | ""
   level: "success" | "error" | "info" | "warning"
-  code?: "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SANDBOX_LANE" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_PARTNER_NOT_PROVISIONED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED" | string
+  code?: "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EVENT_TOO_WIDE" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SANDBOX_LANE" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_PARTNER_NOT_PROVISIONED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED" | string
   message?: string
   detail?: Record<string, unknown>
   created_at: string // date-time
@@ -11660,5 +11720,89 @@ type DocumentationPage = {
 type UpsertDocumentationPageRequest = {
   title: string
   content: string
+}
+```
+
+### `BulkImportWindowRequest`
+
+```ts
+type BulkImportWindowRequest = {
+  starts_at: string // date-time
+  ends_at: string // date-time
+  note: string
+}
+```
+
+### `BulkImportWindow`
+
+```ts
+type BulkImportWindow = {
+  starts_at: string // date-time
+  ends_at: string // date-time
+  note: string
+  created_at: string // date-time
+  created_by: string
+  status: "scheduled" | "active" | "ended"
+  started_at?: string // date-time
+}
+```
+
+### `BulkImportLane`
+
+```ts
+type BulkImportLane = {
+  status: "shared" | "preparing" | "dedicated" | "finishing"
+  since?: string // date-time
+  backlog?: number
+  estimate: "empty" | "finishes" | "growing" | "not_draining" | "unknown"
+  estimated_finish_at?: string // date-time
+}
+```
+
+### `BulkImportWindowLimits`
+
+```ts
+type BulkImportWindowLimits = {
+  max_duration_hours: number
+  max_lead_days: number
+  note_max_length: number
+}
+```
+
+### `BulkImportWindowStatus`
+
+```ts
+type BulkImportWindowStatus = {
+  enabled: boolean
+  window: {
+    starts_at: string // date-time
+    ends_at: string // date-time
+    note: string
+    created_at: string // date-time
+    created_by: string
+    status: "scheduled" | "active" | "ended"
+    started_at?: string // date-time
+  }
+  lane: {
+    status: "shared" | "preparing" | "dedicated" | "finishing"
+    since?: string // date-time
+    backlog?: number
+    estimate: "empty" | "finishes" | "growing" | "not_draining" | "unknown"
+    estimated_finish_at?: string // date-time
+  }
+  limits: {
+    max_duration_hours: number
+    max_lead_days: number
+    note_max_length: number
+  }
+}
+```
+
+### `BulkImportWindowRefusal`
+
+```ts
+type BulkImportWindowRefusal = {
+  error_code: "bulk-imports-unavailable" | "window-active" | "too-many-windows" | "window-too-long" | "starts-in-the-past" | "ends-before-start" | "starts-too-far-ahead"
+  message: string
 }
 ```

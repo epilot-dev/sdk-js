@@ -152,6 +152,11 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
     description: 'The environment variable an env_var_ref field points at does not exist, so the field was left unset',
   },
   EVENT_NOT_CONFIGURED: { level: 'error', description: 'No mapping configuration found for this event type' },
+  EVENT_TOO_WIDE: {
+    level: 'error',
+    description:
+      'The event would produce more updates than one event may (the default is 5,000), so none of it was processed. Split the event into several smaller events, or change the mapping so that one event produces fewer updates',
+  },
   EXTERNAL_API_ERROR: { level: 'error', description: 'An external API returned an error' },
   EXTERNAL_ERROR: {
     level: 'error',
@@ -354,7 +359,7 @@ export const MONITORING_CODES: Record<MonitoringCode, MonitoringCodeMeta> = {
   SANDBOX_LANE: {
     level: 'info',
     description:
-      'This organization is a sandbox, so its events are processed on the sandbox lane: isolated from production organizations and with a fixed, small capacity. Nothing is lost, but a large load takes proportionally longer than it would on a production organization. Use a production organization for full-volume migrations, or ask epilot for a time-boxed lift before a rehearsal. Reported at most once per hour per integration',
+      'This organization is a sandbox, so its large loads are processed at a deliberately low rate, separately from production organizations. Nothing is lost, but large loads take longer. Use a production organization for full-volume migrations, or ask epilot for a time-boxed lift before a rehearsal. Reported at most once per hour per integration',
   },
   SECURE_PROXY_DISABLED: { level: 'error', description: 'The secure proxy use case is disabled' },
   SECURE_PROXY_DOMAIN_BLOCKED: { level: 'error', description: 'The target domain is blocked' },

@@ -14,6 +14,16 @@ export declare namespace Components {
         export type CorrelationWaitRejected = Schemas.ErrorResponseBase;
         export interface ERPUpdatesResponse {
             /**
+             * Only on the refusal of a whole request that would produce too many updates.
+             *
+             */
+            code?: "REQUEST_TOO_WIDE";
+            /**
+             * Only with `code`: the refusal in words, naming the cap of the request and the cap of an event.
+             *
+             */
+            message?: string;
+            /**
              * The request's correlation id, echoed, or the one generated for it when the caller omitted it. This is the id to pass to `GET /v3/erp/updates/events?correlation_id=...` to wait for these events. v3 and v2 generate one when the request has none, so they always return it, except that v2 omits it for an empty `correlation_id`. v1 never generates one: it echoes a non-empty `meta.correlation_id` and otherwise omits the field.
              *
              */
@@ -44,6 +54,11 @@ export declare namespace Components {
                  */
                 lane?: "interactive" | "priority" | "default" | "deferred" | "sandbox";
                 message?: string;
+                /**
+                 * A stable code, present only on the results of events that were refused for one reason a caller can act on, and only with `status` `error`. `EVENT_TOO_WIDE`: the event would produce more updates than one event may (5,000 by default; the `message` names the cap and the count). `EVENT_EVALUATION_LIMIT`: the mapping of the event ran longer than 25 seconds, or built a generated sequence of more than 4 million items, and was stopped before its updates could be counted; it says nothing about the width of the event, which may be accepted in a smaller request. Nothing of the event was queued: send its data in several smaller events. The other events of the request are processed and have a result of their own; the response status is 422.
+                 *
+                 */
+                code?: "EVENT_TOO_WIDE" | "EVENT_EVALUATION_LIMIT";
             }[];
         }
         export interface ERPUpdatesRetryableResponse {
@@ -122,7 +137,47 @@ export declare namespace Components {
             to_date?: string; // date-time
             buckets?: Schemas.TimeSeriesBucketV2[];
         }
+        export interface IngestRetryLater {
+            /**
+             * Computer-readable error code
+             */
+            code: "BULK_CAPACITY_EXHAUSTED" | "INGEST_THROTTLED";
+            /**
+             * Error message
+             */
+            message: string;
+            /**
+             * The request's correlation id, echoed, or the one generated for it when the caller omitted it. Present when some events of the request were accepted, together with `results`.
+             *
+             */
+            correlation_id?: string;
+            correlation_close?: /**
+             * What became of the request's `correlation_complete`. Present exactly when the
+             * request carried `correlation_complete: true`; absent otherwise.
+             *
+             */
+            Schemas.CorrelationCloseResult;
+            /**
+             * Present when some events of the request were accepted.
+             */
+            results?: {
+                event_id: string;
+                status: "success" | "error" | "skipped" | "ignored";
+                message?: string;
+            }[];
+        }
         export type InternalServerError = Schemas.ErrorResponseBase;
+        export interface InvalidLifecycleSettings {
+            /**
+             * Computer-readable error code
+             */
+            code?: string;
+            /**
+             * Error message
+             */
+            message?: string;
+            problems?: string[];
+        }
         export type NotFound = Schemas.ErrorResponseBase;
         export interface QueryAccessLogsResponse {
             /**
@@ -1346,6 +1401,136 @@ export declare namespace Components {
              */
             freshnessThresholdMinutes?: number;
         }
+        export interface BulkImportLane {
+            /**
+             * `shared`: the organisation's updates run on the shared lane (no window
+             * in effect and no large import going on). `preparing`: the organisation
+             * has its own lane and the platform is making sure older updates are done
+             * first. `dedicated`: the updates run on the organisation's own lane.
+             * `finishing`: the own lane is being given back and still works off what
+             * is on it.
+             *
+             */
+            status: "shared" | "preparing" | "dedicated" | "finishing";
+            /**
+             * When the organisation got its own lane
+             */
+            since?: string; // date-time
+            /**
+             * Updates waiting on the organisation's own lane, as the platform last
+             * counted them (about once a minute). Absent on the shared lane, on a lane
+             * shared with other organisations, and when it could not be counted.
+             *
+             */
+            backlog?: number;
+            /**
+             * When the waiting updates will be done. `empty`: nothing waits.
+             * `finishes`: see `estimated_finish_at`. `growing`: more arrive than are
+             * done. `not_draining`: updates wait and none were done recently.
+             * `unknown`: it cannot be said, which is also the answer on the shared lane.
+             *
+             */
+            estimate: "empty" | "finishes" | "growing" | "not_draining" | "unknown";
+            /**
+             * Only with `estimate` `finishes`
+             */
+            estimated_finish_at?: string; // date-time
+        }
+        export interface BulkImportWindow {
+            starts_at: string; // date-time
+            ends_at: string; // date-time
+            note: string;
+            created_at: string; // date-time
+            /**
+             * The id of the user who booked the window
+             */
+            created_by: string;
+            /**
+             * `scheduled`: not started yet, can still be replaced. `active`: open now.
+             * `ended`: over, and removed by the platform shortly.
+             *
+             */
+            status: "scheduled" | "active" | "ended";
+            /**
+             * When the platform first saw the window open
+             */
+            started_at?: string; // date-time
+        }
+        export interface BulkImportWindowLimits {
+            /**
+             * example:
+             * 24
+             */
+            max_duration_hours: number;
+            /**
+             * example:
+             * 30
+             */
+            max_lead_days: number;
+            /**
+             * example:
+             * 500
+             */
+            note_max_length: number;
+        }
+        export interface BulkImportWindowRefusal {
+            error_code: "bulk-imports-unavailable" | "window-active" | "too-many-windows" | "window-too-long" | "starts-in-the-past" | "ends-before-start" | "starts-too-far-ahead";
+            /**
+             * One plain English sentence
+             */
+            message: string;
+        }
+        export interface BulkImportWindowRequest {
+            /**
+             * When the window opens (ISO 8601, UTC)
+             * example:
+             * 2026-11-24T06:00:00Z
+             */
+            starts_at: string; // date-time
+            /**
+             * When the window closes (ISO 8601, UTC); at most 24 hours after `starts_at`
+             * example:
+             * 2026-11-24T18:00:00Z
+             */
+            ends_at: string; // date-time
+            /**
+             * What the import is, for whoever looks at the window later
+             * example:
+             * Migration of all contracts from SAP
+             */
+            note: string;
+        }
+        export interface BulkImportWindowStatus {
+            /**
+             * Whether bulk import windows exist on this stage. When false a window
+             * cannot be booked (409 `bulk-imports-unavailable`); the lane is still
+             * reported.
+             *
+             */
+            enabled: boolean;
+            window: {
+                starts_at: string; // date-time
+                ends_at: string; // date-time
+                note: string;
+                created_at: string; // date-time
+                /**
+                 * The id of the user who booked the window
+                 */
+                created_by: string;
+                /**
+                 * `scheduled`: not started yet, can still be replaced. `active`: open now.
+                 * `ended`: over, and removed by the platform shortly.
+                 *
+                 */
+                status: "scheduled" | "active" | "ended";
+                /**
+                 * When the platform first saw the window open
+                 */
+                started_at?: string; // date-time
+            } | null;
+            lane: BulkImportLane;
+            limits: BulkImportWindowLimits;
+        }
         export interface CommitTypesRequest {
             /**
              * npm package name
@@ -1421,7 +1606,7 @@ export declare namespace Components {
             /**
              * Why the close was not applied, each cause once. Absent when `applied`.
              *
-             * - `retry_requested` - the response is a 422 or 429; the retry carries
+             * - `retry_requested` - the response is a 422, 429 or 503; the retry carries
              *   `correlation_complete` again and closes then.
              * - `queue_refused` - the queue refused an event of the request; send the
              *   close again once every event is accepted.
@@ -3363,13 +3548,14 @@ export declare namespace Components {
         }
         /**
          * Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.
+         * `BULK_CAPACITY_EXHAUSTED` is retryable: the capacity for large data loads stayed in use for the whole waiting time. The import does not fail at once: while it waits it keeps the status PROCESSING and tries again every minute, and the job's `progress.waiting_for_capacity` says that it is waiting and until when. Only after 6 hours of waiting does it fail with this code. Rows sent before that stay sent. Send the import again later with `:validate` followed by `:execute`; the rows already sent update the same entities again.
          */
         export interface ErpImportError {
             /**
              * Enum of possible error codes.
              *
              */
-            code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "INTERNAL_ERROR";
+            code: "VALIDATION_BLOCKED" | "FILE_FORMAT_UNSUPPORTED" | "FILE_UNAVAILABLE" | "VALIDATE_TIMEOUT" | "IMPORT_TIMEOUT" | "USE_CASE_NOT_USABLE" | "IMPORT_NO_PROGRESS" | "TIER_ROWS_NOT_GROUPED" | "CHUNK_TOO_LARGE" | "BULK_CAPACITY_EXHAUSTED" | "INTERNAL_ERROR";
             /**
              * One English sentence, derived from `code` so the two always agree. A fallback for a client that has no translation for this code — prefer translating `code`, and never parse this. It deliberately does NOT restate `validation.issues`.
              */
@@ -3542,7 +3728,11 @@ export declare namespace Components {
              * `total_rows` is ABSENT during the validate phase until the file has been read to the end — there is deliberately no counting pass, since that would be a second unbounded read of the whole file. Render an indeterminate indicator while it is missing: dividing by a missing total yields a determinate bar pinned at 0%, which reads as a hung import.
              */
             ErpImportProgress;
-            error?: /* Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`. */ ErpImportError;
+            error?: /**
+             * Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.
+             * `BULK_CAPACITY_EXHAUSTED` is retryable: the capacity for large data loads stayed in use for the whole waiting time. The import does not fail at once: while it waits it keeps the status PROCESSING and tries again every minute, and the job's `progress.waiting_for_capacity` says that it is waiting and until when. Only after 6 hours of waiting does it fail with this code. Rows sent before that stay sent. Send the import again later with `:validate` followed by `:execute`; the rows already sent update the same entities again.
+             */
+            ErpImportError;
             writing?: /* How far the platform got writing the rows an import handed over. IMPORTED (or CANCELLED) only means the rows were handed over; they are written afterwards, possibly for a while, with retries. Present once rows were handed over. */ ImportWriting;
             /**
              * Whether the person who started the import is notified once it is written, as asked on `:execute`.
@@ -3581,6 +3771,24 @@ export declare namespace Components {
              * Events handed to the platform so far — the denominator for "has everything this run dispatched finished processing?", answered per event by `getMonitoringRunCompletionV2` under the job's `correlation_id`. Equals `processed_rows` on the flat path; smaller on the grouped path, where rows sharing a variant-version collapse into one event. Execute phase only, and absent on jobs written before this field existed.
              */
             events_published?: number;
+            /**
+             * Present only while the import is waiting for room to continue. The import is waiting because the large-load capacity of your organization is in use at the moment. It continues by itself as soon as capacity is free, and nothing needs to be done. The status stays `PROCESSING`, and rows that were already sent stay sent. If capacity does not become free before `gives_up_at`, the import fails with the error code `BULK_CAPACITY_EXHAUSTED`, and you can send it again later.
+             * The field appears with the first refused attempt and is gone as soon as an attempt is accepted, when the import is aborted, and when it ends (imported, failed or cancelled). It is absent on an import that never had to wait. A later, separate wait reports a new `since`.
+             */
+            waiting_for_capacity?: {
+                /**
+                 * When this wait began, the time of the first refused attempt. It does not change while the same wait continues.
+                 */
+                since: string; // date-time
+                /**
+                 * When the next attempt is made, if known. The import tries again about every minute.
+                 */
+                retry_at?: string; // date-time
+                /**
+                 * The time after which the import fails with `BULK_CAPACITY_EXHAUSTED` if capacity is still not free. It is the end of the 6 hours the import waits in total, counted across all of its waits, so the import can fail a little later than shown here, never earlier.
+                 */
+                gives_up_at?: string; // date-time
+            };
         }
         export interface ErpImportUseCaseSuggestion {
             integration_id: string;
@@ -4996,7 +5204,11 @@ export declare namespace Components {
              * `total_rows` is ABSENT during the validate phase until the file has been read to the end — there is deliberately no counting pass, since that would be a second unbounded read of the whole file. Render an indeterminate indicator while it is missing: dividing by a missing total yields a determinate bar pinned at 0%, which reads as a hung import.
              */
             ErpImportProgress;
-            error?: /* Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`. */ ErpImportError;
+            error?: /**
+             * Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.
+             * `BULK_CAPACITY_EXHAUSTED` is retryable: the capacity for large data loads stayed in use for the whole waiting time. The import does not fail at once: while it waits it keeps the status PROCESSING and tries again every minute, and the job's `progress.waiting_for_capacity` says that it is waiting and until when. Only after 6 hours of waiting does it fail with this code. Rows sent before that stay sent. Send the import again later with `:validate` followed by `:execute`; the rows already sent update the same entities again.
+             */
+            ErpImportError;
             writing?: /* How far the platform got writing the rows an import handed over. IMPORTED (or CANCELLED) only means the rows were handed over; they are written afterwards, possibly for a while, with retries. Present once rows were handed over. */ ImportWriting;
             /**
              * Whether the person who started the import is notified once it is written, as asked on `:execute`.
@@ -6305,6 +6517,40 @@ export declare namespace Components {
             jsonataExpression?: string;
         }
         /**
+         * The bootstrap status of an integration's middleware
+         */
+        export interface IntegrationLifecycle {
+            /**
+             * Whether lifecycle webhooks are enabled for the org (rollout feature flag).
+             */
+            enabled: boolean;
+            /**
+             * Whether an apiKey and a signing secret were issued.
+             */
+            bootstrapped: boolean;
+            /**
+             * The current lifecycle version.
+             */
+            version: number;
+            last_delivery?: /* One lifecycle webhook delivery, without its body */ IntegrationLifecycleDelivery;
+        }
+        /**
+         * One lifecycle webhook delivery, without its body
+         */
+        export interface IntegrationLifecycleDelivery {
+            action: "CREATE" | "UPDATE" | "DELETE";
+            version: number;
+            /**
+             * The middleware's HTTP status; 0 when no answer arrived (timeout, connection error).
+             */
+            status_code: number;
+            /**
+             * The middleware's answer (or the transport error), truncated to 2000 characters.
+             */
+            response: string;
+            delivered_at: string; // date-time
+        }
+        /**
          * A flat key/value map stored as an Environments API variable of type `JSON`. Values must be strings, numbers, booleans or null; the serialised map must not exceed 32 KB.
          *
          */
@@ -6935,7 +7181,7 @@ export declare namespace Components {
          * `monitoring-code-enum.test.ts`, which fails if the two diverge.
          *
          */
-        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SANDBOX_LANE" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_PARTNER_NOT_PROVISIONED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED";
+        export type MonitoringCode = "ACK_CONFIRMED" | "ACK_PENDING" | "ACK_TIMEOUT" | "ATTACHMENT_NOT_FOUND" | "ATTRIBUTE_TYPE_MISMATCH" | "CONDITIONAL_VARIANTS_WRITTEN" | "CONDITIONAL_VARIANT_WRITE_FAILED" | "CONDITIONAL_VARIANT_WRITE_WARNING" | "CORRELATION_CLOSED_EMPTY" | "CORRELATION_CLOSED_INCOMPLETE" | "CORRELATION_CLOSE_IGNORED" | "CORRELATION_COMPLETED" | "CORRELATION_EVENT_LIMIT_EXCEEDED" | "CORRELATION_ID_MISSING" | "CORRELATION_LATE_EVENT" | "CORRELATION_REQUIREMENT_FAILED" | "CORRELATION_WAIT_REJECTED" | "CORRELATION_WAIT_TIMEOUT" | "DEPRECATED_ENDPOINT" | "DIRECT_ENTITY_NOT_ALLOWED" | "DIRECT_PAYLOAD_INVALID" | "DIRECT_VERSION_UNSUPPORTED" | "DUPLICATE_EVENT" | "ENTITY_CREATED" | "ENTITY_DELETED" | "ENTITY_NO_OP" | "ENTITY_REFERENCE_NOT_FOUND" | "ENTITY_UPDATED" | "ENV_VAR_REF_JSONATA_FAILED" | "ENV_VAR_REF_LOOKUP_FAILED" | "ENV_VAR_REF_NOT_FOUND" | "EVENT_NOT_CONFIGURED" | "EVENT_TOO_WIDE" | "EXTERNAL_API_ERROR" | "EXTERNAL_ERROR" | "EXTERNAL_INFO" | "EXTERNAL_SUCCESS" | "EXTERNAL_WARNING" | "FAN_OUT_EMPTY" | "FAN_OUT_INVALID_RESULT" | "FILE_EXTRACTION_FAILED" | "FILE_FETCH_FAILED" | "FILE_PROXY_OK" | "FILE_PROXY_UPLOADED" | "FILE_PROXY_UPLOAD_ENQUEUED" | "FILE_PROXY_UPLOAD_FAILED" | "FILE_PROXY_UPLOAD_RETRYING" | "FILE_TOO_LARGE" | "INTEGRATION_NOT_FOUND" | "INTERACTIVE_CROSS_LANE_WRITE" | "INTERACTIVE_NOT_ALLOWED" | "INTERACTIVE_RATE_LIMITED" | "INVALID_METER_READING_ATTRIBUTES" | "LOOKUP_UNMAPPED" | "MALFORMED_PAYLOAD" | "MAPPING_EXPRESSION_FAILED" | "METERING_API_ERROR" | "METER_READING_DELETED" | "METER_READING_GROUP_FAILED" | "METER_READING_GROUP_RETRYING" | "METER_READING_UPSERTED" | "MISSING_METER_COUNTER_UNIQUE_IDS" | "MISSING_METER_UNIQUE_IDS" | "MISSING_REQUIRED_PARAM" | "MISSING_UNIQUE_IDENTIFIERS" | "MSG_ACKED" | "MSG_DEAD_LETTERED" | "MSG_ENQUEUED" | "MSG_EXPIRED_UNPOLLED" | "MSG_HEAD_BLOCKED" | "MSG_LATE_ARRIVAL" | "OAUTH2_TOKEN_FAILURE" | "ORG_DROPPED" | "PAYLOAD_TOO_LARGE" | "PORTAL_REF_AMBIGUOUS" | "PORTAL_REF_JSONATA_FAILED" | "PORTAL_REF_LOOKUP_FAILED" | "PORTAL_REF_NO_MATCH" | "PROCESSING_STATE_LIMIT" | "PRUNE_SCOPE_COMPLETED" | "PRUNE_SCOPE_PARTIAL_FAILURE" | "RECURSION_DEPTH_EXCEEDED" | "RELATION_MISSING_UNIQUE_IDS" | "RELATION_REF_ITEM_NOT_FOUND" | "RELATION_REF_VALUE_UNDEFINED" | "REQUIRED_PARAM_MISSING" | "SANDBOX_LANE" | "SECURE_PROXY_DISABLED" | "SECURE_PROXY_DOMAIN_BLOCKED" | "SECURE_PROXY_DOMAIN_NOT_ALLOWED" | "SECURE_PROXY_ERROR" | "SECURE_PROXY_INVALID_CONFIG" | "SECURE_PROXY_INVALID_TYPE" | "SECURE_PROXY_INVALID_URL" | "SECURE_PROXY_IP_BLOCKED" | "SECURE_PROXY_IP_NOT_ALLOWED" | "SECURE_PROXY_NOT_FOUND" | "SECURE_PROXY_OK" | "SECURE_PROXY_UNAVAILABLE" | "SHARING_FAILED" | "SHARING_PARTNER_NOT_CONNECTED" | "SHARING_PARTNER_NOT_PROVISIONED" | "SHARING_REJECTED" | "SIGNATURE_VERIFICATION_FAILED" | "SIGNATURE_VERIFICATION_UNAVAILABLE" | "SOFT_DELETED_ENTITY_MATCHED" | "STEP_DISABLED" | "TIMEOUT" | "UNIQUE_ID_LOOKUP_UNRESOLVABLE" | "UNIQUE_ID_MULTIPLE_MATCHES" | "UNIQUE_ID_NOT_IN_SCHEMA" | "UNIQUE_ID_TYPE_DERIVATION_FAILED" | "UNKNOWN_ERROR" | "USE_CASE_DISABLED" | "USE_CASE_INVALID_TYPE" | "USE_CASE_MISSING_CONFIG" | "USE_CASE_NOT_FOUND" | "WEBHOOK_DELIVERED" | "WEBHOOK_DELIVERY_FAILED" | "WEBHOOK_SKIPPED";
         export interface MonitoringEventV2 {
             /**
              * Unique monitoring event ID
@@ -10008,6 +10254,22 @@ export declare namespace Paths {
             }
         }
     }
+    namespace BootstrapIntegrationLifecycle {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = /* One lifecycle webhook delivery, without its body */ Components.Schemas.IntegrationLifecycleDelivery;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $422 = Components.Responses.InvalidLifecycleSettings;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace CommitTypes {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -10094,6 +10356,16 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export interface $404 {
             }
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace DeleteBulkImportWindow {
+        namespace Responses {
+            export interface $204 {
+            }
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -10345,6 +10617,14 @@ export declare namespace Paths {
             export type $500 = Components.Responses.InternalServerError;
         }
     }
+    namespace GetBulkImportWindow {
+        namespace Responses {
+            export type $200 = Components.Schemas.BulkImportWindowStatus;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace GetDocumentationPage {
         namespace Parameters {
             export type DocId = string; // ^(general|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$
@@ -10497,6 +10777,21 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* The configuration of an integration, as served to its middleware */ Components.Schemas.IntegrationConfig;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
+    namespace GetIntegrationLifecycle {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = /* The bootstrap status of an integration's middleware */ Components.Schemas.IntegrationLifecycle;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
@@ -10972,6 +11267,23 @@ export declare namespace Paths {
             export type $502 = Components.Schemas.ManagedCallErrorResponse;
         }
     }
+    namespace NotifyIntegrationConfigChanged {
+        namespace Parameters {
+            export type IntegrationId = string; // uuid
+        }
+        export interface PathParameters {
+            integrationId: Parameters.IntegrationId /* uuid */;
+        }
+        namespace Responses {
+            export type $200 = /* One lifecycle webhook delivery, without its body */ Components.Schemas.IntegrationLifecycleDelivery;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $404 = Components.Responses.NotFound;
+            export type $409 = Components.Responses.Conflict;
+            export type $422 = Components.Responses.InvalidLifecycleSettings;
+            export type $500 = Components.Responses.InternalServerError;
+        }
+    }
     namespace PollOutboundMessages {
         namespace Parameters {
             export type IntegrationId = string; // uuid
@@ -11019,8 +11331,10 @@ export declare namespace Paths {
             export type $400 = Components.Responses.BadRequest;
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
+            export type $422 = Components.Responses.ERPUpdatesResponse;
             export type $429 = Components.Responses.ERPUpdatesRetryableResponse;
             export type $500 = Components.Responses.InternalServerError;
+            export type $503 = Components.Responses.IngestRetryLater;
         }
     }
     namespace ProcessErpUpdatesEventsV2 {
@@ -11031,8 +11345,10 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $422 = Components.Responses.ERPUpdatesResponse;
             export type $429 = Components.Responses.ERPUpdatesRetryableResponse;
             export type $500 = Components.Responses.InternalServerError;
+            export type $503 = Components.Responses.IngestRetryLater;
         }
     }
     namespace ProcessErpUpdatesEventsV3 {
@@ -11043,7 +11359,20 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $403 = Components.Responses.Forbidden;
             export type $404 = Components.Responses.NotFound;
+            export type $422 = Components.Responses.ERPUpdatesResponse;
             export type $429 = Components.Responses.ERPUpdatesRetryableResponse;
+            export type $500 = Components.Responses.InternalServerError;
+            export type $503 = Components.Responses.IngestRetryLater;
+        }
+    }
+    namespace PutBulkImportWindow {
+        export type RequestBody = Components.Schemas.BulkImportWindowRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.BulkImportWindow;
+            export type $400 = Components.Responses.BadRequest;
+            export type $401 = Components.Responses.Unauthorized;
+            export type $403 = Components.Responses.Forbidden;
+            export type $409 = Components.Schemas.BulkImportWindowRefusal;
             export type $500 = Components.Responses.InternalServerError;
         }
     }
@@ -11184,6 +11513,7 @@ export declare namespace Paths {
             export type $401 = Components.Responses.Unauthorized;
             export type $404 = Components.Responses.NotFound;
             export type $500 = Components.Responses.InternalServerError;
+            export type $503 = Components.Responses.IngestRetryLater;
         }
     }
     namespace SecureProxy {
@@ -12065,6 +12395,60 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteIntegrationV2.Responses.$200>
   /**
+   * bootstrapIntegrationLifecycle - bootstrapIntegrationLifecycle
+   * 
+   * Bootstraps the integration's middleware, or re-bootstraps it: issues a
+   * new apiKey with the org role the integration names (the previous key is
+   * revoked), a new signing secret and a new lifecycle version, and sends the
+   * lifecycle webhook `CREATE` to the integration's lifecycle webhook URL.
+   * 
+   * The URL and the role are environment variables the integration declares
+   * in its `environment_config`, under keys ending in `lifecycle_webhook_url`
+   * and `lifecycle_api_key_role` (e.g. `tap.lifecycle_webhook_url`).
+   * 
+   * `CREATE` carries the apiKey and the signing secret and is not signed; the
+   * middleware authenticates it by reading the configuration with the apiKey.
+   * Lifecycle webhooks are never stored with their body.
+   * 
+   * Answers `200` with the middleware's response whenever the webhook was
+   * sent, whatever the middleware answered: that is the bootstrap status.
+   * Behind the feature flag `integration-middleware-config` during rollout.
+   * 
+   */
+  'bootstrapIntegrationLifecycle'(
+    parameters?: Parameters<Paths.BootstrapIntegrationLifecycle.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BootstrapIntegrationLifecycle.Responses.$200>
+  /**
+   * notifyIntegrationConfigChanged - notifyIntegrationConfigChanged
+   * 
+   * Tells the integration's middleware that its configuration changed: sends
+   * the lifecycle webhook `UPDATE`, signed with the integration's signing
+   * secret (Standard Webhooks `v1`) and with a new lifecycle version. The
+   * Integration Hub calls it after saving the integration's values. `409`
+   * when the integration was never bootstrapped.
+   * 
+   */
+  'notifyIntegrationConfigChanged'(
+    parameters?: Parameters<Paths.NotifyIntegrationConfigChanged.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.NotifyIntegrationConfigChanged.Responses.$200>
+  /**
+   * getIntegrationLifecycle - getIntegrationLifecycle
+   * 
+   * The integration's bootstrap status: whether lifecycle webhooks are
+   * enabled for the org, whether the middleware is bootstrapped, the current
+   * lifecycle version and the last delivery (without its body).
+   * 
+   */
+  'getIntegrationLifecycle'(
+    parameters?: Parameters<Paths.GetIntegrationLifecycle.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetIntegrationLifecycle.Responses.$200>
+  /**
    * listNotificationHistory - listNotificationHistory
    * 
    * Returns the cursor-paginated, newest-first notification history for an
@@ -12919,6 +13303,49 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteImportTemplate.Responses.$204>
+  /**
+   * getBulkImportWindow - getBulkImportWindow
+   * 
+   * The bulk import window of the caller's organisation, if one is booked, and
+   * the lane its inbound updates run on right now. During a window the
+   * organisation's updates run on their own lane, so a large import or
+   * migration neither waits behind nor slows down other customers.
+   * `enabled` says whether windows can be booked on this stage at all.
+   * 
+   */
+  'getBulkImportWindow'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBulkImportWindow.Responses.$200>
+  /**
+   * putBulkImportWindow - putBulkImportWindow
+   * 
+   * Books the bulk import window of the caller's organisation. A window that
+   * has not started yet is replaced; one that is active is refused
+   * (`window-active`). A window lasts at most 24 hours and starts at most 30
+   * days ahead (and at most one minute in the past). Refusals answer 409 with
+   * an `error_code` and one plain sentence.
+   * 
+   */
+  'putBulkImportWindow'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.PutBulkImportWindow.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PutBulkImportWindow.Responses.$200>
+  /**
+   * deleteBulkImportWindow - deleteBulkImportWindow
+   * 
+   * Cancels the bulk import window of the caller's organisation. An active
+   * window may be cancelled too: its own lane is then given back by the
+   * normal rules, once the updates already on it are done.
+   * 
+   */
+  'deleteBulkImportWindow'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteBulkImportWindow.Responses.$204>
 }
 
 export interface PathsDictionary {
@@ -13501,6 +13928,66 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteIntegrationV2.Responses.$200>
+  }
+  ['/v2/integrations/{integrationId}:bootstrap']: {
+    /**
+     * bootstrapIntegrationLifecycle - bootstrapIntegrationLifecycle
+     * 
+     * Bootstraps the integration's middleware, or re-bootstraps it: issues a
+     * new apiKey with the org role the integration names (the previous key is
+     * revoked), a new signing secret and a new lifecycle version, and sends the
+     * lifecycle webhook `CREATE` to the integration's lifecycle webhook URL.
+     * 
+     * The URL and the role are environment variables the integration declares
+     * in its `environment_config`, under keys ending in `lifecycle_webhook_url`
+     * and `lifecycle_api_key_role` (e.g. `tap.lifecycle_webhook_url`).
+     * 
+     * `CREATE` carries the apiKey and the signing secret and is not signed; the
+     * middleware authenticates it by reading the configuration with the apiKey.
+     * Lifecycle webhooks are never stored with their body.
+     * 
+     * Answers `200` with the middleware's response whenever the webhook was
+     * sent, whatever the middleware answered: that is the bootstrap status.
+     * Behind the feature flag `integration-middleware-config` during rollout.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.BootstrapIntegrationLifecycle.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BootstrapIntegrationLifecycle.Responses.$200>
+  }
+  ['/v2/integrations/{integrationId}:config-changed']: {
+    /**
+     * notifyIntegrationConfigChanged - notifyIntegrationConfigChanged
+     * 
+     * Tells the integration's middleware that its configuration changed: sends
+     * the lifecycle webhook `UPDATE`, signed with the integration's signing
+     * secret (Standard Webhooks `v1`) and with a new lifecycle version. The
+     * Integration Hub calls it after saving the integration's values. `409`
+     * when the integration was never bootstrapped.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.NotifyIntegrationConfigChanged.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.NotifyIntegrationConfigChanged.Responses.$200>
+  }
+  ['/v2/integrations/{integrationId}/lifecycle']: {
+    /**
+     * getIntegrationLifecycle - getIntegrationLifecycle
+     * 
+     * The integration's bootstrap status: whether lifecycle webhooks are
+     * enabled for the org, whether the middleware is bootstrapped, the current
+     * lifecycle version and the last delivery (without its body).
+     * 
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetIntegrationLifecycle.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetIntegrationLifecycle.Responses.$200>
   }
   ['/v2/integrations/{integrationId}/notifications/history']: {
     /**
@@ -14457,6 +14944,51 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteImportTemplate.Responses.$204>
   }
+  ['/v1/bulk-imports/window']: {
+    /**
+     * getBulkImportWindow - getBulkImportWindow
+     * 
+     * The bulk import window of the caller's organisation, if one is booked, and
+     * the lane its inbound updates run on right now. During a window the
+     * organisation's updates run on their own lane, so a large import or
+     * migration neither waits behind nor slows down other customers.
+     * `enabled` says whether windows can be booked on this stage at all.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBulkImportWindow.Responses.$200>
+    /**
+     * putBulkImportWindow - putBulkImportWindow
+     * 
+     * Books the bulk import window of the caller's organisation. A window that
+     * has not started yet is replaced; one that is active is refused
+     * (`window-active`). A window lasts at most 24 hours and starts at most 30
+     * days ahead (and at most one minute in the past). Refusals answer 409 with
+     * an `error_code` and one plain sentence.
+     * 
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.PutBulkImportWindow.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PutBulkImportWindow.Responses.$200>
+    /**
+     * deleteBulkImportWindow - deleteBulkImportWindow
+     * 
+     * Cancels the bulk import window of the caller's organisation. An active
+     * window may be cancelled too: its own lane is then given back by the
+     * normal rules, once the updates already on it are done.
+     * 
+     */
+    'delete'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteBulkImportWindow.Responses.$204>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -14467,6 +14999,12 @@ export type AckOutboundMessagesRequest = Components.Schemas.AckOutboundMessagesR
 export type AckOutboundMessagesResponse = Components.Schemas.AckOutboundMessagesResponse;
 export type AckResult = Components.Schemas.AckResult;
 export type AutoRefreshSettings = Components.Schemas.AutoRefreshSettings;
+export type BulkImportLane = Components.Schemas.BulkImportLane;
+export type BulkImportWindow = Components.Schemas.BulkImportWindow;
+export type BulkImportWindowLimits = Components.Schemas.BulkImportWindowLimits;
+export type BulkImportWindowRefusal = Components.Schemas.BulkImportWindowRefusal;
+export type BulkImportWindowRequest = Components.Schemas.BulkImportWindowRequest;
+export type BulkImportWindowStatus = Components.Schemas.BulkImportWindowStatus;
 export type CommitTypesRequest = Components.Schemas.CommitTypesRequest;
 export type CommitTypesResponse = Components.Schemas.CommitTypesResponse;
 export type ConnectorConfig = Components.Schemas.ConnectorConfig;
@@ -14589,6 +15127,8 @@ export type IntegrationEntitySharing = Components.Schemas.IntegrationEntityShari
 export type IntegrationEntitySharingPartner = Components.Schemas.IntegrationEntitySharingPartner;
 export type IntegrationEntitySharingPartnerLookup = Components.Schemas.IntegrationEntitySharingPartnerLookup;
 export type IntegrationFieldV1 = Components.Schemas.IntegrationFieldV1;
+export type IntegrationLifecycle = Components.Schemas.IntegrationLifecycle;
+export type IntegrationLifecycleDelivery = Components.Schemas.IntegrationLifecycleDelivery;
 export type IntegrationMap = Components.Schemas.IntegrationMap;
 export type IntegrationMeterReading = Components.Schemas.IntegrationMeterReading;
 export type IntegrationNotificationConfig = Components.Schemas.IntegrationNotificationConfig;
