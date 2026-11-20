@@ -1,4 +1,4 @@
-import type { AxiosError, AxiosInstance } from 'axios';
+import type { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 
 export type RetryConfig = {
   /** Maximum number of retries for 429 responses. Set to 0 to disable. Default: 3 */
@@ -36,8 +36,15 @@ export const applyRetryInterceptor = (params: { client: AxiosInstance; config: R
 
     await sleep(delayMs);
 
-    const retryConfig = { ...error.config! };
-    retryConfig.headers.set(RETRY_COUNT_HEADER, String(retryCount + 1));
+    const failedConfig = error.config!;
+    const nextRetryCount = String(retryCount + 1);
+    let retryConfig: AxiosRequestConfig = { ...failedConfig };
+    // axios 0.x (e.g. the epilot360 import map) passes plain header objects; AxiosHeaders#set is axios 1.
+    if (typeof failedConfig.headers?.set === 'function') {
+      failedConfig.headers.set(RETRY_COUNT_HEADER, nextRetryCount);
+    } else {
+      retryConfig = { ...failedConfig, headers: { ...failedConfig.headers, [RETRY_COUNT_HEADER]: nextRetryCount } };
+    }
 
     return client.request(retryConfig);
   });

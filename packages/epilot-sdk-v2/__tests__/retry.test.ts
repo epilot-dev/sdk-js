@@ -94,6 +94,25 @@ describe('retry interceptor', () => {
     expect(client.request).toHaveBeenCalled();
   });
 
+  it('should retry 429 when the request headers are a plain object (axios 0.x)', async () => {
+    const { client, errorHandlers } = createMockClient();
+    applyRetryInterceptor({ client, config: {} });
+
+    const error = {
+      response: { status: 429, headers: { 'retry-after': '1' } },
+      config: { url: '/test', method: 'get', headers: { 'x-epilot-sdk-retry-count': '1' } },
+    } as unknown as AxiosError;
+    (client.request as ReturnType<typeof vi.fn>).mockResolvedValue({ status: 200 });
+
+    const retryPromise = errorHandlers[0](error);
+    await vi.advanceTimersByTimeAsync(1000);
+
+    await expect(retryPromise).resolves.toEqual({ status: 200 });
+    expect(client.request).toHaveBeenCalledWith(
+      expect.objectContaining({ headers: { 'x-epilot-sdk-retry-count': '2' } }),
+    );
+  });
+
   it('should stop retrying after maxRetries', async () => {
     const { client, errorHandlers } = createMockClient();
     applyRetryInterceptor({ client, config: { maxRetries: 2 } });
