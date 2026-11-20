@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Integration Toolkit API",
-    "version": "1.59.0",
+    "version": "1.64.0",
     "description": "API for integrating with external systems in a standardised way."
   },
   "tags": [
@@ -37,6 +37,10 @@
     {
       "name": "proxy",
       "description": "Secure proxy endpoints"
+    },
+    {
+      "name": "bulk-imports",
+      "description": "Bulk import windows - book a time in which the organisation's updates run on their own lane"
     }
   ],
   "servers": [
@@ -249,11 +253,17 @@
           "403": {
             "$ref": "#/components/responses/Forbidden"
           },
+          "422": {
+            "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
           "429": {
             "$ref": "#/components/responses/ERPUpdatesRetryableResponse"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/IngestRetryLater"
           }
         }
       }
@@ -320,11 +330,17 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "422": {
+            "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
           "429": {
             "$ref": "#/components/responses/ERPUpdatesRetryableResponse"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/IngestRetryLater"
           }
         }
       }
@@ -388,11 +404,17 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "422": {
+            "$ref": "#/components/responses/ERPUpdatesResponse"
+          },
           "429": {
             "$ref": "#/components/responses/ERPUpdatesRetryableResponse"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/IngestRetryLater"
           }
         }
       },
@@ -1820,6 +1842,9 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/IngestRetryLater"
           }
         }
       }
@@ -2703,6 +2728,168 @@
           },
           "404": {
             "description": "Integration not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}:bootstrap": {
+      "post": {
+        "operationId": "bootstrapIntegrationLifecycle",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "bootstrapIntegrationLifecycle",
+        "description": "Bootstraps the integration's middleware, or re-bootstraps it: issues a\nnew apiKey with the org role the integration names (the previous key is\nrevoked), a new signing secret and a new lifecycle version, and sends the\nlifecycle webhook `CREATE` to the integration's lifecycle webhook URL.\n\nThe URL and the role are environment variables the integration declares\nin its `environment_config`, under keys ending in `lifecycle_webhook_url`\nand `lifecycle_api_key_role` (e.g. `tap.lifecycle_webhook_url`).\n\n`CREATE` carries the apiKey and the signing secret and is not signed; the\nmiddleware authenticates it by reading the configuration with the apiKey.\nLifecycle webhooks are never stored with their body.\n\nAnswers `200` with the middleware's response whenever the webhook was\nsent, whatever the middleware answered: that is the bootstrap status.\nBehind the feature flag `integration-middleware-config` during rollout.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The webhook was sent; the middleware's answer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationLifecycleDelivery"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/InvalidLifecycleSettings"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}:config-changed": {
+      "post": {
+        "operationId": "notifyIntegrationConfigChanged",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "notifyIntegrationConfigChanged",
+        "description": "Tells the integration's middleware that its configuration changed: sends\nthe lifecycle webhook `UPDATE`, signed with the integration's signing\nsecret (Standard Webhooks `v1`) and with a new lifecycle version. The\nIntegration Hub calls it after saving the integration's values. `409`\nwhen the integration was never bootstrapped.\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The webhook was sent; the middleware's answer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationLifecycleDelivery"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/InvalidLifecycleSettings"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v2/integrations/{integrationId}/lifecycle": {
+      "get": {
+        "operationId": "getIntegrationLifecycle",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view"
+          }
+        ],
+        "summary": "getIntegrationLifecycle",
+        "description": "The integration's bootstrap status: whether lifecycle webhooks are\nenabled for the org, whether the middleware is bootstrapped, the current\nlifecycle version and the last delivery (without its body).\n",
+        "tags": [
+          "integrations"
+        ],
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true,
+            "description": "The integration ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The bootstrap status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationLifecycle"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -6399,6 +6586,129 @@
           }
         }
       }
+    },
+    "/v1/bulk-imports/window": {
+      "get": {
+        "operationId": "getBulkImportWindow",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:view"
+          }
+        ],
+        "summary": "getBulkImportWindow",
+        "description": "The bulk import window of the caller's organisation, if one is booked, and\nthe lane its inbound updates run on right now. During a window the\norganisation's updates run on their own lane, so a large import or\nmigration neither waits behind nor slows down other customers.\n`enabled` says whether windows can be booked on this stage at all.\n",
+        "tags": [
+          "bulk-imports"
+        ],
+        "responses": {
+          "200": {
+            "description": "The window (or none), the lane and the booking limits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkImportWindowStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "operationId": "putBulkImportWindow",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "putBulkImportWindow",
+        "description": "Books the bulk import window of the caller's organisation. A window that\nhas not started yet is replaced; one that is active is refused\n(`window-active`). A window lasts at most 24 hours and starts at most 30\ndays ahead (and at most one minute in the past). Refusals answer 409 with\nan `error_code` and one plain sentence.\n",
+        "tags": [
+          "bulk-imports"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkImportWindowRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The booked window",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkImportWindow"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "The window was refused; `error_code` says why",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkImportWindowRefusal"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBulkImportWindow",
+        "x-epilot-permissions": [
+          {
+            "action": "integration:manage"
+          }
+        ],
+        "summary": "deleteBulkImportWindow",
+        "description": "Cancels the bulk import window of the caller's organisation. An active\nwindow may be cancelled too: its own lane is then given back by the\nnormal rules, once the updates already on it are done.\n",
+        "tags": [
+          "bulk-imports"
+        ],
+        "responses": {
+          "204": {
+            "description": "The window was cancelled"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7282,12 +7592,36 @@
           "events_published": {
             "type": "integer",
             "description": "Events handed to the platform so far — the denominator for \"has everything this run dispatched finished processing?\", answered per event by `getMonitoringRunCompletionV2` under the job's `correlation_id`. Equals `processed_rows` on the flat path; smaller on the grouped path, where rows sharing a variant-version collapse into one event. Execute phase only, and absent on jobs written before this field existed."
+          },
+          "waiting_for_capacity": {
+            "type": "object",
+            "description": "Present only while the import is waiting for room to continue. The import is waiting because the large-load capacity of your organization is in use at the moment. It continues by itself as soon as capacity is free, and nothing needs to be done. The status stays `PROCESSING`, and rows that were already sent stay sent. If capacity does not become free before `gives_up_at`, the import fails with the error code `BULK_CAPACITY_EXHAUSTED`, and you can send it again later.\nThe field appears with the first refused attempt and is gone as soon as an attempt is accepted, when the import is aborted, and when it ends (imported, failed or cancelled). It is absent on an import that never had to wait. A later, separate wait reports a new `since`.",
+            "required": [
+              "since"
+            ],
+            "properties": {
+              "since": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When this wait began, the time of the first refused attempt. It does not change while the same wait continues."
+              },
+              "retry_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the next attempt is made, if known. The import tries again about every minute."
+              },
+              "gives_up_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The time after which the import fails with `BULK_CAPACITY_EXHAUSTED` if capacity is still not free. It is the end of the 6 hours the import waits in total, counted across all of its waits, so the import can fail a little later than shown here, never earlier."
+              }
+            }
           }
         }
       },
       "ErpImportError": {
         "type": "object",
-        "description": "Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.",
+        "description": "Why the import failed — present if and only if status = FAILED. `code` is the translation key; for VALIDATION_BLOCKED the specifics are in `validation`.\n`BULK_CAPACITY_EXHAUSTED` is retryable: the capacity for large data loads stayed in use for the whole waiting time. The import does not fail at once: while it waits it keeps the status PROCESSING and tries again every minute, and the job's `progress.waiting_for_capacity` says that it is waiting and until when. Only after 6 hours of waiting does it fail with this code. Rows sent before that stay sent. Send the import again later with `:validate` followed by `:execute`; the rows already sent update the same entities again.",
         "required": [
           "code",
           "message"
@@ -7306,6 +7640,7 @@
               "IMPORT_NO_PROGRESS",
               "TIER_ROWS_NOT_GROUPED",
               "CHUNK_TOO_LARGE",
+              "BULK_CAPACITY_EXHAUSTED",
               "INTERNAL_ERROR"
             ]
           },
@@ -8147,7 +8482,7 @@
           },
           "reasons": {
             "type": "array",
-            "description": "Why the close was not applied, each cause once. Absent when `applied`.\n\n- `retry_requested` - the response is a 422 or 429; the retry carries\n  `correlation_complete` again and closes then.\n- `queue_refused` - the queue refused an event of the request; send the\n  close again once every event is accepted.\n- `rate_limited`, `rate_limit_unavailable` - see `outcome: rate_limited`.\n- `other_integration` - the correlation belongs to another integration.\n- `events_under_own_correlation_ids`, `events_duplicate`,\n  `events_not_configured`, `events_not_interactive`, `events_unrecorded` -\n  the correlation does not exist and this request, which carries events,\n  recorded none under it, so there was nothing to close.\n- `close_failed` - the close could not be written; send it again.\n- `interactive_unavailable` - interactive processing is not available, so\n  there is no correlation to close.\n",
+            "description": "Why the close was not applied, each cause once. Absent when `applied`.\n\n- `retry_requested` - the response is a 422, 429 or 503; the retry carries\n  `correlation_complete` again and closes then.\n- `queue_refused` - the queue refused an event of the request; send the\n  close again once every event is accepted.\n- `rate_limited`, `rate_limit_unavailable` - see `outcome: rate_limited`.\n- `other_integration` - the correlation belongs to another integration.\n- `events_under_own_correlation_ids`, `events_duplicate`,\n  `events_not_configured`, `events_not_interactive`, `events_unrecorded` -\n  the correlation does not exist and this request, which carries events,\n  recorded none under it, so there was nothing to close.\n- `close_failed` - the close could not be written; send it again.\n- `interactive_unavailable` - interactive processing is not available, so\n  there is no correlation to close.\n",
             "items": {
               "type": "string",
               "enum": [
@@ -8969,6 +9304,70 @@
               "tap.base_url": "https://example.com/api",
               "tap.client_secret": "…"
             }
+          }
+        }
+      },
+      "IntegrationLifecycleDelivery": {
+        "type": "object",
+        "description": "One lifecycle webhook delivery, without its body",
+        "required": [
+          "action",
+          "version",
+          "status_code",
+          "response",
+          "delivered_at"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status_code": {
+            "type": "integer",
+            "description": "The middleware's HTTP status; 0 when no answer arrived (timeout, connection error)."
+          },
+          "response": {
+            "type": "string",
+            "description": "The middleware's answer (or the transport error), truncated to 2000 characters."
+          },
+          "delivered_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IntegrationLifecycle": {
+        "type": "object",
+        "description": "The bootstrap status of an integration's middleware",
+        "required": [
+          "enabled",
+          "bootstrapped",
+          "version"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether lifecycle webhooks are enabled for the org (rollout feature flag)."
+          },
+          "bootstrapped": {
+            "type": "boolean",
+            "description": "Whether an apiKey and a signing secret were issued."
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The current lifecycle version."
+          },
+          "last_delivery": {
+            "$ref": "#/components/schemas/IntegrationLifecycleDelivery"
           }
         }
       },
@@ -15272,6 +15671,7 @@
           "ENV_VAR_REF_LOOKUP_FAILED",
           "ENV_VAR_REF_NOT_FOUND",
           "EVENT_NOT_CONFIGURED",
+          "EVENT_TOO_WIDE",
           "EXTERNAL_API_ERROR",
           "EXTERNAL_ERROR",
           "EXTERNAL_INFO",
@@ -15971,6 +16371,203 @@
             "description": "Markdown source of the page"
           }
         }
+      },
+      "BulkImportWindowRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "starts_at",
+          "ends_at",
+          "note"
+        ],
+        "properties": {
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the window opens (ISO 8601, UTC)",
+            "example": "2026-11-24T06:00:00Z"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the window closes (ISO 8601, UTC); at most 24 hours after `starts_at`",
+            "example": "2026-11-24T18:00:00Z"
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "What the import is, for whoever looks at the window later",
+            "example": "Migration of all contracts from SAP"
+          }
+        }
+      },
+      "BulkImportWindow": {
+        "type": "object",
+        "required": [
+          "starts_at",
+          "ends_at",
+          "note",
+          "created_at",
+          "created_by",
+          "status"
+        ],
+        "properties": {
+          "starts_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "The id of the user who booked the window"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "active",
+              "ended"
+            ],
+            "description": "`scheduled`: not started yet, can still be replaced. `active`: open now.\n`ended`: over, and removed by the platform shortly.\n"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the platform first saw the window open"
+          }
+        }
+      },
+      "BulkImportLane": {
+        "type": "object",
+        "required": [
+          "status",
+          "estimate"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "shared",
+              "preparing",
+              "dedicated",
+              "finishing"
+            ],
+            "description": "`shared`: the organisation's updates run on the shared lane (no window\nin effect and no large import going on). `preparing`: the organisation\nhas its own lane and the platform is making sure older updates are done\nfirst. `dedicated`: the updates run on the organisation's own lane.\n`finishing`: the own lane is being given back and still works off what\nis on it.\n"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the organisation got its own lane"
+          },
+          "backlog": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Updates waiting on the organisation's own lane, as the platform last\ncounted them (about once a minute). Absent on the shared lane, on a lane\nshared with other organisations, and when it could not be counted.\n"
+          },
+          "estimate": {
+            "type": "string",
+            "enum": [
+              "empty",
+              "finishes",
+              "growing",
+              "not_draining",
+              "unknown"
+            ],
+            "description": "When the waiting updates will be done. `empty`: nothing waits.\n`finishes`: see `estimated_finish_at`. `growing`: more arrive than are\ndone. `not_draining`: updates wait and none were done recently.\n`unknown`: it cannot be said, which is also the answer on the shared lane.\n"
+          },
+          "estimated_finish_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Only with `estimate` `finishes`"
+          }
+        }
+      },
+      "BulkImportWindowLimits": {
+        "type": "object",
+        "required": [
+          "max_duration_hours",
+          "max_lead_days",
+          "note_max_length"
+        ],
+        "properties": {
+          "max_duration_hours": {
+            "type": "integer",
+            "example": 24
+          },
+          "max_lead_days": {
+            "type": "integer",
+            "example": 30
+          },
+          "note_max_length": {
+            "type": "integer",
+            "example": 500
+          }
+        }
+      },
+      "BulkImportWindowStatus": {
+        "type": "object",
+        "required": [
+          "enabled",
+          "window",
+          "lane",
+          "limits"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether bulk import windows exist on this stage. When false a window\ncannot be booked (409 `bulk-imports-unavailable`); the lane is still\nreported.\n"
+          },
+          "window": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BulkImportWindow"
+              }
+            ]
+          },
+          "lane": {
+            "$ref": "#/components/schemas/BulkImportLane"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/BulkImportWindowLimits"
+          }
+        }
+      },
+      "BulkImportWindowRefusal": {
+        "type": "object",
+        "required": [
+          "error_code",
+          "message"
+        ],
+        "properties": {
+          "error_code": {
+            "type": "string",
+            "enum": [
+              "bulk-imports-unavailable",
+              "window-active",
+              "too-many-windows",
+              "window-too-long",
+              "starts-in-the-past",
+              "ends-before-start",
+              "starts-too-far-ahead"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "One plain English sentence"
+          }
+        }
       }
     },
     "responses": {
@@ -16020,6 +16617,31 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/ErrorResponseBase"
+            }
+          }
+        }
+      },
+      "InvalidLifecycleSettings": {
+        "description": "The integration's lifecycle settings are missing or invalid; `problems`\nnames the keys, never their values.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "problems": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              ]
             }
           }
         }
@@ -16221,7 +16843,15 @@
         }
       },
       "ReplayEventsResponse": {
-        "description": "Events replay initiated. Always 200 — per-event outcomes are reported in `results`, so inspect it (or compare `replayed` against the number of requested ids) rather than treating the status code as success.\n",
+        "description": "Events replay initiated. Always 200 — per-event outcomes are reported in `results`, so inspect it (or compare `replayed` against the number of requested ids) rather than treating the status code as success.\nWhen the queue that receives the events throttled the replay part of the way, the answer is still 200 with a `Retry-After` header (2 seconds): the events the queue took are `success` (queued, with their `replay_event_id`), the others are `error`. Replay only the events that are not `success`; replaying the whole request again would queue the first ones a second time, because every replay gets new deduplication ids. When the queue took nothing, or the bulk capacity is in use, the answer is 503 (see `IngestRetryLater`) and the replay can be sent again as it was.\n",
+        "headers": {
+          "Retry-After": {
+            "description": "Present when the replay was throttled part of the way: seconds to wait before replaying the events that are not `success`.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
         "content": {
           "application/json": {
             "schema": {
@@ -16286,12 +16916,23 @@
         }
       },
       "ERPUpdatesResponse": {
-        "description": "Some events failed to process",
+        "description": "Some events failed to process. The same body comes with HTTP 422 when an event was refused, an event over the cap on updates per event among them (its result carries the code `EVENT_TOO_WIDE`; the other events of the request are processed).\nA request whose events together would produce more updates than a request may (25,000 by default; a request may carry 100 events) is refused whole with HTTP 422 and a body of `code` `REQUEST_TOO_WIDE` and a `message` that names both numbers, without `results`: nothing of it was accepted and nothing was queued, the deduplication claims of its events are released, and it is sent again as several smaller requests. The events after the one that brought the request over the cap are not evaluated, so the count in the message is a lower bound.",
         "content": {
           "application/json": {
             "schema": {
               "type": "object",
               "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "REQUEST_TOO_WIDE"
+                  ],
+                  "description": "Only on the refusal of a whole request that would produce too many updates.\n"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Only with `code`: the refusal in words, naming the cap of the request and the cap of an event.\n"
+                },
                 "correlation_id": {
                   "type": "string",
                   "description": "The request's correlation id, echoed, or the one generated for it when the caller omitted it. This is the id to pass to `GET /v3/erp/updates/events?correlation_id=...` to wait for these events. v3 and v2 generate one when the request has none, so they always return it, except that v2 omits it for an empty `correlation_id`. v1 never generates one: it echoes a non-empty `meta.correlation_id` and otherwise omits the field.\n"
@@ -16339,9 +16980,153 @@
                       },
                       "message": {
                         "type": "string"
+                      },
+                      "code": {
+                        "type": "string",
+                        "enum": [
+                          "EVENT_TOO_WIDE",
+                          "EVENT_EVALUATION_LIMIT"
+                        ],
+                        "description": "A stable code, present only on the results of events that were refused for one reason a caller can act on, and only with `status` `error`. `EVENT_TOO_WIDE`: the event would produce more updates than one event may (5,000 by default; the `message` names the cap and the count). `EVENT_EVALUATION_LIMIT`: the mapping of the event ran longer than 25 seconds, or built a generated sequence of more than 4 million items, and was stopped before its updates could be counted; it says nothing about the width of the event, which may be accepted in a smaller request. Nothing of the event was queued: send its data in several smaller events. The other events of the request are processed and have a result of their own; the response status is 422.\n"
                       }
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      },
+      "IngestRetryLater": {
+        "description": "The request was not accepted, or only part of it was, and it is safe to send again\nafter the `Retry-After` interval. The body's `code` says why:\n\n- `BULK_CAPACITY_EXHAUSTED`: the capacity for large data loads is in use and the\n  organization is over its allowance for everyday traffic. `Retry-After` is 60\n  seconds, by which time the allowance has refilled or capacity is free. The part of\n  the request that counts as a large data load was not accepted or queued, and a\n  request is never split. Requests within the allowance are not affected. A request\n  that carried only bulk events is refused whole: the body is `code` and `message`\n  alone, with no `results`, and the request can be retried as it was. Interactive\n  events are never charged to the allowance, so a request that mixed them with bulk\n  events still has them accepted: the body then carries the message `Some events of\n  this request were not accepted; see results`, the `correlation_id` of the request\n  and `results`, and, when the request asked to close a correlation, `correlation_close`\n  (the close is not applied, with the reason `retry_requested`).\n- `INGEST_THROTTLED`: the queue that receives the events throttled the request, or the\n  service that checks the allowance of the organization for everyday traffic was busy\n  and could not answer, so the request was not accepted rather than accepted unchecked.\n  Both are transient and have nothing to do with the size of your allowance.\n  `Retry-After` is 2 seconds.\n\nWith `INGEST_THROTTLED` nothing of the request was queued when the body is `code` and\n`message` alone, and the request can be sent again as it was; the deduplication claims\nof its events were released, so the retry is accepted. When some events were queued\nbefore the throttle (or, when the allowance could not be checked, because they are\ninteractive events, which are never charged to it), the body carries the message\n`Some events of this request were not accepted; see results`, the `correlation_id` of\nthe request, and `results`: `success` for the events the queue took (they are queued,\ndo not send them again) and `error` for the events it did not (send those again).\nEvents leave in the order of the request, and\nthe first batch the queue refused ends the send, so an event that was not accepted is\nnever followed by an accepted one on the same queue. If the request asked to close a\ncorrelation (`correlation_complete`), the close is not applied: the retry carries it\nagain.\n\nAn `INGEST_THROTTLED` answer replaces the `500` with the message `Unknown API error`\nthat these operations used to return when the queue throttled the request.\n",
+        "headers": {
+          "Retry-After": {
+            "description": "Seconds to wait before retrying the request",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ErrorResponseBase"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "BULK_CAPACITY_EXHAUSTED",
+                        "INGEST_THROTTLED"
+                      ]
+                    },
+                    "correlation_id": {
+                      "type": "string",
+                      "description": "The request's correlation id, echoed, or the one generated for it when the caller omitted it. Present when some events of the request were accepted, together with `results`.\n"
+                    },
+                    "correlation_close": {
+                      "$ref": "#/components/schemas/CorrelationCloseResult"
+                    },
+                    "results": {
+                      "type": "array",
+                      "description": "Present when some events of the request were accepted.",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "event_id",
+                          "status"
+                        ],
+                        "properties": {
+                          "event_id": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "success",
+                              "error",
+                              "skipped",
+                              "ignored"
+                            ]
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "examples": {
+              "bulk_capacity_exhausted": {
+                "summary": "Nothing of the request was accepted, the capacity for large data loads is in use",
+                "value": {
+                  "code": "BULK_CAPACITY_EXHAUSTED",
+                  "message": "The capacity for large data loads is in use, and this organization is over its allowance for everyday traffic. Nothing of this request was accepted. Send the request again after the Retry-After interval."
+                }
+              },
+              "bulk_capacity_exhausted_mixed_request": {
+                "summary": "The interactive events were accepted, the bulk events were not",
+                "value": {
+                  "code": "BULK_CAPACITY_EXHAUSTED",
+                  "message": "Some events of this request were not accepted; see results",
+                  "correlation_id": "registration-7",
+                  "results": [
+                    {
+                      "event_id": "7f2c4c0e-6f3b-4d5e-9a57-0d7a9e2f8b11",
+                      "status": "success",
+                      "interactive": true,
+                      "lane": "interactive"
+                    },
+                    {
+                      "event_id": "0b6f1d52-92c4-4e0a-8f35-5c1d3a7e4b90",
+                      "status": "error",
+                      "message": "This event was not accepted: the capacity for large data loads is in use, and this organization is over its allowance for everyday traffic. Send the event again after the Retry-After interval."
+                    }
+                  ],
+                  "correlation_close": {
+                    "outcome": "ignored",
+                    "reasons": [
+                      "retry_requested"
+                    ],
+                    "message": "the response asks the caller to retry (422, 429 or 503), so the retried events would arrive after the close; the retry carries the flag again and closes then"
+                  }
+                }
+              },
+              "ingest_throttled": {
+                "summary": "Nothing of the request was accepted, the receiving queue was throttled",
+                "value": {
+                  "code": "INGEST_THROTTLED",
+                  "message": "The queue that receives events is busy and throttled the request. Nothing of this request was accepted. Send the request again after the Retry-After interval."
+                }
+              },
+              "ingest_throttled_partly": {
+                "summary": "Some events were queued before the throttle",
+                "value": {
+                  "code": "INGEST_THROTTLED",
+                  "message": "Some events of this request were not accepted; see results",
+                  "correlation_id": "req-789e4567-e89b-12d3-a456-426614174000",
+                  "results": [
+                    {
+                      "event_id": "7f2c4c0e-6f3b-4d5e-9a57-0d7a9e2f8b11",
+                      "status": "success"
+                    },
+                    {
+                      "event_id": "0b6f1d52-92c4-4e0a-8f35-5c1d3a7e4b90",
+                      "status": "error",
+                      "message": "This event was not accepted: the queue that receives events is busy and throttled the request. Send the event again after the Retry-After interval."
+                    }
+                  ]
                 }
               }
             }
