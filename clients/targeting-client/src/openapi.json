@@ -217,7 +217,7 @@
       "post": {
         "operationId": "setupCampaign",
         "summary": "setupCampaign",
-        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n\nThe campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is\nlaunched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,\n`CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and\nnothing is created.\n\nA campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.\nA request with no or more than one entry fails request validation with 400 (the error points at\n`/requestBody/campaign/target_ids`), and nothing is created.\nRequest validation errors (400) are returned before anything is created.\n",
+        "description": "Creates a `campaign` entity together with its related entities and configurations in a single call.\nUsed by the campaign wizard UI, but not restricted to it.\n\nThe campaign is created as a `draft`. Its optional `start_date` and `end_date` take effect when it is\nlaunched (see `changeCampaignStatus`). Returns 400 with `INVALID_CAMPAIGN_DATES`,\n`CAMPAIGN_END_BEFORE_START` or `CAMPAIGN_END_IN_PAST` when the dates could not be launched, and\nnothing is created.\n\nA campaign has exactly one audience: `campaign.target_ids` must contain exactly one target ID.\nA request with no or more than one entry fails request validation with 400 (the error points at\n`/requestBody/campaign/target_ids`), and nothing is created.\nRequest validation errors (400) are returned before anything is created.\n\nWith `channels.portal_widget`, the portal block must exist: otherwise the request fails with 400\n`PORTAL_BLOCK_NOT_FOUND` before anything is created. Setup points the block at the new campaign; if a\nlater step fails, the block is pointed back at the campaign it pointed at before.\n\nA new product recommendation can carry a rule table (`rules`). It is validated before anything is created.\n",
         "tags": [
           "Campaign"
         ],
@@ -241,7 +241,21 @@
             "$ref": "#/components/responses/SetupCampaignResponse"
           },
           "400": {
-            "$ref": "#/components/responses/ClientErrorResponse"
+            "description": "Invalid request; nothing was created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ClientError"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SetupCampaignRuleError"
+                    }
+                  ]
+                }
+              }
+            }
           },
           "403": {
             "$ref": "#/components/responses/ClientErrorResponse"
@@ -321,7 +335,13 @@
           "400": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
+          "403": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
           "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "503": {
             "$ref": "#/components/responses/ServerErrorResponse"
           }
         }
@@ -572,6 +592,9 @@
           "400": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
+          "403": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
           "404": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
@@ -579,6 +602,9 @@
             "$ref": "#/components/responses/ClientErrorResponse"
           },
           "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "503": {
             "$ref": "#/components/responses/ServerErrorResponse"
           }
         }
@@ -609,6 +635,9 @@
           "200": {
             "$ref": "#/components/responses/RecipientResponse"
           },
+          "403": {
+            "$ref": "#/components/responses/ClientErrorResponse"
+          },
           "404": {
             "$ref": "#/components/responses/ClientErrorResponse"
           },
@@ -616,6 +645,9 @@
             "$ref": "#/components/responses/ClientErrorResponse"
           },
           "500": {
+            "$ref": "#/components/responses/ServerErrorResponse"
+          },
+          "503": {
             "$ref": "#/components/responses/ServerErrorResponse"
           }
         }
@@ -687,9 +719,17 @@
           {
             "name": "email_status",
             "in": "query",
-            "description": "Filter by email delivery status (e.g. bounced, delivered). The response total reflects the count for the filtered status.",
+            "description": "Filter by email delivery status (e.g. bounced, delivered). The response total reflects the count for the filtered status. `delivered` also matches recipients still at `sent` with an open or click, the same as the delivered count in the email stats.",
             "schema": {
               "$ref": "#/components/schemas/EmailStatus"
+            }
+          },
+          {
+            "name": "email_engagement",
+            "in": "query",
+            "description": "Filter by email engagement. Combines with email_status and the other filters; the\nresponse total and next cursor reflect the filtered set.\n",
+            "schema": {
+              "$ref": "#/components/schemas/EmailEngagement"
             }
           },
           {
@@ -1593,6 +1633,15 @@
           "failed"
         ]
       },
+      "EmailEngagement": {
+        "type": "string",
+        "description": "Engagement filter for listing a campaign's recipients, independent of the stored\n`email_status`.\n- `opened`: at least one open or one click (a click proves the email was opened even when\n  the tracking pixel was blocked).\n- `clicked`: at least one link click.\n- `unsubscribed`: the recipient opted out of email marketing.\n",
+        "enum": [
+          "opened",
+          "clicked",
+          "unsubscribed"
+        ]
+      },
       "EmailBounceType": {
         "type": "string",
         "description": "SES bounce classification: `permanent` (hard) or `transient` (soft).",
@@ -1972,7 +2021,8 @@
           "product_recommendations": {
             "type": "array",
             "minItems": 1,
-            "description": "Product recommendations the campaign offers. Each item either reuses an existing\n`product_recommendation` entity (a recommendation can belong to many campaigns) or\ncreates a new one. All of them are linked on the campaign's `product_recommendations`\nrelation.\n",
+            "maxItems": 1,
+            "description": "The campaign's product recommendation (exactly one): an existing one or a new one.\n",
             "items": {
               "oneOf": [
                 {
@@ -2062,7 +2112,7 @@
       },
       "SetupNewProductRecommendation": {
         "type": "object",
-        "description": "Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and\n`source_price_id` it applies to customers on that tariff; without a source it is a general\nrecommendation that applies to every customer of the campaign. The source product and price\nmust be sent together.\n",
+        "description": "Creates a new `product_recommendation` entity of type `change`, either with a rule table (`rules`) or\nwith a single source (`source_product_id` + `source_price_id`) and `offers`. Not both.\n",
         "properties": {
           "name": {
             "type": "string",
@@ -2090,9 +2140,167 @@
             "items": {
               "$ref": "#/components/schemas/ProductRecommendationOffer"
             }
+          },
+          "rules": {
+            "type": "array",
+            "description": "The rule table. Excludes `source_product_id`, `source_price_id` and `offers`.\n",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecommendationRule"
+            }
           }
         },
         "additionalProperties": false
+      },
+      "ProductRecommendationRule": {
+        "type": "object",
+        "description": "Mirrors `ProductRecommendationRule` of the pricing API.\n",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique id of the rule within its product recommendation"
+          },
+          "source": {
+            "type": "object",
+            "nullable": true,
+            "description": "Current tariff the rule applies to. `null` = fallback rule.",
+            "properties": {
+              "product_id": {
+                "$ref": "#/components/schemas/BaseUUID"
+              },
+              "price_id": {
+                "$ref": "#/components/schemas/BaseUUID"
+              }
+            },
+            "required": [
+              "product_id",
+              "price_id"
+            ],
+            "additionalProperties": false
+          },
+          "offer_groups": {
+            "type": "array",
+            "description": "The offers of the rule, grouped by target group",
+            "items": {
+              "$ref": "#/components/schemas/ProductRecommendationOfferGroup"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "offer_groups"
+        ],
+        "additionalProperties": false
+      },
+      "ProductRecommendationOfferGroup": {
+        "type": "object",
+        "description": "Mirrors `ProductRecommendationOfferGroup` of the pricing API. No `target_id` = everyone.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique id of the offer group within its rule"
+          },
+          "target_id": {
+            "$ref": "#/components/schemas/BaseUUID"
+          },
+          "items": {
+            "type": "array",
+            "description": "Product/price pairs within this offer group.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "price_id": {
+                  "$ref": "#/components/schemas/BaseUUID"
+                },
+                "highlight_config": {
+                  "type": "object",
+                  "description": "Opaque per-item highlight/comparison config persisted as-is on the entity.",
+                  "additionalProperties": true
+                }
+              },
+              "required": [
+                "product_id",
+                "price_id"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "SetupCampaignRuleError": {
+        "type": "object",
+        "description": "Setup 400 for an invalid rule table.",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "PRODUCT_RECOMMENDATION_RULES_MIXED",
+              "INVALID_PRODUCT_RECOMMENDATION_RULES",
+              "PRODUCT_OR_PRICE_UNAVAILABLE"
+            ]
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "RULES_REQUIRED",
+                    "RULE_SOURCE_REQUIRED",
+                    "DUPLICATE_SOURCE",
+                    "MULTIPLE_FALLBACKS",
+                    "OFFERS_REQUIRED",
+                    "OFFER_IS_OWN_SOURCE",
+                    "DUPLICATE_RULE_ID"
+                  ]
+                },
+                "rule_id": {
+                  "type": "string"
+                },
+                "offer_group_id": {
+                  "type": "string"
+                },
+                "item_index": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
+          "product_ids": {
+            "type": "array",
+            "description": "Products that do not exist or are archived",
+            "items": {
+              "type": "string"
+            }
+          },
+          "price_ids": {
+            "type": "array",
+            "description": "Prices that do not exist or are archived",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "code"
+        ]
       },
       "ProductRecommendationOffer": {
         "type": "object",
@@ -2307,11 +2515,12 @@
                   "description": "Recipients with a recorded email status (the KPI denominator)."
                 },
                 "sent": {
-                  "type": "integer"
+                  "type": "integer",
+                  "description": "Recipients still at email_status `sent` with no open or click recorded."
                 },
                 "delivered": {
                   "type": "integer",
-                  "description": "Recipients whose SES Delivery event was recorded (needs Delivery publishing enabled)."
+                  "description": "Recipients whose SES Delivery event was recorded, plus recipients still at\nemail_status `sent` that opened or clicked (engagement proves delivery).\n"
                 },
                 "bounced": {
                   "type": "integer"
@@ -2336,7 +2545,7 @@
                 },
                 "opened": {
                   "type": "integer",
-                  "description": "Unique recipients with at least one open (only where open tracking is on)."
+                  "description": "Unique recipients with at least one open or click (only where tracking is on). A\nclick counts as an open even when no open was recorded.\n"
                 },
                 "clicked": {
                   "type": "integer",

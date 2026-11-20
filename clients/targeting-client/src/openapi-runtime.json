@@ -257,6 +257,10 @@
             "in": "query"
           },
           {
+            "name": "email_engagement",
+            "in": "query"
+          },
+          {
             "name": "entity_ui_status",
             "in": "query"
           }
