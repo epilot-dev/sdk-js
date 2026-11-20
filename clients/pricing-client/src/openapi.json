@@ -3,7 +3,7 @@
   "info": {
     "title": "Pricing API",
     "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### Spot Market API\nProvides endpoints to fetch (historic) spot market price data.\n\n### External Integrations API\nProvides endpoints for external integrations. E.g. GetAG.\n\n### External Catalog API\nProvides endpoints for external catalog.\n\n### Product Recommendations API\nProvides endpoints for product recommendations.\n\n### Conditional Pricing API\nProvides endpoints for resolving conditional Products, Prices and Coupons, and for authoring the conditions they vary by.\n\nConditional Pricing reads every date in the organization's timezone, and reports every `as_of`\nin that timezone's offset. Organizations have no timezone setting yet, so every organization\nuses `Europe/Berlin`.\n",
-    "version": "1.2.4",
+    "version": "1.3.0",
     "termsOfService": "https://epilot.cloud/agb",
     "contact": {
       "name": "Support",
@@ -3541,6 +3541,12 @@
                 },
                 "Search product recommendations by contract": {
                   "value": {
+                    "contract_id": "98ffca40-46ab-4288-af10-a478893b2aa2"
+                  }
+                },
+                "Search product recommendations by campaign and contract": {
+                  "value": {
+                    "campaign_id": "3f1c7d2e-9a4b-4c6d-8e2f-1a2b3c4d5e6f",
                     "contract_id": "98ffca40-46ab-4288-af10-a478893b2aa2"
                   }
                 }
@@ -16203,6 +16209,11 @@
           "contract_id": {
             "type": "string",
             "description": "The contract id to be used as source for the recommendation"
+          },
+          "campaign_id": {
+            "type": "string",
+            "description": "The tariff change campaign the offers are requested for. Used together with `contract_id`:\nthe offers come from the rule table of the campaign's product recommendation, and only when\nthe campaign is active and the contract or its contact is in the campaign's audience.\nOtherwise the result is empty.\n\nOnly applies to organizations with campaign-scoped offers enabled; ignored otherwise.\n",
+            "example": "3f1c7d2e-9a4b-4c6d-8e2f-1a2b3c4d5e6f"
           },
           "filters": {
             "$ref": "#/components/schemas/AvailabilityFilters"

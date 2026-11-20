@@ -98,9 +98,14 @@ declare namespace Components {
              * Recipients with a recorded email status (the KPI denominator).
              */
             total_emailed: number;
+            /**
+             * Recipients still at email_status `sent` with no open or click recorded.
+             */
             sent: number;
             /**
-             * Recipients whose SES Delivery event was recorded (needs Delivery publishing enabled).
+             * Recipients whose SES Delivery event was recorded, plus recipients still at
+             * email_status `sent` that opened or clicked (engagement proves delivery).
+             *
              */
             delivered: number;
             bounced: number;
@@ -119,7 +124,9 @@ declare namespace Components {
              */
             unsubscribed: number;
             /**
-             * Unique recipients with at least one open (only where open tracking is on).
+             * Unique recipients with at least one open or click (only where tracking is on). A
+             * click counts as an open even when no open was recorded.
+             *
              */
             opened: number;
             /**
@@ -1099,6 +1106,16 @@ declare namespace Components {
          * SES bounce classification: `permanent` (hard) or `transient` (soft).
          */
         export type EmailBounceType = "permanent" | "transient";
+        /**
+         * Engagement filter for listing a campaign's recipients, independent of the stored
+         * `email_status`.
+         * - `opened`: at least one open or one click (a click proves the email was opened even when
+         *   the tracking pixel was blocked).
+         * - `clicked`: at least one link click.
+         * - `unsubscribed`: the recipient opted out of email marketing.
+         *
+         */
+        export type EmailEngagement = "opened" | "clicked" | "unsubscribed";
         /**
          * Delivery status of the email a campaign's automation sends to a recipient. Set to `sent`
          * once the automation hands the email off, then updated asynchronously as SES notifications
@@ -2287,6 +2304,70 @@ declare namespace Components {
                 };
             }[];
         }
+        /**
+         * Mirrors `ProductRecommendationOfferGroup` of the pricing API. No `target_id` = everyone.
+         */
+        export interface ProductRecommendationOfferGroup {
+            /**
+             * Unique id of the offer group within its rule
+             */
+            id: string;
+            target_id?: /**
+             * example:
+             * b8c01433-5556-4e2b-aad4-6f5348d1df84
+             */
+            BaseUUID /* uuid */;
+            /**
+             * Product/price pairs within this offer group.
+             */
+            items: {
+                product_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                price_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                /**
+                 * Opaque per-item highlight/comparison config persisted as-is on the entity.
+                 */
+                highlight_config?: {
+                    [name: string]: any;
+                };
+            }[];
+        }
+        /**
+         * Mirrors `ProductRecommendationRule` of the pricing API.
+         *
+         */
+        export interface ProductRecommendationRule {
+            /**
+             * Unique id of the rule within its product recommendation
+             */
+            id: string;
+            /**
+             * Current tariff the rule applies to. `null` = fallback rule.
+             */
+            source: {
+                product_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+                price_id: /**
+                 * example:
+                 * b8c01433-5556-4e2b-aad4-6f5348d1df84
+                 */
+                BaseUUID /* uuid */;
+            } | null;
+            /**
+             * The offers of the rule, grouped by target group
+             */
+            offer_groups: /* Mirrors `ProductRecommendationOfferGroup` of the pricing API. No `target_id` = everyone. */ ProductRecommendationOfferGroup[];
+        }
         export interface Recipient {
             entity_id?: /**
              * example:
@@ -2436,6 +2517,27 @@ declare namespace Components {
          */
         SetupTariffChangeCampaignRequest;
         /**
+         * Setup 400 for an invalid rule table.
+         */
+        export interface SetupCampaignRuleError {
+            code: "PRODUCT_RECOMMENDATION_RULES_MIXED" | "INVALID_PRODUCT_RECOMMENDATION_RULES" | "PRODUCT_OR_PRICE_UNAVAILABLE";
+            errors?: {
+                code: "RULES_REQUIRED" | "RULE_SOURCE_REQUIRED" | "DUPLICATE_SOURCE" | "MULTIPLE_FALLBACKS" | "OFFERS_REQUIRED" | "OFFER_IS_OWN_SOURCE" | "DUPLICATE_RULE_ID";
+                rule_id?: string;
+                offer_group_id?: string;
+                item_index?: number;
+                message: string;
+            }[];
+            /**
+             * Products that do not exist or are archived
+             */
+            product_ids?: string[];
+            /**
+             * Prices that do not exist or are archived
+             */
+            price_ids?: string[];
+        }
+        /**
          * Reuses an existing `product_recommendation` entity. It is linked, never modified.
          */
         export interface SetupExistingProductRecommendation {
@@ -2446,10 +2548,8 @@ declare namespace Components {
             BaseUUID /* uuid */;
         }
         /**
-         * Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and
-         * `source_price_id` it applies to customers on that tariff; without a source it is a general
-         * recommendation that applies to every customer of the campaign. The source product and price
-         * must be sent together.
+         * Creates a new `product_recommendation` entity of type `change`, either with a rule table (`rules`) or
+         * with a single source (`source_product_id` + `source_price_id`) and `offers`. Not both.
          *
          */
         export interface SetupNewProductRecommendation {
@@ -2473,6 +2573,15 @@ declare namespace Components {
              * Offer blocks for the product_recommendation entity.
              */
             offers?: ProductRecommendationOffer[];
+            /**
+             * The rule table. Excludes `source_product_id`, `source_price_id` and `offers`.
+             *
+             */
+            rules?: /**
+             * Mirrors `ProductRecommendationRule` of the pricing API.
+             *
+             */
+            ProductRecommendationRule[];
         }
         export interface SetupTariffChangeCampaignRequest {
             /**
@@ -2510,29 +2619,16 @@ declare namespace Components {
                 end_date?: string; // date-time
             };
             /**
-             * Product recommendations the campaign offers. Each item either reuses an existing
-             * `product_recommendation` entity (a recommendation can belong to many campaigns) or
-             * creates a new one. All of them are linked on the campaign's `product_recommendations`
-             * relation.
+             * The campaign's product recommendation (exactly one): an existing one or a new one.
              *
              */
             product_recommendations: [
                 (/* Reuses an existing `product_recommendation` entity. It is linked, never modified. */ SetupExistingProductRecommendation | /**
-                 * Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and
-                 * `source_price_id` it applies to customers on that tariff; without a source it is a general
-                 * recommendation that applies to every customer of the campaign. The source product and price
-                 * must be sent together.
+                 * Creates a new `product_recommendation` entity of type `change`, either with a rule table (`rules`) or
+                 * with a single source (`source_product_id` + `source_price_id`) and `offers`. Not both.
                  *
                  */
-                SetupNewProductRecommendation),
-                ...(/* Reuses an existing `product_recommendation` entity. It is linked, never modified. */ SetupExistingProductRecommendation | /**
-                 * Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and
-                 * `source_price_id` it applies to customers on that tariff; without a source it is a general
-                 * recommendation that applies to every customer of the campaign. The source product and price
-                 * must be sent together.
-                 *
-                 */
-                SetupNewProductRecommendation)[]
+                SetupNewProductRecommendation)
             ];
             /**
              * Optional journey configuration selected in the wizard. Only sent by the
@@ -2812,7 +2908,9 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Responses.DiscoverCampaignsResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
+            export type $403 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
+            export type $503 = Components.Responses.ServerErrorResponse;
         }
     }
     namespace GetCampaignJobStatus {
@@ -2882,6 +2980,16 @@ declare namespace Paths {
              * b8c01433-5556-4e2b-aad4-6f5348d1df84
              */
             Components.Schemas.BaseUUID /* uuid */;
+            export type EmailEngagement = /**
+             * Engagement filter for listing a campaign's recipients, independent of the stored
+             * `email_status`.
+             * - `opened`: at least one open or one click (a click proves the email was opened even when
+             *   the tracking pixel was blocked).
+             * - `clicked`: at least one link click.
+             * - `unsubscribed`: the recipient opted out of email marketing.
+             *
+             */
+            Components.Schemas.EmailEngagement;
             export type EmailStatus = /**
              * Delivery status of the email a campaign's automation sends to a recipient. Set to `sent`
              * once the automation hands the email off, then updated asynchronously as SES notifications
@@ -2913,6 +3021,7 @@ declare namespace Paths {
             automation_status?: Parameters.AutomationStatus;
             portal_status?: Parameters.PortalStatus;
             email_status?: Parameters.EmailStatus;
+            email_engagement?: Parameters.EmailEngagement;
             entity_ui_status?: Parameters.EntityUiStatus;
         }
         namespace Responses {
@@ -2964,9 +3073,11 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Responses.RecipientResponse;
+            export type $403 = Components.Responses.ClientErrorResponse;
             export type $404 = Components.Responses.ClientErrorResponse;
             export type $409 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
+            export type $503 = Components.Responses.ServerErrorResponse;
         }
     }
     namespace RetriggerCampaignAutomations {
@@ -2997,7 +3108,15 @@ declare namespace Paths {
         Components.Schemas.SetupCampaignRequest;
         namespace Responses {
             export type $201 = Components.Responses.SetupCampaignResponse;
-            export type $400 = Components.Responses.ClientErrorResponse;
+            export type $400 = /**
+             * Describes the structure of a client error response, which can be one of several types:
+             * 1. `MessageError`: Contains a 'message' field for general descriptive errors.
+             * 2. `CodeError`: Contains a 'code' field for specific, machine-readable error codes.
+             * 3. `StatusedError`: Contains 'error' and 'status' fields.
+             * The HTTP status code of the response itself (e.g., 400, 404, 409) will always indicate the overall error category.
+             *
+             */
+            Components.Schemas.ClientError | /* Setup 400 for an invalid rule table. */ Components.Schemas.SetupCampaignRuleError;
             export type $403 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
             export type $504 = Components.Responses.ServerErrorResponse;
@@ -3048,9 +3167,11 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Responses.RecipientResponse;
             export type $400 = Components.Responses.ClientErrorResponse;
+            export type $403 = Components.Responses.ClientErrorResponse;
             export type $404 = Components.Responses.ClientErrorResponse;
             export type $409 = Components.Responses.ClientErrorResponse;
             export type $500 = Components.Responses.ServerErrorResponse;
+            export type $503 = Components.Responses.ServerErrorResponse;
         }
     }
     namespace UpdateRecipientPortalStatus {
@@ -3183,6 +3304,12 @@ export interface OperationMethods {
    * A request with no or more than one entry fails request validation with 400 (the error points at
    * `/requestBody/campaign/target_ids`), and nothing is created.
    * Request validation errors (400) are returned before anything is created.
+   * 
+   * With `channels.portal_widget`, the portal block must exist: otherwise the request fails with 400
+   * `PORTAL_BLOCK_NOT_FOUND` before anything is created. Setup points the block at the new campaign; if a
+   * later step fails, the block is pointed back at the campaign it pointed at before.
+   * 
+   * A new product recommendation can carry a rule table (`rules`). It is validated before anything is created.
    * 
    */
   'setupCampaign'(
@@ -3470,6 +3597,12 @@ export interface PathsDictionary {
      * `/requestBody/campaign/target_ids`), and nothing is created.
      * Request validation errors (400) are returned before anything is created.
      * 
+     * With `channels.portal_widget`, the portal block must exist: otherwise the request fails with 400
+     * `PORTAL_BLOCK_NOT_FOUND` before anything is created. Setup points the block at the new campaign; if a
+     * later step fails, the block is pointed back at the campaign it pointed at before.
+     * 
+     * A new product recommendation can carry a rule table (`rules`). It is validated before anything is created.
+     * 
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -3695,6 +3828,7 @@ export type CreateRecipientPayload = Components.Schemas.CreateRecipientPayload;
 export type DiscoverCampaignsParams = Components.Schemas.DiscoverCampaignsParams;
 export type DiscoverResult = Components.Schemas.DiscoverResult;
 export type EmailBounceType = Components.Schemas.EmailBounceType;
+export type EmailEngagement = Components.Schemas.EmailEngagement;
 export type EmailStatus = Components.Schemas.EmailStatus;
 export type EntityUiStatus = Components.Schemas.EntityUiStatus;
 export type ExecutionSummaryItem = Components.Schemas.ExecutionSummaryItem;
@@ -3706,11 +3840,14 @@ export type NextBestAction = Components.Schemas.NextBestAction;
 export type PortalRecipientPayload = Components.Schemas.PortalRecipientPayload;
 export type PortalStatus = Components.Schemas.PortalStatus;
 export type ProductRecommendationOffer = Components.Schemas.ProductRecommendationOffer;
+export type ProductRecommendationOfferGroup = Components.Schemas.ProductRecommendationOfferGroup;
+export type ProductRecommendationRule = Components.Schemas.ProductRecommendationRule;
 export type Recipient = Components.Schemas.Recipient;
 export type RetriggerAutomationsRequest = Components.Schemas.RetriggerAutomationsRequest;
 export type RetriggerAutomationsResult = Components.Schemas.RetriggerAutomationsResult;
 export type ServerError = Components.Schemas.ServerError;
 export type SetupCampaignRequest = Components.Schemas.SetupCampaignRequest;
+export type SetupCampaignRuleError = Components.Schemas.SetupCampaignRuleError;
 export type SetupExistingProductRecommendation = Components.Schemas.SetupExistingProductRecommendation;
 export type SetupNewProductRecommendation = Components.Schemas.SetupNewProductRecommendation;
 export type SetupTariffChangeCampaignRequest = Components.Schemas.SetupTariffChangeCampaignRequest;
