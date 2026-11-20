@@ -513,6 +513,45 @@
         "responses": {}
       }
     },
+    "/v2/integrations/{integrationId}:bootstrap": {
+      "post": {
+        "operationId": "bootstrapIntegrationLifecycle",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/integrations/{integrationId}:config-changed": {
+      "post": {
+        "operationId": "notifyIntegrationConfigChanged",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/integrations/{integrationId}/lifecycle": {
+      "get": {
+        "operationId": "getIntegrationLifecycle",
+        "parameters": [
+          {
+            "name": "integrationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v2/integrations/{integrationId}/notifications/history": {
       "get": {
         "operationId": "listNotificationHistory",
@@ -1511,6 +1550,26 @@
         ],
         "responses": {}
       }
+    },
+    "/v1/bulk-imports/window": {
+      "get": {
+        "operationId": "getBulkImportWindow",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "putBulkImportWindow",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteBulkImportWindow",
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -1536,6 +1595,11 @@
         }
       },
       "Conflict": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InvalidLifecycleSettings": {
         "content": {
           "application/json": {}
         }
@@ -1579,11 +1643,22 @@
         }
       },
       "ReplayEventsResponse": {
+        "headers": {
+          "Retry-After": {}
+        },
         "content": {
           "application/json": {}
         }
       },
       "ERPUpdatesResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "IngestRetryLater": {
+        "headers": {
+          "Retry-After": {}
+        },
         "content": {
           "application/json": {}
         }
