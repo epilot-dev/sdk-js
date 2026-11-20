@@ -86,6 +86,7 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`PortalStatus`](#portalstatus)
 - [`EntityUiStatus`](#entityuistatus)
 - [`EmailStatus`](#emailstatus)
+- [`EmailEngagement`](#emailengagement)
 - [`EmailBounceType`](#emailbouncetype)
 - [`Recipient`](#recipient)
 - [`BaseRecipientPayload`](#baserecipientpayload)
@@ -101,6 +102,9 @@ const { data } = await targetingClient.changeCampaignStatus(...)
 - [`SetupTariffChangeCampaignRequest`](#setuptariffchangecampaignrequest)
 - [`SetupExistingProductRecommendation`](#setupexistingproductrecommendation)
 - [`SetupNewProductRecommendation`](#setupnewproductrecommendation)
+- [`ProductRecommendationRule`](#productrecommendationrule)
+- [`ProductRecommendationOfferGroup`](#productrecommendationoffergroup)
+- [`SetupCampaignRuleError`](#setupcampaignruleerror)
 - [`ProductRecommendationOffer`](#productrecommendationoffer)
 - [`SetupTariffChangeCampaignResponse`](#setuptariffchangecampaignresponse)
 
@@ -1014,6 +1018,7 @@ const { data } = await client.getRecipients({
   automation_status: ['...'],
   portal_status: 'example',
   email_status: 'example',
+  email_engagement: 'example',
   entity_ui_status: 'example',
 })
 ```
@@ -1591,6 +1596,19 @@ failure (the automation execu
 type EmailStatus = "sent" | "delivered" | "bounced" | "complained" | "failed"
 ```
 
+### `EmailEngagement`
+
+Engagement filter for listing a campaign's recipients, independent of the stored
+`email_status`.
+- `opened`: at least one open or one click (a click proves the email was opened even when
+  the tracking pixel was blocked).
+- `clicked`: at least one link click.
+- `unsubscribed`: the recipient opted ou
+
+```ts
+type EmailEngagement = "opened" | "clicked" | "unsubscribed"
+```
+
 ### `EmailBounceType`
 
 SES bounce classification: `permanent` (hard) or `transient` (soft).
@@ -1760,6 +1778,11 @@ type SetupCampaignRequest = {
       target_id?: { ... }
       items: { ... }
     }>
+    rules?: Array<{
+      id: { ... }
+      source: { ... }
+      offer_groups: { ... }
+    }>
   }>
   journey?: {
     journey_id: string // uuid
@@ -1808,6 +1831,11 @@ type SetupTariffChangeCampaignRequest = {
       target_id?: { ... }
       items: { ... }
     }>
+    rules?: Array<{
+      id: { ... }
+      source: { ... }
+      offer_groups: { ... }
+    }>
   }>
   journey?: {
     journey_id: string // uuid
@@ -1846,10 +1874,8 @@ type SetupExistingProductRecommendation = {
 
 ### `SetupNewProductRecommendation`
 
-Creates a new `product_recommendation` entity of type `change`. With `source_product_id` and
-`source_price_id` it applies to customers on that tariff; without a source it is a general
-recommendation that applies to every customer of the campaign. The source product and price
-must be sent together.
+Creates a new `product_recommendation` entity of type `change`, either with a rule table (`rules`) or
+with a single source (`source_product_id` + `source_price_id`) and `offers`. Not both.
 
 
 ```ts
@@ -1865,6 +1891,77 @@ type SetupNewProductRecommendation = {
       highlight_config?: { ... }
     }>
   }>
+  rules?: Array<{
+    id: string
+    source: {
+      product_id: { ... }
+      price_id: { ... }
+    }
+    offer_groups: Array<{
+      id: { ... }
+      target_id?: { ... }
+      items: { ... }
+    }>
+  }>
+}
+```
+
+### `ProductRecommendationRule`
+
+Mirrors `ProductRecommendationRule` of the pricing API.
+
+
+```ts
+type ProductRecommendationRule = {
+  id: string
+  source: {
+    product_id: string // uuid
+    price_id: string // uuid
+  }
+  offer_groups: Array<{
+    id: string
+    target_id?: string // uuid
+    items: Array<{
+      product_id: { ... }
+      price_id: { ... }
+      highlight_config?: { ... }
+    }>
+  }>
+}
+```
+
+### `ProductRecommendationOfferGroup`
+
+Mirrors `ProductRecommendationOfferGroup` of the pricing API. No `target_id` = everyone.
+
+```ts
+type ProductRecommendationOfferGroup = {
+  id: string
+  target_id?: string // uuid
+  items: Array<{
+    product_id: string // uuid
+    price_id: string // uuid
+    highlight_config?: Record<string, unknown>
+  }>
+}
+```
+
+### `SetupCampaignRuleError`
+
+Setup 400 for an invalid rule table.
+
+```ts
+type SetupCampaignRuleError = {
+  code: "PRODUCT_RECOMMENDATION_RULES_MIXED" | "INVALID_PRODUCT_RECOMMENDATION_RULES" | "PRODUCT_OR_PRICE_UNAVAILABLE"
+  errors?: Array<{
+    code: "RULES_REQUIRED" | "RULE_SOURCE_REQUIRED" | "DUPLICATE_SOURCE" | "MULTIPLE_FALLBACKS" | "OFFERS_REQUIRED" | "OFFER_IS_OWN_SOURCE" | "DUPLICATE_RULE_ID"
+    rule_id?: string
+    offer_group_id?: string
+    item_index?: number
+    message: string
+  }>
+  product_ids?: string[]
+  price_ids?: string[]
 }
 ```
 

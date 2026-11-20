@@ -1920,6 +1920,7 @@ const { data } = await client.$productRecommendations(
       price_id: 'string'
     },
     contract_id: 'string',
+    campaign_id: '3f1c7d2e-9a4b-4c6d-8e2f-1a2b3c4d5e6f',
     filters: {
       location: {
         street: 'string',
@@ -9712,6 +9713,7 @@ type ProductRecommendationSearch = {
     price_id?: string
   }
   contract_id?: string
+  campaign_id?: string
   filters?: {
     location: {
       street?: { ... }

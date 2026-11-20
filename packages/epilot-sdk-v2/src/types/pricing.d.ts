@@ -20163,6 +20163,18 @@ export declare namespace Components {
              * The contract id to be used as source for the recommendation
              */
             contract_id?: string;
+            /**
+             * The tariff change campaign the offers are requested for. Used together with `contract_id`:
+             * the offers come from the rule table of the campaign's product recommendation, and only when
+             * the campaign is active and the contract or its contact is in the campaign's audience.
+             * Otherwise the result is empty.
+             *
+             * Only applies to organizations with campaign-scoped offers enabled; ignored otherwise.
+             *
+             * example:
+             * 3f1c7d2e-9a4b-4c6d-8e2f-1a2b3c4d5e6f
+             */
+            campaign_id?: string;
             filters?: /* Availability filters dimensions */ AvailabilityFilters;
         }
         /**
