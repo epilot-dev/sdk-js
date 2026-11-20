@@ -1197,7 +1197,7 @@
           },
           "_manifest": {
             "type": "array",
-            "description": "Source blueprint/manifest ID used when automation is created via blueprints.",
+            "description": "Source blueprint/manifest ID used when automation is created via blueprints.\nA full update (PUT) that omits this field keeps the stored value; send `null` to unlink the automation from its blueprint.\n",
             "items": {
               "type": "string",
               "format": "uuid",
@@ -1313,6 +1313,10 @@
               },
               "action_type": {
                 "type": "string"
+              },
+              "action_index": {
+                "type": "integer",
+                "minimum": 0
               }
             }
           },
@@ -3081,8 +3085,8 @@
               "properties": {
                 "email": {
                   "type": "string",
-                  "format": "email",
-                  "description": "Email address to forward to"
+                  "pattern": "^([^@\\s{},;]+@[^@\\s{},;]+|\\{\\{\\s*env\\.[a-z0-9][a-z0-9_.\\-]{0,127}\\s*\\}\\})$",
+                  "description": "Either a plain email address or exactly one epilot environment variable placeholder\n(`{{env.KEY}}`, whitespace inside the braces allowed) that is resolved when the action runs.\nThe key follows the environments-api key format (lowercase letters, digits, `_`, `-`, `.`).\nMixed text such as `a@b.de, {{env.KEY}}` is rejected. Example: `{{env.support_inbox}}`\n"
                 },
                 "name": {
                   "type": "string",
@@ -4374,6 +4378,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "ephemeral": {
+            "$ref": "#/components/schemas/EphemeralExecution"
           }
         },
         "required": [
@@ -4952,6 +4959,94 @@
         "required": [
           "entity_id",
           "flow_id"
+        ]
+      },
+      "StartEphemeralExecutionRequest": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "$ref": "#/components/schemas/EntityId"
+          },
+          "flow_name": {
+            "type": "string",
+            "example": "Handle contact form"
+          },
+          "actions": {
+            "type": "array",
+            "description": "Every action needs an `id`. The execution keeps it as the action's `flow_action_id`.",
+            "items": {
+              "$ref": "#/components/schemas/AnyAction"
+            }
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionCondition"
+            }
+          },
+          "schedules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionSchedule"
+            }
+          },
+          "workflow_context": {
+            "$ref": "#/components/schemas/WorkflowExecutionContext"
+          },
+          "action_inputs": {
+            "$ref": "#/components/schemas/ActionInputs"
+          },
+          "ephemeral": {
+            "$ref": "#/components/schemas/EphemeralExecution"
+          }
+        },
+        "required": [
+          "entity_id",
+          "flow_name",
+          "actions",
+          "ephemeral"
+        ]
+      },
+      "EphemeralExecution": {
+        "type": "object",
+        "description": "Present on an execution started from an automation definition sent in the request.",
+        "properties": {
+          "identity": {
+            "$ref": "#/components/schemas/EphemeralIdentity"
+          }
+        },
+        "required": [
+          "identity"
+        ]
+      },
+      "EphemeralIdentity": {
+        "type": "object",
+        "description": "Identifies the automation of an ephemeral execution. The execution's `flow_id` is derived from the organization and this identity.\nExecutions with the same identity share the state kept per `flow_id` across runs, e.g. round-robin assignment queues.\nConfigurations that must not share this state need different identities.\n",
+        "additionalProperties": false,
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The internal feature that owns the execution.",
+            "example": "flows"
+          },
+          "key": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Owner-defined parts that identify the automation within the namespace.",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "example": [
+              "7791b04a-16d2-44a2-9af9-2d59c25c512f",
+              "task-1"
+            ]
+          }
+        },
+        "required": [
+          "namespace",
+          "key"
         ]
       },
       "ActionInputs": {
