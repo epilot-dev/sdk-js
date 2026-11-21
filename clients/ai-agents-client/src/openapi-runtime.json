@@ -81,6 +81,33 @@
         "responses": {}
       }
     },
+    "/v1/agents/{agent_id}/agent-auth": {
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getAgentAuth",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "activateAgentAuth",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deactivateAgentAuth",
+        "responses": {}
+      }
+    },
     "/v1/customer-chat": {
       "get": {
         "operationId": "listCustomerChat",
@@ -170,38 +197,50 @@
         "responses": {}
       }
     },
-    "/v1/knowledge/sources": {
+    "/v1/customer-chat/{agent_id}/conversations": {
       "get": {
-        "operationId": "listKnowledgeSources",
-        "responses": {}
-      }
-    },
-    "/v1/knowledge/file-uploads": {
-      "post": {
-        "operationId": "createKnowledgeFileUpload",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
+        "operationId": "listCustomerChatConversations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          },
+          {
+            "name": "has_ticket",
+            "in": "query"
+          },
+          {
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "name": "to",
+            "in": "query"
           }
-        },
+        ],
         "responses": {}
       }
     },
-    "/v1/knowledge/sources/{source_id}": {
-      "parameters": [
-        {
-          "name": "source_id",
-          "in": "path",
-          "required": true
-        }
-      ],
+    "/v1/customer-chat/{agent_id}/conversations/{conversation_id}": {
       "get": {
-        "operationId": "getKnowledgeSource",
-        "responses": {}
-      },
-      "delete": {
-        "operationId": "deleteKnowledgeSource",
+        "operationId": "getCustomerChatConversation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          },
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true
+          }
+        ],
         "responses": {}
       }
     },
@@ -257,6 +296,10 @@
           },
           {
             "name": "limit",
+            "in": "query"
+          },
+          {
+            "name": "cursor",
             "in": "query"
           }
         ],
@@ -462,6 +505,194 @@
         },
         "responses": {}
       }
+    },
+    "/v2/sessions/uploads": {
+      "post": {
+        "operationId": "createSessionUpload",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/sessions": {
+      "post": {
+        "operationId": "createSession",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listSessions",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/sessions/{sessionId}": {
+      "get": {
+        "operationId": "getSession",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "renameSession",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSession",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/sessions/{sessionId}/events": {
+      "get": {
+        "operationId": "listSessionEvents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "sendSessionEvent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/sessions/{sessionId}/files/{fileId}": {
+      "get": {
+        "operationId": "getSessionFileUrl",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/sessions/scripts": {
+      "post": {
+        "operationId": "runScript",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/sessions/scripts/{runId}": {
+      "get": {
+        "operationId": "getScriptRun",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScriptRunIdPath"
+          },
+          {
+            "name": "waitMs",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/sessions/scripts/{runId}/apply": {
+      "post": {
+        "operationId": "applyScriptRun",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScriptRunIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/agents/revoke": {
+      "post": {
+        "operationId": "revokeSessionAgents",
+        "responses": {}
+      }
     }
   },
   "components": {
@@ -475,6 +706,61 @@
         "name": "If-Match",
         "in": "header",
         "required": false
+      },
+      "SessionIdPath": {
+        "name": "sessionId",
+        "in": "path",
+        "required": true
+      },
+      "ScriptRunIdPath": {
+        "name": "runId",
+        "in": "path",
+        "required": true
+      }
+    },
+    "responses": {
+      "SessionsBadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsUnauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsNotEnabled": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsNotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsConflict": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsPayloadTooLarge": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsQuotaExceeded": {
+        "headers": {
+          "retry-after": {}
+        },
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsInternalError": {
+        "content": {
+          "application/json": {}
+        }
       }
     }
   }
