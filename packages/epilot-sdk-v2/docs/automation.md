@@ -160,6 +160,9 @@ const { data } = await automationClient.searchFlows(...)
 - [`SearchExecutionsReq`](#searchexecutionsreq)
 - [`SearchExecutionsResp`](#searchexecutionsresp)
 - [`StartExecutionRequest`](#startexecutionrequest)
+- [`StartEphemeralExecutionRequest`](#startephemeralexecutionrequest)
+- [`EphemeralExecution`](#ephemeralexecution)
+- [`EphemeralIdentity`](#ephemeralidentity)
 - [`ActionInputs`](#actioninputs)
 - [`SendEmailInputs`](#sendemailinputs)
 - [`FlowExecutionCancelInputs`](#flowexecutioncancelinputs)
@@ -348,7 +351,8 @@ const { data } = await client.getExecutions({
       "workflow_wait_context": {},
       "loops": [],
       "loop_state": {},
-      "chain": ["string"]
+      "chain": ["string"],
+      "ephemeral": {}
     }
   ]
 }
@@ -575,7 +579,13 @@ const { data } = await client.startExecution(
     }
   ],
   "loop_state": {},
-  "chain": ["string"]
+  "chain": ["string"],
+  "ephemeral": {
+    "identity": {
+      "namespace": "flows",
+      "key": ["7791b04a-16d2-44a2-9af9-2d59c25c512f", "task-1"]
+    }
+  }
 }
 ```
 
@@ -635,7 +645,8 @@ const { data } = await client.searchExecutions(
       "workflow_wait_context": {},
       "loops": [],
       "loop_state": {},
-      "chain": ["string"]
+      "chain": ["string"],
+      "ephemeral": {}
     }
   ],
   "next_cursor": "string"
@@ -1004,7 +1015,13 @@ const { data } = await client.getExecution({
     }
   ],
   "loop_state": {},
-  "chain": ["string"]
+  "chain": ["string"],
+  "ephemeral": {
+    "identity": {
+      "namespace": "flows",
+      "key": ["7791b04a-16d2-44a2-9af9-2d59c25c512f", "task-1"]
+    }
+  }
 }
 ```
 
@@ -1175,7 +1192,13 @@ const { data } = await client.cancelExecution({
     }
   ],
   "loop_state": {},
-  "chain": ["string"]
+  "chain": ["string"],
+  "ephemeral": {
+    "identity": {
+      "namespace": "flows",
+      "key": ["7791b04a-16d2-44a2-9af9-2d59c25c512f", "task-1"]
+    }
+  }
 }
 ```
 
@@ -1289,7 +1312,10 @@ const { data } = await client.resumeExecutionWithToken(
       {}
     ],
     "loop_state": {},
-    "chain": ["string"]
+    "chain": ["string"],
+    "ephemeral": {
+      "identity": {}
+    }
   },
   "resumedAction": {
     "id": "9ec3711b-db63-449c-b894-54d5bb622a8f",
@@ -1635,6 +1661,7 @@ type JourneyContextUsage = {
   location?: {
     action_id?: string
     action_type?: string
+    action_index?: number
   }
   matched_as: {
     dialect: "name"
@@ -1662,6 +1689,7 @@ type JourneyContextUsagesResp = {
     location?: {
       action_id?: { ... }
       action_type?: { ... }
+      action_index?: { ... }
     }
     matched_as: {
       dialect: { ... }
@@ -3164,7 +3192,7 @@ type ForwardEmailAction = {
 ```ts
 type ForwardEmailConfig = {
   forward_to: Array<{
-    email: string // email
+    email: string
     name?: string
   }>
   include_attachments?: boolean
@@ -4379,6 +4407,139 @@ type StartExecutionRequest = {
       attachment_entity_ids?: { ... }
     }
   }
+}
+```
+
+### `StartEphemeralExecutionRequest`
+
+```ts
+type StartEphemeralExecutionRequest = {
+  entity_id: string
+  flow_name: string
+  actions: Array<{
+    type?: "map-entity"
+    config?: {
+      mapping_config?: { ... }
+      target_schema: { ... }
+      use_uniqueness_criteria?: { ... }
+      target_unique?: { ... }
+      mapping_attributes?: { ... }
+      relation_attributes?: { ... }
+      linkback_relation_attribute?: { ... }
+      linkback_relation_tags?: { ... }
+      graph_context?: { ... }
+    }
+  } | {
+    type?: "trigger-workflow"
+    config?: {
+      target_workflow?: { ... }
+      conditions?: { ... }
+      assignees?: { ... }
+      assign_steps?: { ... }
+      filter_with_purposes?: { ... }
+    }
+  } | {
+    type?: "trigger-share-entity"
+    config?: {
+      operation?: { ... }
+      unshare_all_partners?: { ... }
+      partner_org_ids?: { ... }
+    }
+  } | {
+    type?: "trigger-webhook"
+    config?: {
+      event_id?: { ... }
+      entity_sources?: { ... }
+      target_webhook_id?: { ... }
+      sync?: { ... }
+    }
+  } | {
+    type?: "inform-erp"
+    config?: {
+      entity_sources?: { ... }
+      target_webhook_id?: { ... }
+      sync?: { ... }
+    }
+  } | {
+    type?: "trigger-event"
+    config?: {
+      event_name: { ... }
+      event_inputs?: { ... }
+    }
+  } | {
+    type?: "create-document"
+    config?: {
+      template_id?: { ... }
+      filename?: { ... }
+    }
+  } | {
+    type?: "send-email"
+    config?: {
+      email_template_id?: { ... }
+      language_code?: { ... }
+      notify_portal_user_only?: { ... }
+      skip_creating_entities?: { ... }
+      wait_for_confirmation?: { ... }
+      wait_for_journey_submission?: { ... }
+      journey_id?: { ... }
+      reply_to_sender?: { ... }
+      reply_mode?: { ... }
+      mark_as_done?: { ... }
+      mark_as_read?: { ... }
+      attachments?: { ... }
+      conditions?: { ... }
+    }
+  } | {
+    type?: "cart-checkout"
+    config?: {
+      version?: { ... }
+      mapping_config?: { ... }
+      relation_attributes?: { ... }
+      mapping_attributes?: { ... }
+      linkback_relation_attribute?: { ... }
+      linkback_relation_tags?: { ... }
+      target_unique?: { ... }
+    }
+  } | {
+    type?: "custom-action"
+    config?: {
+      name?: { ... }
+      description?: { ... }
+      app_id?: { ... }
+      component_id?: { ... }
+      wait_for_callback?: { ... }
+    }
+  } | {
+    id?: string
+    flow_action_id?: string
+    name?: string
+  // ...
+}
+```
+
+### `EphemeralExecution`
+
+Present on an execution started from an automation definition sent in the request.
+
+```ts
+type EphemeralExecution = {
+  identity: {
+    namespace: string
+    key: string[]
+  }
+}
+```
+
+### `EphemeralIdentity`
+
+Identifies the automation of an ephemeral execution. The execution's `flow_id` is derived from the organization and this identity.
+Executions with the same identity share the state kept per `flow_id` across runs, e.g. round-robin assignment queues.
+Configurations that must not share this state need 
+
+```ts
+type EphemeralIdentity = {
+  namespace: string
+  key: string[]
 }
 ```
 

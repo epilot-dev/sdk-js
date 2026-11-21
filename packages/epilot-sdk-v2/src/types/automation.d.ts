@@ -1697,6 +1697,7 @@ export declare namespace Components {
              * Ordered automation flow ids in this execution's trigger chain (multi-automation loop prevention).
              */
             chain?: string[];
+            ephemeral?: /* Present on an execution started from an automation definition sent in the request. */ EphemeralExecution;
         }
         /**
          * example:
@@ -1815,6 +1816,8 @@ export declare namespace Components {
             version?: number;
             /**
              * Source blueprint/manifest ID used when automation is created via blueprints.
+             * A full update (PUT) that omits this field keeps the stored value; send `null` to unlink the automation from its blueprint.
+             *
              */
             _manifest?: string /* uuid */[] | null;
             /**
@@ -3058,6 +3061,44 @@ export declare namespace Components {
          * A filter field value.
          */
         export type EntitySearchFilterValue = /* A filter field value. */ (string | null) | number | boolean;
+        /**
+         * Present on an execution started from an automation definition sent in the request.
+         */
+        export interface EphemeralExecution {
+            identity: /**
+             * Identifies the automation of an ephemeral execution. The execution's `flow_id` is derived from the organization and this identity.
+             * Executions with the same identity share the state kept per `flow_id` across runs, e.g. round-robin assignment queues.
+             * Configurations that must not share this state need different identities.
+             *
+             */
+            EphemeralIdentity;
+        }
+        /**
+         * Identifies the automation of an ephemeral execution. The execution's `flow_id` is derived from the organization and this identity.
+         * Executions with the same identity share the state kept per `flow_id` across runs, e.g. round-robin assignment queues.
+         * Configurations that must not share this state need different identities.
+         *
+         */
+        export interface EphemeralIdentity {
+            /**
+             * The internal feature that owns the execution.
+             * example:
+             * flows
+             */
+            namespace: string;
+            /**
+             * Owner-defined parts that identify the automation within the namespace.
+             * example:
+             * [
+             *   "7791b04a-16d2-44a2-9af9-2d59c25c512f",
+             *   "task-1"
+             * ]
+             */
+            key: [
+                string,
+                ...string[]
+            ];
+        }
         export interface EqualsIgnoreCaseCondition {
             "equals-ignore-case"?: string;
         }
@@ -3547,9 +3588,13 @@ export declare namespace Components {
              */
             forward_to: {
                 /**
-                 * Email address to forward to
+                 * Either a plain email address or exactly one epilot environment variable placeholder
+                 * (`{{env.KEY}}`, whitespace inside the braces allowed) that is resolved when the action runs.
+                 * The key follows the environments-api key format (lowercase letters, digits, `_`, `-`, `.`).
+                 * Mixed text such as `a@b.de, {{env.KEY}}` is rejected. Example: `{{env.support_inbox}}`
+                 *
                  */
-                email: string; // email
+                email: string; // ^([^@\s{},;]+@[^@\s{},;]+|\{\{\s*env\.[a-z0-9][a-z0-9_.\-]{0,127}\s*\}\})$
                 /**
                  * Display name for the recipient
                  */
@@ -3871,6 +3916,7 @@ export declare namespace Components {
             location?: {
                 action_id?: string;
                 action_type?: string;
+                action_index?: number;
             };
             matched_as: {
                 dialect: "name";
@@ -5136,6 +5182,47 @@ export declare namespace Components {
              *
              */
             value: any;
+        }
+        export interface StartEphemeralExecutionRequest {
+            entity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId;
+            /**
+             * example:
+             * Handle contact form
+             */
+            flow_name: string;
+            /**
+             * Every action needs an `id`. The execution keeps it as the action's `flow_action_id`.
+             */
+            actions: AnyAction[];
+            conditions?: ActionCondition[];
+            schedules?: ActionSchedule[];
+            workflow_context?: WorkflowExecutionContext;
+            action_inputs?: /**
+             * Internal. Run-time inputs for the actions of this execution, keyed by
+             * action type. An action reads the entry for its own type and treats it
+             * as replacing the matching configured values; an action whose type has
+             * no entry runs entirely from its configuration.
+             *
+             * Only the workflows service may set this field, on behalf of the person
+             * running a semi-automated flow task: it forwards what that person chose
+             * after checking their permission to run the task. A request carrying
+             * `action_inputs` under any other token is refused with 403 and nothing
+             * is stored.
+             *
+             * This is deliberately NOT stored on `actions[].config`. Retrying a step
+             * refreshes that action's config from the live flow (see `startAction`),
+             * which would silently drop an override and re-run the action with the
+             * configured values — sending the wrong email, or cancelling a flow
+             * under the wrong reason. Keeping the inputs on the execution row means a
+             * retry replays what the person actually chose.
+             *
+             */
+            ActionInputs;
+            ephemeral: /* Present on an execution started from an automation definition sent in the request. */ EphemeralExecution;
         }
         export interface StartExecutionRequest {
             entity_id: /**
@@ -7064,6 +7151,8 @@ export type EntityOperationTrigger = Components.Schemas.EntityOperationTrigger;
 export type EntityRef = Components.Schemas.EntityRef;
 export type EntitySearchFilter = Components.Schemas.EntitySearchFilter;
 export type EntitySearchFilterValue = Components.Schemas.EntitySearchFilterValue;
+export type EphemeralExecution = Components.Schemas.EphemeralExecution;
+export type EphemeralIdentity = Components.Schemas.EphemeralIdentity;
 export type EqualsIgnoreCaseCondition = Components.Schemas.EqualsIgnoreCaseCondition;
 export type ErrorCode = Components.Schemas.ErrorCode;
 export type ErrorDetail = Components.Schemas.ErrorDetail;
@@ -7141,6 +7230,7 @@ export type SendEmailConfig = Components.Schemas.SendEmailConfig;
 export type SendEmailInputs = Components.Schemas.SendEmailInputs;
 export type SentEmailTrigger = Components.Schemas.SentEmailTrigger;
 export type SetValueMapper = Components.Schemas.SetValueMapper;
+export type StartEphemeralExecutionRequest = Components.Schemas.StartEphemeralExecutionRequest;
 export type StartExecutionRequest = Components.Schemas.StartExecutionRequest;
 export type SuffixCondition = Components.Schemas.SuffixCondition;
 export type TriggerCondition = Components.Schemas.TriggerCondition;
