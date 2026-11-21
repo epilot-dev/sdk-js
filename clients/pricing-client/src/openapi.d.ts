@@ -204,8 +204,9 @@ declare namespace Components {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                  * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                 * 13 digits.
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -1991,8 +1992,10 @@ declare namespace Components {
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
              * and `until` in that form where an empty string is an open end, a `location` of format
              * `postal_code` the postal code itself, one of format `postal_code_city` an object carrying
-             * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` the
-             * grid operator's code number: a string of exactly 13 digits, whatever its prefix.
+             * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` an
+             * object carrying the grid operator's code number alone. A grid operator is written as its code
+             * number, a string of exactly 13 digits whatever its prefix, or as the object a read returns;
+             * only `code_number` is read from the object.
              *
              * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
              * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
@@ -4642,8 +4645,10 @@ declare namespace Components {
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
              * and `until` in that form where an empty string is an open end, a `location` of format
              * `postal_code` the postal code itself, one of format `postal_code_city` an object carrying
-             * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` the
-             * grid operator's code number: a string of exactly 13 digits, whatever its prefix.
+             * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` an
+             * object carrying the grid operator's code number alone. A grid operator is written as its code
+             * number, a string of exactly 13 digits whatever its prefix, or as the object a read returns;
+             * only `code_number` is read from the object.
              *
              * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
              * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
@@ -7783,8 +7788,9 @@ declare namespace Components {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                      * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                     * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                     * 13 digits.
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                     * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                     * digits.
                      *
                      */
                     PinnedConditionValue;
@@ -8029,8 +8035,9 @@ declare namespace Components {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                      * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                     * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                     * 13 digits.
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                     * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                     * digits.
                      *
                      */
                     PinnedConditionValue;
@@ -8222,8 +8229,9 @@ declare namespace Components {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                      * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                     * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                     * 13 digits.
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                     * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                     * digits.
                      *
                      */
                     PinnedConditionValue;
@@ -14066,8 +14074,10 @@ declare namespace Components {
              * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
              * and `until` in that form where an empty string is an open end, a `location` of format
              * `postal_code` the postal code itself, one of format `postal_code_city` an object carrying
-             * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` the
-             * grid operator's code number: a string of exactly 13 digits, whatever its prefix.
+             * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` an
+             * object carrying the grid operator's code number alone. A grid operator is written as its code
+             * number, a string of exactly 13 digits whatever its prefix, or as the object a read returns;
+             * only `code_number` is read from the object.
              *
              * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
              * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
@@ -14143,8 +14153,9 @@ declare namespace Components {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                  * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                 * 13 digits.
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -14838,6 +14849,57 @@ declare namespace Components {
              * The vritual trading point identifier
              */
             virtualTradingPoint?: string;
+        }
+        /**
+         * A grid operator as the list Pricing API bundles names it, built from the Marktstammdatenregister,
+         * bdew-codes.de (power) and DVGW (gas).
+         *
+         */
+        export interface GridOperator {
+            /**
+             * The 13-digit code number, a BDEW or DVGW code or a GLN.
+             * example:
+             * 4045458000000
+             */
+            code_number: string;
+            /**
+             * The name assigned to the code number.
+             * example:
+             * Westnetz GmbH
+             */
+            name: string;
+            /**
+             * Whether the grid is a closed distribution grid. Left out where that is unknown.
+             */
+            closed_distribution_grid?: boolean;
+        }
+        /**
+         * The commodity whose grid operators to search or look up. Power and gas code numbers are separate lists.
+         */
+        export type GridOperatorCommodity = "power" | "gas";
+        export interface GridOperatorLookupRequest {
+            commodity: /* The commodity whose grid operators to search or look up. Power and gas code numbers are separate lists. */ GridOperatorCommodity;
+            /**
+             * 1 to 100 code numbers of 13 digits each.
+             */
+            code_numbers: string[];
+        }
+        export interface GridOperatorResults {
+            results: /**
+             * A grid operator as the list Pricing API bundles names it, built from the Marktstammdatenregister,
+             * bdew-codes.de (power) and DVGW (gas).
+             *
+             */
+            GridOperator[];
+        }
+        export interface GridOperatorSearchRequest {
+            commodity: /* The commodity whose grid operators to search or look up. Power and gas code numbers are separate lists. */ GridOperatorCommodity;
+            /**
+             * Words the grid operator's name must all contain, ignoring case. At least one word.
+             * example:
+             * westnetz
+             */
+            name: string;
         }
         /**
          * A market price at a given point in time.
@@ -15577,8 +15639,11 @@ declare namespace Components {
             search?: string;
             /**
              * `conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,
-             * `date` or `location` pin. A location orders by postal code, then by city ignoring case.
-             * `variant_id:asc` is always appended, so the order is total.
+             * `date` or `location` pin. A postal code location orders by postal code, then by city
+             * ignoring case. A grid operator location orders by the grid operator's name in dictionary
+             * order, ignoring case and accents (`Ü` sorts as `U`, `ß` as `ss`); a code number with no
+             * known name sorts last in both directions, as does a variant that does not pin the
+             * condition. `variant_id:asc` is always appended, so the order is total.
              *
              * example:
              * conditions.postal_code:asc
@@ -17046,8 +17111,9 @@ declare namespace Components {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                  * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                 * 13 digits.
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -17072,15 +17138,17 @@ declare namespace Components {
         /**
          * One condition's exact value. Which of these shapes a condition takes is set by its type in the
          * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-         * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-         * 13 digits.
+         * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+         * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+         * digits.
          *
          */
         export type PinnedConditionValue = /**
          * One condition's exact value. Which of these shapes a condition takes is set by its type in the
          * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-         * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-         * 13 digits.
+         * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+         * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+         * digits.
          *
          */
         string | number | boolean | /**
@@ -17097,7 +17165,14 @@ declare namespace Components {
          * address names them.
          *
          */
-        PostalCodeCity;
+        PostalCodeCity | /**
+         * The value of a `location` condition of format `power_grid_operator` or `gas_grid_operator`:
+         * the grid operator's code number, with the name and closed distribution grid flag the list
+         * Pricing API bundles assigns it, retired or not. A write reads only `code_number` and ignores
+         * the rest.
+         *
+         */
+        PinnedGridOperator;
         /**
          * The situation this variant applies to: a flat map keyed by condition name. A condition left
          * out is a wildcard, which is what makes adding a condition to a schema non-breaking for
@@ -17107,8 +17182,10 @@ declare namespace Components {
          * type: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`
          * and `until` in that form where an empty string is an open end, a `location` of format
          * `postal_code` the postal code itself, one of format `postal_code_city` an object carrying
-         * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` the
-         * grid operator's code number: a string of exactly 13 digits, whatever its prefix.
+         * `postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` an
+         * object carrying the grid operator's code number alone. A grid operator is written as its code
+         * number, a string of exactly 13 digits whatever its prefix, or as the object a read returns;
+         * only `code_number` is read from the object.
          *
          * A date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the
          * organization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only
@@ -17126,11 +17203,39 @@ declare namespace Components {
             [name: string]: /**
              * One condition's exact value. Which of these shapes a condition takes is set by its type in the
              * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-             * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-             * 13 digits.
+             * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+             * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+             * digits.
              *
              */
             PinnedConditionValue;
+        }
+        /**
+         * The value of a `location` condition of format `power_grid_operator` or `gas_grid_operator`:
+         * the grid operator's code number, with the name and closed distribution grid flag the list
+         * Pricing API bundles assigns it, retired or not. A write reads only `code_number` and ignores
+         * the rest.
+         *
+         */
+        export interface PinnedGridOperator {
+            /**
+             * The 13-digit code number, a BDEW or DVGW code or a GLN.
+             * example:
+             * 4045458000000
+             */
+            code_number: string;
+            /**
+             * The name assigned to the code number. Left out for a code number the list doesn't hold.
+             * example:
+             * Westnetz GmbH
+             */
+            name?: string;
+            /**
+             * Whether the grid is a closed distribution grid. Left out where that is unknown.
+             * example:
+             * false
+             */
+            closed_distribution_grid?: boolean;
         }
         /**
          * The options a pinned resolve accepts — `hydrate` and nothing else. `resolve_one` has nothing
@@ -20599,8 +20704,9 @@ declare namespace Components {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                  * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                 * 13 digits.
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -21787,8 +21893,9 @@ declare namespace Components {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                      * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                     * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                     * 13 digits.
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                     * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                     * digits.
                      *
                      */
                     PinnedConditionValue;
@@ -21874,8 +21981,9 @@ declare namespace Components {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                  * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                 * 13 digits.
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22410,8 +22518,9 @@ declare namespace Components {
             [name: string]: /**
              * One condition's exact value. Which of these shapes a condition takes is set by its type in the
              * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-             * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-             * 13 digits.
+             * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+             * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+             * digits.
              *
              */
             PinnedConditionValue;
@@ -22463,8 +22572,9 @@ declare namespace Components {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                  * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                 * 13 digits.
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22538,8 +22648,11 @@ declare namespace Components {
             search?: string;
             /**
              * `conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,
-             * `date` or `location` pin. A location orders by postal code, then by city ignoring case.
-             * `variant_id:asc` is always appended, so the order is total.
+             * `date` or `location` pin. A postal code location orders by postal code, then by city
+             * ignoring case. A grid operator location orders by the grid operator's name in dictionary
+             * order, ignoring case and accents (`Ü` sorts as `U`, `ß` as `ss`); a code number with no
+             * known name sorts last in both directions, as does a variant that does not pin the
+             * condition. `variant_id:asc` is always appended, so the order is total.
              *
              * example:
              * conditions.postal_code:asc
@@ -22607,8 +22720,9 @@ declare namespace Components {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                  * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                 * 13 digits.
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22654,8 +22768,9 @@ declare namespace Components {
                     [name: string]: /**
                      * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                      * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                     * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                     * 13 digits.
+                     * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                     * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                     * digits.
                      *
                      */
                     PinnedConditionValue;
@@ -22764,8 +22879,9 @@ declare namespace Components {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                  * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                 * 13 digits.
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -22865,8 +22981,9 @@ declare namespace Components {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                  * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                 * 13 digits.
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -23018,8 +23135,9 @@ declare namespace Components {
                 [name: string]: /**
                  * One condition's exact value. Which of these shapes a condition takes is set by its type in the
                  * entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-                 * `location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-                 * 13 digits.
+                 * `location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+                 * `PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13
+                 * digits.
                  *
                  */
                 PinnedConditionValue;
@@ -24078,6 +24196,13 @@ declare namespace Paths {
             Components.Schemas.ConditionalPricingError;
         }
     }
+    namespace $LookupGridOperators {
+        export type RequestBody = Components.Schemas.GridOperatorLookupRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.GridOperatorResults;
+            export type $400 = Components.Schemas.Error;
+        }
+    }
     namespace $PatchActiveConditionalVariantVersion {
         namespace Parameters {
             export type EntityId = string;
@@ -24518,6 +24643,13 @@ declare namespace Paths {
             export type $200 = Components.Schemas.SearchExternalCatalogResult;
             export type $400 = Components.Schemas.Error;
             export type $403 = Components.Schemas.Error;
+        }
+    }
+    namespace $SearchGridOperators {
+        export type RequestBody = Components.Schemas.GridOperatorSearchRequest;
+        namespace Responses {
+            export type $200 = Components.Schemas.GridOperatorResults;
+            export type $400 = Components.Schemas.Error;
         }
     }
     namespace $SearchProviders {
@@ -26017,6 +26149,31 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.$ProductRecommendations.Responses.$200>
   /**
+   * $searchGridOperators - $searchGridOperators
+   * 
+   * Finds the active grid operators of one commodity whose name contains every word of `name`,
+   * ignoring case, and answers the first 10 by name. Type more of the name to narrow the results.
+   * A retired code number is never answered.
+   * 
+   */
+  '$searchGridOperators'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$SearchGridOperators.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$SearchGridOperators.Responses.$200>
+  /**
+   * $lookupGridOperators - $lookupGridOperators
+   * 
+   * Answers the grid operator each code number is assigned to, retired code numbers included,
+   * in the order asked and each once. A code number the list doesn't hold is missing from `results`.
+   * 
+   */
+  '$lookupGridOperators'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.$LookupGridOperators.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.$LookupGridOperators.Responses.$200>
+  /**
    * $getConditionSets - $getConditionSets
    * 
    * Returns the condition sets built in for one conditional entity type, ready to copy into that schema's `conditions` array. Read-only, and the same for every organization.
@@ -26621,6 +26778,35 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.$ProductRecommendations.Responses.$200>
   }
+  ['/v1/grid-operators:search']: {
+    /**
+     * $searchGridOperators - $searchGridOperators
+     * 
+     * Finds the active grid operators of one commodity whose name contains every word of `name`,
+     * ignoring case, and answers the first 10 by name. Type more of the name to narrow the results.
+     * A retired code number is never answered.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$SearchGridOperators.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$SearchGridOperators.Responses.$200>
+  }
+  ['/v1/grid-operators:lookup']: {
+    /**
+     * $lookupGridOperators - $lookupGridOperators
+     * 
+     * Answers the grid operator each code number is assigned to, retired code numbers included,
+     * in the order asked and each once. A code number the list doesn't hold is missing from `results`.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.$LookupGridOperators.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.$LookupGridOperators.Responses.$200>
+  }
   ['/v1/conditional-pricing/{slug}/condition-sets']: {
     /**
      * $getConditionSets - $getConditionSets
@@ -27059,6 +27245,11 @@ export type ExternalPriceMetadata = Components.Schemas.ExternalPriceMetadata;
 export type File = Components.Schemas.File;
 export type GasConcessionType = Components.Schemas.GasConcessionType;
 export type GasMarketAreaDetails = Components.Schemas.GasMarketAreaDetails;
+export type GridOperator = Components.Schemas.GridOperator;
+export type GridOperatorCommodity = Components.Schemas.GridOperatorCommodity;
+export type GridOperatorLookupRequest = Components.Schemas.GridOperatorLookupRequest;
+export type GridOperatorResults = Components.Schemas.GridOperatorResults;
+export type GridOperatorSearchRequest = Components.Schemas.GridOperatorSearchRequest;
 export type HistoricMarketPriceRecord = Components.Schemas.HistoricMarketPriceRecord;
 export type HistoricMarketPricesResult = Components.Schemas.HistoricMarketPricesResult;
 export type HydratedCompositePrice = Components.Schemas.HydratedCompositePrice;
@@ -27091,6 +27282,7 @@ export type PatchVersionRequest = Components.Schemas.PatchVersionRequest;
 export type PaymentMethod = Components.Schemas.PaymentMethod;
 export type PinnedConditionValue = Components.Schemas.PinnedConditionValue;
 export type PinnedConditions = Components.Schemas.PinnedConditions;
+export type PinnedGridOperator = Components.Schemas.PinnedGridOperator;
 export type PinnedResolveOptions = Components.Schemas.PinnedResolveOptions;
 export type PortalContext = Components.Schemas.PortalContext;
 export type PostalCodeCity = Components.Schemas.PostalCodeCity;

@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Pricing API",
-    "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### Spot Market API\nProvides endpoints to fetch (historic) spot market price data.\n\n### External Integrations API\nProvides endpoints for external integrations. E.g. GetAG.\n\n### External Catalog API\nProvides endpoints for external catalog.\n\n### Product Recommendations API\nProvides endpoints for product recommendations.\n\n### Conditional Pricing API\nProvides endpoints for resolving conditional Products, Prices and Coupons, and for authoring the conditions they vary by.\n\nConditional Pricing reads every date in the organization's timezone, and reports every `as_of`\nin that timezone's offset. Organizations have no timezone setting yet, so every organization\nuses `Europe/Berlin`.\n",
+    "description": "The `pricing-api` hub sets the foundations for the following Pricing APIs:\n\n### Order API\nThis api enables the management of orders in epilot 360, providing features such as:\n - Automatic calculation of totals and price breakdowns for taxes on the Order entity\n - Product and pricing data validation\n\n### Shopping Cart API\nUsed to interact with a cart during a customer's checkout session, providing:\n - An unified data model to model a Shopping Cart\n - Product and pricing data validation\n - Checkout a cart into an order or quote\n\n### Catalog API\nProvides a way to query the entire catalog of products and prices.\n\n### Availability API\nProvides endpoints for querying products availability by a set of predefined dimensions.\n\n### Spot Market API\nProvides endpoints to fetch (historic) spot market price data.\n\n### External Integrations API\nProvides endpoints for external integrations. E.g. GetAG.\n\n### External Catalog API\nProvides endpoints for external catalog.\n\n### Product Recommendations API\nProvides endpoints for product recommendations.\n\n### Grid Operators API\nProvides endpoints for finding a grid operator's code number by name, and its name by code number.\n\n### Conditional Pricing API\nProvides endpoints for resolving conditional Products, Prices and Coupons, and for authoring the conditions they vary by.\n\nConditional Pricing reads every date in the organization's timezone, and reports every `as_of`\nin that timezone's offset. Organizations have no timezone setting yet, so every organization\nuses `Europe/Berlin`.\n\n### Data sources\nGrid operator data contains data from the Marktstammdatenregister of the Bundesnetzagentur\n(https://www.marktstammdatenregister.de), licensed under the Datenlizenz Deutschland – Namensnennung –\nVersion 2.0 (https://www.govdata.de/dl-de/by-2-0).\n",
     "version": "1.3.0",
     "termsOfService": "https://epilot.cloud/agb",
     "contact": {
@@ -47,6 +47,10 @@
     {
       "name": "Product Recommendations API",
       "description": "Provides endpoints for product recommendations.\n"
+    },
+    {
+      "name": "Grid Operators API",
+      "description": "Provides endpoints for finding a grid operator's code number by name, and its name by code number.\n"
     },
     {
       "name": "Conditional Pricing API",
@@ -101,6 +105,7 @@
         "External Catalog API",
         "Product Recommendations API",
         "Promo Codes API",
+        "Grid Operators API",
         "Conditional Pricing API"
       ]
     },
@@ -3630,6 +3635,119 @@
         }
       }
     },
+    "/v1/grid-operators:search": {
+      "post": {
+        "description": "Finds the active grid operators of one commodity whose name contains every word of `name`,\nignoring case, and answers the first 10 by name. Type more of the name to narrow the results.\nA retired code number is never answered.\n",
+        "operationId": "$searchGridOperators",
+        "summary": "$searchGridOperators",
+        "tags": [
+          "Grid Operators API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GridOperatorSearchRequest"
+              },
+              "example": {
+                "commodity": "power",
+                "name": "westnetz"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The first 10 matching grid operators by name, possibly none",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GridOperatorResults"
+                },
+                "example": {
+                  "results": [
+                    {
+                      "code_number": "4045458000000",
+                      "name": "Westnetz GmbH",
+                      "closed_distribution_grid": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, e.g. a `name` with no word in it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/grid-operators:lookup": {
+      "post": {
+        "description": "Answers the grid operator each code number is assigned to, retired code numbers included,\nin the order asked and each once. A code number the list doesn't hold is missing from `results`.\n",
+        "operationId": "$lookupGridOperators",
+        "summary": "$lookupGridOperators",
+        "tags": [
+          "Grid Operators API"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GridOperatorLookupRequest"
+              },
+              "example": {
+                "commodity": "power",
+                "code_numbers": [
+                  "4045458000000",
+                  "9900000000001"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The grid operators the list holds for the code numbers asked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GridOperatorResults"
+                },
+                "example": {
+                  "results": [
+                    {
+                      "code_number": "4045458000000",
+                      "name": "Westnetz GmbH",
+                      "closed_distribution_grid": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, e.g. no code numbers, more than 100, or one that is not 13 digits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/conditional-pricing/{slug}/condition-sets": {
       "get": {
         "description": "Returns the condition sets built in for one conditional entity type, ready to copy into that schema's `conditions` array. Read-only, and the same for every organization.",
@@ -6634,13 +6752,13 @@
         "additionalProperties": {
           "$ref": "#/components/schemas/PinnedConditionValue"
         },
-        "description": "The situation this variant applies to: a flat map keyed by condition name. A condition left\nout is a wildcard, which is what makes adding a condition to a schema non-breaking for\nexisting variants.\n\nExact values only; predicates belong to reads. Values are stored canonicalized for their\ntype: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`\nand `until` in that form where an empty string is an open end, a `location` of format\n`postal_code` the postal code itself, one of format `postal_code_city` an object carrying\n`postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` the\ngrid operator's code number: a string of exactly 13 digits, whatever its prefix.\n\nA date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the\norganization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only\n`until` is the last millisecond of that day: `2026-04-30` is stored as\n`2026-04-30T21:59:59.999Z`.\n\n`default` and names beginning with `_` are reserved; use the request's `default` flag.\n",
+        "description": "The situation this variant applies to: a flat map keyed by condition name. A condition left\nout is a wildcard, which is what makes adding a condition to a schema non-breaking for\nexisting variants.\n\nExact values only; predicates belong to reads. Values are stored canonicalized for their\ntype: a `date` becomes millisecond-precision UTC, a `daterange` an object carrying `from`\nand `until` in that form where an empty string is an open end, a `location` of format\n`postal_code` the postal code itself, one of format `postal_code_city` an object carrying\n`postal_code` and `city`, and one of format `power_grid_operator` or `gas_grid_operator` an\nobject carrying the grid operator's code number alone. A grid operator is written as its code\nnumber, a string of exactly 13 digits whatever its prefix, or as the object a read returns;\nonly `code_number` is read from the object.\n\nA date-only `date`, or a date-only `from` of a `daterange`, is midnight of that day in the\norganization's timezone: `2026-04-01` is stored as `2026-03-31T22:00:00.000Z`. A date-only\n`until` is the last millisecond of that day: `2026-04-30` is stored as\n`2026-04-30T21:59:59.999Z`.\n\n`default` and names beginning with `_` are reserved; use the request's `default` flag.\n",
         "example": {
           "postal_code": "46045"
         }
       },
       "PinnedConditionValue": {
-        "description": "One condition's exact value. Which of these shapes a condition takes is set by its type in the\nentity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A\n`location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly\n13 digits.\n",
+        "description": "One condition's exact value. Which of these shapes a condition takes is set by its type in the\nentity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A\n`location` of format `power_grid_operator` or `gas_grid_operator` is read as a\n`PinnedGridOperator`, and written as one or as its code number alone, a string of exactly 13\ndigits.\n",
         "anyOf": [
           {
             "type": "string"
@@ -6656,8 +6774,35 @@
           },
           {
             "$ref": "#/components/schemas/PostalCodeCity"
+          },
+          {
+            "$ref": "#/components/schemas/PinnedGridOperator"
           }
         ]
+      },
+      "PinnedGridOperator": {
+        "type": "object",
+        "description": "The value of a `location` condition of format `power_grid_operator` or `gas_grid_operator`:\nthe grid operator's code number, with the name and closed distribution grid flag the list\nPricing API bundles assigns it, retired or not. A write reads only `code_number` and ignores\nthe rest.\n",
+        "required": [
+          "code_number"
+        ],
+        "properties": {
+          "code_number": {
+            "type": "string",
+            "description": "The 13-digit code number, a BDEW or DVGW code or a GLN.",
+            "example": "4045458000000"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name assigned to the code number. Left out for a code number the list doesn't hold.",
+            "example": "Westnetz GmbH"
+          },
+          "closed_distribution_grid": {
+            "type": "boolean",
+            "description": "Whether the grid is a closed distribution grid. Left out where that is unknown.",
+            "example": false
+          }
+        }
       },
       "PostalCodeFilter": {
         "type": "object",
@@ -7408,7 +7553,7 @@
           },
           "sort": {
             "type": "string",
-            "description": "`conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,\n`date` or `location` pin. A location orders by postal code, then by city ignoring case.\n`variant_id:asc` is always appended, so the order is total.\n",
+            "description": "`conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,\n`date` or `location` pin. A postal code location orders by postal code, then by city\nignoring case. A grid operator location orders by the grid operator's name in dictionary\norder, ignoring case and accents (`Ü` sorts as `U`, `ß` as `ss`); a code number with no\nknown name sorts last in both directions, as does a variant that does not pin the\ncondition. `variant_id:asc` is always appended, so the order is total.\n",
             "example": "conditions.postal_code:asc"
           },
           "from": {
@@ -7445,7 +7590,7 @@
           },
           "sort": {
             "type": "string",
-            "description": "`conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,\n`date` or `location` pin. A location orders by postal code, then by city ignoring case.\n`variant_id:asc` is always appended, so the order is total.\n",
+            "description": "`conditions.<name>:asc` or `conditions.<name>:desc`, for a `string`, `select`, `number`,\n`date` or `location` pin. A postal code location orders by postal code, then by city\nignoring case. A grid operator location orders by the grid operator's name in dictionary\norder, ignoring case and accents (`Ü` sorts as `U`, `ß` as `ss`); a code number with no\nknown name sorts last in both directions, as does a variant that does not pin the\ncondition. `variant_id:asc` is always appended, so the order is total.\n",
             "example": "conditions.postal_code:asc"
           },
           "from": {
@@ -8065,6 +8210,93 @@
               }
             ],
             "description": "Why this item failed, present only with `outcome: error`:\n`LAST_VERSION_UNDELETABLE`, `VARIANT_UNPINNED`, the codes a condition tuple that cannot\nbe canonicalized raises, `IDENTIFIER_INVALID`, `VALID_FROM_INVALID`, `WRITE_CONFLICT`,\nand the per-item `ENTITY_NOT_FOUND`, `ENTITY_TYPE_MISMATCH`, `ENTITY_SOFT_DELETED` and\n`ENTITY_NOT_CONDITIONAL`. A missing variant or version is `skipped` instead.\n"
+          }
+        }
+      },
+      "GridOperatorCommodity": {
+        "type": "string",
+        "description": "The commodity whose grid operators to search or look up. Power and gas code numbers are separate lists.",
+        "enum": [
+          "power",
+          "gas"
+        ]
+      },
+      "GridOperatorSearchRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "commodity",
+          "name"
+        ],
+        "properties": {
+          "commodity": {
+            "$ref": "#/components/schemas/GridOperatorCommodity"
+          },
+          "name": {
+            "type": "string",
+            "description": "Words the grid operator's name must all contain, ignoring case. At least one word.",
+            "example": "westnetz"
+          }
+        }
+      },
+      "GridOperatorLookupRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "commodity",
+          "code_numbers"
+        ],
+        "properties": {
+          "commodity": {
+            "$ref": "#/components/schemas/GridOperatorCommodity"
+          },
+          "code_numbers": {
+            "type": "array",
+            "description": "1 to 100 code numbers of 13 digits each.",
+            "items": {
+              "type": "string",
+              "example": "4045458000000"
+            }
+          }
+        }
+      },
+      "GridOperatorResults": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "results"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GridOperator"
+            }
+          }
+        }
+      },
+      "GridOperator": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A grid operator as the list Pricing API bundles names it, built from the Marktstammdatenregister,\nbdew-codes.de (power) and DVGW (gas).\n",
+        "required": [
+          "code_number",
+          "name"
+        ],
+        "properties": {
+          "code_number": {
+            "type": "string",
+            "description": "The 13-digit code number, a BDEW or DVGW code or a GLN.",
+            "example": "4045458000000"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name assigned to the code number.",
+            "example": "Westnetz GmbH"
+          },
+          "closed_distribution_grid": {
+            "type": "boolean",
+            "description": "Whether the grid is a closed distribution grid. Left out where that is unknown."
           }
         }
       },
