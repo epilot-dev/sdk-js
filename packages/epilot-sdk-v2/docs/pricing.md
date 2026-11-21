@@ -65,6 +65,10 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 **Product Recommendations API**
 - [`$productRecommendations`](#$productrecommendations)
 
+**Grid Operators API**
+- [`$searchGridOperators`](#$searchgridoperators)
+- [`$lookupGridOperators`](#$lookupgridoperators)
+
 **Conditional Pricing API**
 - [`$getConditionSets`](#$getconditionsets)
 - [`$getConditionUsage`](#$getconditionusage)
@@ -113,6 +117,7 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`VariantConditions`](#variantconditions)
 - [`PinnedConditions`](#pinnedconditions)
 - [`PinnedConditionValue`](#pinnedconditionvalue)
+- [`PinnedGridOperator`](#pinnedgridoperator)
 - [`PostalCodeFilter`](#postalcodefilter)
 - [`ConditionDateRange`](#conditiondaterange)
 - [`PostalCodeCity`](#postalcodecity)
@@ -156,6 +161,11 @@ const { data } = await pricingClient.$calculatePricingDetails(...)
 - [`BatchDeleteCounts`](#batchdeletecounts)
 - [`BatchUpsertResultEntry`](#batchupsertresultentry)
 - [`BatchDeleteResultEntry`](#batchdeleteresultentry)
+- [`GridOperatorCommodity`](#gridoperatorcommodity)
+- [`GridOperatorSearchRequest`](#gridoperatorsearchrequest)
+- [`GridOperatorLookupRequest`](#gridoperatorlookuprequest)
+- [`GridOperatorResults`](#gridoperatorresults)
+- [`GridOperator`](#gridoperator)
 - [`Error`](#error)
 - [`RefusedLineItem`](#refusedlineitem)
 - [`ReportedError`](#reportederror)
@@ -1986,6 +1996,79 @@ const { data } = await client.$productRecommendations(
 
 ---
 
+### `$searchGridOperators`
+
+Finds the active grid operators of one commodity whose name contains every word of `name`,
+ignoring case, and answers the first 10 by name. Type more of the name to narrow the results.
+A retired code 
+
+`POST /v1/grid-operators:search`
+
+```ts
+const { data } = await client.$searchGridOperators(
+  null,
+  {
+    commodity: 'power',
+    name: 'westnetz'
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "code_number": "4045458000000",
+      "name": "Westnetz GmbH",
+      "closed_distribution_grid": true
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `$lookupGridOperators`
+
+Answers the grid operator each code number is assigned to, retired code numbers included,
+in the order asked and each once. A code number the list doesn't hold is missing from `results`.
+
+`POST /v1/grid-operators:lookup`
+
+```ts
+const { data } = await client.$lookupGridOperators(
+  null,
+  {
+    commodity: 'power',
+    code_numbers: ['4045458000000']
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "results": [
+    {
+      "code_number": "4045458000000",
+      "name": "Westnetz GmbH",
+      "closed_distribution_grid": true
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
 ### `$getConditionSets`
 
 Returns the condition sets built in for one conditional entity type, ready to copy into that schema's `conditions` array. Read-only, and the same for every organization.
@@ -3472,6 +3555,10 @@ type CreateVariantRequest = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
   default?: boolean
   valid_from?: string // date
@@ -3507,6 +3594,10 @@ type PinnedConditions = Record<string, string | number | boolean | {
 } | {
   postal_code: string
   city: string
+} | {
+  code_number: string
+  name?: string
+  closed_distribution_grid?: boolean
 }>
 ```
 
@@ -3514,9 +3605,8 @@ type PinnedConditions = Record<string, string | number | boolean | {
 
 One condition's exact value. Which of these shapes a condition takes is set by its type in the
 entity's schema, and a value of another shape is refused with `PIN_FORMAT_INVALID`. A
-`location` of format `power_grid_operator` or `gas_grid_operator` takes a string of exactly
-13 digits.
-
+`location` of format `power_grid_operator` or `gas_grid_operator` is read as a
+`PinnedGridOperator`, and written as one
 
 ```ts
 type PinnedConditionValue = string | number | boolean | {
@@ -3525,6 +3615,26 @@ type PinnedConditionValue = string | number | boolean | {
 } | {
   postal_code: string
   city: string
+} | {
+  code_number: string
+  name?: string
+  closed_distribution_grid?: boolean
+}
+```
+
+### `PinnedGridOperator`
+
+The value of a `location` condition of format `power_grid_operator` or `gas_grid_operator`:
+the grid operator's code number, with the name and closed distribution grid flag the list
+Pricing API bundles assigns it, retired or not. A write reads only `code_number` and ignores
+the rest.
+
+
+```ts
+type PinnedGridOperator = {
+  code_number: string
+  name?: string
+  closed_distribution_grid?: boolean
 }
 ```
 
@@ -3921,6 +4031,10 @@ type AppendVersionRequest = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
 }
 ```
@@ -3938,6 +4052,10 @@ type ReplaceVersionRequest = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
 }
 ```
@@ -3955,6 +4073,10 @@ type PatchVersionRequest = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
 }
 ```
@@ -4221,6 +4343,10 @@ type BatchUpsertVariantsRequest = {
     } | {
       postal_code: { ... }
       city: { ... }
+    } | {
+      code_number: { ... }
+      name?: { ... }
+      closed_distribution_grid?: { ... }
     }>
     default?: boolean
     valid_from?: string // date
@@ -4244,6 +4370,10 @@ type BatchUpsertItem = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
   default?: boolean
   valid_from?: string // date
@@ -4270,6 +4400,10 @@ type BatchDeleteVariantsRequest = {
     } | {
       postal_code: { ... }
       city: { ... }
+    } | {
+      code_number: { ... }
+      name?: { ... }
+      closed_distribution_grid?: { ... }
     }>
     default?: boolean
     valid_from?: string // date
@@ -4297,6 +4431,10 @@ type BatchDeleteItem = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
   default?: boolean
   valid_from?: string // date
@@ -4332,6 +4470,10 @@ type BatchDeleteByConditions = {
   } | {
     postal_code: string
     city: string
+  } | {
+    code_number: string
+    name?: string
+    closed_distribution_grid?: boolean
   }>
   default?: boolean
   valid_from?: string // date
@@ -4595,6 +4737,58 @@ type BatchDeleteResultEntry = {
     cause?: string
     error?: string | Record<string, unknown>[]
   }
+}
+```
+
+### `GridOperatorCommodity`
+
+The commodity whose grid operators to search or look up. Power and gas code numbers are separate lists.
+
+```ts
+type GridOperatorCommodity = "power" | "gas"
+```
+
+### `GridOperatorSearchRequest`
+
+```ts
+type GridOperatorSearchRequest = {
+  commodity: "power" | "gas"
+  name: string
+}
+```
+
+### `GridOperatorLookupRequest`
+
+```ts
+type GridOperatorLookupRequest = {
+  commodity: "power" | "gas"
+  code_numbers: string[]
+}
+```
+
+### `GridOperatorResults`
+
+```ts
+type GridOperatorResults = {
+  results: Array<{
+    code_number: string
+    name: string
+    closed_distribution_grid?: boolean
+  }>
+}
+```
+
+### `GridOperator`
+
+A grid operator as the list Pricing API bundles names it, built from the Marktstammdatenregister,
+bdew-codes.de (power) and DVGW (gas).
+
+
+```ts
+type GridOperator = {
+  code_number: string
+  name: string
+  closed_distribution_grid?: boolean
 }
 ```
 
