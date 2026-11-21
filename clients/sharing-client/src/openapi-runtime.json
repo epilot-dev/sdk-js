@@ -172,12 +172,92 @@
         },
         "responses": {}
       }
+    },
+    "/v1/sharing/rules/{partner_org_id}": {
+      "get": {
+        "operationId": "listSharingRules",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createSharingRule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/sharing/rules/{partner_org_id}/{rule_id}": {
+      "get": {
+        "operationId": "getSharingRule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/RuleIdPath"
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateSharingRule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/RuleIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSharingRule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/RuleIdPath"
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {
     "parameters": {
       "PartnerOrgIdPath": {
         "name": "partner_org_id",
+        "in": "path",
+        "required": true
+      },
+      "RuleIdPath": {
+        "name": "rule_id",
         "in": "path",
         "required": true
       }
