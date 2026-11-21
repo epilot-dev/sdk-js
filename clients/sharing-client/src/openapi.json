@@ -27,6 +27,10 @@
     {
       "name": "Entity Offering",
       "description": "Offer entities to partners (First Come First Served)"
+    },
+    {
+      "name": "Sharing Rules",
+      "description": "Manage auto-sharing rules per partner"
     }
   ],
   "security": [
@@ -38,7 +42,7 @@
     "/v1/sharing/configurations/{partner_org_id}": {
       "get": {
         "operationId": "getSharingConfiguration",
-        "summary": "Get sharing configuration for a partner",
+        "summary": "getSharingConfiguration",
         "description": "Returns the sharing configuration for a specific partner organization, including shared entities, offered entities, and assigned users.",
         "tags": [
           "Sharing Configuration"
@@ -69,7 +73,7 @@
       },
       "patch": {
         "operationId": "updateSharingConfiguration",
-        "summary": "Update sharing configuration for a partner",
+        "summary": "updateSharingConfiguration",
         "description": "Updates the sharing configuration for a partner, such as the user limit. Also patches the internal role if the user limit changes.",
         "tags": [
           "Sharing Configuration"
@@ -110,7 +114,7 @@
       },
       "delete": {
         "operationId": "deleteSharingConfiguration",
-        "summary": "Delete sharing configuration for a partner",
+        "summary": "deleteSharingConfiguration",
         "description": "Deletes the sharing configuration for a partner, removing all shared and offered entity access.",
         "tags": [
           "Sharing Configuration"
@@ -140,7 +144,7 @@
     "/v1/sharing/configurations/{partner_org_id}/role": {
       "put": {
         "operationId": "assignRoleToConfiguration",
-        "summary": "Assign a template role to a partner sharing configuration",
+        "summary": "assignRoleToConfiguration",
         "description": "Assigns a template role to a partner sharing configuration. The role grants are copied into the configuration for entity access control.",
         "tags": [
           "Sharing Configuration"
@@ -183,7 +187,7 @@
     "/v1/sharing/configurations": {
       "get": {
         "operationId": "getSharingConfigurations",
-        "summary": "Get sharing configurations for multiple partners",
+        "summary": "getSharingConfigurations",
         "description": "Returns sharing configurations for multiple partner organizations in a single batch request.",
         "tags": [
           "Sharing Configuration"
@@ -227,7 +231,7 @@
     "/v1/sharing/configurations:search": {
       "post": {
         "operationId": "searchPartnerSharingConfigurations",
-        "summary": "Search partner sharing configurations by entities",
+        "summary": "searchPartnerSharingConfigurations",
         "description": "Searches for partner sharing configurations that have access to the given entities. Returns configurations with their shared and offered entity lists.",
         "tags": [
           "Sharing Configuration"
@@ -265,7 +269,7 @@
     "/v1/sharing/configurations/by-role/{template_role_id}": {
       "get": {
         "operationId": "getConfigurationsByTemplateRole",
-        "summary": "Get sharing configurations that use a specific template role",
+        "summary": "getConfigurationsByTemplateRole",
         "description": "Returns all partner sharing configurations that reference the given template role ID. Useful for checking role usage before deletion.",
         "tags": [
           "Sharing Configuration"
@@ -307,7 +311,7 @@
     "/v1/sharing/entities:share": {
       "post": {
         "operationId": "shareEntityWithPartners",
-        "summary": "Share or unshare entities with partners",
+        "summary": "shareEntityWithPartners",
         "description": "Shares or unshares top-level entities with one or more partner organizations. Publishes sharing events for downstream processing.",
         "tags": [
           "Entity Sharing"
@@ -348,7 +352,7 @@
     "/v1/sharing/entities:share-child": {
       "post": {
         "operationId": "shareChildEntityWithPartners",
-        "summary": "Share or unshare child entities with partners",
+        "summary": "shareChildEntityWithPartners",
         "description": "Shares or unshares child entities (entities that belong to an already-shared parent) with partner organizations.",
         "tags": [
           "Entity Sharing"
@@ -389,7 +393,7 @@
     "/v1/sharing/entities:offer": {
       "post": {
         "operationId": "offerEntityToPartners",
-        "summary": "Offer or unoffer entities to partners (First Come First Served)",
+        "summary": "offerEntityToPartners",
         "description": "Offers or unoffers entities to partner organizations using a First Come First Served model. Only one partner can accept each offered entity.",
         "tags": [
           "Entity Offering"
@@ -430,7 +434,7 @@
     "/v1/sharing/offers/status": {
       "get": {
         "operationId": "getOfferStatus",
-        "summary": "Get the status of an entity offer (public, no auth required)",
+        "summary": "getOfferStatus",
         "description": "Returns the current status of an entity offer (pending, accepted, expired). This is a public endpoint used from partner-facing pages without authentication.",
         "tags": [
           "Entity Offering"
@@ -482,7 +486,7 @@
     "/v1/sharing/offers:accept": {
       "post": {
         "operationId": "acceptOffer",
-        "summary": "Accept an entity offer (public, no auth required)",
+        "summary": "acceptOffer",
         "description": "Accepts an entity offer on behalf of a partner organization. This is a public endpoint used from partner-facing pages without authentication. Only one partner can accept each offer.",
         "tags": [
           "Entity Offering"
@@ -514,6 +518,207 @@
           }
         }
       }
+    },
+    "/v1/sharing/rules/{partner_org_id}": {
+      "get": {
+        "operationId": "listSharingRules",
+        "summary": "listSharingRules",
+        "description": "Lists the auto-sharing rules the caller's organization configured for a partner.",
+        "tags": [
+          "Sharing Rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "description": "Only return rules with this enabled state",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rules for the partner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "rules"
+                  ],
+                  "properties": {
+                    "rules": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SharingRule"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createSharingRule",
+        "summary": "createSharingRule",
+        "description": "Creates an auto-sharing rule for a partner.",
+        "tags": [
+          "Sharing Rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SharingRuleInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created rule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharingRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/v1/sharing/rules/{partner_org_id}/{rule_id}": {
+      "get": {
+        "operationId": "getSharingRule",
+        "summary": "getSharingRule",
+        "description": "Returns a single auto-sharing rule.",
+        "tags": [
+          "Sharing Rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/RuleIdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The rule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharingRule"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Rule not found"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateSharingRule",
+        "summary": "updateSharingRule",
+        "description": "Partially updates an auto-sharing rule. The patch is merged into the stored rule, which is then validated as a whole. Use `{ \"enabled\": false }` to disable a rule.",
+        "tags": [
+          "Sharing Rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/RuleIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SharingRuleUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated rule",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharingRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Rule not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSharingRule",
+        "summary": "deleteSharingRule",
+        "description": "Deletes an auto-sharing rule.",
+        "tags": [
+          "Sharing Rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/RuleIdPath"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Rule deleted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -530,6 +735,15 @@
         "in": "path",
         "required": true,
         "description": "Partner organization ID",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "RuleIdPath": {
+        "name": "rule_id",
+        "in": "path",
+        "required": true,
+        "description": "Sharing rule ID",
         "schema": {
           "type": "string"
         }
@@ -948,6 +1162,256 @@
           },
           "entity_id": {
             "type": "string"
+          }
+        }
+      },
+      "SharingRuleInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "trigger_schema",
+          "include_schemas",
+          "evaluation_type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "trigger_schema": {
+            "type": "string",
+            "description": "Schema of the shared parent entity that triggers the rule",
+            "example": "opportunity"
+          },
+          "include_schemas": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Schemas of related entities the rule may share",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evaluation_type": {
+            "type": "string",
+            "enum": [
+              "deterministic",
+              "ai"
+            ]
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/SharingRuleConditions"
+          },
+          "ai_config": {
+            "$ref": "#/components/schemas/SharingRuleAiConfig"
+          }
+        }
+      },
+      "SharingRuleUpdate": {
+        "type": "object",
+        "description": "Every SharingRuleInput field is optional. The patch is merged into the stored rule, then validated.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "trigger_schema": {
+            "type": "string"
+          },
+          "include_schemas": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "evaluation_type": {
+            "type": "string",
+            "enum": [
+              "deterministic",
+              "ai"
+            ]
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/SharingRuleConditions"
+          },
+          "ai_config": {
+            "$ref": "#/components/schemas/SharingRuleAiConfig"
+          }
+        }
+      },
+      "SharingRule": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SharingRuleInput"
+          },
+          {
+            "type": "object",
+            "required": [
+              "rule_id",
+              "vendor_org_id",
+              "partner_org_id",
+              "enabled",
+              "source",
+              "created_at",
+              "updated_at"
+            ],
+            "properties": {
+              "rule_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "vendor_org_id": {
+                "type": "string"
+              },
+              "partner_org_id": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "AUTO_SHARING_RULE"
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "created_by": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "SharingRuleConditions": {
+        "type": "object",
+        "description": "Required iff evaluation_type is deterministic",
+        "required": [
+          "logical_operator",
+          "statements"
+        ],
+        "properties": {
+          "logical_operator": {
+            "type": "string",
+            "enum": [
+              "AND",
+              "OR"
+            ]
+          },
+          "statements": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/Statement"
+            }
+          }
+        }
+      },
+      "Statement": {
+        "type": "object",
+        "description": "Subset of the Flows condition Statement",
+        "required": [
+          "id",
+          "source",
+          "operator",
+          "values"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "object",
+            "required": [
+              "attribute",
+              "attribute_type"
+            ],
+            "properties": {
+              "attribute": {
+                "type": "string",
+                "description": "Top-level entity attribute. Labels are `_tags`."
+              },
+              "attribute_type": {
+                "type": "string",
+                "enum": [
+                  "string",
+                  "text",
+                  "number",
+                  "boolean",
+                  "date",
+                  "datetime",
+                  "tags",
+                  "country",
+                  "email",
+                  "phone",
+                  "status",
+                  "relation",
+                  "multiselect",
+                  "select",
+                  "radio",
+                  "relation_user",
+                  "purpose",
+                  "label",
+                  "price"
+                ]
+              }
+            }
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "equals",
+              "not_equals",
+              "any_of",
+              "none_of",
+              "contains",
+              "not_contains",
+              "starts_with",
+              "ends_with",
+              "greater_than",
+              "less_than",
+              "is_empty",
+              "is_not_empty"
+            ]
+          },
+          "values": {
+            "type": "array",
+            "description": "May be empty only for is_empty / is_not_empty",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SharingRuleAiConfig": {
+        "type": "object",
+        "description": "Required iff evaluation_type is ai",
+        "required": [
+          "confidence_threshold"
+        ],
+        "properties": {
+          "confidence_threshold": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "guidance": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Vendor's natural-language instructions for the evaluator"
           }
         }
       }
