@@ -444,6 +444,30 @@
         "responses": {}
       }
     },
+    "/v1/grid-operators:search": {
+      "post": {
+        "operationId": "$searchGridOperators",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/grid-operators:lookup": {
+      "post": {
+        "operationId": "$lookupGridOperators",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/conditional-pricing/{slug}/condition-sets": {
       "get": {
         "operationId": "$getConditionSets",
