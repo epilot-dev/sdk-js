@@ -407,77 +407,10 @@
         "responses": {}
       }
     },
-    "/v2/portal/external-links": {
-      "get": {
-        "operationId": "getExternalLinks",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "query",
-            "name": "origin",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "contactId",
-            "required": false
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v2/portal/resolve:external-link/{id}": {
-      "get": {
-        "operationId": "getResolvedExternalLink",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "origin",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "contactId",
-            "required": false
-          }
-        ],
-        "responses": {}
-      }
-    },
     "/v3/portal/external-links": {
       "get": {
         "operationId": "getExternalLinksV3",
         "parameters": [
-          {
-            "in": "query",
-            "name": "portal_id",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "contactId",
-            "required": false
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v3/portal/resolve:external-link/{id}": {
-      "get": {
-        "operationId": "getResolvedExternalLinkV3",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
           {
             "in": "query",
             "name": "portal_id",
@@ -1324,25 +1257,6 @@
         "responses": {}
       }
     },
-    "/v2/portal/order": {
-      "get": {
-        "operationId": "getAllOrders",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false
-          }
-        ],
-        "responses": {}
-      }
-    },
     "/v2/portal/order/{id}/acceptance": {
       "post": {
         "operationId": "postOrderAcceptance",
@@ -1375,69 +1289,6 @@
         "responses": {}
       }
     },
-    "/v2/portal/opportunity": {
-      "get": {
-        "operationId": "getAllOpportunities",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v2/portal/opportunities/searchable-attributes": {
-      "get": {
-        "operationId": "getSearchableAttributesForOpportunities",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v2/portal/opportunities/search": {
-      "post": {
-        "operationId": "getSearchResultsForOpportunities",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
-          }
-        },
-        "responses": {}
-      }
-    },
     "/v2/portal/opportunities/{id}": {
       "get": {
         "operationId": "getOpportunity",
@@ -1447,25 +1298,6 @@
             "in": "path",
             "name": "id",
             "required": true
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v2/portal/request": {
-      "get": {
-        "operationId": "getAllRequests",
-        "deprecated": true,
-        "parameters": [
-          {
-            "in": "query",
-            "name": "from",
-            "required": false
-          },
-          {
-            "in": "query",
-            "name": "size",
-            "required": false
           }
         ],
         "responses": {}
@@ -1561,48 +1393,6 @@
             "in": "path",
             "name": "slug",
             "required": true
-          }
-        ],
-        "responses": {}
-      }
-    },
-    "/v2/portal/entity/{slug}/{id}/activity": {
-      "get": {
-        "operationId": "getEntityActivityFeed",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "slug",
-            "required": true
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "after"
-          },
-          {
-            "in": "query",
-            "name": "before"
-          },
-          {
-            "in": "query",
-            "name": "from"
-          },
-          {
-            "in": "query",
-            "name": "size"
-          },
-          {
-            "in": "query",
-            "name": "type"
-          },
-          {
-            "in": "query",
-            "name": "include_relations"
           }
         ],
         "responses": {}
@@ -2608,6 +2398,18 @@
         "responses": {}
       }
     },
+    "/v3/portal/public/user/temporary-password/resend": {
+      "post": {
+        "operationId": "resendTemporaryPasswordLink",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/portal/campaign/{campaign_id}/entity:status": {
       "put": {
         "operationId": "updateCampaignPortalBlockStatus",
@@ -2904,6 +2706,36 @@
         "responses": {}
       }
     },
+    "/v3/portal/config/{portal_id}/validate": {
+      "post": {
+        "operationId": "validatePortalConfig",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "portal_id",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "revision_id",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "page_upsert_mode",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {},
+            "text/plain": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v3/portal/configs": {
       "get": {
         "operationId": "listAllPortalConfigs",
@@ -2937,6 +2769,18 @@
             "application/json": {}
           }
         },
+        "responses": {}
+      }
+    },
+    "/v3/portal/user/role": {
+      "get": {
+        "operationId": "getPortalUserRole",
+        "responses": {}
+      }
+    },
+    "/v3/portal/roles": {
+      "get": {
+        "operationId": "listPortalRoles",
         "responses": {}
       }
     },
@@ -2994,6 +2838,25 @@
             "required": true
           }
         ],
+        "responses": {}
+      }
+    },
+    "/v3/portal/partner/{partner_id}/role": {
+      "put": {
+        "operationId": "setPartnerRole",
+        "parameters": [
+          {
+            "name": "partner_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       }
     },
@@ -3078,6 +2941,11 @@
           "application/json": {}
         }
       },
+      "InvalidPortalConfigWrite": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "Unauthorized": {
         "content": {
           "application/json": {}
@@ -3108,6 +2976,11 @@
           "application/json": {}
         }
       },
+      "ResponseTooLarge": {
+        "content": {
+          "application/json": {}
+        }
+      },
       "NotFound": {
         "content": {
           "application/json": {}
@@ -3134,6 +3007,11 @@
         }
       },
       "GatewayTimeout": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "TemporaryPasswordInvalidRequest": {
         "content": {
           "application/json": {}
         }
