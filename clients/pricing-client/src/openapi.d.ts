@@ -11597,7 +11597,39 @@ declare namespace Components {
              */
             OrderedConditionOperand;
         } | {
-            in: (string | number)[];
+            in: (string | number | /**
+             * A `location` of format `postal_code` or `postal_code_city` named in a variant listing filter.
+             * As the filter's value, it may name part of the location: `postal_code` alone matches every
+             * postal code starting with it, so `66` matches `66636` and a whole postal code matches only
+             * itself; `city` alone, on `postal_code_city` only, matches that city in any postal code,
+             * regardless of case; both must match where both are given.
+             *
+             * In an `in` or `not_in` list it names one whole location: `postal_code` and `city` on
+             * `postal_code_city`, a bare postal code string on `postal_code`. A partial value there, or a
+             * part the format does not have, is refused with `CONTEXT_FORMAT_INVALID`.
+             *
+             */
+            PostalCodeFilter)[];
+        } | {
+            /**
+             * Exclusion, accepted only by a variant listing filter: matches a variant pinning none of
+             * the values, and one leaving the condition unpinned. A resolve context carrying it is
+             * refused with `OPERATOR_UNSUPPORTED`.
+             *
+             */
+            not_in: (string | number | /**
+             * A `location` of format `postal_code` or `postal_code_city` named in a variant listing filter.
+             * As the filter's value, it may name part of the location: `postal_code` alone matches every
+             * postal code starting with it, so `66` matches `66636` and a whole postal code matches only
+             * itself; `city` alone, on `postal_code_city` only, matches that city in any postal code,
+             * regardless of case; both must match where both are given.
+             *
+             * In an `in` or `not_in` list it names one whole location: `postal_code` and `city` on
+             * `postal_code_city`, a bare postal code string on `postal_code`. A partial value there, or a
+             * part the format does not have, is refused with `CONTEXT_FORMAT_INVALID`.
+             *
+             */
+            PostalCodeFilter)[];
         } | {
             /**
              * The instant a `daterange` condition's range must contain. A date is midnight of that day
@@ -15602,19 +15634,30 @@ declare namespace Components {
         export interface ListVariantsRequest {
             conditions?: /**
              * Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the
-             * same exact values and predicates a resolve context does. A condition left out is not
-             * filtered on. An `in` list carries at most 50,000 values.
+             * same exact values and predicates a resolve context does, plus `not_in`. A condition left
+             * out is not filtered on. An `in` or `not_in` list carries at most 50,000 values.
              *
              * A variant matches only where it pins the condition — unlike `:resolve`, where an unpinned
              * condition matches any value. `{ "exists": false }` selects the variants that leave it
              * unpinned.
              *
-             * A `location` of format `power_grid_operator` or `gas_grid_operator` takes `in`, so one
-             * filter lists the variants pinned to any of several code numbers, each a string of exactly
-             * 13 digits. A `location` of format `postal_code` or `postal_code_city` does not.
+             * `{ "not_in": [...] }` is the one exception: it lists the variants pinning none of the
+             * values **and** those leaving the condition unpinned. It applies where `in` does.
              *
-             * A `location` of format `postal_code_city` also takes its postal code alone,
-             * `{ "postal_code": "10115" }`, matching that postal code in any city.
+             * A `location` of format `power_grid_operator` or `gas_grid_operator` takes `in` and
+             * `not_in`, so one filter lists the variants pinned to any, or none, of several code numbers,
+             * each a string of exactly 13 digits.
+             *
+             * A `location` of format `postal_code` or `postal_code_city` takes four forms a resolve
+             * context does not:
+             *
+             * - `{ "postal_code": "66" }` matches every postal code starting with `66`. Postal codes
+             *   are fixed-length, so a whole postal code matches only itself.
+             * - `{ "city": "Tholey" }`, on `postal_code_city` only, matches that city in any postal
+             *   code, regardless of case. `{ "postal_code": "66", "city": "Tholey" }` needs both.
+             * - `{ "in": [...] }` and `{ "not_in": [...] }` take whole values only, each matched as the exact value is:
+             *   `{ "postal_code": "66636", "city": "Tholey" }` objects on `postal_code_city`, postal
+             *   code strings on `postal_code`. A postal code or city alone in a list is refused.
              *
              * `default` is accepted as an exact boolean and takes no predicate: `true` selects the
              * entity's fallback variant, `false` every variant that is not it. Names beginning with `_`
@@ -17338,17 +17381,28 @@ declare namespace Components {
             city: string;
         }
         /**
-         * A listing filter on a `location` of format `postal_code_city` by its postal code alone: it
-         * matches the variants pinned to that postal code, whatever their city. Only a listing filter
-         * takes it; a resolve context must name the city too.
+         * A `location` of format `postal_code` or `postal_code_city` named in a variant listing filter.
+         * As the filter's value, it may name part of the location: `postal_code` alone matches every
+         * postal code starting with it, so `66` matches `66636` and a whole postal code matches only
+         * itself; `city` alone, on `postal_code_city` only, matches that city in any postal code,
+         * regardless of case; both must match where both are given.
+         *
+         * In an `in` or `not_in` list it names one whole location: `postal_code` and `city` on
+         * `postal_code_city`, a bare postal code string on `postal_code`. A partial value there, or a
+         * part the format does not have, is refused with `CONTEXT_FORMAT_INVALID`.
          *
          */
         export interface PostalCodeFilter {
             /**
              * example:
-             * 10115
+             * 66
              */
-            postal_code: string;
+            postal_code?: string;
+            /**
+             * example:
+             * Tholey
+             */
+            city?: string;
         }
         /**
          * Market area details for power
@@ -22462,19 +22516,30 @@ declare namespace Components {
         }
         /**
          * Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the
-         * same exact values and predicates a resolve context does. A condition left out is not
-         * filtered on. An `in` list carries at most 50,000 values.
+         * same exact values and predicates a resolve context does, plus `not_in`. A condition left
+         * out is not filtered on. An `in` or `not_in` list carries at most 50,000 values.
          *
          * A variant matches only where it pins the condition — unlike `:resolve`, where an unpinned
          * condition matches any value. `{ "exists": false }` selects the variants that leave it
          * unpinned.
          *
-         * A `location` of format `power_grid_operator` or `gas_grid_operator` takes `in`, so one
-         * filter lists the variants pinned to any of several code numbers, each a string of exactly
-         * 13 digits. A `location` of format `postal_code` or `postal_code_city` does not.
+         * `{ "not_in": [...] }` is the one exception: it lists the variants pinning none of the
+         * values **and** those leaving the condition unpinned. It applies where `in` does.
          *
-         * A `location` of format `postal_code_city` also takes its postal code alone,
-         * `{ "postal_code": "10115" }`, matching that postal code in any city.
+         * A `location` of format `power_grid_operator` or `gas_grid_operator` takes `in` and
+         * `not_in`, so one filter lists the variants pinned to any, or none, of several code numbers,
+         * each a string of exactly 13 digits.
+         *
+         * A `location` of format `postal_code` or `postal_code_city` takes four forms a resolve
+         * context does not:
+         *
+         * - `{ "postal_code": "66" }` matches every postal code starting with `66`. Postal codes
+         *   are fixed-length, so a whole postal code matches only itself.
+         * - `{ "city": "Tholey" }`, on `postal_code_city` only, matches that city in any postal
+         *   code, regardless of case. `{ "postal_code": "66", "city": "Tholey" }` needs both.
+         * - `{ "in": [...] }` and `{ "not_in": [...] }` take whole values only, each matched as the exact value is:
+         *   `{ "postal_code": "66636", "city": "Tholey" }` objects on `postal_code_city`, postal
+         *   code strings on `postal_code`. A postal code or city alone in a list is refused.
          *
          * `default` is accepted as an exact boolean and takes no predicate: `true` selects the
          * entity's fallback variant, `false` every variant that is not it. Names beginning with `_`
@@ -22497,9 +22562,15 @@ declare namespace Components {
              *
              */
             ContextConditionValue | /**
-             * A listing filter on a `location` of format `postal_code_city` by its postal code alone: it
-             * matches the variants pinned to that postal code, whatever their city. Only a listing filter
-             * takes it; a resolve context must name the city too.
+             * A `location` of format `postal_code` or `postal_code_city` named in a variant listing filter.
+             * As the filter's value, it may name part of the location: `postal_code` alone matches every
+             * postal code starting with it, so `66` matches `66636` and a whole postal code matches only
+             * itself; `city` alone, on `postal_code_city` only, matches that city in any postal code,
+             * regardless of case; both must match where both are given.
+             *
+             * In an `in` or `not_in` list it names one whole location: `postal_code` and `city` on
+             * `postal_code_city`, a bare postal code string on `postal_code`. A partial value there, or a
+             * part the format does not have, is refused with `CONTEXT_FORMAT_INVALID`.
              *
              */
             PostalCodeFilter;
@@ -22611,19 +22682,30 @@ declare namespace Components {
         export interface VariantTreeRequest {
             conditions?: /**
              * Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the
-             * same exact values and predicates a resolve context does. A condition left out is not
-             * filtered on. An `in` list carries at most 50,000 values.
+             * same exact values and predicates a resolve context does, plus `not_in`. A condition left
+             * out is not filtered on. An `in` or `not_in` list carries at most 50,000 values.
              *
              * A variant matches only where it pins the condition — unlike `:resolve`, where an unpinned
              * condition matches any value. `{ "exists": false }` selects the variants that leave it
              * unpinned.
              *
-             * A `location` of format `power_grid_operator` or `gas_grid_operator` takes `in`, so one
-             * filter lists the variants pinned to any of several code numbers, each a string of exactly
-             * 13 digits. A `location` of format `postal_code` or `postal_code_city` does not.
+             * `{ "not_in": [...] }` is the one exception: it lists the variants pinning none of the
+             * values **and** those leaving the condition unpinned. It applies where `in` does.
              *
-             * A `location` of format `postal_code_city` also takes its postal code alone,
-             * `{ "postal_code": "10115" }`, matching that postal code in any city.
+             * A `location` of format `power_grid_operator` or `gas_grid_operator` takes `in` and
+             * `not_in`, so one filter lists the variants pinned to any, or none, of several code numbers,
+             * each a string of exactly 13 digits.
+             *
+             * A `location` of format `postal_code` or `postal_code_city` takes four forms a resolve
+             * context does not:
+             *
+             * - `{ "postal_code": "66" }` matches every postal code starting with `66`. Postal codes
+             *   are fixed-length, so a whole postal code matches only itself.
+             * - `{ "city": "Tholey" }`, on `postal_code_city` only, matches that city in any postal
+             *   code, regardless of case. `{ "postal_code": "66", "city": "Tholey" }` needs both.
+             * - `{ "in": [...] }` and `{ "not_in": [...] }` take whole values only, each matched as the exact value is:
+             *   `{ "postal_code": "66636", "city": "Tholey" }` objects on `postal_code_city`, postal
+             *   code strings on `postal_code`. A postal code or city alone in a list is refused.
              *
              * `default` is accepted as an exact boolean and takes no predicate: `true` selects the
              * entity's fallback variant, `false` every variant that is not it. Names beginning with `_`
