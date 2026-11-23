@@ -6807,14 +6807,15 @@
       "PostalCodeFilter": {
         "type": "object",
         "additionalProperties": false,
-        "description": "A listing filter on a `location` of format `postal_code_city` by its postal code alone: it\nmatches the variants pinned to that postal code, whatever their city. Only a listing filter\ntakes it; a resolve context must name the city too.\n",
-        "required": [
-          "postal_code"
-        ],
+        "description": "A `location` of format `postal_code` or `postal_code_city` named in a variant listing filter.\nAs the filter's value, it may name part of the location: `postal_code` alone matches every\npostal code starting with it, so `66` matches `66636` and a whole postal code matches only\nitself; `city` alone, on `postal_code_city` only, matches that city in any postal code,\nregardless of case; both must match where both are given.\n\nIn an `in` or `not_in` list it names one whole location: `postal_code` and `city` on\n`postal_code_city`, a bare postal code string on `postal_code`. A partial value there, or a\npart the format does not have, is refused with `CONTEXT_FORMAT_INVALID`.\n",
         "properties": {
           "postal_code": {
             "type": "string",
-            "example": "10115"
+            "example": "66"
+          },
+          "city": {
+            "type": "string",
+            "example": "Tholey"
           }
         }
       },
@@ -6941,6 +6942,35 @@
                     },
                     {
                       "type": "number"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PostalCodeFilter"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "not_in"
+            ],
+            "properties": {
+              "not_in": {
+                "type": "array",
+                "description": "Exclusion, accepted only by a variant listing filter: matches a variant pinning none of\nthe values, and one leaving the condition unpinned. A resolve context carrying it is\nrefused with `OPERATOR_UNSUPPORTED`.\n",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PostalCodeFilter"
                     }
                   ]
                 }
@@ -7629,7 +7659,7 @@
             }
           ]
         },
-        "description": "Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the\nsame exact values and predicates a resolve context does. A condition left out is not\nfiltered on. An `in` list carries at most 50,000 values.\n\nA variant matches only where it pins the condition — unlike `:resolve`, where an unpinned\ncondition matches any value. `{ \"exists\": false }` selects the variants that leave it\nunpinned.\n\nA `location` of format `power_grid_operator` or `gas_grid_operator` takes `in`, so one\nfilter lists the variants pinned to any of several code numbers, each a string of exactly\n13 digits. A `location` of format `postal_code` or `postal_code_city` does not.\n\nA `location` of format `postal_code_city` also takes its postal code alone,\n`{ \"postal_code\": \"10115\" }`, matching that postal code in any city.\n\n`default` is accepted as an exact boolean and takes no predicate: `true` selects the\nentity's fallback variant, `false` every variant that is not it. Names beginning with `_`\nare reserved.\n",
+        "description": "Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the\nsame exact values and predicates a resolve context does, plus `not_in`. A condition left\nout is not filtered on. An `in` or `not_in` list carries at most 50,000 values.\n\nA variant matches only where it pins the condition — unlike `:resolve`, where an unpinned\ncondition matches any value. `{ \"exists\": false }` selects the variants that leave it\nunpinned.\n\n`{ \"not_in\": [...] }` is the one exception: it lists the variants pinning none of the\nvalues **and** those leaving the condition unpinned. It applies where `in` does.\n\nA `location` of format `power_grid_operator` or `gas_grid_operator` takes `in` and\n`not_in`, so one filter lists the variants pinned to any, or none, of several code numbers,\neach a string of exactly 13 digits.\n\nA `location` of format `postal_code` or `postal_code_city` takes four forms a resolve\ncontext does not:\n\n- `{ \"postal_code\": \"66\" }` matches every postal code starting with `66`. Postal codes\n  are fixed-length, so a whole postal code matches only itself.\n- `{ \"city\": \"Tholey\" }`, on `postal_code_city` only, matches that city in any postal\n  code, regardless of case. `{ \"postal_code\": \"66\", \"city\": \"Tholey\" }` needs both.\n- `{ \"in\": [...] }` and `{ \"not_in\": [...] }` take whole values only, each matched as the exact value is:\n  `{ \"postal_code\": \"66636\", \"city\": \"Tholey\" }` objects on `postal_code_city`, postal\n  code strings on `postal_code`. A postal code or city alone in a list is refused.\n\n`default` is accepted as an exact boolean and takes no predicate: `true` selects the\nentity's fallback variant, `false` every variant that is not it. Names beginning with `_`\nare reserved.\n",
         "example": {
           "postal_code": "46045",
           "consumption": {
