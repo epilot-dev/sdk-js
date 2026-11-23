@@ -685,6 +685,9 @@ export declare namespace Components {
             download_file?: S3Reference;
         }
         export interface BlueprintGraphSuggestionAcceptInput {
+            /**
+             * Ids of suggestions and/or possible problems (`problems[].id`) of the generation.
+             */
             suggestion_ids: [
                 string,
                 string?,
@@ -803,7 +806,13 @@ export declare namespace Components {
             prompt_version?: string;
             model?: string;
             digest?: string;
+            /**
+             * Suggestions of the generation, without the ones already accepted from it.
+             */
             total: number;
+            /**
+             * Suggestions by shape, without the ones already accepted from the generation.
+             */
             counts_by_shape: {
                 journey_starts_workflow?: number;
                 event_sends_email?: number;
@@ -811,14 +820,18 @@ export declare namespace Components {
                 answer_options?: number;
                 process_order?: number;
                 catalog_structure?: number;
+                other?: number;
             };
             excluded: {
-                reason: "invalid" | "unknown_subject" | "shape_unknown" | "not_passing" | "cannot_verify" | "trivial" | "duplicate";
+                /**
+                 * `shape_unknown` is no longer produced (shapes are open); it remains for stored generations.
+                 */
+                reason: "invalid" | "unknown_subject" | "shape_unknown" | "not_passing" | "cannot_verify" | "trivial" | "duplicate" | "subsumed";
                 count: number;
             }[];
             unreadable: BlueprintTestUnreadableResource[];
             /**
-             * Identities only; labels come from the graph when presented.
+             * Identities only; labels come from the graph when presented. A skipped type subject (one AI pass over every resource of a type) has `node_id` = `resource_id` = `type:<resource_type>`.
              */
             incomplete_subjects: {
                 node_id: string;
@@ -826,8 +839,84 @@ export declare namespace Components {
                 resource_type: string;
                 reason: "step_cap" | "input_cap" | "deadline" | "model_error";
             }[];
+            /**
+             * One page of suggestions. Suggestions accepted from this generation are left out for good, also after their test case is deleted (a new generation offers them again), so a page may hold fewer than `limit` items, even none, while `next_cursor` is present. Paging ends only when `next_cursor` is absent.
+             */
             items: Suggestion[];
+            /**
+             * Possible problems of the generation (at most 50), never counted in `total` or `counts_by_shape`. Only on a completed
+             * page requested without `cursor`, filtered by `shape` when given. Problems accepted from this generation are left
+             * out, as accepted suggestions are. Absent for generations created before problems existed.
+             *
+             */
+            problems?: /**
+             * A possible problem: a proposal the engine evaluated with every clause PASSED or FAILED and at least one FAILED.
+             * The configuration may be wrong, or the AI may be. Never counted as a suggestion. The properties of
+             * `Suggestion` plus `results`. Accepting its id creates an ordinary v2 test case (without `results`), which
+             * reports FAILED on a run until the configuration changes.
+             *
+             */
+            BlueprintGraphSuggestionProblem[];
+            /**
+             * Possible problems kept by a completed generation (all shapes), without the ones already accepted from it. Absent for older generations.
+             */
+            problems_total?: number;
             next_cursor?: string;
+        }
+        /**
+         * A possible problem: a proposal the engine evaluated with every clause PASSED or FAILED and at least one FAILED.
+         * The configuration may be wrong, or the AI may be. Never counted as a suggestion. The properties of
+         * `Suggestion` plus `results`. Accepting its id creates an ordinary v2 test case (without `results`), which
+         * reports FAILED on a run until the configuration changes.
+         *
+         */
+        export interface BlueprintGraphSuggestionProblem {
+            /**
+             * sha256 of the canonical clauses.
+             */
+            id: string; // ^[0-9a-f]{64}$
+            shape: /* Suggestion shape. `other` holds suggestions that fit none of the named shapes. */ BlueprintTestCaseShape;
+            subject: {
+                node_id: string;
+                resource_id: string;
+                resource_type: string;
+                /**
+                 * The graph label of the subject.
+                 */
+                label: string;
+            };
+            clauses: {
+                [name: string]: any;
+            }[];
+            sentences: /* A translation key and its parameters. The UI renders the text; the server never returns sentences. */ Sentence[];
+            titles?: /**
+             * An AI-written plain-language title in both UI languages, checked by deterministic guardrails before it is
+             * stored. Optional: absent when the title step gave none (or for items stored before titles existed); the UI
+             * then renders the sentence. On a test case (schema version 2 only): the title of the suggestion it was accepted
+             * from, kept on duplicates.
+             *
+             */
+            BlueprintTestTitles;
+            /**
+             * An existing v2 test case that already holds every clause of this suggestion.
+             */
+            covered_by?: {
+                case_id: string; // uuid
+                title?: string;
+            };
+            /**
+             * Always set on GET, not stored.
+             */
+            why_code?: "untested_resource" | "new_check";
+            main_resource?: BlueprintTestMainResource;
+            /**
+             * Always set on GET, not stored.
+             */
+            resource_types?: string[];
+            /**
+             * One engine result per clause, in clause order (verdict and evidence, as in suite run results).
+             */
+            results: ClauseResultView[];
         }
         export interface BlueprintGraphSuggestionsStarted {
             generation_id: string; // uuid
@@ -1239,6 +1328,131 @@ export declare namespace Components {
             operation_kind: "generate" | "execute";
             run: BlueprintTestRun;
         }
+        export interface BlueprintSuggestionCheck {
+            subject_node_id: string;
+            suggestion: {
+                shape?: string;
+                clauses: {
+                    [name: string]: any;
+                }[];
+            };
+        }
+        export interface BlueprintSuggestionCheckResult {
+            verdict: "offered" | "failed" | "excluded" | "invalid";
+            issues: {
+                [name: string]: any;
+            }[];
+            /**
+             * With excluded, the first exclusion rule the draft fails.
+             */
+            reason?: string;
+        }
+        export interface BlueprintSuggestionGraphQuery {
+            tool: "list_subjects" | "graph_summary" | "list_nodes" | "get_node" | "follow_edges" | "list_paths" | "list_operators";
+            /**
+             * The tool's input. list_subjects: `{ cursor?: string }` (the previous page's `next_cursor`).
+             */
+            input?: {
+                [name: string]: any;
+            };
+        }
+        export interface BlueprintSuggestionGraphQueryResult {
+            ok: boolean;
+            data?: {
+                [name: string]: any;
+            };
+            truncated?: boolean;
+            error?: "unknown_node" | "bad_input";
+        }
+        export interface BlueprintSuggestionSubmission {
+            /**
+             * Every subject from list_subjects, each with its suggestions (an empty array when it has none). Subjects not named here are stored as incomplete.
+             */
+            subjects: {
+                subject_node_id: string;
+                suggestions: {
+                    [name: string]: any;
+                    /**
+                     * Optional plain-language title written by the agent. Checked by the same guardrails as generated titles (length, no line breaks, no arrows, quoted names must exist in the configuration); an invalid title is dropped and the suggestion stays untitled. Used for both UI languages.
+                     */
+                    title?: string;
+                }[];
+            }[];
+        }
+        export interface BlueprintSuggestionSubmissionResult {
+            status: "completed";
+            total: number;
+            problems_total: number;
+        }
+        export interface BlueprintTag {
+            id: string;
+            blueprint_id: string;
+            /**
+             * Semantic version for release tags, `sync-<UTC timestamp>` for sync tags
+             */
+            name: string;
+            kind: /* `release`: a semantic version someone tagged. `sync`: recorded automatically for every sync, named by time, for debugging. */ BlueprintTagKind;
+            note?: string | null;
+            status: "building" | "ready" | "failed";
+            created_at: string; // date-time
+            created_by?: {
+                /**
+                 * a human readable name of the caller (e.g. user name, token name or email address)
+                 * example:
+                 * manifest@epilot.cloud
+                 */
+                name?: any;
+                /**
+                 * epilot organization id
+                 * example:
+                 * 911690
+                 */
+                org_id: string;
+                /**
+                 * epilot user id, when called by a user
+                 * example:
+                 * 11001045
+                 */
+                user_id?: string;
+                /**
+                 * token id, when called by API token
+                 * example:
+                 * api_5ZugdRXasLfWBypHi93Fk
+                 */
+                token_id?: string;
+            } | null;
+            /**
+             * First time a Marketplace listing made this tag live; published tags cannot be deleted
+             */
+            published_at?: string | null; // date-time
+            /**
+             * Sync tags are deleted after 90 days; release tags never expire
+             */
+            expires_at?: string | null; // date-time
+            package?: {
+                /**
+                 * `zip`: the signed package, built once. `manifest`: the resources a sync sent; the download builds the signed zip on first use.
+                 */
+                format?: "zip" | "manifest";
+                job_id?: string | null;
+                bucket?: string;
+                key?: string;
+                error?: string | null;
+            } | null;
+            /**
+             * The sync a `sync` tag was recorded for
+             */
+            sync?: {
+                job_id?: string;
+                destination_org_id?: string;
+                destination_blueprint_id?: string;
+                status?: string;
+            } | null;
+        }
+        /**
+         * `release`: a semantic version someone tagged. `sync`: recorded automatically for every sync, named by time, for debugging.
+         */
+        export type BlueprintTagKind = "release" | "sync";
         export interface BlueprintTestCase {
             id: string; // uuid
             blueprint_id: string;
@@ -1276,6 +1490,14 @@ export declare namespace Components {
             title_key?: {
                 [name: string]: any;
             };
+            titles?: /**
+             * An AI-written plain-language title in both UI languages, checked by deterministic guardrails before it is
+             * stored. Optional: absent when the title step gave none (or for items stored before titles existed); the UI
+             * then renders the sentence. On a test case (schema version 2 only): the title of the suggestion it was accepted
+             * from, kept on duplicates.
+             *
+             */
+            BlueprintTestTitles;
             /**
              * Schema version 2 only. Where the case came from (an accepted suggestion, a migrated v1 case or a confirmed interpretation); see BlueprintTestCaseOrigin.
              */
@@ -1288,6 +1510,424 @@ export declare namespace Components {
             needs_reinterpretation?: {
                 reason: string; // ^[a-z0-9_]{1,64}$
             };
+        }
+        export interface BlueprintTestCaseBatchDeleteInput {
+            /**
+             * Test case ids must be unique.
+             */
+            cases: [
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                },
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?,
+                {
+                    id: string; // uuid
+                    expected_revision: number;
+                }?
+            ];
+        }
+        export interface BlueprintTestCaseBatchDeleteResult {
+            deleted: string[];
+            /**
+             * The case changed since expected_revision; nothing was deleted for it.
+             */
+            conflicts: string[];
+            /**
+             * The case does not exist or was already deleted.
+             */
+            not_found: string[];
         }
         export interface BlueprintTestCaseConfirmation {
             schema_version: "1";
@@ -1313,7 +1953,7 @@ export declare namespace Components {
         export type BlueprintTestCaseOrigin = /* Where a v2 case came from (BlueprintTestCase.origin). */ {
             kind: "suggestion";
             source: "ai";
-            shape: BlueprintTestCaseShape;
+            shape: /* Suggestion shape. `other` holds suggestions that fit none of the named shapes. */ BlueprintTestCaseShape;
             suggestion_id: string;
             generation_id: string;
             prompt_version: string;
@@ -1339,7 +1979,10 @@ export declare namespace Components {
             results: BlueprintTestCase[];
             next_cursor?: string;
         }
-        export type BlueprintTestCaseShape = "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure";
+        /**
+         * Suggestion shape. `other` holds suggestions that fit none of the named shapes.
+         */
+        export type BlueprintTestCaseShape = "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure" | "other";
         /**
          * `expectation` is required for schema version 1 and must be absent for schema version 2 (title-only rename).
          */
@@ -2205,7 +2848,7 @@ export declare namespace Components {
         }
         export interface BlueprintTestSuiteError {
             status: number;
-            code: "invalid_request" | "unauthorized" | "forbidden" | "not_found" | "conflict" | "credential_invalid" | "permissions_unavailable" | "permission_denied" | "feature_unavailable" | "session_expiring" | "storage_conflict" | "suite_unavailable" | "v2_case" | "active_generation" | "active_suite_run" | "org_run_limit" | "suggestions_stale" | "unknown_suggestion" | "suggestion_acceptance_changed" | "suggestion_input_too_large" | "invalid_clauses" | "not_implemented" | "interpretation_input_too_large" | "interpretation_incomplete" | "interpretation_not_ready" | "interpretation_used" | "confirmation_required";
+            code: "invalid_request" | "unauthorized" | "forbidden" | "not_found" | "conflict" | "credential_invalid" | "permissions_unavailable" | "permission_denied" | "feature_unavailable" | "session_expiring" | "storage_conflict" | "suite_unavailable" | "v2_case" | "active_generation" | "active_suite_run" | "org_run_limit" | "suggestions_stale" | "unknown_suggestion" | "suggestion_acceptance_changed" | "suggestion_input_too_large" | "generation_not_running" | "generation_submitting" | "invalid_clauses" | "not_implemented" | "interpretation_input_too_large" | "interpretation_incomplete" | "interpretation_not_ready" | "interpretation_used" | "confirmation_required";
             /**
              * Whether repeating the same request later can succeed.
              */
@@ -2227,7 +2870,7 @@ export declare namespace Components {
              */
             accepted_ids?: string /* ^[0-9a-f]{64}$ */[];
             /**
-             * With unknown_suggestion. How many requested ids the generation does not have.
+             * With unknown_suggestion. How many requested ids the generation does not have, counting ids accepted from it whose test case has since been deleted.
              */
             count?: number;
         }
@@ -2241,6 +2884,17 @@ export declare namespace Components {
             never_run: number;
             stale: number;
             needs_reinterpretation: number;
+        }
+        /**
+         * An AI-written plain-language title in both UI languages, checked by deterministic guardrails before it is
+         * stored. Optional: absent when the title step gave none (or for items stored before titles existed); the UI
+         * then renders the sentence. On a test case (schema version 2 only): the title of the suggestion it was accepted
+         * from, kept on duplicates.
+         *
+         */
+        export interface BlueprintTestTitles {
+            en: string;
+            de: string;
         }
         export interface BlueprintTestUnreadableResource {
             type: string;
@@ -5237,6 +5891,22 @@ export declare namespace Components {
             status: "draft" | "live" | "archived";
             created_at?: string; // date-time
             updated_at?: string; // date-time
+            /**
+             * Snapshot of what is currently live
+             */
+            live?: {
+                version_id?: string;
+                version_name?: string | null;
+                published_at?: string; // date-time
+                installation_link?: string | null;
+                content?: MarketplaceListingUpdate;
+            } | null;
+            webflow_item_id?: string | null;
+            webflow_sync?: {
+                status?: "ok" | "failed";
+                at?: string; // date-time
+                error?: string | null;
+            } | null;
         }
         export interface MarketplaceListingUpdate {
             name?: string;
@@ -5278,6 +5948,13 @@ export declare namespace Components {
             id: string; // uuid
             listing_id: string;
             status: "draft" | "published" | "archived";
+            /**
+             * Blueprint release tag whose zip this version ships
+             */
+            tag_id?: string | null;
+            /**
+             * Name of the tag this version ships
+             */
             version_name?: string | null;
             draft_label: string;
             update_note?: string | null;
@@ -5288,7 +5965,206 @@ export declare namespace Components {
             recommended_apps?: string[] | null;
             created_at: string; // date-time
             published_at?: string | null; // date-time
+            created_by?: {
+                /**
+                 * a human readable name of the caller (e.g. user name, token name or email address)
+                 * example:
+                 * manifest@epilot.cloud
+                 */
+                name?: any;
+                /**
+                 * epilot organization id
+                 * example:
+                 * 911690
+                 */
+                org_id: string;
+                /**
+                 * epilot user id, when called by a user
+                 * example:
+                 * 11001045
+                 */
+                user_id?: string;
+                /**
+                 * token id, when called by API token
+                 * example:
+                 * api_5ZugdRXasLfWBypHi93Fk
+                 */
+                token_id?: string;
+            } | null;
+            published_by?: {
+                /**
+                 * a human readable name of the caller (e.g. user name, token name or email address)
+                 * example:
+                 * manifest@epilot.cloud
+                 */
+                name?: any;
+                /**
+                 * epilot organization id
+                 * example:
+                 * 911690
+                 */
+                org_id: string;
+                /**
+                 * epilot user id, when called by a user
+                 * example:
+                 * 11001045
+                 */
+                user_id?: string;
+                /**
+                 * token id, when called by API token
+                 * example:
+                 * api_5ZugdRXasLfWBypHi93Fk
+                 */
+                token_id?: string;
+            } | null;
+            package?: MarketplaceListingVersionPackage;
+            content?: {
+                name?: string;
+                slug?: string;
+                logo?: string | null;
+                documentation_url?: string | null;
+                pricing_type?: "free" | "paid" | "freemium" | "contact_us";
+                support_email?: string | null;
+                portal_description?: string | null;
+                teaser_name?: string | null;
+                teaser_short_description?: string | null;
+                teaser_thumbnail?: string | null;
+                details_page_title?: string | null;
+                details_page_description?: string | null;
+                details_page_hero_image?: string | null;
+                details_page_carousel?: string[] | null;
+                resources_section_description?: string | null;
+                resources_section_benefits_title?: string | null;
+                resources_section_benefits_list?: string | null;
+                resources_section_process_details?: string | null;
+                partner?: string | null;
+                partner_subtext?: string | null;
+                partner_logo?: string | null;
+                partner_website_link?: string | null;
+                last_updated_on?: string | null;
+                requires_customer_portal?: boolean | null;
+                process_details_section_title?: string | null;
+                is_new_blueprint?: boolean | null;
+                available_in?: string | null;
+                testimonials?: string[] | null;
+                installation_link?: string | null;
+                installation_slug?: string | null;
+                demo_form_link?: string | null;
+                order?: number | null;
+                categories?: string[] | null;
+                main_category?: string[] | null;
+            } | null;
+            /**
+             * When `content` was last published; equals `published_at` until a text-only publish
+             */
+            content_published_at?: string | null; // date-time
+            content_published_by?: {
+                /**
+                 * a human readable name of the caller (e.g. user name, token name or email address)
+                 * example:
+                 * manifest@epilot.cloud
+                 */
+                name?: any;
+                /**
+                 * epilot organization id
+                 * example:
+                 * 911690
+                 */
+                org_id: string;
+                /**
+                 * epilot user id, when called by a user
+                 * example:
+                 * 11001045
+                 */
+                user_id?: string;
+                /**
+                 * token id, when called by API token
+                 * example:
+                 * api_5ZugdRXasLfWBypHi93Fk
+                 */
+                token_id?: string;
+            } | null;
+            /**
+             * Earlier texts of this version, oldest first, each replaced by a text-only publish
+             */
+            content_revisions?: {
+                content?: {
+                    name?: string;
+                    slug?: string;
+                    logo?: string | null;
+                    documentation_url?: string | null;
+                    pricing_type?: "free" | "paid" | "freemium" | "contact_us";
+                    support_email?: string | null;
+                    portal_description?: string | null;
+                    teaser_name?: string | null;
+                    teaser_short_description?: string | null;
+                    teaser_thumbnail?: string | null;
+                    details_page_title?: string | null;
+                    details_page_description?: string | null;
+                    details_page_hero_image?: string | null;
+                    details_page_carousel?: string[] | null;
+                    resources_section_description?: string | null;
+                    resources_section_benefits_title?: string | null;
+                    resources_section_benefits_list?: string | null;
+                    resources_section_process_details?: string | null;
+                    partner?: string | null;
+                    partner_subtext?: string | null;
+                    partner_logo?: string | null;
+                    partner_website_link?: string | null;
+                    last_updated_on?: string | null;
+                    requires_customer_portal?: boolean | null;
+                    process_details_section_title?: string | null;
+                    is_new_blueprint?: boolean | null;
+                    available_in?: string | null;
+                    testimonials?: string[] | null;
+                    installation_link?: string | null;
+                    installation_slug?: string | null;
+                    demo_form_link?: string | null;
+                    order?: number | null;
+                    categories?: string[] | null;
+                    main_category?: string[] | null;
+                } | null;
+                published_at?: string | null; // date-time
+                published_by?: {
+                    /**
+                     * a human readable name of the caller (e.g. user name, token name or email address)
+                     * example:
+                     * manifest@epilot.cloud
+                     */
+                    name?: any;
+                    /**
+                     * epilot organization id
+                     * example:
+                     * 911690
+                     */
+                    org_id: string;
+                    /**
+                     * epilot user id, when called by a user
+                     * example:
+                     * 11001045
+                     */
+                    user_id?: string;
+                    /**
+                     * token id, when called by API token
+                     * example:
+                     * api_5ZugdRXasLfWBypHi93Fk
+                     */
+                    token_id?: string;
+                } | null;
+            }[];
         }
+        export type MarketplaceListingVersionPackage = {
+            status: "building" | "ready" | "failed";
+            /**
+             * V3 publish job that built the zip
+             */
+            job_id?: string;
+            bucket?: string;
+            key?: string;
+            public_url?: string | null;
+            installation_link?: string | null;
+            error?: string | null;
+        } | null;
         export interface MergeBaseProvenance {
             rung: "apply_evidence" | "none";
             job_id?: string;
@@ -5964,7 +6840,7 @@ export declare namespace Components {
              * sha256 of the canonical clauses.
              */
             id: string; // ^[0-9a-f]{64}$
-            shape: BlueprintTestCaseShape;
+            shape: /* Suggestion shape. `other` holds suggestions that fit none of the named shapes. */ BlueprintTestCaseShape;
             subject: {
                 node_id: string;
                 resource_id: string;
@@ -5978,6 +6854,14 @@ export declare namespace Components {
                 [name: string]: any;
             }[];
             sentences: /* A translation key and its parameters. The UI renders the text; the server never returns sentences. */ Sentence[];
+            titles?: /**
+             * An AI-written plain-language title in both UI languages, checked by deterministic guardrails before it is
+             * stored. Optional: absent when the title step gave none (or for items stored before titles existed); the UI
+             * then renders the sentence. On a test case (schema version 2 only): the title of the suggestion it was accepted
+             * from, kept on duplicates.
+             *
+             */
+            BlueprintTestTitles;
             /**
              * An existing v2 test case that already holds every clause of this suggestion.
              */
@@ -6303,6 +7187,32 @@ export declare namespace Paths {
             }
         }
     }
+    namespace BatchDeleteBlueprintTestCases {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintTestCaseBatchDeleteInput;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTestCaseBatchDeleteResult;
+            export interface $400 {
+            }
+            export interface $401 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $500 {
+            }
+            export interface $503 {
+            }
+        }
+    }
     namespace BulkAddBlueprintResources {
         namespace Parameters {
             /**
@@ -6409,6 +7319,26 @@ export declare namespace Paths {
             export type $200 = Components.Schemas.BlueprintJob;
         }
     }
+    namespace CheckBlueprintTestSuggestion {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type GenerationId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            generation_id: Parameters.GenerationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintSuggestionCheck;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintSuggestionCheckResult;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
+        }
+    }
     namespace ConfirmBlueprintTestInterpretationV2 {
         namespace Parameters {
             export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
@@ -6472,6 +7402,37 @@ export declare namespace Paths {
             export type $404 = Components.Schemas.BlueprintTestSuiteError;
             export type $409 = Components.Schemas.BlueprintTestSuiteError;
             export type $503 = Components.Schemas.BlueprintTestSuiteError;
+        }
+    }
+    namespace CreateBlueprintTag {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface RequestBody {
+            /**
+             * Semantic version, higher than every release tag of this blueprint
+             * example:
+             * 1.2.0
+             */
+            name: string;
+            note?: string | null;
+        }
+        namespace Responses {
+            export type $202 = Components.Schemas.BlueprintTag;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
         }
     }
     namespace CreateBlueprintTestCase {
@@ -6742,9 +7703,25 @@ export declare namespace Paths {
         export interface PathParameters {
             listing_id: Parameters.ListingId;
         }
+        export interface RequestBody {
+            /**
+             * Ready release tag of the listing's blueprint
+             */
+            tag_id?: string;
+            /**
+             * Copy this version's tag, required features and recommended apps
+             */
+            from_version_id?: string;
+        }
         namespace Responses {
             export type $201 = Components.Schemas.MarketplaceListingVersion;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
             export interface $404 {
+            }
+            export interface $409 {
             }
         }
     }
@@ -6942,6 +7919,31 @@ export declare namespace Paths {
             }
         }
     }
+    namespace DeleteBlueprintTag {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type TagId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            tag_id: Parameters.TagId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+        }
+    }
     namespace DeleteBlueprintTestCase {
         namespace Parameters {
             export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
@@ -7000,7 +8002,11 @@ export declare namespace Paths {
         namespace Responses {
             export interface $204 {
             }
+            export interface $403 {
+            }
             export interface $404 {
+            }
+            export interface $502 {
             }
         }
     }
@@ -7022,6 +8028,32 @@ export declare namespace Paths {
             export type $200 = /* Summary of an update merge plan. */ Components.Schemas.MergePlanReview;
             export type $404 = Components.Schemas.MergePlanError;
             export type $409 = Components.Schemas.MergePlanError;
+        }
+    }
+    namespace DownloadBlueprintTag {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type TagId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            tag_id: Parameters.TagId;
+        }
+        namespace Responses {
+            export interface $200 {
+                download_url: string;
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
         }
     }
     namespace DuplicateBlueprintTestCase {
@@ -7211,7 +8243,7 @@ export declare namespace Paths {
             export type Cursor = string;
             export type GenerationId = string; // uuid
             export type Limit = number;
-            export type Shape = Components.Schemas.BlueprintTestCaseShape;
+            export type Shape = /* Suggestion shape. `other` holds suggestions that fit none of the named shapes. */ Components.Schemas.BlueprintTestCaseShape;
         }
         export interface PathParameters {
             blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
@@ -7301,6 +8333,28 @@ export declare namespace Paths {
         }
         namespace Responses {
             export type $200 = /* Preview data for a blueprint before installation. Stored temporarily with TTL. */ Components.Schemas.BlueprintPreview;
+            export interface $404 {
+            }
+        }
+    }
+    namespace GetBlueprintTag {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type TagId = string;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+            tag_id: Parameters.TagId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintTag;
+            export interface $403 {
+            }
             export interface $404 {
             }
         }
@@ -7534,8 +8588,31 @@ export declare namespace Paths {
                 status: "draft" | "live" | "archived";
                 created_at?: string; // date-time
                 updated_at?: string; // date-time
+                /**
+                 * Snapshot of what is currently live
+                 */
+                live?: {
+                    version_id?: string;
+                    version_name?: string | null;
+                    published_at?: string; // date-time
+                    installation_link?: string | null;
+                    content?: Components.Schemas.MarketplaceListingUpdate;
+                } | null;
+                webflow_item_id?: string | null;
+                webflow_sync?: {
+                    status?: "ok" | "failed";
+                    at?: string; // date-time
+                    error?: string | null;
+                } | null;
+                /**
+                 * Versions without `resources` and `content`
+                 */
                 versions?: Components.Schemas.MarketplaceListingVersion[];
                 has_publishable_draft?: boolean;
+                /**
+                 * The listing text differs from the text of the live version; publish it with publishMarketplaceListingContent
+                 */
+                has_unpublished_content?: boolean;
             }
             export interface $404 {
             }
@@ -7589,8 +8666,31 @@ export declare namespace Paths {
                 status: "draft" | "live" | "archived";
                 created_at?: string; // date-time
                 updated_at?: string; // date-time
+                /**
+                 * Snapshot of what is currently live
+                 */
+                live?: {
+                    version_id?: string;
+                    version_name?: string | null;
+                    published_at?: string; // date-time
+                    installation_link?: string | null;
+                    content?: Components.Schemas.MarketplaceListingUpdate;
+                } | null;
+                webflow_item_id?: string | null;
+                webflow_sync?: {
+                    status?: "ok" | "failed";
+                    at?: string; // date-time
+                    error?: string | null;
+                } | null;
+                /**
+                 * Versions without `resources` and `content`
+                 */
                 versions?: Components.Schemas.MarketplaceListingVersion[];
                 has_publishable_draft?: boolean;
+                /**
+                 * The listing text differs from the text of the live version; publish it with publishMarketplaceListingContent
+                 */
+                has_unpublished_content?: boolean;
             }
             export interface $404 {
             }
@@ -7913,6 +9013,30 @@ export declare namespace Paths {
             export type $409 = Components.Schemas.MergePlanError;
         }
     }
+    namespace ListBlueprintTags {
+        namespace Parameters {
+            export type BlueprintId = /**
+             * ID of a blueprint
+             * example:
+             * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
+             */
+            Components.Schemas.BlueprintID;
+            export type Kind = /* `release`: a semantic version someone tagged. `sync`: recorded automatically for every sync, named by time, for debugging. */ Components.Schemas.BlueprintTagKind;
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId;
+        }
+        export interface QueryParameters {
+            kind?: Parameters.Kind;
+        }
+        namespace Responses {
+            export interface $200 {
+                tags: Components.Schemas.BlueprintTag[];
+            }
+            export interface $403 {
+            }
+        }
+    }
     namespace ListBlueprintTestCases {
         namespace Parameters {
             export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
@@ -8040,6 +9164,9 @@ export declare namespace Paths {
         }
         namespace Responses {
             export interface $200 {
+                /**
+                 * Versions without `resources` and `content`
+                 */
                 versions?: Components.Schemas.MarketplaceListingVersion[];
             }
         }
@@ -8226,6 +9353,27 @@ export declare namespace Paths {
             }
         }
     }
+    namespace PublishMarketplaceListingContent {
+        namespace Parameters {
+            export type ListingId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MarketplaceListing;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $413 {
+            }
+        }
+    }
     namespace PublishMarketplaceListingVersion {
         namespace Parameters {
             export type ListingId = string;
@@ -8236,14 +9384,19 @@ export declare namespace Paths {
             version_id: Parameters.VersionId;
         }
         export interface RequestBody {
-            version_name: string;
             update_note?: string | null;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.MarketplaceListingVersion;
+            export type $200 = Components.Schemas.MarketplaceListing;
             export interface $400 {
             }
+            export interface $403 {
+            }
             export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $413 {
             }
         }
     }
@@ -8265,6 +9418,26 @@ export declare namespace Paths {
             export type $200 = Components.Schemas.UniquenessCriteria;
             export interface $400 {
             }
+        }
+    }
+    namespace QueryBlueprintSuggestionGraph {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type GenerationId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            generation_id: Parameters.GenerationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintSuggestionGraphQuery;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintSuggestionGraphQueryResult;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
         }
     }
     namespace ReplanBlueprintMergePlan {
@@ -8387,6 +9560,29 @@ export declare namespace Paths {
             }
         }
     }
+    namespace RollbackMarketplaceListingVersion {
+        namespace Parameters {
+            export type ListingId = string;
+            export type VersionId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+            version_id: Parameters.VersionId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MarketplaceListing;
+            export interface $400 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $413 {
+            }
+        }
+    }
     namespace SendBlueprintAssistantMessage {
         namespace Parameters {
             export type BlueprintId = /**
@@ -8407,6 +9603,26 @@ export declare namespace Paths {
             }
             export interface $409 {
             }
+        }
+    }
+    namespace SubmitBlueprintTestSuggestions {
+        namespace Parameters {
+            export type BlueprintId = string; // ^[a-zA-Z0-9_-]+$
+            export type GenerationId = string; // uuid
+        }
+        export interface PathParameters {
+            blueprint_id: Parameters.BlueprintId /* ^[a-zA-Z0-9_-]+$ */;
+            generation_id: Parameters.GenerationId /* uuid */;
+        }
+        export type RequestBody = Components.Schemas.BlueprintSuggestionSubmission;
+        namespace Responses {
+            export type $200 = Components.Schemas.BlueprintSuggestionSubmissionResult;
+            export type $400 = Components.Schemas.BlueprintTestSuiteError;
+            export type $401 = Components.Schemas.BlueprintTestSuiteError;
+            export type $403 = Components.Schemas.BlueprintTestSuiteError;
+            export type $404 = Components.Schemas.BlueprintTestSuiteError;
+            export type $409 = Components.Schemas.BlueprintTestSuiteError;
+            export type $503 = Components.Schemas.BlueprintTestSuiteError;
         }
     }
     namespace SuggestBlueprintResources {
@@ -8439,6 +9655,23 @@ export declare namespace Paths {
                  * c2d6cac8-bdd5-4ea2-8a6c-1cbdbe77b341
                  */
                 Components.Schemas.BlueprintJobID;
+            }
+            export interface $404 {
+            }
+        }
+    }
+    namespace SyncMarketplaceListing {
+        namespace Parameters {
+            export type ListingId = string;
+        }
+        export interface PathParameters {
+            listing_id: Parameters.ListingId;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MarketplaceListing;
+            export interface $400 {
+            }
+            export interface $403 {
             }
             export interface $404 {
             }
@@ -8669,7 +9902,13 @@ export declare namespace Paths {
         export type RequestBody = Components.Schemas.MarketplaceListingUpdate;
         namespace Responses {
             export type $200 = Components.Schemas.MarketplaceListing;
+            export interface $400 {
+            }
             export interface $404 {
+            }
+            export interface $409 {
+            }
+            export interface $413 {
             }
         }
     }
@@ -9380,11 +10619,11 @@ export interface OperationMethods {
   /**
    * createMarketplaceListingVersion - createMarketplaceListingVersion
    * 
-   * Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint
+   * Create a draft version that ships a ready release tag of the listing's blueprint. `from_version_id` copies another version's tag and settings for a text-only change.
    */
   'createMarketplaceListingVersion'(
     parameters?: Parameters<Paths.CreateMarketplaceListingVersion.PathParameters> | null,
-    data?: any,
+    data?: Paths.CreateMarketplaceListingVersion.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateMarketplaceListingVersion.Responses.$201>
   /**
@@ -9400,13 +10639,99 @@ export interface OperationMethods {
   /**
    * publishMarketplaceListingVersion - publishMarketplaceListingVersion
    * 
-   * Publish a draft version; archives the previous live version
+   * Publish a draft version; archives the previous live version and pushes the listing to the Marketplace
    */
   'publishMarketplaceListingVersion'(
     parameters?: Parameters<Paths.PublishMarketplaceListingVersion.PathParameters> | null,
     data?: Paths.PublishMarketplaceListingVersion.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
+  /**
+   * rollbackMarketplaceListingVersion - rollbackMarketplaceListingVersion
+   * 
+   * Make an archived version the live version again
+   */
+  'rollbackMarketplaceListingVersion'(
+    parameters?: Parameters<Paths.RollbackMarketplaceListingVersion.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RollbackMarketplaceListingVersion.Responses.$200>
+  /**
+   * syncMarketplaceListing - syncMarketplaceListing
+   * 
+   * Re-push the live listing to Webflow
+   */
+  'syncMarketplaceListing'(
+    parameters?: Parameters<Paths.SyncMarketplaceListing.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SyncMarketplaceListing.Responses.$200>
+  /**
+   * publishMarketplaceListingContent - publishMarketplaceListingContent
+   * 
+   * Publishes the listing's edited text on the live version: same tag, same zip, same version number, no update
+   * for installers. The text it replaces is kept in the version's `content_revisions`. Changed resources need a new
+   * tag and a new version instead.
+   * 
+   */
+  'publishMarketplaceListingContent'(
+    parameters?: Parameters<Paths.PublishMarketplaceListingContent.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.PublishMarketplaceListingContent.Responses.$200>
+  /**
+   * listBlueprintTags - listBlueprintTags
+   * 
+   * Tags of the blueprint, newest first
+   */
+  'listBlueprintTags'(
+    parameters?: Parameters<Paths.ListBlueprintTags.QueryParameters & Paths.ListBlueprintTags.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListBlueprintTags.Responses.$200>
+  /**
+   * createBlueprintTag - createBlueprintTag
+   * 
+   * Tags the blueprint's current state as a release. The zip is built once in the background
+   * (poll the tag until `status` is `ready`) and never changes afterwards. When it is ready, the
+   * blueprint's `version` becomes the tag name.
+   * 
+   */
+  'createBlueprintTag'(
+    parameters?: Parameters<Paths.CreateBlueprintTag.PathParameters> | null,
+    data?: Paths.CreateBlueprintTag.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateBlueprintTag.Responses.$202>
+  /**
+   * getBlueprintTag - getBlueprintTag
+   * 
+   * A release or sync tag of the blueprint, with its build status
+   */
+  'getBlueprintTag'(
+    parameters?: Parameters<Paths.GetBlueprintTag.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetBlueprintTag.Responses.$200>
+  /**
+   * deleteBlueprintTag - deleteBlueprintTag
+   * 
+   * Deletes a tag and its zip. Tags that were ever published to the Marketplace are kept.
+   */
+  'deleteBlueprintTag'(
+    parameters?: Parameters<Paths.DeleteBlueprintTag.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteBlueprintTag.Responses.$204>
+  /**
+   * downloadBlueprintTag - downloadBlueprintTag
+   * 
+   * Short-lived download URL for the tag's signed zip. For a sync tag the zip is built on the first download.
+   */
+  'downloadBlueprintTag'(
+    parameters?: Parameters<Paths.DownloadBlueprintTag.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DownloadBlueprintTag.Responses.$200>
   /**
    * publishBlueprintV3 - publishBlueprintV3
    * 
@@ -9905,6 +11230,16 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteUniquenessCriteria.Responses.$204>
   /**
+   * batchDeleteBlueprintTestCases - batchDeleteBlueprintTestCases
+   * 
+   * Delete up to 100 test cases of the blueprint in one request. Each case is deleted exactly like deleteBlueprintTestCase (own revision check, never all-or-nothing across cases); every requested id is returned in exactly one of deleted, conflicts or not_found. Requires the blueprint-test-cases organization feature flag.
+   */
+  'batchDeleteBlueprintTestCases'(
+    parameters?: Parameters<Paths.BatchDeleteBlueprintTestCases.PathParameters> | null,
+    data?: Paths.BatchDeleteBlueprintTestCases.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.BatchDeleteBlueprintTestCases.Responses.$200>
+  /**
    * duplicateBlueprintTestCase - duplicateBlueprintTestCase
    * 
    * Copy a v2 test case of the blueprint into a new test case that keeps the source's clauses. Requires the blueprint-test-cases organization feature flag.
@@ -10064,6 +11399,36 @@ export interface OperationMethods {
     data?: Paths.ConfirmBlueprintTestInterpretationV2.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ConfirmBlueprintTestInterpretationV2.Responses.$200 | Paths.ConfirmBlueprintTestInterpretationV2.Responses.$201>
+  /**
+   * queryBlueprintSuggestionGraph - queryBlueprintSuggestionGraph
+   * 
+   * Read-only graph query for the Luna suggestions agent of a running Luna generation (list_subjects or one of the graph tools). Only a Luna agent token acting for the user who started the generation is accepted. `list_subjects` takes `{ cursor? }` and returns one page `{ subjects, next_cursor?, total, unreadable, unreadable_total }`: pass `next_cursor` back until it is absent to read every subject (pages are sized to the tool result cap; no subject is ever cut). `unreadable` lists up to 20 resources the capture could not read (type, id, reason code), `unreadable_total` counts them all: when it is not 0 the blueprint picture is incomplete. Requires the blueprint-test-cases organization feature flag.
+   */
+  'queryBlueprintSuggestionGraph'(
+    parameters?: Parameters<Paths.QueryBlueprintSuggestionGraph.PathParameters> | null,
+    data?: Paths.QueryBlueprintSuggestionGraph.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.QueryBlueprintSuggestionGraph.Responses.$200>
+  /**
+   * checkBlueprintTestSuggestion - checkBlueprintTestSuggestion
+   * 
+   * Checks one draft suggestion with the engine for a running Luna generation (offered, failed, excluded or invalid) without storing anything. Requires the blueprint-test-cases organization feature flag.
+   */
+  'checkBlueprintTestSuggestion'(
+    parameters?: Parameters<Paths.CheckBlueprintTestSuggestion.PathParameters> | null,
+    data?: Paths.CheckBlueprintTestSuggestion.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CheckBlueprintTestSuggestion.Responses.$200>
+  /**
+   * submitBlueprintTestSuggestions - submitBlueprintTestSuggestions
+   * 
+   * Final submission of the Luna suggestions agent. Verifies every draft, stores suggestions and problems and completes the generation. Only once per running Luna generation; while a submission is being saved every Luna endpoint of the generation answers 409 generation_submitting. Name every subject from list_subjects: a subject with an empty `suggestions` array counts as covered, every subject not named is stored as incomplete. Only a Luna agent token acting for the user who started the generation is accepted. Requires the blueprint-test-cases organization feature flag.
+   */
+  'submitBlueprintTestSuggestions'(
+    parameters?: Parameters<Paths.SubmitBlueprintTestSuggestions.PathParameters> | null,
+    data?: Paths.SubmitBlueprintTestSuggestions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SubmitBlueprintTestSuggestions.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -10688,11 +12053,11 @@ export interface PathsDictionary {
     /**
      * createMarketplaceListingVersion - createMarketplaceListingVersion
      * 
-     * Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint
+     * Create a draft version that ships a ready release tag of the listing's blueprint. `from_version_id` copies another version's tag and settings for a text-only change.
      */
     'post'(
       parameters?: Parameters<Paths.CreateMarketplaceListingVersion.PathParameters> | null,
-      data?: any,
+      data?: Paths.CreateMarketplaceListingVersion.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateMarketplaceListingVersion.Responses.$201>
     /**
@@ -10722,13 +12087,111 @@ export interface PathsDictionary {
     /**
      * publishMarketplaceListingVersion - publishMarketplaceListingVersion
      * 
-     * Publish a draft version; archives the previous live version
+     * Publish a draft version; archives the previous live version and pushes the listing to the Marketplace
      */
     'post'(
       parameters?: Parameters<Paths.PublishMarketplaceListingVersion.PathParameters> | null,
       data?: Paths.PublishMarketplaceListingVersion.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PublishMarketplaceListingVersion.Responses.$200>
+  }
+  ['/v1/marketplace-listings/{listing_id}/versions/{version_id}/rollback']: {
+    /**
+     * rollbackMarketplaceListingVersion - rollbackMarketplaceListingVersion
+     * 
+     * Make an archived version the live version again
+     */
+    'post'(
+      parameters?: Parameters<Paths.RollbackMarketplaceListingVersion.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RollbackMarketplaceListingVersion.Responses.$200>
+  }
+  ['/v1/marketplace-listings/{listing_id}/sync']: {
+    /**
+     * syncMarketplaceListing - syncMarketplaceListing
+     * 
+     * Re-push the live listing to Webflow
+     */
+    'post'(
+      parameters?: Parameters<Paths.SyncMarketplaceListing.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SyncMarketplaceListing.Responses.$200>
+  }
+  ['/v1/marketplace-listings/{listing_id}/publish-content']: {
+    /**
+     * publishMarketplaceListingContent - publishMarketplaceListingContent
+     * 
+     * Publishes the listing's edited text on the live version: same tag, same zip, same version number, no update
+     * for installers. The text it replaces is kept in the version's `content_revisions`. Changed resources need a new
+     * tag and a new version instead.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.PublishMarketplaceListingContent.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.PublishMarketplaceListingContent.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/tags']: {
+    /**
+     * createBlueprintTag - createBlueprintTag
+     * 
+     * Tags the blueprint's current state as a release. The zip is built once in the background
+     * (poll the tag until `status` is `ready`) and never changes afterwards. When it is ready, the
+     * blueprint's `version` becomes the tag name.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.CreateBlueprintTag.PathParameters> | null,
+      data?: Paths.CreateBlueprintTag.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateBlueprintTag.Responses.$202>
+    /**
+     * listBlueprintTags - listBlueprintTags
+     * 
+     * Tags of the blueprint, newest first
+     */
+    'get'(
+      parameters?: Parameters<Paths.ListBlueprintTags.QueryParameters & Paths.ListBlueprintTags.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListBlueprintTags.Responses.$200>
+  }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/tags/{tag_id}']: {
+    /**
+     * getBlueprintTag - getBlueprintTag
+     * 
+     * A release or sync tag of the blueprint, with its build status
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetBlueprintTag.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetBlueprintTag.Responses.$200>
+    /**
+     * deleteBlueprintTag - deleteBlueprintTag
+     * 
+     * Deletes a tag and its zip. Tags that were ever published to the Marketplace are kept.
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteBlueprintTag.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteBlueprintTag.Responses.$204>
+  }
+  ['/v3/blueprint-manifest/blueprints/{blueprint_id}/tags/{tag_id}/download']: {
+    /**
+     * downloadBlueprintTag - downloadBlueprintTag
+     * 
+     * Short-lived download URL for the tag's signed zip. For a sync tag the zip is built on the first download.
+     */
+    'get'(
+      parameters?: Parameters<Paths.DownloadBlueprintTag.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DownloadBlueprintTag.Responses.$200>
   }
   ['/v3/blueprint-manifest/blueprints/{blueprint_id}:publish']: {
     /**
@@ -11287,6 +12750,18 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteUniquenessCriteria.Responses.$204>
   }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases:batchDelete']: {
+    /**
+     * batchDeleteBlueprintTestCases - batchDeleteBlueprintTestCases
+     * 
+     * Delete up to 100 test cases of the blueprint in one request. Each case is deleted exactly like deleteBlueprintTestCase (own revision check, never all-or-nothing across cases); every requested id is returned in exactly one of deleted, conflicts or not_found. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.BatchDeleteBlueprintTestCases.PathParameters> | null,
+      data?: Paths.BatchDeleteBlueprintTestCases.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.BatchDeleteBlueprintTestCases.Responses.$200>
+  }
   ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/duplicate']: {
     /**
      * duplicateBlueprintTestCase - duplicateBlueprintTestCase
@@ -11477,6 +12952,42 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.ConfirmBlueprintTestInterpretationV2.Responses.$200 | Paths.ConfirmBlueprintTestInterpretationV2.Responses.$201>
   }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/graph-query']: {
+    /**
+     * queryBlueprintSuggestionGraph - queryBlueprintSuggestionGraph
+     * 
+     * Read-only graph query for the Luna suggestions agent of a running Luna generation (list_subjects or one of the graph tools). Only a Luna agent token acting for the user who started the generation is accepted. `list_subjects` takes `{ cursor? }` and returns one page `{ subjects, next_cursor?, total, unreadable, unreadable_total }`: pass `next_cursor` back until it is absent to read every subject (pages are sized to the tool result cap; no subject is ever cut). `unreadable` lists up to 20 resources the capture could not read (type, id, reason code), `unreadable_total` counts them all: when it is not 0 the blueprint picture is incomplete. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.QueryBlueprintSuggestionGraph.PathParameters> | null,
+      data?: Paths.QueryBlueprintSuggestionGraph.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.QueryBlueprintSuggestionGraph.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/check']: {
+    /**
+     * checkBlueprintTestSuggestion - checkBlueprintTestSuggestion
+     * 
+     * Checks one draft suggestion with the engine for a running Luna generation (offered, failed, excluded or invalid) without storing anything. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.CheckBlueprintTestSuggestion.PathParameters> | null,
+      data?: Paths.CheckBlueprintTestSuggestion.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CheckBlueprintTestSuggestion.Responses.$200>
+  }
+  ['/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/submissions']: {
+    /**
+     * submitBlueprintTestSuggestions - submitBlueprintTestSuggestions
+     * 
+     * Final submission of the Luna suggestions agent. Verifies every draft, stores suggestions and problems and completes the generation. Only once per running Luna generation; while a submission is being saved every Luna endpoint of the generation answers 409 generation_submitting. Name every subject from list_subjects: a subject with an empty `suggestions` array counts as covered, every subject not named is stored as incomplete. Only a Luna agent token acting for the user who started the generation is accepted. Requires the blueprint-test-cases organization feature flag.
+     */
+    'post'(
+      parameters?: Parameters<Paths.SubmitBlueprintTestSuggestions.PathParameters> | null,
+      data?: Paths.SubmitBlueprintTestSuggestions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SubmitBlueprintTestSuggestions.Responses.$200>
+  }
 }
 
 export type Client = OpenAPIClient<OperationMethods, PathsDictionary>
@@ -11497,6 +13008,7 @@ export type BlueprintExportJob = Components.Schemas.BlueprintExportJob;
 export type BlueprintGraphSuggestionAcceptInput = Components.Schemas.BlueprintGraphSuggestionAcceptInput;
 export type BlueprintGraphSuggestionAcceptance = Components.Schemas.BlueprintGraphSuggestionAcceptance;
 export type BlueprintGraphSuggestionPage = Components.Schemas.BlueprintGraphSuggestionPage;
+export type BlueprintGraphSuggestionProblem = Components.Schemas.BlueprintGraphSuggestionProblem;
 export type BlueprintGraphSuggestionsStarted = Components.Schemas.BlueprintGraphSuggestionsStarted;
 export type BlueprintID = Components.Schemas.BlueprintID;
 export type BlueprintInstallStatus = Components.Schemas.BlueprintInstallStatus;
@@ -11514,7 +13026,17 @@ export type BlueprintResource = Components.Schemas.BlueprintResource;
 export type BlueprintResourceID = Components.Schemas.BlueprintResourceID;
 export type BlueprintRestoreJob = Components.Schemas.BlueprintRestoreJob;
 export type BlueprintSourceTestOperation = Components.Schemas.BlueprintSourceTestOperation;
+export type BlueprintSuggestionCheck = Components.Schemas.BlueprintSuggestionCheck;
+export type BlueprintSuggestionCheckResult = Components.Schemas.BlueprintSuggestionCheckResult;
+export type BlueprintSuggestionGraphQuery = Components.Schemas.BlueprintSuggestionGraphQuery;
+export type BlueprintSuggestionGraphQueryResult = Components.Schemas.BlueprintSuggestionGraphQueryResult;
+export type BlueprintSuggestionSubmission = Components.Schemas.BlueprintSuggestionSubmission;
+export type BlueprintSuggestionSubmissionResult = Components.Schemas.BlueprintSuggestionSubmissionResult;
+export type BlueprintTag = Components.Schemas.BlueprintTag;
+export type BlueprintTagKind = Components.Schemas.BlueprintTagKind;
 export type BlueprintTestCase = Components.Schemas.BlueprintTestCase;
+export type BlueprintTestCaseBatchDeleteInput = Components.Schemas.BlueprintTestCaseBatchDeleteInput;
+export type BlueprintTestCaseBatchDeleteResult = Components.Schemas.BlueprintTestCaseBatchDeleteResult;
 export type BlueprintTestCaseConfirmation = Components.Schemas.BlueprintTestCaseConfirmation;
 export type BlueprintTestCaseInput = Components.Schemas.BlueprintTestCaseInput;
 export type BlueprintTestCaseOrigin = Components.Schemas.BlueprintTestCaseOrigin;
@@ -11543,6 +13065,7 @@ export type BlueprintTestRunResult = Components.Schemas.BlueprintTestRunResult;
 export type BlueprintTestSuite = Components.Schemas.BlueprintTestSuite;
 export type BlueprintTestSuiteError = Components.Schemas.BlueprintTestSuiteError;
 export type BlueprintTestSuiteSummary = Components.Schemas.BlueprintTestSuiteSummary;
+export type BlueprintTestTitles = Components.Schemas.BlueprintTestTitles;
 export type BlueprintTestUnreadableResource = Components.Schemas.BlueprintTestUnreadableResource;
 export type BlueprintV1TestCaseMigration = Components.Schemas.BlueprintV1TestCaseMigration;
 export type BlueprintVerificationJob = Components.Schemas.BlueprintVerificationJob;
@@ -11591,6 +13114,7 @@ export type MarketplaceBlueprint = Components.Schemas.MarketplaceBlueprint;
 export type MarketplaceListing = Components.Schemas.MarketplaceListing;
 export type MarketplaceListingUpdate = Components.Schemas.MarketplaceListingUpdate;
 export type MarketplaceListingVersion = Components.Schemas.MarketplaceListingVersion;
+export type MarketplaceListingVersionPackage = Components.Schemas.MarketplaceListingVersionPackage;
 export type MergeBaseProvenance = Components.Schemas.MergeBaseProvenance;
 export type MergeChoice = Components.Schemas.MergeChoice;
 export type MergeChoiceInput = Components.Schemas.MergeChoiceInput;

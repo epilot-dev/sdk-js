@@ -738,6 +738,12 @@
             "required": true
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
         "responses": {}
       },
       "get": {
@@ -792,11 +798,142 @@
           }
         ],
         "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}/versions/{version_id}/rollback": {
+      "post": {
+        "operationId": "rollbackMarketplaceListingVersion",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}/sync": {
+      "post": {
+        "operationId": "syncMarketplaceListing",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}/publish-content": {
+      "post": {
+        "operationId": "publishMarketplaceListingContent",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/tags": {
+      "post": {
+        "operationId": "createBlueprintTag",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          }
+        ],
+        "requestBody": {
           "required": true,
           "content": {
             "application/json": {}
           }
         },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listBlueprintTags",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/tags/{tag_id}": {
+      "get": {
+        "operationId": "getBlueprintTag",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "tag_id"
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteBlueprintTag",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "tag_id"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/tags/{tag_id}/download": {
+      "get": {
+        "operationId": "downloadBlueprintTag",
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id"
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "tag_id"
+          }
+        ],
         "responses": {}
       }
     },
@@ -1336,6 +1473,25 @@
         "responses": {}
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases:batchDelete": {
+      "post": {
+        "operationId": "batchDeleteBlueprintTestCases",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/duplicate": {
       "post": {
         "operationId": "duplicateBlueprintTestCase",
@@ -1682,6 +1838,78 @@
           {
             "in": "path",
             "name": "interpretation_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/graph-query": {
+      "post": {
+        "operationId": "queryBlueprintSuggestionGraph",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "generation_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/check": {
+      "post": {
+        "operationId": "checkBlueprintTestSuggestion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "generation_id",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/submissions": {
+      "post": {
+        "operationId": "submitBlueprintTestSuggestions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "generation_id",
             "required": true
           }
         ],

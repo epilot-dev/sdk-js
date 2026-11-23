@@ -39,6 +39,10 @@
       "description": "Manage versions for marketplace listings"
     },
     {
+      "name": "Blueprint Tags",
+      "description": "Blueprint versions (release tags with an immutable zip) and the sync tags recorded for every synchronization"
+    },
+    {
       "name": "Uniqueness Criteria",
       "description": "Configure per-org field sets used to match existing resources during install"
     },
@@ -2761,12 +2765,17 @@
                       "properties": {
                         "versions": {
                           "type": "array",
+                          "description": "Versions without `resources` and `content`",
                           "items": {
                             "$ref": "#/components/schemas/MarketplaceListingVersion"
                           }
                         },
                         "has_publishable_draft": {
                           "type": "boolean"
+                        },
+                        "has_unpublished_content": {
+                          "type": "boolean",
+                          "description": "The listing text differs from the text of the live version; publish it with publishMarketplaceListingContent"
                         }
                       }
                     }
@@ -2859,12 +2868,17 @@
                       "properties": {
                         "versions": {
                           "type": "array",
+                          "description": "Versions without `resources` and `content`",
                           "items": {
                             "$ref": "#/components/schemas/MarketplaceListingVersion"
                           }
                         },
                         "has_publishable_draft": {
                           "type": "boolean"
+                        },
+                        "has_unpublished_content": {
+                          "type": "boolean",
+                          "description": "The listing text differs from the text of the live version; publish it with publishMarketplaceListingContent"
                         }
                       }
                     }
@@ -2921,8 +2935,17 @@
               }
             }
           },
+          "400": {
+            "description": "Installation slug cannot change while the listing is live"
+          },
           "404": {
             "description": "Listing not found"
+          },
+          "409": {
+            "description": "Listing was changed concurrently"
+          },
+          "413": {
+            "description": "Listing is too large"
           }
         }
       },
@@ -2952,8 +2975,14 @@
           "204": {
             "description": "Listing deleted"
           },
+          "403": {
+            "description": "Marketplace publishing not enabled"
+          },
           "404": {
             "description": "Listing not found"
+          },
+          "502": {
+            "description": "Listing could not be removed from the Marketplace"
           }
         }
       }
@@ -2967,7 +2996,7 @@
           }
         ],
         "summary": "createMarketplaceListingVersion",
-        "description": "Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint",
+        "description": "Create a draft version that ships a ready release tag of the listing's blueprint. `from_version_id` copies another version's tag and settings for a text-only change.",
         "tags": [
           "Marketplace Listing Versions"
         ],
@@ -2981,6 +3010,26 @@
             }
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tag_id": {
+                    "type": "string",
+                    "description": "Ready release tag of the listing's blueprint"
+                  },
+                  "from_version_id": {
+                    "type": "string",
+                    "description": "Copy this version's tag, required features and recommended apps"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "Draft version created",
@@ -2992,8 +3041,17 @@
               }
             }
           },
+          "400": {
+            "description": "Neither tag_id nor from_version_id, or the tag is a sync tag"
+          },
+          "403": {
+            "description": "Blueprint versions (`blueprint-versioning` flag) are not enabled for this organization"
+          },
           "404": {
-            "description": "Listing not found"
+            "description": "Listing, tag or source version not found"
+          },
+          "409": {
+            "description": "Tag is not ready"
           }
         }
       },
@@ -3029,6 +3087,7 @@
                   "properties": {
                     "versions": {
                       "type": "array",
+                      "description": "Versions without `resources` and `content`",
                       "items": {
                         "$ref": "#/components/schemas/MarketplaceListingVersion"
                       }
@@ -3129,7 +3188,7 @@
           }
         ],
         "summary": "publishMarketplaceListingVersion",
-        "description": "Publish a draft version; archives the previous live version",
+        "description": "Publish a draft version; archives the previous live version and pushes the listing to the Marketplace",
         "tags": [
           "Marketplace Listing Versions"
         ],
@@ -3152,18 +3211,12 @@
           }
         ],
         "requestBody": {
-          "required": true,
+          "required": false,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "version_name"
-                ],
                 "properties": {
-                  "version_name": {
-                    "type": "string"
-                  },
                   "update_note": {
                     "type": "string",
                     "nullable": true
@@ -3175,20 +3228,472 @@
         },
         "responses": {
           "200": {
-            "description": "Published version",
+            "description": "Listing after publish; webflow_sync tells whether the Marketplace push worked",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MarketplaceListingVersion"
+                  "$ref": "#/components/schemas/MarketplaceListing"
                 }
               }
             }
           },
           "400": {
-            "description": "Version not publishable or version_name already taken"
+            "description": "Version not a draft, listing has no slug, or its tag was already released on this listing or is not higher than every released one"
+          },
+          "403": {
+            "description": "Marketplace publishing not enabled"
           },
           "404": {
-            "description": "Version not found"
+            "description": "Version or listing not found"
+          },
+          "409": {
+            "description": "Another version was published meanwhile, concurrent change, or package still building or failed"
+          },
+          "413": {
+            "description": "Version is too large to publish"
+          }
+        }
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}/versions/{version_id}/rollback": {
+      "post": {
+        "operationId": "rollbackMarketplaceListingVersion",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "rollbackMarketplaceListingVersion",
+        "description": "Make an archived version the live version again",
+        "tags": [
+          "Marketplace Listing Versions"
+        ],
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing after rollback; webflow_sync tells whether the Marketplace push worked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListing"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Version is not archived or cannot be rolled back"
+          },
+          "403": {
+            "description": "Marketplace publishing not enabled"
+          },
+          "404": {
+            "description": "Version or listing not found"
+          },
+          "409": {
+            "description": "Another version was published meanwhile or concurrent change"
+          },
+          "413": {
+            "description": "Version is too large to publish"
+          }
+        }
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}/sync": {
+      "post": {
+        "operationId": "syncMarketplaceListing",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "syncMarketplaceListing",
+        "description": "Re-push the live listing to Webflow",
+        "tags": [
+          "Marketplace Listings"
+        ],
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing after sync",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListing"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Listing is not live"
+          },
+          "403": {
+            "description": "Marketplace publishing not enabled"
+          },
+          "404": {
+            "description": "Listing not found"
+          }
+        }
+      }
+    },
+    "/v1/marketplace-listings/{listing_id}/publish-content": {
+      "post": {
+        "operationId": "publishMarketplaceListingContent",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "publishMarketplaceListingContent",
+        "description": "Publishes the listing's edited text on the live version: same tag, same zip, same version number, no update\nfor installers. The text it replaces is kept in the version's `content_revisions`. Changed resources need a new\ntag and a new version instead.\n",
+        "tags": [
+          "Marketplace Listing Versions"
+        ],
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listing after publish; webflow_sync tells whether the Marketplace push worked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListing"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Listing is not live, or its text has no unpublished changes"
+          },
+          "403": {
+            "description": "Marketplace publishing not enabled"
+          },
+          "404": {
+            "description": "Listing not found"
+          },
+          "409": {
+            "description": "Another version was published meanwhile, or a concurrent change"
+          },
+          "413": {
+            "description": "Version is too large to publish"
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/tags": {
+      "post": {
+        "operationId": "createBlueprintTag",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "createBlueprintTag",
+        "description": "Tags the blueprint's current state as a release. The zip is built once in the background\n(poll the tag until `status` is `ready`) and never changes afterwards. When it is ready, the\nblueprint's `version` becomes the tag name.\n",
+        "tags": [
+          "Blueprint Tags"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Semantic version, higher than every release tag of this blueprint",
+                    "example": "1.2.0"
+                  },
+                  "note": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Tag created; its zip is building",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTag"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Name is not a semantic version, is taken or is not higher than the latest release tag"
+          },
+          "403": {
+            "description": "Blueprint versions (`blueprint-versioning` flag) are not enabled for this organization"
+          },
+          "404": {
+            "description": "Blueprint not found"
+          }
+        }
+      },
+      "get": {
+        "operationId": "listBlueprintTags",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "listBlueprintTags",
+        "description": "Tags of the blueprint, newest first",
+        "tags": [
+          "Blueprint Tags"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintTagKind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "tags"
+                  ],
+                  "properties": {
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlueprintTag"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Blueprint versions (`blueprint-versioning` flag) are not enabled for this organization"
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/tags/{tag_id}": {
+      "get": {
+        "operationId": "getBlueprintTag",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "getBlueprintTag",
+        "description": "A release or sync tag of the blueprint, with its build status",
+        "tags": [
+          "Blueprint Tags"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "tag_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTag"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Blueprint versions (`blueprint-versioning` flag) are not enabled for this organization"
+          },
+          "404": {
+            "description": "Tag not found"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBlueprintTag",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "deleteBlueprintTag",
+        "description": "Deletes a tag and its zip. Tags that were ever published to the Marketplace are kept.",
+        "tags": [
+          "Blueprint Tags"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "tag_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tag deleted"
+          },
+          "403": {
+            "description": "Blueprint versions (`blueprint-versioning` flag) are not enabled for this organization"
+          },
+          "404": {
+            "description": "Tag not found"
+          },
+          "409": {
+            "description": "Tag was published to the Marketplace, or its zip is still building"
+          }
+        }
+      }
+    },
+    "/v3/blueprint-manifest/blueprints/{blueprint_id}/tags/{tag_id}/download": {
+      "get": {
+        "operationId": "downloadBlueprintTag",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
+        "summary": "downloadBlueprintTag",
+        "description": "Short-lived download URL for the tag's signed zip. For a sync tag the zip is built on the first download.",
+        "tags": [
+          "Blueprint Tags"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "blueprint_id",
+            "schema": {
+              "$ref": "#/components/schemas/BlueprintID"
+            }
+          },
+          {
+            "in": "path",
+            "required": true,
+            "name": "tag_id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Download URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "download_url"
+                  ],
+                  "properties": {
+                    "download_url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Blueprint versions (`blueprint-versioning` flag) are not enabled for this organization"
+          },
+          "404": {
+            "description": "Tag not found"
+          },
+          "409": {
+            "description": "Zip is still building or failed"
           }
         }
       }
@@ -5355,6 +5860,77 @@
         }
       }
     },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases:batchDelete": {
+      "post": {
+        "operationId": "batchDeleteBlueprintTestCases",
+        "summary": "batchDeleteBlueprintTestCases",
+        "description": "Delete up to 100 test cases of the blueprint in one request. Each case is deleted exactly like deleteBlueprintTestCase (own revision check, never all-or-nothing across cases); every requested id is returned in exactly one of deleted, conflicts or not_found. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintTestCaseBatchDeleteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Per-case outcome",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestCaseBatchDeleteResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request, including duplicate test case ids"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Feature unavailable, insufficient Blueprint permissions, or organization override denied"
+          },
+          "404": {
+            "description": "Blueprint not found"
+          },
+          "409": {
+            "description": "Blueprint-wide write conflict (for example a local overlay exists)"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Permissions service unavailable"
+          }
+        }
+      }
+    },
     "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases/{test_case_id}/duplicate": {
       "post": {
         "operationId": "duplicateBlueprintTestCase",
@@ -7291,6 +7867,372 @@
           }
         }
       }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/graph-query": {
+      "post": {
+        "operationId": "queryBlueprintSuggestionGraph",
+        "summary": "queryBlueprintSuggestionGraph",
+        "description": "Read-only graph query for the Luna suggestions agent of a running Luna generation (list_subjects or one of the graph tools). Only a Luna agent token acting for the user who started the generation is accepted. `list_subjects` takes `{ cursor? }` and returns one page `{ subjects, next_cursor?, total, unreadable, unreadable_total }`: pass `next_cursor` back until it is absent to read every subject (pages are sized to the tool result cap; no subject is ever cut). `unreadable` lists up to 20 resources the capture could not read (type, id, reason code), `unreadable_total` counts them all: when it is not 0 the blueprint picture is incomplete. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-agent": {
+          "effect": "read"
+        },
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "generation_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintSuggestionGraphQuery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintSuggestionGraphQueryResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable, or the token is not a Luna agent token acting for the user who started the generation (forbidden)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint or generation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The generation is not a running Luna generation (generation_not_running), or a submission for it is being saved (generation_submitting)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/check": {
+      "post": {
+        "operationId": "checkBlueprintTestSuggestion",
+        "summary": "checkBlueprintTestSuggestion",
+        "description": "Checks one draft suggestion with the engine for a running Luna generation (offered, failed, excluded or invalid) without storing anything. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-agent": {
+          "effect": "read"
+        },
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:view"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "generation_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintSuggestionCheck"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintSuggestionCheckResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable, or the token is not a Luna agent token acting for the user who started the generation (forbidden)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint or generation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The generation is not a running Luna generation (generation_not_running), or a submission for it is being saved (generation_submitting)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/submissions": {
+      "post": {
+        "operationId": "submitBlueprintTestSuggestions",
+        "summary": "submitBlueprintTestSuggestions",
+        "x-epilot-agent": {
+          "effect": "write"
+        },
+        "description": "Final submission of the Luna suggestions agent. Verifies every draft, stores suggestions and problems and completes the generation. Only once per running Luna generation; while a submission is being saved every Luna endpoint of the generation answers 409 generation_submitting. Name every subject from list_subjects: a subject with an empty `suggestions` array counts as covered, every subject not named is stored as incomplete. Only a Luna agent token acting for the user who started the generation is accepted. Requires the blueprint-test-cases organization feature flag.",
+        "tags": [
+          "Blueprints"
+        ],
+        "x-epilot-permissions": [
+          {
+            "action": "blueprint:*"
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "blueprint_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            }
+          },
+          {
+            "in": "path",
+            "name": "generation_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlueprintSuggestionSubmission"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintSuggestionSubmissionResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Feature or Blueprint permission unavailable, or the token is not a Luna agent token acting for the user who started the generation (forbidden)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blueprint or generation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The generation is not a running Luna generation (generation_not_running), or a submission for it is being saved (generation_submitting)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlueprintTestSuiteError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7330,6 +8272,8 @@
               "unknown_suggestion",
               "suggestion_acceptance_changed",
               "suggestion_input_too_large",
+              "generation_not_running",
+              "generation_submitting",
               "invalid_clauses",
               "not_implemented",
               "interpretation_input_too_large",
@@ -7369,7 +8313,7 @@
           "count": {
             "type": "integer",
             "minimum": 1,
-            "description": "With unknown_suggestion. How many requested ids the generation does not have."
+            "description": "With unknown_suggestion. How many requested ids the generation does not have, counting ids accepted from it whose test case has since been deleted."
           }
         }
       },
@@ -7410,6 +8354,27 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/SentenceParamValue"
             }
+          }
+        }
+      },
+      "BlueprintTestTitles": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "An AI-written plain-language title in both UI languages, checked by deterministic guardrails before it is\nstored. Optional: absent when the title step gave none (or for items stored before titles existed); the UI\nthen renders the sentence. On a test case (schema version 2 only): the title of the suggestion it was accepted\nfrom, kept on duplicates.\n",
+        "required": [
+          "en",
+          "de"
+        ],
+        "properties": {
+          "en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "de": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
           }
         }
       },
@@ -7849,13 +8814,15 @@
       },
       "BlueprintTestCaseShape": {
         "type": "string",
+        "description": "Suggestion shape. `other` holds suggestions that fit none of the named shapes.",
         "enum": [
           "journey_starts_workflow",
           "event_sends_email",
           "step_logic",
           "answer_options",
           "process_order",
-          "catalog_structure"
+          "catalog_structure",
+          "other"
         ]
       },
       "Suggestion": {
@@ -7915,6 +8882,9 @@
               "$ref": "#/components/schemas/Sentence"
             }
           },
+          "titles": {
+            "$ref": "#/components/schemas/BlueprintTestTitles"
+          },
           "covered_by": {
             "type": "object",
             "additionalProperties": false,
@@ -7949,6 +8919,293 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "BlueprintGraphSuggestionProblem": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A possible problem: a proposal the engine evaluated with every clause PASSED or FAILED and at least one FAILED.\nThe configuration may be wrong, or the AI may be. Never counted as a suggestion. The properties of\n`Suggestion` plus `results`. Accepting its id creates an ordinary v2 test case (without `results`), which\nreports FAILED on a run until the configuration changes.\n",
+        "required": [
+          "id",
+          "shape",
+          "subject",
+          "clauses",
+          "sentences",
+          "results"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "sha256 of the canonical clauses."
+          },
+          "shape": {
+            "$ref": "#/components/schemas/BlueprintTestCaseShape"
+          },
+          "subject": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "node_id",
+              "resource_id",
+              "resource_type",
+              "label"
+            ],
+            "properties": {
+              "node_id": {
+                "type": "string"
+              },
+              "resource_id": {
+                "type": "string"
+              },
+              "resource_type": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string",
+                "description": "The graph label of the subject."
+              }
+            }
+          },
+          "clauses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "sentences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Sentence"
+            }
+          },
+          "titles": {
+            "$ref": "#/components/schemas/BlueprintTestTitles"
+          },
+          "covered_by": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "case_id"
+            ],
+            "description": "An existing v2 test case that already holds every clause of this suggestion.",
+            "properties": {
+              "case_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "title": {
+                "type": "string"
+              }
+            }
+          },
+          "why_code": {
+            "type": "string",
+            "enum": [
+              "untested_resource",
+              "new_check"
+            ],
+            "description": "Always set on GET, not stored."
+          },
+          "main_resource": {
+            "$ref": "#/components/schemas/BlueprintTestMainResource"
+          },
+          "resource_types": {
+            "type": "array",
+            "description": "Always set on GET, not stored.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "results": {
+            "type": "array",
+            "description": "One engine result per clause, in clause order (verdict and evidence, as in suite run results).",
+            "items": {
+              "$ref": "#/components/schemas/ClauseResultView"
+            }
+          }
+        }
+      },
+      "BlueprintSuggestionGraphQuery": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tool"
+        ],
+        "properties": {
+          "tool": {
+            "type": "string",
+            "enum": [
+              "list_subjects",
+              "graph_summary",
+              "list_nodes",
+              "get_node",
+              "follow_edges",
+              "list_paths",
+              "list_operators"
+            ]
+          },
+          "input": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "The tool's input. list_subjects: `{ cursor?: string }` (the previous page's `next_cursor`)."
+          }
+        }
+      },
+      "BlueprintSuggestionGraphQueryResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "enum": [
+              "unknown_node",
+              "bad_input"
+            ]
+          }
+        }
+      },
+      "BlueprintSuggestionCheck": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "subject_node_id",
+          "suggestion"
+        ],
+        "properties": {
+          "subject_node_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "suggestion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "clauses"
+            ],
+            "properties": {
+              "shape": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "clauses": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "BlueprintSuggestionCheckResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "verdict",
+          "issues"
+        ],
+        "properties": {
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "offered",
+              "failed",
+              "excluded",
+              "invalid"
+            ]
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "reason": {
+            "type": "string",
+            "description": "With excluded, the first exclusion rule the draft fails."
+          }
+        }
+      },
+      "BlueprintSuggestionSubmission": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "subjects"
+        ],
+        "properties": {
+          "subjects": {
+            "type": "array",
+            "description": "Every subject from list_subjects, each with its suggestions (an empty array when it has none). Subjects not named here are stored as incomplete.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "subject_node_id",
+                "suggestions"
+              ],
+              "properties": {
+                "subject_node_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                "suggestions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "Optional plain-language title written by the agent. Checked by the same guardrails as generated titles (length, no line breaks, no arrows, quoted names must exist in the configuration); an invalid title is dropped and the suggestion stays untitled. Used for both UI languages."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "BlueprintSuggestionSubmissionResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "total",
+          "problems_total"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed"
+            ]
+          },
+          "total": {
+            "type": "integer"
+          },
+          "problems_total": {
+            "type": "integer"
           }
         }
       },
@@ -8560,11 +9817,13 @@
           },
           "total": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Suggestions of the generation, without the ones already accepted from it."
           },
           "counts_by_shape": {
             "type": "object",
             "additionalProperties": false,
+            "description": "Suggestions by shape, without the ones already accepted from the generation.",
             "properties": {
               "journey_starts_workflow": {
                 "type": "integer"
@@ -8583,6 +9842,9 @@
               },
               "catalog_structure": {
                 "type": "integer"
+              },
+              "other": {
+                "type": "integer"
               }
             }
           },
@@ -8598,6 +9860,7 @@
               "properties": {
                 "reason": {
                   "type": "string",
+                  "description": "`shape_unknown` is no longer produced (shapes are open); it remains for stored generations.",
                   "enum": [
                     "invalid",
                     "unknown_subject",
@@ -8605,7 +9868,8 @@
                     "not_passing",
                     "cannot_verify",
                     "trivial",
-                    "duplicate"
+                    "duplicate",
+                    "subsumed"
                   ]
                 },
                 "count": {
@@ -8623,7 +9887,7 @@
           },
           "incomplete_subjects": {
             "type": "array",
-            "description": "Identities only; labels come from the graph when presented.",
+            "description": "Identities only; labels come from the graph when presented. A skipped type subject (one AI pass over every resource of a type) has `node_id` = `resource_id` = `type:<resource_type>`.",
             "items": {
               "type": "object",
               "additionalProperties": false,
@@ -8657,9 +9921,22 @@
           },
           "items": {
             "type": "array",
+            "description": "One page of suggestions. Suggestions accepted from this generation are left out for good, also after their test case is deleted (a new generation offers them again), so a page may hold fewer than `limit` items, even none, while `next_cursor` is present. Paging ends only when `next_cursor` is absent.",
             "items": {
               "$ref": "#/components/schemas/Suggestion"
             }
+          },
+          "problems": {
+            "type": "array",
+            "description": "Possible problems of the generation (at most 50), never counted in `total` or `counts_by_shape`. Only on a completed\npage requested without `cursor`, filtered by `shape` when given. Problems accepted from this generation are left\nout, as accepted suggestions are. Absent for generations created before problems existed.\n",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintGraphSuggestionProblem"
+            }
+          },
+          "problems_total": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Possible problems kept by a completed generation (all shapes), without the ones already accepted from it. Absent for older generations."
           },
           "next_cursor": {
             "type": "string"
@@ -8675,6 +9952,7 @@
         "properties": {
           "suggestion_ids": {
             "type": "array",
+            "description": "Ids of suggestions and/or possible problems (`problems[].id`) of the generation.",
             "minItems": 1,
             "maxItems": 100,
             "items": {
@@ -8925,6 +10203,9 @@
             "type": "object",
             "additionalProperties": true,
             "description": "Schema version 2 only. A Sentence ({key, params}) the UI renders."
+          },
+          "titles": {
+            "$ref": "#/components/schemas/BlueprintTestTitles"
           },
           "origin": {
             "type": "object",
@@ -9941,6 +11222,71 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 9007199254740990
+          }
+        }
+      },
+      "BlueprintTestCaseBatchDeleteInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cases"
+        ],
+        "properties": {
+          "cases": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "description": "Test case ids must be unique.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "expected_revision"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "expected_revision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9007199254740990
+                }
+              }
+            }
+          }
+        }
+      },
+      "BlueprintTestCaseBatchDeleteResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "deleted",
+          "conflicts",
+          "not_found"
+        ],
+        "properties": {
+          "deleted": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "conflicts": {
+            "type": "array",
+            "description": "The case changed since expected_revision; nothing was deleted for it.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "not_found": {
+            "type": "array",
+            "description": "The case does not exist or was already deleted.",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -13722,6 +15068,56 @@
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "live": {
+            "type": "object",
+            "nullable": true,
+            "description": "Snapshot of what is currently live",
+            "properties": {
+              "version_id": {
+                "type": "string"
+              },
+              "version_name": {
+                "type": "string",
+                "nullable": true
+              },
+              "published_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "installation_link": {
+                "type": "string",
+                "nullable": true
+              },
+              "content": {
+                "$ref": "#/components/schemas/MarketplaceListingUpdate"
+              }
+            }
+          },
+          "webflow_item_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "webflow_sync": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "ok",
+                  "failed"
+                ]
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "error": {
+                "type": "string",
+                "nullable": true
+              }
+            }
           }
         }
       },
@@ -13907,9 +15303,15 @@
               "archived"
             ]
           },
+          "tag_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Blueprint release tag whose zip this version ships"
+          },
           "version_name": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "description": "Name of the tag this version ships"
           },
           "draft_label": {
             "type": "string"
@@ -13947,6 +15349,233 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CallerIdentity"
+              }
+            ],
+            "nullable": true
+          },
+          "published_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CallerIdentity"
+              }
+            ],
+            "nullable": true
+          },
+          "package": {
+            "$ref": "#/components/schemas/MarketplaceListingVersionPackage"
+          },
+          "content": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MarketplaceListingUpdate"
+              }
+            ],
+            "nullable": true
+          },
+          "content_published_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When `content` was last published; equals `published_at` until a text-only publish"
+          },
+          "content_published_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CallerIdentity"
+              }
+            ],
+            "nullable": true
+          },
+          "content_revisions": {
+            "type": "array",
+            "description": "Earlier texts of this version, oldest first, each replaced by a text-only publish",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/MarketplaceListingUpdate"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "published_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "nullable": true
+                },
+                "published_by": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/CallerIdentity"
+                    }
+                  ],
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "MarketplaceListingVersionPackage": {
+        "type": "object",
+        "nullable": true,
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "building",
+              "ready",
+              "failed"
+            ]
+          },
+          "job_id": {
+            "type": "string",
+            "description": "V3 publish job that built the zip"
+          },
+          "bucket": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "public_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "installation_link": {
+            "type": "string",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "BlueprintTagKind": {
+        "type": "string",
+        "description": "`release`: a semantic version someone tagged. `sync`: recorded automatically for every sync, named by time, for debugging.",
+        "enum": [
+          "release",
+          "sync"
+        ]
+      },
+      "BlueprintTag": {
+        "type": "object",
+        "required": [
+          "id",
+          "blueprint_id",
+          "name",
+          "kind",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "blueprint_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Semantic version for release tags, `sync-<UTC timestamp>` for sync tags"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/BlueprintTagKind"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "building",
+              "ready",
+              "failed"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CallerIdentity"
+              }
+            ],
+            "nullable": true
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "First time a Marketplace listing made this tag live; published tags cannot be deleted"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Sync tags are deleted after 90 days; release tags never expire"
+          },
+          "package": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "format": {
+                "type": "string",
+                "enum": [
+                  "zip",
+                  "manifest"
+                ],
+                "description": "`zip`: the signed package, built once. `manifest`: the resources a sync sent; the download builds the signed zip on first use."
+              },
+              "job_id": {
+                "type": "string",
+                "nullable": true
+              },
+              "bucket": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "error": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "sync": {
+            "type": "object",
+            "nullable": true,
+            "description": "The sync a `sync` tag was recorded for",
+            "properties": {
+              "job_id": {
+                "type": "string"
+              },
+              "destination_org_id": {
+                "type": "string"
+              },
+              "destination_blueprint_id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              }
+            }
           }
         }
       },
