@@ -712,6 +712,13 @@ const { data } = await client.validateMappingFlow(
         type: 'map-entity',
         config: {}
       }
+    ],
+    acknowledged: [
+      {
+        action_id: 'string',
+        code: 'attribute-not-on-target',
+        target: 'string'
+      }
     ]
   },
 )
@@ -724,6 +731,32 @@ const { data } = await client.validateMappingFlow(
 {
   "valid": true,
   "blocking": [
+    {
+      "code": "ambiguous-producer",
+      "severity": "error",
+      "path": "string",
+      "key": "string",
+      "message": "string",
+      "params": {},
+      "action_id": "string"
+    }
+  ],
+  "generated": [
+    {
+      "code": "ambiguous-producer",
+      "severity": "error",
+      "path": "string",
+      "key": "string",
+      "message": "string",
+      "params": {},
+      "action_id": "string"
+    }
+  ],
+  "references": {
+    "resolved": ["string"],
+    "unresolved": ["string"]
+  },
+  "acknowledged": [
     {
       "code": "ambiguous-producer",
       "severity": "error",
@@ -1202,6 +1235,11 @@ type ValidateMappingFlowReq = {
     type?: string
     config?: Record<string, unknown>
   }>
+  acknowledged?: Array<{
+    action_id: string
+    code: string
+    target?: string
+  }>
 }
 ```
 
@@ -1225,6 +1263,28 @@ type FlowMappingIssue = {
 type ValidateMappingFlowResp = {
   valid: boolean
   blocking: Array<{
+    code: string
+    severity: "error" | "warning"
+    path: string
+    key: string
+    message: string
+    params?: Record<string, string>
+    action_id: string
+  }>
+  generated?: Array<{
+    code: string
+    severity: "error" | "warning"
+    path: string
+    key: string
+    message: string
+    params?: Record<string, string>
+    action_id: string
+  }>
+  references?: {
+    resolved?: string[]
+    unresolved?: string[]
+  }
+  acknowledged?: Array<{
     code: string
     severity: "error" | "warning"
     path: string

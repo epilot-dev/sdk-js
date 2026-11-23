@@ -500,9 +500,9 @@ export declare namespace Components {
                 issues?: MappingIssue[];
                 suggestions?: {
                     /**
-                     * What the rewrite does. `template-syntax`, `nearest-attribute`, `nearest-option` and `operation-key` come with validator 0.4.4. Applying any suggestion adds no error to its line.
+                     * What the rewrite does. `template-syntax`, `nearest-attribute`, `nearest-option` and `operation-key` come with validator 0.4.4. `fallback-producers` (validator 0.6.0): every creator of the schema runs behind a condition, so the line copies from all of them in order. Applying any suggestion adds no error to its line.
                      */
-                    why?: "pick-producer" | "explicit-output" | "add-mode" | "merge-keys" | "template-syntax" | "nearest-attribute" | "nearest-option" | "operation-key";
+                    why?: "pick-producer" | "fallback-producers" | "explicit-output" | "add-mode" | "merge-keys" | "template-syntax" | "nearest-attribute" | "nearest-option" | "operation-key";
                     task?: string;
                     line?: {
                         [name: string]: any;
@@ -924,9 +924,9 @@ export declare namespace Components {
             raw?: boolean;
         }
         /**
-         * What the automation's trigger provides, by id. Used when `roots.source` is not sent: the server loads the journey's mapping sources (`rootFromMappingSources`) or the entity schema (`rootFromEntitySchema`) with the caller's authorization. A journey or schema that does not exist is an error issue (`source-journey-not-found`, `source-schema-not-found`); one that could not be loaded is a warning (`source-not-loaded`) and the source checks are skipped (`skipped_checks`). Likewise for a target schema (`target-schema-not-found`, `target-schema-not-loaded`).
+         * What the automation's trigger provides, by id. Used when `roots.source` is not sent: the server loads the journey's mapping sources (`rootFromMappingSources`) or the entity schema (`rootFromEntitySchema`) with the caller's authorization. A journey or schema that does not exist is an error issue (`source-journey-not-found`, `source-schema-not-found`); one that could not be loaded is a warning (`source-not-loaded`) and the source checks are skipped (`skipped_checks`). Likewise for a target schema (`target-schema-not-found`, `target-schema-not-loaded`). `automation_step` (the trigger of a workflow's automation task) names no data: a warning (`source-not-fixed`) and the source checks are skipped; pass what the workflow was started with instead.
          */
-        export type MappingSourceRef = /* What the automation's trigger provides, by id. Used when `roots.source` is not sent: the server loads the journey's mapping sources (`rootFromMappingSources`) or the entity schema (`rootFromEntitySchema`) with the caller's authorization. A journey or schema that does not exist is an error issue (`source-journey-not-found`, `source-schema-not-found`); one that could not be loaded is a warning (`source-not-loaded`) and the source checks are skipped (`skipped_checks`). Likewise for a target schema (`target-schema-not-found`, `target-schema-not-loaded`). */ {
+        export type MappingSourceRef = /* What the automation's trigger provides, by id. Used when `roots.source` is not sent: the server loads the journey's mapping sources (`rootFromMappingSources`) or the entity schema (`rootFromEntitySchema`) with the caller's authorization. A journey or schema that does not exist is an error issue (`source-journey-not-found`, `source-schema-not-found`); one that could not be loaded is a warning (`source-not-loaded`) and the source checks are skipped (`skipped_checks`). Likewise for a target schema (`target-schema-not-found`, `target-schema-not-loaded`). `automation_step` (the trigger of a workflow's automation task) names no data: a warning (`source-not-fixed`) and the source checks are skipped; pass what the workflow was started with instead. */ {
             /**
              * The triggering journey; its source root is `submission`
              */
@@ -1281,11 +1281,26 @@ export declare namespace Components {
              * Every action of the automation in execution order; ids are unique
              */
             actions: /* An action of an automation (as stored in it), in execution order; only mapping actions are analysed */ MappingFlowAction[];
-            source?: /* What the automation's trigger provides, by id. Used when `roots.source` is not sent: the server loads the journey's mapping sources (`rootFromMappingSources`) or the entity schema (`rootFromEntitySchema`) with the caller's authorization. A journey or schema that does not exist is an error issue (`source-journey-not-found`, `source-schema-not-found`); one that could not be loaded is a warning (`source-not-loaded`) and the source checks are skipped (`skipped_checks`). Likewise for a target schema (`target-schema-not-found`, `target-schema-not-loaded`). */ MappingSourceRef;
+            source?: /* What the automation's trigger provides, by id. Used when `roots.source` is not sent: the server loads the journey's mapping sources (`rootFromMappingSources`) or the entity schema (`rootFromEntitySchema`) with the caller's authorization. A journey or schema that does not exist is an error issue (`source-journey-not-found`, `source-schema-not-found`); one that could not be loaded is a warning (`source-not-loaded`) and the source checks are skipped (`skipped_checks`). Likewise for a target schema (`target-schema-not-found`, `target-schema-not-loaded`). `automation_step` (the trigger of a workflow's automation task) names no data: a warning (`source-not-fixed`) and the source checks are skipped; pass what the workflow was started with instead. */ MappingSourceRef;
             /**
              * The automation's actions as stored. With them, only issues this change introduced block (`blocking`), matched by action id, target attribute and code.
              */
             previous_actions?: /* An action of an automation (as stored in it), in execution order; only mapping actions are analysed */ MappingFlowAction[];
+            /**
+             * Blocking findings the user decided to keep, after the agent explained them: they stop blocking and are listed in `acknowledged` of the response instead. Send only what the user explicitly accepted. Each matches by action id and code, and by the line's target attribute when `target` is set (without it, every finding of that code in the action). At most 200 entries.
+             */
+            acknowledged?: {
+                action_id: string;
+                /**
+                 * example:
+                 * attribute-not-on-target
+                 */
+                code: string;
+                /**
+                 * The target attribute of the line the finding is about
+                 */
+                target?: string;
+            }[];
         }
         export interface ValidateMappingFlowResp {
             /**
@@ -1296,6 +1311,21 @@ export declare namespace Components {
              * What a save gate rejects: per action the errors, the issues on lines whose verdict is `broken` and `value-not-an-option`; with `previous_actions`, only those this change introduced
              */
             blocking: FlowMappingIssue[];
+            /**
+             * Findings on lines the Journey Builder generated for a journey's default mapping (`origin` `system_recommendation` or `entity_updating_system_recommendation`). The builder regenerates those lines, so these findings are reported but never block.
+             */
+            generated?: FlowMappingIssue[];
+            /**
+             * Actions that only point at a target of a mapping config (`config.mapping_config`) are checked as that target. `unresolved` lists the actions whose config or target could not be found in the organization; they are left out of the check.
+             */
+            references?: {
+                resolved?: string[];
+                unresolved?: string[];
+            };
+            /**
+             * Only with `acknowledged` in the request; the blocking findings it matched, which did not block
+             */
+            acknowledged?: FlowMappingIssue[];
             /**
              * Only with `previous_actions`; every issue (errors and warnings) this change introduced
              */
@@ -1355,7 +1385,7 @@ export declare namespace Components {
                 kind: "declared" | "inferred";
                 fields: MappingRootField[];
             };
-            source?: /* What the automation's trigger provides, by id. Used when `roots.source` is not sent: the server loads the journey's mapping sources (`rootFromMappingSources`) or the entity schema (`rootFromEntitySchema`) with the caller's authorization. A journey or schema that does not exist is an error issue (`source-journey-not-found`, `source-schema-not-found`); one that could not be loaded is a warning (`source-not-loaded`) and the source checks are skipped (`skipped_checks`). Likewise for a target schema (`target-schema-not-found`, `target-schema-not-loaded`). */ MappingSourceRef;
+            source?: /* What the automation's trigger provides, by id. Used when `roots.source` is not sent: the server loads the journey's mapping sources (`rootFromMappingSources`) or the entity schema (`rootFromEntitySchema`) with the caller's authorization. A journey or schema that does not exist is an error issue (`source-journey-not-found`, `source-schema-not-found`); one that could not be loaded is a warning (`source-not-loaded`) and the source checks are skipped (`skipped_checks`). Likewise for a target schema (`target-schema-not-found`, `target-schema-not-loaded`). `automation_step` (the trigger of a workflow's automation task) names no data: a warning (`source-not-fixed`) and the source checks are skipped; pass what the workflow was started with instead. */ MappingSourceRef;
         }
     }
 }
