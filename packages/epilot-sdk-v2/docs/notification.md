@@ -31,6 +31,7 @@ const { data } = await notificationClient.getNotificationsV2(...)
 - [`getNotification`](#getnotification)
 - [`markAllAsRead`](#markallasread)
 - [`markAsRead`](#markasread)
+- [`markAsUnread`](#markasunread)
 - [`getTotalUnread`](#gettotalunread)
 
 **Template**
@@ -233,7 +234,9 @@ const { data } = await client.createNotification(
     },
     allowed_channels: ['in_app'],
     read_state: false,
-    visibility_user_ids: ['1', '2', '3', '4', '5']
+    visibility_user_ids: ['1', '2', '3', '4', '5'],
+    skip_user_resolution: true,
+    template_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
   },
 )
 ```
@@ -450,6 +453,20 @@ const { data } = await client.markAsRead({
 
 ---
 
+### `markAsUnread`
+
+Mark a notification as unread again, e.g. to use it as a reminder. A later "mark all as read" clears it again.
+
+`PUT /v1/notification/notifications/{id}/unmark`
+
+```ts
+const { data } = await client.markAsUnread({
+  id: 1,
+})
+```
+
+---
+
 ### `getTotalUnread`
 
 Get total unread
@@ -512,6 +529,7 @@ const { data } = await client.listNotificationTemplates({
       "action_label": "string",
       "action_url": "string",
       "style": "string",
+      "email_template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "system_template": true,
       "created_by": "string",
       "updated_by": "string"
@@ -542,6 +560,7 @@ const { data } = await client.createNotificationTemplate(
     action_label: 'string',
     action_url: 'string',
     style: 'string',
+    email_template_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     _title: 'string',
     _tags: ['string'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000']
@@ -580,6 +599,7 @@ const { data } = await client.createNotificationTemplate(
   "action_label": "string",
   "action_url": "string",
   "style": "string",
+  "email_template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "system_template": true,
   "created_by": "string",
   "updated_by": "string"
@@ -633,6 +653,7 @@ const { data } = await client.getNotificationTemplate({
   "action_label": "string",
   "action_url": "string",
   "style": "string",
+  "email_template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "system_template": true,
   "created_by": "string",
   "updated_by": "string"
@@ -661,6 +682,7 @@ const { data } = await client.updateNotificationTemplate(
     action_label: 'string',
     action_url: 'string',
     style: 'string',
+    email_template_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     _title: 'string',
     _tags: ['string'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000']
@@ -699,6 +721,7 @@ const { data } = await client.updateNotificationTemplate(
   "action_label": "string",
   "action_url": "string",
   "style": "string",
+  "email_template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "system_template": true,
   "created_by": "string",
   "updated_by": "string"
@@ -727,6 +750,7 @@ const { data } = await client.patchNotificationTemplate(
     action_label: 'string',
     action_url: 'string',
     style: 'string',
+    email_template_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     _title: 'string',
     _tags: ['string'],
     _manifest: ['123e4567-e89b-12d3-a456-426614174000']
@@ -765,6 +789,7 @@ const { data } = await client.patchNotificationTemplate(
   "action_label": "string",
   "action_url": "string",
   "style": "string",
+  "email_template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "system_template": true,
   "created_by": "string",
   "updated_by": "string"
@@ -818,6 +843,7 @@ const { data } = await client.deleteNotificationTemplate({
   "action_label": "string",
   "action_url": "string",
   "style": "string",
+  "email_template_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "system_template": true,
   "created_by": "string",
   "updated_by": "string"
@@ -846,6 +872,7 @@ const { data } = await client.sendPreview(
       action_label: 'string',
       action_url: 'string',
       style: 'string',
+      email_template_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
       _title: 'string',
       _tags: ['string'],
       _manifest: ['123e4567-e89b-12d3-a456-426614174000']
@@ -943,7 +970,7 @@ type Notification = {
   timestamp?: string // date-time
   type: string
   redirect_url?: string
-  organization_id?: string
+  organization_id: string
   title: {
     en?: string
     de?: string
@@ -971,6 +998,8 @@ type Notification = {
   allowed_channels?: "email" | "in_app"[]
   read_state?: boolean
   visibility_user_ids?: string[]
+  skip_user_resolution?: boolean
+  template_id?: string // uuid
 }
 ```
 
@@ -1107,6 +1136,7 @@ type NotificationTemplate = {
   action_label?: string
   action_url?: string
   style?: string
+  email_template_id?: string // uuid
   system_template?: boolean
   created_by?: string
   updated_by?: string
@@ -1124,6 +1154,7 @@ type CreateNotificationTemplateInput = {
   action_label?: string
   action_url?: string
   style?: string
+  email_template_id?: string // uuid
   _title?: string
   _tags?: string[]
   _manifest?: string // uuid[]
@@ -1140,6 +1171,7 @@ type UpdateNotificationTemplateInput = {
   action_label?: string
   action_url?: string
   style?: string
+  email_template_id?: string // uuid
   _title?: string
   _tags?: string[]
   _manifest?: string // uuid[]
@@ -1175,6 +1207,7 @@ type NotificationTemplateListResponse = {
     action_label?: string
     action_url?: string
     style?: string
+    email_template_id?: string // uuid
     system_template?: boolean
     created_by?: string
     updated_by?: string
@@ -1194,6 +1227,7 @@ type SendPreviewInput = {
     action_label?: string
     action_url?: string
     style?: string
+    email_template_id?: string // uuid
     _title?: string
     _tags?: string[]
     _manifest?: string // uuid[]
