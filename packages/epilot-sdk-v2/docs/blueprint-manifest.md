@@ -77,6 +77,7 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`getBulkInstallV3`](#getbulkinstallv3)
 - [`listBulkInstallTargetsV3`](#listbulkinstalltargetsv3)
 - [`retryBulkInstallTargetV3`](#retrybulkinstalltargetv3)
+- [`batchDeleteBlueprintTestCases`](#batchdeleteblueprinttestcases)
 - [`duplicateBlueprintTestCase`](#duplicateblueprinttestcase)
 - [`getSourceTestOperation`](#getsourcetestoperation)
 - [`createSourceConfirmedRun`](#createsourceconfirmedrun)
@@ -93,6 +94,9 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`createBlueprintTestInterpretation`](#createblueprinttestinterpretation)
 - [`getBlueprintTestInterpretation`](#getblueprinttestinterpretation)
 - [`confirmBlueprintTestInterpretationV2`](#confirmblueprinttestinterpretationv2)
+- [`queryBlueprintSuggestionGraph`](#queryblueprintsuggestiongraph)
+- [`checkBlueprintTestSuggestion`](#checkblueprinttestsuggestion)
+- [`submitBlueprintTestSuggestions`](#submitblueprinttestsuggestions)
 
 **Jobs**
 - [`listBlueprintJobs`](#listblueprintjobs)
@@ -108,12 +112,22 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`getMarketplaceListingById`](#getmarketplacelistingbyid)
 - [`updateMarketplaceListing`](#updatemarketplacelisting)
 - [`deleteMarketplaceListing`](#deletemarketplacelisting)
+- [`syncMarketplaceListing`](#syncmarketplacelisting)
 
 **Marketplace Listing Versions**
 - [`createMarketplaceListingVersion`](#createmarketplacelistingversion)
 - [`listMarketplaceListingVersions`](#listmarketplacelistingversions)
 - [`updateMarketplaceListingVersion`](#updatemarketplacelistingversion)
 - [`publishMarketplaceListingVersion`](#publishmarketplacelistingversion)
+- [`rollbackMarketplaceListingVersion`](#rollbackmarketplacelistingversion)
+- [`publishMarketplaceListingContent`](#publishmarketplacelistingcontent)
+
+**Blueprint Tags**
+- [`createBlueprintTag`](#createblueprinttag)
+- [`listBlueprintTags`](#listblueprinttags)
+- [`getBlueprintTag`](#getblueprinttag)
+- [`deleteBlueprintTag`](#deleteblueprinttag)
+- [`downloadBlueprintTag`](#downloadblueprinttag)
 
 **merge-plans**
 - [`getBlueprintMergePlan`](#getblueprintmergeplan)
@@ -136,6 +150,7 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`BlueprintTestSuiteError`](#blueprinttestsuiteerror)
 - [`SentenceParamValue`](#sentenceparamvalue)
 - [`Sentence`](#sentence)
+- [`BlueprintTestTitles`](#blueprinttesttitles)
 - [`ClauseEvidenceView`](#clauseevidenceview)
 - [`ClauseResultView`](#clauseresultview)
 - [`BlueprintTestUnreadableResource`](#blueprinttestunreadableresource)
@@ -147,6 +162,13 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`BlueprintTestCoverage`](#blueprinttestcoverage)
 - [`BlueprintTestCaseShape`](#blueprinttestcaseshape)
 - [`Suggestion`](#suggestion)
+- [`BlueprintGraphSuggestionProblem`](#blueprintgraphsuggestionproblem)
+- [`BlueprintSuggestionGraphQuery`](#blueprintsuggestiongraphquery)
+- [`BlueprintSuggestionGraphQueryResult`](#blueprintsuggestiongraphqueryresult)
+- [`BlueprintSuggestionCheck`](#blueprintsuggestioncheck)
+- [`BlueprintSuggestionCheckResult`](#blueprintsuggestioncheckresult)
+- [`BlueprintSuggestionSubmission`](#blueprintsuggestionsubmission)
+- [`BlueprintSuggestionSubmissionResult`](#blueprintsuggestionsubmissionresult)
 - [`BlueprintGraphSuggestionsStarted`](#blueprintgraphsuggestionsstarted)
 - [`BlueprintTestInterpretationInput`](#blueprinttestinterpretationinput)
 - [`BlueprintTestInterpretationStarted`](#blueprinttestinterpretationstarted)
@@ -178,6 +200,8 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`BlueprintTestRunPage`](#blueprinttestrunpage)
 - [`BlueprintTestRunError`](#blueprinttestrunerror)
 - [`BlueprintTestRunInput`](#blueprinttestruninput)
+- [`BlueprintTestCaseBatchDeleteInput`](#blueprinttestcasebatchdeleteinput)
+- [`BlueprintTestCaseBatchDeleteResult`](#blueprinttestcasebatchdeleteresult)
 - [`BlueprintTestCasePage`](#blueprinttestcasepage)
 - [`BlueprintAssistantMessageRequest`](#blueprintassistantmessagerequest)
 - [`BlueprintAssistantConversation`](#blueprintassistantconversation)
@@ -271,6 +295,9 @@ const { data } = await blueprintManifestClient.getJob(...)
 - [`MarketplaceListing`](#marketplacelisting)
 - [`MarketplaceListingUpdate`](#marketplacelistingupdate)
 - [`MarketplaceListingVersion`](#marketplacelistingversion)
+- [`MarketplaceListingVersionPackage`](#marketplacelistingversionpackage)
+- [`BlueprintTagKind`](#blueprinttagkind)
+- [`BlueprintTag`](#blueprinttag)
 - [`MergePlanState`](#mergeplanstate)
 - [`MergeOptionId`](#mergeoptionid)
 - [`MergeChoice`](#mergechoice)
@@ -1494,6 +1521,10 @@ const { data } = await client.listBlueprintTestCases({
       "clauses_hash": "string",
       "clauses_revision": 1,
       "title_key": {},
+      "titles": {
+        "en": "string",
+        "de": "string"
+      },
       "origin": {},
       "needs_reinterpretation": {
         "reason": "string"
@@ -1606,6 +1637,10 @@ const { data } = await client.createBlueprintTestCase(
   "clauses_hash": "string",
   "clauses_revision": 1,
   "title_key": {},
+  "titles": {
+    "en": "string",
+    "de": "string"
+  },
   "origin": {},
   "needs_reinterpretation": {
     "reason": "string"
@@ -1711,6 +1746,10 @@ const { data } = await client.getBlueprintTestCase({
   "clauses_hash": "string",
   "clauses_revision": 1,
   "title_key": {},
+  "titles": {
+    "en": "string",
+    "de": "string"
+  },
   "origin": {},
   "needs_reinterpretation": {
     "reason": "string"
@@ -1822,6 +1861,10 @@ const { data } = await client.updateBlueprintTestCase(
   "clauses_hash": "string",
   "clauses_revision": 1,
   "title_key": {},
+  "titles": {
+    "en": "string",
+    "de": "string"
+  },
   "origin": {},
   "needs_reinterpretation": {
     "reason": "string"
@@ -3049,7 +3092,55 @@ const { data } = await client.createMarketplaceListing(
   "main_category": ["string"],
   "status": "draft",
   "created_at": "1970-01-01T00:00:00.000Z",
-  "updated_at": "1970-01-01T00:00:00.000Z"
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "live": {
+    "version_id": "string",
+    "version_name": "string",
+    "published_at": "1970-01-01T00:00:00.000Z",
+    "installation_link": "string",
+    "content": {
+      "name": "string",
+      "slug": "string",
+      "logo": "string",
+      "documentation_url": "string",
+      "pricing_type": "free",
+      "support_email": "string",
+      "portal_description": "string",
+      "teaser_name": "string",
+      "teaser_short_description": "string",
+      "teaser_thumbnail": "string",
+      "details_page_title": "string",
+      "details_page_description": "string",
+      "details_page_hero_image": "string",
+      "details_page_carousel": ["string"],
+      "resources_section_description": "string",
+      "resources_section_benefits_title": "string",
+      "resources_section_benefits_list": "string",
+      "resources_section_process_details": "string",
+      "partner": "string",
+      "partner_subtext": "string",
+      "partner_logo": "string",
+      "partner_website_link": "string",
+      "last_updated_on": "string",
+      "requires_customer_portal": true,
+      "process_details_section_title": "string",
+      "is_new_blueprint": true,
+      "available_in": "string",
+      "testimonials": ["string"],
+      "installation_link": "string",
+      "installation_slug": "string",
+      "demo_form_link": "string",
+      "order": 0,
+      "categories": ["string"],
+      "main_category": ["string"]
+    }
+  },
+  "webflow_item_id": "string",
+  "webflow_sync": {
+    "status": "ok",
+    "at": "1970-01-01T00:00:00.000Z",
+    "error": "string"
+  }
 }
 ```
 
@@ -3113,24 +3204,79 @@ const { data } = await client.getMarketplaceListing({
   "status": "draft",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
+  "live": {
+    "version_id": "string",
+    "version_name": "string",
+    "published_at": "1970-01-01T00:00:00.000Z",
+    "installation_link": "string",
+    "content": {
+      "name": "string",
+      "slug": "string",
+      "logo": "string",
+      "documentation_url": "string",
+      "pricing_type": "free",
+      "support_email": "string",
+      "portal_description": "string",
+      "teaser_name": "string",
+      "teaser_short_description": "string",
+      "teaser_thumbnail": "string",
+      "details_page_title": "string",
+      "details_page_description": "string",
+      "details_page_hero_image": "string",
+      "details_page_carousel": ["string"],
+      "resources_section_description": "string",
+      "resources_section_benefits_title": "string",
+      "resources_section_benefits_list": "string",
+      "resources_section_process_details": "string",
+      "partner": "string",
+      "partner_subtext": "string",
+      "partner_logo": "string",
+      "partner_website_link": "string",
+      "last_updated_on": "string",
+      "requires_customer_portal": true,
+      "process_details_section_title": "string",
+      "is_new_blueprint": true,
+      "available_in": "string",
+      "testimonials": ["string"],
+      "installation_link": "string",
+      "installation_slug": "string",
+      "demo_form_link": "string",
+      "order": 0,
+      "categories": ["string"],
+      "main_category": ["string"]
+    }
+  },
+  "webflow_item_id": "string",
+  "webflow_sync": {
+    "status": "ok",
+    "at": "1970-01-01T00:00:00.000Z",
+    "error": "string"
+  },
   "versions": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "listing_id": "string",
       "status": "draft",
+      "tag_id": "string",
       "version_name": "string",
       "draft_label": "string",
       "update_note": "string",
-      "resources": [
-        {}
-      ],
+      "resources": [],
       "required_features": ["string"],
       "recommended_apps": ["string"],
       "created_at": "1970-01-01T00:00:00.000Z",
-      "published_at": "1970-01-01T00:00:00.000Z"
+      "published_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {},
+      "published_by": {},
+      "package": {},
+      "content": {},
+      "content_published_at": "1970-01-01T00:00:00.000Z",
+      "content_published_by": {},
+      "content_revisions": []
     }
   ],
-  "has_publishable_draft": true
+  "has_publishable_draft": true,
+  "has_unpublished_content": true
 }
 ```
 
@@ -3193,7 +3339,55 @@ const { data } = await client.listMarketplaceListings()
       "main_category": ["string"],
       "status": "draft",
       "created_at": "1970-01-01T00:00:00.000Z",
-      "updated_at": "1970-01-01T00:00:00.000Z"
+      "updated_at": "1970-01-01T00:00:00.000Z",
+      "live": {
+        "version_id": "string",
+        "version_name": "string",
+        "published_at": "1970-01-01T00:00:00.000Z",
+        "installation_link": "string",
+        "content": {
+          "name": "string",
+          "slug": "string",
+          "logo": "string",
+          "documentation_url": "string",
+          "pricing_type": "free",
+          "support_email": "string",
+          "portal_description": "string",
+          "teaser_name": "string",
+          "teaser_short_description": "string",
+          "teaser_thumbnail": "string",
+          "details_page_title": "string",
+          "details_page_description": "string",
+          "details_page_hero_image": "string",
+          "details_page_carousel": ["string"],
+          "resources_section_description": "string",
+          "resources_section_benefits_title": "string",
+          "resources_section_benefits_list": "string",
+          "resources_section_process_details": "string",
+          "partner": "string",
+          "partner_subtext": "string",
+          "partner_logo": "string",
+          "partner_website_link": "string",
+          "last_updated_on": "string",
+          "requires_customer_portal": true,
+          "process_details_section_title": "string",
+          "is_new_blueprint": true,
+          "available_in": "string",
+          "testimonials": ["string"],
+          "installation_link": "string",
+          "installation_slug": "string",
+          "demo_form_link": "string",
+          "order": 0,
+          "categories": ["string"],
+          "main_category": ["string"]
+        }
+      },
+      "webflow_item_id": "string",
+      "webflow_sync": {
+        "status": "ok",
+        "at": "1970-01-01T00:00:00.000Z",
+        "error": "string"
+      }
     }
   ]
 }
@@ -3259,24 +3453,79 @@ const { data } = await client.getMarketplaceListingById({
   "status": "draft",
   "created_at": "1970-01-01T00:00:00.000Z",
   "updated_at": "1970-01-01T00:00:00.000Z",
+  "live": {
+    "version_id": "string",
+    "version_name": "string",
+    "published_at": "1970-01-01T00:00:00.000Z",
+    "installation_link": "string",
+    "content": {
+      "name": "string",
+      "slug": "string",
+      "logo": "string",
+      "documentation_url": "string",
+      "pricing_type": "free",
+      "support_email": "string",
+      "portal_description": "string",
+      "teaser_name": "string",
+      "teaser_short_description": "string",
+      "teaser_thumbnail": "string",
+      "details_page_title": "string",
+      "details_page_description": "string",
+      "details_page_hero_image": "string",
+      "details_page_carousel": ["string"],
+      "resources_section_description": "string",
+      "resources_section_benefits_title": "string",
+      "resources_section_benefits_list": "string",
+      "resources_section_process_details": "string",
+      "partner": "string",
+      "partner_subtext": "string",
+      "partner_logo": "string",
+      "partner_website_link": "string",
+      "last_updated_on": "string",
+      "requires_customer_portal": true,
+      "process_details_section_title": "string",
+      "is_new_blueprint": true,
+      "available_in": "string",
+      "testimonials": ["string"],
+      "installation_link": "string",
+      "installation_slug": "string",
+      "demo_form_link": "string",
+      "order": 0,
+      "categories": ["string"],
+      "main_category": ["string"]
+    }
+  },
+  "webflow_item_id": "string",
+  "webflow_sync": {
+    "status": "ok",
+    "at": "1970-01-01T00:00:00.000Z",
+    "error": "string"
+  },
   "versions": [
     {
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "listing_id": "string",
       "status": "draft",
+      "tag_id": "string",
       "version_name": "string",
       "draft_label": "string",
       "update_note": "string",
-      "resources": [
-        {}
-      ],
+      "resources": [],
       "required_features": ["string"],
       "recommended_apps": ["string"],
       "created_at": "1970-01-01T00:00:00.000Z",
-      "published_at": "1970-01-01T00:00:00.000Z"
+      "published_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {},
+      "published_by": {},
+      "package": {},
+      "content": {},
+      "content_published_at": "1970-01-01T00:00:00.000Z",
+      "content_published_by": {},
+      "content_revisions": []
     }
   ],
-  "has_publishable_draft": true
+  "has_publishable_draft": true,
+  "has_unpublished_content": true
 }
 ```
 
@@ -3377,7 +3626,55 @@ const { data } = await client.updateMarketplaceListing(
   "main_category": ["string"],
   "status": "draft",
   "created_at": "1970-01-01T00:00:00.000Z",
-  "updated_at": "1970-01-01T00:00:00.000Z"
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "live": {
+    "version_id": "string",
+    "version_name": "string",
+    "published_at": "1970-01-01T00:00:00.000Z",
+    "installation_link": "string",
+    "content": {
+      "name": "string",
+      "slug": "string",
+      "logo": "string",
+      "documentation_url": "string",
+      "pricing_type": "free",
+      "support_email": "string",
+      "portal_description": "string",
+      "teaser_name": "string",
+      "teaser_short_description": "string",
+      "teaser_thumbnail": "string",
+      "details_page_title": "string",
+      "details_page_description": "string",
+      "details_page_hero_image": "string",
+      "details_page_carousel": ["string"],
+      "resources_section_description": "string",
+      "resources_section_benefits_title": "string",
+      "resources_section_benefits_list": "string",
+      "resources_section_process_details": "string",
+      "partner": "string",
+      "partner_subtext": "string",
+      "partner_logo": "string",
+      "partner_website_link": "string",
+      "last_updated_on": "string",
+      "requires_customer_portal": true,
+      "process_details_section_title": "string",
+      "is_new_blueprint": true,
+      "available_in": "string",
+      "testimonials": ["string"],
+      "installation_link": "string",
+      "installation_slug": "string",
+      "demo_form_link": "string",
+      "order": 0,
+      "categories": ["string"],
+      "main_category": ["string"]
+    }
+  },
+  "webflow_item_id": "string",
+  "webflow_sync": {
+    "status": "ok",
+    "at": "1970-01-01T00:00:00.000Z",
+    "error": "string"
+  }
 }
 ```
 
@@ -3401,14 +3698,20 @@ const { data } = await client.deleteMarketplaceListing({
 
 ### `createMarketplaceListingVersion`
 
-Create a draft version; auto-snapshots resources, requiredFeatures, recommendedApps from current blueprint
+Create a draft version that ships a ready release tag of the listing's blueprint. `from_version_id` copies another version's tag and settings for a text-only change.
 
 `POST /v1/marketplace-listings/{listing_id}/versions`
 
 ```ts
-const { data } = await client.createMarketplaceListingVersion({
-  listing_id: 'example',
-})
+const { data } = await client.createMarketplaceListingVersion(
+  {
+    listing_id: 'example',
+  },
+  {
+    tag_id: 'string',
+    from_version_id: 'string'
+  },
+)
 ```
 
 <details>
@@ -3419,6 +3722,7 @@ const { data } = await client.createMarketplaceListingVersion({
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "listing_id": "string",
   "status": "draft",
+  "tag_id": "string",
   "version_name": "string",
   "draft_label": "string",
   "update_note": "string",
@@ -3428,7 +3732,78 @@ const { data } = await client.createMarketplaceListingVersion({
   "required_features": ["string"],
   "recommended_apps": ["string"],
   "created_at": "1970-01-01T00:00:00.000Z",
-  "published_at": "1970-01-01T00:00:00.000Z"
+  "published_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  },
+  "published_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  },
+  "package": {
+    "status": "building",
+    "job_id": "string",
+    "bucket": "string",
+    "key": "string",
+    "public_url": "string",
+    "installation_link": "string",
+    "error": "string"
+  },
+  "content": {
+    "name": "string",
+    "slug": "string",
+    "logo": "string",
+    "documentation_url": "string",
+    "pricing_type": "free",
+    "support_email": "string",
+    "portal_description": "string",
+    "teaser_name": "string",
+    "teaser_short_description": "string",
+    "teaser_thumbnail": "string",
+    "details_page_title": "string",
+    "details_page_description": "string",
+    "details_page_hero_image": "string",
+    "details_page_carousel": ["string"],
+    "resources_section_description": "string",
+    "resources_section_benefits_title": "string",
+    "resources_section_benefits_list": "string",
+    "resources_section_process_details": "string",
+    "partner": "string",
+    "partner_subtext": "string",
+    "partner_logo": "string",
+    "partner_website_link": "string",
+    "last_updated_on": "string",
+    "requires_customer_portal": true,
+    "process_details_section_title": "string",
+    "is_new_blueprint": true,
+    "available_in": "string",
+    "testimonials": ["string"],
+    "installation_link": "string",
+    "installation_slug": "string",
+    "demo_form_link": "string",
+    "order": 0,
+    "categories": ["string"],
+    "main_category": ["string"]
+  },
+  "content_published_at": "1970-01-01T00:00:00.000Z",
+  "content_published_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  },
+  "content_revisions": [
+    {
+      "content": {},
+      "published_at": "1970-01-01T00:00:00.000Z",
+      "published_by": {}
+    }
+  ]
 }
 ```
 
@@ -3458,16 +3833,22 @@ const { data } = await client.listMarketplaceListingVersions({
       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "listing_id": "string",
       "status": "draft",
+      "tag_id": "string",
       "version_name": "string",
       "draft_label": "string",
       "update_note": "string",
-      "resources": [
-        {}
-      ],
+      "resources": [],
       "required_features": ["string"],
       "recommended_apps": ["string"],
       "created_at": "1970-01-01T00:00:00.000Z",
-      "published_at": "1970-01-01T00:00:00.000Z"
+      "published_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {},
+      "published_by": {},
+      "package": {},
+      "content": {},
+      "content_published_at": "1970-01-01T00:00:00.000Z",
+      "content_published_by": {},
+      "content_revisions": []
     }
   ]
 }
@@ -3505,6 +3886,7 @@ const { data } = await client.updateMarketplaceListingVersion(
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "listing_id": "string",
   "status": "draft",
+  "tag_id": "string",
   "version_name": "string",
   "draft_label": "string",
   "update_note": "string",
@@ -3514,7 +3896,78 @@ const { data } = await client.updateMarketplaceListingVersion(
   "required_features": ["string"],
   "recommended_apps": ["string"],
   "created_at": "1970-01-01T00:00:00.000Z",
-  "published_at": "1970-01-01T00:00:00.000Z"
+  "published_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  },
+  "published_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  },
+  "package": {
+    "status": "building",
+    "job_id": "string",
+    "bucket": "string",
+    "key": "string",
+    "public_url": "string",
+    "installation_link": "string",
+    "error": "string"
+  },
+  "content": {
+    "name": "string",
+    "slug": "string",
+    "logo": "string",
+    "documentation_url": "string",
+    "pricing_type": "free",
+    "support_email": "string",
+    "portal_description": "string",
+    "teaser_name": "string",
+    "teaser_short_description": "string",
+    "teaser_thumbnail": "string",
+    "details_page_title": "string",
+    "details_page_description": "string",
+    "details_page_hero_image": "string",
+    "details_page_carousel": ["string"],
+    "resources_section_description": "string",
+    "resources_section_benefits_title": "string",
+    "resources_section_benefits_list": "string",
+    "resources_section_process_details": "string",
+    "partner": "string",
+    "partner_subtext": "string",
+    "partner_logo": "string",
+    "partner_website_link": "string",
+    "last_updated_on": "string",
+    "requires_customer_portal": true,
+    "process_details_section_title": "string",
+    "is_new_blueprint": true,
+    "available_in": "string",
+    "testimonials": ["string"],
+    "installation_link": "string",
+    "installation_slug": "string",
+    "demo_form_link": "string",
+    "order": 0,
+    "categories": ["string"],
+    "main_category": ["string"]
+  },
+  "content_published_at": "1970-01-01T00:00:00.000Z",
+  "content_published_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  },
+  "content_revisions": [
+    {
+      "content": {},
+      "published_at": "1970-01-01T00:00:00.000Z",
+      "published_by": {}
+    }
+  ]
 }
 ```
 
@@ -3524,7 +3977,7 @@ const { data } = await client.updateMarketplaceListingVersion(
 
 ### `publishMarketplaceListingVersion`
 
-Publish a draft version; archives the previous live version
+Publish a draft version; archives the previous live version and pushes the listing to the Marketplace
 
 `POST /v1/marketplace-listings/{listing_id}/versions/{version_id}/publish`
 
@@ -3535,7 +3988,6 @@ const { data } = await client.publishMarketplaceListingVersion(
     version_id: 'example',
   },
   {
-    version_name: 'string',
     update_note: 'string'
   },
 )
@@ -3547,18 +3999,600 @@ const { data } = await client.publishMarketplaceListingVersion(
 ```json
 {
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "listing_id": "string",
+  "blueprint_id": "string",
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"],
   "status": "draft",
-  "version_name": "string",
-  "draft_label": "string",
-  "update_note": "string",
-  "resources": [
-    {}
-  ],
-  "required_features": ["string"],
-  "recommended_apps": ["string"],
   "created_at": "1970-01-01T00:00:00.000Z",
-  "published_at": "1970-01-01T00:00:00.000Z"
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "live": {
+    "version_id": "string",
+    "version_name": "string",
+    "published_at": "1970-01-01T00:00:00.000Z",
+    "installation_link": "string",
+    "content": {
+      "name": "string",
+      "slug": "string",
+      "logo": "string",
+      "documentation_url": "string",
+      "pricing_type": "free",
+      "support_email": "string",
+      "portal_description": "string",
+      "teaser_name": "string",
+      "teaser_short_description": "string",
+      "teaser_thumbnail": "string",
+      "details_page_title": "string",
+      "details_page_description": "string",
+      "details_page_hero_image": "string",
+      "details_page_carousel": ["string"],
+      "resources_section_description": "string",
+      "resources_section_benefits_title": "string",
+      "resources_section_benefits_list": "string",
+      "resources_section_process_details": "string",
+      "partner": "string",
+      "partner_subtext": "string",
+      "partner_logo": "string",
+      "partner_website_link": "string",
+      "last_updated_on": "string",
+      "requires_customer_portal": true,
+      "process_details_section_title": "string",
+      "is_new_blueprint": true,
+      "available_in": "string",
+      "testimonials": ["string"],
+      "installation_link": "string",
+      "installation_slug": "string",
+      "demo_form_link": "string",
+      "order": 0,
+      "categories": ["string"],
+      "main_category": ["string"]
+    }
+  },
+  "webflow_item_id": "string",
+  "webflow_sync": {
+    "status": "ok",
+    "at": "1970-01-01T00:00:00.000Z",
+    "error": "string"
+  }
+}
+```
+
+</details>
+
+---
+
+### `rollbackMarketplaceListingVersion`
+
+Make an archived version the live version again
+
+`POST /v1/marketplace-listings/{listing_id}/versions/{version_id}/rollback`
+
+```ts
+const { data } = await client.rollbackMarketplaceListingVersion({
+  listing_id: 'example',
+  version_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "blueprint_id": "string",
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"],
+  "status": "draft",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "live": {
+    "version_id": "string",
+    "version_name": "string",
+    "published_at": "1970-01-01T00:00:00.000Z",
+    "installation_link": "string",
+    "content": {
+      "name": "string",
+      "slug": "string",
+      "logo": "string",
+      "documentation_url": "string",
+      "pricing_type": "free",
+      "support_email": "string",
+      "portal_description": "string",
+      "teaser_name": "string",
+      "teaser_short_description": "string",
+      "teaser_thumbnail": "string",
+      "details_page_title": "string",
+      "details_page_description": "string",
+      "details_page_hero_image": "string",
+      "details_page_carousel": ["string"],
+      "resources_section_description": "string",
+      "resources_section_benefits_title": "string",
+      "resources_section_benefits_list": "string",
+      "resources_section_process_details": "string",
+      "partner": "string",
+      "partner_subtext": "string",
+      "partner_logo": "string",
+      "partner_website_link": "string",
+      "last_updated_on": "string",
+      "requires_customer_portal": true,
+      "process_details_section_title": "string",
+      "is_new_blueprint": true,
+      "available_in": "string",
+      "testimonials": ["string"],
+      "installation_link": "string",
+      "installation_slug": "string",
+      "demo_form_link": "string",
+      "order": 0,
+      "categories": ["string"],
+      "main_category": ["string"]
+    }
+  },
+  "webflow_item_id": "string",
+  "webflow_sync": {
+    "status": "ok",
+    "at": "1970-01-01T00:00:00.000Z",
+    "error": "string"
+  }
+}
+```
+
+</details>
+
+---
+
+### `syncMarketplaceListing`
+
+Re-push the live listing to Webflow
+
+`POST /v1/marketplace-listings/{listing_id}/sync`
+
+```ts
+const { data } = await client.syncMarketplaceListing({
+  listing_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "blueprint_id": "string",
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"],
+  "status": "draft",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "live": {
+    "version_id": "string",
+    "version_name": "string",
+    "published_at": "1970-01-01T00:00:00.000Z",
+    "installation_link": "string",
+    "content": {
+      "name": "string",
+      "slug": "string",
+      "logo": "string",
+      "documentation_url": "string",
+      "pricing_type": "free",
+      "support_email": "string",
+      "portal_description": "string",
+      "teaser_name": "string",
+      "teaser_short_description": "string",
+      "teaser_thumbnail": "string",
+      "details_page_title": "string",
+      "details_page_description": "string",
+      "details_page_hero_image": "string",
+      "details_page_carousel": ["string"],
+      "resources_section_description": "string",
+      "resources_section_benefits_title": "string",
+      "resources_section_benefits_list": "string",
+      "resources_section_process_details": "string",
+      "partner": "string",
+      "partner_subtext": "string",
+      "partner_logo": "string",
+      "partner_website_link": "string",
+      "last_updated_on": "string",
+      "requires_customer_portal": true,
+      "process_details_section_title": "string",
+      "is_new_blueprint": true,
+      "available_in": "string",
+      "testimonials": ["string"],
+      "installation_link": "string",
+      "installation_slug": "string",
+      "demo_form_link": "string",
+      "order": 0,
+      "categories": ["string"],
+      "main_category": ["string"]
+    }
+  },
+  "webflow_item_id": "string",
+  "webflow_sync": {
+    "status": "ok",
+    "at": "1970-01-01T00:00:00.000Z",
+    "error": "string"
+  }
+}
+```
+
+</details>
+
+---
+
+### `publishMarketplaceListingContent`
+
+Publishes the listing's edited text on the live version: same tag, same zip, same version number, no update
+for installers. The text it replaces is kept in the version's `content_revisions`. Changed r
+
+`POST /v1/marketplace-listings/{listing_id}/publish-content`
+
+```ts
+const { data } = await client.publishMarketplaceListingContent({
+  listing_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "blueprint_id": "string",
+  "name": "string",
+  "slug": "string",
+  "logo": "string",
+  "documentation_url": "string",
+  "pricing_type": "free",
+  "support_email": "string",
+  "portal_description": "string",
+  "teaser_name": "string",
+  "teaser_short_description": "string",
+  "teaser_thumbnail": "string",
+  "details_page_title": "string",
+  "details_page_description": "string",
+  "details_page_hero_image": "string",
+  "details_page_carousel": ["string"],
+  "resources_section_description": "string",
+  "resources_section_benefits_title": "string",
+  "resources_section_benefits_list": "string",
+  "resources_section_process_details": "string",
+  "partner": "string",
+  "partner_subtext": "string",
+  "partner_logo": "string",
+  "partner_website_link": "string",
+  "last_updated_on": "string",
+  "requires_customer_portal": true,
+  "process_details_section_title": "string",
+  "is_new_blueprint": true,
+  "available_in": "string",
+  "testimonials": ["string"],
+  "installation_link": "string",
+  "installation_slug": "string",
+  "demo_form_link": "string",
+  "order": 0,
+  "categories": ["string"],
+  "main_category": ["string"],
+  "status": "draft",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "updated_at": "1970-01-01T00:00:00.000Z",
+  "live": {
+    "version_id": "string",
+    "version_name": "string",
+    "published_at": "1970-01-01T00:00:00.000Z",
+    "installation_link": "string",
+    "content": {
+      "name": "string",
+      "slug": "string",
+      "logo": "string",
+      "documentation_url": "string",
+      "pricing_type": "free",
+      "support_email": "string",
+      "portal_description": "string",
+      "teaser_name": "string",
+      "teaser_short_description": "string",
+      "teaser_thumbnail": "string",
+      "details_page_title": "string",
+      "details_page_description": "string",
+      "details_page_hero_image": "string",
+      "details_page_carousel": ["string"],
+      "resources_section_description": "string",
+      "resources_section_benefits_title": "string",
+      "resources_section_benefits_list": "string",
+      "resources_section_process_details": "string",
+      "partner": "string",
+      "partner_subtext": "string",
+      "partner_logo": "string",
+      "partner_website_link": "string",
+      "last_updated_on": "string",
+      "requires_customer_portal": true,
+      "process_details_section_title": "string",
+      "is_new_blueprint": true,
+      "available_in": "string",
+      "testimonials": ["string"],
+      "installation_link": "string",
+      "installation_slug": "string",
+      "demo_form_link": "string",
+      "order": 0,
+      "categories": ["string"],
+      "main_category": ["string"]
+    }
+  },
+  "webflow_item_id": "string",
+  "webflow_sync": {
+    "status": "ok",
+    "at": "1970-01-01T00:00:00.000Z",
+    "error": "string"
+  }
+}
+```
+
+</details>
+
+---
+
+### `createBlueprintTag`
+
+Tags the blueprint's current state as a release. The zip is built once in the background
+(poll the tag until `status` is `ready`) and never changes afterwards. When it is ready, the
+blueprint's `versi
+
+`POST /v3/blueprint-manifest/blueprints/{blueprint_id}/tags`
+
+```ts
+const { data } = await client.createBlueprintTag(
+  {
+    blueprint_id: 'example',
+  },
+  {
+    name: '1.2.0',
+    note: 'string'
+  },
+)
+```
+
+---
+
+### `listBlueprintTags`
+
+Tags of the blueprint, newest first
+
+`GET /v3/blueprint-manifest/blueprints/{blueprint_id}/tags`
+
+```ts
+const { data } = await client.listBlueprintTags({
+  blueprint_id: 'example',
+  kind: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "tags": [
+    {
+      "id": "string",
+      "blueprint_id": "string",
+      "name": "string",
+      "kind": "release",
+      "note": "string",
+      "status": "building",
+      "created_at": "1970-01-01T00:00:00.000Z",
+      "created_by": {
+        "name": "manifest@epilot.cloud",
+        "org_id": "911690",
+        "user_id": "11001045",
+        "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+      },
+      "published_at": "1970-01-01T00:00:00.000Z",
+      "expires_at": "1970-01-01T00:00:00.000Z",
+      "package": {
+        "format": "zip",
+        "job_id": "string",
+        "bucket": "string",
+        "key": "string",
+        "error": "string"
+      },
+      "sync": {
+        "job_id": "string",
+        "destination_org_id": "string",
+        "destination_blueprint_id": "string",
+        "status": "string"
+      }
+    }
+  ]
+}
+```
+
+</details>
+
+---
+
+### `getBlueprintTag`
+
+A release or sync tag of the blueprint, with its build status
+
+`GET /v3/blueprint-manifest/blueprints/{blueprint_id}/tags/{tag_id}`
+
+```ts
+const { data } = await client.getBlueprintTag({
+  blueprint_id: 'example',
+  tag_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "id": "string",
+  "blueprint_id": "string",
+  "name": "string",
+  "kind": "release",
+  "note": "string",
+  "status": "building",
+  "created_at": "1970-01-01T00:00:00.000Z",
+  "created_by": {
+    "name": "manifest@epilot.cloud",
+    "org_id": "911690",
+    "user_id": "11001045",
+    "token_id": "api_5ZugdRXasLfWBypHi93Fk"
+  },
+  "published_at": "1970-01-01T00:00:00.000Z",
+  "expires_at": "1970-01-01T00:00:00.000Z",
+  "package": {
+    "format": "zip",
+    "job_id": "string",
+    "bucket": "string",
+    "key": "string",
+    "error": "string"
+  },
+  "sync": {
+    "job_id": "string",
+    "destination_org_id": "string",
+    "destination_blueprint_id": "string",
+    "status": "string"
+  }
+}
+```
+
+</details>
+
+---
+
+### `deleteBlueprintTag`
+
+Deletes a tag and its zip. Tags that were ever published to the Marketplace are kept.
+
+`DELETE /v3/blueprint-manifest/blueprints/{blueprint_id}/tags/{tag_id}`
+
+```ts
+const { data } = await client.deleteBlueprintTag({
+  blueprint_id: 'example',
+  tag_id: 'example',
+})
+```
+
+---
+
+### `downloadBlueprintTag`
+
+Short-lived download URL for the tag's signed zip. For a sync tag the zip is built on the first download.
+
+`GET /v3/blueprint-manifest/blueprints/{blueprint_id}/tags/{tag_id}/download`
+
+```ts
+const { data } = await client.downloadBlueprintTag({
+  blueprint_id: 'example',
+  tag_id: 'example',
+})
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "download_url": "string"
 }
 ```
 
@@ -5086,6 +6120,43 @@ const { data } = await client.deleteUniquenessCriteria({
 
 ---
 
+### `batchDeleteBlueprintTestCases`
+
+Delete up to 100 test cases of the blueprint in one request. Each case is deleted exactly like deleteBlueprintTestCase (own revision check, never all-or-nothing across cases); every requested id is re
+
+`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/test-cases:batchDelete`
+
+```ts
+const { data } = await client.batchDeleteBlueprintTestCases(
+  {
+    blueprint_id: 'example',
+  },
+  {
+    cases: [
+      {
+        id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+        expected_revision: 1
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "deleted": ["string"],
+  "conflicts": ["string"],
+  "not_found": ["string"]
+}
+```
+
+</details>
+
+---
+
 ### `duplicateBlueprintTestCase`
 
 Copy a v2 test case of the blueprint into a new test case that keeps the source's clauses. Requires the blueprint-test-cases organization feature flag.
@@ -5184,6 +6255,10 @@ const { data } = await client.duplicateBlueprintTestCase(
   "clauses_hash": "string",
   "clauses_revision": 1,
   "title_key": {},
+  "titles": {
+    "en": "string",
+    "de": "string"
+  },
   "origin": {},
   "needs_reinterpretation": {
     "reason": "string"
@@ -5672,7 +6747,8 @@ const { data } = await client.getBlueprintGraphSuggestions({
     "step_logic": 0,
     "answer_options": 0,
     "process_order": 0,
-    "catalog_structure": 0
+    "catalog_structure": 0,
+    "other": 0
   },
   "excluded": [
     {
@@ -5699,34 +6775,32 @@ const { data } = await client.getBlueprintGraphSuggestions({
     {
       "id": "string",
       "shape": "journey_starts_workflow",
-      "subject": {
-        "node_id": "string",
-        "resource_id": "string",
-        "resource_type": "string",
-        "label": "string"
-      },
-      "clauses": [
-        {}
-      ],
-      "sentences": [
-        {
-          "key": "string",
-          "params": {}
-        }
-      ],
-      "covered_by": {
-        "case_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        "title": "string"
-      },
+      "subject": {},
+      "clauses": [],
+      "sentences": [],
+      "titles": {},
+      "covered_by": {},
       "why_code": "untested_resource",
-      "main_resource": {
-        "type": "string",
-        "id": "string",
-        "name": "string"
-      },
+      "main_resource": {},
       "resource_types": ["string"]
     }
   ],
+  "problems": [
+    {
+      "id": "string",
+      "shape": "journey_starts_workflow",
+      "subject": {},
+      "clauses": [],
+      "sentences": [],
+      "titles": {},
+      "covered_by": {},
+      "why_code": "untested_resource",
+      "main_resource": {},
+      "resource_types": ["string"],
+      "results": []
+    }
+  ],
+  "problems_total": 0,
   "next_cursor": "string"
 }
 ```
@@ -5835,6 +6909,10 @@ const { data } = await client.acceptBlueprintGraphSuggestions(
       "clauses_hash": "string",
       "clauses_revision": 1,
       "title_key": {},
+      "titles": {
+        "en": "string",
+        "de": "string"
+      },
       "origin": {},
       "needs_reinterpretation": {
         "reason": "string"
@@ -6098,12 +7176,134 @@ const { data } = await client.confirmBlueprintTestInterpretationV2(
     "clauses_hash": "string",
     "clauses_revision": 1,
     "title_key": {},
+    "titles": {
+      "en": "string",
+      "de": "string"
+    },
     "origin": {},
     "needs_reinterpretation": {
       "reason": "string"
     }
   },
   "confirmation_kept": true
+}
+```
+
+</details>
+
+---
+
+### `queryBlueprintSuggestionGraph`
+
+Read-only graph query for the Luna suggestions agent of a running Luna generation (list_subjects or one of the graph tools). Only a Luna agent token acting for the user who started the generation is a
+
+`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/graph-query`
+
+```ts
+const { data } = await client.queryBlueprintSuggestionGraph(
+  {
+    blueprint_id: 'example',
+    generation_id: 'example',
+  },
+  {
+    tool: 'list_subjects',
+    input: {}
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "ok": true,
+  "data": {},
+  "truncated": true,
+  "error": "unknown_node"
+}
+```
+
+</details>
+
+---
+
+### `checkBlueprintTestSuggestion`
+
+Checks one draft suggestion with the engine for a running Luna generation (offered, failed, excluded or invalid) without storing anything. Requires the blueprint-test-cases organization feature flag.
+
+`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/check`
+
+```ts
+const { data } = await client.checkBlueprintTestSuggestion(
+  {
+    blueprint_id: 'example',
+    generation_id: 'example',
+  },
+  {
+    subject_node_id: 'string',
+    suggestion: {
+      shape: 'string',
+      clauses: [
+        {}
+      ]
+    }
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "verdict": "offered",
+  "issues": [
+    {}
+  ],
+  "reason": "string"
+}
+```
+
+</details>
+
+---
+
+### `submitBlueprintTestSuggestions`
+
+Final submission of the Luna suggestions agent. Verifies every draft, stores suggestions and problems and completes the generation. Only once per running Luna generation; while a submission is being s
+
+`POST /v2/blueprint-manifest/blueprints/{blueprint_id}/test-suite/suggestions/{generation_id}/submissions`
+
+```ts
+const { data } = await client.submitBlueprintTestSuggestions(
+  {
+    blueprint_id: 'example',
+    generation_id: 'example',
+  },
+  {
+    subjects: [
+      {
+        subject_node_id: 'string',
+        suggestions: [
+          {
+            title: 'string'
+          }
+        ]
+      }
+    ]
+  },
+)
+```
+
+<details>
+<summary>Response</summary>
+
+```json
+{
+  "status": "completed",
+  "total": 0,
+  "problems_total": 0
 }
 ```
 
@@ -6118,7 +7318,7 @@ const { data } = await client.confirmBlueprintTestInterpretationV2(
 ```ts
 type BlueprintTestSuiteError = {
   status: number
-  code: "invalid_request" | "unauthorized" | "forbidden" | "not_found" | "conflict" | "credential_invalid" | "permissions_unavailable" | "permission_denied" | "feature_unavailable" | "session_expiring" | "storage_conflict" | "suite_unavailable" | "v2_case" | "active_generation" | "active_suite_run" | "org_run_limit" | "suggestions_stale" | "unknown_suggestion" | "suggestion_acceptance_changed" | "suggestion_input_too_large" | "invalid_clauses" | "not_implemented" | "interpretation_input_too_large" | "interpretation_incomplete" | "interpretation_not_ready" | "interpretation_used" | "confirmation_required"
+  code: "invalid_request" | "unauthorized" | "forbidden" | "not_found" | "conflict" | "credential_invalid" | "permissions_unavailable" | "permission_denied" | "feature_unavailable" | "session_expiring" | "storage_conflict" | "suite_unavailable" | "v2_case" | "active_generation" | "active_suite_run" | "org_run_limit" | "suggestions_stale" | "unknown_suggestion" | "suggestion_acceptance_changed" | "suggestion_input_too_large" | "generation_not_running" | "generation_submitting" | "invalid_clauses" | "not_implemented" | "interpretation_input_too_large" | "interpretation_incomplete" | "interpretation_not_ready" | "interpretation_used" | "confirmation_required"
   retriable: boolean
   active_run_id?: string // uuid
   generation_id?: string // uuid
@@ -6144,6 +7344,19 @@ A translation key and its parameters. The UI renders the text; the server never 
 type Sentence = {
   key: string
   params: Record<string, string | { ... }[] | Record<string, { ... }>>
+}
+```
+
+### `BlueprintTestTitles`
+
+An AI-written plain-language title in both UI languages, checked by deterministic guardrails before it is
+stored. Optional: absent when the title step gave none (or for items stored before titles existed); the UI
+then renders the sentence. On a test case (schema version 2 only): the title of the sug
+
+```ts
+type BlueprintTestTitles = {
+  en: string
+  de: string
 }
 ```
 
@@ -6302,6 +7515,7 @@ type BlueprintTestSuite = {
       clauses_hash?: { ... }
       clauses_revision?: { ... }
       title_key?: { ... }
+      titles?: { ... }
       origin?: { ... }
       needs_reinterpretation?: { ... }
     }
@@ -6381,7 +7595,6 @@ type BlueprintTestSuite = {
     counts?: {
       passed: { ... }
       failed: { ... }
-      cannot_verify: { ... }
   // ...
 }
 ```
@@ -6412,8 +7625,10 @@ type BlueprintTestCoverage = {
 
 ### `BlueprintTestCaseShape`
 
+Suggestion shape. `other` holds suggestions that fit none of the named shapes.
+
 ```ts
-type BlueprintTestCaseShape = "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure"
+type BlueprintTestCaseShape = "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure" | "other"
 ```
 
 ### `Suggestion`
@@ -6421,7 +7636,7 @@ type BlueprintTestCaseShape = "journey_starts_workflow" | "event_sends_email" | 
 ```ts
 type Suggestion = {
   id: string
-  shape: "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure"
+  shape: "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure" | "other"
   subject: {
     node_id: string
     resource_id: string
@@ -6433,6 +7648,10 @@ type Suggestion = {
     key: string
     params: Record<string, string | { ... }[] | Record<string, { ... }>>
   }>
+  titles?: {
+    en: string
+    de: string
+  }
   covered_by?: {
     case_id: string // uuid
     title?: string
@@ -6444,6 +7663,130 @@ type Suggestion = {
     name: string
   }
   resource_types?: string[]
+}
+```
+
+### `BlueprintGraphSuggestionProblem`
+
+A possible problem: a proposal the engine evaluated with every clause PASSED or FAILED and at least one FAILED.
+The configuration may be wrong, or the AI may be. Never counted as a suggestion. The properties of
+`Suggestion` plus `results`. Accepting its id creates an ordinary v2 test case (without `
+
+```ts
+type BlueprintGraphSuggestionProblem = {
+  id: string
+  shape: "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure" | "other"
+  subject: {
+    node_id: string
+    resource_id: string
+    resource_type: string
+    label: string
+  }
+  clauses: Record<string, unknown>[]
+  sentences: Array<{
+    key: string
+    params: Record<string, string | { ... }[] | Record<string, { ... }>>
+  }>
+  titles?: {
+    en: string
+    de: string
+  }
+  covered_by?: {
+    case_id: string // uuid
+    title?: string
+  }
+  why_code?: "untested_resource" | "new_check"
+  main_resource?: {
+    type: string
+    id: string
+    name: string
+  }
+  resource_types?: string[]
+  results: Array<{
+    clause_id: string
+    verdict: "PASSED" | "FAILED" | "CANNOT_VERIFY"
+    reason?: string
+    sentence: {
+      key: { ... }
+      params: { ... }
+    }
+    evidence: Array<{
+      node_id: { ... }
+      resource_id: { ... }
+      resource_type: { ... }
+      label: { ... }
+      path?: { ... }
+      expected?: { ... }
+      actual?: { ... }
+    }>
+    evidence_truncated?: boolean
+    candidates?: string[]
+  }>
+}
+```
+
+### `BlueprintSuggestionGraphQuery`
+
+```ts
+type BlueprintSuggestionGraphQuery = {
+  tool: "list_subjects" | "graph_summary" | "list_nodes" | "get_node" | "follow_edges" | "list_paths" | "list_operators"
+  input?: Record<string, unknown>
+}
+```
+
+### `BlueprintSuggestionGraphQueryResult`
+
+```ts
+type BlueprintSuggestionGraphQueryResult = {
+  ok: boolean
+  data?: Record<string, unknown>
+  truncated?: boolean
+  error?: "unknown_node" | "bad_input"
+}
+```
+
+### `BlueprintSuggestionCheck`
+
+```ts
+type BlueprintSuggestionCheck = {
+  subject_node_id: string
+  suggestion: {
+    shape?: string
+    clauses: Record<string, unknown>[]
+  }
+}
+```
+
+### `BlueprintSuggestionCheckResult`
+
+```ts
+type BlueprintSuggestionCheckResult = {
+  verdict: "offered" | "failed" | "excluded" | "invalid"
+  issues: Record<string, unknown>[]
+  reason?: string
+}
+```
+
+### `BlueprintSuggestionSubmission`
+
+```ts
+type BlueprintSuggestionSubmission = {
+  subjects: Array<{
+    subject_node_id: string
+    suggestions: Array<{
+      title?: { ... }
+    }>
+  }>
+}
+```
+
+### `BlueprintSuggestionSubmissionResult`
+
+```ts
+type BlueprintSuggestionSubmissionResult = {
+  status: "completed"
+  total: number
+  problems_total: number
 }
 ```
 
@@ -6695,6 +8038,10 @@ type BlueprintTestInterpretationConfirmation = {
     clauses_hash?: string
     clauses_revision?: number
     title_key?: Record<string, unknown>
+    titles?: {
+      en: { ... }
+      de: { ... }
+    }
     origin?: Record<string, unknown>
     needs_reinterpretation?: {
       reason: { ... }
@@ -6712,7 +8059,7 @@ Where a v2 case came from (BlueprintTestCase.origin).
 type BlueprintTestCaseOrigin = {
   kind: "suggestion"
   source: "ai"
-  shape: "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure"
+  shape: "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure" | "other"
   suggestion_id: string
   generation_id: string
   prompt_version: string
@@ -6763,9 +8110,10 @@ type BlueprintGraphSuggestionPage = {
     answer_options?: number
     process_order?: number
     catalog_structure?: number
+    other?: number
   }
   excluded: Array<{
-    reason: "invalid" | "unknown_subject" | "shape_unknown" | "not_passing" | "cannot_verify" | "trivial" | "duplicate"
+    reason: "invalid" | "unknown_subject" | "shape_unknown" | "not_passing" | "cannot_verify" | "trivial" | "duplicate" | "subsumed"
     count: number
   }>
   unreadable: Array<{
@@ -6781,7 +8129,7 @@ type BlueprintGraphSuggestionPage = {
   }>
   items: Array<{
     id: string
-    shape: "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure"
+    shape: "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure" | "other"
     subject: {
       node_id: { ... }
       resource_id: { ... }
@@ -6793,6 +8141,10 @@ type BlueprintGraphSuggestionPage = {
       key: { ... }
       params: { ... }
     }>
+    titles?: {
+      en: { ... }
+      de: { ... }
+    }
     covered_by?: {
       case_id: { ... }
       title?: { ... }
@@ -6805,7 +8157,41 @@ type BlueprintGraphSuggestionPage = {
     }
     resource_types?: string[]
   }>
-  next_cursor?: string
+  problems?: Array<{
+    id: string
+    shape: "journey_starts_workflow" | "event_sends_email" | "step_logic" | "answer_options" | "process_order" | "catalog_structure" | "other"
+    subject: {
+      node_id: { ... }
+      resource_id: { ... }
+      resource_type: { ... }
+      label: { ... }
+    }
+    clauses: Record<string, unknown>[]
+    sentences: Array<{
+      key: { ... }
+      params: { ... }
+    }>
+    titles?: {
+      en: { ... }
+      de: { ... }
+    }
+    covered_by?: {
+      case_id: { ... }
+      title?: { ... }
+    }
+    why_code?: "untested_resource" | "new_check"
+    main_resource?: {
+      type: { ... }
+      id: { ... }
+      name: { ... }
+    }
+    resource_types?: string[]
+    results: Array<{
+      clause_id: { ... }
+      verdict: { ... }
+      reason?: { ... }
+      sentence: { ... }
+  // ...
 }
 ```
 
@@ -6859,6 +8245,10 @@ type BlueprintGraphSuggestionAcceptance = {
     clauses_hash?: string
     clauses_revision?: number
     title_key?: Record<string, unknown>
+    titles?: {
+      en: { ... }
+      de: { ... }
+    }
     origin?: Record<string, unknown>
     needs_reinterpretation?: {
       reason: { ... }
@@ -6964,6 +8354,10 @@ type BlueprintTestCase = {
   clauses_hash?: string
   clauses_revision?: number
   title_key?: Record<string, unknown>
+  titles?: {
+    en: string
+    de: string
+  }
   origin?: Record<string, unknown>
   needs_reinterpretation?: {
     reason: string
@@ -7541,6 +8935,27 @@ type BlueprintTestRunInput = {
 }
 ```
 
+### `BlueprintTestCaseBatchDeleteInput`
+
+```ts
+type BlueprintTestCaseBatchDeleteInput = {
+  cases: Array<{
+    id: string // uuid
+    expected_revision: number
+  }>
+}
+```
+
+### `BlueprintTestCaseBatchDeleteResult`
+
+```ts
+type BlueprintTestCaseBatchDeleteResult = {
+  deleted: string[]
+  conflicts: string[]
+  not_found: string[]
+}
+```
+
 ### `BlueprintTestCasePage`
 
 ```ts
@@ -7583,6 +8998,10 @@ type BlueprintTestCasePage = {
     clauses_hash?: string
     clauses_revision?: number
     title_key?: Record<string, unknown>
+    titles?: {
+      en: { ... }
+      de: { ... }
+    }
     origin?: Record<string, unknown>
     needs_reinterpretation?: {
       reason: { ... }
@@ -10441,6 +11860,54 @@ type MarketplaceListing = {
   status: "draft" | "live" | "archived"
   created_at?: string // date-time
   updated_at?: string // date-time
+  live?: {
+    version_id?: string
+    version_name?: string
+    published_at?: string // date-time
+    installation_link?: string
+    content?: {
+      name?: { ... }
+      slug?: { ... }
+      logo?: { ... }
+      documentation_url?: { ... }
+      pricing_type?: { ... }
+      support_email?: { ... }
+      portal_description?: { ... }
+      teaser_name?: { ... }
+      teaser_short_description?: { ... }
+      teaser_thumbnail?: { ... }
+      details_page_title?: { ... }
+      details_page_description?: { ... }
+      details_page_hero_image?: { ... }
+      details_page_carousel?: { ... }
+      resources_section_description?: { ... }
+      resources_section_benefits_title?: { ... }
+      resources_section_benefits_list?: { ... }
+      resources_section_process_details?: { ... }
+      partner?: { ... }
+      partner_subtext?: { ... }
+      partner_logo?: { ... }
+      partner_website_link?: { ... }
+      last_updated_on?: { ... }
+      requires_customer_portal?: { ... }
+      process_details_section_title?: { ... }
+      is_new_blueprint?: { ... }
+      available_in?: { ... }
+      testimonials?: { ... }
+      installation_link?: { ... }
+      installation_slug?: { ... }
+      demo_form_link?: { ... }
+      order?: { ... }
+      categories?: { ... }
+      main_category?: { ... }
+    }
+  }
+  webflow_item_id?: string
+  webflow_sync?: {
+    status?: "ok" | "failed"
+    at?: string // date-time
+    error?: string
+  }
 }
 ```
 
@@ -10492,6 +11959,7 @@ type MarketplaceListingVersion = {
   id: string // uuid
   listing_id: string
   status: "draft" | "published" | "archived"
+  tag_id?: string
   version_name?: string
   draft_label: string
   update_note?: string
@@ -10500,6 +11968,151 @@ type MarketplaceListingVersion = {
   recommended_apps?: string[]
   created_at: string // date-time
   published_at?: string // date-time
+  created_by?: {
+    name?: unknown
+    org_id: string
+    user_id?: string
+    token_id?: string
+  }
+  published_by?: {
+    name?: unknown
+    org_id: string
+    user_id?: string
+    token_id?: string
+  }
+  package?: {
+    status: "building" | "ready" | "failed"
+    job_id?: string
+    bucket?: string
+    key?: string
+    public_url?: string
+    installation_link?: string
+    error?: string
+  }
+  content?: {
+    name?: string
+    slug?: string
+    logo?: string
+    documentation_url?: string
+    pricing_type?: "free" | "paid" | "freemium" | "contact_us"
+    support_email?: string
+    portal_description?: string
+    teaser_name?: string
+    teaser_short_description?: string
+    teaser_thumbnail?: string
+    details_page_title?: string
+    details_page_description?: string
+    details_page_hero_image?: string
+    details_page_carousel?: string[]
+    resources_section_description?: string
+    resources_section_benefits_title?: string
+    resources_section_benefits_list?: string
+    resources_section_process_details?: string
+    partner?: string
+    partner_subtext?: string
+    partner_logo?: string
+    partner_website_link?: string
+    last_updated_on?: string
+    requires_customer_portal?: boolean
+    process_details_section_title?: string
+    is_new_blueprint?: boolean
+    available_in?: string
+    testimonials?: string[]
+    installation_link?: string
+    installation_slug?: string
+    demo_form_link?: string
+    order?: number
+    categories?: string[]
+    main_category?: string[]
+  }
+  content_published_at?: string // date-time
+  content_published_by?: {
+    name?: unknown
+    org_id: string
+    user_id?: string
+    token_id?: string
+  }
+  content_revisions?: Array<{
+    content?: {
+      name?: { ... }
+      slug?: { ... }
+      logo?: { ... }
+      documentation_url?: { ... }
+      pricing_type?: { ... }
+      support_email?: { ... }
+      portal_description?: { ... }
+      teaser_name?: { ... }
+      teaser_short_description?: { ... }
+      teaser_thumbnail?: { ... }
+      details_page_title?: { ... }
+      details_page_description?: { ... }
+      details_page_hero_image?: { ... }
+      details_page_carousel?: { ... }
+      resources_section_description?: { ... }
+      resources_section_benefits_title?: { ... }
+      resources_section_benefits_list?: { ... }
+      resources_section_process_details?: { ... }
+      partner?: { ... }
+      partner_subtext?: { ... }
+      partner_logo?: { ... }
+  // ...
+}
+```
+
+### `MarketplaceListingVersionPackage`
+
+```ts
+type MarketplaceListingVersionPackage = {
+  status: "building" | "ready" | "failed"
+  job_id?: string
+  bucket?: string
+  key?: string
+  public_url?: string
+  installation_link?: string
+  error?: string
+}
+```
+
+### `BlueprintTagKind`
+
+`release`: a semantic version someone tagged. `sync`: recorded automatically for every sync, named by time, for debugging.
+
+```ts
+type BlueprintTagKind = "release" | "sync"
+```
+
+### `BlueprintTag`
+
+```ts
+type BlueprintTag = {
+  id: string
+  blueprint_id: string
+  name: string
+  kind: "release" | "sync"
+  note?: string
+  status: "building" | "ready" | "failed"
+  created_at: string // date-time
+  created_by?: {
+    name?: unknown
+    org_id: string
+    user_id?: string
+    token_id?: string
+  }
+  published_at?: string // date-time
+  expires_at?: string // date-time
+  package?: {
+    format?: "zip" | "manifest"
+    job_id?: string
+    bucket?: string
+    key?: string
+    error?: string
+  }
+  sync?: {
+    job_id?: string
+    destination_org_id?: string
+    destination_blueprint_id?: string
+    status?: string
+  }
 }
 ```
 
