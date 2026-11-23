@@ -3379,7 +3379,15 @@ type ResolveConditionalEntityRequest = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
@@ -3423,7 +3431,15 @@ type ResolveByContextRequest = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
@@ -3474,7 +3490,15 @@ type ResolveContext = Record<string, string | number | boolean | {
 } | {
   gte: number | string
 } | {
-  in: string | number[]
+  in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
+} | {
+  not_in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
 } | {
   between: string
 } | {
@@ -3640,14 +3664,15 @@ type PinnedGridOperator = {
 
 ### `PostalCodeFilter`
 
-A listing filter on a `location` of format `postal_code_city` by its postal code alone: it
-matches the variants pinned to that postal code, whatever their city. Only a listing filter
-takes it; a resolve context must name the city too.
-
+A `location` of format `postal_code` or `postal_code_city` named in a variant listing filter.
+As the filter's value, it may name part of the location: `postal_code` alone matches every
+postal code starting with it, so `66` matches `66636` and a whole postal code matches only
+itself; `city` alone, on
 
 ```ts
 type PostalCodeFilter = {
-  postal_code: string
+  postal_code?: string
+  city?: string
 }
 ```
 
@@ -3698,7 +3723,15 @@ type ContextConditionValue = string | number | boolean | {
 } | {
   gte: number | string
 } | {
-  in: string | number[]
+  in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
+} | {
+  not_in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
 } | {
   between: string
 } | {
@@ -3720,7 +3753,15 @@ type ConditionPredicate = {
 } | {
   gte: number | string
 } | {
-  in: string | number[]
+  in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
+} | {
+  not_in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
 } | {
   between: string
 } | {
@@ -4102,13 +4143,22 @@ type ListVariantsRequest = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
     exists: boolean
   } | {
-    postal_code: string
+    postal_code?: string
+    city?: string
   }>
   search?: string
   sort?: string
@@ -4138,13 +4188,22 @@ type VariantTreeRequest = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
     exists: boolean
   } | {
-    postal_code: string
+    postal_code?: string
+    city?: string
   }>
   search?: string
   sort?: string
@@ -4158,10 +4217,10 @@ type VariantTreeRequest = {
 ### `VariantConditionFilter`
 
 Which pins a variant must carry to be listed: a flat map keyed by condition name, taking the
-same exact values and predicates a resolve context does. A condition left out is not
-filtered on. An `in` list carries at most 50,000 values.
+same exact values and predicates a resolve context does, plus `not_in`. A condition left
+out is not filtered on. An `in` or `not_in` list carries at most 50,000 values.
 
-A variant matches only where it pins the condition — unlike `:re
+A variant matches only where it pins 
 
 ```ts
 type VariantConditionFilter = Record<string, string | number | boolean | {
@@ -4176,13 +4235,22 @@ type VariantConditionFilter = Record<string, string | number | boolean | {
 } | {
   gte: number | string
 } | {
-  in: string | number[]
+  in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
+} | {
+  not_in: Array<string | number | {
+    postal_code?: string
+    city?: string
+  }>
 } | {
   between: string
 } | {
   exists: boolean
 } | {
-  postal_code: string
+  postal_code?: string
+  city?: string
 }>
 ```
 
@@ -5782,6 +5850,8 @@ type ResolveCatalogRequest = {
     } | {
       in: { ... }
     } | {
+      not_in: { ... }
+    } | {
       between: { ... }
     } | {
       exists: { ... }
@@ -5800,6 +5870,8 @@ type ResolveCatalogRequest = {
     } | {
       in: { ... }
     } | {
+      not_in: { ... }
+    } | {
       between: { ... }
     } | {
       exists: { ... }
@@ -5817,6 +5889,8 @@ type ResolveCatalogRequest = {
       gte: { ... }
     } | {
       in: { ... }
+    } | {
+      not_in: { ... }
     } | {
       between: { ... }
     } | {
@@ -5848,7 +5922,15 @@ type CatalogContext = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
@@ -5866,7 +5948,15 @@ type CatalogContext = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
@@ -5884,7 +5974,15 @@ type CatalogContext = {
   } | {
     gte: number | string
   } | {
-    in: string | number[]
+    in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
+  } | {
+    not_in: Array<string | number | {
+      postal_code?: { ... }
+      city?: { ... }
+    }>
   } | {
     between: string
   } | {
