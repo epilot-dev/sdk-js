@@ -44,6 +44,10 @@ declare namespace Components {
              */
             style?: string;
             /**
+             * Entity id of the `email_template` to send to end-customer portal users in addition to the in-app notification. Only portal users who opted in to email notifications receive it (sent by the customer portal API). Absent or null means no email is sent for this notification.
+             */
+            email_template_id?: string | null; // uuid
+            /**
              * Display title
              */
             _title?: string;
@@ -154,7 +158,7 @@ declare namespace Components {
              * example:
              * 206801
              */
-            organization_id?: string;
+            organization_id: string;
             title: {
                 /**
                  * Title for notification. Supports handlebars syntax.
@@ -234,6 +238,14 @@ declare namespace Components {
              * ]
              */
             visibility_user_ids?: string[];
+            /**
+             * When true, the notification is written directly for each id in `visibility_user_ids` without resolving them against the user API (an in-app notification only; email is skipped). Only honored for trusted service callers whose token carries no user identity of its own — used to target end-customer portal users (`USER#{portal_user_id}`). A real end-user token may not set it.
+             */
+            skip_user_resolution?: boolean;
+            /**
+             * Render this specific `notification_template` entity (by id) instead of looking one up by `type`. Used by portal notification triggers, which let the builder pick an exact template.
+             */
+            template_id?: string; // uuid
         }
         export interface NotificationBase {
             notification_id?: number;
@@ -547,6 +559,10 @@ declare namespace Components {
              */
             style?: string;
             /**
+             * Entity id of the `email_template` to send to end-customer portal users in addition to the in-app notification. Only portal users who opted in to email notifications receive it (sent by the customer portal API). Absent or null means no email is sent for this notification.
+             */
+            email_template_id?: string | null; // uuid
+            /**
              * Whether this is a system template
              */
             system_template?: boolean;
@@ -614,6 +630,10 @@ declare namespace Components {
              */
             style?: string;
             /**
+             * Entity id of the `email_template` to send to end-customer portal users in addition to the in-app notification. Only portal users who opted in to email notifications receive it (sent by the customer portal API). Absent or null means no email is sent for this notification.
+             */
+            email_template_id?: string | null; // uuid
+            /**
              * Display title
              */
             _title?: string;
@@ -634,6 +654,9 @@ declare namespace Paths {
         namespace Responses {
             export interface $202 {
             }
+            export type $401 = Components.Schemas.Error;
+            export type $403 = Components.Schemas.Error;
+            export type $413 = Components.Schemas.Error;
         }
     }
     namespace CreateNotificationTemplate {
@@ -794,6 +817,20 @@ declare namespace Paths {
             }
         }
     }
+    namespace MarkAsUnread {
+        namespace Parameters {
+            export type Id = number;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace PatchNotificationTemplate {
         namespace Parameters {
             export type Id = string; // uuid
@@ -899,6 +936,16 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.MarkAsRead.Responses.$204>
+  /**
+   * markAsUnread - markAsUnread
+   * 
+   * Mark a notification as unread again, e.g. to use it as a reminder. A later "mark all as read" clears it again.
+   */
+  'markAsUnread'(
+    parameters?: Parameters<Paths.MarkAsUnread.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.MarkAsUnread.Responses.$204>
   /**
    * getTotalUnread - getTotalUnread
    * 
@@ -1053,6 +1100,18 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.MarkAsRead.Responses.$204>
+  }
+  ['/v1/notification/notifications/{id}/unmark']: {
+    /**
+     * markAsUnread - markAsUnread
+     * 
+     * Mark a notification as unread again, e.g. to use it as a reminder. A later "mark all as read" clears it again.
+     */
+    'put'(
+      parameters?: Parameters<Paths.MarkAsUnread.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.MarkAsUnread.Responses.$204>
   }
   ['/v1/notification/unreads']: {
     /**

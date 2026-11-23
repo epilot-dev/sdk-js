@@ -87,6 +87,19 @@
         "responses": {}
       }
     },
+    "/v1/notification/notifications/{id}/unmark": {
+      "put": {
+        "operationId": "markAsUnread",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/notification/unreads": {
       "get": {
         "operationId": "getTotalUnread",
