@@ -1,5 +1,13 @@
 # @epilot/entity-mapping-client
 
+## 0.12.0
+
+### Minor Changes
+
+- `validateMappingFlow`: new request field `acknowledged` (`{ action_id, code, target? }[]`, at most 200): blocking findings the user decided to keep stop blocking and come back in `acknowledged` of the response
+- `validateMappingFlow` response: `generated` (findings on Journey Builder-generated lines, never blocking) and `references` (`resolved` / `unresolved`: actions that point at a mapping config target via `config.mapping_config` are checked as that target)
+- New codes: `source-not-fixed` (an `automation_step` source, source checks skipped) and the suggestion kind `fallback-producers`
+
 ## 0.11.0
 
 ### Minor Changes

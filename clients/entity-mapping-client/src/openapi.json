@@ -819,9 +819,10 @@
                     "properties": {
                       "why": {
                         "type": "string",
-                        "description": "What the rewrite does. `template-syntax`, `nearest-attribute`, `nearest-option` and `operation-key` come with validator 0.4.4. Applying any suggestion adds no error to its line.",
+                        "description": "What the rewrite does. `template-syntax`, `nearest-attribute`, `nearest-option` and `operation-key` come with validator 0.4.4. `fallback-producers` (validator 0.6.0): every creator of the schema runs behind a condition, so the line copies from all of them in order. Applying any suggestion adds no error to its line.",
                         "enum": [
                           "pick-producer",
+                          "fallback-producers",
                           "explicit-output",
                           "add-mode",
                           "merge-keys",
@@ -885,7 +886,7 @@
         }
       },
       "MappingSourceRef": {
-        "description": "What the automation's trigger provides, by id. Used when `roots.source` is not sent: the server loads the journey's mapping sources (`rootFromMappingSources`) or the entity schema (`rootFromEntitySchema`) with the caller's authorization. A journey or schema that does not exist is an error issue (`source-journey-not-found`, `source-schema-not-found`); one that could not be loaded is a warning (`source-not-loaded`) and the source checks are skipped (`skipped_checks`). Likewise for a target schema (`target-schema-not-found`, `target-schema-not-loaded`).",
+        "description": "What the automation's trigger provides, by id. Used when `roots.source` is not sent: the server loads the journey's mapping sources (`rootFromMappingSources`) or the entity schema (`rootFromEntitySchema`) with the caller's authorization. A journey or schema that does not exist is an error issue (`source-journey-not-found`, `source-schema-not-found`); one that could not be loaded is a warning (`source-not-loaded`) and the source checks are skipped (`skipped_checks`). Likewise for a target schema (`target-schema-not-found`, `target-schema-not-loaded`). `automation_step` (the trigger of a workflow's automation task) names no data: a warning (`source-not-fixed`) and the source checks are skipped; pass what the workflow was started with instead.",
         "oneOf": [
           {
             "type": "object",
@@ -959,6 +960,30 @@
             "items": {
               "$ref": "#/components/schemas/MappingFlowAction"
             }
+          },
+          "acknowledged": {
+            "type": "array",
+            "description": "Blocking findings the user decided to keep, after the agent explained them: they stop blocking and are listed in `acknowledged` of the response instead. Send only what the user explicitly accepted. Each matches by action id and code, and by the line's target attribute when `target` is set (without it, every finding of that code in the action). At most 200 entries.",
+            "items": {
+              "type": "object",
+              "required": [
+                "action_id",
+                "code"
+              ],
+              "properties": {
+                "action_id": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string",
+                  "example": "attribute-not-on-target"
+                },
+                "target": {
+                  "type": "string",
+                  "description": "The target attribute of the line the finding is about"
+                }
+              }
+            }
           }
         }
       },
@@ -995,6 +1020,38 @@
           "blocking": {
             "type": "array",
             "description": "What a save gate rejects: per action the errors, the issues on lines whose verdict is `broken` and `value-not-an-option`; with `previous_actions`, only those this change introduced",
+            "items": {
+              "$ref": "#/components/schemas/FlowMappingIssue"
+            }
+          },
+          "generated": {
+            "type": "array",
+            "description": "Findings on lines the Journey Builder generated for a journey's default mapping (`origin` `system_recommendation` or `entity_updating_system_recommendation`). The builder regenerates those lines, so these findings are reported but never block.",
+            "items": {
+              "$ref": "#/components/schemas/FlowMappingIssue"
+            }
+          },
+          "references": {
+            "type": "object",
+            "description": "Actions that only point at a target of a mapping config (`config.mapping_config`) are checked as that target. `unresolved` lists the actions whose config or target could not be found in the organization; they are left out of the check.",
+            "properties": {
+              "resolved": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "unresolved": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "acknowledged": {
+            "type": "array",
+            "description": "Only with `acknowledged` in the request; the blocking findings it matched, which did not block",
             "items": {
               "$ref": "#/components/schemas/FlowMappingIssue"
             }
