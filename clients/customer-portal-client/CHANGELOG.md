@@ -1,5 +1,12 @@
 # @epilot/customer-portal-client
 
+## 0.54.0
+
+### Minor Changes
+
+- Export: `format` (`csv` / `xlsx`) on `createExport` and on the `getExport` job status, and `targets` / `match_any_targets` in the export `search`
+- Regenerated from the Customer Portal API: removed `getAllOrders`, `getAllOpportunities`, `getAllRequests`, `getExternalLinks`, `getResolvedExternalLink`, `getResolvedExternalLinkV3`, `getEntityActivityFeed`, `getSearchResultsForOpportunities` and `getSearchableAttributesForOpportunities` (the API no longer serves them); added `getPortalUserRole`, `listPortalRoles`, `resendTemporaryPasswordLink`, `setPartnerRole` and `validatePortalConfig`
+
 ## 0.53.0
 
 ### Minor Changes
