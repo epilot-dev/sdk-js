@@ -3,12 +3,16 @@
   "info": {
     "title": "Consent API",
     "version": "1.0.0",
-    "description": "Consent Management for epilot customer entities\n"
+    "description": "The Consent API provides centralized consent management for epilot customer entities,\nenabling GDPR-compliant handling of marketing permissions and communication preferences.\n\n## Key Features\n\n- **Opt-in/Opt-out Management**: Track and manage customer consent for various marketing channels\n  (email, SMS, phone calls) with a complete audit trail of all consent events.\n- **Double Opt-in Support**: Implement double opt-in workflows to verify customer consent,\n  ensuring compliance with GDPR and other privacy regulations.\n- **Append-only Consent Store**: All consent events are stored immutably, providing a complete\n  history of consent changes for compliance and auditing purposes.\n- **Token-based Verification**: Secure token-based endpoints for customers to confirm opt-in\n  or manage opt-out preferences via email links.\n\n## Consent Event Types\n\n| Type | Description |\n|------|-------------|\n| `OPT_IN` | Customer grants consent for a specific topic |\n| `OPT_OUT` | Customer revokes consent for a specific topic |\n| `DOUBLE_OPT_IN_REQUESTED` | Double opt-in email has been sent, awaiting confirmation |\n| `DOUBLE_OPT_IN` | Customer confirmed consent via double opt-in link |\n\n## Common Topics\n\n- `EMAIL_MARKETING` - Consent for marketing emails\n- `SMS_MARKETING` - Consent for marketing SMS messages\n- `PHONE_CALL_MARKETING` - Consent for marketing phone calls\n\n## Integration with Entities\n\nThe Consent API integrates with the Entity API to keep contact entities' marketing permissions\nsynchronized. Consent status is stored as a special consent attribute on contact entities,\ndisplaying both current status and historical events.\n"
   },
   "tags": [
     {
+      "name": "consent_definitions",
+      "description": "Consent definitions: the consents an organization collects, one topic on one channel each.\nNot available until the consent definitions release.\n"
+    },
+    {
       "name": "consent",
-      "description": "Consent Management"
+      "description": "Endpoints for managing customer consent events including opt-ins, opt-outs,\nand double opt-in verification. These endpoints support both programmatic\nconsent management (authenticated) and customer-facing token-based\nverification (public endpoints).\n"
     }
   ],
   "security": [
@@ -20,12 +24,19 @@
     "/v1/consent/publish": {
       "post": {
         "operationId": "publishConsentEvent",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "publishConsentEvent",
-        "description": "Publishes consent event on event bus, which appends to consent store\n",
+        "description": "Publishes a consent event (opt-in or opt-out) to the event bus, which appends\nthe event to the immutable consent store. This endpoint is used to record\ncustomer consent decisions from various sources such as journeys, portals,\nor manual entry.\n\nWhen `meta.double_opt_in: true` is set, a double opt-in email will be sent\nto the customer to verify their consent. The consent will only be fully\nactivated after the customer clicks the verification link.\n\n**Use Cases:**\n- Recording consent from journey submissions\n- Processing opt-out requests from customer service\n- Syncing consent from external systems\n",
         "tags": [
           "consent"
         ],
         "requestBody": {
+          "description": "The consent event to publish",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -43,6 +54,9 @@
                 },
                 "OptOutEmailMarketing": {
                   "$ref": "#/components/examples/ConsentOptOutEmailMarketing"
+                },
+                "DoubleOptInEmailMarketing": {
+                  "$ref": "#/components/examples/ConsentDoubleOptInEmailMarketing"
                 }
               }
             }
@@ -50,11 +64,67 @@
         },
         "responses": {
           "201": {
-            "description": "The created opt-in",
+            "description": "Consent event successfully created and published",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ConsentEvent"
+                },
+                "examples": {
+                  "CreatedOptIn": {
+                    "summary": "Successfully created opt-in event",
+                    "value": {
+                      "type": "OPT_IN",
+                      "topic": "EMAIL_MARKETING",
+                      "identifier": "exampleuser@epilot.cloud",
+                      "source": "frontend.epilot.cloud",
+                      "organization_id": "123",
+                      "created_at": "2024-01-15T10:30:00Z",
+                      "meta": {
+                        "ip_address": "1.1.1.1",
+                        "user_agent": "Mozilla/5.0"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body - missing required fields or invalid values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "message": "Validation error: 'identifier' is required"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid authentication token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "message": "Unauthorized"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "message": "Internal server error"
                 }
               }
             }
@@ -65,8 +135,13 @@
     "/v1/consent/{identifier}": {
       "get": {
         "operationId": "listConsentEvents",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "listConsentEvents",
-        "description": "List opt-ins and opt-outs by customer identifier\n",
+        "description": "Retrieves the complete consent history for a customer identified by their\nemail address or phone number. Returns all opt-in and opt-out events in\nchronological order, providing a full audit trail for compliance purposes.\n\n**Use Cases:**\n- Displaying consent history on contact entity detail pages\n- Verifying current consent status before sending marketing communications\n- Generating compliance reports for GDPR audits\n",
         "tags": [
           "consent"
         ],
@@ -75,22 +150,27 @@
             "name": "identifier",
             "in": "path",
             "required": true,
+            "description": "The customer's unique identifier, typically an email address or phone number.\nThis should match the identifier used when publishing consent events.\n",
             "schema": {
               "$ref": "#/components/schemas/ConsentIdentifier"
-            }
+            },
+            "example": "exampleuser@epilot.cloud"
           },
           {
             "name": "topic",
             "in": "query",
             "required": false,
+            "description": "Filter results to a specific consent topic. If not provided, events for\nall topics are returned.\n",
             "schema": {
               "$ref": "#/components/schemas/ConsentTopic"
-            }
+            },
+            "example": "EMAIL_MARKETING"
           },
           {
             "name": "limit",
             "in": "query",
             "required": false,
+            "description": "Maximum number of events to return per page",
             "schema": {
               "type": "integer",
               "default": 50,
@@ -102,6 +182,7 @@
             "name": "from",
             "in": "query",
             "required": false,
+            "description": "Offset for pagination - number of events to skip",
             "schema": {
               "type": "integer",
               "default": 0,
@@ -111,23 +192,583 @@
         ],
         "responses": {
           "200": {
-            "description": "list of opt-ins and opt-outs",
+            "description": "List of consent events for the specified customer",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "events": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ConsentEvent"
-                      }
+                  "$ref": "#/components/schemas/ConsentEventListResponse"
+                },
+                "example": {
+                  "events": [
+                    {
+                      "type": "DOUBLE_OPT_IN",
+                      "topic": "EMAIL_MARKETING",
+                      "identifier": "exampleuser@epilot.cloud",
+                      "source": "opt-in link",
+                      "organization_id": "123",
+                      "created_at": "2024-01-15T10:35:00Z",
+                      "meta": {}
                     },
-                    "total": {
-                      "type": "integer",
-                      "example": 1
+                    {
+                      "type": "DOUBLE_OPT_IN_REQUESTED",
+                      "topic": "EMAIL_MARKETING",
+                      "identifier": "exampleuser@epilot.cloud",
+                      "source": "frontend.epilot.cloud",
+                      "organization_id": "123",
+                      "created_at": "2024-01-15T10:30:00Z",
+                      "meta": {
+                        "double_opt_in": true
+                      }
                     }
-                  }
+                  ],
+                  "total": 2
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "message": "Invalid identifier format"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid authentication token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "message": "Unauthorized"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "message": "Internal server error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/consent/definitions": {
+      "post": {
+        "operationId": "createConsentDefinition",
+        "x-release-flag": "consent-definitions",
+        "x-epilot-permissions": [
+          {
+            "action": "consent:definition:edit"
+          }
+        ],
+        "summary": "createConsentDefinition",
+        "description": "Creates a consent definition: one topic on one channel, for example \"PV newsletter\" by email.\n\nA new definition starts as `draft`. Its contact attribute name is generated from the topic and\nchannel as `consent_<topic>_<channel>` and is unique in the organization: a second definition for\nthe same topic and channel is rejected with `409`. `topic`, `channel` and `attribute` cannot change\nafter creation.\n\nRequires the `consent:definition:edit` grant. Not available until the consent definitions release.\n",
+        "tags": [
+          "consent_definitions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentDefinitionCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created consent definition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDefinition"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "A definition for the same topic and channel already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDefinitionConflictError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listConsentDefinitions",
+        "x-release-flag": "consent-definitions",
+        "x-epilot-permissions": [
+          {
+            "action": "consent:definition:view"
+          }
+        ],
+        "summary": "listConsentDefinitions",
+        "description": "Lists the organization's consent definitions, sorted by topic.\n\nArchived definitions are left out unless `status=archived` or `include_archived=true` asks for them,\nso pickers only offer definitions that are still in use. An archived definition can still be read by id.\n\nRequires the `consent:definition:view` grant. Not available until the consent definitions release.\n",
+        "tags": [
+          "consent_definitions"
+        ],
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false,
+            "description": "Only definitions of this topic. Spellings with the same topic key match, so \"pv Newsletter\" also finds \"PV newsletter\".",
+            "schema": {
+              "type": "string"
+            },
+            "example": "PV newsletter"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Only definitions with this status. Without it, every status except `archived`.",
+            "schema": {
+              "$ref": "#/components/schemas/ConsentDefinitionStatus"
+            }
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false,
+            "description": "Also list archived definitions when no `status` is given, e.g. for a table of all definitions. Ignored together with `status`.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "Number of definitions to skip. `from` + `size` can be at most 10,000.",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of definitions to return",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The matching consent definitions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDefinitionListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/v1/consent/definitions/{definition_id}": {
+      "parameters": [
+        {
+          "name": "definition_id",
+          "in": "path",
+          "required": true,
+          "description": "The consent definition's id",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getConsentDefinition",
+        "x-release-flag": "consent-definitions",
+        "x-epilot-permissions": [
+          {
+            "action": "consent:definition:view"
+          }
+        ],
+        "summary": "getConsentDefinition",
+        "description": "Reads one consent definition by id.\n\nRequires the `consent:definition:view` grant. Not available until the consent definitions release.\n",
+        "tags": [
+          "consent_definitions"
+        ],
+        "responses": {
+          "200": {
+            "description": "The consent definition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDefinition"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateConsentDefinition",
+        "x-release-flag": "consent-definitions",
+        "x-epilot-permissions": [
+          {
+            "action": "consent:definition:edit"
+          }
+        ],
+        "summary": "updateConsentDefinition",
+        "description": "Updates a consent definition's name, legal text and double opt-in settings. Only the fields sent\nare changed; send `null` to clear an email template.\n\n`topic`, `channel`, `attribute` and `status` may be sent with their current value, for clients that\nsend the whole definition back, but changing them is rejected with `400`. The status changes through\nits own operations (publish, archive, unarchive).\n\nA blank `name` is rejected with `400` and `missing_fields`, for drafts and published definitions alike.\n\nA published definition's changes take effect at once: the next journey that loads shows the new text.\nIt must stay publishable, with the same checks as publishing: a change that leaves it without a legal\ntext, or with double opt-in and a confirmation or reminder email template that does not exist, is\nrejected with `400` and `missing_fields`. The templates are looked up on every change, since they can\nbe deleted after publishing. A draft may be saved incomplete.\n\nAn archived definition keeps its name, legal text and double opt-in setting until it is unarchived:\nchanging them answers `409`. Only its email templates can be changed, without the publish checks, so a\ntemplate deleted while it was archived can be replaced before unarchiving. A definition in the trash\ncannot be changed (`409`).\n\nRequires the `consent:definition:edit` grant. Not available until the consent definitions release.\n",
+        "tags": [
+          "consent_definitions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentDefinitionUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated consent definition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDefinition"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid, or it changes a fixed field. A blank name, and for a published definition a change that leaves it unpublishable, come with `missing_fields`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDefinitionNotPublishableError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "The definition is archived or in the trash",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteConsentDefinition",
+        "x-release-flag": "consent-definitions",
+        "x-epilot-permissions": [
+          {
+            "action": "consent:definition:edit"
+          }
+        ],
+        "summary": "deleteConsentDefinition",
+        "description": "Deletes a draft consent definition for good. A draft has collected no consents, so nothing is kept:\nthe entity is purged (it does not go to the trash) and its topic and channel can be used again by a new\ndefinition. A draft that is already in the trash is purged too.\n\nA definition that has been published is never deleted, since its consents are proof and its contact\nattribute is referenced elsewhere: deleting a published or archived definition is rejected with `409`.\nArchive it instead.\n\nRequires the `consent:definition:edit` grant. Not available until the consent definitions release.\n",
+        "tags": [
+          "consent_definitions"
+        ],
+        "responses": {
+          "200": {
+            "description": "The deleted consent definition, as it was before it was deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDefinition"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "The definition has been published, so it can only be archived",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/consent/definitions/{definition_id}/publish": {
+      "parameters": [
+        {
+          "name": "definition_id",
+          "in": "path",
+          "required": true,
+          "description": "The consent definition's id",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "publishConsentDefinition",
+        "x-release-flag": "consent-definitions",
+        "x-epilot-permissions": [
+          {
+            "action": "consent:definition:edit"
+          }
+        ],
+        "summary": "publishConsentDefinition",
+        "description": "Publishes a draft consent definition, so journeys can use it. Its current name, legal text and\ndouble opt-in settings are what customers see from then on.\n\nA definition is published only when it has a name and a legal text, and, with double opt-in, a\nconfirmation email template that exists and, when one is set, a reminder email template that exists.\nOtherwise the request is rejected with `400` and `missing_fields`.\n\nPublishing is one-way: a published definition never goes back to `draft`. Its name, text and\ndouble opt-in settings stay editable through `updateConsentDefinition`, and each change takes effect\nat once. Publishing a definition that is already published changes nothing and answers `200`.\n\nRequires the `consent:definition:edit` grant. Not available until the consent definitions release.\n",
+        "tags": [
+          "consent_definitions"
+        ],
+        "responses": {
+          "200": {
+            "description": "The published consent definition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDefinition"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The definition cannot be published yet; `missing_fields` names what it lacks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDefinitionNotPublishableError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "The definition is archived or in the trash, so it cannot be published",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/consent/definitions/{definition_id}/archive": {
+      "parameters": [
+        {
+          "name": "definition_id",
+          "in": "path",
+          "required": true,
+          "description": "The consent definition's id",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "archiveConsentDefinition",
+        "x-release-flag": "consent-definitions",
+        "x-epilot-permissions": [
+          {
+            "action": "consent:definition:edit"
+          }
+        ],
+        "summary": "archiveConsentDefinition",
+        "description": "Archives a published consent definition that is no longer in use. It is left out of lists and pickers\nby default but can still be read by id. Its contact attribute, the consents stored on contacts and the\nledger stay as they are. An archived definition keeps its text until it is unarchived; only its email\ntemplates can be changed.\n\nArchiving a definition that is already archived changes nothing and answers `200`. A draft cannot be\narchived (`409`); delete it instead.\n\nRequires the `consent:definition:edit` grant. Not available until the consent definitions release.\n",
+        "tags": [
+          "consent_definitions"
+        ],
+        "responses": {
+          "200": {
+            "description": "The archived consent definition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDefinition"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "The definition is a draft or in the trash, so it cannot be archived",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/consent/definitions/{definition_id}/unarchive": {
+      "parameters": [
+        {
+          "name": "definition_id",
+          "in": "path",
+          "required": true,
+          "description": "The consent definition's id",
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "unarchiveConsentDefinition",
+        "x-release-flag": "consent-definitions",
+        "x-epilot-permissions": [
+          {
+            "action": "consent:definition:edit"
+          }
+        ],
+        "summary": "unarchiveConsentDefinition",
+        "description": "Brings an archived consent definition back into use: its status becomes `published` again.\n\nIt must still be publishable, with the same checks as publishing, since its email templates may have\nbeen deleted while it was archived; otherwise the request is rejected with `400` and `missing_fields`.\nUnarchiving a published definition changes nothing and answers `200`. A draft cannot be unarchived\n(`409`).\n\nRequires the `consent:definition:edit` grant. Not available until the consent definitions release.\n",
+        "tags": [
+          "consent_definitions"
+        ],
+        "responses": {
+          "200": {
+            "description": "The unarchived consent definition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDefinition"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The definition can no longer be published; `missing_fields` names what it lacks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentDefinitionNotPublishableError"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "The definition is a draft or in the trash, so it cannot be unarchived",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpError"
                 }
               }
             }
@@ -138,9 +779,12 @@
     "/v1/opt-in/{token}": {
       "get": {
         "operationId": "handleOptInWithToken",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "handleOptInWithToken",
         "security": [],
-        "description": "Endpoint to handle opt-in links\n",
+        "description": "Public endpoint for customers to confirm their opt-in by clicking a\nverification link sent via email (double opt-in flow). This endpoint\nvalidates the token and records a `DOUBLE_OPT_IN` event if valid.\n\n**Flow:**\n1. Customer submits a journey/form with marketing consent\n2. System sends verification email with opt-in link containing a secure token\n3. Customer clicks the link, which calls this endpoint\n4. System validates token and records confirmed consent\n\nThis endpoint returns an HTML page to provide visual feedback to the customer.\n",
         "tags": [
           "consent"
         ],
@@ -149,13 +793,75 @@
             "name": "token",
             "in": "path",
             "required": true,
+            "description": "Secure token generated when the double opt-in email was sent.\nContains encrypted information about the consent event to be confirmed.\n",
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
           },
           {
             "name": "lang",
             "in": "query",
+            "description": "Language code for the confirmation page. Determines the language of\nthe success/error message displayed to the customer.\n",
+            "schema": {
+              "type": "string",
+              "default": "de"
+            },
+            "example": "de"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML confirmation page displayed to the customer after successfully\nconfirming their opt-in\n",
+            "content": {
+              "text/html": {
+                "example": "<p>You are subscribed!</p>\n"
+              }
+            }
+          },
+          "400": {
+            "description": "HTML error page displayed when the token is invalid, expired, or\nhas already been used\n",
+            "content": {
+              "text/html": {
+                "example": "<p>Invalid or expired link</p>\n"
+              }
+            }
+          },
+          "500": {
+            "description": "HTML error page displayed when an internal error occurs",
+            "content": {
+              "text/html": {
+                "example": "<p>An error occurred. Please try again later.</p>\n"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/opt-out/{token}": {
+      "post": {
+        "operationId": "handleOptOutWithTokenConfirmation",
+        "summary": "handleOptOutWithTokenConfirmation",
+        "security": [],
+        "description": "Public endpoint for customers to confirm their opt-out request. This is\ntypically called when a customer submits an unsubscribe confirmation form.\n\nThe POST method is used when the opt-out requires explicit confirmation\n(e.g., clicking an \"Unsubscribe\" button on a confirmation page) to prevent\naccidental unsubscribes from email preview features.\n\nRecords an `OPT_OUT` event for the customer and topic specified in the token.\n",
+        "tags": [
+          "consent"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Secure token containing encrypted information about the opt-out request,\nincluding the customer identifier and consent topic.\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Language code for the confirmation page. Determines the language of\nthe success/error message displayed to the customer.\n",
             "schema": {
               "type": "string",
               "default": "de"
@@ -164,10 +870,83 @@
         ],
         "responses": {
           "200": {
-            "description": "Handler page for opt in links",
+            "description": "HTML confirmation page displayed to the customer after successfully\nprocessing their opt-out request\n",
             "content": {
               "text/html": {
-                "example": "<p>You are subscribed!</p>\n"
+                "example": "<p>You are unsubscribed!</p>\n"
+              }
+            }
+          },
+          "400": {
+            "description": "HTML error page displayed when the token is invalid or expired\n",
+            "content": {
+              "text/html": {
+                "example": "<p>Invalid or expired link</p>\n"
+              }
+            }
+          },
+          "500": {
+            "description": "HTML error page displayed when an internal error occurs",
+            "content": {
+              "text/html": {
+                "example": "<p>An error occurred. Please try again later.</p>\n"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "handleOptOutWithToken",
+        "summary": "handleOptOutWithToken",
+        "security": [],
+        "description": "Public endpoint that displays the opt-out confirmation page when a customer\nclicks an unsubscribe link in an email. The page allows the customer to\nconfirm their decision to opt-out.\n\nThe GET method displays the confirmation page without processing the opt-out.\nThe actual opt-out is processed when the customer submits the form (POST).\n\n**Flow:**\n1. Customer clicks unsubscribe link in marketing email\n2. GET request displays confirmation page asking \"Are you sure?\"\n3. Customer clicks \"Unsubscribe\" button\n4. POST request processes the opt-out and shows success message\n",
+        "tags": [
+          "consent"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Secure token containing encrypted information about the opt-out request,\nincluding the customer identifier and consent topic.\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Language code for the confirmation page. Determines the language of\nthe page content displayed to the customer.\n",
+            "schema": {
+              "type": "string",
+              "default": "de"
+            },
+            "example": "de"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML confirmation page asking the customer to confirm their opt-out.\nContains a form that submits to the POST endpoint.\n",
+            "content": {
+              "text/html": {
+                "example": "<p>Are you sure you want to unsubscribe?</p>\n<form method=\"POST\"><button type=\"submit\">Unsubscribe</button></form>\n"
+              }
+            }
+          },
+          "400": {
+            "description": "HTML error page displayed when the token is invalid or expired\n",
+            "content": {
+              "text/html": {
+                "example": "<p>Invalid or expired link</p>\n"
+              }
+            }
+          },
+          "500": {
+            "description": "HTML error page displayed when an internal error occurs",
+            "content": {
+              "text/html": {
+                "example": "<p>An error occurred. Please try again later.</p>\n"
               }
             }
           }
@@ -180,28 +959,29 @@
       "EpilotAuth": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Epilot Id Token\n"
+        "description": "Epilot authentication token (JWT). Obtain this token by authenticating\nwith the epilot Identity API. The token must be included in the\nAuthorization header as: `Authorization: Bearer <token>`\n"
       }
     },
     "schemas": {
       "ConsentIdentifier": {
         "type": "string",
-        "description": "Unique identifier for consent source (e.g. customer email or phone)",
+        "description": "Unique identifier for the customer whose consent is being managed.\nTypically an email address or phone number that matches how the customer\nis identified in marketing communications.\n",
         "example": "exampleuser@epilot.cloud"
       },
       "ConsentTopic": {
         "type": "string",
-        "description": "Consent Topic (what the person is opting into)",
+        "description": "The specific type of marketing communication the customer is consenting to\nor revoking consent for. Common topics include:\n- `EMAIL_MARKETING` - Marketing emails and newsletters\n- `SMS_MARKETING` - Marketing SMS/text messages\n- `PHONE_CALL_MARKETING` - Marketing phone calls\n\nCustom topics can be defined based on business requirements.\n",
         "example": "EMAIL_MARKETING"
       },
       "ConsentSource": {
         "type": "string",
-        "description": "Consent Source (Origin of the Consent Event)",
+        "description": "Origin of the consent event, indicating where/how the consent was collected.\nExamples include:\n- Journey URLs (e.g., `frontend.epilot.cloud`)\n- Portal identifiers\n- Manual entry indicators (e.g., `customer service`)\n- Unsubscribe sources (e.g., `unsubscribe via email`)\n",
         "example": "www.frontend.epilot.cloud"
       },
       "ConsentMeta": {
         "type": "object",
         "additionalProperties": true,
+        "description": "Additional metadata associated with the consent event. This flexible object\ncan store any relevant context about how and where consent was collected.\n\n**Common fields:**\n- `double_opt_in` (boolean): When `true`, triggers a double opt-in email\n  to verify the customer's consent\n- `source_type` (string): Type of source (e.g., `journey`, `portal`, `api`)\n- `source_id` (string): UUID of the source (e.g., journey ID)\n- `ip_address` (string): Customer's IP address for audit purposes\n- `user_agent` (string): Customer's browser user agent string\n",
         "example": {
           "double_opt_in": true,
           "source_type": "journey",
@@ -212,9 +992,11 @@
       },
       "ConsentEventRequestBody": {
         "type": "object",
+        "description": "Request body for publishing a new consent event",
         "properties": {
           "type": {
             "type": "string",
+            "description": "The type of consent event:\n- `OPT_IN`: Customer grants consent\n- `OPT_OUT`: Customer revokes consent\n",
             "enum": [
               "OPT_IN",
               "OPT_OUT"
@@ -231,6 +1013,12 @@
           },
           "meta": {
             "$ref": "#/components/schemas/ConsentMeta"
+          },
+          "created_at": {
+            "description": "Timestamp of when the consent was given or revoked. Useful for\nimporting historical consent data. If not provided, the current\ntimestamp is used.\n",
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-01-01T00:00:00Z"
           }
         },
         "required": [
@@ -241,9 +1029,11 @@
       },
       "ConsentEvent": {
         "type": "object",
+        "description": "A recorded consent event representing a change in customer consent status.\nEvents are immutable once created and form an audit trail of all consent changes.\n",
         "properties": {
           "type": {
             "type": "string",
+            "description": "The type of consent event:\n- `OPT_IN`: Customer granted consent directly\n- `OPT_OUT`: Customer revoked consent\n- `DOUBLE_OPT_IN_REQUESTED`: Verification email sent, awaiting confirmation\n- `DOUBLE_OPT_IN`: Customer confirmed consent via verification link\n",
             "enum": [
               "OPT_IN",
               "OPT_OUT",
@@ -253,7 +1043,9 @@
           },
           "created_at": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when the consent event was recorded",
+            "example": "2024-01-15T10:30:00Z"
           },
           "topic": {
             "$ref": "#/components/schemas/ConsentTopic"
@@ -277,13 +1069,508 @@
           "identifier"
         ]
       },
+      "ConsentEventListResponse": {
+        "type": "object",
+        "description": "Paginated list of consent events for a customer",
+        "properties": {
+          "events": {
+            "type": "array",
+            "description": "List of consent events, ordered by creation date (newest first)",
+            "items": {
+              "$ref": "#/components/schemas/ConsentEvent"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of consent events matching the query criteria",
+            "example": 1
+          }
+        }
+      },
       "OrganizationId": {
         "type": "string",
+        "description": "The epilot organization ID that owns this consent record",
         "example": "123"
+      },
+      "ConsentChannel": {
+        "type": "string",
+        "description": "The channel a consent covers. The list is fixed by epilot.",
+        "enum": [
+          "email",
+          "sms",
+          "phone",
+          "print"
+        ],
+        "example": "email"
+      },
+      "ConsentDefinitionStatus": {
+        "type": "string",
+        "description": "- `draft`: editable and deletable, and not usable in journeys yet\n- `published`: usable in journeys; stays editable, never goes back to `draft` and is never deleted\n- `archived`: a published definition taken out of use, hidden from lists and pickers by default and\n  keeps its text until it is unarchived (only its email templates can change); its attribute and\n  stored consents stay\n",
+        "enum": [
+          "draft",
+          "published",
+          "archived"
+        ],
+        "example": "draft"
+      },
+      "ConsentDefinitionTopic": {
+        "type": "string",
+        "description": "What the customer agrees to, for example \"PV newsletter\". Definitions of the same topic are shown\ntogether. It names the contact attribute, so it cannot change after creation: lowercased, with\nä/ö/ü/ß written as ae/oe/ue/ss and every other run of characters outside a-z and 0-9 turned into `_`,\nit may be at most 40 characters long and must keep at least one letter or digit.\n",
+        "minLength": 1,
+        "maxLength": 200,
+        "example": "PV newsletter"
+      },
+      "ConsentDefinitionName": {
+        "type": "string",
+        "description": "The label customers see. Defaults to the topic, also when created blank. An update cannot make it blank (`400` with `missing_fields`).",
+        "maxLength": 200,
+        "example": "PV newsletter"
+      },
+      "ConsentDefinitionLegalText": {
+        "type": "string",
+        "description": "The consent text customers agree to, as rich text (HTML). May contain environment variables such as\n`{{env.company_name}}`, which are filled in when the text is shown.\n",
+        "example": "<p>I agree that {{env.company_name}} may send me the PV newsletter by email.</p>"
+      },
+      "ConsentDefinitionEmailTemplateId": {
+        "type": "string",
+        "nullable": true,
+        "description": "Id of an email template",
+        "example": "8d396871-95a0-4c9d-bb4d-9eda9c35776c"
+      },
+      "ConsentDefinition": {
+        "type": "object",
+        "description": "A consent the organization collects, for one topic on one channel",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5c1f0a46-4fb4-4e0e-9e9f-3b3f2c1d7a10"
+          },
+          "topic": {
+            "$ref": "#/components/schemas/ConsentDefinitionTopic"
+          },
+          "name": {
+            "$ref": "#/components/schemas/ConsentDefinitionName"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/ConsentChannel"
+          },
+          "legal_text": {
+            "$ref": "#/components/schemas/ConsentDefinitionLegalText"
+          },
+          "double_opt_in": {
+            "type": "boolean",
+            "description": "Whether a consent given in a journey needs to be confirmed by double opt-in"
+          },
+          "confirmation_email_template_id": {
+            "$ref": "#/components/schemas/ConsentDefinitionEmailTemplateId"
+          },
+          "reminder_email_template_id": {
+            "$ref": "#/components/schemas/ConsentDefinitionEmailTemplateId"
+          },
+          "attribute": {
+            "type": "string",
+            "description": "Name of the contact attribute that holds this consent, generated as `consent_<topic>_<channel>`\non creation. Unique in the organization and fixed after creation.\n",
+            "example": "consent_pv_newsletter_email"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ConsentDefinitionStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "topic",
+          "name",
+          "channel",
+          "double_opt_in",
+          "attribute",
+          "status"
+        ]
+      },
+      "ConsentDefinitionCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "topic": {
+            "$ref": "#/components/schemas/ConsentDefinitionTopic"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/ConsentChannel"
+          },
+          "name": {
+            "$ref": "#/components/schemas/ConsentDefinitionName"
+          },
+          "legal_text": {
+            "$ref": "#/components/schemas/ConsentDefinitionLegalText"
+          },
+          "double_opt_in": {
+            "type": "boolean",
+            "default": false
+          },
+          "confirmation_email_template_id": {
+            "$ref": "#/components/schemas/ConsentDefinitionEmailTemplateId"
+          },
+          "reminder_email_template_id": {
+            "$ref": "#/components/schemas/ConsentDefinitionEmailTemplateId"
+          }
+        },
+        "required": [
+          "topic",
+          "channel"
+        ]
+      },
+      "ConsentDefinitionUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/ConsentDefinitionName"
+          },
+          "legal_text": {
+            "$ref": "#/components/schemas/ConsentDefinitionLegalText"
+          },
+          "double_opt_in": {
+            "type": "boolean"
+          },
+          "confirmation_email_template_id": {
+            "$ref": "#/components/schemas/ConsentDefinitionEmailTemplateId"
+          },
+          "reminder_email_template_id": {
+            "$ref": "#/components/schemas/ConsentDefinitionEmailTemplateId"
+          },
+          "topic": {
+            "type": "string",
+            "description": "Accepted only with the current value"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/ConsentChannel"
+          },
+          "attribute": {
+            "type": "string",
+            "description": "Accepted only with the current value"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ConsentDefinitionStatus"
+          },
+          "id": {
+            "type": "string",
+            "description": "Accepted only with the current value"
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Ignored"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Ignored"
+          }
+        }
+      },
+      "ConsentDefinitionListResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsentDefinition"
+            }
+          },
+          "hits": {
+            "type": "integer",
+            "description": "Total number of matching definitions",
+            "example": 2
+          }
+        },
+        "required": [
+          "results",
+          "hits"
+        ]
+      },
+      "HttpError": {
+        "type": "object",
+        "description": "Error returned by the consent definition operations",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "example": "topic cannot be changed after creation"
+          }
+        },
+        "required": [
+          "status",
+          "error"
+        ]
+      },
+      "ConsentDefinitionConflictError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HttpError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "existing_definition_id": {
+                "type": "string",
+                "description": "The definition that already uses the attribute"
+              },
+              "attribute": {
+                "type": "string",
+                "example": "consent_pv_newsletter_email"
+              }
+            }
+          }
+        ]
+      },
+      "ConsentDefinitionNotPublishableError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HttpError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "missing_fields": {
+                "type": "array",
+                "description": "The fields that keep the definition from being published, or that a published definition must keep valid. With double opt-in, `confirmation_email_template_id` is listed when the template is not set or does not exist, and `reminder_email_template_id` when it is set but does not exist.",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "name",
+                    "legal_text",
+                    "confirmation_email_template_id",
+                    "reminder_email_template_id"
+                  ]
+                },
+                "example": [
+                  "legal_text"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ConsentDefinitionResolveEvent": {
+        "type": "object",
+        "description": "Not an HTTP request body: the payload a service sends when it invokes the consent definition resolver\nLambda directly. There is no token: only services allowed by IAM to invoke the function can call it, and\nthey vouch for `orgId`.\n",
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "description": "The organization the definitions belong to, e.g. the organization of the journey being served",
+            "example": "123"
+          },
+          "ids": {
+            "type": "array",
+            "description": "Ids of consent definitions, at most 50 once duplicates are removed (more answers `400`). Duplicates are answered once.",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "example": [
+              "5c1f0a46-4fb4-4e0e-9e9f-3b3f2c1d7a10"
+            ]
+          },
+          "language": {
+            "type": "string",
+            "description": "The language the texts are wanted in, e.g. `de`. Accepted and ignored for now: a definition has one text. Callers send it already so they do not change once texts per language arrive (ER-5685).",
+            "example": "de"
+          }
+        },
+        "required": [
+          "orgId",
+          "ids"
+        ]
+      },
+      "ResolvedConsentDefinition": {
+        "type": "object",
+        "description": "A published definition with its current text. Holds only what a journey needs to show and store the consent, since journeys are served to anonymous visitors.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "5c1f0a46-4fb4-4e0e-9e9f-3b3f2c1d7a10"
+          },
+          "name": {
+            "$ref": "#/components/schemas/ConsentDefinitionName"
+          },
+          "topic": {
+            "$ref": "#/components/schemas/ConsentDefinitionTopic"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/ConsentChannel"
+          },
+          "legal_text": {
+            "type": "string",
+            "description": "The current consent text as rich text (HTML), as stored. Environment variables such as `{{env.company_name}}` are left in place for the caller's templating to fill in.",
+            "example": "<p>I agree that {{env.company_name}} may send me the PV newsletter by email.</p>"
+          },
+          "double_opt_in": {
+            "type": "boolean",
+            "description": "Whether a consent given in a journey needs to be confirmed by double opt-in"
+          },
+          "attribute": {
+            "type": "string",
+            "description": "The contact attribute that holds this consent",
+            "example": "consent_pv_newsletter_email"
+          },
+          "status": {
+            "type": "string",
+            "description": "Always `published`, since only published definitions resolve",
+            "enum": [
+              "published"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "topic",
+          "channel",
+          "legal_text",
+          "double_opt_in",
+          "attribute",
+          "status"
+        ]
+      },
+      "UnresolvedConsentDefinition": {
+        "type": "object",
+        "description": "An id that does not resolve. Nothing else about the definition is given.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "5c1f0a46-4fb4-4e0e-9e9f-3b3f2c1d7a10"
+          },
+          "reason": {
+            "type": "string",
+            "description": "- `not_found`: no definition with this id in the organization, also when it is in entity-api's trash\n- `draft`: not published yet\n- `archived`: taken out of use\n",
+            "enum": [
+              "not_found",
+              "draft",
+              "archived"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "reason"
+        ]
+      },
+      "ConsentDefinitionResolveResult": {
+        "type": "object",
+        "description": "The resolved definitions and the ids that did not resolve, each id in one of the two lists",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResolvedConsentDefinition"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnresolvedConsentDefinition"
+            }
+          }
+        },
+        "required": [
+          "items",
+          "errors"
+        ]
+      },
+      "ConsentDefinitionResolveResponse": {
+        "type": "object",
+        "description": "Not an HTTP response: what the consent definition resolver Lambda returns as its payload. `200` with `body`;\n`400` when the event is invalid (no `orgId` or one that is not an org id, `ids` not a list of strings, more\nthan 50 ids); `500` when the definitions could not be read. On `400` and `500`, `error` says why; it never\ncontains a definition's content. An invoke can still fail without a payload (`FunctionError`), e.g. when\nthe function times out, and callers must handle that too.\n",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "enum": [
+              200,
+              400,
+              500
+            ]
+          },
+          "body": {
+            "$ref": "#/components/schemas/ConsentDefinitionResolveResult"
+          },
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "statusCode"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Standard error response returned when a request fails",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Human-readable error message describing what went wrong",
+            "example": "Validation error: 'identifier' is required"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "The request is invalid",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HttpError"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing or invalid authentication token",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HttpError"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "The caller lacks the required grant",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HttpError"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not found. Also answered for every consent definition operation while the organization does not\nhave the consent definitions release.\n",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HttpError"
+            }
+          }
+        }
       }
     },
     "examples": {
       "ConsentOptInEmailMarketing": {
+        "summary": "Opt-in for email marketing",
+        "description": "Simple opt-in for email marketing communications.\nThis creates a direct opt-in without requiring double opt-in verification.\n",
         "value": {
           "type": "OPT_IN",
           "topic": "EMAIL_MARKETING",
@@ -295,7 +1582,26 @@
           }
         }
       },
+      "ConsentDoubleOptInEmailMarketing": {
+        "summary": "Double opt-in for email marketing (GDPR recommended)",
+        "description": "Opt-in with double opt-in verification enabled. Setting `double_opt_in: true`\nin the meta object triggers a verification email to the customer. The consent\nis only fully activated after the customer clicks the verification link.\nThis is the recommended approach for GDPR compliance.\n",
+        "value": {
+          "type": "OPT_IN",
+          "topic": "EMAIL_MARKETING",
+          "identifier": "exampleuser@epilot.cloud",
+          "source": "frontend.epilot.cloud",
+          "meta": {
+            "double_opt_in": true,
+            "source_type": "journey",
+            "source_id": "0e4f2a26-14f0-4ada-9294-a7d7a0b9b214",
+            "ip_address": "1.1.1.1",
+            "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
+          }
+        }
+      },
       "ConsentOptOutEmailMarketing": {
+        "summary": "Opt-out from email marketing",
+        "description": "Records that the customer has revoked their consent for email marketing.\nThis should be recorded when a customer unsubscribes via email link,\ncustomer service request, or portal settings.\n",
         "value": {
           "type": "OPT_OUT",
           "topic": "EMAIL_MARKETING",
@@ -308,6 +1614,8 @@
         }
       },
       "ConsentOptInSMSMarketing": {
+        "summary": "Opt-in for SMS marketing",
+        "description": "Opt-in for SMS/text message marketing using a phone number as the identifier.\nThe identifier should be in international format for consistency.\n",
         "value": {
           "type": "OPT_IN",
           "topic": "SMS_MARKETING",
@@ -320,6 +1628,8 @@
         }
       },
       "ConsentOptInPhoneCallMarketing": {
+        "summary": "Opt-in for phone call marketing",
+        "description": "Opt-in for marketing phone calls using a phone number as the identifier.\nThe identifier should be in international format for consistency.\n",
         "value": {
           "type": "OPT_IN",
           "topic": "PHONE_CALL_MARKETING",
@@ -334,9 +1644,6 @@
     }
   },
   "servers": [
-    {
-      "url": "https://consent.sls.epilot.io"
-    },
     {
       "url": "https://consent.sls.epilot.io"
     }

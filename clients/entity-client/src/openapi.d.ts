@@ -855,7 +855,15 @@ declare namespace Components {
              */
             journey_id: string;
         }
-        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /**
+        export type Attribute = /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /**
+         * Consent Management.
+         *
+         * A consent attribute with a `definition_id` belongs to a consent definition (consent-api) and stores a
+         * `ConsentValue`. Without one, it is a legacy consent attribute configured by `topic` and `identifiers`,
+         * whose value consent-api rebuilds from its ledger.
+         *
+         */
+        ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /**
          * Portal roles of a portal user. The value is a list of portal role slugs (e.g. `["b2b_admin", "b2b_billing"]`);
          * a single slug string is also accepted. The user's permissions are the union of all their roles.
          * An empty value means the portal's default role is used.
@@ -877,7 +885,15 @@ declare namespace Components {
              * contact
              */
             schema?: string;
-        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /* Consent Management */ ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /**
+        } & (/* a readonly computed ID for the attribute including schema slug and the attribute ID */ /* Textarea or text input */ TextAttribute | /* Link with title and href */ LinkAttribute | /* Date or Datetime picker */ DateAttribute | /* Country picker */ CountryAttribute | /* Yes / No Toggle */ BooleanAttribute | /* Dropdown select */ SelectAttribute | /* Multi Choice Selection */ MultiSelectAttribute | /* Status select */ StatusAttribute | /* Sequence of unique identifiers */ SequenceAttribute | /* Entity Relationship */ RelationAttribute | /* User Relationship */ UserRelationAttribute | /* Address attribute */ AddressAttribute | /* Reference to an address attribute of another entity */ AddressRelationAttribute | /* Reference to a payment method attribute of another entity */ PaymentMethodRelationAttribute | /* Currency input */ CurrencyAttribute | /* Tags */ TagsAttribute | /* Message emil address */ MessageEmailAddressAttribute | /* Numeric input */ NumberAttribute | /* Dynamic data table with configurable columns. Data is stored as an array of objects where each object represents a row. */ TableAttribute | /**
+         * Consent Management.
+         *
+         * A consent attribute with a `definition_id` belongs to a consent definition (consent-api) and stores a
+         * `ConsentValue`. Without one, it is a legacy consent attribute configured by `topic` and `identifiers`,
+         * whose value consent-api rebuilds from its ledger.
+         *
+         */
+        ConsentAttribute | /* No UI representation */ InternalAttribute | /* Type of attribute to render N number of ordered fields */ OrderedListAttribute | /* File or Image Attachment */ FileAttribute | /* An attribute that is computed from the entity data. For more details on how to use them, check the docs [here](https://e-pilot.atlassian.net/wiki/spaces/EO/pages/5642977476/How+To+Computed+Schema+Attributes) */ ComputedAttribute | /* Partner Status */ PartnerStatusAttribute | /* Email address for send invitation */ InvitationEmailAttribute | /* Automation entity */ AutomationAttribute | /* Epilot internal user info */ InternalUserAttribute | /* Entity Taxonomy */ PurposeAttribute | /* Shared Partner Organisations */ PartnerOrganisationAttribute | /* Portal access configuration */ PortalAccessAttribute | /**
          * Portal roles of a portal user. The value is a list of portal role slugs (e.g. `["b2b_admin", "b2b_billing"]`);
          * a single slug string is also accepted. The user's permissions are the union of all their roles.
          * An empty value means the portal's default role is used.
@@ -2053,7 +2069,12 @@ declare namespace Components {
          */
         /* A condition whose value is a plain scalar, with no further configuration. */ ScalarConditionDefinition | /* A condition whose value is one of a fixed set of options. */ SelectConditionDefinition | /* A condition whose value identifies a place, or the grid operator a place is connected to. */ LocationConditionDefinition;
         /**
-         * Consent Management
+         * Consent Management.
+         *
+         * A consent attribute with a `definition_id` belongs to a consent definition (consent-api) and stores a
+         * `ConsentValue`. Without one, it is a legacy consent attribute configured by `topic` and `identifiers`,
+         * whose value consent-api rebuilds from its ledger.
+         *
          */
         export interface ConsentAttribute {
             /**
@@ -2264,8 +2285,62 @@ declare namespace Components {
                 FuzzyConfig;
             };
             type: "consent";
-            topic: string;
+            /**
+             * Legacy consent topic, e.g. `EMAIL_MARKETING`. Required for legacy consent attributes.
+             */
+            topic?: string;
+            /**
+             * Legacy only. Paths of the entity's identifiers (e.g. `email[*].email`) the consent applies to.
+             */
             identifiers?: string[];
+            /**
+             * Id of the consent definition this attribute belongs to. When set, the attribute's value is a
+             * `ConsentValue`.
+             *
+             * example:
+             * 2f8d9c3e-6a1b-4c1e-9f0a-1b2c3d4e5f60
+             */
+            definition_id?: string;
+        }
+        /**
+         * Value of a consent attribute that belongs to a consent definition (has a `definition_id`).
+         *
+         * The stored value. Writers may send shorthand instead of the object: `true` (active), `false` (declined),
+         * or a status string; `null` or `""` clears it. `definition_id` is always taken from the attribute; `source`
+         * and `updated_at` are filled in when left out. When the status stays the same, fields the writer leaves out
+         * are kept, so repeating an answer changes nothing; otherwise the write replaces the whole value. A contact
+         * without a value has never answered: read it as `unknown`.
+         *
+         */
+        export interface ConsentValue {
+            [name: string]: any;
+            status: "active" | "pending" | "declined" | "unknown";
+            /**
+             * Id of the consent definition, copied from the attribute
+             */
+            definition_id: string;
+            /**
+             * Where the consent was given or changed, e.g. `journey`, `epilot`, `api`, `erp`, or `import` for a CSV
+             * import (its `source_id` is the import's `job_id`)
+             *
+             * example:
+             * journey
+             */
+            source: string;
+            /**
+             * Id of the source record, e.g. a journey submission id
+             */
+            source_id?: string;
+            /**
+             * The address the consent was given for (email address, phone number or postal address)
+             * example:
+             * jane.doe@example.com
+             */
+            identifier?: string;
+            /**
+             * When the status was set
+             */
+            updated_at: string; // date-time
         }
         /**
          * Country picker
@@ -11337,9 +11412,26 @@ declare namespace Components {
                 FuzzyConfig;
             };
             type: "relation";
+            /**
+             * Cardinality of the relation: how many entities the attribute can hold (`has_one` = one, `has_many` = many).
+             * This says nothing about direction. Direction is determined by `reverse_attributes`.
+             *
+             */
             relation_type?: "has_many" | "has_one";
             /**
-             * Map of schema slug to target relation attribute
+             * Determines the direction of the relation. A relation attribute is either a direct or a reverse relation:
+             *
+             * - **`reverse_attributes` absent (direct relation)**: this entity points to the related entities.
+             *   The links are stored on this entity, in the value of this attribute (`{ "$relation": [{ "entity_id": "..." }] }`).
+             * - **`reverse_attributes` present (reverse relation)**: the related entities point to this entity.
+             *   The links are stored on the related entities, in the direct relation attribute named here.
+             *   The value of this attribute is derived from them when the entity is hydrated, nothing is stored on this entity.
+             *
+             * Map of related schema slug to the name of the direct relation attribute on that schema that points back to this entity.
+             * `{ "contact": "account" }` on `account.contacts` means: the contacts of an account are the `contact` entities whose `account` attribute points to it.
+             *
+             * Direction is independent of `relation_type`, which only describes cardinality.
+             *
              * example:
              * {
              *   "contact": "account",
@@ -21609,6 +21701,7 @@ export type ClassificationsUpdate = Components.Schemas.ClassificationsUpdate;
 export type ComputedAttribute = Components.Schemas.ComputedAttribute;
 export type ConditionDefinition = Components.Schemas.ConditionDefinition;
 export type ConsentAttribute = Components.Schemas.ConsentAttribute;
+export type ConsentValue = Components.Schemas.ConsentValue;
 export type CountryAttribute = Components.Schemas.CountryAttribute;
 export type CurrencyAttribute = Components.Schemas.CurrencyAttribute;
 export type DateAttribute = Components.Schemas.DateAttribute;
