@@ -1520,14 +1520,6 @@ export const API_LIST: ApiInfo[] = [
     ],
   },
   {
-    apiName: 'translation',
-    kebabName: 'translation',
-    title: 'Translation API',
-    serverUrl: 'https://translation.sls.epilot.io',
-    operationCount: 1,
-    operationIds: ['translateTexts'],
-  },
-  {
     apiName: 'user',
     kebabName: 'user',
     title: 'User API',
