@@ -415,6 +415,12 @@ const { data } = await customerPortalClient.upsertPortal(...)
 - [`SwapPortalReferenceItem`](#swapportalreferenceitem)
 - [`PortalUserRegistrationStatus`](#portaluserregistrationstatus)
 - [`BusinessPartnerItem`](#businesspartneritem)
+- [`RecordAccess`](#recordaccess)
+- [`RecordAccessRule`](#recordaccessrule)
+- [`RecordAccessCondition`](#recordaccesscondition)
+- [`RecordAccessRelationAttributeCondition`](#recordaccessrelationattributecondition)
+- [`RecordAccessName`](#recordaccessname)
+- [`RecordAccessDefaults`](#recordaccessdefaults)
 - [`PortalRoleRef`](#portalroleref)
 - [`SupportReportType`](#supportreporttype)
 - [`SupportRequestAttachment`](#supportrequestattachment)
@@ -722,6 +728,18 @@ const { data } = await client.getPortalConfigByDomain({
   ],
   "default_role": "default_end_customer_portal_role",
   "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -1677,6 +1695,18 @@ const { data } = await client.getPublicPortalConfigV3({
   ],
   "default_role": "default_end_customer_portal_role",
   "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -2023,6 +2053,18 @@ const { data } = await client.getOrgPortalConfigV3({
   ],
   "default_role": "default_end_customer_portal_role",
   "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -2225,6 +2267,8 @@ const { data } = await client.getAllPortalConfigs()
       "registration_identifiers": [],
       "default_role": "default_end_customer_portal_role",
       "allowed_roles": ["b2b_admin", "b2b_viewer"],
+      "record_access": {},
+      "record_access_defaults": {},
       "surfaces": [],
       "contact_identifiers_for_account": [],
       "additional_contact_attributes": [],
@@ -7480,6 +7524,18 @@ const { data } = await client.createPortalConfig(
     ],
     default_role: 'default_end_customer_portal_role',
     allowed_roles: ['b2b_admin', 'b2b_viewer'],
+    record_access: {
+      contract: {
+        conditions: [ /* ... */ ]
+      },
+      meter: {
+        conditions: [ /* ... */ ]
+      },
+      ticket: {
+        conditions: [ /* ... */ ]
+      }
+    },
+    record_access_defaults: {},
     surfaces: [
       {
         id: 'website-journeys',
@@ -7797,6 +7853,18 @@ const { data } = await client.createPortalConfig(
   ],
   "default_role": "default_end_customer_portal_role",
   "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -8159,6 +8227,18 @@ const { data } = await client.getPortalConfigV3({
   ],
   "default_role": "default_end_customer_portal_role",
   "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -8513,6 +8593,18 @@ const { data } = await client.putPortalConfig(
     ],
     default_role: 'default_end_customer_portal_role',
     allowed_roles: ['b2b_admin', 'b2b_viewer'],
+    record_access: {
+      contract: {
+        conditions: [ /* ... */ ]
+      },
+      meter: {
+        conditions: [ /* ... */ ]
+      },
+      ticket: {
+        conditions: [ /* ... */ ]
+      }
+    },
+    record_access_defaults: {},
     surfaces: [
       {
         id: 'website-journeys',
@@ -8854,6 +8946,18 @@ const { data } = await client.putPortalConfig(
   ],
   "default_role": "default_end_customer_portal_role",
   "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -9227,6 +9331,18 @@ const { data } = await client.createPortalRevision(
     ],
     default_role: 'default_end_customer_portal_role',
     allowed_roles: ['b2b_admin', 'b2b_viewer'],
+    record_access: {
+      contract: {
+        conditions: [ /* ... */ ]
+      },
+      meter: {
+        conditions: [ /* ... */ ]
+      },
+      ticket: {
+        conditions: [ /* ... */ ]
+      }
+    },
+    record_access_defaults: {},
     surfaces: [
       {
         id: 'website-journeys',
@@ -9942,6 +10058,18 @@ const { data } = await client.validatePortalConfig(
     ],
     default_role: 'default_end_customer_portal_role',
     allowed_roles: ['b2b_admin', 'b2b_viewer'],
+    record_access: {
+      contract: {
+        conditions: [ /* ... */ ]
+      },
+      meter: {
+        conditions: [ /* ... */ ]
+      },
+      ticket: {
+        conditions: [ /* ... */ ]
+      }
+    },
+    record_access_defaults: {},
     surfaces: [
       {
         id: 'website-journeys',
@@ -10139,6 +10267,8 @@ const { data } = await client.listAllPortalConfigs()
       "registration_identifiers": [],
       "default_role": "default_end_customer_portal_role",
       "allowed_roles": ["b2b_admin", "b2b_viewer"],
+      "record_access": {},
+      "record_access_defaults": {},
       "surfaces": [],
       "contact_identifiers_for_account": [],
       "additional_contact_attributes": [],
@@ -10209,6 +10339,8 @@ const { data } = await client.listPortalConfigSummaries()
       "registration_identifiers": [],
       "default_role": "default_end_customer_portal_role",
       "allowed_roles": ["b2b_admin", "b2b_viewer"],
+      "record_access": {},
+      "record_access_defaults": {},
       "surfaces": [],
       "is_dummy": true,
       "is_v3_item": true,
@@ -10536,6 +10668,18 @@ const { data } = await client.clonePortalConfig(
   ],
   "default_role": "default_end_customer_portal_role",
   "allowed_roles": ["b2b_admin", "b2b_viewer"],
+  "record_access": {
+    "contract": {
+      "conditions": []
+    },
+    "meter": {
+      "conditions": []
+    },
+    "ticket": {
+      "conditions": []
+    }
+  },
+  "record_access_defaults": {},
   "surfaces": [
     {
       "id": "website-journeys",
@@ -15968,6 +16112,24 @@ type PortalConfigSummaryV3 = {
   }>
   default_role?: string
   allowed_roles?: string[]
+  record_access?: Record<string, {
+    conditions: Array<{
+      type: { ... }
+      attribute: { ... }
+      through?: { ... }
+    }>
+  }>
+  record_access_defaults?: Record<string, {
+    conditions: Array<{
+      type: { ... }
+      attribute: { ... }
+      through?: { ... }
+    }>
+    never_listed?: Array<{
+      attribute: { ... }
+      value: { ... }
+    }>
+  }>
   surfaces?: Array<{
     id: string
     name: string
@@ -16725,6 +16887,90 @@ type BusinessPartnerItem = {
   role?: string
   role_name?: string
 }
+```
+
+### `RecordAccess`
+
+Which records portal users see in the portal's lists, per record type (schema slug). A
+record type without an entry uses its default rule (`record_access_defaults`), or else any
+of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+`file` and `portal_user` are ignored
+
+```ts
+type RecordAccess = Record<string, {
+  conditions: Array<{
+    type: "relation_attribute"
+    attribute: string
+    through?: string
+  }>
+}>
+```
+
+### `RecordAccessRule`
+
+A record is visible when one of the conditions applies.
+
+```ts
+type RecordAccessRule = {
+  conditions: Array<{
+    type: "relation_attribute"
+    attribute: string
+    through?: string
+  }>
+}
+```
+
+### `RecordAccessCondition`
+
+```ts
+type RecordAccessCondition = {
+  type: "relation_attribute"
+  attribute: string
+  through?: string
+}
+```
+
+### `RecordAccessRelationAttributeCondition`
+
+The record's relation attribute `attribute` contains the user's contact. With `through`,
+the record related through the attribute `through` must contain it instead, e.g. on meters
+`through: contract, attribute: customer`.
+
+
+```ts
+type RecordAccessRelationAttributeCondition = {
+  type: "relation_attribute"
+  attribute: string
+  through?: string
+}
+```
+
+### `RecordAccessName`
+
+A schema slug or attribute name. Letters, digits and underscores only.
+
+```ts
+type RecordAccessName = string
+```
+
+### `RecordAccessDefaults`
+
+Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+write.
+
+
+```ts
+type RecordAccessDefaults = Record<string, {
+  conditions: Array<{
+    type: "relation_attribute"
+    attribute: string
+    through?: string
+  }>
+  never_listed?: Array<{
+    attribute: string
+    value: string
+  }>
+}>
 ```
 
 ### `PortalRoleRef`
