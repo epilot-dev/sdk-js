@@ -9,10 +9,12 @@
       "post": {
         "operationId": "publishConsentEvent",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
-        }
+        },
+        "responses": {}
       }
     },
     "/v1/consent/{identifier}": {
@@ -39,7 +41,121 @@
             "in": "query",
             "required": false
           }
-        ]
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/consent/definitions": {
+      "post": {
+        "operationId": "createConsentDefinition",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listConsentDefinitions",
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/consent/definitions/{definition_id}": {
+      "parameters": [
+        {
+          "name": "definition_id",
+          "in": "path",
+          "required": true,
+          "description": "The consent definition's id"
+        }
+      ],
+      "get": {
+        "operationId": "getConsentDefinition",
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateConsentDefinition",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteConsentDefinition",
+        "responses": {}
+      }
+    },
+    "/v1/consent/definitions/{definition_id}/publish": {
+      "parameters": [
+        {
+          "name": "definition_id",
+          "in": "path",
+          "required": true,
+          "description": "The consent definition's id"
+        }
+      ],
+      "post": {
+        "operationId": "publishConsentDefinition",
+        "responses": {}
+      }
+    },
+    "/v1/consent/definitions/{definition_id}/archive": {
+      "parameters": [
+        {
+          "name": "definition_id",
+          "in": "path",
+          "required": true,
+          "description": "The consent definition's id"
+        }
+      ],
+      "post": {
+        "operationId": "archiveConsentDefinition",
+        "responses": {}
+      }
+    },
+    "/v1/consent/definitions/{definition_id}/unarchive": {
+      "parameters": [
+        {
+          "name": "definition_id",
+          "in": "path",
+          "required": true,
+          "description": "The consent definition's id"
+        }
+      ],
+      "post": {
+        "operationId": "unarchiveConsentDefinition",
+        "responses": {}
       }
     },
     "/v1/opt-in/{token}": {
@@ -55,11 +171,67 @@
             "name": "lang",
             "in": "query"
           }
-        ]
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/opt-out/{token}": {
+      "post": {
+        "operationId": "handleOptOutWithTokenConfirmation",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "lang",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      },
+      "get": {
+        "operationId": "handleOptOutWithToken",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "lang",
+            "in": "query"
+          }
+        ],
+        "responses": {}
       }
     }
   },
-  "components": {},
+  "components": {
+    "responses": {
+      "BadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Unauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "Forbidden": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFound": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://consent.sls.epilot.io"

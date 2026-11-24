@@ -48,7 +48,8 @@ declare namespace Components {
          * same in every language". A translated field must carry the fallback
          * language.
          *
-         * The URL must be absolute and use `http`, `https`, `mailto` or `tel`.
+         * The URL must be absolute and use `https`, `mailto` or `tel`; `http` is
+         * rejected.
          * `mailto:` needs at least one address (`name@domain`) and may carry
          * `?subject=…`; `tel:` needs a phone number (digits, an optional leading
          * `+`, spaces, `-`, `.`, `(`, `)`) and may carry `;ext=…`. The checks are
@@ -134,7 +135,8 @@ declare namespace Components {
              * same in every language". A translated field must carry the fallback
              * language.
              *
-             * The URL must be absolute and use `http`, `https`, `mailto` or `tel`.
+             * The URL must be absolute and use `https`, `mailto` or `tel`; `http` is
+             * rejected.
              * `mailto:` needs at least one address (`name@domain`) and may carry
              * `?subject=…`; `tel:` needs a phone number (digits, an optional leading
              * `+`, spaces, `-`, `.`, `(`, `)`) and may carry `;ext=…`. The checks are
@@ -248,7 +250,8 @@ declare namespace Components {
              * same in every language". A translated field must carry the fallback
              * language.
              *
-             * The URL must be absolute and use `http`, `https`, `mailto` or `tel`.
+             * The URL must be absolute and use `https`, `mailto` or `tel`; `http` is
+             * rejected.
              * `mailto:` needs at least one address (`name@domain`) and may carry
              * `?subject=…`; `tel:` needs a phone number (digits, an optional leading
              * `+`, spaces, `-`, `.`, `(`, `)`) and may carry `;ext=…`. The checks are
@@ -356,7 +359,8 @@ declare namespace Components {
          * same in every language". A translated field must carry the fallback
          * language.
          *
-         * The URL must be absolute and use `http`, `https`, `mailto` or `tel`.
+         * The URL must be absolute and use `https`, `mailto` or `tel`; `http` is
+         * rejected.
          * `mailto:` needs at least one address (`name@domain`) and may carry
          * `?subject=…`; `tel:` needs a phone number (digits, an optional leading
          * `+`, spaces, `-`, `.`, `(`, `)`) and may carry `;ext=…`. The checks are
@@ -717,7 +721,7 @@ export interface OperationMethods {
   /**
    * listEnvironmentVariables - listEnvironmentVariables
    * 
-   * List all environment variables for the organization. Returns metadata only, no secret values.
+   * List all environment variables for the organization. Returns metadata only, no secret values. Requires `environments:view`; `environments:edit` is also accepted for roles granted before `environments:view` existed.
    */
   'listEnvironmentVariables'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -737,7 +741,7 @@ export interface OperationMethods {
   /**
    * listEnvironmentGroups - listEnvironmentGroups
    * 
-   * List all environment groups for the organization.
+   * List all environment groups for the organization. Requires `environments:view`; `environments:edit` is also accepted for roles granted before `environments:view` existed.
    */
   'listEnvironmentGroups'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -767,7 +771,7 @@ export interface OperationMethods {
   /**
    * getEnvironmentVariable - getEnvironmentVariable
    * 
-   * Get an environment variable by key. Returns value for non-secret types, omitted for SecretString.
+   * Get an environment variable by key. Returns value for non-secret types, omitted for SecretString. Requires `environments:view`; `environments:edit` is also accepted for roles granted before `environments:view` existed.
    */
   'getEnvironmentVariable'(
     parameters?: Parameters<Paths.V1Environments$Key.PathParameters> | null,
@@ -801,7 +805,7 @@ export interface PathsDictionary {
     /**
      * listEnvironmentVariables - listEnvironmentVariables
      * 
-     * List all environment variables for the organization. Returns metadata only, no secret values.
+     * List all environment variables for the organization. Returns metadata only, no secret values. Requires `environments:view`; `environments:edit` is also accepted for roles granted before `environments:view` existed.
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -823,7 +827,7 @@ export interface PathsDictionary {
     /**
      * listEnvironmentGroups - listEnvironmentGroups
      * 
-     * List all environment groups for the organization.
+     * List all environment groups for the organization. Requires `environments:view`; `environments:edit` is also accepted for roles granted before `environments:view` existed.
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -857,7 +861,7 @@ export interface PathsDictionary {
     /**
      * getEnvironmentVariable - getEnvironmentVariable
      * 
-     * Get an environment variable by key. Returns value for non-secret types, omitted for SecretString.
+     * Get an environment variable by key. Returns value for non-secret types, omitted for SecretString. Requires `environments:view`; `environments:edit` is also accepted for roles granted before `environments:view` existed.
      */
     'get'(
       parameters?: Parameters<Paths.V1Environments$Key.PathParameters> | null,

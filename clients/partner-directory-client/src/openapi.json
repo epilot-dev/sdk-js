@@ -383,6 +383,9 @@
     "/v1/partner-directory/public/getPartnerByToken": {
       "get": {
         "operationId": "getPartnerByToken",
+        "x-epilot-agent": {
+          "expose": false
+        },
         "summary": "getPartnerByToken",
         "description": "Retrieves partner information using an invitation token.\n\nThis is a **public endpoint** that does not require authentication.\nIt is used during the partner onboarding flow to display partner information\nbefore the invited organization completes their registration.\n\nThe token is sent to the partner via email when they are invited.\n",
         "security": [],
@@ -529,6 +532,9 @@
     "/v2/partners/{id}/invite": {
       "post": {
         "operationId": "invitePartnerV2",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "invitePartnerV2",
         "tags": [
           "Partners"
@@ -618,8 +624,16 @@
                       "items": {
                         "$ref": "#/components/schemas/PartnerUser"
                       }
+                    },
+                    "can_manage_roles": {
+                      "type": "boolean",
+                      "description": "Whether the caller (Vendor) is allowed to mutate roles for this partner\norganization. `false` when the partner org is not on the Partner pricing tier —\ni.e. when the \"partnership\" is between two Vendors. Frontends should disable\nrole-mutation UI (create / edit / delete role, assign / unassign user roles)\nwhen this flag is `false`.\n"
                     }
-                  }
+                  },
+                  "required": [
+                    "results",
+                    "can_manage_roles"
+                  ]
                 },
                 "example": {
                   "results": [
@@ -632,11 +646,13 @@
                         {
                           "id": "role-123",
                           "slug": "partner_admin",
-                          "name": "Partner Administrator"
+                          "name": "Partner Administrator",
+                          "mutable": true
                         }
                       ]
                     }
-                  ]
+                  ],
+                  "can_manage_roles": true
                 }
               }
             }
@@ -657,6 +673,9 @@
       },
       "post": {
         "operationId": "createPartnerUser",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "createPartnerUser",
         "tags": [
           "Partner Users"
@@ -810,8 +829,16 @@
                       "items": {
                         "$ref": "#/components/schemas/PartnerRole"
                       }
+                    },
+                    "can_manage_roles": {
+                      "type": "boolean",
+                      "description": "Whether the caller (Vendor) is allowed to mutate roles for this partner\norganization. `false` when the partner org is not on the Partner pricing tier —\ni.e. when the \"partnership\" is between two Vendors.\n"
                     }
-                  }
+                  },
+                  "required": [
+                    "results",
+                    "can_manage_roles"
+                  ]
                 },
                 "example": {
                   "results": [
@@ -820,6 +847,7 @@
                       "slug": "partner_admin",
                       "name": "Partner Administrator",
                       "type": "share_role",
+                      "mutable": true,
                       "grants": [
                         {
                           "action": "entity-read",
@@ -833,6 +861,7 @@
                       "slug": "partner_viewer",
                       "name": "Partner Viewer",
                       "type": "share_role",
+                      "mutable": true,
                       "grants": [
                         {
                           "action": "entity-read",
@@ -841,7 +870,8 @@
                         }
                       ]
                     }
-                  ]
+                  ],
+                  "can_manage_roles": true
                 }
               }
             }
@@ -862,6 +892,9 @@
       },
       "post": {
         "operationId": "createPartnerRole",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "createPartnerRole",
         "tags": [
           "Partner Users"
@@ -916,6 +949,7 @@
                   "slug": "partner_sales",
                   "name": "Partner Sales",
                   "type": "share_role",
+                  "mutable": true,
                   "grants": [
                     {
                       "action": "entity-read",
@@ -950,6 +984,9 @@
     "/v2/partners/{orgId}/roles/{roleId}": {
       "put": {
         "operationId": "updatePartnerRole",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "updatePartnerRole",
         "tags": [
           "Partner Users"
@@ -1019,6 +1056,7 @@
                   "slug": "partner_sales",
                   "name": "Partner Sales Updated",
                   "type": "share_role",
+                  "mutable": true,
                   "grants": [
                     {
                       "action": "entity-read",
@@ -1113,6 +1151,9 @@
     "/v2/partners/{orgId}/users/{userId}/roles": {
       "post": {
         "operationId": "assignPartnerUserRoles",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
         "summary": "assignPartnerUserRoles",
         "tags": [
           "Partner Users"
@@ -1467,10 +1508,6 @@
           "language": {
             "type": "string",
             "description": "Language for the partner invitation email. Determines the email template language.",
-            "enum": [
-              "en",
-              "de"
-            ],
             "default": "en",
             "example": "de"
           }
@@ -1678,6 +1715,13 @@
                 "type": "string",
                 "description": "Unique identifier of the user group",
                 "example": "group-456"
+              },
+              "abbreviation": {
+                "type": "string",
+                "maxLength": 2,
+                "nullable": true,
+                "description": "Short abbreviation for the group, up to 2 characters",
+                "example": "FN"
               }
             }
           }
@@ -1943,12 +1987,18 @@
                   "type": "string",
                   "description": "Human-readable role name",
                   "example": "Partner Administrator"
+                },
+                "mutable": {
+                  "type": "boolean",
+                  "description": "Whether this role can be re-assigned / unassigned by the calling Vendor.\nReflects the partner organization's pricing tier.\n",
+                  "example": true
                 }
               },
               "required": [
                 "id",
                 "slug",
-                "name"
+                "name",
+                "mutable"
               ]
             }
           }
@@ -1972,10 +2022,6 @@
           },
           "language": {
             "type": "string",
-            "enum": [
-              "en",
-              "de"
-            ],
             "description": "Preferred language for the user. Determines the language of the invitation email and default UI language.",
             "example": "de"
           },
@@ -2213,13 +2259,19 @@
             "items": {
               "$ref": "#/components/schemas/Grant"
             }
+          },
+          "mutable": {
+            "type": "boolean",
+            "description": "Whether this role can be mutated (edited / deleted / assigned) by the calling Vendor.\nReflects the partner organization's pricing tier — role mutations are only allowed\nwhen the partner org is on the Partner pricing tier.\n",
+            "example": true
           }
         },
         "required": [
           "id",
           "slug",
           "name",
-          "grants"
+          "grants",
+          "mutable"
         ]
       },
       "AssignRolesPayload": {

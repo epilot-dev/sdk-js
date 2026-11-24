@@ -139,6 +139,42 @@ declare namespace Components {
          * 1663308898789
          */
         export type CacheExpiration = string; // timestamp
+        export interface ChartTemplateOptionSource {
+            dataset: "workflows";
+            attribute: "workflow_executions.definition_id" | "workflow_phases.name" | "workflow_tasks.name";
+            filters?: {
+                [name: string]: {
+                    parameter: string;
+                };
+            };
+        }
+        export interface ChartTemplateParameter {
+            id: string;
+            label: string;
+            description?: string;
+            required: boolean;
+            depends_on: string[];
+            option_source: ChartTemplateOptionSource;
+        }
+        export type ChartTemplateParameterValue = string | {
+            value: string;
+            label?: string;
+            context?: {
+                workflow_name?: string;
+                phase_name?: string;
+            };
+        };
+        export interface ChartTemplateSummary {
+            id: string;
+            version: number;
+            category: "workflows" | "journeys" | "opportunities" | "sharing" | "contacts" | "orders" | "tickets" | "contracts" | "service";
+            title: string;
+            description: string;
+            chart_type: "metric" | "line" | "bar" | "horizontal-bar" | "pie" | "donut" | "funnel" | "area";
+            tags: string[];
+            requires_setup: boolean;
+            parameters: ChartTemplateParameter[];
+        }
         /**
          * example:
          * {
@@ -547,6 +583,15 @@ declare namespace Components {
              * Invalid query parameters provided
              */
             message?: string;
+            /**
+             * Machine-readable reason, when available. For raw-SQL execution this is the
+             * ClickHouse error type (e.g. `UNKNOWN_IDENTIFIER`) on 400/403,
+             * `QUERY_TOO_EXPENSIVE` on 422 and `CLICKHOUSE_BUSY` on 503.
+             *
+             * example:
+             * QUERY_TOO_EXPENSIVE
+             */
+            code?: string;
         }
         /**
          * example:
@@ -623,6 +668,96 @@ declare namespace Components {
             results?: {
                 [name: string]: any;
             }[];
+            /**
+             * The ClickHouse SQL that was executed. For chart-config requests this is the compiler-emitted SQL; for raw_sql requests this echoes the input query (or its paginated wrap when a `pagination` object was supplied). Useful for debugging and for dashboards that want to surface the underlying query.
+             * example:
+             * WITH main AS (...) SELECT ... FROM main LEFT JOIN rel_current_sharing_configs ON ...
+             */
+            sql?: string;
+            /**
+             * Keyset pagination cursor (chart-config `mode: 'rows'` only). Present when the result page is full and more rows are available; re-execute with `cursor: <nextCursor>` to fetch the next slice.
+             */
+            nextCursor?: string | null;
+            /**
+             * Total rows the inner query would return without LIMIT/OFFSET. Present only on the paginated raw-SQL path (when the request body included a `pagination` object). Lets the UI render "page N of M".
+             */
+            total?: number;
+            timeRange?: /* A resolved time window, ISO-8601 instants with the offset of `timezone`. */ QueryTimeWindow;
+            /**
+             * The chart over the previous window, when the request asked for a `comparison`.
+             */
+            comparison?: {
+                to: "previous_period" | "previous_year";
+                timeRange: /* A resolved time window, ISO-8601 instants with the offset of `timezone`. */ QueryTimeWindow;
+                results: {
+                    [name: string]: any;
+                }[];
+                sql: string;
+                /**
+                 * One entry per measure column of `columns`.
+                 */
+                deltas: {
+                    /**
+                     * The measure's key on the result rows.
+                     */
+                    column: string;
+                    current: number | null;
+                    previous: number | null;
+                    /**
+                     * current − previous
+                     */
+                    absolute: number | null;
+                    /**
+                     * absolute / |previous|; null when previous is 0 or missing.
+                     */
+                    relative: number | null;
+                }[];
+            };
+            /**
+             * Authoritative mapping from config field id to the key that field's values appear under on each row of `results`, in the order the columns are selected. Present on the chart-config path only. Read row keys from here rather than deriving them from the request config: when two fields would produce the same column name (a dimension `workflow_phases.name` alongside a breakdown `purposes.name` — both want `name`), the later one is qualified with its table (`purposes_name`), and this array is the only place that says so. Requires `aliasContract: "columns-v1"` on the request; without it, such a config is rejected with a 400 instead.
+             */
+            columns?: {
+                role?: "dimension" | "breakdown" | "measure";
+                /**
+                 * The config field id, e.g. `purposes.name`.
+                 * example:
+                 * purposes.name
+                 */
+                id?: string;
+                /**
+                 * The key this column's values appear under on each result row.
+                 * example:
+                 * purposes_name
+                 */
+                alias?: string;
+                /**
+                 * Display label from the request config, passed through untouched.
+                 * example:
+                 * Purpose Name
+                 */
+                name?: string;
+            }[];
+        }
+        /**
+         * A resolved time window, ISO-8601 instants with the offset of `timezone`.
+         */
+        export interface QueryTimeWindow {
+            /**
+             * example:
+             * 2026-09-28T00:00:00+02:00
+             */
+            from: string;
+            /**
+             * Exclusive.
+             * example:
+             * 2026-10-05T00:00:00+02:00
+             */
+            to: string;
+            /**
+             * example:
+             * Europe/Berlin
+             */
+            timezone: string;
         }
         /**
          * example:
@@ -715,97 +850,134 @@ declare namespace Components {
             RelationshipResponse[];
         }
         export type RelativeTimeRange = "all_time" | "this_week" | "last_week" | "last_7_days" | "this_month" | "last_month" | "last_30_days" | "last_3_months" | "last_6_months" | "this_year" | "last_year";
+        export interface ResolvedChartTemplate {
+            title: string;
+            description: string;
+            chart_config: {
+                [name: string]: any;
+            };
+        }
         export interface ResponseWorkflowTaskOverview {
             results?: Task[];
             hits?: number;
         }
         /**
-         * The semantic model exposing entities, relationships, and query capabilities
+         * Describes the ClickHouse datasets an agent can query: which tables exist, how they
+         * connect, and what conventions (FINAL, soft-delete, JSON extraction, org filter) must
+         * be observed. Intentionally terse — per-entity payload fields live in the Entity API
+         * and are not repeated here.
+         *
          */
         export interface SemanticModel {
-            /**
-             * Available entity tables that can be queried
-             */
-            entities?: {
-                /**
-                 * Table identifier used in queries
-                 * example:
-                 * current_contacts
-                 */
-                name?: string;
-                /**
-                 * Human-readable name
-                 * example:
-                 * Contacts
-                 */
-                displayName?: string;
-                /**
-                 * Schema type (entity, workflow, purpose)
-                 * example:
-                 * entity
-                 */
-                schema?: string;
-            }[];
-            /**
-             * Relationships between entities for JOIN operations
-             */
-            relationships?: {
-                /**
-                 * example:
-                 * current_contacts
-                 */
-                from?: string;
-                /**
-                 * example:
-                 * opportunity_account_contact_relation
-                 */
-                to?: string;
-                relationship?: "hasMany" | "belongsTo" | "hasOne";
-                /**
-                 * example:
-                 * Contact has many Opportunities
-                 */
-                displayName?: string;
-            }[];
-            /**
-             * Supported query capabilities
-             */
-            capabilities?: {
-                /**
-                 * example:
-                 * [
-                 *   "count",
-                 *   "count_distinct",
-                 *   "sum",
-                 *   "average",
-                 *   "min",
-                 *   "max",
-                 *   "median"
-                 * ]
-                 */
-                aggregations?: string[];
-                calculationTypes?: {
-                    type?: string;
-                    description?: string;
-                    parameters?: {
-                        [name: string]: string;
+            version: "3";
+            sql_flavor: "ClickHouse";
+            tables: {
+                entities: SemanticModelTable;
+                entity_edges: SemanticModelTable;
+                purposes: SemanticModelTable;
+                taxonomies: SemanticModelTable;
+                workflows: {
+                    description: string;
+                    tables: {
+                        [name: string]: {
+                            description: string;
+                            /**
+                             * Supported physical column names, shared with the query compiler field catalog. Names are unchanged in the corresponding _final view.
+                             */
+                            columns: SemanticModelColumn[];
+                        };
                     };
-                }[];
+                };
+                sharing: {
+                    description: string;
+                    tables: {
+                        [name: string]: {
+                            description?: string;
+                        };
+                    };
+                };
                 /**
-                 * example:
-                 * [
-                 *   "day",
-                 *   "week",
-                 *   "month",
-                 *   "quarter",
-                 *   "year"
-                 * ]
+                 * Typed views from the dataset registry (e.g. service analytics: `service_ticket_facts`,
+                 * `service_ticket_responses`, …), keyed by view name. Only datasets the organization can
+                 * use are listed.
+                 *
                  */
-                granularities?: string[];
-                filterOperators?: {
-                    operator?: string;
-                    description?: string;
-                }[];
+                analytics_datasets: {
+                    description: string;
+                    tables: {
+                        [name: string]: {
+                            description: string;
+                            category: string;
+                            /**
+                             * Column with one value per row.
+                             */
+                            key: string;
+                            columns: SemanticModelColumn[];
+                            /**
+                             * Reading rules raw SQL must follow, e.g. filters every query applies.
+                             */
+                            notes: string[];
+                        };
+                    };
+                };
+            };
+            relationships: SemanticModelRelationship[];
+            conventions: {
+                deduplication: string;
+                soft_delete: string;
+                org_filter: string;
+                json_extract: string;
+                workflow_org_id_padding: string;
+                entity_fields: string;
+            };
+            capabilities: {
+                chart_calculations: {
+                    formula: {
+                        input_scope: "main_dataset";
+                        input_aggregations: ("count" | "sum" | "average")[];
+                        shared_and_input_filters: true;
+                        operators: ("add" | "subtract" | "multiply" | "divide")[];
+                        division_by_zero: "null";
+                    };
+                    milestone_duration: {
+                        correlation: "workflow_execution";
+                        sources: ("workflow_phases" | "workflow_tasks")[];
+                        timestamps: ("started_at" | "completed_at")[];
+                        units: ("hours" | "days")[];
+                    };
+                };
+            };
+        }
+        export interface SemanticModelColumn {
+            name: string;
+            /**
+             * Semantic field type (string, number, date, boolean) or ClickHouse type annotation. Use DESCRIBE TABLE for exact physical types.
+             */
+            type: string;
+            description?: string;
+        }
+        export interface SemanticModelRelationship {
+            name: string;
+            mechanism: "entity_relation" | "purpose_array" | "tags_array" | "workflow_context" | "direct_fk";
+            from: string;
+            to?: string | null;
+            via?: string;
+            cardinality: "one-to-one" | "one-to-many" | "many-to-one" | "many-to-many";
+            description: string;
+        }
+        export interface SemanticModelTable {
+            name: string;
+            description: string;
+            columns?: SemanticModelColumn[];
+            /**
+             * Curated hint list of entity `schema` values (only populated for the `entities` table).
+             */
+            known_schemas?: string[];
+            /**
+             * Named convenience selectors over this table (e.g. the `current_purposes` view for `taxonomies WHERE type='purpose'`).
+             */
+            shortcuts?: {
+                [name: string]: string;
             };
         }
         export type SortBy = "due_date_ascending" | "due_date_descending" | "creation_date_ascending" | "creation_date_descending";
@@ -1150,12 +1322,20 @@ declare namespace Paths {
              * current_purposes.name
              */
             export type Attribute = string;
-            export type Dataset = "workflows" | "purposes" | "sharing_configs" | "partners";
+            /**
+             * example:
+             * workflows
+             */
+            export type Dataset = string;
             export type Input = string;
             export type Size = number;
         }
         export interface QueryParameters {
-            dataset: Parameters.Dataset;
+            dataset: /**
+             * example:
+             * workflows
+             */
+            Parameters.Dataset;
             input?: Parameters.Input;
             attribute: /**
              * example:
@@ -1340,7 +1520,9 @@ declare namespace Paths {
             export type $400 = Components.Responses.BadRequestResponse;
             export type $401 = Components.Responses.UnauthorizedResponse;
             export type $403 = Components.Responses.ForbiddenResponse;
+            export type $422 = /* Standard error response body */ Components.Schemas.ErrorResponse;
             export type $500 = Components.Responses.InternalServerErrorResponse;
+            export type $503 = /* Standard error response body */ Components.Schemas.ErrorResponse;
         }
     }
     namespace ExecuteWorkflowsQuery {
@@ -1502,9 +1684,34 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerErrorResponse;
         }
     }
+    namespace GetChartModel {
+        namespace Responses {
+            export interface $200 {
+                [name: string]: any;
+            }
+            export type $401 = Components.Responses.UnauthorizedResponse;
+            export type $500 = Components.Responses.InternalServerErrorResponse;
+        }
+    }
+    namespace GetChartTemplates {
+        namespace Responses {
+            export interface $200 {
+                templates: Components.Schemas.ChartTemplateSummary[];
+            }
+            export type $401 = Components.Responses.UnauthorizedResponse;
+            export type $500 = Components.Responses.InternalServerErrorResponse;
+        }
+    }
     namespace GetSemanticModel {
         namespace Responses {
-            export type $200 = /* The semantic model exposing entities, relationships, and query capabilities */ Components.Schemas.SemanticModel;
+            export type $200 = /**
+             * Describes the ClickHouse datasets an agent can query: which tables exist, how they
+             * connect, and what conventions (FINAL, soft-delete, JSON extraction, org filter) must
+             * be observed. Intentionally terse — per-entity payload fields live in the Entity API
+             * and are not repeated here.
+             *
+             */
+            Components.Schemas.SemanticModel;
             export type $401 = Components.Responses.UnauthorizedResponse;
             export type $500 = Components.Responses.InternalServerErrorResponse;
         }
@@ -1699,6 +1906,28 @@ declare namespace Paths {
             export type $500 = Components.Responses.InternalServerErrorResponse;
         }
     }
+    namespace ResolveChartTemplate {
+        namespace Parameters {
+            export type TemplateId = string;
+        }
+        export interface PathParameters {
+            template_id: Parameters.TemplateId;
+        }
+        export interface RequestBody {
+            version: number;
+            parameters?: {
+                [name: string]: Components.Schemas.ChartTemplateParameterValue;
+            };
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.ResolvedChartTemplate;
+            export type $400 = Components.Responses.BadRequestResponse;
+            export type $401 = Components.Responses.UnauthorizedResponse;
+            export type $404 = Components.Responses.NotFoundResponse;
+            export type $409 = /* Standard error response body */ Components.Schemas.ErrorResponse;
+            export type $500 = Components.Responses.InternalServerErrorResponse;
+        }
+    }
     namespace RevokeCredentialsV2 {
         namespace Parameters {
             export type UserId = /* Execution Id for the query */ Components.Schemas.UserId;
@@ -1717,6 +1946,38 @@ declare namespace Paths {
             export type $401 = Components.Responses.UnauthorizedResponse;
             export type $403 = Components.Responses.ForbiddenResponse;
             export type $404 = Components.Responses.NotFoundResponse;
+            export type $500 = Components.Responses.InternalServerErrorResponse;
+        }
+    }
+    namespace SearchAutocomplete {
+        export interface RequestBody {
+            dataset: "workflows";
+            attribute: "workflow_executions.definition_id" | "workflow_phases.name" | "workflow_tasks.name";
+            input?: string;
+            size?: number;
+            /**
+             * example:
+             * {
+             *   "workflow_executions.definition_id": "definition-1"
+             * }
+             */
+            filters?: {
+                [name: string]: string;
+            };
+        }
+        namespace Responses {
+            export interface $200 {
+                options: {
+                    value: string;
+                    label: string;
+                    context?: {
+                        workflow_name?: string;
+                        phase_name?: string;
+                    };
+                }[];
+            }
+            export type $400 = Components.Responses.BadRequestResponse;
+            export type $401 = Components.Responses.UnauthorizedResponse;
             export type $500 = Components.Responses.InternalServerErrorResponse;
         }
     }
@@ -1965,6 +2226,25 @@ export interface OperationMethods {
    * 
    * Execute queries against datasets.
    * 
+   * Two input modes are supported:
+   * 
+   * 1. **Chart config** — pass a `chartType` (or `mode: 'rows'`) and the usual `dataSource`/`dimensions`/`measures`/`filters`/etc. The server transpiles this into ClickHouse SQL via the built-in query compiler.
+   *    Supported top-level fields on the chart config payload:
+   *     - `mode`: `'aggregate'` (default) groups by dimensions and aggregates measures; `'rows'` returns unsummarized entity rows (DISTINCT on main entity_id; respects `limit`, default 100, max 1000).
+   *     - `sorts`: `[{ field, direction }]` — explicit ORDER BY. `field` follows the `<table>.<column>` form used by dimensions/filters.
+   *     - `limit`: hard cap on returned rows. Applied to both aggregate and rows mode.
+   *     - `relatedDatasetPolicies`: optional map keyed by related dataset. `{ unmatched: 'required' }` excludes main records without a relation; `{ unmatched: 'bucket', label: 'No product' }` retains them under the supplied label. Bucket policies require a string dimension or breakdown from that dataset.
+   *     - `aliasContract`: set to `'columns-v1'` to declare that you read output column names from the response's `columns` array rather than deriving them from this config. Without it, a config whose fields would produce the same column name — a dimension `workflow_phases.name` next to a breakdown `purposes.name`, both wanting `name` — is rejected with a **400**; with it, the later one is qualified with its table (`purposes_name`) and `columns` tells you so. Column names are unchanged either way when there is no collision.
+   *     - `timeRange`: `{ field, preset | from + to, timezone? }` — a window on a date field, applied as shared `>=` / `<` filters (so it reaches every formula input). `preset` is one of `today`, `yesterday`, `this_week`, `last_week`, `this_month`, `last_month`, `this_quarter`, `last_quarter`, `this_year`, `last_year`, `last_7_days`, `last_30_days`, `last_90_days`, `last_12_months`; `from`/`to` are calendar days (`YYYY-MM-DD`, `to` inclusive). Days are read in `timezone` (IANA, default `Europe/Berlin`); weeks start on Monday and "last N days" includes today. The response echoes the resolved window as `timeRange`.
+   *     - `comparison`: `{ to: 'previous_period' | 'previous_year' }` — also runs the chart over the previous window and returns it as `comparison` with per-measure `deltas`. Needs `timeRange`, aggregate mode, and no dimensions or breakdown. Calendar presets step back one unit (`last_month` → the month before); a period that runs past today (`this_month`) compares the days elapsed so far with the same days of the previous period; rolling and custom ranges step back by their length; `previous_year` steps back a year (52 weeks for week presets).
+   *    Composite metric tiles support exactly one measure and no dimensions, breakdown, sorts, or rows mode:
+   *     - `calculationType: 'formula'`: combines one to ten isolated aggregate inputs with a validated expression tree. Inputs support distinct record count, sum, and average; top-level `filters` apply to every input while each input also carries its own `filters`. Sum and average fields must belong to the selected main dataset. Expression nodes may reference an input, hold a finite numeric constant, or apply add/subtract/multiply/divide to two child nodes. Division by zero yields `null` through `nullIf`.
+   *     - `calculationType: 'milestone_duration'`: averages fractional hours or days between two named workflow phase/task milestones. New configurations select a stable workflow definition ID; legacy workflow-name selectors remain supported. The main population may be a schema-specific entity dataset linked through workflow contexts or `workflow_executions` directly. Both selectors are correlated by one `workflow_execution_id`; each execution contributes at most once even when linked to multiple population entities. Start/end occurrence is deterministically `first`.
+   *    Filters with a missing `value` now return **400** (previously silently dropped, which produced full unfiltered results). Omit the filter entirely to leave a predicate unbounded.
+   * 2. **Raw SQL** — pass `raw_sql` with a ClickHouse query string. Any additional top-level fields (e.g. `chartType`, `title`, `xAxis`, `yAxis`) are echoed back as display-only chart metadata. Gated by the `tenant-query-isolation` feature flag: the query runs as the per-tenant ClickHouse user whose row policies enforce isolation. If the flag is disabled for the org, the endpoint returns **403**. Do NOT add `WHERE org_id = …` — row policies handle it.
+   * 
+   *    **Pagination (raw_sql only).** Pass an optional `pagination` object: `{ offset: UInt32 (default 0), limit: UInt32 (1..1000, default 100) }`. The server wraps the inner SQL as a subquery and appends `LIMIT/OFFSET` via ClickHouse parameter binding (no SQL-string interpolation of caller-controlled values). A parallel `SELECT count() FROM (<inner>)` populates `total` in the response so the UI can render "page N of M". The inner SQL should include a stable `ORDER BY` — without one, pagination may return duplicate or missing rows across pages.
+   * 
    * **Measures** are referred to as quantitative data, such as number of unique entities, operations, sum of profit, and so on.
    * 
    * **Dimensions** are referred to as categorical data, such as workflow status, product name, or units of time (e.g., day, week, month).
@@ -1980,10 +2260,12 @@ export interface OperationMethods {
   /**
    * getSemanticModel - getSemanticModel
    * 
-   * Get the semantic model for agent/tool consumption.
+   * Get the semantic model for agent/tool (LLM) consumption.
    * 
-   * Returns available entities, their relationships, and supported query capabilities
-   * including aggregations, calculation types, date granularities, and filter operators.
+   * Returns available entities, their relationships, and conventions in a
+   * terse, mechanism-focused shape optimised for LLM prompt context. For
+   * the chart-builder UI use `/v2/query/chart-model` instead — it exposes
+   * dataset pickers, field lists, and suggested measures.
    * 
    */
   'getSemanticModel'(
@@ -1991,6 +2273,92 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSemanticModel.Responses.$200>
+  /**
+   * getChartModel - getChartModel
+   * 
+   * Chart-builder UI model. Returns the dataset catalog (per-schema entity
+   * views, cross-schema `current_entities_final`, workflow tables, purposes,
+   * sharing, partners, and pseudo-datasets for purposes/tags/labels), each
+   * entry's static fields, the list of directly joinable related datasets
+   * (derived from the compiler's NAMED_RELATIONS), and suggested measures.
+   * 
+   * Use this to render the chart-builder picker, related-tables tray, and
+   * measure/dimension drop-zones. Entity payload fields (dynamic per tenant)
+   * are resolved separately via the Entity API json-schema endpoint — the
+   * model flags this via `conventions.entity_payload_via_json_schema`.
+   * 
+   * Registered datasets (category `service_analytics`: `service_ticket_facts`
+   * and the `service_ticket_*` event datasets) list typed `static_fields`
+   * that may carry `format` (`number`, `percent`, `duration`), `unit`,
+   * `description` and a closed set of `values`, plus `default_time_field`
+   * and `time_fields` for binding time ranges. They are only returned to
+   * organizations whose PostHog flag for them is on
+   * (`service-analytics-activities`).
+   * 
+   * Field IDs are always fully qualified as `<dataset>.<column>`.
+   * `features.formula_metrics`, `features.milestone_duration_metrics`,
+   * `features.relative_date_filters`, `features.contextual_autocomplete`,
+   * `features.time_ranges` and `features.comparisons` advertise compiler
+   * and discovery capabilities. Each main dataset
+   * exposes its `primary_key` and whether it is `workflow_linked`.
+   * 
+   */
+  'getChartModel'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetChartModel.Responses.$200>
+  /**
+   * getChartTemplates - List chart templates
+   * 
+   * Lists versioned, server-owned chart templates for the Insights gallery.
+   * The catalog response contains setup metadata only and never executes a
+   * query. Templates with required parameters advertise
+   * `requires_setup: true`.
+   * 
+   */
+  'getChartTemplates'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetChartTemplates.Responses.$200>
+  /**
+   * resolveChartTemplate - Resolve a chart template
+   * 
+   * Validates the requested template version and setup values, builds
+   * canonical BI compiler v2 metadata, and structurally compiles it without
+   * executing ClickHouse. The returned chart configuration is an independent
+   * editable copy.
+   * 
+   * A resolved `chart_config` may carry `timeRange` and `comparison` (see
+   * `executeQueryV2`) and a `metricConfig` for metric tiles: `prefix`,
+   * `suffix`, `decimalPlaces`, `compactNotation`, `format` (`number`,
+   * `percent` — a 0–100 value — or `duration` in `durationUnit`), and
+   * `polarity` (`higher_is_better`, `lower_is_better`, `neutral`: which
+   * direction of a comparison delta is good).
+   * 
+   */
+  'resolveChartTemplate'(
+    parameters?: Parameters<Paths.ResolveChartTemplate.PathParameters> | null,
+    data?: Paths.ResolveChartTemplate.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ResolveChartTemplate.Responses.$200>
+  /**
+   * searchAutocomplete - Search contextual autocomplete options
+   * 
+   * Returns typed options for chart-template setup. Workflow definitions
+   * use their stable definition ID as `value` and their display name as
+   * `label`. Phase and task searches require a selected workflow definition
+   * filter. Task options include phase context so duplicate task names can
+   * be distinguished. Dataset, attribute, and filter identifiers are
+   * allowlisted; all caller values are bound as ClickHouse parameters.
+   * 
+   */
+  'searchAutocomplete'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.SearchAutocomplete.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.SearchAutocomplete.Responses.$200>
   /**
    * autocomplete - autocomplete
    * 
@@ -2253,6 +2621,25 @@ export interface PathsDictionary {
      * 
      * Execute queries against datasets.
      * 
+     * Two input modes are supported:
+     * 
+     * 1. **Chart config** — pass a `chartType` (or `mode: 'rows'`) and the usual `dataSource`/`dimensions`/`measures`/`filters`/etc. The server transpiles this into ClickHouse SQL via the built-in query compiler.
+     *    Supported top-level fields on the chart config payload:
+     *     - `mode`: `'aggregate'` (default) groups by dimensions and aggregates measures; `'rows'` returns unsummarized entity rows (DISTINCT on main entity_id; respects `limit`, default 100, max 1000).
+     *     - `sorts`: `[{ field, direction }]` — explicit ORDER BY. `field` follows the `<table>.<column>` form used by dimensions/filters.
+     *     - `limit`: hard cap on returned rows. Applied to both aggregate and rows mode.
+     *     - `relatedDatasetPolicies`: optional map keyed by related dataset. `{ unmatched: 'required' }` excludes main records without a relation; `{ unmatched: 'bucket', label: 'No product' }` retains them under the supplied label. Bucket policies require a string dimension or breakdown from that dataset.
+     *     - `aliasContract`: set to `'columns-v1'` to declare that you read output column names from the response's `columns` array rather than deriving them from this config. Without it, a config whose fields would produce the same column name — a dimension `workflow_phases.name` next to a breakdown `purposes.name`, both wanting `name` — is rejected with a **400**; with it, the later one is qualified with its table (`purposes_name`) and `columns` tells you so. Column names are unchanged either way when there is no collision.
+     *     - `timeRange`: `{ field, preset | from + to, timezone? }` — a window on a date field, applied as shared `>=` / `<` filters (so it reaches every formula input). `preset` is one of `today`, `yesterday`, `this_week`, `last_week`, `this_month`, `last_month`, `this_quarter`, `last_quarter`, `this_year`, `last_year`, `last_7_days`, `last_30_days`, `last_90_days`, `last_12_months`; `from`/`to` are calendar days (`YYYY-MM-DD`, `to` inclusive). Days are read in `timezone` (IANA, default `Europe/Berlin`); weeks start on Monday and "last N days" includes today. The response echoes the resolved window as `timeRange`.
+     *     - `comparison`: `{ to: 'previous_period' | 'previous_year' }` — also runs the chart over the previous window and returns it as `comparison` with per-measure `deltas`. Needs `timeRange`, aggregate mode, and no dimensions or breakdown. Calendar presets step back one unit (`last_month` → the month before); a period that runs past today (`this_month`) compares the days elapsed so far with the same days of the previous period; rolling and custom ranges step back by their length; `previous_year` steps back a year (52 weeks for week presets).
+     *    Composite metric tiles support exactly one measure and no dimensions, breakdown, sorts, or rows mode:
+     *     - `calculationType: 'formula'`: combines one to ten isolated aggregate inputs with a validated expression tree. Inputs support distinct record count, sum, and average; top-level `filters` apply to every input while each input also carries its own `filters`. Sum and average fields must belong to the selected main dataset. Expression nodes may reference an input, hold a finite numeric constant, or apply add/subtract/multiply/divide to two child nodes. Division by zero yields `null` through `nullIf`.
+     *     - `calculationType: 'milestone_duration'`: averages fractional hours or days between two named workflow phase/task milestones. New configurations select a stable workflow definition ID; legacy workflow-name selectors remain supported. The main population may be a schema-specific entity dataset linked through workflow contexts or `workflow_executions` directly. Both selectors are correlated by one `workflow_execution_id`; each execution contributes at most once even when linked to multiple population entities. Start/end occurrence is deterministically `first`.
+     *    Filters with a missing `value` now return **400** (previously silently dropped, which produced full unfiltered results). Omit the filter entirely to leave a predicate unbounded.
+     * 2. **Raw SQL** — pass `raw_sql` with a ClickHouse query string. Any additional top-level fields (e.g. `chartType`, `title`, `xAxis`, `yAxis`) are echoed back as display-only chart metadata. Gated by the `tenant-query-isolation` feature flag: the query runs as the per-tenant ClickHouse user whose row policies enforce isolation. If the flag is disabled for the org, the endpoint returns **403**. Do NOT add `WHERE org_id = …` — row policies handle it.
+     * 
+     *    **Pagination (raw_sql only).** Pass an optional `pagination` object: `{ offset: UInt32 (default 0), limit: UInt32 (1..1000, default 100) }`. The server wraps the inner SQL as a subquery and appends `LIMIT/OFFSET` via ClickHouse parameter binding (no SQL-string interpolation of caller-controlled values). A parallel `SELECT count() FROM (<inner>)` populates `total` in the response so the UI can render "page N of M". The inner SQL should include a stable `ORDER BY` — without one, pagination may return duplicate or missing rows across pages.
+     * 
      * **Measures** are referred to as quantitative data, such as number of unique entities, operations, sum of profit, and so on.
      * 
      * **Dimensions** are referred to as categorical data, such as workflow status, product name, or units of time (e.g., day, week, month).
@@ -2270,10 +2657,12 @@ export interface PathsDictionary {
     /**
      * getSemanticModel - getSemanticModel
      * 
-     * Get the semantic model for agent/tool consumption.
+     * Get the semantic model for agent/tool (LLM) consumption.
      * 
-     * Returns available entities, their relationships, and supported query capabilities
-     * including aggregations, calculation types, date granularities, and filter operators.
+     * Returns available entities, their relationships, and conventions in a
+     * terse, mechanism-focused shape optimised for LLM prompt context. For
+     * the chart-builder UI use `/v2/query/chart-model` instead — it exposes
+     * dataset pickers, field lists, and suggested measures.
      * 
      */
     'get'(
@@ -2281,6 +2670,100 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSemanticModel.Responses.$200>
+  }
+  ['/v2/query/chart-model']: {
+    /**
+     * getChartModel - getChartModel
+     * 
+     * Chart-builder UI model. Returns the dataset catalog (per-schema entity
+     * views, cross-schema `current_entities_final`, workflow tables, purposes,
+     * sharing, partners, and pseudo-datasets for purposes/tags/labels), each
+     * entry's static fields, the list of directly joinable related datasets
+     * (derived from the compiler's NAMED_RELATIONS), and suggested measures.
+     * 
+     * Use this to render the chart-builder picker, related-tables tray, and
+     * measure/dimension drop-zones. Entity payload fields (dynamic per tenant)
+     * are resolved separately via the Entity API json-schema endpoint — the
+     * model flags this via `conventions.entity_payload_via_json_schema`.
+     * 
+     * Registered datasets (category `service_analytics`: `service_ticket_facts`
+     * and the `service_ticket_*` event datasets) list typed `static_fields`
+     * that may carry `format` (`number`, `percent`, `duration`), `unit`,
+     * `description` and a closed set of `values`, plus `default_time_field`
+     * and `time_fields` for binding time ranges. They are only returned to
+     * organizations whose PostHog flag for them is on
+     * (`service-analytics-activities`).
+     * 
+     * Field IDs are always fully qualified as `<dataset>.<column>`.
+     * `features.formula_metrics`, `features.milestone_duration_metrics`,
+     * `features.relative_date_filters`, `features.contextual_autocomplete`,
+     * `features.time_ranges` and `features.comparisons` advertise compiler
+     * and discovery capabilities. Each main dataset
+     * exposes its `primary_key` and whether it is `workflow_linked`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetChartModel.Responses.$200>
+  }
+  ['/v2/query/chart-templates']: {
+    /**
+     * getChartTemplates - List chart templates
+     * 
+     * Lists versioned, server-owned chart templates for the Insights gallery.
+     * The catalog response contains setup metadata only and never executes a
+     * query. Templates with required parameters advertise
+     * `requires_setup: true`.
+     * 
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetChartTemplates.Responses.$200>
+  }
+  ['/v2/query/chart-templates/{template_id}:resolve']: {
+    /**
+     * resolveChartTemplate - Resolve a chart template
+     * 
+     * Validates the requested template version and setup values, builds
+     * canonical BI compiler v2 metadata, and structurally compiles it without
+     * executing ClickHouse. The returned chart configuration is an independent
+     * editable copy.
+     * 
+     * A resolved `chart_config` may carry `timeRange` and `comparison` (see
+     * `executeQueryV2`) and a `metricConfig` for metric tiles: `prefix`,
+     * `suffix`, `decimalPlaces`, `compactNotation`, `format` (`number`,
+     * `percent` — a 0–100 value — or `duration` in `durationUnit`), and
+     * `polarity` (`higher_is_better`, `lower_is_better`, `neutral`: which
+     * direction of a comparison delta is good).
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.ResolveChartTemplate.PathParameters> | null,
+      data?: Paths.ResolveChartTemplate.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ResolveChartTemplate.Responses.$200>
+  }
+  ['/v2/query/autocomplete:search']: {
+    /**
+     * searchAutocomplete - Search contextual autocomplete options
+     * 
+     * Returns typed options for chart-template setup. Workflow definitions
+     * use their stable definition ID as `value` and their display name as
+     * `label`. Phase and task searches require a selected workflow definition
+     * filter. Task options include phase context so duplicate task names can
+     * be distinguished. Dataset, attribute, and filter identifiers are
+     * allowlisted; all caller values are bound as ClickHouse parameters.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.SearchAutocomplete.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.SearchAutocomplete.Responses.$200>
   }
   ['/v2/query/autocomplete']: {
     /**
@@ -2319,6 +2802,10 @@ export type AutomationExecutionDataset = Components.Schemas.AutomationExecutionD
 export type AutomationExecutionResponse = Components.Schemas.AutomationExecutionResponse;
 export type AutomationQueryOptions = Components.Schemas.AutomationQueryOptions;
 export type CacheExpiration = Components.Schemas.CacheExpiration;
+export type ChartTemplateOptionSource = Components.Schemas.ChartTemplateOptionSource;
+export type ChartTemplateParameter = Components.Schemas.ChartTemplateParameter;
+export type ChartTemplateParameterValue = Components.Schemas.ChartTemplateParameterValue;
+export type ChartTemplateSummary = Components.Schemas.ChartTemplateSummary;
 export type CurrentEntitiesViewRequest = Components.Schemas.CurrentEntitiesViewRequest;
 export type DatalakeQuery = Components.Schemas.DatalakeQuery;
 export type DatalakeQueryOptions = Components.Schemas.DatalakeQueryOptions;
@@ -2341,12 +2828,17 @@ export type NameDurationSettings = Components.Schemas.NameDurationSettings;
 export type NoCache = Components.Schemas.NoCache;
 export type PhaseStates = Components.Schemas.PhaseStates;
 export type QueryResults = Components.Schemas.QueryResults;
+export type QueryTimeWindow = Components.Schemas.QueryTimeWindow;
 export type RelationshipRequest = Components.Schemas.RelationshipRequest;
 export type RelationshipResponse = Components.Schemas.RelationshipResponse;
 export type RelationshipsListResponse = Components.Schemas.RelationshipsListResponse;
 export type RelativeTimeRange = Components.Schemas.RelativeTimeRange;
+export type ResolvedChartTemplate = Components.Schemas.ResolvedChartTemplate;
 export type Response_WorkflowTaskOverview = Components.Schemas.ResponseWorkflowTaskOverview;
 export type SemanticModel = Components.Schemas.SemanticModel;
+export type SemanticModelColumn = Components.Schemas.SemanticModelColumn;
+export type SemanticModelRelationship = Components.Schemas.SemanticModelRelationship;
+export type SemanticModelTable = Components.Schemas.SemanticModelTable;
 export type SortBy = Components.Schemas.SortBy;
 export type Task = Components.Schemas.Task;
 export type TaskRequirement = Components.Schemas.TaskRequirement;

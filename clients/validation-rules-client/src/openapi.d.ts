@@ -117,8 +117,43 @@ declare namespace Components {
              * The input is valid when every blocking (non-advisory) condition passes.
              * A rule whose conditions are all advisory is always valid (warnings only).
              *
+             * A parameter (e.g. `{ "source": "parameter", "name": "warn_only" }`) lets the consumer
+             * decide at evaluation time, e.g. blocking for end customers but advisory for service agents.
+             * The condition is advisory only when the consumer binds the parameter to the boolean `true`;
+             * an unbound, empty or any other value keeps it blocking. The parameter must not carry an
+             * adjustment.
+             *
              */
-            allow_failure?: boolean;
+            allow_failure?: /**
+             * When true, the condition is advisory: it is always evaluated and reported
+             * when it fails, but it never takes part in the validity verdict.
+             * The input is valid when every blocking (non-advisory) condition passes.
+             * A rule whose conditions are all advisory is always valid (warnings only).
+             *
+             * A parameter (e.g. `{ "source": "parameter", "name": "warn_only" }`) lets the consumer
+             * decide at evaluation time, e.g. blocking for end customers but advisory for service agents.
+             * The condition is advisory only when the consumer binds the parameter to the boolean `true`;
+             * an unbound, empty or any other value keeps it blocking. The parameter must not carry an
+             * adjustment.
+             *
+             */
+            boolean | /**
+             * A comparison value supplied by the consumer that evaluates the rule, identified by a name
+             * the rule chooses (e.g. `start_date`). The rule stores the name only. The consumer binds the
+             * name to a source of its own - a journey binds it to the value of another block - and
+             * resolves it at evaluation time, so the rule never references the consumer's objects and
+             * stays reusable across journeys and forms.
+             *
+             * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
+             * for comparison values, range bounds, adjustment amounts and relative date offsets, a
+             * number, string or boolean as an `applies_when` value, a boolean as a condition's
+             * `allow_failure`, or the `value_type` of the External Values hook input it supplies
+             * (`ExternalValue.inputs`). One name is compared as one kind
+             * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
+             * the consumer leaves unbound or empty leaves the comparison unresolved.
+             *
+             */
+            ParameterValue;
         }
         /**
          * The comparison value of a condition - a scalar, a range of scalars, or nothing (unary operators).
@@ -168,9 +203,10 @@ declare namespace Components {
          * stays reusable across journeys and forms.
          *
          * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
-         * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
-         * number, string or boolean as an `applies_when` value, or the `value_type` of the External
-         * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+         * for comparison values, range bounds, adjustment amounts and relative date offsets, a
+         * number, string or boolean as an `applies_when` value, a boolean as a condition's
+         * `allow_failure`, or the `value_type` of the External Values hook input it supplies
+         * (`ExternalValue.inputs`). One name is compared as one kind
          * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
          * the consumer leaves unbound or empty leaves the comparison unresolved.
          *
@@ -451,9 +487,10 @@ declare namespace Components {
                  * stays reusable across journeys and forms.
                  *
                  * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
-                 * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
-                 * number, string or boolean as an `applies_when` value, or the `value_type` of the External
-                 * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+                 * for comparison values, range bounds, adjustment amounts and relative date offsets, a
+                 * number, string or boolean as an `applies_when` value, a boolean as a condition's
+                 * `allow_failure`, or the `value_type` of the External Values hook input it supplies
+                 * (`ExternalValue.inputs`). One name is compared as one kind
                  * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
                  * the consumer leaves unbound or empty leaves the comparison unresolved.
                  *
@@ -648,9 +685,10 @@ declare namespace Components {
          * stays reusable across journeys and forms.
          *
          * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
-         * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
-         * number, string or boolean as an `applies_when` value, or the `value_type` of the External
-         * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+         * for comparison values, range bounds, adjustment amounts and relative date offsets, a
+         * number, string or boolean as an `applies_when` value, a boolean as a condition's
+         * `allow_failure`, or the `value_type` of the External Values hook input it supplies
+         * (`ExternalValue.inputs`). One name is compared as one kind
          * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
          * the consumer leaves unbound or empty leaves the comparison unresolved.
          *
@@ -999,9 +1037,10 @@ declare namespace Components {
          * stays reusable across journeys and forms.
          *
          * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
-         * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
-         * number, string or boolean as an `applies_when` value, or the `value_type` of the External
-         * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+         * for comparison values, range bounds, adjustment amounts and relative date offsets, a
+         * number, string or boolean as an `applies_when` value, a boolean as a condition's
+         * `allow_failure`, or the `value_type` of the External Values hook input it supplies
+         * (`ExternalValue.inputs`). One name is compared as one kind
          * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
          * the consumer leaves unbound or empty leaves the comparison unresolved.
          *
@@ -1356,9 +1395,10 @@ declare namespace Components {
          * stays reusable across journeys and forms.
          *
          * A parameter's kind is determined by the field it is used in: `number`, `text` or `date`
-         * for comparison values, range bounds, adjustment amounts and relative date offsets, or a
-         * number, string or boolean as an `applies_when` value, or the `value_type` of the External
-         * Values hook input it supplies (`ExternalValue.inputs`). One name is compared as one kind
+         * for comparison values, range bounds, adjustment amounts and relative date offsets, a
+         * number, string or boolean as an `applies_when` value, a boolean as a condition's
+         * `allow_failure`, or the `value_type` of the External Values hook input it supplies
+         * (`ExternalValue.inputs`). One name is compared as one kind
          * throughout a rule; a rule using a name as two kinds is rejected at write time. A parameter
          * the consumer leaves unbound or empty leaves the comparison unresolved.
          *

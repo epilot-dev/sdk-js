@@ -45,6 +45,37 @@
         "responses": {}
       }
     },
+    "/v1/email-template/templates/{id}:migrate-automations": {
+      "post": {
+        "operationId": "migrateAutomationsForTemplate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/email-template/templates/{id}:references": {
+      "get": {
+        "operationId": "getTemplateReferences",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/email-template/templates:replace": {
       "post": {
         "operationId": "replaceVariables",
@@ -89,6 +120,25 @@
       "post": {
         "operationId": "revertToOriginalTemplate",
         "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/email-template/templates/{id}:convertToBuilder": {
+      "post": {
+        "operationId": "convertToBuilder",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
           "content": {
             "application/json": {}
           }

@@ -2389,6 +2389,12 @@
   "servers": [
     {
       "url": "https://billing.sls.epilot.io"
+    },
+    {
+      "url": "--exclude-ext"
+    },
+    {
+      "url": "x-internal"
     }
   ]
 }

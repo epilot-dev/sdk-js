@@ -25,6 +25,9 @@
             "name": "filter",
             "in": "query",
             "required": false
+          },
+          {
+            "$ref": "#/components/parameters/SharedWithFormat"
           }
         ],
         "responses": {}
@@ -34,6 +37,9 @@
       "get": {
         "operationId": "getKanbanBoard",
         "parameters": [
+          {
+            "$ref": "#/components/parameters/SharedWithFormat"
+          },
           {
             "name": "boardId",
             "in": "path",
@@ -45,6 +51,9 @@
       "put": {
         "operationId": "updateKanbanBoard",
         "parameters": [
+          {
+            "$ref": "#/components/parameters/SharedWithFormat"
+          },
           {
             "name": "boardId",
             "in": "path",
@@ -62,6 +71,9 @@
       "patch": {
         "operationId": "patchKanbanBoard",
         "parameters": [
+          {
+            "$ref": "#/components/parameters/SharedWithFormat"
+          },
           {
             "name": "boardId",
             "in": "path",
@@ -143,7 +155,15 @@
       }
     }
   },
-  "components": {},
+  "components": {
+    "parameters": {
+      "SharedWithFormat": {
+        "name": "shared_with_format",
+        "in": "query",
+        "required": false
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://kanban.sls.epilot.io"

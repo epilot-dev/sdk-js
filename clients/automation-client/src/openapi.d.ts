@@ -1025,6 +1025,26 @@ declare namespace Components {
             };
             /**
              * Candidate condition for `sequential` and `even_distribution`: when true,
+             * skip users who are currently absent (out-of-office). Opt-in; defaults
+             * to false.
+             *
+             */
+            only_available_users?: boolean;
+            /**
+             * Sub-option of only_available_users, for `sequential` and
+             * `even_distribution`: holds the entity when nobody is left after the
+             * availability and skill filters and at least one user the availability
+             * filter removed is on a day off (weekend / whole day off) with a known
+             * return. Each retry waits until the soonest such return, at most 7 days,
+             * with at most 7 retries; after that the fallback applies. Out-of-office
+             * or unknown absence never holds. Defaults to true; set false to skip the
+             * hold and fall straight through to the fallback. With write_mode replace,
+             * a held run overwrites assignees set while it was held.
+             *
+             */
+            hold_until_available?: boolean;
+            /**
+             * Candidate condition for `sequential` and `even_distribution`: when true,
              * only assign to users whose skills (tags) match a label on the entity
              * being assigned. Opt-in; defaults to false. An entity carrying no
              * namespaced label matches nobody, so the fallback applies.
@@ -1696,12 +1716,16 @@ declare namespace Components {
              * Ordered automation flow ids in this execution's trigger chain (multi-automation loop prevention).
              */
             chain?: string[];
+            ephemeral?: /* Present on an execution started from an automation definition sent in the request. */ EphemeralExecution;
         }
         /**
          * example:
          * 9baf184f-bc81-4128-bca3-d974c90a12c4
          */
         export type AutomationExecutionId = string;
+        /**
+         * The top-level fields of an automation flow. None is required.
+         */
         export interface AutomationFlow {
             id?: /**
              * ID of the Automation Flow
@@ -1814,6 +1838,132 @@ declare namespace Components {
             version?: number;
             /**
              * Source blueprint/manifest ID used when automation is created via blueprints.
+             * A full update (PUT) that omits this field keeps the stored value; send `null` to unlink the automation from its blueprint.
+             *
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
+             * If true, automation is displayed in read-only mode in the UI to discourage changes
+             */
+            protected?: boolean;
+        }
+        /**
+         * The top-level fields of an automation flow. None is required.
+         */
+        export interface AutomationFlowFields {
+            id?: /**
+             * ID of the Automation Flow
+             * example:
+             * 7791b04a-16d2-44a2-9af9-2d59c25c512f
+             */
+            AutomationFlowId;
+            /**
+             * A descriptive name for the Automation
+             * example:
+             * Handle contact form
+             */
+            flow_name?: string;
+            /**
+             * Whether the automation is enabled or not
+             */
+            enabled?: boolean;
+            disable_details?: {
+                /**
+                 * When the flow was disabled
+                 */
+                disabled_at: string; // date-time
+                /**
+                 * Who disabled the flow (system or user)
+                 */
+                disabled_by: "system" | "user";
+                /**
+                 * The 360 user email that disabled the flow
+                 */
+                blame?: string;
+            };
+            triggers?: AnyTrigger[];
+            trigger_conditions?: /**
+             * example:
+             * {
+             *   "source": "billing_contact.email",
+             *   "comparison": "exists"
+             * }
+             */
+            TriggerCondition[];
+            /**
+             * The triggering entity schema
+             * example:
+             * submission
+             */
+            entity_schema?: string;
+            conditions?: ActionCondition[];
+            schedules?: ActionSchedule[];
+            /**
+             * Loop scope definitions. Each loop has an id and a source_path resolved against the trigger entity at execution time. Actions referencing a loop's id via their loop_id property run once per item in the resolved array. Loop members must be contiguous in the actions array.
+             *
+             */
+            loops?: /* A loop scope on an automation flow. */ AutomationLoop[];
+            /**
+             * The actions (nodes) of the automation flow
+             */
+            actions?: AnyAction[];
+            /**
+             * Number of automation executions that ran
+             * example:
+             * 7
+             */
+            runs?: number;
+            /**
+             * Customized execution hot flow rate limit. Takes precedence over the default hot flow rate limit if specified.
+             */
+            max_executions?: {
+                /**
+                 * Maximum number of executions per time window
+                 * example:
+                 * 100
+                 */
+                count?: number;
+                /**
+                 * ISO 8601 duration time window for the threshold
+                 * example:
+                 * PT1M
+                 */
+                window?: string;
+            };
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            /**
+             * User / service who created automation flow
+             * example:
+             * user:123
+             */
+            created_by?: string;
+            /**
+             * User / service who last updated automation flow
+             * example:
+             * user:123
+             */
+            last_updated_by?: string;
+            /**
+             * Organization the automation flow belongs to
+             * example:
+             * 123
+             */
+            org_id?: string;
+            /**
+             * Determines if the flow is a system generated flow
+             */
+            system_flow?: boolean;
+            /**
+             * Version of the flow
+             * example:
+             * 2
+             */
+            version?: number;
+            /**
+             * Source blueprint/manifest ID used when automation is created via blueprints.
+             * A full update (PUT) that omits this field keeps the stored value; send `null` to unlink the automation from its blueprint.
+             *
              */
             _manifest?: string /* uuid */[] | null;
             /**
@@ -1874,6 +2024,437 @@ declare namespace Components {
              * 12d4f45a-1883-4841-a94c-5928cb338a94
              */
             id?: string; // uuid
+        }
+        /**
+         * The answer of a batch sync with at least one `failed` result
+         */
+        export interface BatchSyncFlowsFailure {
+            /**
+             * The HTTP status code of the error
+             * example:
+             * 400
+             */
+            status?: number;
+            /**
+             * The error message
+             */
+            error?: string;
+            /**
+             * One entry per upsert in request order, then one per delete in request order.
+             * `flow` is the automation flow as it is stored after the sync, as getFlow returns it. `created`, `updated` and `unchanged` entries have it.
+             * Its `runs` is the count the sync read.
+             * `reason` and `error` are set on `failed` entries only.
+             *
+             */
+            results: {
+                id: string;
+                result: "created" | "updated" | "unchanged" | "deleted" | "not_found" | "failed";
+                flow?: /* The top-level fields of an automation flow. None is required. */ AutomationFlow;
+                /**
+                 * Why the item is `failed`:
+                 * - `changed`, another writer changed the flow on each of 3 attempts. The request can be sent again.
+                 * - `no_capacity`, the database throttled the read or the write, failed on its side or was not reached. The request can be sent again.
+                 * - `out_of_time`, the 20 seconds of the request were over. The request can be sent again.
+                 * - `deleted`, another writer deleted the flow during the sync. It is not created again, also when the sync was about to create it and found the id taken.
+                 * - `invalid`, the flow changed during the sync and fails a check with the sent fields, or the database refuses the flow itself, for its size or its nesting for example. The same request fails again.
+                 *
+                 */
+                reason?: "changed" | "no_capacity" | "out_of_time" | "deleted" | "invalid";
+                /**
+                 * What happened to a `failed` item, as text
+                 */
+                error?: string;
+            }[];
+        }
+        /**
+         * At least one of `upsert` and `delete` needs an item. An id may appear once in the request.
+         * Each list has at most 100 items.
+         *
+         */
+        export interface BatchSyncFlowsRequest {
+            /**
+             * Automation flows to create or update. Each item has the `id` and any other top-level fields of an automation flow.
+             *
+             * An id that exists is updated:
+             * - Only the sent top-level fields that differ from the stored ones are written, with a new `updated_at`.
+             * - A sent field replaces the stored top-level field whole. A list or an object is not merged with the stored one.
+             * - If every sent field equals the stored one, the result is `unchanged` and the flow is not checked beyond the schema of the sent fields.
+             * - A field that is left out stays as stored. A field cannot be removed, except `disable_details` by `enabled: true`. `null` removes nothing. It is stored as `null` where the schema allows `null`, and refused with 400 elsewhere.
+             * - `org_id`, `created_at`, `created_by`, `runs` and `updated_at` are not written when sent. Their type is checked like that of every sent field.
+             * - `disable_details` are stored as sent. If the item has none, `enabled: true` removes the stored ones, and `enabled: false` sets `disabled_at` and `disabled_by: user` unless the flow is disabled already.
+             *
+             * An id that does not exist is created as createFlow creates it, with three differences:
+             * - The given `id` is kept whatever its length.
+             * - An action without an `id` is refused. None is generated.
+             * - A `schedule_id` without its schedule is removed from actions and conditions.
+             *
+             * Before any write, a flow that is created or changed must pass the request schema and the checks of createFlow as it would be stored. For a flow that is changed:
+             * - Every sent action needs an `id`, as for a new flow.
+             * - A sent action without `created_automatically` gets `false`.
+             * - A `loop_id` or `schedule_id` without its loop or schedule is removed from sent `actions` and `conditions`. If `actions` or `conditions` that are not sent hold one, the request is refused.
+             *
+             * A flow that another writer changes during the sync is checked again with the sent fields. If it fails then, only that item fails, with the reason `invalid`.
+             *
+             */
+            upsert?: [
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?,
+                /* The id and any other top-level fields of an automation flow */ BatchSyncFlowsUpsert?
+            ];
+            /**
+             * Ids of automation flows to delete. An id that does not exist is ignored.
+             */
+            delete?: [
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?,
+                string?
+            ];
+        }
+        export interface BatchSyncFlowsResponse {
+            /**
+             * One entry per upsert in request order, then one per delete in request order.
+             * `flow` is the automation flow as it is stored after the sync, as getFlow returns it. `created`, `updated` and `unchanged` entries have it.
+             * Its `runs` is the count the sync read.
+             * `reason` and `error` are set on `failed` entries only.
+             *
+             */
+            results: {
+                id: string;
+                result: "created" | "updated" | "unchanged" | "deleted" | "not_found" | "failed";
+                flow?: /* The top-level fields of an automation flow. None is required. */ AutomationFlow;
+                /**
+                 * Why the item is `failed`:
+                 * - `changed`, another writer changed the flow on each of 3 attempts. The request can be sent again.
+                 * - `no_capacity`, the database throttled the read or the write, failed on its side or was not reached. The request can be sent again.
+                 * - `out_of_time`, the 20 seconds of the request were over. The request can be sent again.
+                 * - `deleted`, another writer deleted the flow during the sync. It is not created again, also when the sync was about to create it and found the id taken.
+                 * - `invalid`, the flow changed during the sync and fails a check with the sent fields, or the database refuses the flow itself, for its size or its nesting for example. The same request fails again.
+                 *
+                 */
+                reason?: "changed" | "no_capacity" | "out_of_time" | "deleted" | "invalid";
+                /**
+                 * What happened to a `failed` item, as text
+                 */
+                error?: string;
+            }[];
+        }
+        /**
+         * The id and any other top-level fields of an automation flow
+         */
+        export interface BatchSyncFlowsUpsert {
+            id: /**
+             * ID of the Automation Flow
+             * example:
+             * 7791b04a-16d2-44a2-9af9-2d59c25c512f
+             */
+            AutomationFlowId;
+            /**
+             * A descriptive name for the Automation
+             * example:
+             * Handle contact form
+             */
+            flow_name?: string;
+            /**
+             * Whether the automation is enabled or not
+             */
+            enabled?: boolean;
+            disable_details?: {
+                /**
+                 * When the flow was disabled
+                 */
+                disabled_at: string; // date-time
+                /**
+                 * Who disabled the flow (system or user)
+                 */
+                disabled_by: "system" | "user";
+                /**
+                 * The 360 user email that disabled the flow
+                 */
+                blame?: string;
+            };
+            triggers?: AnyTrigger[];
+            trigger_conditions?: /**
+             * example:
+             * {
+             *   "source": "billing_contact.email",
+             *   "comparison": "exists"
+             * }
+             */
+            TriggerCondition[];
+            /**
+             * The triggering entity schema
+             * example:
+             * submission
+             */
+            entity_schema?: string;
+            conditions?: ActionCondition[];
+            schedules?: ActionSchedule[];
+            /**
+             * Loop scope definitions. Each loop has an id and a source_path resolved against the trigger entity at execution time. Actions referencing a loop's id via their loop_id property run once per item in the resolved array. Loop members must be contiguous in the actions array.
+             *
+             */
+            loops?: /* A loop scope on an automation flow. */ AutomationLoop[];
+            /**
+             * The actions (nodes) of the automation flow
+             */
+            actions?: AnyAction[];
+            /**
+             * Number of automation executions that ran
+             * example:
+             * 7
+             */
+            runs?: number;
+            /**
+             * Customized execution hot flow rate limit. Takes precedence over the default hot flow rate limit if specified.
+             */
+            max_executions?: {
+                /**
+                 * Maximum number of executions per time window
+                 * example:
+                 * 100
+                 */
+                count?: number;
+                /**
+                 * ISO 8601 duration time window for the threshold
+                 * example:
+                 * PT1M
+                 */
+                window?: string;
+            };
+            created_at?: string; // date-time
+            updated_at?: string; // date-time
+            /**
+             * User / service who created automation flow
+             * example:
+             * user:123
+             */
+            created_by?: string;
+            /**
+             * User / service who last updated automation flow
+             * example:
+             * user:123
+             */
+            last_updated_by?: string;
+            /**
+             * Organization the automation flow belongs to
+             * example:
+             * 123
+             */
+            org_id?: string;
+            /**
+             * Determines if the flow is a system generated flow
+             */
+            system_flow?: boolean;
+            /**
+             * Version of the flow
+             * example:
+             * 2
+             */
+            version?: number;
+            /**
+             * Source blueprint/manifest ID used when automation is created via blueprints.
+             * A full update (PUT) that omits this field keeps the stored value; send `null` to unlink the automation from its blueprint.
+             *
+             */
+            _manifest?: string /* uuid */[] | null;
+            /**
+             * If true, automation is displayed in read-only mode in the UI to discourage changes
+             */
+            protected?: boolean;
         }
         export interface BulkTriggerJob {
             job_id: /**
@@ -2274,6 +2855,14 @@ declare namespace Components {
             target_unique?: string[];
         }
         export type Comparison = "equals" | "any_of" | "not_empty" | "is_empty";
+        export interface ConditionNode {
+            source?: string;
+            value?: string | number | {
+                [key: string]: any;
+            } | {
+                [key: string]: any;
+            }[];
+        }
         /**
          * example:
          * {
@@ -2814,6 +3403,49 @@ declare namespace Components {
                 ];
                 include_activities?: string[];
                 exclude_activities?: string[];
+                conditions?: /**
+                 * Conditions the entity must satisfy for the trigger to start the automation, checked after
+                 * `schema`, `operations`, the activity filters and `filter_config` have matched. An event that
+                 * does not satisfy them starts nothing: no execution is created.
+                 *
+                 * Statements use the flows condition dialect (the `Statement` of a flow decision) and are
+                 * evaluated against the entity of the event, never against related entities. The change
+                 * operators (`has_changed`, `changes_to`, `changes_to_all`, `no_longer_is`, `no_longer_is_all`) compare the entity before and after
+                 * the update and are only accepted on a trigger whose operations are all `updateEntity`.
+                 *
+                 * example:
+                 * {
+                 *   "logical_operator": "AND",
+                 *   "statements": [
+                 *     {
+                 *       "id": "3f1c8c0e-6a41-4d0e-9a51-8f6f0f6f2f11",
+                 *       "source": {
+                 *         "schema": "order",
+                 *         "attribute": "status",
+                 *         "attribute_type": "status"
+                 *       },
+                 *       "operator": "changes_to",
+                 *       "values": [
+                 *         "interessent"
+                 *       ]
+                 *     },
+                 *     {
+                 *       "id": "0b6f0e1c-1a0b-4a57-9d0c-0e3c9c0c7a52",
+                 *       "source": {
+                 *         "schema": "order",
+                 *         "attribute": "_purpose",
+                 *         "attribute_type": "purpose",
+                 *         "attribute_repeatable": true
+                 *       },
+                 *       "operator": "any_of",
+                 *       "values": [
+                 *         "commodity"
+                 *       ]
+                 *     }
+                 *   ]
+                 * }
+                 */
+                EntityTriggerConditions;
                 filter_config?: {
                     operation?: {
                         /**
@@ -3057,6 +3689,170 @@ declare namespace Components {
          * A filter field value.
          */
         export type EntitySearchFilterValue = /* A filter field value. */ (string | null) | number | boolean;
+        /**
+         * Conditions the entity must satisfy for the trigger to start the automation, checked after
+         * `schema`, `operations`, the activity filters and `filter_config` have matched. An event that
+         * does not satisfy them starts nothing: no execution is created.
+         *
+         * Statements use the flows condition dialect (the `Statement` of a flow decision) and are
+         * evaluated against the entity of the event, never against related entities. The change
+         * operators (`has_changed`, `changes_to`, `changes_to_all`, `no_longer_is`, `no_longer_is_all`) compare the entity before and after
+         * the update and are only accepted on a trigger whose operations are all `updateEntity`.
+         *
+         * example:
+         * {
+         *   "logical_operator": "AND",
+         *   "statements": [
+         *     {
+         *       "id": "3f1c8c0e-6a41-4d0e-9a51-8f6f0f6f2f11",
+         *       "source": {
+         *         "schema": "order",
+         *         "attribute": "status",
+         *         "attribute_type": "status"
+         *       },
+         *       "operator": "changes_to",
+         *       "values": [
+         *         "interessent"
+         *       ]
+         *     },
+         *     {
+         *       "id": "0b6f0e1c-1a0b-4a57-9d0c-0e3c9c0c7a52",
+         *       "source": {
+         *         "schema": "order",
+         *         "attribute": "_purpose",
+         *         "attribute_type": "purpose",
+         *         "attribute_repeatable": true
+         *       },
+         *       "operator": "any_of",
+         *       "values": [
+         *         "commodity"
+         *       ]
+         *     }
+         *   ]
+         * }
+         */
+        export interface EntityTriggerConditions {
+            /**
+             * How the statements are joined. Defaults to `AND`.
+             */
+            logical_operator?: "AND" | "OR";
+            statements: [
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?,
+                EntityTriggerStatement?
+            ];
+        }
+        /**
+         * The value operators of a flow decision, plus three change operators for update triggers:
+         * - `has_changed`: the update touched the attribute
+         * - `changes_to`: the attribute was not the value and now is; on a list, at least one of the values was not there and now is
+         * - `changes_to_all`: every listed value was not on the list and now is (strict: a value already there does not count)
+         * - `no_longer_is`: the attribute was the value and no longer is; on a list, at least one of the values was there and no longer is
+         * - `no_longer_is_all`: every listed value was on the list and no longer is
+         *
+         */
+        export type EntityTriggerOperator = "equals" | "not_equals" | "any_of" | "none_of" | "contains" | "not_contains" | "starts_with" | "ends_with" | "greater_than" | "less_than" | "greater_than_or_equals" | "less_than_or_equals" | "is_empty" | "is_not_empty" | "has_changed" | "changes_to" | "changes_to_all" | "no_longer_is" | "no_longer_is_all";
+        export interface EntityTriggerStatement {
+            id?: string;
+            source: EntityTriggerStatementSource;
+            operator: /**
+             * The value operators of a flow decision, plus three change operators for update triggers:
+             * - `has_changed`: the update touched the attribute
+             * - `changes_to`: the attribute was not the value and now is; on a list, at least one of the values was not there and now is
+             * - `changes_to_all`: every listed value was not on the list and now is (strict: a value already there does not count)
+             * - `no_longer_is`: the attribute was the value and no longer is; on a list, at least one of the values was there and no longer is
+             * - `no_longer_is_all`: every listed value was on the list and no longer is
+             *
+             */
+            EntityTriggerOperator;
+            /**
+             * Not needed for `is_empty`, `is_not_empty` and `has_changed`.
+             */
+            values?: string[];
+            /**
+             * How to interpret values. "static" (default) means literal values. "relative_date" means values[0] is a dynamic date token like "today".
+             */
+            value_type?: "static" | "relative_date";
+        }
+        export interface EntityTriggerStatementSource {
+            schema?: string;
+            attribute: string;
+            attribute_type?: "string" | "text" | "number" | "boolean" | "date" | "datetime" | "tags" | "country" | "email" | "phone" | "status" | "multiselect" | "select" | "radio" | "purpose" | "label";
+            attribute_repeatable?: boolean;
+            /**
+             * For complex attribute types, the sub-field to compare (e.g. "address", "contact.email").
+             */
+            attribute_sub_field?: string;
+            /**
+             * Narrows `has_changed` to one kind of change: the attribute gained a value (`added`), a value it
+             * had was replaced (`updated`) or lost (`deleted`). Absent or `all` means any of them. Other
+             * operators ignore it.
+             *
+             */
+            attribute_operation?: "all" | "added" | "updated" | "deleted";
+            /**
+             * Offset applied to the entity's date before comparison.
+             */
+            date_offset?: {
+                amount?: number;
+                unit?: "days" | "months" | "years";
+            };
+        }
+        /**
+         * Present on an execution started from an automation definition sent in the request.
+         */
+        export interface EphemeralExecution {
+            identity: /**
+             * Identifies the automation of an ephemeral execution. The execution's `flow_id` is derived from the organization and this identity.
+             * Executions with the same identity share the state kept per `flow_id` across runs, e.g. round-robin assignment queues.
+             * Configurations that must not share this state need different identities.
+             *
+             */
+            EphemeralIdentity;
+        }
+        /**
+         * Identifies the automation of an ephemeral execution. The execution's `flow_id` is derived from the organization and this identity.
+         * Executions with the same identity share the state kept per `flow_id` across runs, e.g. round-robin assignment queues.
+         * Configurations that must not share this state need different identities.
+         *
+         */
+        export interface EphemeralIdentity {
+            /**
+             * The internal feature that owns the execution.
+             * example:
+             * flows
+             */
+            namespace: string;
+            /**
+             * Owner-defined parts that identify the automation within the namespace.
+             * example:
+             * [
+             *   "7791b04a-16d2-44a2-9af9-2d59c25c512f",
+             *   "task-1"
+             * ]
+             */
+            key: [
+                string,
+                ...string[]
+            ];
+        }
         export interface EqualsIgnoreCaseCondition {
             "equals-ignore-case"?: string;
         }
@@ -3546,9 +4342,13 @@ declare namespace Components {
              */
             forward_to: {
                 /**
-                 * Email address to forward to
+                 * Either a plain email address or exactly one epilot environment variable placeholder
+                 * (`{{env.KEY}}`, whitespace inside the braces allowed) that is resolved when the action runs.
+                 * The key follows the environments-api key format (lowercase letters, digits, `_`, `-`, `.`).
+                 * Mixed text such as `a@b.de, {{env.KEY}}` is rejected. Example: `{{env.support_inbox}}`
+                 *
                  */
-                email: string; // email
+                email: string; // ^([^@\s{},;]+@[^@\s{},;]+|\{\{\s*env\.[a-z0-9][a-z0-9_.\-]{0,127}\s*\}\})$
                 /**
                  * Display name for the recipient
                  */
@@ -3870,6 +4670,7 @@ declare namespace Components {
             location?: {
                 action_id?: string;
                 action_type?: string;
+                action_index?: number;
             };
             matched_as: {
                 dialect: "name";
@@ -3999,6 +4800,12 @@ declare namespace Components {
                 string,
                 ...string[]
             ];
+        }
+        export interface MapCondition {
+            _exists?: ConditionNode;
+            _equals?: ConditionNode;
+            _not_exists?: ConditionNode;
+            _any_of?: ConditionNode;
         }
         export interface MapEntityAction {
             id?: /**
@@ -4311,6 +5118,39 @@ declare namespace Components {
              *
              */
             GraphContextEntry[];
+            /**
+             * Run this target once per item of an array on the source entity, as a mapping config target does. `##LOOP_INDEX##` in source paths resolves to the current item's index. Forwarded by automation-workers and evaluated in entity-mapping-api.
+             *
+             */
+            loop_config?: {
+                /**
+                 * path to the array from the entity payload
+                 */
+                source_path?: string;
+                /**
+                 * Kind of journey block the loop iterates. 'journey-multi-select' (default) is a cards block with multi selection. 'journey-file-upload' is a file upload block: source_path points at the submission's `_files.$relation` array and `filter_tags` narrows it down to the block's files.
+                 *
+                 */
+                source_type?: "journey-multi-select" | "journey-file-upload";
+                /**
+                 * Only iterate items of the array whose `_tags` contain every listed tag. Meant for relation arrays such as `submission._files.$relation`, where the journey tags each file relation with the upload block it came from. `##LOOP_INDEX##` keeps referring to the item's index in the unfiltered array.
+                 *
+                 */
+                filter_tags?: string[];
+                /**
+                 * a hard limit of how many times the loop is allowed to run.
+                 */
+                length?: number;
+            };
+            /**
+             * Mode of how conditions are considered valid
+             */
+            conditionMode?: "oneOf" | "anyOf" | "allOf";
+            /**
+             * Conditions necessary to hold for the target entity to be mapped, as on a mapping config target. Forwarded by automation-workers and evaluated in entity-mapping-api.
+             *
+             */
+            conditions?: MapCondition[];
         }
         export type MappingAttribute = SetValueMapper | CopyValueMapper | AppendValueMapper;
         /**
@@ -4351,6 +5191,100 @@ declare namespace Components {
              * Version of Entity Mapping Configuration to run for mapping.
              */
             version?: number;
+        }
+        export interface MarkTicketEmailsDoneAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "mark-ticket-emails-done";
+            config?: /**
+             * Runs on a ticket and marks the threads of the ticket's emails as done, whatever that ticket's own status is: when the action runs is up to the flow's trigger and conditions. A thread that also belongs to another ticket whose status is not in `ending_statuses` stays open.
+             *
+             */
+            MarkTicketEmailsDoneConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
+        }
+        /**
+         * Runs on a ticket and marks the threads of the ticket's emails as done, whatever that ticket's own status is: when the action runs is up to the flow's trigger and conditions. A thread that also belongs to another ticket whose status is not in `ending_statuses` stays open.
+         *
+         */
+        export interface MarkTicketEmailsDoneConfig {
+            /**
+             * Ticket status values in which another ticket on the thread counts as closed, e.g. `closed` and `canceled`. Compared case-sensitively after trimming surrounding spaces from both sides. Values that aren't status options, e.g. ones older flows write, can be listed too.
+             *
+             * example:
+             * [
+             *   "closed",
+             *   "canceled"
+             * ]
+             */
+            ending_statuses: [
+                string,
+                ...string[]
+            ];
         }
         export interface MoveThreadAction {
             id?: /**
@@ -4570,6 +5504,106 @@ declare namespace Components {
             };
             mode: "append" | "prepend" | "set";
         }
+        export interface ReopenEmailTicketsAction {
+            id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            flow_action_id?: /**
+             * example:
+             * 9ec3711b-db63-449c-b894-54d5bb622a8f
+             */
+            AutomationActionId;
+            name?: string;
+            type?: "reopen-email-tickets";
+            config?: /**
+             * Runs on an email: the trigger's message, or a thread's latest received email. Finds the tickets of every email in the email's thread, through links in both directions, and sets each one whose status counts as closed to `reopen_status`. Nothing else on the ticket changes. Does nothing for our own outgoing emails and for automatic emails (auto-replies and bounces).
+             *
+             */
+            ReopenEmailTicketsConfig;
+            /**
+             * Whether to stop execution in a failed state if this action fails
+             */
+            allow_failure?: boolean;
+            /**
+             * Flag indicating whether the action was created automatically or manually
+             */
+            created_automatically?: boolean;
+            /**
+             * Flag indicating whether the same action can be in bulk in a single execution. e.g; send-email / map-entity
+             */
+            is_bulk_action?: boolean;
+            reason?: {
+                /**
+                 * Why the action has to be skipped/failed
+                 * example:
+                 * There are no registered portal users for the given emails, hence skipping the action
+                 */
+                message?: string;
+                /**
+                 * Extra metadata about the skipping reason - such as a certain condition not met, etc.
+                 */
+                payload?: {
+                    [name: string]: any;
+                };
+            };
+            /**
+             * Condition Id to be checked before executing the action
+             */
+            condition_id?: string;
+            /**
+             * Schedule Id which indicates the schedule of the action
+             */
+            schedule_id?: string;
+            /**
+             * Id of a loop scope defined on the parent flow. When set, the action runs once per item resolved from the loop's source_path. All actions sharing the same loop_id must be contiguous in the actions array.
+             *
+             */
+            loop_id?: string;
+            execution_status?: ExecutionStatus;
+            started_at?: string;
+            updated_at?: string;
+            /**
+             * example:
+             * {}
+             */
+            outputs?: {
+                [name: string]: any;
+            };
+            error_output?: ErrorOutput;
+            retry_strategy?: /* different behaviors for retrying failed execution actions. */ RetryStrategy;
+            /**
+             * For looped actions, an archive of completed iterations. The action's own execution_status / outputs / error_output always reflect the current (latest) iteration. The previous iteration's state is pushed here before the action is reset for the next pass.
+             *
+             */
+            iterations?: /* A snapshot of a single completed pass through a looped action. */ AutomationActionIteration[];
+        }
+        /**
+         * Runs on an email: the trigger's message, or a thread's latest received email. Finds the tickets of every email in the email's thread, through links in both directions, and sets each one whose status counts as closed to `reopen_status`. Nothing else on the ticket changes. Does nothing for our own outgoing emails and for automatic emails (auto-replies and bounces).
+         *
+         */
+        export interface ReopenEmailTicketsConfig {
+            /**
+             * Ticket status values that count as closed, as stored on the ticket. Compared case-sensitively after trimming surrounding spaces from both sides. Values that are not options of the ticket's status attribute are allowed, e.g. an older plain-text value.
+             *
+             * example:
+             * [
+             *   "closed",
+             *   "Geschlossen"
+             * ]
+             */
+            closed_statuses: [
+                string,
+                ...string[]
+            ];
+            /**
+             * The status value a closed ticket is set to
+             * example:
+             * in_progress
+             */
+            reopen_status: string;
+        }
         export interface ReplyEmailAction {
             id?: /**
              * example:
@@ -4766,7 +5800,7 @@ declare namespace Components {
         export type RetryStrategy = "RETRY_AND_RESUME" | "RETRY_AND_STOP" | "RETRY_ALL_PARENT_CONDITION_ACTIONS";
         export interface SearchAutomationsResp {
             total: number;
-            results: AutomationFlow[];
+            results: /* The top-level fields of an automation flow. None is required. */ AutomationFlow[];
         }
         export interface SearchExecutionsReq {
             entity_id: /**
@@ -5135,6 +6169,51 @@ declare namespace Components {
              *
              */
             value: any;
+        }
+        export interface StartEphemeralExecutionRequest {
+            entity_id: /**
+             * example:
+             * e3d3ebac-baab-4395-abf4-50b5bf1f8b74
+             */
+            EntityId;
+            /**
+             * example:
+             * Handle contact form
+             */
+            flow_name: string;
+            /**
+             * Every action needs an `id`. The execution keeps it as the action's `flow_action_id`.
+             */
+            actions: AnyAction[];
+            conditions?: ActionCondition[];
+            schedules?: ActionSchedule[];
+            /**
+             * Loop scopes. Actions whose `loop_id` names a loop run once per item it resolves to.
+             */
+            loops?: /* A loop scope on an automation flow. */ AutomationLoop[];
+            workflow_context?: WorkflowExecutionContext;
+            action_inputs?: /**
+             * Internal. Run-time inputs for the actions of this execution, keyed by
+             * action type. An action reads the entry for its own type and treats it
+             * as replacing the matching configured values; an action whose type has
+             * no entry runs entirely from its configuration.
+             *
+             * Only the workflows service may set this field, on behalf of the person
+             * running a semi-automated flow task: it forwards what that person chose
+             * after checking their permission to run the task. A request carrying
+             * `action_inputs` under any other token is refused with 403 and nothing
+             * is stored.
+             *
+             * This is deliberately NOT stored on `actions[].config`. Retrying a step
+             * refreshes that action's config from the live flow (see `startAction`),
+             * which would silently drop an override and re-run the action with the
+             * configured values — sending the wrong email, or cancelling a flow
+             * under the wrong reason. Keeping the inputs on the execution row means a
+             * retry replays what the person actually chose.
+             *
+             */
+            ActionInputs;
+            ephemeral: /* Present on an execution started from an automation definition sent in the request. */ EphemeralExecution;
         }
         export interface StartExecutionRequest {
             entity_id: /**
@@ -6218,9 +7297,9 @@ declare namespace Paths {
         }
     }
     namespace CreateFlow {
-        export type RequestBody = Components.Schemas.AutomationFlow;
+        export type RequestBody = /* The top-level fields of an automation flow. None is required. */ Components.Schemas.AutomationFlow;
         namespace Responses {
-            export type $201 = Components.Schemas.AutomationFlow;
+            export type $201 = /* The top-level fields of an automation flow. None is required. */ Components.Schemas.AutomationFlow;
             export type $403 = /**
              * example:
              * {
@@ -6373,7 +7452,7 @@ declare namespace Paths {
             flow_id: Parameters.FlowId;
         }
         namespace Responses {
-            export type $200 = Components.Schemas.AutomationFlow;
+            export type $200 = /* The top-level fields of an automation flow. None is required. */ Components.Schemas.AutomationFlow;
             export type $403 = /**
              * example:
              * {
@@ -6437,9 +7516,9 @@ declare namespace Paths {
         export interface PathParameters {
             flow_id: Parameters.FlowId;
         }
-        export type RequestBody = Components.Schemas.AutomationFlow;
+        export type RequestBody = /* The top-level fields of an automation flow. None is required. */ Components.Schemas.AutomationFlow;
         namespace Responses {
-            export type $200 = Components.Schemas.AutomationFlow;
+            export type $200 = /* The top-level fields of an automation flow. None is required. */ Components.Schemas.AutomationFlow;
             export type $403 = /**
              * example:
              * {
@@ -6613,7 +7692,7 @@ export interface OperationMethods {
   /**
    * createFlow - createFlow
    * 
-   * Create new automation flow
+   * Create new automation flow. Map-entity actions hold their mappings inline: check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving (`{ source, actions }`, with `source` `{ journey_id }` for a journey_submission trigger or `{ entity_schema }` for an entity trigger; on update also `previous_actions`, the stored actions) and fix every `blocking` issue.
    */
   'createFlow'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -6643,7 +7722,7 @@ export interface OperationMethods {
   /**
    * putFlow - putFlow
    * 
-   * Update automation flow by id
+   * Update automation flow by id. Map-entity actions hold their mappings inline: check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving (`{ source, actions }`, with `source` `{ journey_id }` for a journey_submission trigger or `{ entity_schema }` for an entity trigger; on update also `previous_actions`, the stored actions) and fix every `blocking` issue.
    */
   'putFlow'(
     parameters?: Parameters<Paths.PutFlow.PathParameters> | null,
@@ -6805,7 +7884,7 @@ export interface PathsDictionary {
     /**
      * createFlow - createFlow
      * 
-     * Create new automation flow
+     * Create new automation flow. Map-entity actions hold their mappings inline: check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving (`{ source, actions }`, with `source` `{ journey_id }` for a journey_submission trigger or `{ entity_schema }` for an entity trigger; on update also `previous_actions`, the stored actions) and fix every `blocking` issue.
      */
     'post'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -6839,7 +7918,7 @@ export interface PathsDictionary {
     /**
      * putFlow - putFlow
      * 
-     * Update automation flow by id
+     * Update automation flow by id. Map-entity actions hold their mappings inline: check the actions with entity-mapping-api `POST /v1/mappings:validate-flow` before saving (`{ source, actions }`, with `source` `{ journey_id }` for a journey_submission trigger or `{ entity_schema }` for an entity trigger; on update also `previous_actions`, the stored actions) and fix every `blocking` issue.
      */
     'put'(
       parameters?: Parameters<Paths.PutFlow.PathParameters> | null,
@@ -7033,10 +8112,15 @@ export type AutomationActionIteration = Components.Schemas.AutomationActionItera
 export type AutomationExecution = Components.Schemas.AutomationExecution;
 export type AutomationExecutionId = Components.Schemas.AutomationExecutionId;
 export type AutomationFlow = Components.Schemas.AutomationFlow;
+export type AutomationFlowFields = Components.Schemas.AutomationFlowFields;
 export type AutomationFlowId = Components.Schemas.AutomationFlowId;
 export type AutomationLoop = Components.Schemas.AutomationLoop;
 export type AutomationLoopState = Components.Schemas.AutomationLoopState;
 export type AutomationTrigger = Components.Schemas.AutomationTrigger;
+export type BatchSyncFlowsFailure = Components.Schemas.BatchSyncFlowsFailure;
+export type BatchSyncFlowsRequest = Components.Schemas.BatchSyncFlowsRequest;
+export type BatchSyncFlowsResponse = Components.Schemas.BatchSyncFlowsResponse;
+export type BatchSyncFlowsUpsert = Components.Schemas.BatchSyncFlowsUpsert;
 export type BulkTriggerJob = Components.Schemas.BulkTriggerJob;
 export type BulkTriggerRequest = Components.Schemas.BulkTriggerRequest;
 export type CancellationReason = Components.Schemas.CancellationReason;
@@ -7044,6 +8128,7 @@ export type CartCheckoutAction = Components.Schemas.CartCheckoutAction;
 export type CartCheckoutActionConfig = Components.Schemas.CartCheckoutActionConfig;
 export type CartCheckoutConfig = Components.Schemas.CartCheckoutConfig;
 export type Comparison = Components.Schemas.Comparison;
+export type ConditionNode = Components.Schemas.ConditionNode;
 export type ConditionStatement = Components.Schemas.ConditionStatement;
 export type CopyValueMapper = Components.Schemas.CopyValueMapper;
 export type CreateDocumentAction = Components.Schemas.CreateDocumentAction;
@@ -7063,6 +8148,12 @@ export type EntityOperationTrigger = Components.Schemas.EntityOperationTrigger;
 export type EntityRef = Components.Schemas.EntityRef;
 export type EntitySearchFilter = Components.Schemas.EntitySearchFilter;
 export type EntitySearchFilterValue = Components.Schemas.EntitySearchFilterValue;
+export type EntityTriggerConditions = Components.Schemas.EntityTriggerConditions;
+export type EntityTriggerOperator = Components.Schemas.EntityTriggerOperator;
+export type EntityTriggerStatement = Components.Schemas.EntityTriggerStatement;
+export type EntityTriggerStatementSource = Components.Schemas.EntityTriggerStatementSource;
+export type EphemeralExecution = Components.Schemas.EphemeralExecution;
+export type EphemeralIdentity = Components.Schemas.EphemeralIdentity;
 export type EqualsIgnoreCaseCondition = Components.Schemas.EqualsIgnoreCaseCondition;
 export type ErrorCode = Components.Schemas.ErrorCode;
 export type ErrorDetail = Components.Schemas.ErrorDetail;
@@ -7101,6 +8192,7 @@ export type JourneyContextUsagesResp = Components.Schemas.JourneyContextUsagesRe
 export type JourneySubmitTrigger = Components.Schemas.JourneySubmitTrigger;
 export type LabelEmailAction = Components.Schemas.LabelEmailAction;
 export type LabelEmailConfig = Components.Schemas.LabelEmailConfig;
+export type MapCondition = Components.Schemas.MapCondition;
 export type MapEntityAction = Components.Schemas.MapEntityAction;
 export type MapEntityActionConfig = Components.Schemas.MapEntityActionConfig;
 export type MapEntityConfig = Components.Schemas.MapEntityConfig;
@@ -7108,6 +8200,8 @@ export type MappingAttribute = Components.Schemas.MappingAttribute;
 export type MappingAttributeMode = Components.Schemas.MappingAttributeMode;
 export type MappingAttributeV2 = Components.Schemas.MappingAttributeV2;
 export type MappingConfigRef = Components.Schemas.MappingConfigRef;
+export type MarkTicketEmailsDoneAction = Components.Schemas.MarkTicketEmailsDoneAction;
+export type MarkTicketEmailsDoneConfig = Components.Schemas.MarkTicketEmailsDoneConfig;
 export type MoveThreadAction = Components.Schemas.MoveThreadAction;
 export type MoveThreadConfig = Components.Schemas.MoveThreadConfig;
 export type NewEmailThreadTrigger = Components.Schemas.NewEmailThreadTrigger;
@@ -7122,6 +8216,8 @@ export type PrefixCondition = Components.Schemas.PrefixCondition;
 export type PrimitiveJSONValue = Components.Schemas.PrimitiveJSONValue;
 export type ReceivedEmailTrigger = Components.Schemas.ReceivedEmailTrigger;
 export type RelationAttribute = Components.Schemas.RelationAttribute;
+export type ReopenEmailTicketsAction = Components.Schemas.ReopenEmailTicketsAction;
+export type ReopenEmailTicketsConfig = Components.Schemas.ReopenEmailTicketsConfig;
 export type ReplyEmailAction = Components.Schemas.ReplyEmailAction;
 export type ReplyEmailActionConfig = Components.Schemas.ReplyEmailActionConfig;
 export type ReplyEmailConfig = Components.Schemas.ReplyEmailConfig;
@@ -7140,6 +8236,7 @@ export type SendEmailConfig = Components.Schemas.SendEmailConfig;
 export type SendEmailInputs = Components.Schemas.SendEmailInputs;
 export type SentEmailTrigger = Components.Schemas.SentEmailTrigger;
 export type SetValueMapper = Components.Schemas.SetValueMapper;
+export type StartEphemeralExecutionRequest = Components.Schemas.StartEphemeralExecutionRequest;
 export type StartExecutionRequest = Components.Schemas.StartExecutionRequest;
 export type SuffixCondition = Components.Schemas.SuffixCondition;
 export type TriggerCondition = Components.Schemas.TriggerCondition;

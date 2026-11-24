@@ -302,6 +302,15 @@ declare namespace Components {
              */
             type: "portal_role";
             /**
+             * ID of the portal this role is scoped to. When set, the role applies to users of that
+             * specific portal only. Absent on legacy origin-based portal roles (default_<origin>_role),
+             * which apply to all portals of their origin.
+             *
+             * example:
+             * 9ac9b210-8ee4-4a08-9cf8-9f5d67c72e35
+             */
+            portal_id?: string;
+            /**
              * List of grants (permissions) applied to the role
              */
             grants: Grant[];
@@ -479,18 +488,6 @@ declare namespace Components {
             operation: "not_equals_current_user";
         }
         /**
-         * All roles attached to an users of an organization
-         */
-        export interface OrgAssignments {
-            organizationId?: /**
-             * Id of an organization
-             * example:
-             * 123
-             */
-            OrganizationId;
-            assignments?: /* A role attached to an user */ InternalAssignment[];
-        }
-        /**
          * A role automatically applied to all users in an organization.
          */
         export interface OrgRole {
@@ -538,18 +535,6 @@ declare namespace Components {
              * Professional
              */
             pricing_tier?: string;
-        }
-        /**
-         * All roles attached to an users of an organization
-         */
-        export interface OrgRoles {
-            organizationId?: /**
-             * Id of an organization
-             * example:
-             * 123
-             */
-            OrganizationId;
-            roles?: Role[];
         }
         /**
          * Id of an organization
@@ -656,6 +641,15 @@ declare namespace Components {
              * List of grants (permissions) applied to the role
              */
             grants: Grant[];
+            /**
+             * ID of the portal this role is scoped to. When set, the role applies to users of that
+             * specific portal only. Absent on legacy origin-based portal roles (default_<origin>_role),
+             * which apply to all portals of their origin.
+             *
+             * example:
+             * 9ac9b210-8ee4-4a08-9cf8-9f5d67c72e35
+             */
+            portal_id?: string;
         }
         export type Role = /* A standard user role. Must be explicitly assigned to users. */ UserRole | /* A role automatically applied to all users in an organization. */ OrgRole | /* A role that can be assigned to users in other organizations for sharing purposes. */ ShareRole | /* A role that appears in another organization's role list that can be assigned but not modified by the partner organization. */ PartnerRole | /* A role that is applied to end customers and installers using the Portals */ PortalRole;
         /**
@@ -778,6 +772,47 @@ declare namespace Components {
          * owner
          */
         export type Slug = string;
+        /**
+         * Restrictions the calling token puts on top of its roles. Only present for restricted tokens.
+         *
+         */
+        export interface TokenRestrictions {
+            /**
+             * Only view actions are allowed
+             */
+            read_only?: boolean;
+            /**
+             * Personal data is masked in entity responses
+             */
+            anonymize?: boolean;
+            /**
+             * Only these actions are allowed (exact, or `prefix:*` at a `:` boundary), e.g. the
+             * access profile of an AI agent token
+             *
+             * example:
+             * [
+             *   "journey:*",
+             *   "entity:view"
+             * ]
+             */
+            allowed_actions?: string[];
+            /**
+             * The AI agent the token was issued to (Agent Auth)
+             */
+            actor?: {
+                /**
+                 * example:
+                 * agent
+                 */
+                type?: string;
+                agent_id?: string;
+                host_id?: string;
+                /**
+                 * The reason the agent gave when requesting access
+                 */
+                purpose?: string;
+            };
+        }
         /**
          * Id of a user
          * example:
@@ -954,6 +989,11 @@ declare namespace Paths {
         namespace Responses {
             export interface $200 {
                 roles?: Components.Schemas.Role[];
+                token_restrictions?: /**
+                 * Restrictions the calling token puts on top of its roles. Only present for restricted tokens.
+                 *
+                 */
+                Components.Schemas.TokenRestrictions;
             }
         }
     }
@@ -1021,7 +1061,12 @@ export interface OperationMethods {
   /**
    * listCurrentRoles - listCurrentRoles
    * 
-   * Returns roles and grants assigned to current user
+   * Returns roles and grants assigned to current user.
+   * 
+   * When the calling token itself is restricted (read-only, anonymized, or an AI agent token
+   * with an access profile), `token_restrictions` describes those restrictions. Effective
+   * permissions are the roles' grants narrowed by them.
+   * 
    */
   'listCurrentRoles'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -1112,6 +1157,13 @@ export interface OperationMethods {
    * assignRoles - assignRoles
    * 
    * Assign / unassign roles to users.
+   * 
+   * Only an organization owner can grant the `owner` role to a user. `role:assign` alone (e.g. the
+   * Administrator role) is not sufficient and results in a 403.
+   * 
+   * An organization must always keep at least one owner: removing the `owner` role from the last user
+   * holding it results in a 409 (internal callers are exempt).
+   * 
    */
   'assignRoles'(
     parameters?: Parameters<Paths.AssignRoles.PathParameters> | null,
@@ -1158,7 +1210,12 @@ export interface PathsDictionary {
     /**
      * listCurrentRoles - listCurrentRoles
      * 
-     * Returns roles and grants assigned to current user
+     * Returns roles and grants assigned to current user.
+     * 
+     * When the calling token itself is restricted (read-only, anonymized, or an AI agent token
+     * with an access profile), `token_restrictions` describes those restrictions. Effective
+     * permissions are the roles' grants narrowed by them.
+     * 
      */
     'get'(
       parameters?: Parameters<UnknownParamsObject> | null,
@@ -1259,6 +1316,13 @@ export interface PathsDictionary {
      * assignRoles - assignRoles
      * 
      * Assign / unassign roles to users.
+     * 
+     * Only an organization owner can grant the `owner` role to a user. `role:assign` alone (e.g. the
+     * Administrator role) is not sufficient and results in a 403.
+     * 
+     * An organization must always keep at least one owner: removing the `owner` role from the last user
+     * holding it results in a 409 (internal callers are exempt).
+     * 
      */
     'put'(
       parameters?: Parameters<Paths.AssignRoles.PathParameters> | null,
@@ -1322,9 +1386,7 @@ export type GrantWithDependencies = Components.Schemas.GrantWithDependencies;
 export type InternalAssignment = Components.Schemas.InternalAssignment;
 export type NotEqualsCondition = Components.Schemas.NotEqualsCondition;
 export type NotEqualsCurrentUserCondition = Components.Schemas.NotEqualsCurrentUserCondition;
-export type OrgAssignments = Components.Schemas.OrgAssignments;
 export type OrgRole = Components.Schemas.OrgRole;
-export type OrgRoles = Components.Schemas.OrgRoles;
 export type OrganizationId = Components.Schemas.OrganizationId;
 export type PartnerRole = Components.Schemas.PartnerRole;
 export type PortalRole = Components.Schemas.PortalRole;
@@ -1334,5 +1396,6 @@ export type RolePayload = Components.Schemas.RolePayload;
 export type RoleSearchInput = Components.Schemas.RoleSearchInput;
 export type ShareRole = Components.Schemas.ShareRole;
 export type Slug = Components.Schemas.Slug;
+export type TokenRestrictions = Components.Schemas.TokenRestrictions;
 export type UserId = Components.Schemas.UserId;
 export type UserRole = Components.Schemas.UserRole;

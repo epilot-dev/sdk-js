@@ -393,7 +393,7 @@
         }
       },
       "delete": {
-        "summary": "Delete app configuration",
+        "summary": "deleteConfiguration",
         "description": "Delete an app configuration and all its versions and components.",
         "operationId": "deleteConfiguration",
         "x-epilot-permissions": [
@@ -2062,6 +2062,13 @@
                   },
                   "description": "Replaces the full set of app-level option declarations for this version.\nOption keys must be unique app-wide; `secret`-touching options are always\nsensitive and must not declare `sensitive: false`.\n"
                 },
+                "option_groups": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OptionGroup"
+                  },
+                  "description": "Replaces the sections app-level options are grouped under in the\nconfiguration UI. Listed in display order; referenced by `options[].group`.\n"
+                },
                 "changelog": {
                   "type": "string",
                   "maxLength": 250,
@@ -2202,16 +2209,82 @@
             "description": "Unique identifier for this configuration option"
           },
           "label": {
-            "type": "string",
-            "description": "Human-readable label for the configuration option"
+            "description": "Human-readable label for the configuration option. A plain string, or\ntranslations (`{ de, en }`) for app-level options.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedText"
+              }
+            ]
           },
           "required": {
             "type": "boolean",
             "description": "Flag to indicate if this option is required"
           },
           "description": {
+            "description": "Detailed description of what this configuration option does. A plain string,\nor translations (`{ de, en }`) for app-level options.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedText"
+              }
+            ]
+          },
+          "placeholder": {
+            "description": "Example shown in the empty input field (app-level `text`, `number` and\n`secret` options). A plain string or translations.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedText"
+              }
+            ]
+          },
+          "default": {
+            "description": "Value used while the installing organization has not set one (app-level,\nnon-repeatable, non-sensitive `text`, `number` and `boolean` options). The\ndefault is the option's effective value everywhere values are read — API\nproxies, functions, client-side components and `visible_if` — and satisfies\n`required`. It must itself pass `choices`, `format`, `pattern`, `min` and `max`.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OptionConditionValue"
+              }
+            ]
+          },
+          "choices": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Fixed set of accepted values, rendered as a selection (app-level `text` and\n`number` options). The stored value stays a plain string or number. For a\nrepeatable option every entry must be one of the choices.\n",
+            "items": {
+              "$ref": "#/components/schemas/OptionChoice"
+            }
+          },
+          "format": {
             "type": "string",
-            "description": "Detailed description of what this configuration option does"
+            "enum": [
+              "hostname",
+              "url",
+              "email"
+            ],
+            "description": "Well-known shape the value must have (app-level `text` options). `hostname` is\na bare host name without scheme, port or path; `url` is an absolute http(s) URL.\n"
+          },
+          "pattern": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Regular expression the whole value must match (app-level `text` and `secret`\noptions). Anchored implicitly; values longer than 2000 characters never match.\n"
+          },
+          "pattern_message": {
+            "description": "Message shown when the value does not match `pattern`. A plain string or\ntranslations.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedText"
+              }
+            ]
+          },
+          "min": {
+            "type": "number",
+            "description": "Smallest accepted value (app-level `number` options)."
+          },
+          "max": {
+            "type": "number",
+            "description": "Largest accepted value (app-level `number` options)."
+          },
+          "group": {
+            "type": "string",
+            "description": "Key of the `option_groups` entry this option is shown under (app-level options\nonly). Options without a group are shown first, ungrouped.\n"
           },
           "repeatable": {
             "type": "boolean",
@@ -2238,6 +2311,30 @@
             ],
             "description": "The type of this option. `object` declares a structured value whose fields are listed\nunder `fields`. Combine with `repeatable: true` to express a list of these objects.\n"
           },
+          "visible_if": {
+            "type": "object",
+            "description": "Show this option only while other options have the given values (app-level\noptions only). Keys are option keys of the same app; each value is the value\nthat option must have, or a list of accepted values. All entries must match.\nA hidden option is not asked for in the configuration UI and — when\n`required` — does not keep the installation from being enabled. Its stored\nvalue, if any, is kept. The referenced options must be non-sensitive\n`text`, `number` or `boolean` options; an option whose controlling option is\nitself hidden is hidden too.\n",
+            "example": {
+              "auth_mode": [
+                "basic",
+                "bearer"
+              ]
+            },
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/OptionConditionValue"
+                },
+                {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "#/components/schemas/OptionConditionValue"
+                  }
+                }
+              ]
+            }
+          },
           "sensitive": {
             "type": "boolean",
             "description": "Write-only, server-side only value — like a sensitive environment variable\n(app-level options only). Sensitive values are never serialized in any response;\nthey are resolvable only via server-side channels (API proxy injection, function\nruns, the internal options/resolve endpoint). Non-sensitive values\nare readable wherever the app runs, including the end-customer browser (journey and\nportal runtime). Forced to true for `secret`-touching options. Default: false.\n"
@@ -2258,6 +2355,90 @@
             "description": "Timestamp of the last value change. Only returned for sensitive options\n(alongside `configured`) so installers can see when a secret was last rotated.\n"
           }
         }
+      },
+      "LocalizedText": {
+        "description": "A plain string, or translations with German required.",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/components/schemas/TranslatedString"
+          }
+        ]
+      },
+      "OptionChoice": {
+        "type": "object",
+        "description": "One accepted value of an option that declares `choices`.",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "description": "The value stored when this choice is selected. Unique within the option.",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "label": {
+            "description": "Label shown for the choice. Defaults to the value. A plain string or translations.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedText"
+              }
+            ]
+          }
+        }
+      },
+      "OptionGroup": {
+        "type": "object",
+        "description": "A section the configuration UI groups app-level options under.",
+        "required": [
+          "key",
+          "label"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Identifier referenced by an option's `group`. Unique within the version."
+          },
+          "label": {
+            "description": "Heading of the section. A plain string or translations.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedText"
+              }
+            ]
+          },
+          "description": {
+            "description": "Optional explanation shown under the heading. A plain string or translations.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocalizedText"
+              }
+            ]
+          }
+        }
+      },
+      "OptionConditionValue": {
+        "description": "A primitive option value to compare against in `visible_if`.",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
       },
       "ObjectField": {
         "type": "object",
@@ -3259,10 +3440,6 @@
                 "type": "string",
                 "deprecated": true,
                 "description": "Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
-              },
-              "result_correlation_id": {
-                "type": "string",
-                "description": "Correlation id to wait for inbound ERP events under, resolved from the third-party\nresponse, e.g. `{{CallResponse.data.acknowledgeId}}`. Only read when the portal is\nconfigured to wait on the Integration Toolkit\n(`extension_hooks.<hook>.wait_for_toolkit`).\n\nThere is no default: unless a hook declares this, the portal waits on the id it\nminted and handed the hook as `{{CorrelationId}}`, whatever the response carries. A\npartner that pushes under that id leaves this unset; only a partner that pushes\nunder an id of its own declares where the response carries it. A declared id that\nis absent from the response falls back to the minted one; one that is not a valid\ncorrelation id (at most 255 letters, digits, `-` and `_`) is not waited on, and\nthe portal polls entity search instead.\n"
               }
             },
             "required": [
@@ -3278,10 +3455,6 @@
               "result": {
                 "type": "string",
                 "description": "Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`."
-              },
-              "result_correlation_id": {
-                "type": "string",
-                "description": "Correlation id to wait for inbound ERP events under, resolved from the third-party\nresponse, e.g. `{{CallResponse.data.acknowledgeId}}`. Supersedes\n`call.result_correlation_id`. No default; see `call.result_correlation_id`.\n"
               },
               "error_message_path": {
                 "type": "string",
@@ -3365,10 +3538,6 @@
                 "type": "string",
                 "deprecated": true,
                 "description": "Deprecated. Use `resolved.result` instead. Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation."
-              },
-              "result_correlation_id": {
-                "type": "string",
-                "description": "Correlation id to wait for inbound ERP events under, resolved from the third-party\nresponse, e.g. `{{CallResponse.data.acknowledgeId}}`. Only read when the portal is\nconfigured to wait on the Integration Toolkit\n(`extension_hooks.<hook>.wait_for_toolkit`).\n\nThere is no default: unless a hook declares this, the portal waits on the id it\nminted and handed the hook as `{{CorrelationId}}`, whatever the response carries. A\npartner that pushes under that id leaves this unset; only a partner that pushes\nunder an id of its own declares where the response carries it. A declared id that\nis absent from the response falls back to the minted one; one that is not a valid\ncorrelation id (at most 255 letters, digits, `-` and `_`) is not waited on, and\nthe portal polls entity search instead.\n"
               }
             },
             "required": [
@@ -3383,10 +3552,6 @@
               "result": {
                 "type": "string",
                 "description": "Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`."
-              },
-              "result_correlation_id": {
-                "type": "string",
-                "description": "Correlation id to wait for inbound ERP events under, resolved from the third-party\nresponse, e.g. `{{CallResponse.data.acknowledgeId}}`. Supersedes\n`call.result_correlation_id`. No default; see `call.result_correlation_id`.\n"
               },
               "error_message_path": {
                 "type": "string",
@@ -4714,10 +4879,114 @@
                 "default": [
                   "main"
                 ]
+              },
+              "settings": {
+                "$ref": "#/components/schemas/PortalBlockSettings"
               }
             }
           }
         ]
+      },
+      "PortalBlockSettings": {
+        "type": "object",
+        "description": "Settings a Portal Builder user can set on each placed instance of this block. The Portal Builder renders a\nform from these fields and stores the values on the block; the portal passes them to the block as\n`config.settings`. Values reach the end customer's browser, so secrets are not allowed: keep them as\ninstallation options and use them server-side.\n",
+        "required": [
+          "version",
+          "fields"
+        ],
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Increase when fields change. Stored values that no longer fit fall back to the default."
+          },
+          "fields": {
+            "type": "array",
+            "maxItems": 30,
+            "items": {
+              "$ref": "#/components/schemas/PortalBlockSettingsField"
+            }
+          }
+        }
+      },
+      "PortalBlockSettingsField": {
+        "type": "object",
+        "required": [
+          "key",
+          "type",
+          "label"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z][a-zA-Z0-9_]{0,63}$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "translated_text",
+              "number",
+              "boolean",
+              "select",
+              "entity_schema",
+              "page",
+              "journey",
+              "color_token"
+            ]
+          },
+          "label": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "description": {
+            "$ref": "#/components/schemas/TranslatedString"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "default": {
+            "description": "Must satisfy the field. `translated_text` takes a translated string."
+          },
+          "options": {
+            "type": "array",
+            "description": "Choices of a `select` field",
+            "items": {
+              "type": "object",
+              "required": [
+                "value",
+                "label"
+              ],
+              "properties": {
+                "value": {
+                  "type": "string"
+                },
+                "label": {
+                  "$ref": "#/components/schemas/TranslatedString"
+                }
+              }
+            }
+          },
+          "min": {
+            "type": "number"
+          },
+          "max": {
+            "type": "number"
+          },
+          "step": {
+            "type": "number"
+          },
+          "maxLength": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "allowed": {
+            "type": "array",
+            "description": "Entity schemas an `entity_schema` field may pick",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       },
       "JourneyBlockComponentArgs": {
         "allOf": [
@@ -5174,6 +5443,14 @@
             "minItems": 0,
             "description": "App-level option declarations (with sensitivity) of this version"
           },
+          "option_groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OptionGroup"
+            },
+            "minItems": 0,
+            "description": "Sections app-level options are grouped under, in display order"
+          },
           "visibility": {
             "type": "string",
             "enum": [
@@ -5420,9 +5697,9 @@
           "timeout_ms": {
             "type": "integer",
             "minimum": 500,
-            "maximum": 5000,
+            "maximum": 20000,
             "default": 3000,
-            "description": "Timeout for the external call in milliseconds."
+            "description": "Timeout in milliseconds for the hook as a whole: one budget for the auth pre-call and the call together."
           },
           "on_unavailable": {
             "type": "string",
@@ -5694,6 +5971,13 @@
             },
             "readOnly": true
           },
+          "option_groups": {
+            "description": "Sections the app-level options are grouped under in the configuration UI, in display order.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OptionGroup"
+            }
+          },
           "installed_version": {
             "type": "string",
             "description": "Version of the app that is installed",
@@ -5762,6 +6046,12 @@
             "type": "boolean",
             "description": "Flag to indicate if the app is in dev mode."
           },
+          "internal": {
+            "type": "boolean",
+            "default": false,
+            "description": "Flag to indicate if the app is built by epilot.",
+            "readOnly": true
+          },
           "category": {
             "type": "string",
             "description": "Category of the app."
@@ -5816,6 +6106,14 @@
             },
             "minItems": 0,
             "description": "App-level option declarations (with sensitivity) of this version"
+          },
+          "option_groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OptionGroup"
+            },
+            "minItems": 0,
+            "description": "Sections app-level options are grouped under, in display order"
           },
           "is_beta": {
             "type": "boolean",

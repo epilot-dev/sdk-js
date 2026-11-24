@@ -4,11 +4,6 @@
     "title": "",
     "version": ""
   },
-  "servers": [
-    {
-      "url": "https://presence.sls.epilot.io"
-    }
-  ],
   "paths": {
     "/v1/presence/{resource_type}/{resource_id}/heartbeat": {
       "post": {
@@ -92,5 +87,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://presence.sls.epilot.io"
+    }
+  ]
 }

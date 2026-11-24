@@ -23,7 +23,6 @@
     {
       "name": "Drafts"
     },
-    null,
     {
       "name": "message_schema",
       "x-displayName": "Message",
@@ -288,7 +287,7 @@
           }
         ],
         "summary": "getMessageEml",
-        "description": "Download a message as an EML file.\nReturns a 302 redirect to a pre-signed S3 URL where the EML file can be downloaded.\n",
+        "description": "Download a message as an EML file.\nReturns a 302 redirect to a pre-signed S3 URL where the EML file can be downloaded.\nBrowsers cannot read the target of a redirect, so pass `redirect=false` to get the same URL\nas JSON instead (200).\n",
         "tags": [
           "Messages"
         ],
@@ -302,9 +301,38 @@
               "type": "string",
               "example": "4d74976d-fb64-47fd-85e2-65eea140f5eb"
             }
+          },
+          {
+            "name": "redirect",
+            "description": "Set to `false` to receive the download URL as JSON instead of a 302 redirect.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
           }
         ],
         "responses": {
+          "200": {
+            "description": "The pre-signed download URL (only when `redirect=false`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "download_url"
+                  ],
+                  "properties": {
+                    "download_url": {
+                      "type": "string",
+                      "description": "Pre-signed S3 URL to download the EML file (expires in 15 minutes)"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "302": {
             "description": "Redirect to EML file download URL",
             "headers": {
@@ -710,7 +738,7 @@
           }
         ],
         "summary": "getUnreadCounts",
-        "description": "Unread counts for several named scopes in one request.\n\nA scope is a name plus the same parameters the thread list already takes (`q`, `inbox_id`),\nso a scope's count and the list beneath it are the same predicate and agree by construction.\nThe server adds only the read-state condition; it does not re-author the caller's view.\n\nThe `organization` scope is the exception and takes no `q`: it reuses the four canonical\ncentral-inbox queries, so its numbers match `getUnread` exactly.\n\nWhich buckets come back varies by scope type and actor. Every scope other than `organization`\nreturns `unread` alone. An `organization` scope returns all four (`unread`, `drafts`,\n`unassigned`, `spam`) for `actor: organization`, and `unread` and `drafts` only for\n`actor: user`. `getUnread` returns all four for both actors; this endpoint omits the two that\nno per-user surface renders, since each costs an aggregation.\n\nGated on the `message-unread-counts` flag, evaluated once per request against the calling\norg. With the flag off the response is `{ \"enabled\": false, \"counts\": {} }` and no\nElasticsearch query is issued.\n",
+        "description": "Unread counts for several named scopes in one request.\n\nA scope names a saved view (`view_id`), a shared inbox (`inbox_id`), or the organization's\nfolders. Each compiles to the query its thread list runs, plus the read-state condition, so a\ncount matches the list beneath it. A `saved_view` scope may send its own `q` instead.\n\nThe `organization` scope takes no `q`; each bucket compiles from the folder it badges.\n\nWhich buckets come back varies by scope type and actor. Every scope other than `organization`\nreturns `unread` alone. An `organization` scope returns all four (`unread`, `drafts`,\n`unassigned`, `spam`) for `actor: organization`, and `unread` and `drafts` only for\n`actor: user`. `getUnread` returns all four for both actors; this endpoint omits the two that\nno per-user surface renders, since each costs an aggregation.\n",
         "tags": [
           "Messages"
         ],
@@ -1698,10 +1726,27 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success. When only some threads failed, `failedIds` lists them.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkActionsResponse"
+                }
+              }
+            }
           },
           "403": {
             "description": "Forbidden"
+          },
+          "422": {
+            "description": "None of the threads could be processed (an already-done / already-moved thread counts as processed). `failedIds` lists them.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkActionsResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -2068,10 +2113,27 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success. When only some threads failed, `failedIds` lists them.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkActionsResponse"
+                }
+              }
+            }
           },
           "403": {
             "description": "Forbidden"
+          },
+          "422": {
+            "description": "None of the threads could be processed (an already-done / already-moved thread counts as processed). `failedIds` lists them.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkActionsResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -2110,10 +2172,27 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success. When only some threads failed, `failedIds` lists them.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkActionsResponse"
+                }
+              }
+            }
           },
           "403": {
             "description": "Forbidden"
+          },
+          "422": {
+            "description": "None of the threads could be processed (an already-done / already-moved thread counts as processed). `failedIds` lists them.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkActionsResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -2325,6 +2404,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "confirmed_warning",
+            "description": "The user confirmed a warning that the thread is already linked to another record of the same type (e.g. another opportunity). Only recorded in logs.",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "requestBody": {
@@ -2445,6 +2533,97 @@
                   "properties": {
                     "dismissed": {
                       "description": "IDs of the suggestions that had at least one candidate dismissed",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Thread not found"
+          }
+        }
+      }
+    },
+    "/v1/message/threads/{id}/link-suggestions/restore": {
+      "post": {
+        "operationId": "restoreThreadLinkSuggestions",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "thread"
+          },
+          {
+            "action": "entity:edit",
+            "resource": "message"
+          }
+        ],
+        "summary": "restoreThreadLinkSuggestions",
+        "description": "Restore dismissed candidates of entity-link suggestions on a thread, e.g. to undo a dismissal. Their suggestions are pending again. Unlinking an entity that was linked from a suggestion (unassignThread) reopens its candidate the same way.",
+        "tags": [
+          "Threads"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Thread ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "suggestion_ids": {
+                    "description": "Suggestions to restore candidates of. Omit for every suggestion on the thread.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "entity_ids": {
+                    "description": "Candidates to restore. Omit to restore every dismissed candidate of the selected suggestions.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "restored"
+                  ],
+                  "properties": {
+                    "restored": {
+                      "description": "IDs of the suggestions that had at least one candidate restored",
                       "type": "array",
                       "items": {
                         "type": "string"
@@ -3015,6 +3194,33 @@
             "type": "string",
             "description": "Inbox ID",
             "example": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/ThreadMoveReason"
+          }
+        }
+      },
+      "ThreadMoveReason": {
+        "type": "object",
+        "description": "Why the thread is being moved, recorded on its \"moved to inbox\" activity. Only accepted from\ninternal callers (the inbox deletion job); ignored for user requests.\n",
+        "required": [
+          "type",
+          "source_inbox_id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "inbox_deleted"
+            ]
+          },
+          "source_inbox_id": {
+            "type": "string",
+            "description": "ID of the deleted inbox the thread was in"
+          },
+          "source_inbox_name": {
+            "type": "string",
+            "description": "Name of the deleted inbox the thread was in"
           }
         }
       },
@@ -3121,6 +3327,9 @@
             "type": "string",
             "description": "The date of the latest message time in the thread",
             "example": "2024-02-10T09:14:31.990Z"
+          },
+          "view_latest_message": {
+            "$ref": "#/components/schemas/Message"
           }
         }
       },
@@ -3270,6 +3479,17 @@
               "$ref": "#/components/schemas/LinkSuggestion"
             }
           },
+          "auto_link_fields": {
+            "type": "array",
+            "description": "The identifier fields this message was auto-linked by, as `<entity schema>:<attribute>` (e.g. `contact:customer_number`). Recorded once linking ran with expanded identifiers, so the settings can show how often each field links emails.",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "contact:customer_number",
+              "contract:lima_contract_ref"
+            ]
+          },
           "html_omitted": {
             "type": "boolean",
             "description": "If true then html is not provided and must be downloaded using the html_download_url",
@@ -3402,6 +3622,14 @@
             "description": "When true (default), replying marks the whole thread read for the sender: every message on the\nthread is marked read, so the thread is read without leaving any message unread under it. When\nfalse, no message is marked and the thread's read-state reflects its messages — a message still\nunread keeps the thread unread (e.g. an automated reply-in-thread stays unread for a human to\npick up). Only applies to replies (`parent_id` set); a new thread always reflects its single\nmessage. Defaults to true.\n",
             "default": true
           },
+          "category": {
+            "type": "string",
+            "enum": [
+              "transactional",
+              "promotional"
+            ],
+            "description": "Type of email, either transactional or promotional."
+          },
           "thread": {
             "type": "object",
             "required": [
@@ -3531,7 +3759,16 @@
             "items": {
               "type": "string"
             },
-            "description": "Saved-filter labels, ANDed. Matched exactly against the tag rather than against its\ntokens, so a label whose words overlap a folder tag no longer lands in that folder.\n"
+            "description": "Saved-filter labels, joined by `labels_operator`. Matched exactly against the tag rather than\nagainst its tokens, so a label whose words overlap a folder tag no longer lands in that folder.\n"
+          },
+          "labels_operator": {
+            "type": "string",
+            "enum": [
+              "and",
+              "or"
+            ],
+            "default": "and",
+            "description": "How `labels` combine. `and`: the email carries every label. `or`: it carries at least one.\nAbsent means `and`, which is how every view matched before this field existed.\n"
           },
           "purposes": {
             "type": "array",
@@ -3608,6 +3845,10 @@
           "pinned_by": {
             "type": "string",
             "description": "Restrict the view to threads this user pinned. The pinned strip above the list is the same\nview with this one extra condition.\n"
+          },
+          "has_link_suggestion": {
+            "type": "boolean",
+            "description": "Restrict the view to threads with a message whose auto-link suggestion still waits for a\ndecision. Omitted or false adds no condition.\n\nLike every other condition, it is matched per message: a thread is included when one of\nits messages has a pending suggestion and also meets the rest of the view.\n"
           }
         }
       },
@@ -3630,16 +3871,16 @@
               "shared_inbox",
               "saved_view"
             ],
-            "description": "Decides which buckets come back, and whether `q` is required. `organization` returns all\nfour buckets from the canonical central-inbox queries and takes no `q`. `shared_inbox`\nand `saved_view` return `unread` alone. A `saved_view` scope names its view with `view_id`;\na `shared_inbox` scope needs only its `inbox_id`, since the query follows from the type.\n\nA `shared_inbox` scope additionally requires `actor: organization` and is refused with a\n400 otherwise. A shared inbox is an organization-level construct — selecting one always\nswitches the mailbox to the organization — so it has no per-user read state and the\ncombination would compute a number no surface renders. `saved_view` accepts either actor,\nbecause a view's own configuration names its mailbox.\n"
+            "description": "Decides which buckets come back, and whether `q` is required. `organization` returns all\nfour buckets, each compiled from its folder, and takes no `q`. `shared_inbox` and `saved_view`\nreturn `unread` alone. A `saved_view` scope names its view with `view_id`;\na `shared_inbox` scope needs only its `inbox_id`, since the query follows from the type.\n\nA `shared_inbox` scope additionally requires `actor: organization` and is refused with a\n400 otherwise. A shared inbox is an organization-level construct — selecting one always\nswitches the mailbox to the organization — so it has no per-user read state and the\ncombination would compute a number no surface renders. `saved_view` accepts either actor,\nbecause a view's own configuration names its mailbox.\n"
           },
           "q": {
             "type": "string",
-            "description": "The scope's query, in Lucene syntax, as passed to `threads:search` for the same scope. The\nserver adds the read-state condition and nothing else, so the count matches that list.\n\nAccepted for `shared_inbox` and `saved_view`; rejected for `organization`.\n\nSuperseded by server-side compilation. It remains accepted for callers whose counts are\nenabled while compilation is not, and is ignored when compilation is enabled. It will be\nremoved once compilation is enabled everywhere counts are.\n",
+            "description": "The scope's query, in Lucene syntax, as passed to `threads:search` for the same scope. The\nserver adds the read-state condition and nothing else, so the count matches that list.\n\nAccepted for `shared_inbox` and `saved_view`; rejected for `organization`.\n\nIgnored for `shared_inbox`, and for a `saved_view` whose `view_id` resolves.\n",
             "example": "_tags.keyword:inbox AND !_tags.keyword:trash"
           },
           "view_id": {
             "type": "string",
-            "description": "The id of the saved view this scope counts. The server reads that view and compiles the same\nquery the thread list runs for it, so the count and the list cannot describe the view\ndifferently.\n\nRequired for `saved_view` scopes unless `q` is supplied instead; rejected for the other two\ntypes. A `shared_inbox` scope needs no predicate field at all, because its query follows from\nthe type and its `inbox_id`. An `organization` scope uses the canonical folder queries.\n\nThe view's own shared-inbox filter is read from the stored view, so `inbox_id` need not be\nsent alongside this.\n\nCompilation is enabled per organization by the `message-unread-unified-predicate` feature\nflag. While it is off, a scope supplying only a `view_id` has no query to run and its name is\nreturned in `omitted` rather than counted. A named view that this organization does not have,\nor whose stored configuration cannot be read, is omitted the same way.\n",
+            "description": "The id of the saved view this scope counts. The server reads that view and compiles the same\nquery the thread list runs for it, so the count and the list cannot describe the view\ndifferently.\n\nRequired for `saved_view` scopes unless `q` is supplied instead; rejected for the other two\ntypes. A `shared_inbox` scope needs no predicate field at all, because its query follows from\nthe type and its `inbox_id`. An `organization` scope compiles from its folders.\n\nThe view's own shared-inbox filter is read from the stored view, so `inbox_id` need not be\nsent alongside this.\n\nA view that is missing or unreadable, sent without a `q`, puts the scope in `omitted`.\n",
             "example": "3f34ce73-089c-4d45-a5ee-c161234e41c3"
           },
           "inbox_id": {
@@ -3679,7 +3920,7 @@
             "items": {
               "type": "string"
             },
-            "description": "The addresses selected in the address filter, applied to the `organization` scope only.\n\nNot a request-level restriction, despite arriving at request level. A `shared_inbox`\nscope's own list applies no address filter at all, because scoping to an inbox is what\nswitches it off, and a `saved_view` ignores the address lens entirely. Applying this to\neither would make the badge answer a narrower question than the list beneath it.\n"
+            "description": "The addresses selected in the address filter, applied to the `organization` scope only.\n\nNot a request-level restriction, despite arriving at request level. A `shared_inbox`\nscope's badge belongs to the sidebar inbox, whose list sends no address filter, and a\n`saved_view` ignores the address lens entirely. Applying this to\neither would make the badge answer a narrower question than the list beneath it.\n"
           },
           "user_groups": {
             "type": "array",
@@ -3707,7 +3948,8 @@
         "properties": {
           "enabled": {
             "type": "boolean",
-            "description": "False when the `message-unread-counts` flag is off for the calling org, in which case\n`counts` is empty and no Elasticsearch work was done. Callers render no badges rather\nthan rendering zeroes.\n",
+            "deprecated": true,
+            "description": "Always `true`; kept because older clients hide every badge when it is false or missing.\n",
             "example": true
           },
           "counts": {
@@ -3719,7 +3961,7 @@
           },
           "omitted": {
             "type": "array",
-            "description": "Names of scopes that were accepted but could not be counted. Each appears here and is\nabsent from `counts`, so an omission is distinguishable from a mis-spelled scope name.\n\nCauses, not distinguishable from this field: a `shared_inbox` scope whose ids matched no\nbucket in the organization; a scope with no query to run because compilation is disabled for\nthe organization and no `q` was supplied; and a `view_id` naming a view this organization\ndoes not have or whose stored configuration cannot be read.\n",
+            "description": "Names of scopes that were accepted but could not be counted. Each appears here and is\nabsent from `counts`, so an omission is distinguishable from a mis-spelled scope name.\n\nCauses, not distinguishable from this field: a `shared_inbox` scope whose ids matched no\nbucket, or a missing or unreadable `view_id` sent without a `q`.\n",
             "items": {
               "type": "string"
             }
@@ -3787,7 +4029,7 @@
                 "$ref": "#/components/schemas/ThreadView"
               }
             ],
-            "description": "A view for the server to compile into the query, instead of supplying `q`. When a view is\npresent and compilation is enabled for the calling organization, the compiled query runs and\n`q` is not consulted.\n\nRead by `threads:search` and `threads:searchIds` only. This schema is shared with\n`messages:search`, which compiles no view and ignores the field, so a request there must\nsupply `q`.\n\nCompilation is enabled per organization by the `message-unread-unified-predicate` feature\nflag. While it is off, `q` runs and a request supplying only a view returns no hits.\n"
+            "description": "A view for the server to compile into the query, instead of supplying `q`. When present, `q`\nis ignored.\n\nRead by `threads:search` and `threads:searchIds` only. This schema is shared with\n`messages:search`, which compiles no view and ignores the field, so a request there must\nsupply `q`.\n"
           },
           "user_groups": {
             "type": "array",
@@ -4226,6 +4468,189 @@
           }
         }
       },
+      "ThreadValidationContext": {
+        "type": "object",
+        "required": [
+          "thread_id",
+          "message_id",
+          "subject",
+          "message",
+          "earlier_messages",
+          "attachments",
+          "entities"
+        ],
+        "properties": {
+          "thread_id": {
+            "type": "string"
+          },
+          "message_id": {
+            "type": "string",
+            "description": "The triggering message"
+          },
+          "subject": {
+            "type": "string",
+            "description": "Subject of the triggering message, or of the first one"
+          },
+          "message": {
+            "$ref": "#/components/schemas/ThreadValidationMessage"
+          },
+          "earlier_messages": {
+            "type": "array",
+            "description": "Messages before the triggering one, oldest first; drafts, trashed, spam and empty messages left out",
+            "items": {
+              "$ref": "#/components/schemas/ThreadValidationMessage"
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "description": "Attachments of the messages up to the triggering one, newest first, each file once",
+            "items": {
+              "$ref": "#/components/schemas/ThreadValidationAttachment"
+            }
+          },
+          "entities": {
+            "type": "array",
+            "description": "Entities linked to the thread or the triggering message, main entity first; suggestions left out",
+            "items": {
+              "$ref": "#/components/schemas/ThreadValidationEntity"
+            }
+          }
+        }
+      },
+      "ThreadValidationMessage": {
+        "type": "object",
+        "required": [
+          "message_id",
+          "type",
+          "sent_at",
+          "text"
+        ],
+        "properties": {
+          "message_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "RECEIVED",
+              "SENT",
+              "DRAFT"
+            ]
+          },
+          "sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "from": {
+            "type": "object",
+            "required": [
+              "address"
+            ],
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email_type": {
+                "type": "string",
+                "enum": [
+                  "INTERNAL",
+                  "EXTERNAL",
+                  "PARTNER"
+                ]
+              }
+            }
+          },
+          "text": {
+            "type": "string",
+            "description": "Plain text with quoted history, reply headers and links removed (the thread summary's cleaning). Earlier\nmessages also lose text that repeats an earlier message; the triggering message keeps all of its own text.\n"
+          }
+        }
+      },
+      "ThreadValidationAttachment": {
+        "type": "object",
+        "required": [
+          "file_id",
+          "message_id",
+          "sent_at",
+          "inline",
+          "likely_signature",
+          "eligible"
+        ],
+        "properties": {
+          "file_id": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "message_id": {
+            "type": "string",
+            "description": "Latest message the file is attached to"
+          },
+          "sent_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "inline": {
+            "type": "boolean",
+            "description": "Embedded in the email body (CID image)"
+          },
+          "likely_signature": {
+            "type": "boolean",
+            "description": "Ingestion marked it as a probable signature image"
+          },
+          "eligible": {
+            "type": "boolean",
+            "description": "Worth reading for validation; false when inline, a signature, or beyond max_attachments"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "inline",
+              "signature",
+              "limit"
+            ],
+            "description": "Why the file is not eligible"
+          }
+        }
+      },
+      "ThreadValidationEntity": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "schema",
+          "is_main_entity",
+          "source"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          },
+          "schema": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "is_main_entity": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "thread",
+              "message"
+            ],
+            "description": "Where the link was found first"
+          }
+        }
+      },
       "SimilarSentMessagesRequest": {
         "type": "object",
         "required": [
@@ -4564,6 +4989,21 @@
           "target_inbox_name": {
             "type": "string",
             "description": "Name of the shared inbox the thread was moved to"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "inbox_deleted"
+            ],
+            "description": "Set when the move happened because the thread's inbox was deleted"
+          },
+          "source_inbox_id": {
+            "type": "string",
+            "description": "ID of the deleted inbox, when `reason` is `inbox_deleted`"
+          },
+          "source_inbox_name": {
+            "type": "string",
+            "description": "Name of the deleted inbox, when `reason` is `inbox_deleted`"
           }
         }
       },
@@ -4611,7 +5051,7 @@
           },
           "attribute": {
             "type": "string",
-            "description": "The identifier attribute that matched, e.g. \"contract_number\""
+            "description": "The identifier attribute that matched, e.g. \"contract_number\", or \"email\" for an email address"
           },
           "attribute_value": {
             "type": "string",
@@ -4658,7 +5098,16 @@
           },
           "found_in": {
             "type": "string",
-            "description": "Where the identifier was found, e.g. \"subject\" or \"text\""
+            "description": "Where the identifier was found: \"subject\", \"text\" (the email body, or a reply's new part above the quoted earlier mail) or \"quoted\" (only in the earlier mail quoted below a reply); for an email address shared by several records, the address field: \"from\", \"to\", \"cc\" or \"bcc\""
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why it was suggested instead of linked. ambiguous (also when absent): the identifier matched several records. other_record: it matched one record, but the thread is already linked to a different record of that type (e.g. another opportunity). quoted_only: it matched one record (an opportunity, order, contract, request, ticket or lead), but only in the earlier mail quoted below the reply.",
+            "enum": [
+              "ambiguous",
+              "other_record",
+              "quoted_only"
+            ]
           },
           "status": {
             "type": "string",
@@ -4848,7 +5297,7 @@
           "timestamp": {
             "type": "string",
             "description": "Timestamp of the event",
-            "example": "2024-01-01T00:00:00Z"
+            "example": "2024-01-01T00:00:00.000Z"
           },
           "message_id": {
             "type": "string",
@@ -4937,6 +5386,63 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "BulkActionsResponse": {
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "integer",
+            "description": "Number of threads the action was applied to",
+            "example": 2
+          },
+          "failed": {
+            "type": "integer",
+            "description": "Number of threads the action failed for. Only present when at least one thread failed.",
+            "example": 1
+          },
+          "failedIds": {
+            "type": "array",
+            "description": "Ids of the threads the action failed for. Only present when at least one thread failed.",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "6b299eda-4018-4554-8965-c4b5598e6531"
+            ]
+          },
+          "failures": {
+            "type": "array",
+            "description": "Why each thread failed, one entry per id in `failedIds`. Only present when at least one thread failed.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "message"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "6b299eda-4018-4554-8965-c4b5598e6531"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Thread 6b299eda-4018-4554-8965-c4b5598e6531 was changed at the same time"
+                },
+                "status": {
+                  "type": "integer",
+                  "description": "HTTP status of the failure, when there is one",
+                  "example": 409
+                }
+              }
+            }
+          },
+          "error": {
+            "description": "Per-thread outcomes (settled promises) or a message, for debugging. Only present when at least one thread failed."
           }
         }
       },

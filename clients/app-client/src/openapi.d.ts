@@ -127,6 +127,12 @@ declare namespace Components {
              */
             options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Schemas.Options[];
             /**
+             * Replaces the sections app-level options are grouped under in the
+             * configuration UI. Listed in display order; referenced by `options[].group`.
+             *
+             */
+            option_groups?: /* A section the configuration UI groups app-level options under. */ Schemas.OptionGroup[];
+            /**
              * Short description of what changed in this version
              */
             changelog?: string;
@@ -672,6 +678,10 @@ declare namespace Components {
              */
             options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Options[];
             /**
+             * Sections app-level options are grouped under, in display order
+             */
+            option_groups?: /* A section the configuration UI groups app-level options under. */ OptionGroup[];
+            /**
              * Visibility of the app version
              */
             visibility?: "public" | "private";
@@ -861,6 +871,10 @@ declare namespace Components {
              * App-level option declarations (with sensitivity) of this version
              */
             options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Options[];
+            /**
+             * Sections app-level options are grouped under, in display order
+             */
+            option_groups?: /* A section the configuration UI groups app-level options under. */ OptionGroup[];
             /**
              * Visibility of the app version
              */
@@ -1390,7 +1404,7 @@ declare namespace Components {
                 ExternalValuesResult[]
             ];
             /**
-             * Timeout for the external call in milliseconds.
+             * Timeout in milliseconds for the hook as a whole: one budget for the auth pre-call and the call together.
              */
             timeout_ms?: number;
             /**
@@ -1602,6 +1616,10 @@ declare namespace Components {
              */
             options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Options[];
             /**
+             * Sections the app-level options are grouped under in the configuration UI, in display order.
+             */
+            option_groups?: /* A section the configuration UI groups app-level options under. */ OptionGroup[];
+            /**
              * Version of the app that is installed
              */
             installed_version: string;
@@ -1760,6 +1778,10 @@ declare namespace Components {
                 [name: string]: "string" | "boolean" | "date" | "datetime" | "link" | "number";
             };
         }
+        /**
+         * A plain string, or translations with German required.
+         */
+        export type LocalizedText = /* A plain string, or translations with German required. */ string | TranslatedString;
         export interface NotificationConfig {
             /**
              * Email address to receive notifications
@@ -1813,6 +1835,40 @@ declare namespace Components {
             value: any;
         }
         /**
+         * One accepted value of an option that declares `choices`.
+         */
+        export interface OptionChoice {
+            /**
+             * The value stored when this choice is selected. Unique within the option.
+             */
+            value: /* The value stored when this choice is selected. Unique within the option. */ string | number;
+            /**
+             * Label shown for the choice. Defaults to the value. A plain string or translations.
+             */
+            label?: /* Label shown for the choice. Defaults to the value. A plain string or translations. */ string | TranslatedString;
+        }
+        /**
+         * A primitive option value to compare against in `visible_if`.
+         */
+        export type OptionConditionValue = /* A primitive option value to compare against in `visible_if`. */ string | number | boolean;
+        /**
+         * A section the configuration UI groups app-level options under.
+         */
+        export interface OptionGroup {
+            /**
+             * Identifier referenced by an option's `group`. Unique within the version.
+             */
+            key: string;
+            /**
+             * Heading of the section. A plain string or translations.
+             */
+            label: /* Heading of the section. A plain string or translations. */ string | TranslatedString;
+            /**
+             * Optional explanation shown under the heading. A plain string or translations.
+             */
+            description?: /* Optional explanation shown under the heading. A plain string or translations. */ string | TranslatedString;
+        }
+        /**
          * An option declaration — a setting the installing org fills in. Declared at app level.
          */
         export interface Options {
@@ -1821,17 +1877,106 @@ declare namespace Components {
              */
             key: string;
             /**
-             * Human-readable label for the configuration option
+             * Human-readable label for the configuration option. A plain string, or
+             * translations (`{ de, en }`) for app-level options.
+             *
              */
-            label?: string;
+            label?: /**
+             * Human-readable label for the configuration option. A plain string, or
+             * translations (`{ de, en }`) for app-level options.
+             *
+             */
+            string | TranslatedString;
             /**
              * Flag to indicate if this option is required
              */
             required?: boolean;
             /**
-             * Detailed description of what this configuration option does
+             * Detailed description of what this configuration option does. A plain string,
+             * or translations (`{ de, en }`) for app-level options.
+             *
              */
-            description?: string;
+            description?: /**
+             * Detailed description of what this configuration option does. A plain string,
+             * or translations (`{ de, en }`) for app-level options.
+             *
+             */
+            string | TranslatedString;
+            /**
+             * Example shown in the empty input field (app-level `text`, `number` and
+             * `secret` options). A plain string or translations.
+             *
+             */
+            placeholder?: /**
+             * Example shown in the empty input field (app-level `text`, `number` and
+             * `secret` options). A plain string or translations.
+             *
+             */
+            string | TranslatedString;
+            /**
+             * Value used while the installing organization has not set one (app-level,
+             * non-repeatable, non-sensitive `text`, `number` and `boolean` options). The
+             * default is the option's effective value everywhere values are read — API
+             * proxies, functions, client-side components and `visible_if` — and satisfies
+             * `required`. It must itself pass `choices`, `format`, `pattern`, `min` and `max`.
+             *
+             */
+            default?: /**
+             * Value used while the installing organization has not set one (app-level,
+             * non-repeatable, non-sensitive `text`, `number` and `boolean` options). The
+             * default is the option's effective value everywhere values are read — API
+             * proxies, functions, client-side components and `visible_if` — and satisfies
+             * `required`. It must itself pass `choices`, `format`, `pattern`, `min` and `max`.
+             *
+             */
+            string | number | boolean;
+            /**
+             * Fixed set of accepted values, rendered as a selection (app-level `text` and
+             * `number` options). The stored value stays a plain string or number. For a
+             * repeatable option every entry must be one of the choices.
+             *
+             */
+            choices?: [
+                /* One accepted value of an option that declares `choices`. */ OptionChoice,
+                .../* One accepted value of an option that declares `choices`. */ OptionChoice[]
+            ];
+            /**
+             * Well-known shape the value must have (app-level `text` options). `hostname` is
+             * a bare host name without scheme, port or path; `url` is an absolute http(s) URL.
+             *
+             */
+            format?: "hostname" | "url" | "email";
+            /**
+             * Regular expression the whole value must match (app-level `text` and `secret`
+             * options). Anchored implicitly; values longer than 2000 characters never match.
+             *
+             */
+            pattern?: string;
+            /**
+             * Message shown when the value does not match `pattern`. A plain string or
+             * translations.
+             *
+             */
+            pattern_message?: /**
+             * Message shown when the value does not match `pattern`. A plain string or
+             * translations.
+             *
+             */
+            string | TranslatedString;
+            /**
+             * Smallest accepted value (app-level `number` options).
+             */
+            min?: number;
+            /**
+             * Largest accepted value (app-level `number` options).
+             */
+            max?: number;
+            /**
+             * Key of the `option_groups` entry this option is shown under (app-level options
+             * only). Options without a group are shown first, ungrouped.
+             *
+             */
+            group?: string;
             /**
              * When true, the configured value is an array of entries, each tagged with a stable
              * server-assigned `id`. Combine with any `type` to express "many of this thing."
@@ -1868,6 +2013,30 @@ declare namespace Components {
              *
              */
             type: "text" | "number" | "boolean" | "secret" | "object";
+            /**
+             * Show this option only while other options have the given values (app-level
+             * options only). Keys are option keys of the same app; each value is the value
+             * that option must have, or a list of accepted values. All entries must match.
+             * A hidden option is not asked for in the configuration UI and — when
+             * `required` — does not keep the installation from being enabled. Its stored
+             * value, if any, is kept. The referenced options must be non-sensitive
+             * `text`, `number` or `boolean` options; an option whose controlling option is
+             * itself hidden is hidden too.
+             *
+             * example:
+             * {
+             *   "auth_mode": [
+             *     "basic",
+             *     "bearer"
+             *   ]
+             * }
+             */
+            visible_if?: {
+                [name: string]: /* A primitive option value to compare against in `visible_if`. */ OptionConditionValue | [
+                    /* A primitive option value to compare against in `visible_if`. */ OptionConditionValue,
+                    .../* A primitive option value to compare against in `visible_if`. */ OptionConditionValue[]
+                ];
+            };
             /**
              * Write-only, server-side only value — like a sensitive environment variable
              * (app-level options only). Sensitive values are never serialized in any response;
@@ -1928,6 +2097,77 @@ declare namespace Components {
         }
         export interface PortalBlockConfig {
         }
+        /**
+         * Settings a Portal Builder user can set on each placed instance of this block. The Portal Builder renders a
+         * form from these fields and stores the values on the block; the portal passes them to the block as
+         * `config.settings`. Values reach the end customer's browser, so secrets are not allowed: keep them as
+         * installation options and use them server-side.
+         *
+         */
+        export interface PortalBlockSettings {
+            /**
+             * Increase when fields change. Stored values that no longer fit fall back to the default.
+             */
+            version: number;
+            fields: [
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?,
+                PortalBlockSettingsField?
+            ];
+        }
+        export interface PortalBlockSettingsField {
+            key: string; // ^[a-z][a-zA-Z0-9_]{0,63}$
+            type: "text" | "translated_text" | "number" | "boolean" | "select" | "entity_schema" | "page" | "journey" | "color_token";
+            label: TranslatedString;
+            description?: TranslatedString;
+            required?: boolean;
+            /**
+             * Must satisfy the field. `translated_text` takes a translated string.
+             */
+            default?: any;
+            /**
+             * Choices of a `select` field
+             */
+            options?: {
+                value: string;
+                label: TranslatedString;
+            }[];
+            min?: number;
+            max?: number;
+            step?: number;
+            maxLength?: number;
+            /**
+             * Entity schemas an `entity_schema` field may pick
+             */
+            allowed?: string[];
+        }
         export interface PortalBlockSurfaceConfig {
             /**
              * URL of the uploaded App Bridge App. This is the entrypoint for the app
@@ -1945,6 +2185,14 @@ declare namespace Components {
              * Define which surfaces of the portal this block can be placed in
              */
             supported_surfaces?: ("main" | "footer_inline" | "footer_left_absolute" | "footer_right_absolute")[];
+            settings?: /**
+             * Settings a Portal Builder user can set on each placed instance of this block. The Portal Builder renders a
+             * form from these fields and stores the values on the block; the portal passes them to the block as
+             * `config.settings`. Values reach the end customer's browser, so secrets are not allowed: keep them as
+             * installation options and use them server-side.
+             *
+             */
+            PortalBlockSettings;
         }
         export interface PortalExtensionAuthBlock {
             /**
@@ -2403,35 +2651,12 @@ declare namespace Components {
                  * Deprecated. Use `resolved.result` instead. Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result?: string;
-                /**
-                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
-                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Only read when the portal is
-                 * configured to wait on the Integration Toolkit
-                 * (`extension_hooks.<hook>.wait_for_toolkit`).
-                 *
-                 * There is no default: unless a hook declares this, the portal waits on the id it
-                 * minted and handed the hook as `{{CorrelationId}}`, whatever the response carries. A
-                 * partner that pushes under that id leaves this unset; only a partner that pushes
-                 * under an id of its own declares where the response carries it. A declared id that
-                 * is absent from the response falls back to the minted one; one that is not a valid
-                 * correlation id (at most 255 letters, digits, `-` and `_`) is not waited on, and
-                 * the portal polls entity search instead.
-                 *
-                 */
-                result_correlation_id?: string;
             };
             resolved?: {
                 /**
                  * Contract or Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
                  */
                 result?: string;
-                /**
-                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
-                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Supersedes
-                 * `call.result_correlation_id`. No default; see `call.result_correlation_id`.
-                 *
-                 */
-                result_correlation_id?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
                  * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
@@ -2922,35 +3147,12 @@ declare namespace Components {
                  * Deprecated. Use `resolved.result` instead. Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation.
                  */
                 result: string;
-                /**
-                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
-                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Only read when the portal is
-                 * configured to wait on the Integration Toolkit
-                 * (`extension_hooks.<hook>.wait_for_toolkit`).
-                 *
-                 * There is no default: unless a hook declares this, the portal waits on the id it
-                 * minted and handed the hook as `{{CorrelationId}}`, whatever the response carries. A
-                 * partner that pushes under that id leaves this unset; only a partner that pushes
-                 * under an id of its own declares where the response carries it. A declared id that
-                 * is absent from the response falls back to the minted one; one that is not a valid
-                 * correlation id (at most 255 letters, digits, `-` and `_`) is not waited on, and
-                 * the portal polls entity search instead.
-                 *
-                 */
-                result_correlation_id?: string;
             };
             resolved?: {
                 /**
                  * Contact ID usually retrieved from the response body, e.g. `{{CallResponse.data.contact_id}}`. If no result is passed and the request suceeds, we attempt to resolve the Contact ID automatically. Supports variable interpolation. Supersedes the deprecated `call.result`.
                  */
                 result?: string;
-                /**
-                 * Correlation id to wait for inbound ERP events under, resolved from the third-party
-                 * response, e.g. `{{CallResponse.data.acknowledgeId}}`. Supersedes
-                 * `call.result_correlation_id`. No default; see `call.result_correlation_id`.
-                 *
-                 */
-                result_correlation_id?: string;
                 /**
                  * Optional path to a human-readable error message in the third-party response body, used when the call fails (non-2xx status).
                  * If specified and the path resolves to a string, that message is forwarded to the end user instead of a generic error.
@@ -3121,6 +3323,10 @@ declare namespace Components {
              */
             dev_mode?: boolean;
             /**
+             * Flag to indicate if the app is built by epilot.
+             */
+            internal?: boolean;
+            /**
              * Category of the app.
              */
             category?: string;
@@ -3165,6 +3371,10 @@ declare namespace Components {
              * App-level option declarations (with sensitivity) of this version
              */
             options?: /* An option declaration — a setting the installing org fills in. Declared at app level. */ Options[];
+            /**
+             * Sections app-level options are grouped under, in display order
+             */
+            option_groups?: /* A section the configuration UI groups app-level options under. */ OptionGroup[];
             /**
              * Flag to indicate if the app is in beta.
              */
@@ -4027,7 +4237,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.PatchMetadata.Responses.$204>
   /**
-   * deleteConfiguration - Delete app configuration
+   * deleteConfiguration - deleteConfiguration
    * 
    * Delete an app configuration and all its versions and components.
    */
@@ -4400,7 +4610,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.PatchMetadata.Responses.$204>
     /**
-     * deleteConfiguration - Delete app configuration
+     * deleteConfiguration - deleteConfiguration
      * 
      * Delete an app configuration and all its versions and components.
      */
@@ -4778,15 +4988,21 @@ export type InternalReview = Components.Schemas.InternalReview;
 export type JourneyBlockComponent = Components.Schemas.JourneyBlockComponent;
 export type JourneyBlockComponentArgs = Components.Schemas.JourneyBlockComponentArgs;
 export type JourneyBlockConfig = Components.Schemas.JourneyBlockConfig;
+export type LocalizedText = Components.Schemas.LocalizedText;
 export type NotificationConfig = Components.Schemas.NotificationConfig;
 export type NotificationEvent = Components.Schemas.NotificationEvent;
 export type ObjectField = Components.Schemas.ObjectField;
 export type Option = Components.Schemas.Option;
+export type OptionChoice = Components.Schemas.OptionChoice;
+export type OptionConditionValue = Components.Schemas.OptionConditionValue;
+export type OptionGroup = Components.Schemas.OptionGroup;
 export type Options = Components.Schemas.Options;
 export type OptionsRef = Components.Schemas.OptionsRef;
 export type OverrideDevMode = Components.Schemas.OverrideDevMode;
 export type PortalBlockComponent = Components.Schemas.PortalBlockComponent;
 export type PortalBlockConfig = Components.Schemas.PortalBlockConfig;
+export type PortalBlockSettings = Components.Schemas.PortalBlockSettings;
+export type PortalBlockSettingsField = Components.Schemas.PortalBlockSettingsField;
 export type PortalBlockSurfaceConfig = Components.Schemas.PortalBlockSurfaceConfig;
 export type PortalExtensionAuthBlock = Components.Schemas.PortalExtensionAuthBlock;
 export type PortalExtensionComponent = Components.Schemas.PortalExtensionComponent;
