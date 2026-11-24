@@ -1500,6 +1500,61 @@ declare namespace Components {
              * ]
              */
             allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -2100,6 +2155,61 @@ declare namespace Components {
              * ]
              */
             allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -7225,6 +7335,61 @@ declare namespace Components {
              * ]
              */
             allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -7630,6 +7795,61 @@ declare namespace Components {
              * ]
              */
             allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself.
              */
@@ -8100,6 +8320,61 @@ declare namespace Components {
              * ]
              */
             allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -8771,6 +9046,61 @@ declare namespace Components {
              * ]
              */
             allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -9417,6 +9747,61 @@ declare namespace Components {
              * ]
              */
             allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -10797,6 +11182,61 @@ declare namespace Components {
              * ]
              */
             allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -12163,6 +12603,127 @@ declare namespace Components {
          * Storing the feed-in record
          */
         export type Reason = "" | "regular" | "irregular" | "last" | "first" | "meter_change" | "contract_change" | "meter_adjustment";
+        /**
+         * Which records portal users see in the portal's lists, per record type (schema slug). A
+         * record type without an entry uses its default rule (`record_access_defaults`), or else any
+         * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+         * `file` and `portal_user` are ignored.
+         *
+         * example:
+         * {
+         *   "contract": {
+         *     "conditions": [
+         *       {
+         *         "type": "relation_attribute",
+         *         "attribute": "customer"
+         *       },
+         *       {
+         *         "type": "relation_attribute",
+         *         "attribute": "property_manager"
+         *       }
+         *     ]
+         *   },
+         *   "meter": {
+         *     "conditions": [
+         *       {
+         *         "type": "relation_attribute",
+         *         "attribute": "customer"
+         *       },
+         *       {
+         *         "type": "relation_attribute",
+         *         "through": "contract",
+         *         "attribute": "customer"
+         *       },
+         *       {
+         *         "type": "relation_attribute",
+         *         "through": "contract",
+         *         "attribute": "property_manager"
+         *       }
+         *     ]
+         *   },
+         *   "ticket": {
+         *     "conditions": [
+         *       {
+         *         "type": "relation_attribute",
+         *         "attribute": "customer"
+         *       }
+         *     ]
+         *   }
+         * }
+         */
+        export interface RecordAccess {
+            [name: string]: /* A record is visible when one of the conditions applies. */ RecordAccessRule;
+        }
+        export type RecordAccessCondition = /**
+         * The record's relation attribute `attribute` contains the user's contact. With `through`,
+         * the record related through the attribute `through` must contain it instead, e.g. on meters
+         * `through: contract, attribute: customer`.
+         *
+         */
+        RecordAccessRelationAttributeCondition;
+        /**
+         * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+         * write.
+         *
+         */
+        export interface RecordAccessDefaults {
+            [name: string]: {
+                conditions: {
+                    type: "relation_attribute";
+                    attribute: string;
+                    through?: string;
+                }[];
+                /**
+                 * Records with one of these attribute values are never listed.
+                 */
+                never_listed?: {
+                    attribute: string;
+                    value: string;
+                }[];
+            };
+        }
+        /**
+         * A schema slug or attribute name. Letters, digits and underscores only.
+         */
+        export type RecordAccessName = string; // ^[A-Za-z_][A-Za-z0-9_]{0,63}$
+        /**
+         * The record's relation attribute `attribute` contains the user's contact. With `through`,
+         * the record related through the attribute `through` must contain it instead, e.g. on meters
+         * `through: contract, attribute: customer`.
+         *
+         */
+        export interface RecordAccessRelationAttributeCondition {
+            type: "relation_attribute";
+            attribute: /* A schema slug or attribute name. Letters, digits and underscores only. */ RecordAccessName /* ^[A-Za-z_][A-Za-z0-9_]{0,63}$ */;
+            through?: /* A schema slug or attribute name. Letters, digits and underscores only. */ RecordAccessName /* ^[A-Za-z_][A-Za-z0-9_]{0,63}$ */;
+        }
+        /**
+         * A record is visible when one of the conditions applies.
+         */
+        export interface RecordAccessRule {
+            conditions: [
+                RecordAccessCondition,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?,
+                RecordAccessCondition?
+            ];
+        }
         export interface RegistrationIdentifier {
             /**
              * Name of the identifier/attribute
@@ -13583,6 +14144,61 @@ declare namespace Components {
              * ]
              */
             allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -14247,6 +14863,61 @@ declare namespace Components {
              * ]
              */
             allowed_roles?: string[];
+            record_access?: /**
+             * Which records portal users see in the portal's lists, per record type (schema slug). A
+             * record type without an entry uses its default rule (`record_access_defaults`), or else any
+             * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+             * `file` and `portal_user` are ignored.
+             *
+             * example:
+             * {
+             *   "contract": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "meter": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "customer"
+             *       },
+             *       {
+             *         "type": "relation_attribute",
+             *         "through": "contract",
+             *         "attribute": "property_manager"
+             *       }
+             *     ]
+             *   },
+             *   "ticket": {
+             *     "conditions": [
+             *       {
+             *         "type": "relation_attribute",
+             *         "attribute": "customer"
+             *       }
+             *     ]
+             *   }
+             * }
+             */
+            RecordAccess;
+            record_access_defaults?: /**
+             * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+             * write.
+             *
+             */
+            RecordAccessDefaults;
             /**
              * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
              *
@@ -18283,6 +18954,61 @@ declare namespace Paths {
                  * ]
                  */
                 allowed_roles?: string[];
+                record_access?: /**
+                 * Which records portal users see in the portal's lists, per record type (schema slug). A
+                 * record type without an entry uses its default rule (`record_access_defaults`), or else any
+                 * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+                 * `file` and `portal_user` are ignored.
+                 *
+                 * example:
+                 * {
+                 *   "contract": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "property_manager"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "meter": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "through": "contract",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "through": "contract",
+                 *         "attribute": "property_manager"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "ticket": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       }
+                 *     ]
+                 *   }
+                 * }
+                 */
+                Components.Schemas.RecordAccess;
+                record_access_defaults?: /**
+                 * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+                 * write.
+                 *
+                 */
+                Components.Schemas.RecordAccessDefaults;
                 /**
                  * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
                  *
@@ -19034,6 +19760,61 @@ declare namespace Paths {
                  * ]
                  */
                 allowed_roles?: string[];
+                record_access?: /**
+                 * Which records portal users see in the portal's lists, per record type (schema slug). A
+                 * record type without an entry uses its default rule (`record_access_defaults`), or else any
+                 * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+                 * `file` and `portal_user` are ignored.
+                 *
+                 * example:
+                 * {
+                 *   "contract": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "property_manager"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "meter": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "through": "contract",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "through": "contract",
+                 *         "attribute": "property_manager"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "ticket": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       }
+                 *     ]
+                 *   }
+                 * }
+                 */
+                Components.Schemas.RecordAccess;
+                record_access_defaults?: /**
+                 * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+                 * write.
+                 *
+                 */
+                Components.Schemas.RecordAccessDefaults;
                 /**
                  * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
                  *
@@ -20404,6 +21185,61 @@ declare namespace Paths {
                  * ]
                  */
                 allowed_roles?: string[];
+                record_access?: /**
+                 * Which records portal users see in the portal's lists, per record type (schema slug). A
+                 * record type without an entry uses its default rule (`record_access_defaults`), or else any
+                 * of its relation attributes that can hold a contact. Entries for `contact`, `account`,
+                 * `file` and `portal_user` are ignored.
+                 *
+                 * example:
+                 * {
+                 *   "contract": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "property_manager"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "meter": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "through": "contract",
+                 *         "attribute": "customer"
+                 *       },
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "through": "contract",
+                 *         "attribute": "property_manager"
+                 *       }
+                 *     ]
+                 *   },
+                 *   "ticket": {
+                 *     "conditions": [
+                 *       {
+                 *         "type": "relation_attribute",
+                 *         "attribute": "customer"
+                 *       }
+                 *     ]
+                 *   }
+                 * }
+                 */
+                Components.Schemas.RecordAccess;
+                record_access_defaults?: /**
+                 * Read-only. The default rule per record type, in the shape of `record_access`. Ignored on
+                 * write.
+                 *
+                 */
+                Components.Schemas.RecordAccessDefaults;
                 /**
                  * Surfaces this portal's data is reached from besides the portal UI itself (public journeys on the website, chat). Configured under Security > Surfaces. Each surface defines how a caller authenticates and what data access applies on it; the portal UI is the implicit default surface (login, default scope) and is not listed here. A surface with `authentication: registration_identifiers` is what makes `identifyContact` issue tokens for this portal: without one, `identifyContact` returns 403.
                  *
@@ -28284,6 +29120,12 @@ export type PublishRevisionRequest = Components.Schemas.PublishRevisionRequest;
 export type ReadBy = Components.Schemas.ReadBy;
 export type ReadingStatus = Components.Schemas.ReadingStatus;
 export type Reason = Components.Schemas.Reason;
+export type RecordAccess = Components.Schemas.RecordAccess;
+export type RecordAccessCondition = Components.Schemas.RecordAccessCondition;
+export type RecordAccessDefaults = Components.Schemas.RecordAccessDefaults;
+export type RecordAccessName = Components.Schemas.RecordAccessName;
+export type RecordAccessRelationAttributeCondition = Components.Schemas.RecordAccessRelationAttributeCondition;
+export type RecordAccessRule = Components.Schemas.RecordAccessRule;
 export type RegistrationIdentifier = Components.Schemas.RegistrationIdentifier;
 export type RegistrationTargetGroup = Components.Schemas.RegistrationTargetGroup;
 export type RegistrationValidationRule = Components.Schemas.RegistrationValidationRule;

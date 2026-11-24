@@ -1,5 +1,11 @@
 # @epilot/customer-portal-client
 
+## 0.55.0
+
+### Minor Changes
+
+- Portal config: `record_access`, the portal's rules for which records portal users see in lists, per record type (`RecordAccess`, `RecordAccessRule`, `RecordAccessCondition`, `RecordAccessRelationAttributeCondition`, `RecordAccessName`), and the read-only `record_access_defaults` with the built-in rules (`RecordAccessDefaults`)
+
 ## 0.54.0
 
 ### Minor Changes
