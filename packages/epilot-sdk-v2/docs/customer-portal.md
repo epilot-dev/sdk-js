@@ -919,6 +919,8 @@ const { data } = await client.createExport(
           attribute: 'customer_number',
           address_field: 'full'
         },
+        template: '{{contract.customer.last_name}}',
+        address_field: 'full',
         formatter: 'text',
         enum_labels: {}
       }
@@ -15752,17 +15754,20 @@ type PortalId = string
 
 ### `PortalDataExportColumn`
 
-One column of the portal data export CSV.
+One column of the portal data export. Send the column value as `template`; `source` is the older single-attribute shape, still accepted.
+
 
 ```ts
 type PortalDataExportColumn = {
   key: string
   header: Record<string, string>
-  source: {
+  source?: {
     path?: string[]
     attribute: string
     address_field?: "full" | "street" | "street_number" | "postal_code" | "city" | "additional_info" | "country"
   }
+  template?: string
+  address_field?: "full" | "street" | "street_number" | "postal_code" | "city" | "additional_info" | "country"
   formatter?: "text" | "date" | "money_cents" | "enum" | "address"
   enum_labels?: Record<string, Record<string, string>>
 }
