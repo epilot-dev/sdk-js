@@ -27,8 +27,13 @@
     "/v1/permissions/me": {
       "get": {
         "operationId": "listCurrentRoles",
+        "x-epilot-permissions": [
+          {
+            "access": "self"
+          }
+        ],
         "summary": "listCurrentRoles",
-        "description": "Returns roles and grants assigned to current user",
+        "description": "Returns roles and grants assigned to current user.\n\nWhen the calling token itself is restricted (read-only, anonymized, or an AI agent token\nwith an access profile), `token_restrictions` describes those restrictions. Effective\npermissions are the roles' grants narrowed by them.\n",
         "tags": [
           "Roles"
         ],
@@ -45,6 +50,9 @@
                       "items": {
                         "$ref": "#/components/schemas/Role"
                       }
+                    },
+                    "token_restrictions": {
+                      "$ref": "#/components/schemas/TokenRestrictions"
                     }
                   }
                 }
@@ -57,6 +65,12 @@
     "/v1/permissions/roles": {
       "get": {
         "operationId": "listAllRoles",
+        "x-epilot-permissions": [
+          {
+            "action": "role:view",
+            "filter": true
+          }
+        ],
         "summary": "listAllRoles",
         "description": "Returns list of all roles in organization",
         "tags": [
@@ -85,6 +99,14 @@
       },
       "post": {
         "operationId": "createRole",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
+        "x-epilot-permissions": [
+          {
+            "action": "role:create"
+          }
+        ],
         "summary": "createRole",
         "description": "Create role",
         "tags": [
@@ -176,6 +198,12 @@
     "/v1/permissions/roles:search": {
       "post": {
         "operationId": "searchRoles",
+        "x-epilot-permissions": [
+          {
+            "action": "role:view",
+            "filter": true
+          }
+        ],
         "summary": "searchRoles",
         "description": "Search Roles",
         "tags": [
@@ -218,6 +246,12 @@
     "/v1/permissions/roles/{roleId}": {
       "get": {
         "operationId": "getRole",
+        "x-epilot-permissions": [
+          {
+            "action": "role:view",
+            "resource": "{roleId}"
+          }
+        ],
         "summary": "getRole",
         "description": "Get role by id",
         "tags": [
@@ -248,6 +282,23 @@
       },
       "put": {
         "operationId": "putRole",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "role:edit",
+                "resource": "{roleId}"
+              },
+              {
+                "action": "role:create",
+                "resource": "{roleId}"
+              }
+            ]
+          }
+        ],
         "summary": "putRole",
         "description": "Create or update role",
         "tags": [
@@ -625,6 +676,12 @@
       },
       "delete": {
         "operationId": "deleteRole",
+        "x-epilot-permissions": [
+          {
+            "action": "role:delete",
+            "resource": "{roleId}"
+          }
+        ],
         "summary": "deleteRole",
         "description": "Delete role by id",
         "tags": [
@@ -657,6 +714,11 @@
     "/v1/permissions/refresh": {
       "get": {
         "operationId": "refreshPermissions",
+        "x-epilot-permissions": [
+          {
+            "access": "org"
+          }
+        ],
         "summary": "refreshPermissions",
         "description": "Makes sure the user has a role in the organization",
         "tags": [
@@ -672,6 +734,23 @@
     "/v1/permissions/assignments/{userId}": {
       "get": {
         "operationId": "getAssignedRolesForUser",
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "access": "self"
+              },
+              {
+                "action": "user:view",
+                "resource": "{userId}"
+              },
+              {
+                "action": "role:assign",
+                "resource": "{userId}"
+              }
+            ]
+          }
+        ],
         "summary": "getAssignedRolesForUser",
         "description": "Get list of assigned roles by user id",
         "tags": [
@@ -702,8 +781,17 @@
       },
       "put": {
         "operationId": "assignRoles",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
+        "x-epilot-permissions": [
+          {
+            "action": "role:assign",
+            "resource": "{userId}"
+          }
+        ],
         "summary": "assignRoles",
-        "description": "Assign / unassign roles to users.",
+        "description": "Assign / unassign roles to users.\n\nOnly an organization owner can grant the `owner` role to a user. `role:assign` alone (e.g. the\nAdministrator role) is not sufficient and results in a 403.\n\nAn organization must always keep at least one owner: removing the `owner` role from the last user\nholding it results in a 409 (internal callers are exempt).\n",
         "tags": [
           "Assignments"
         ],
@@ -743,6 +831,23 @@
     "/v1/permissions/assignments/{userId}/{roleId}": {
       "post": {
         "operationId": "addAssignment",
+        "x-epilot-agent": {
+          "effect": "config"
+        },
+        "x-epilot-permissions": [
+          {
+            "anyOf": [
+              {
+                "action": "role:assign",
+                "resource": "{userId}"
+              },
+              {
+                "action": "role:share",
+                "resource": "{userId}"
+              }
+            ]
+          }
+        ],
         "summary": "addAssignment",
         "description": "Assign a user to a role.\n\nUse the `x-epilot-org-id` header to assign share roles to users in other orgs\n",
         "tags": [
@@ -781,6 +886,12 @@
       },
       "delete": {
         "operationId": "removeAssignment",
+        "x-epilot-permissions": [
+          {
+            "action": "role:assign",
+            "resource": "{userId}"
+          }
+        ],
         "summary": "removeAssignment",
         "description": "Remove role assignment from user",
         "tags": [
@@ -821,6 +932,12 @@
     "/v1/permissions/assignments": {
       "get": {
         "operationId": "listAllAssignments",
+        "x-epilot-permissions": [
+          {
+            "action": "user:view",
+            "filter": true
+          }
+        ],
         "summary": "listAllAssignments",
         "description": "Returns list of all assignments in organization",
         "tags": [
@@ -865,6 +982,51 @@
       }
     },
     "schemas": {
+      "TokenRestrictions": {
+        "type": "object",
+        "description": "Restrictions the calling token puts on top of its roles. Only present for restricted tokens.\n",
+        "properties": {
+          "read_only": {
+            "type": "boolean",
+            "description": "Only view actions are allowed"
+          },
+          "anonymize": {
+            "type": "boolean",
+            "description": "Personal data is masked in entity responses"
+          },
+          "allowed_actions": {
+            "type": "array",
+            "description": "Only these actions are allowed (exact, or `prefix:*` at a `:` boundary), e.g. the\naccess profile of an AI agent token\n",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "journey:*",
+              "entity:view"
+            ]
+          },
+          "actor": {
+            "type": "object",
+            "description": "The AI agent the token was issued to (Agent Auth)",
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "agent"
+              },
+              "agent_id": {
+                "type": "string"
+              },
+              "host_id": {
+                "type": "string"
+              },
+              "purpose": {
+                "type": "string",
+                "description": "The reason the agent gave when requesting access"
+              }
+            }
+          }
+        }
+      },
       "Grant": {
         "type": "object",
         "properties": {
@@ -1274,6 +1436,11 @@
                 "enum": [
                   "portal_role"
                 ]
+              },
+              "portal_id": {
+                "type": "string",
+                "description": "ID of the portal this role is scoped to. When set, the role applies to users of that\nspecific portal only. Absent on legacy origin-based portal roles (default_<origin>_role),\nwhich apply to all portals of their origin.\n",
+                "example": "9ac9b210-8ee4-4a08-9cf8-9f5d67c72e35"
               }
             }
           }
@@ -1357,36 +1524,6 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RoleId"
-            }
-          }
-        }
-      },
-      "OrgAssignments": {
-        "type": "object",
-        "description": "All roles attached to an users of an organization",
-        "properties": {
-          "organizationId": {
-            "$ref": "#/components/schemas/OrganizationId"
-          },
-          "assignments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InternalAssignment"
-            }
-          }
-        }
-      },
-      "OrgRoles": {
-        "type": "object",
-        "description": "All roles attached to an users of an organization",
-        "properties": {
-          "organizationId": {
-            "$ref": "#/components/schemas/OrganizationId"
-          },
-          "roles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Role"
             }
           }
         }
@@ -1567,6 +1704,11 @@
                     "enum": [
                       "portal_role"
                     ]
+                  },
+                  "portal_id": {
+                    "type": "string",
+                    "description": "ID of the portal this role is scoped to. When set, the role applies to users of that\nspecific portal only. Absent on legacy origin-based portal roles (default_<origin>_role),\nwhich apply to all portals of their origin.\n",
+                    "example": "9ac9b210-8ee4-4a08-9cf8-9f5d67c72e35"
                   }
                 }
               }

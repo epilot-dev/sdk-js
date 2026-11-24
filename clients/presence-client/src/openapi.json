@@ -5,11 +5,6 @@
     "version": "1.0.0",
     "description": "Shows who else has a resource open in an epilot builder, such as a journey, a portal or a flow,\nand whether they are viewing it or editing it.\n\nPresence is short-lived: a session counts as present for `ttl_seconds` after its last heartbeat\nand is then discarded. No history of who was present is kept.\n\nThere is no read-only operation. Seeing who is on a resource means announcing yourself there,\nso nobody can see colleagues without being seen.\n"
   },
-  "servers": [
-    {
-      "url": "https://presence.sls.epilot.io"
-    }
-  ],
   "tags": [
     {
       "name": "Presence",
@@ -393,5 +388,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://presence.sls.epilot.io"
+    }
+  ]
 }

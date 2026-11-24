@@ -231,6 +231,49 @@
         "responses": {}
       }
     },
+    "/v2/query/chart-model": {
+      "get": {
+        "operationId": "getChartModel",
+        "responses": {}
+      }
+    },
+    "/v2/query/chart-templates": {
+      "get": {
+        "operationId": "getChartTemplates",
+        "responses": {}
+      }
+    },
+    "/v2/query/chart-templates/{template_id}:resolve": {
+      "post": {
+        "operationId": "resolveChartTemplate",
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/query/autocomplete:search": {
+      "post": {
+        "operationId": "searchAutocomplete",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v2/query/autocomplete": {
       "get": {
         "operationId": "autocomplete",

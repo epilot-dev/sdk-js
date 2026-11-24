@@ -9,6 +9,7 @@
       "post": {
         "operationId": "createSubmission",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {}
           }
@@ -30,7 +31,35 @@
       }
     }
   },
-  "components": {},
+  "components": {
+    "responses": {
+      "BadRequestResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UnauthorizedResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ForbiddenResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "NotFoundResponse": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "InternalServerErrorResponse": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://submission.sls.epilot.io"

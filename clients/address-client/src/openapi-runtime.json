@@ -4,11 +4,6 @@
     "title": "",
     "version": ""
   },
-  "servers": [
-    {
-      "url": "https://address.sls.epilot.io"
-    }
-  ],
   "paths": {
     "/v1/public/suggestions": {
       "get": {
@@ -50,6 +45,18 @@
         "responses": {}
       }
     },
+    "/v1/public/location-service/resolve": {
+      "post": {
+        "operationId": "resolveLocation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/availability/{id}/validate": {
       "get": {
         "operationId": "validateAvailabilityFile",
@@ -64,5 +71,10 @@
       }
     }
   },
-  "components": {}
+  "components": {},
+  "servers": [
+    {
+      "url": "https://address.sls.epilot.io"
+    }
+  ]
 }

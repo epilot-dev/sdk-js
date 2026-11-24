@@ -161,6 +161,9 @@
               ]
             },
             "required": false
+          },
+          {
+            "$ref": "#/components/parameters/SharedWithFormat"
           }
         ],
         "responses": {
@@ -234,6 +237,9 @@
           "Kanban"
         ],
         "parameters": [
+          {
+            "$ref": "#/components/parameters/SharedWithFormat"
+          },
           {
             "name": "boardId",
             "in": "path",
@@ -351,6 +357,9 @@
         ],
         "parameters": [
           {
+            "$ref": "#/components/parameters/SharedWithFormat"
+          },
+          {
             "name": "boardId",
             "in": "path",
             "required": true,
@@ -459,6 +468,9 @@
         ],
         "parameters": [
           {
+            "$ref": "#/components/parameters/SharedWithFormat"
+          },
+          {
             "name": "boardId",
             "in": "path",
             "required": true,
@@ -484,15 +496,21 @@
                     "example": "Board description"
                   },
                   "shared_with": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "Array of user IDs to share the board with"
+                    "$ref": "#/components/schemas/SharedWith"
                   },
                   "shared_with_org": {
                     "type": "boolean",
-                    "description": "Whether the board is shared with the entire organization"
+                    "description": "Whether the board is shared with the entire organization. Ignored when `org_access` is provided."
+                  },
+                  "org_access": {
+                    "type": "string",
+                    "enum": [
+                      "view",
+                      "edit",
+                      null
+                    ],
+                    "nullable": true,
+                    "description": "Org-wide access level. `null` removes org-wide sharing."
                   },
                   "owners": {
                     "type": "array",
@@ -1077,6 +1095,22 @@
         "type": "apiKey"
       }
     },
+    "parameters": {
+      "SharedWithFormat": {
+        "name": "shared_with_format",
+        "in": "query",
+        "required": false,
+        "description": "Shape of `shared_with` in the response. `legacy` (default) returns plain principal ids; `grants` returns\n`{user_id, permission}` objects and is what clients that understand edit permissions should request.\n",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "legacy",
+            "grants"
+          ],
+          "default": "legacy"
+        }
+      }
+    },
     "schemas": {
       "Error": {
         "type": "object",
@@ -1127,13 +1161,14 @@
             "type": "string"
           },
           "shared_with": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+            "$ref": "#/components/schemas/SharedWith"
           },
           "shared_with_org": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the board is shared with the whole organization (equivalent to `org_access` being set)"
+          },
+          "org_access": {
+            "$ref": "#/components/schemas/BoardPermission"
           },
           "owners": {
             "type": "array",
@@ -1141,7 +1176,56 @@
               "type": "string"
             },
             "description": "Array of user IDs who have full ownership rights for this board (view, edit, delete)"
+          },
+          "my_access": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "edit",
+              "view"
+            ],
+            "readOnly": true,
+            "description": "Access level of the calling user. Only returned by getKanbanBoard."
           }
+        }
+      },
+      "BoardPermission": {
+        "type": "string",
+        "enum": [
+          "view",
+          "edit"
+        ],
+        "description": "Access level of a share. `view` is read-only. `edit` can additionally change the board configuration and title,\nbut cannot delete the board, change sharing or change owners (owners only).\n"
+      },
+      "SharedWithGrant": {
+        "type": "object",
+        "required": [
+          "user_id",
+          "permission"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "Principal the board is shared with. One of `{userId}`, `group_{groupId}`, `{partnerOrgId}_partnerOrg`\nor `{partnerOrgId}_{userId}`.\n",
+            "example": "group_abc"
+          },
+          "permission": {
+            "$ref": "#/components/schemas/BoardPermission"
+          }
+        }
+      },
+      "SharedWith": {
+        "type": "array",
+        "description": "Principals the board is shared with. Responses return plain principal ids (read access and above) unless the\nrequest sets `shared_with_format=grants`, in which case each entry is a `{user_id, permission}` grant.\nRequests accept both forms; a plain id keeps the permission the principal already has (or `view` for new shares).\n",
+        "items": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/components/schemas/SharedWithGrant"
+            }
+          ]
         }
       },
       "Board": {
@@ -1258,7 +1342,8 @@
             "enum": [
               "context_entity",
               "phase",
-              "task"
+              "task",
+              "flow_template_id"
             ],
             "description": "Property to group tasks by within each swimlane"
           }

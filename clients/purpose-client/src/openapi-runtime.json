@@ -4,11 +4,6 @@
     "title": "",
     "version": ""
   },
-  "servers": [
-    {
-      "url": "https://purpose.sls.epilot.io"
-    }
-  ],
   "paths": {
     "/v1/purpose": {
       "post": {
@@ -160,5 +155,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://purpose.sls.epilot.io"
+    }
+  ]
 }

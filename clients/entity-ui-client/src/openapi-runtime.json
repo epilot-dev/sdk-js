@@ -28,6 +28,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/WidgetDefinitionRefPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/WidgetDefinitionSchemaQueryParam"
           }
         ],
         "responses": {}
@@ -36,6 +39,11 @@
     "/v1/entity-ui/widget-definitions/batch-get": {
       "post": {
         "operationId": "batchGetWidgetDefinitions",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WidgetDefinitionSchemaQueryParam"
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -52,6 +60,11 @@
         "name": "ref",
         "in": "path",
         "required": true
+      },
+      "WidgetDefinitionSchemaQueryParam": {
+        "name": "schema",
+        "in": "query",
+        "required": false
       }
     },
     "responses": {

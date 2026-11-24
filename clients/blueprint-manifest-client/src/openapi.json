@@ -2581,7 +2581,7 @@
           }
         ],
         "summary": "retryInstallationJob",
-        "description": "Retry a finished V3 installation job whose status is `FAILED` or\n`PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same\nsource/destination and `auto_apply: true` — no `:continue` call is needed.\nFor an AI-agent caller the new job instead pauses at the plan\n(`WAITING_USER_ACTION`) for the user to approve via `:continue`.\nThe plan phase re-resolves every resource: already-synced resources no-op,\nso effectively only the failed resources are re-applied.\n\nMust be called by a user of the destination org (where the job lives); the\ncaller's bearer token is used as the destination token. The plan reuses the\nmanifest persisted by the original install, so no source-org access is\nrequired. The original job's `options` (ignored resources, sync_notes) are\nreused when present; older jobs without persisted options fall back to the\ndestination blueprint's `ignored_resource_addresses`.\n",
+        "description": "Retry a finished V3 installation job whose status is `FAILED` or\n`PARTIAL_SUCCESS`. Starts a fresh install job (new `job_id`) with the same\nsource/destination and `auto_apply: true` — no `:continue` call is needed.\nFor an AI-agent caller the new job instead pauses at the plan\n(`WAITING_USER_ACTION`) for the user to approve via `:continue`.\nThe plan phase re-resolves every resource: already-synced resources no-op,\nso effectively only the failed resources are re-applied.\n\nMust be called by a user of the destination org (where the job lives); the\ncaller's bearer token is used as the destination token. The plan reuses the\nmanifest persisted by the original install, but a cross-org job still reads\nthe source org (file contents, a merge job's live source), so send a token for\nthe source org (e.g. the pipeline token) as `source_auth_token`. Without it the\ncaller's bearer stands in for the source and those reads fail with 403.\nThe original job's `options` (ignored resources, sync_notes) are\nreused when present; older jobs without persisted options fall back to the\ndestination blueprint's `ignored_resource_addresses`.\n",
         "tags": [
           "Jobs"
         ],
@@ -2595,6 +2595,22 @@
             }
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source_auth_token": {
+                    "type": "string",
+                    "description": "Token for the job's source org (e.g. the pipeline token). Needed for a cross-org job; never persisted."
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "202": {
             "description": "Retry install job started",
@@ -2706,6 +2722,11 @@
                   },
                   "slug": {
                     "type": "string"
+                  },
+                  "installation_slug": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 200
                   }
                 }
               }

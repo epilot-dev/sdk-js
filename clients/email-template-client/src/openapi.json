@@ -166,6 +166,97 @@
         }
       }
     },
+    "/v1/email-template/templates/{id}:migrate-automations": {
+      "post": {
+        "operationId": "migrateAutomationsForTemplate",
+        "summary": "migrateAutomationsForTemplate",
+        "description": "Find all automation flows in the org that contain a `send-email` or `reply-email`\naction referencing `old_template_id` and rewrite those actions to point at the\nnew template id (`{id}` path param). Intended to be called after a duplicated\ntemplate has been refined, so automations follow over to the new template.\n",
+        "tags": [
+          "Email templates"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "New template id (the duplicate that automations should be migrated onto)",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "old_template_id"
+                ],
+                "properties": {
+                  "old_template_id": {
+                    "type": "string",
+                    "description": "Source template id that automations are being migrated away from",
+                    "example": "511ceb90-f738-47aa-8b1e-915ace0ae13c"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MigrateAutomationsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/v1/email-template/templates/{id}:references": {
+      "get": {
+        "operationId": "getTemplateReferences",
+        "summary": "getTemplateReferences",
+        "description": "List the automation flows, workflows and customer portals that currently\nreference this template, without modifying anything. Powers the template\nsettings \"used by\" view and the pre-migrate preview, and uses the same\ndiscovery as `migrateAutomationsForTemplate` so the preview matches what a\nmigrate would touch.\n",
+        "tags": [
+          "Email templates"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Template id to find references for",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateReferencesResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
     "/v1/email-template/templates:replace": {
       "post": {
         "operationId": "replaceVariables",
@@ -385,6 +476,83 @@
           }
         }
       }
+    },
+    "/v1/email-template/templates/{id}:convertToBuilder": {
+      "post": {
+        "operationId": "convertToBuilder",
+        "summary": "convertToBuilder",
+        "description": "Converts a legacy HTML email template into the email-builder block format.\nStores the new `json_template` (stringified block graph), re-renders `body`\nfrom the resulting blocks, and stashes the original HTML at `backup.body`.\nReturns 409 if the template is already converted unless `force=true`.\n",
+        "tags": [
+          "Email templates"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Template entity ID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dryRun": {
+                    "type": "boolean",
+                    "description": "When true, return the converted output without saving.",
+                    "example": false
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "When true, overwrite an existing json_template.",
+                    "example": false
+                  },
+                  "as_copy": {
+                    "type": "boolean",
+                    "description": "When true, leave the source template untouched and save the converted result as a NEW template (linked via original_template_id). The response is the new entity.",
+                    "example": false
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Optional name for the as_copy result. The UI sends a localized copy name (e.g. \"Copy of <name> (Visual)\") so the new template is named like the list-view \"Duplicate\" action. Ignored unless as_copy is true.",
+                    "example": "Copy of Welcome email (Visual)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTemplateEntity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Template body is empty"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Template already converted; pass force=true to overwrite"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -474,6 +642,129 @@
               "format": "uuid",
               "example": "123e4567-e89b-12d3-a456-426614174000"
             }
+          }
+        }
+      },
+      "TemplateReferenceItem": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Human-friendly name (flow_name / workflow name / portal name); may be absent."
+          }
+        }
+      },
+      "TemplateReferencesResponse": {
+        "type": "object",
+        "required": [
+          "flows",
+          "workflows",
+          "portals",
+          "portal_lookup_errored"
+        ],
+        "properties": {
+          "flows": {
+            "type": "array",
+            "description": "Automation flows whose send-email/reply-email actions reference this template",
+            "items": {
+              "$ref": "#/components/schemas/TemplateReferenceItem"
+            }
+          },
+          "workflows": {
+            "type": "array",
+            "description": "v2 workflows that own a referencing automation flow",
+            "items": {
+              "$ref": "#/components/schemas/TemplateReferenceItem"
+            }
+          },
+          "portals": {
+            "type": "array",
+            "description": "Customer portals whose email-template config references this template",
+            "items": {
+              "$ref": "#/components/schemas/TemplateReferenceItem"
+            }
+          },
+          "portal_lookup_errored": {
+            "type": "boolean",
+            "description": "True when the customer-portal lookup failed, so `portals` may be incomplete."
+          }
+        }
+      },
+      "MigrateAutomationsResponse": {
+        "type": "object",
+        "required": [
+          "migrated_flow_count",
+          "migrated_flow_ids",
+          "migrated_workflow_count",
+          "migrated_workflow_ids",
+          "migrated_portal_count",
+          "migrated_portal_ids",
+          "failed_flow_ids",
+          "failed_portal_ids",
+          "portal_migration_errored"
+        ],
+        "properties": {
+          "migrated_flow_count": {
+            "type": "integer",
+            "description": "Number of automation flows successfully rewritten to point at the new template",
+            "example": 3
+          },
+          "migrated_flow_ids": {
+            "type": "array",
+            "description": "IDs of automation flows that were successfully migrated",
+            "items": {
+              "type": "string"
+            }
+          },
+          "migrated_workflow_count": {
+            "type": "integer",
+            "description": "Number of v2 workflows whose `AUTOMATION` tasks point at a migrated automation flow.\nDerived from `migrated_flow_ids` — a workflow is counted once even if multiple of\nits tasks reference the same migrated flow.\n",
+            "example": 2
+          },
+          "migrated_workflow_ids": {
+            "type": "array",
+            "description": "IDs of workflows (`wf-*`) that owned at least one migrated automation flow",
+            "items": {
+              "type": "string"
+            }
+          },
+          "migrated_portal_count": {
+            "type": "integer",
+            "description": "Number of customer-portal email-template config rows whose references were rewritten\nfrom the old template id to the new one (via customer-portal-api's\n`migrateEmailTemplateReferences`).\n",
+            "example": 1
+          },
+          "migrated_portal_ids": {
+            "type": "array",
+            "description": "Portal IDs whose email-template references were successfully rewritten",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failed_flow_ids": {
+            "type": "array",
+            "description": "IDs of automation flows whose `putFlow` update failed. Caller can retry or surface to the user.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failed_portal_ids": {
+            "type": "array",
+            "description": "Portal IDs whose email-template reference rewrite failed in customer-portal-api.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "portal_migration_errored": {
+            "type": "boolean",
+            "description": "True when the call to customer-portal-api threw before returning, so the portal\ncounts could not be computed. Flow/workflow results are still valid; the caller\nshould surface this and offer a retry of the portal migration.\n",
+            "example": false
           }
         }
       },
@@ -589,6 +880,11 @@
             "type": "boolean",
             "example": false
           },
+          "protected": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, the template is displayed in read-only mode in the UI"
+          },
           "created_by": {
             "description": "Created by",
             "type": "string",
@@ -602,6 +898,32 @@
           "json_template": {
             "type": "string",
             "description": "This field is used to store JSON templates. If this field is populated, then the Body html is derived from the JSON."
+          },
+          "original_template_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Set on a duplicated template to point at its source template id.\nCleared (set to null) after automations referencing the source have been\nmigrated onto the new template via `migrateAutomationsForTemplate`.\n",
+            "example": "cd7809ba-a111-4dd9-8d15-18eb4de0faed"
+          },
+          "backup": {
+            "type": "object",
+            "description": "Snapshot of the legacy template body, taken when migrating to the email-builder format.",
+            "properties": {
+              "body": {
+                "type": "string",
+                "description": "Original HTML body before conversion to email-builder blocks."
+              },
+              "backed_up_at": {
+                "type": "string",
+                "description": "ISO 8601 timestamp when the backup was created.",
+                "example": "2026-05-13T10:00:00.000Z"
+              }
+            }
+          },
+          "converted_to_new_editor": {
+            "type": "boolean",
+            "description": "True after the template has been converted from legacy HTML to the new email-builder format. Used by the UI to expose the \"Revert to legacy HTML\" action.",
+            "example": false
           }
         }
       },
@@ -696,10 +1018,41 @@
                 "type": "string",
                 "description": "This field is used to store JSON templates. If this field is populated, then the Body html is derived from the JSON."
               },
+              "backup": {
+                "type": "object",
+                "description": "Snapshot of the legacy template body, taken when migrating to the email-builder format.",
+                "properties": {
+                  "body": {
+                    "type": "string",
+                    "description": "Original HTML body before conversion to email-builder blocks."
+                  },
+                  "backed_up_at": {
+                    "type": "string",
+                    "description": "ISO 8601 timestamp when the backup was created.",
+                    "example": "2026-05-13T10:00:00.000Z"
+                  }
+                }
+              },
+              "converted_to_new_editor": {
+                "type": "boolean",
+                "description": "True after the template has been converted from legacy HTML to the new email-builder format. Used by the UI to expose the \"Revert to legacy HTML\" action.",
+                "example": false
+              },
               "system_template": {
                 "description": "If template is created by system (Double Opt-in, CMD invitation,...) then true, and some attributes can not be edited such as Name, To,...\nRemember to add default content of template to system_template enum for revert to original feature\n",
                 "type": "boolean",
                 "example": false
+              },
+              "protected": {
+                "type": "boolean",
+                "default": false,
+                "description": "If true, the template is displayed in read-only mode in the UI"
+              },
+              "original_template_id": {
+                "type": "string",
+                "nullable": true,
+                "description": "Set on a duplicated template to point at its source template id.\nCleared after automations have been migrated via `migrateAutomationsForTemplate`.\n",
+                "example": "cd7809ba-a111-4dd9-8d15-18eb4de0faed"
               }
             }
           }
@@ -785,7 +1138,7 @@
           },
           "email": {
             "type": "string",
-            "example": "no-reply@epilot.cloud"
+            "example": "service@stadtwerke-example.de"
           }
         }
       },
@@ -983,10 +1336,7 @@
           },
           "language": {
             "type": "string",
-            "enum": [
-              "en",
-              "de"
-            ]
+            "example": "de"
           },
           "main_entity_id": {
             "type": "string",
@@ -1430,6 +1780,178 @@
         "description": "Task token to approve or cancel the bulk message action",
         "example": "8c086140-f33e-4bb7-a993-50c0f2402c7b",
         "readOnly": true
+      },
+      "JourneyContextUsagesRequest": {
+        "type": "object",
+        "description": "Shared request shape across journey-api's eight context-usage\nadapters. `journey_id` is required for parity with the other seven,\nbut this adapter does not use it: email templates reference context\nparameters by name and carry no journey id at all, so it cannot\nnarrow the search here.\n",
+        "required": [
+          "journey_id",
+          "param_keys"
+        ],
+        "properties": {
+          "journey_id": {
+            "type": "string",
+            "description": "Journey the usage check originated from. Validated, not used by this adapter.",
+            "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          },
+          "param_keys": {
+            "type": "array",
+            "description": "Context parameter keys to search for, e.g. `contact_id`.",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "example": [
+              "contact_id"
+            ]
+          },
+          "param_ids": {
+            "type": "array",
+            "description": "Accepted and ignored. This adapter resolves context parameters by name only.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "JourneyContextUsagesResponse": {
+        "type": "object",
+        "required": [
+          "usages",
+          "status",
+          "scanned"
+        ],
+        "properties": {
+          "usages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JourneyContextUsageItem"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "`partial` when a page cap, row cap, or soft deadline truncated the scan before every template was read.",
+            "enum": [
+              "ok",
+              "partial"
+            ]
+          },
+          "scanned": {
+            "type": "integer",
+            "description": "Number of email templates read during the scan."
+          }
+        }
+      },
+      "JourneyContextUsageItem": {
+        "type": "object",
+        "required": [
+          "kind",
+          "resource",
+          "location",
+          "matched_as",
+          "link_hint"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "email-template-body"
+            ]
+          },
+          "resource": {
+            "type": "object",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "email_template"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "location": {
+            "type": "object",
+            "required": [
+              "field"
+            ],
+            "properties": {
+              "field": {
+                "type": "string",
+                "description": "Email template field the match was found in.",
+                "enum": [
+                  "subject",
+                  "body",
+                  "to",
+                  "cc",
+                  "bcc",
+                  "json_template",
+                  "backup.body"
+                ]
+              }
+            }
+          },
+          "matched_as": {
+            "type": "object",
+            "required": [
+              "dialect",
+              "token",
+              "at"
+            ],
+            "properties": {
+              "dialect": {
+                "type": "string",
+                "enum": [
+                  "name"
+                ]
+              },
+              "token": {
+                "type": "string",
+                "description": "The exact token found, e.g. `submission.journey_context.contact_id`."
+              },
+              "at": {
+                "type": "string",
+                "description": "Path the match was found at. Debugging and tests only."
+              }
+            }
+          },
+          "link_hint": {
+            "type": "object",
+            "required": [
+              "route",
+              "params"
+            ],
+            "properties": {
+              "route": {
+                "type": "string",
+                "enum": [
+                  "email-template"
+                ]
+              },
+              "params": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },

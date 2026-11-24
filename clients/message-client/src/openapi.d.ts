@@ -173,6 +173,53 @@ declare namespace Components {
              */
             scopes?: /* Who is marking an item as read or unread. */ ReadingScope[];
         }
+        export interface BulkActionsResponse {
+            /**
+             * Number of threads the action was applied to
+             * example:
+             * 2
+             */
+            success: number;
+            /**
+             * Number of threads the action failed for. Only present when at least one thread failed.
+             * example:
+             * 1
+             */
+            failed?: number;
+            /**
+             * Ids of the threads the action failed for. Only present when at least one thread failed.
+             * example:
+             * [
+             *   "6b299eda-4018-4554-8965-c4b5598e6531"
+             * ]
+             */
+            failedIds?: string[];
+            /**
+             * Why each thread failed, one entry per id in `failedIds`. Only present when at least one thread failed.
+             */
+            failures?: {
+                /**
+                 * example:
+                 * 6b299eda-4018-4554-8965-c4b5598e6531
+                 */
+                id: string;
+                /**
+                 * example:
+                 * Thread 6b299eda-4018-4554-8965-c4b5598e6531 was changed at the same time
+                 */
+                message: string;
+                /**
+                 * HTTP status of the failure, when there is one
+                 * example:
+                 * 409
+                 */
+                status?: number;
+            }[];
+            /**
+             * Per-thread outcomes (settled promises) or a message, for debugging. Only present when at least one thread failed.
+             */
+            error?: any;
+        }
         export interface ErrorResponse {
             /**
              * Error message
@@ -252,9 +299,13 @@ declare namespace Components {
              */
             identifier: string;
             /**
-             * Where the identifier was found, e.g. "subject" or "text"
+             * Where the identifier was found: "subject", "text" (the email body, or a reply's new part above the quoted earlier mail) or "quoted" (only in the earlier mail quoted below a reply); for an email address shared by several records, the address field: "from", "to", "cc" or "bcc"
              */
             found_in?: string;
+            /**
+             * Why it was suggested instead of linked. ambiguous (also when absent): the identifier matched several records. other_record: it matched one record, but the thread is already linked to a different record of that type (e.g. another opportunity). quoted_only: it matched one record (an opportunity, order, contract, request, ticket or lead), but only in the earlier mail quoted below the reply.
+             */
+            reason?: "ambiguous" | "other_record" | "quoted_only";
             /**
              * pending while any candidate is pending; once all are resolved, accepted if any candidate was linked, otherwise dismissed
              */
@@ -275,7 +326,7 @@ declare namespace Components {
              */
             schema: string;
             /**
-             * The identifier attribute that matched, e.g. "contract_number"
+             * The identifier attribute that matched, e.g. "contract_number", or "email" for an email address
              */
             attribute?: string;
             /**
@@ -464,6 +515,10 @@ declare namespace Components {
              *
              */
             mark_thread_as_read?: boolean;
+            /**
+             * Type of email, either transactional or promotional.
+             */
+            category?: "transactional" | "promotional";
             /**
              * Open new thread when sending the very first message in conversation. Thread should contains context related to all messages in it (eg. topic, brand_id, opportunity_id, assigned_to,...).            Thread properties depend on API caller as it's not pre-defined. We do recommend having at least `topic` property for categorizing.            `thread` or `parent_id` must be provided either.
              *
@@ -692,6 +747,15 @@ declare namespace Components {
              */
             link_suggestions?: LinkSuggestion[];
             /**
+             * The identifier fields this message was auto-linked by, as `<entity schema>:<attribute>` (e.g. `contact:customer_number`). Recorded once linking ran with expanded identifiers, so the settings can show how often each field links emails.
+             * example:
+             * [
+             *   "contact:customer_number",
+             *   "contract:lima_contract_ref"
+             * ]
+             */
+            auto_link_fields?: string[];
+            /**
              * If true then html is not provided and must be downloaded using the html_download_url
              */
             html_omitted?: boolean;
@@ -709,6 +773,12 @@ declare namespace Components {
              * 3f34ce73-089c-4d45-a5ee-c161234e41c3
              */
             inbox_id: string;
+            reason?: /**
+             * Why the thread is being moved, recorded on its "moved to inbox" activity. Only accepted from
+             * internal callers (the inbox deletion job); ignored for user requests.
+             *
+             */
+            ThreadMoveReason;
         }
         export interface ReadMessagePayload {
             /**
@@ -768,11 +838,17 @@ declare namespace Components {
                  */
                 mailbox?: "organization" | "agent";
                 /**
-                 * Saved-filter labels, ANDed. Matched exactly against the tag rather than against its
-                 * tokens, so a label whose words overlap a folder tag no longer lands in that folder.
+                 * Saved-filter labels, joined by `labels_operator`. Matched exactly against the tag rather than
+                 * against its tokens, so a label whose words overlap a folder tag no longer lands in that folder.
                  *
                  */
                 labels?: string[];
+                /**
+                 * How `labels` combine. `and`: the email carries every label. `or`: it carries at least one.
+                 * Absent means `and`, which is how every view matched before this field existed.
+                 *
+                 */
+                labels_operator?: "and" | "or";
                 /**
                  * Purpose ids on linked entities, ANDed.
                  */
@@ -839,6 +915,15 @@ declare namespace Components {
                  *
                  */
                 pinned_by?: string;
+                /**
+                 * Restrict the view to threads with a message whose auto-link suggestion still waits for a
+                 * decision. Omitted or false adds no condition.
+                 *
+                 * Like every other condition, it is matched per message: a thread is included when one of
+                 * its messages has a pending suggestion and also meets the rest of the view.
+                 *
+                 */
+                has_link_suggestion?: boolean;
             };
             /**
              * The caller's group ids, with the same meaning and caveats as on `threads:search`.
@@ -876,16 +961,12 @@ declare namespace Components {
              */
             q?: string;
             /**
-             * A view for the server to compile into the query, instead of supplying `q`. When a view is
-             * present and compilation is enabled for the calling organization, the compiled query runs and
-             * `q` is not consulted.
+             * A view for the server to compile into the query, instead of supplying `q`. When present, `q`
+             * is ignored.
              *
              * Read by `threads:search` and `threads:searchIds` only. This schema is shared with
              * `messages:search`, which compiles no view and ignores the field, so a request there must
              * supply `q`.
-             *
-             * Compilation is enabled per organization by the `message-unread-unified-predicate` feature
-             * flag. While it is off, `q` runs and a request supplying only a view returns no hits.
              *
              */
             view?: {
@@ -901,11 +982,17 @@ declare namespace Components {
                  */
                 mailbox?: "organization" | "agent";
                 /**
-                 * Saved-filter labels, ANDed. Matched exactly against the tag rather than against its
-                 * tokens, so a label whose words overlap a folder tag no longer lands in that folder.
+                 * Saved-filter labels, joined by `labels_operator`. Matched exactly against the tag rather than
+                 * against its tokens, so a label whose words overlap a folder tag no longer lands in that folder.
                  *
                  */
                 labels?: string[];
+                /**
+                 * How `labels` combine. `and`: the email carries every label. `or`: it carries at least one.
+                 * Absent means `and`, which is how every view matched before this field existed.
+                 *
+                 */
+                labels_operator?: "and" | "or";
                 /**
                  * Purpose ids on linked entities, ANDed.
                  */
@@ -972,6 +1059,15 @@ declare namespace Components {
                  *
                  */
                 pinned_by?: string;
+                /**
+                 * Restrict the view to threads with a message whose auto-link suggestion still waits for a
+                 * decision. Omitted or false adds no condition.
+                 *
+                 * Like every other condition, it is matched per message: a thread is included when one of
+                 * its messages has a pending suggestion and also meets the rest of the view.
+                 *
+                 */
+                has_link_suggestion?: boolean;
             };
             /**
              * The caller's group ids, as `group_<id>`. Read only when a `view` is compiled, where they
@@ -1091,6 +1187,7 @@ declare namespace Components {
              * 2024-02-10T09:14:31.990Z
              */
             latest_message_at?: string;
+            view_latest_message?: Message;
         }
         export interface ThreadDoneEvent {
             type: "THREAD_DONE";
@@ -1107,6 +1204,22 @@ declare namespace Components {
              */
             organization_id: string;
         }
+        /**
+         * Why the thread is being moved, recorded on its "moved to inbox" activity. Only accepted from
+         * internal callers (the inbox deletion job); ignored for user requests.
+         *
+         */
+        export interface ThreadMoveReason {
+            type: "inbox_deleted";
+            /**
+             * ID of the deleted inbox the thread was in
+             */
+            source_inbox_id: string;
+            /**
+             * Name of the deleted inbox the thread was in
+             */
+            source_inbox_name?: string;
+        }
         export interface ThreadMovedToInboxEvent {
             type: "THREAD_MOVED_TO_INBOX";
             /**
@@ -1117,6 +1230,18 @@ declare namespace Components {
              * Name of the shared inbox the thread was moved to
              */
             target_inbox_name?: string;
+            /**
+             * Set when the move happened because the thread's inbox was deleted
+             */
+            reason?: "inbox_deleted";
+            /**
+             * ID of the deleted inbox, when `reason` is `inbox_deleted`
+             */
+            source_inbox_id?: string;
+            /**
+             * Name of the deleted inbox, when `reason` is `inbox_deleted`
+             */
+            source_inbox_name?: string;
         }
         export interface ThreadOpenEvent {
             type: "THREAD_OPEN";
@@ -1244,6 +1369,82 @@ declare namespace Components {
              */
             removed?: string[];
         }
+        export interface ThreadValidationAttachment {
+            file_id: string;
+            filename?: string;
+            /**
+             * Latest message the file is attached to
+             */
+            message_id: string;
+            sent_at: string; // date-time
+            /**
+             * Embedded in the email body (CID image)
+             */
+            inline: boolean;
+            /**
+             * Ingestion marked it as a probable signature image
+             */
+            likely_signature: boolean;
+            /**
+             * Worth reading for validation; false when inline, a signature, or beyond max_attachments
+             */
+            eligible: boolean;
+            /**
+             * Why the file is not eligible
+             */
+            reason?: "inline" | "signature" | "limit";
+        }
+        export interface ThreadValidationContext {
+            thread_id: string;
+            /**
+             * The triggering message
+             */
+            message_id: string;
+            /**
+             * Subject of the triggering message, or of the first one
+             */
+            subject: string;
+            message: ThreadValidationMessage;
+            /**
+             * Messages before the triggering one, oldest first; drafts, trashed, spam and empty messages left out
+             */
+            earlier_messages: ThreadValidationMessage[];
+            /**
+             * Attachments of the messages up to the triggering one, newest first, each file once
+             */
+            attachments: ThreadValidationAttachment[];
+            /**
+             * Entities linked to the thread or the triggering message, main entity first; suggestions left out
+             */
+            entities: ThreadValidationEntity[];
+        }
+        export interface ThreadValidationEntity {
+            entity_id: string;
+            schema: string;
+            title?: string;
+            is_main_entity: boolean;
+            /**
+             * Where the link was found first
+             */
+            source: "thread" | "message";
+        }
+        export interface ThreadValidationMessage {
+            message_id: string;
+            type: "RECEIVED" | "SENT" | "DRAFT";
+            sent_at: string; // date-time
+            subject?: string;
+            from?: {
+                address: string;
+                name?: string;
+                email_type?: "INTERNAL" | "EXTERNAL" | "PARTNER";
+            };
+            /**
+             * Plain text with quoted history, reply headers and links removed (the thread summary's cleaning). Earlier
+             * messages also lose text that repeats an earlier message; the triggering message keeps all of its own text.
+             *
+             */
+            text: string;
+        }
         /**
          * A central-inbox view, described structurally so the server compiles the query for it. Both the
          * thread list and the unread count for a view are compiled from the same description, so the two
@@ -1266,11 +1467,17 @@ declare namespace Components {
              */
             mailbox?: "organization" | "agent";
             /**
-             * Saved-filter labels, ANDed. Matched exactly against the tag rather than against its
-             * tokens, so a label whose words overlap a folder tag no longer lands in that folder.
+             * Saved-filter labels, joined by `labels_operator`. Matched exactly against the tag rather than
+             * against its tokens, so a label whose words overlap a folder tag no longer lands in that folder.
              *
              */
             labels?: string[];
+            /**
+             * How `labels` combine. `and`: the email carries every label. `or`: it carries at least one.
+             * Absent means `and`, which is how every view matched before this field existed.
+             *
+             */
+            labels_operator?: "and" | "or";
             /**
              * Purpose ids on linked entities, ANDed.
              */
@@ -1337,6 +1544,15 @@ declare namespace Components {
              *
              */
             pinned_by?: string;
+            /**
+             * Restrict the view to threads with a message whose auto-link suggestion still waits for a
+             * decision. Omitted or false adds no condition.
+             *
+             * Like every other condition, it is matched per message: a thread is included when one of
+             * its messages has a pending suggestion and also meets the rest of the view.
+             *
+             */
+            has_link_suggestion?: boolean;
         }
         export interface TimelineActor {
             user_id?: string;
@@ -1351,7 +1567,7 @@ declare namespace Components {
             /**
              * Timestamp of the event
              * example:
-             * 2024-01-01T00:00:00Z
+             * 2024-01-01T00:00:00.000Z
              */
             timestamp: string;
             /**
@@ -1419,8 +1635,8 @@ declare namespace Components {
             name: string;
             /**
              * Decides which buckets come back, and whether `q` is required. `organization` returns all
-             * four buckets from the canonical central-inbox queries and takes no `q`. `shared_inbox`
-             * and `saved_view` return `unread` alone. A `saved_view` scope names its view with `view_id`;
+             * four buckets, each compiled from its folder, and takes no `q`. `shared_inbox` and `saved_view`
+             * return `unread` alone. A `saved_view` scope names its view with `view_id`;
              * a `shared_inbox` scope needs only its `inbox_id`, since the query follows from the type.
              *
              * A `shared_inbox` scope additionally requires `actor: organization` and is refused with a
@@ -1437,9 +1653,7 @@ declare namespace Components {
              *
              * Accepted for `shared_inbox` and `saved_view`; rejected for `organization`.
              *
-             * Superseded by server-side compilation. It remains accepted for callers whose counts are
-             * enabled while compilation is not, and is ignored when compilation is enabled. It will be
-             * removed once compilation is enabled everywhere counts are.
+             * Ignored for `shared_inbox`, and for a `saved_view` whose `view_id` resolves.
              *
              * example:
              * _tags.keyword:inbox AND !_tags.keyword:trash
@@ -1452,15 +1666,12 @@ declare namespace Components {
              *
              * Required for `saved_view` scopes unless `q` is supplied instead; rejected for the other two
              * types. A `shared_inbox` scope needs no predicate field at all, because its query follows from
-             * the type and its `inbox_id`. An `organization` scope uses the canonical folder queries.
+             * the type and its `inbox_id`. An `organization` scope compiles from its folders.
              *
              * The view's own shared-inbox filter is read from the stored view, so `inbox_id` need not be
              * sent alongside this.
              *
-             * Compilation is enabled per organization by the `message-unread-unified-predicate` feature
-             * flag. While it is off, a scope supplying only a `view_id` has no query to run and its name is
-             * returned in `omitted` rather than counted. A named view that this organization does not have,
-             * or whose stored configuration cannot be read, is omitted the same way.
+             * A view that is missing or unreadable, sent without a `q`, puts the scope in `omitted`.
              *
              * example:
              * 3f34ce73-089c-4d45-a5ee-c161234e41c3
@@ -1482,8 +1693,8 @@ declare namespace Components {
              * The addresses selected in the address filter, applied to the `organization` scope only.
              *
              * Not a request-level restriction, despite arriving at request level. A `shared_inbox`
-             * scope's own list applies no address filter at all, because scoping to an inbox is what
-             * switches it off, and a `saved_view` ignores the address lens entirely. Applying this to
+             * scope's badge belongs to the sidebar inbox, whose list sends no address filter, and a
+             * `saved_view` ignores the address lens entirely. Applying this to
              * either would make the badge answer a narrower question than the list beneath it.
              *
              */
@@ -1525,9 +1736,7 @@ declare namespace Components {
         }
         export interface UnreadCountsResult {
             /**
-             * False when the `message-unread-counts` flag is off for the calling org, in which case
-             * `counts` is empty and no Elasticsearch work was done. Callers render no badges rather
-             * than rendering zeroes.
+             * Always `true`; kept because older clients hide every badge when it is false or missing.
              *
              * example:
              * true
@@ -1547,9 +1756,7 @@ declare namespace Components {
              * absent from `counts`, so an omission is distinguishable from a mis-spelled scope name.
              *
              * Causes, not distinguishable from this field: a `shared_inbox` scope whose ids matched no
-             * bucket in the organization; a scope with no query to run because compilation is disabled for
-             * the organization and no `q` was supplied; and a `view_id` naming a view this organization
-             * does not have or whose stored configuration cannot be read.
+             * bucket, or a missing or unreadable `view_id` sent without a `q`.
              *
              */
             omitted?: string[];
@@ -1570,10 +1777,14 @@ declare namespace Components {
 declare namespace Paths {
     namespace AssignThread {
         namespace Parameters {
+            export type ConfirmedWarning = boolean;
             export type Id = string;
         }
         export interface PathParameters {
             id: Parameters.Id;
+        }
+        export interface QueryParameters {
+            confirmed_warning?: Parameters.ConfirmedWarning;
         }
         /**
          * Entities which thread is assigned to
@@ -1670,10 +1881,10 @@ declare namespace Paths {
     namespace BulkMoveThreads {
         export type RequestBody = Components.Schemas.BulkActionsPayloadWithScopes;
         namespace Responses {
-            export interface $200 {
-            }
+            export type $200 = Components.Schemas.BulkActionsResponse;
             export interface $403 {
             }
+            export type $422 = Components.Schemas.BulkActionsResponse;
         }
     }
     namespace CreateDraft {
@@ -2064,6 +2275,7 @@ declare namespace Paths {
              * 4d74976d-fb64-47fd-85e2-65eea140f5eb
              */
             export type Id = string;
+            export type Redirect = boolean;
         }
         export interface PathParameters {
             id: /**
@@ -2072,7 +2284,16 @@ declare namespace Paths {
              */
             Parameters.Id;
         }
+        export interface QueryParameters {
+            redirect?: Parameters.Redirect;
+        }
         namespace Responses {
+            export interface $200 {
+                /**
+                 * Pre-signed S3 URL to download the EML file (expires in 15 minutes)
+                 */
+                download_url: string;
+            }
             export interface $302 {
             }
             export interface $403 {
@@ -2243,6 +2464,15 @@ declare namespace Paths {
                  * Entity-link suggestions recorded when the message arrived: identifiers that matched entities of different customers, so none was linked automatically.
                  */
                 link_suggestions?: Components.Schemas.LinkSuggestion[];
+                /**
+                 * The identifier fields this message was auto-linked by, as `<entity schema>:<attribute>` (e.g. `contact:customer_number`). Recorded once linking ran with expanded identifiers, so the settings can show how often each field links emails.
+                 * example:
+                 * [
+                 *   "contact:customer_number",
+                 *   "contract:lima_contract_ref"
+                 * ]
+                 */
+                auto_link_fields?: string[];
                 /**
                  * If true then html is not provided and must be downloaded using the html_download_url
                  */
@@ -2533,6 +2763,36 @@ declare namespace Paths {
             }
         }
     }
+    namespace RestoreThreadLinkSuggestions {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        export interface RequestBody {
+            /**
+             * Suggestions to restore candidates of. Omit for every suggestion on the thread.
+             */
+            suggestion_ids?: string[];
+            /**
+             * Candidates to restore. Omit to restore every dismissed candidate of the selected suggestions.
+             */
+            entity_ids?: string[];
+        }
+        namespace Responses {
+            export interface $200 {
+                /**
+                 * IDs of the suggestions that had at least one candidate restored
+                 */
+                restored: string[];
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+        }
+    }
     namespace SearchIds {
         export type RequestBody = Components.Schemas.SearchIDParams;
         namespace Responses {
@@ -2808,6 +3068,7 @@ declare namespace Paths {
                      * 2024-02-10T09:14:31.990Z
                      */
                     latest_message_at?: string;
+                    view_latest_message?: Components.Schemas.Message;
                 }[];
             }
             export interface $403 {
@@ -2909,6 +3170,7 @@ declare namespace Paths {
                      * 2024-02-10T09:14:31.990Z
                      */
                     latest_message_at?: string;
+                    view_latest_message?: Components.Schemas.Message;
                 }[];
             }
             export interface $403 {
@@ -3124,10 +3386,10 @@ declare namespace Paths {
     namespace ThreadBulkActionsDone {
         export type RequestBody = Components.Schemas.BulkActionsPayload;
         namespace Responses {
-            export interface $200 {
-            }
+            export type $200 = Components.Schemas.BulkActionsResponse;
             export interface $403 {
             }
+            export type $422 = Components.Schemas.BulkActionsResponse;
         }
     }
     namespace ThreadBulkActionsFavorite {
@@ -3142,10 +3404,10 @@ declare namespace Paths {
     namespace ThreadBulkActionsOpen {
         export type RequestBody = Components.Schemas.BulkActionsPayload;
         namespace Responses {
-            export interface $200 {
-            }
+            export type $200 = Components.Schemas.BulkActionsResponse;
             export interface $403 {
             }
+            export type $422 = Components.Schemas.BulkActionsResponse;
         }
     }
     namespace ThreadBulkActionsRead {
@@ -3726,6 +3988,7 @@ declare namespace Paths {
                  * 2024-02-10T09:14:31.990Z
                  */
                 latest_message_at?: string;
+                view_latest_message?: Components.Schemas.Message;
             }
             export interface $403 {
             }
@@ -3785,13 +4048,15 @@ export interface OperationMethods {
    * 
    * Download a message as an EML file.
    * Returns a 302 redirect to a pre-signed S3 URL where the EML file can be downloaded.
+   * Browsers cannot read the target of a redirect, so pass `redirect=false` to get the same URL
+   * as JSON instead (200).
    * 
    */
   'getMessageEml'(
-    parameters?: Parameters<Paths.GetMessageEml.PathParameters> | null,
+    parameters?: Parameters<Paths.GetMessageEml.QueryParameters & Paths.GetMessageEml.PathParameters> | null,
     data?: any,
     config?: AxiosRequestConfig  
-  ): OperationResponse<any>
+  ): OperationResponse<Paths.GetMessageEml.Responses.$200>
   /**
    * searchMessages - searchMessages
    * 
@@ -3867,22 +4132,17 @@ export interface OperationMethods {
    * 
    * Unread counts for several named scopes in one request.
    * 
-   * A scope is a name plus the same parameters the thread list already takes (`q`, `inbox_id`),
-   * so a scope's count and the list beneath it are the same predicate and agree by construction.
-   * The server adds only the read-state condition; it does not re-author the caller's view.
+   * A scope names a saved view (`view_id`), a shared inbox (`inbox_id`), or the organization's
+   * folders. Each compiles to the query its thread list runs, plus the read-state condition, so a
+   * count matches the list beneath it. A `saved_view` scope may send its own `q` instead.
    * 
-   * The `organization` scope is the exception and takes no `q`: it reuses the four canonical
-   * central-inbox queries, so its numbers match `getUnread` exactly.
+   * The `organization` scope takes no `q`; each bucket compiles from the folder it badges.
    * 
    * Which buckets come back varies by scope type and actor. Every scope other than `organization`
    * returns `unread` alone. An `organization` scope returns all four (`unread`, `drafts`,
    * `unassigned`, `spam`) for `actor: organization`, and `unread` and `drafts` only for
    * `actor: user`. `getUnread` returns all four for both actors; this endpoint omits the two that
    * no per-user surface renders, since each costs an aggregation.
-   * 
-   * Gated on the `message-unread-counts` flag, evaluated once per request against the calling
-   * org. With the flag off the response is `{ "enabled": false, "counts": {} }` and no
-   * Elasticsearch query is issued.
    * 
    */
   'getUnreadCounts'(
@@ -4251,7 +4511,7 @@ export interface OperationMethods {
    * Assign thread to entities
    */
   'assignThread'(
-    parameters?: Parameters<Paths.AssignThread.PathParameters> | null,
+    parameters?: Parameters<Paths.AssignThread.QueryParameters & Paths.AssignThread.PathParameters> | null,
     data?: Paths.AssignThread.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.AssignThread.Responses.$204>
@@ -4265,6 +4525,16 @@ export interface OperationMethods {
     data?: Paths.DismissThreadLinkSuggestions.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DismissThreadLinkSuggestions.Responses.$200>
+  /**
+   * restoreThreadLinkSuggestions - restoreThreadLinkSuggestions
+   * 
+   * Restore dismissed candidates of entity-link suggestions on a thread, e.g. to undo a dismissal. Their suggestions are pending again. Unlinking an entity that was linked from a suggestion (unassignThread) reopens its candidate the same way.
+   */
+  'restoreThreadLinkSuggestions'(
+    parameters?: Parameters<Paths.RestoreThreadLinkSuggestions.PathParameters> | null,
+    data?: Paths.RestoreThreadLinkSuggestions.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.RestoreThreadLinkSuggestions.Responses.$200>
   /**
    * unassignThread - unassignThread
    * 
@@ -4423,13 +4693,15 @@ export interface PathsDictionary {
      * 
      * Download a message as an EML file.
      * Returns a 302 redirect to a pre-signed S3 URL where the EML file can be downloaded.
+     * Browsers cannot read the target of a redirect, so pass `redirect=false` to get the same URL
+     * as JSON instead (200).
      * 
      */
     'get'(
-      parameters?: Parameters<Paths.GetMessageEml.PathParameters> | null,
+      parameters?: Parameters<Paths.GetMessageEml.QueryParameters & Paths.GetMessageEml.PathParameters> | null,
       data?: any,
       config?: AxiosRequestConfig  
-    ): OperationResponse<any>
+    ): OperationResponse<Paths.GetMessageEml.Responses.$200>
   }
   ['/v1/message/messages:search']: {
     /**
@@ -4521,22 +4793,17 @@ export interface PathsDictionary {
      * 
      * Unread counts for several named scopes in one request.
      * 
-     * A scope is a name plus the same parameters the thread list already takes (`q`, `inbox_id`),
-     * so a scope's count and the list beneath it are the same predicate and agree by construction.
-     * The server adds only the read-state condition; it does not re-author the caller's view.
+     * A scope names a saved view (`view_id`), a shared inbox (`inbox_id`), or the organization's
+     * folders. Each compiles to the query its thread list runs, plus the read-state condition, so a
+     * count matches the list beneath it. A `saved_view` scope may send its own `q` instead.
      * 
-     * The `organization` scope is the exception and takes no `q`: it reuses the four canonical
-     * central-inbox queries, so its numbers match `getUnread` exactly.
+     * The `organization` scope takes no `q`; each bucket compiles from the folder it badges.
      * 
      * Which buckets come back varies by scope type and actor. Every scope other than `organization`
      * returns `unread` alone. An `organization` scope returns all four (`unread`, `drafts`,
      * `unassigned`, `spam`) for `actor: organization`, and `unread` and `drafts` only for
      * `actor: user`. `getUnread` returns all four for both actors; this endpoint omits the two that
      * no per-user surface renders, since each costs an aggregation.
-     * 
-     * Gated on the `message-unread-counts` flag, evaluated once per request against the calling
-     * org. With the flag off the response is `{ "enabled": false, "counts": {} }` and no
-     * Elasticsearch query is issued.
      * 
      */
     'post'(
@@ -4973,7 +5240,7 @@ export interface PathsDictionary {
      * Assign thread to entities
      */
     'post'(
-      parameters?: Parameters<Paths.AssignThread.PathParameters> | null,
+      parameters?: Parameters<Paths.AssignThread.QueryParameters & Paths.AssignThread.PathParameters> | null,
       data?: Paths.AssignThread.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.AssignThread.Responses.$204>
@@ -4989,6 +5256,18 @@ export interface PathsDictionary {
       data?: Paths.DismissThreadLinkSuggestions.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DismissThreadLinkSuggestions.Responses.$200>
+  }
+  ['/v1/message/threads/{id}/link-suggestions/restore']: {
+    /**
+     * restoreThreadLinkSuggestions - restoreThreadLinkSuggestions
+     * 
+     * Restore dismissed candidates of entity-link suggestions on a thread, e.g. to undo a dismissal. Their suggestions are pending again. Unlinking an entity that was linked from a suggestion (unassignThread) reopens its candidate the same way.
+     */
+    'post'(
+      parameters?: Parameters<Paths.RestoreThreadLinkSuggestions.PathParameters> | null,
+      data?: Paths.RestoreThreadLinkSuggestions.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.RestoreThreadLinkSuggestions.Responses.$200>
   }
   ['/v1/message/threads/{id}/unassign']: {
     /**
@@ -5117,6 +5396,7 @@ export type AttachmentsRelation = Components.Schemas.AttachmentsRelation;
 export type BaseEntity = Components.Schemas.BaseEntity;
 export type BulkActionsPayload = Components.Schemas.BulkActionsPayload;
 export type BulkActionsPayloadWithScopes = Components.Schemas.BulkActionsPayloadWithScopes;
+export type BulkActionsResponse = Components.Schemas.BulkActionsResponse;
 export type ErrorResponse = Components.Schemas.ErrorResponse;
 export type FieldsParam = Components.Schemas.FieldsParam;
 export type File = Components.Schemas.File;
@@ -5145,6 +5425,7 @@ export type SimilarSentMessagesRequest = Components.Schemas.SimilarSentMessagesR
 export type SimilarSentMessagesResponse = Components.Schemas.SimilarSentMessagesResponse;
 export type Thread = Components.Schemas.Thread;
 export type ThreadDoneEvent = Components.Schemas.ThreadDoneEvent;
+export type ThreadMoveReason = Components.Schemas.ThreadMoveReason;
 export type ThreadMovedToInboxEvent = Components.Schemas.ThreadMovedToInboxEvent;
 export type ThreadOpenEvent = Components.Schemas.ThreadOpenEvent;
 export type ThreadReplyContext = Components.Schemas.ThreadReplyContext;
@@ -5156,6 +5437,10 @@ export type ThreadSummaryPayload = Components.Schemas.ThreadSummaryPayload;
 export type ThreadTimeline = Components.Schemas.ThreadTimeline;
 export type ThreadTrashedEvent = Components.Schemas.ThreadTrashedEvent;
 export type ThreadUserAssignedEvent = Components.Schemas.ThreadUserAssignedEvent;
+export type ThreadValidationAttachment = Components.Schemas.ThreadValidationAttachment;
+export type ThreadValidationContext = Components.Schemas.ThreadValidationContext;
+export type ThreadValidationEntity = Components.Schemas.ThreadValidationEntity;
+export type ThreadValidationMessage = Components.Schemas.ThreadValidationMessage;
 export type ThreadView = Components.Schemas.ThreadView;
 export type TimelineActor = Components.Schemas.TimelineActor;
 export type TimelineEvent = Components.Schemas.TimelineEvent;

@@ -81,6 +81,33 @@
         "responses": {}
       }
     },
+    "/v1/agents/{agent_id}/agent-auth": {
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getAgentAuth",
+        "responses": {}
+      },
+      "put": {
+        "operationId": "activateAgentAuth",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deactivateAgentAuth",
+        "responses": {}
+      }
+    },
     "/v1/customer-chat": {
       "get": {
         "operationId": "listCustomerChat",
@@ -170,38 +197,50 @@
         "responses": {}
       }
     },
-    "/v1/knowledge/sources": {
+    "/v1/customer-chat/{agent_id}/conversations": {
       "get": {
-        "operationId": "listKnowledgeSources",
-        "responses": {}
-      }
-    },
-    "/v1/knowledge/file-uploads": {
-      "post": {
-        "operationId": "createKnowledgeFileUpload",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {}
+        "operationId": "listCustomerChatConversations",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          },
+          {
+            "name": "has_ticket",
+            "in": "query"
+          },
+          {
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "name": "to",
+            "in": "query"
           }
-        },
+        ],
         "responses": {}
       }
     },
-    "/v1/knowledge/sources/{source_id}": {
-      "parameters": [
-        {
-          "name": "source_id",
-          "in": "path",
-          "required": true
-        }
-      ],
+    "/v1/customer-chat/{agent_id}/conversations/{conversation_id}": {
       "get": {
-        "operationId": "getKnowledgeSource",
-        "responses": {}
-      },
-      "delete": {
-        "operationId": "deleteKnowledgeSource",
+        "operationId": "getCustomerChatConversation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CustomerChatAgentIdPath"
+          },
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true
+          }
+        ],
         "responses": {}
       }
     },
@@ -258,6 +297,10 @@
           {
             "name": "limit",
             "in": "query"
+          },
+          {
+            "name": "cursor",
+            "in": "query"
           }
         ],
         "responses": {}
@@ -295,6 +338,24 @@
             "name": "execution_id",
             "in": "path",
             "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/executions/{execution_id}/screenshots": {
+      "get": {
+        "operationId": "getExecutionScreenshots",
+        "parameters": [
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false
           }
         ],
         "responses": {}
@@ -462,10 +523,441 @@
         },
         "responses": {}
       }
+    },
+    "/v2/portal/sessions": {
+      "post": {
+        "operationId": "createPortalSession",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PortalDomainQuery"
+          }
+        ],
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listPortalSessions",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PortalDomainQuery"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/sessions/{sessionId}": {
+      "get": {
+        "operationId": "getPortalSession",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PortalDomainQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deletePortalSession",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PortalDomainQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/portal/sessions/{sessionId}/events": {
+      "get": {
+        "operationId": "listPortalSessionEvents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PortalDomainQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "sendPortalSessionEvent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PortalDomainQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/portal/config": {
+      "get": {
+        "operationId": "getPortalChatConfig",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/sessions/uploads": {
+      "post": {
+        "operationId": "createSessionUpload",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/sessions": {
+      "post": {
+        "operationId": "createSession",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "get": {
+        "operationId": "listSessions",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/sessions/{sessionId}": {
+      "get": {
+        "operationId": "getSession",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "renameSession",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSession",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/sessions/{sessionId}/events": {
+      "get": {
+        "operationId": "listSessionEvents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "sendSessionEvent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/sessions/{sessionId}/files/{fileId}": {
+      "get": {
+        "operationId": "getSessionFileUrl",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/sessions/scripts": {
+      "post": {
+        "operationId": "runScript",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/sessions/scripts/{runId}": {
+      "get": {
+        "operationId": "getScriptRun",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScriptRunIdPath"
+          },
+          {
+            "name": "waitMs",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/sessions/scripts/{runId}/apply": {
+      "post": {
+        "operationId": "applyScriptRun",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScriptRunIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/agents/revoke": {
+      "post": {
+        "operationId": "revokeSessionAgents",
+        "responses": {}
+      }
+    },
+    "/v2/internal/sessions": {
+      "post": {
+        "operationId": "createInternalSession",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/internal/sessions/{sessionId}": {
+      "get": {
+        "operationId": "getInternalSession",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/internal/executions": {
+      "post": {
+        "operationId": "createInternalExecution",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/internal/executions/{executionId}/decision": {
+      "post": {
+        "operationId": "decideInternalExecution",
+        "parameters": [
+          {
+            "name": "executionId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v2/internal/portal-chats": {
+      "get": {
+        "operationId": "listInternalPortalChats",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "name": "after_updated_at",
+            "in": "query"
+          },
+          {
+            "name": "after_id",
+            "in": "query"
+          },
+          {
+            "name": "from",
+            "in": "query"
+          },
+          {
+            "name": "to",
+            "in": "query"
+          },
+          {
+            "name": "has_ticket",
+            "in": "query"
+          },
+          {
+            "name": "ids",
+            "in": "query"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v2/internal/portal-chats/{sessionId}": {
+      "get": {
+        "operationId": "getInternalPortalChat",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SessionIdPath"
+          },
+          {
+            "name": "agent_id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {
     "parameters": {
+      "PortalDomainQuery": {
+        "name": "domain",
+        "in": "query",
+        "required": false
+      },
       "CustomerChatAgentIdPath": {
         "name": "agent_id",
         "in": "path",
@@ -475,6 +967,81 @@
         "name": "If-Match",
         "in": "header",
         "required": false
+      },
+      "SessionIdPath": {
+        "name": "sessionId",
+        "in": "path",
+        "required": true
+      },
+      "ScriptRunIdPath": {
+        "name": "runId",
+        "in": "path",
+        "required": true
+      }
+    },
+    "responses": {
+      "SessionsBadRequest": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsUnauthorized": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "PortalScreeningUnavailable": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsNotEnabled": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ScriptsRefused": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "UnattendedRefused": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "ExecutionRefused": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsNotFound": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsConflict": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsPayloadTooLarge": {
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsQuotaExceeded": {
+        "headers": {
+          "retry-after": {}
+        },
+        "content": {
+          "application/json": {}
+        }
+      },
+      "SessionsInternalError": {
+        "content": {
+          "application/json": {}
+        }
       }
     }
   }

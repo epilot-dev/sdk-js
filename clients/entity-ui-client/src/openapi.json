@@ -3,7 +3,7 @@
   "info": {
     "title": "Entity UI API",
     "version": "1.0.0",
-    "description": "Stores the definitions of AI widgets rendered on entity pages.\n\nA widget definition is **immutable** and **content-addressed**: its `ref` is the lowercase hex SHA-256 of the\ndefinition's RFC 8785 (JCS) canonical JSON, scoped to the caller's organization. Storing the same definition\ntwice returns the same `ref`. Definitions are never updated or deleted, so every schema version that ever\nreferenced a `ref` keeps resolving it.\n"
+    "description": "Stores the definitions of AI widgets rendered on entity pages.\n\nA widget definition is **immutable** and **content-addressed**: its `ref` is the lowercase hex SHA-256 of the\ndefinition's RFC 8785 (JCS) canonical JSON, scoped to the organization that stored it. Storing the same\ndefinition twice returns the same `ref`. Definitions are never updated or deleted, so every schema version that\never referenced a `ref` keeps resolving it.\n\nReads act in the organization of the token, or in another organization named by `x-epilot-org-id` when the\ncaller holds an `entity:view` grant there, the way a partner reads the definitions a vendor's shared schema\nreferences. Writes act in the organization of the token only. `x-epilot-org-id` must be an organization id;\nanything else, `*` included, is a `400`.\n"
   },
   "tags": [
     {
@@ -26,7 +26,7 @@
       "put": {
         "operationId": "putWidgetDefinition",
         "summary": "putWidgetDefinition",
-        "description": "Stores a widget definition and returns its `ref`.\n\nThe server canonicalizes the body with RFC 8785 (JCS) and hashes the canonical UTF-8 bytes with SHA-256.\nStoring a definition that already exists in the organization is a no-op that returns `200` with the same\n`ref`; the stored item is never overwritten.\n\nRequires `schema:update` in the organization.\n",
+        "description": "Stores a widget definition and returns its `ref`.\n\nThe server canonicalizes the body with RFC 8785 (JCS) and hashes the canonical UTF-8 bytes with SHA-256.\nStoring a definition that already exists in the organization is a no-op that returns `200` with the same\n`ref`; the stored item is never overwritten.\n\nRequires `schema:update` in the organization of the token. `x-epilot-org-id` naming another organization is\nrefused with `403`.\n",
         "tags": [
           "Widget Definitions"
         ],
@@ -85,7 +85,7 @@
       "get": {
         "operationId": "getWidgetDefinition",
         "summary": "getWidgetDefinition",
-        "description": "Returns a stored widget definition in its canonical form.\n\nThe response never changes for a given `ref`, so it is cacheable forever.\n\nRequires `entity:view` in the organization of the token.\n",
+        "description": "Returns a stored widget definition in its canonical form.\n\nThe response never changes for a given `ref`, so it is cacheable forever.\n\nRequires `entity:view` in the organization the request acts in: the organization of the token, or the one\nnamed by `x-epilot-org-id`, where only the roles the caller holds in that organization count. A caller with\nno `entity:view` there gets `403` whether or not the `ref` exists.\n",
         "tags": [
           "Widget Definitions"
         ],
@@ -97,6 +97,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/WidgetDefinitionRefPathParam"
+          },
+          {
+            "$ref": "#/components/parameters/WidgetDefinitionSchemaQueryParam"
           }
         ],
         "responses": {
@@ -141,6 +144,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
       }
@@ -149,13 +155,18 @@
       "post": {
         "operationId": "batchGetWidgetDefinitions",
         "summary": "batchGetWidgetDefinitions",
-        "description": "Returns up to 20 stored widget definitions by `ref`. Refs that are not stored in the organization are\nlisted in `missing`.\n\nThe limit keeps the largest possible response under Lambda's 6MB synchronous response limit: 20 definitions\nat the 131072-byte canonical cap, with every byte escaped a second time inside the Lambda response.\n\nRequires `entity:view` in the organization of the token.\n",
+        "description": "Returns up to 20 stored widget definitions by `ref`. Refs that are not stored in the organization are\nlisted in `missing`.\n\nThe limit keeps the largest possible response under Lambda's 6MB synchronous response limit: 20 definitions\nat the 131072-byte canonical cap, with every byte escaped a second time inside the Lambda response.\n\nRequires `entity:view` in the organization the request acts in: the organization of the token, or the one\nnamed by `x-epilot-org-id`, where only the roles the caller holds in that organization count.\n",
         "tags": [
           "Widget Definitions"
         ],
         "x-epilot-permissions": [
           {
             "action": "entity:view"
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WidgetDefinitionSchemaQueryParam"
           }
         ],
         "requestBody": {
@@ -213,6 +224,16 @@
         "schema": {
           "$ref": "#/components/schemas/WidgetDefinitionRef"
         }
+      },
+      "WidgetDefinitionSchemaQueryParam": {
+        "name": "schema",
+        "in": "query",
+        "required": false,
+        "description": "Slug of the schema whose widgets reference the requested definitions. Required when `x-epilot-org-id` names\nan organization other than the caller's: the read is then limited to refs the widgets of that schema point\nat, as entity-api returns the schema to the caller, and any other ref is a `403`. Ignored for reads in the\ncaller's own organization.\n",
+        "schema": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$"
+        }
       }
     },
     "responses": {
@@ -267,7 +288,7 @@
         }
       },
       "ServiceUnavailable": {
-        "description": "Some definitions could not be read before the retry budget ran out; the request can be retried",
+        "description": "Some definitions could not be read before the retry budget ran out, or the schema a cross-organization read\nnames could not be read from entity-api; the request can be retried\n",
         "content": {
           "application/json": {
             "schema": {
@@ -296,8 +317,19 @@
         }
       },
       "WidgetDefinition": {
+        "description": "An AI widget definition, version 1 or version 2. Unknown keys are rejected at every level, because any extra\nkey would produce a different `ref` for an otherwise identical definition.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/WidgetDefinitionV1"
+          },
+          {
+            "$ref": "#/components/schemas/WidgetDefinitionV2"
+          }
+        ]
+      },
+      "WidgetDefinitionV1": {
         "type": "object",
-        "description": "Version 1 of an AI widget definition. Unknown keys are rejected at every level, because any extra key would\nproduce a different `ref` for an otherwise identical definition.\n",
+        "description": "Version 1 of an AI widget definition. The widget receives every attribute of every record.",
         "additionalProperties": false,
         "required": [
           "version",
@@ -314,19 +346,13 @@
             ]
           },
           "prompt": {
-            "type": "string",
-            "description": "The admin's own words",
-            "minLength": 1,
-            "maxLength": 4000
+            "$ref": "#/components/schemas/WidgetPrompt"
           },
           "manifest": {
             "$ref": "#/components/schemas/WidgetManifest"
           },
           "html": {
-            "type": "string",
-            "description": "Body fragment rendered inside the sandboxed frame",
-            "minLength": 1,
-            "maxLength": 65536
+            "$ref": "#/components/schemas/WidgetHtml"
           },
           "strings": {
             "$ref": "#/components/schemas/WidgetStrings"
@@ -335,6 +361,53 @@
             "$ref": "#/components/schemas/WidgetSuggestions"
           }
         }
+      },
+      "WidgetDefinitionV2": {
+        "type": "object",
+        "description": "Version 2 of an AI widget definition. The widget receives only the attributes its `manifest.fields` declares,\nplus `_id`, `_schema` and `_title`.\n\nAcross both string tables, the UTF-8 bytes of every key plus every value may total at most 65536 bytes. The\nserver enforces this and answers `400`; JSON Schema has no keyword to express it.\n",
+        "additionalProperties": false,
+        "required": [
+          "version",
+          "prompt",
+          "manifest",
+          "html",
+          "strings"
+        ],
+        "properties": {
+          "version": {
+            "type": "integer",
+            "enum": [
+              2
+            ]
+          },
+          "prompt": {
+            "$ref": "#/components/schemas/WidgetPrompt"
+          },
+          "manifest": {
+            "$ref": "#/components/schemas/WidgetManifestV2"
+          },
+          "html": {
+            "$ref": "#/components/schemas/WidgetHtml"
+          },
+          "strings": {
+            "$ref": "#/components/schemas/WidgetStrings"
+          },
+          "suggestions": {
+            "$ref": "#/components/schemas/WidgetSuggestions"
+          }
+        }
+      },
+      "WidgetPrompt": {
+        "type": "string",
+        "description": "The admin's own words, at most 4000 UTF-16 code units. The server counts code units and answers `400`, because\n`maxLength` counts code points, so a prompt of astral characters passes it at up to 8000 code units.\n",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "WidgetHtml": {
+        "type": "string",
+        "description": "Body fragment rendered inside the sandboxed frame, at most 65536 UTF-8 bytes. The server counts bytes and\nanswers `400`, because `maxLength` counts characters.\n",
+        "minLength": 1,
+        "maxLength": 65536
       },
       "WidgetManifest": {
         "type": "object",
@@ -348,23 +421,53 @@
             "$ref": "#/components/schemas/WidgetRelations"
           },
           "libs": {
-            "type": "array",
-            "description": "Host-injected libraries, `[]` for none",
-            "items": {
-              "type": "string",
-              "enum": [
-                "echarts"
-              ]
-            }
+            "$ref": "#/components/schemas/WidgetLibs"
           },
           "icons": {
-            "type": "array",
-            "description": "Icon names the widget renders",
-            "maxItems": 40,
-            "items": {
-              "type": "string"
-            }
+            "$ref": "#/components/schemas/WidgetIcons"
           }
+        }
+      },
+      "WidgetManifestV2": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "relations",
+          "libs",
+          "fields"
+        ],
+        "properties": {
+          "relations": {
+            "$ref": "#/components/schemas/WidgetRelationsV2"
+          },
+          "libs": {
+            "$ref": "#/components/schemas/WidgetLibs"
+          },
+          "icons": {
+            "$ref": "#/components/schemas/WidgetIcons"
+          },
+          "fields": {
+            "$ref": "#/components/schemas/WidgetFields"
+          }
+        }
+      },
+      "WidgetLibs": {
+        "type": "array",
+        "description": "Host-injected libraries, `[]` for none",
+        "items": {
+          "type": "string",
+          "enum": [
+            "echarts"
+          ]
+        }
+      },
+      "WidgetIcons": {
+        "type": "array",
+        "description": "Icon names the widget renders",
+        "maxItems": 40,
+        "items": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "WidgetRelations": {
@@ -389,7 +492,8 @@
             "type": "array",
             "description": "Related schemas to load; empty means every related schema, and must be empty when mode is none",
             "items": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             }
           },
           "size": {
@@ -423,6 +527,50 @@
             }
           }
         ]
+      },
+      "WidgetRelationsV2": {
+        "description": "Relations of a version 2 definition: `schemas` names every related schema to load, so it must be non-empty\nunless mode is none, and empty when mode is none.\n",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WidgetRelations"
+          },
+          {
+            "anyOf": [
+              {
+                "properties": {
+                  "mode": {
+                    "enum": [
+                      "none"
+                    ]
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "schemas": {
+                    "minItems": 1
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "WidgetFields": {
+        "type": "object",
+        "description": "Maps an entity schema slug to the top-level attributes the widget reads from records of that schema. A record\nwhose schema has no key receives `_id`, `_schema` and `_title` only.\n\nEvery key must be 1 to 128 UTF-16 code units and may not be `__proto__`, and every attribute name at most 128\nUTF-16 code units. The server enforces both and answers `400` naming the offending entry; OpenAPI 3.0 cannot\nconstrain object keys, and `maxLength` counts code points.\n",
+        "maxProperties": 21,
+        "additionalProperties": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        }
       },
       "WidgetStrings": {
         "type": "object",

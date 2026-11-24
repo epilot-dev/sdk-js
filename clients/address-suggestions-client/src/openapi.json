@@ -2,6 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Address Suggestions API",
+    "description": "Api responsible to provide address suggestions and availability checks",
     "version": "1.0.0",
     "termsOfService": "https://epilot.cloud/agb",
     "contact": {
@@ -10,6 +11,12 @@
       "url": "https://help.epilot.cloud"
     }
   },
+  "tags": [
+    {
+      "name": "Addresses API",
+      "description": "Operations related to address suggestions and availability checks"
+    }
+  ],
   "security": [
     {
       "EpilotAuth": []
@@ -19,9 +26,6 @@
     }
   ],
   "servers": [
-    {
-      "url": "https://address-suggestions-api.sls.epilot.io"
-    },
     {
       "url": "https://address-suggestions-api.sls.epilot.io"
     }
@@ -39,7 +43,7 @@
               "type": "string"
             },
             "required": true,
-            "example": 739224
+            "example": "739224"
           },
           {
             "in": "query",
@@ -79,7 +83,7 @@
               "type": "string"
             },
             "description": "postal code search term",
-            "example": 506
+            "example": "506"
           },
           {
             "in": "query",
@@ -92,7 +96,7 @@
           }
         ],
         "operationId": "getAddresses",
-        "summary": "get addresses from file",
+        "summary": "getAddresses",
         "tags": [
           "Addresses API"
         ],
@@ -135,7 +139,7 @@
       "get": {
         "description": "Validates an addresses file, it returns an array of errors if the file is invalid",
         "operationId": "validateAddresses",
-        "summary": "validate addresses file",
+        "summary": "validateAddresses",
         "deprecated": true,
         "tags": [
           "Addresses API"
@@ -179,8 +183,11 @@
                     "value": {
                       "number_of_rules_parsed": 8,
                       "errors": [
-                        "File must be UTF-8 encoded",
-                        "Line 3 - Postal code is missing or invalid"
+                        {
+                          "line": 3,
+                          "msg": "Postal code is missing or invalid",
+                          "data": "50667"
+                        }
                       ]
                     }
                   }
@@ -205,7 +212,7 @@
       "get": {
         "description": "Check the availability of a given address within multiple files",
         "operationId": "checkAvailability",
-        "summary": "Check address availability",
+        "summary": "checkAvailability",
         "tags": [
           "Addresses API"
         ],
@@ -218,7 +225,7 @@
               "type": "string"
             },
             "required": true,
-            "example": 739224
+            "example": "739224"
           },
           {
             "in": "query",
@@ -247,7 +254,7 @@
               "type": "string"
             },
             "description": "postal code",
-            "example": 50667
+            "example": "50667"
           },
           {
             "in": "query",
@@ -267,7 +274,7 @@
               "type": "string"
             },
             "description": "street number",
-            "example": 1
+            "example": "1"
           }
         ],
         "security": [
@@ -314,7 +321,7 @@
       "get": {
         "description": "Validates an addresses file, it returns an array of errors if the file is invalid",
         "operationId": "validateAddressesFile",
-        "summary": "validate addresses file",
+        "summary": "validateAddressesFile",
         "tags": [
           "Addresses API"
         ],
@@ -348,8 +355,11 @@
                     "value": {
                       "number_of_rules_parsed": 8,
                       "errors": [
-                        "File must be UTF-8 encoded",
-                        "Line 3 - Postal code is missing or invalid"
+                        {
+                          "line": 3,
+                          "msg": "Postal code is missing or invalid",
+                          "data": "50667"
+                        }
                       ]
                     }
                   }
@@ -390,7 +400,7 @@
       "address-suggestions": {
         "value": [
           {
-            "postal_code": 10115,
+            "postal_code": "10115",
             "city": "Berlin",
             "street": "Bernauer Str."
           }
@@ -398,31 +408,6 @@
       }
     },
     "schemas": {
-      "AvailabilityLocation": {
-        "type": "object",
-        "properties": {
-          "street": {
-            "type": "string",
-            "description": "The first line of the address. Typically the street address or PO Box number."
-          },
-          "street_number": {
-            "type": "string",
-            "description": "The second line of the address. Typically the number of the apartment, suite, or unit."
-          },
-          "postal_code": {
-            "type": "string",
-            "description": "The postal code for the address."
-          },
-          "city": {
-            "type": "string",
-            "description": "The name of the city, district, village, or town."
-          },
-          "country": {
-            "type": "string",
-            "description": "The name of the country."
-          }
-        }
-      },
       "AvailabilityResult": {
         "type": "object",
         "properties": {

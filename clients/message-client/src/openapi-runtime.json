@@ -58,6 +58,11 @@
             "name": "id",
             "in": "path",
             "required": true
+          },
+          {
+            "name": "redirect",
+            "in": "query",
+            "required": false
           }
         ],
         "responses": {}
@@ -615,6 +620,11 @@
             "name": "id",
             "in": "path",
             "required": true
+          },
+          {
+            "name": "confirmed_warning",
+            "in": "query",
+            "required": false
           }
         ],
         "requestBody": {
@@ -629,6 +639,25 @@
     "/v1/message/threads/{id}/link-suggestions/dismiss": {
       "post": {
         "operationId": "dismissThreadLinkSuggestions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/message/threads/{id}/link-suggestions/restore": {
+      "post": {
+        "operationId": "restoreThreadLinkSuggestions",
         "parameters": [
           {
             "name": "id",

@@ -9,6 +9,10 @@
     {
       "name": "Pipelines",
       "description": "Manage Sandbox Pipelines"
+    },
+    {
+      "name": "Sandbox Requests",
+      "description": "Manage Sandbox Requests"
     }
   ],
   "security": [
@@ -146,7 +150,7 @@
       "get": {
         "operationId": "generatePipelineToken",
         "summary": "generatePipelineToken",
-        "description": "Generate a temporary pipeline access token to access the other org from the pipeline",
+        "description": "Generate a temporary pipeline access token to access the other org from the pipeline\n\nRead-only tokens carry the claim `read_only: true` (enforced by `@epilot/permissions`: only view actions are permitted)\nand expire after 15 minutes.\n\nThe token is never wider than the caller's token: its `read_only`, `anonymize` and `allowed_actions` claims carry over.\n\nAgents (caller token with an `actor` claim) only ever get configuration access to the paired org, like the\nAccess Token API's `config:read` profile: read-only, `allowed_actions` limited to configuration actions\n(plus `configuration_hub:view`), and anonymized. The caller's `actor` claim is copied into the generated token.\n",
         "tags": [
           "Pipelines"
         ],
@@ -157,6 +161,31 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/PipelineId"
+            }
+          },
+          {
+            "name": "read_only",
+            "in": "query",
+            "required": false,
+            "description": "Generate a read-only token (claim `read_only: true`, only view actions permitted, expires after 15 minutes).\n\nForced to `true` when the caller's token is read-only or carries an `actor` claim.\n",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "access_profile",
+            "in": "query",
+            "required": false,
+            "description": "Access the generated token carries, by the Access Token API's profile names:\n- `full` (default): the pipeline's access, narrowed by the caller token's restrictions\n- `read`: read-only\n- `config:read`: read-only, configuration actions only, anonymized\n\nForced to `config:read` when the caller's token carries an `actor` claim (an agent).\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "read",
+                "config:read"
+              ],
+              "default": "full"
             }
           }
         ],
@@ -209,40 +238,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SandboxRequest"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/sandbox/requests": {
-      "get": {
-        "operationId": "listSandboxRequests",
-        "summary": "listSandboxRequests",
-        "description": "List sandbox requests from users",
-        "tags": [
-          "Sandbox Requests"
-        ],
-        "responses": {
-          "200": {
-            "description": "List of sandbox requests made by users",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/SandboxRequest"
-                      }
-                    },
-                    "total": {
-                      "type": "integer",
-                      "example": 1
-                    }
-                  }
                 }
               }
             }
@@ -310,6 +305,22 @@
             "type": "string",
             "format": "date-time",
             "readOnly": true
+          },
+          "managed_by": {
+            "$ref": "#/components/schemas/ManagedBy"
+          },
+          "one_way": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Only the sandbox org can list the pipeline and mint tokens through it (to the production org).\nSet on managed pipelines.\n"
+          },
+          "max_access_profile": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Most access a token minted through the pipeline carries, whatever the caller asks for.\nSet on managed pipelines (`config:read`).\n",
+            "enum": [
+              "config:read"
+            ]
           }
         }
       },
@@ -325,6 +336,37 @@
           {
             "$ref": "#/components/schemas/PipelineItem"
           }
+        ]
+      },
+      "ManagedBy": {
+        "type": "string",
+        "description": "The platform service that manages a pipeline (absent on pipelines an org created)",
+        "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+        "example": "configuration-hub"
+      },
+      "ManagedPipelineRequest": {
+        "type": "object",
+        "properties": {
+          "sandbox_org_id": {
+            "$ref": "#/components/schemas/OrgId"
+          },
+          "sandbox_org_name": {
+            "type": "string"
+          },
+          "production_org_id": {
+            "$ref": "#/components/schemas/OrgId"
+          },
+          "production_org_name": {
+            "type": "string"
+          },
+          "managed_by": {
+            "$ref": "#/components/schemas/ManagedBy"
+          }
+        },
+        "required": [
+          "sandbox_org_id",
+          "production_org_id",
+          "managed_by"
         ]
       },
       "CreatePipelineRequest": {
@@ -373,7 +415,7 @@
           "id": {
             "type": "string",
             "description": "Unique identifier for the request",
-            "example": 12345,
+            "example": "12345",
             "readOnly": true
           },
           "fullname": {
