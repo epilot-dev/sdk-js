@@ -51,6 +51,17 @@
         "responses": {}
       }
     },
+    "/v1/duplicates/resolve": {
+      "post": {
+        "operationId": "resolveDuplicates",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
     "/v1/duplicates/dismiss": {
       "post": {
         "operationId": "dismissDuplicates",
@@ -117,6 +128,138 @@
         "parameters": [
           {
             "name": "schema",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/uniqueness-criteria/{schema}/{id}": {
+      "get": {
+        "operationId": "getUniquenessCriteriaById",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      },
+      "put": {
+        "operationId": "updateUniquenessCriteriaById",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteUniquenessCriteriaById",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/uniqueness-criteria/{schema}/{id}/global": {
+      "post": {
+        "operationId": "setGlobalUniquenessCriteria",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/uniqueness-criteria/{schema}/{id}/usages/{consumer}/{ref}": {
+      "put": {
+        "operationId": "registerUniquenessCriteriaUsage",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "consumer",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "ref",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "unregisterUniquenessCriteriaUsage",
+        "parameters": [
+          {
+            "name": "schema",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "consumer",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "ref",
             "in": "path",
             "required": true
           }
