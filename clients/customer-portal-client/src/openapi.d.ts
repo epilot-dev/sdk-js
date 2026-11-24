@@ -10177,7 +10177,8 @@ declare namespace Components {
             hidden_for_operator?: "and" | "or";
         }
         /**
-         * One column of the portal data export CSV.
+         * One column of the portal data export. Send the column value as `template`; `source` is the older single-attribute shape, still accepted.
+         *
          */
         export interface PortalDataExportColumn {
             /**
@@ -10199,10 +10200,10 @@ declare namespace Components {
                 [name: string]: string;
             };
             /**
-             * Where the value comes from: relation hops from the anchor entity plus the attribute to read on the resolved entity. An empty path means the anchor itself.
+             * Older single-attribute shape (use `template`): relation hops from the anchor entity plus the attribute to read on the resolved entity. An empty path means the anchor itself.
              *
              */
-            source: {
+            source?: {
                 /**
                  * Relation hops from the anchor entity (max 3).
                  * example:
@@ -10222,6 +10223,17 @@ declare namespace Components {
                  */
                 address_field?: "full" | "street" | "street_number" | "postal_code" | "city" | "additional_info" | "country";
             };
+            /**
+             * The column value as a Handlebars template, rendered per row with the portal's block template engine and helpers, e.g. `{{#if contract.customer.name}}{{contract.customer.name}}{{else}}{{contract.customer.first_name}}{{/if}}`. Variables are anchor-relative paths with up to 3 relation hops; a relation resolves to its first entity, and block-style indices (`contract.customer.0.name`) are accepted. A template that is exactly one variable is read as that attribute and can use any `formatter`; any other template renders as text.
+             *
+             * example:
+             * {{contract.customer.last_name}}
+             */
+            template?: string;
+            /**
+             * Address part for the `address` formatter on a single-variable template.
+             */
+            address_field?: "full" | "street" | "street_number" | "postal_code" | "city" | "additional_info" | "country";
             formatter?: "text" | "date" | "money_cents" | "enum" | "address";
             /**
              * Localized value maps for the enum formatter, keyed by language then raw value.
@@ -15806,7 +15818,11 @@ declare namespace Paths {
             /**
              * Ordered column definitions; order is the CSV column order.
              */
-            columns: /* One column of the portal data export CSV. */ Components.Schemas.PortalDataExportColumn[];
+            columns: /**
+             * One column of the portal data export. Send the column value as `template`; `source` is the older single-attribute shape, still accepted.
+             *
+             */
+            Components.Schemas.PortalDataExportColumn[];
             expand_over?: string;
             /**
              * example:

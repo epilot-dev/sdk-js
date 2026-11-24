@@ -22397,11 +22397,10 @@
       },
       "PortalDataExportColumn": {
         "type": "object",
-        "description": "One column of the portal data export CSV.",
+        "description": "One column of the portal data export. Send the column value as `template`; `source` is the older single-attribute shape, still accepted.\n",
         "required": [
           "key",
-          "header",
-          "source"
+          "header"
         ],
         "properties": {
           "key": {
@@ -22422,7 +22421,7 @@
           },
           "source": {
             "type": "object",
-            "description": "Where the value comes from: relation hops from the anchor entity plus the attribute to read on the resolved entity. An empty path means the anchor itself.\n",
+            "description": "Older single-attribute shape (use `template`): relation hops from the anchor entity plus the attribute to read on the resolved entity. An empty path means the anchor itself.\n",
             "required": [
               "attribute"
             ],
@@ -22456,6 +22455,25 @@
                 ]
               }
             }
+          },
+          "template": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "The column value as a Handlebars template, rendered per row with the portal's block template engine and helpers, e.g. `{{#if contract.customer.name}}{{contract.customer.name}}{{else}}{{contract.customer.first_name}}{{/if}}`. Variables are anchor-relative paths with up to 3 relation hops; a relation resolves to its first entity, and block-style indices (`contract.customer.0.name`) are accepted. A template that is exactly one variable is read as that attribute and can use any `formatter`; any other template renders as text.\n",
+            "example": "{{contract.customer.last_name}}"
+          },
+          "address_field": {
+            "type": "string",
+            "description": "Address part for the `address` formatter on a single-variable template.",
+            "enum": [
+              "full",
+              "street",
+              "street_number",
+              "postal_code",
+              "city",
+              "additional_info",
+              "country"
+            ]
           },
           "formatter": {
             "type": "string",
