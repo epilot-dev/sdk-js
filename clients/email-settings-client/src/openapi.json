@@ -3447,6 +3447,11 @@
           "connected_by_user_id": {
             "type": "string",
             "description": "User who connected this mailbox"
+          },
+          "mailbox_unavailable_since": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Set when Microsoft Graph can no longer reach the mailbox, for example because it was\ndeactivated, unlicensed or deleted in the Microsoft 365 tenant. New emails are not synced\nwhile it is set. Cleared automatically once the mailbox is reachable again.\n"
           }
         }
       },
