@@ -512,6 +512,19 @@
         "responses": {}
       }
     },
+    "/v2/users/me/organizations/{org_id}/leave": {
+      "post": {
+        "operationId": "leaveOrganization",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/users/me": {
       "get": {
         "operationId": "getMe",

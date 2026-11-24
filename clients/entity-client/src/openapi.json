@@ -3,7 +3,7 @@
   "info": {
     "title": "Entity API",
     "version": "2.10.0",
-    "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n"
+    "description": "Flexible data layer for epilot Entities.\n\nUse this API configure and access your business objects like Contacts, Opportunities and Products.\n\n[Feature Documentation](https://docs.epilot.io/docs/entities/flexible-entities)\n\n## Consistency\n\nEntities are written to a primary store and indexed for search afterwards.\n\n- Reads by id (`getEntity`) always return the latest stored state.\n- Search and list (`searchEntities`, `listEntities`) read from the search index. By default a write is\n  searchable when the write call returns; with `?async=true` it becomes searchable eventually.\n- Data of related entities inside search documents is refreshed asynchronously.\n\nSee [Search Indexing Guarantees](https://docs.epilot.io/docs/entities/indexing-guarantees).\n"
   },
   "tags": [
     {
@@ -1110,7 +1110,7 @@
           "window": 60,
           "pool": "search"
         },
-        "description": "Search for entities. Supports ordering and pagination. [Lucene query syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) supported for complex querying.\n\nPassing comma-separated `x-epilot-org-id` is supported for cross-org entity search.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  },\n  \"addresses\": {\n    \"$relation_ref\": [\n      { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ],\n  \"addresses\": [\n    {\n      \"$relation_ref\": { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      \"_id\": \"123\",\n      \"address\": \"address 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation_ref\": { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n      \"_id\": \"234\",\n      \"address\": \"address 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
+        "description": "Search for entities. Supports ordering and pagination. [Lucene query syntax](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax) supported for complex querying.\n\nPassing comma-separated `x-epilot-org-id` is supported for cross-org entity search.\n\n## Consistency\n\nReads from the search index, not from the primary store.\n\n- Entities written with default settings are searchable when the write call returns.\n- Entities written with `?async=true` become searchable eventually, usually within seconds.\n- Matching and sorting on data of related entities can lag behind, as related entities are re-indexed asynchronously.\n- Only attributes defined in the entity schema are indexed. Other properties are stored but cannot be searched, filtered or sorted.\n- The query, sort and `hits` are evaluated against the index; the entities in `results` are loaded from the primary store, so they can be newer than the state that matched.\n- `hits` is the exact number of matches.\n\nTo read an entity you just wrote, use `getEntity` with its id.\nSee [Search Indexing Guarantees](https://docs.epilot.io/docs/entities/indexing-guarantees).\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  },\n  \"addresses\": {\n    \"$relation_ref\": [\n      { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ],\n  \"addresses\": [\n    {\n      \"$relation_ref\": { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      \"_id\": \"123\",\n      \"address\": \"address 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation_ref\": { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n      \"_id\": \"234\",\n      \"address\": \"address 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
         "tags": [
           "Entities"
         ],
@@ -1160,7 +1160,7 @@
           "window": 60,
           "pool": "search"
         },
-        "description": "List entities that meet the specified conditions.\n\nSupports the same options as entity search but utilizes filtering using a subset of [Elastic Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html) and does not perform scoring.\n",
+        "description": "List entities that meet the specified conditions.\n\nSupports the same options as entity search but utilizes filtering using a subset of [Elastic Query DSL](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html) and does not perform scoring.\n\n## Consistency\n\nReads from the search index, not from the primary store.\n\n- Entities written with default settings are searchable when the write call returns.\n- Entities written with `?async=true` become searchable eventually, usually within seconds.\n- Matching and sorting on data of related entities can lag behind, as related entities are re-indexed asynchronously.\n- Only attributes defined in the entity schema are indexed. Other properties are stored but cannot be searched, filtered or sorted.\n- The query, sort and `hits` are evaluated against the index; the entities in `results` are loaded from the primary store, so they can be newer than the state that matched.\n- `hits` is the exact number of matches.\n\nTo read an entity you just wrote, use `getEntity` with its id.\nSee [Search Indexing Guarantees](https://docs.epilot.io/docs/entities/indexing-guarantees).\n",
         "tags": [
           "Entities"
         ],
@@ -1483,7 +1483,7 @@
           }
         ],
         "summary": "upsertEntity",
-        "description": "Create or update an entity using `unique_key`\n\n- If no entities are matched, a new entity is created.\n- If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityCreated` or `EntityUpdated`\n",
+        "description": "Create or update an entity using `unique_key`\n\n- If no entities are matched, a new entity is created.\n- If exactly one entity is matched, a `PATCH`-style update is applied to the existing entity.\n\n## Consistency\n\nExisting entities are matched by `unique_key` through the search index, so uniqueness is not enforced transactionally.\nConcurrent upserts with the same key, or an upsert right after an `?async=true` write of the same key, can create duplicates.\nRun upserts for the same key sequentially and without `?async=true` to avoid this.\n\n## Activity\n\nIf no `activity_id` query parameter is provided, implicitly creates Activity of type `EntityCreated` or `EntityUpdated`\n",
         "tags": [
           "Entities"
         ],
@@ -1599,7 +1599,7 @@
           }
         ],
         "summary": "getEntityV2",
-        "description": "Gets Entity by id.\n\nSupports `hydrate` and `fields` parameters to control the shape of the response.\n",
+        "description": "Gets Entity by id.\n\nSupports `hydrate` and `fields` parameters to control the shape of the response.\n\nReads from the primary store: always returns the latest stored state, independent of search indexing.\n",
         "tags": [
           "Entities"
         ],
@@ -1715,7 +1715,7 @@
           }
         ],
         "summary": "reindexEntity",
-        "description": "Triggers a reindex for the Entity for search.\n",
+        "description": "Triggers a reindex for the Entity for search.\n\nSynchronously re-indexes the entity from its latest stored state and queues a re-index of all entities related to it.\nUse it to repair an entity that is out of date in `searchEntities` / `listEntities`.\n",
         "tags": [
           "Entities"
         ],
@@ -1770,7 +1770,7 @@
           }
         ],
         "summary": "getEntity",
-        "description": "Gets Entity and relations by id.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  },\n  \"addresses\": {\n    \"$relation_ref\": [\n      { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ],\n  \"addresses\": [\n    {\n      \"$relation_ref\": { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      \"_id\": \"123\",\n      \"address\": \"address 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation_ref\": { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n      \"_id\": \"234\",\n      \"address\": \"address 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
+        "description": "Gets Entity and relations by id.\n\nReads from the primary store: always returns the latest stored state, independent of search indexing.\n\n## Relations\n\nWhen `hydrate=true`, relation attributes are replaced in-place with nested entity values.\n\nExample:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": {\n    \"$relation\": [\n      { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n    ]\n  },\n  \"addresses\": {\n    \"$relation_ref\": [\n      { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n    ]\n  }\n}\n```\n\nBecomes:\n```json\n{\n  \"_id\": \"123\",\n  \"name\": \"parent\",\n  \"_tags\": [\"parent\"],\n  \"contacts\": [\n    {\n      \"$relation\": { \"entity_id\": \"456\", \"_tags\": [\"primary\"] },\n      \"_id\": \"456\",\n      \"name\": \"child 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation\": { \"entity_id\": \"789\", \"_tags\": [\"secondary\"] },\n      \"_id\": \"789\",\n      \"name\": \"child 2\",\n      \"_tags\": [\"child\"]\n    }\n  ],\n  \"addresses\": [\n    {\n      \"$relation_ref\": { \"entity_id\": \"123\", \"_tags\": [\"primary\"], \"path\": \"address.0\" },\n      \"_id\": \"123\",\n      \"address\": \"address 1\",\n      \"_tags\": [\"child\"]\n    },\n    {\n      \"$relation_ref\": { \"entity_id\": \"234\", \"_tags\": [\"secondary\"], \"path\": \"address.0\" },\n      \"_id\": \"234\",\n      \"address\": \"address 2\",\n      \"_tags\": [\"child\"]\n    }\n  ]\n}\n```\n",
         "tags": [
           "Entities"
         ],
@@ -3008,7 +3008,7 @@
           }
         ],
         "summary": "getRelationsV2",
-        "description": "Returns 1st level direct relations for an entity with pagination.\n\nYou can control whether to return the full entity or just the relation item with the `?hydrate` query param.\n\nReverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.\n",
+        "description": "Returns 1st level direct relations for an entity with pagination.\n\nYou can control whether to return the full entity or just the relation item with the `?hydrate` query param.\n\nReverse relations i.e. entities referring to this entity are included with the `?include_reverse` query param.\n\nReads from the search index: relations written with `?async=true` appear eventually.\n",
         "tags": [
           "Relations"
         ],
@@ -4776,7 +4776,7 @@
               "description": "ISO 8601 timestamp to filter jobs created after this time (e.g., 2023-01-01T00:00:00Z).",
               "type": "string",
               "format": "date-time",
-              "example": "2023-01-01T00:00:00Z"
+              "example": "2023-01-01T00:00:00.000Z"
             }
           },
           {
@@ -7811,7 +7811,7 @@
           },
           {
             "type": "object",
-            "description": "Portal role of a portal user. The value is a portal role slug (e.g. `default_end_customer_portal_role`).\nAn empty value means the portal's default role is used.\n",
+            "description": "Portal roles of a portal user. The value is a list of portal role slugs (e.g. `[\"b2b_admin\", \"b2b_billing\"]`);\na single slug string is also accepted. The user's permissions are the union of all their roles.\nAn empty value means the portal's default role is used.\n",
             "properties": {
               "type": {
                 "type": "string",
@@ -8891,6 +8891,11 @@
                   "type": "string",
                   "description": "The pricing-tier settings key an organisation must have enabled to use this widget. Omit for widgets available to everyone. Resolved against `GET /v2/pricing-tiers/me` as `override_settings[key].enabled ?? settings[key].enabled`. Note this is commercial packaging enforced in the UI, not a security control — the key must also be added to the pricing tier settings list in epilot-admin-portal, or it can never be switched on for a tier.",
                   "example": "entity_address_maps"
+                },
+                "insert_after": {
+                  "type": "string",
+                  "description": "The `field` of the table column this column goes right after, e.g. the attribute it describes. Only meaningful on the `EntityTable:Column` hook. Without it the column goes to the end of the table (or, with `order`, to the start). It only shapes the default column layout: a saved table view keeps its own column order and adds a column it doesn't know yet hidden, like any new column, for the user to switch on. Ignored when no column has that field.",
+                  "example": "status"
                 }
               },
               "required": [
@@ -10028,7 +10033,7 @@
             "type": "integer",
             "minimum": 0,
             "default": 0,
-            "description": "The offset from which to start the search results.\nOnly one of `from` or `search_after` should be used.\n"
+            "description": "The offset from which to start the search results.\nOnly one of `from` or `search_after` should be used.\n\n`from + size` is limited to 25000. A larger `from` is clamped to the last available window instead of\nreturning an error. Use `search_after` to paginate deeper.\n"
           },
           "size": {
             "type": "integer",
@@ -10072,7 +10077,7 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 60,
-            "description": "A TTL (in seconds) that specifies how long the context should be maintained.\nDefaults to 30 seconds; configurable up to 60 seconds to prevent abuse.\nA value of 0 can be provided the close the context after the query.\nDefaults to none.\n"
+            "description": "A TTL (in seconds) that specifies how long the context should be maintained.\nConfigurable up to 60 seconds to prevent abuse.\nA value of 0 can be provided the close the context after the query.\nDefaults to none.\n\nA stable query reads from a snapshot of the index taken at the first request: paginating it with\n`stable_query_id` and `search_after` returns every match exactly once, and writes made after the\nfirst request are not visible. Passing `stable_for` again extends the context. An expired context\nfails with `400`.\n"
           },
           "stable_query_id": {
             "type": "string",
@@ -12225,7 +12230,7 @@
       },
       "AsyncOperationQueryParam": {
         "name": "async",
-        "description": "Don't wait for updated entity to become available in Search API. Useful for large migrations",
+        "description": "Don't wait for updated entity to become available in Search API. Useful for large migrations\n\n- `false` (default): the entity is indexed before the call returns and is immediately visible in `searchEntities` and `listEntities`.\n- `true`: the call returns once the entity is stored. It is indexed in the background and becomes searchable eventually,\n  usually within seconds, without a guaranteed upper bound. Events triggered by the write (webhooks, automations) may be delivered before the entity is searchable.\n\nThe entity is readable by id (`getEntity`) right away in both modes.\n",
         "in": "query",
         "required": false,
         "schema": {

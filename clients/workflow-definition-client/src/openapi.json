@@ -347,7 +347,7 @@
       "get": {
         "operationId": "listFlowTemplates",
         "summary": "listFlowTemplates",
-        "description": "List all Flow Templates for a customer. Optionally, you can filter flow templates by trigger values.",
+        "description": "List all Flow Templates for a customer. Optionally, you can filter flow templates by trigger values. A stored template that cannot be read is left out and logged.",
         "tags": [
           "Flows V2"
         ],
@@ -535,8 +535,28 @@
               }
             }
           },
+          "413": {
+            "description": "The flow template is too large to store (FLOW_TEMPLATE_TOO_LARGE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Other errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "With flow versioning on, the trigger automations could not be written in time. The flow is not saved. Some of its trigger automations may be written, the same request again repairs that.",
             "content": {
               "application/json": {
                 "schema": {
@@ -552,7 +572,7 @@
       "post": {
         "operationId": "searchFlowTemplates",
         "summary": "searchFlowTemplates",
-        "description": "Search for flow templates by name, trigger type, enabled status, and more.",
+        "description": "Search for flow templates by name, trigger type, enabled status, and more. A stored template that cannot be read is left out and logged.",
         "tags": [
           "Flows V2"
         ],
@@ -630,6 +650,9 @@
           },
           {
             "$ref": "#/components/parameters/SkipHealParam"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeRevisionParam"
           }
         ],
         "responses": {
@@ -674,7 +697,7 @@
             }
           },
           "500": {
-            "description": "Other errors",
+            "description": "Other errors, including a stored template that cannot be read (FLOW_TEMPLATE_UNREADABLE)",
             "content": {
               "application/json": {
                 "schema": {
@@ -771,8 +794,28 @@
               }
             }
           },
+          "413": {
+            "description": "The flow template is too large to store (FLOW_TEMPLATE_TOO_LARGE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Internal server error",
+            "description": "Internal server error, including a stored template that cannot be read (FLOW_TEMPLATE_UNREADABLE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "With flow versioning on, the trigger automations could not be written in time. The flow is not saved. Some of its trigger automations may be written, the same request again repairs that.",
             "content": {
               "application/json": {
                 "schema": {
@@ -827,6 +870,366 @@
           },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/templates/{flowId}/revisions": {
+      "post": {
+        "operationId": "createFlowRevision",
+        "summary": "createFlowRevision",
+        "description": "Save a flow as a new revision on top of its latest one. The published flow does not change.\nThe revision holds `enabled` and `keep_task_automations_in_sync` like every other field of the flow.\nThe body is checked like an update. A save that changes nothing returns the latest revision with 200.\nAnswers 404 while flow versioning is off for the organization.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "schema": {
+              "$ref": "#/components/schemas/FlowTemplateId"
+            },
+            "required": true,
+            "description": "Unique identifier of the flow template."
+          },
+          {
+            "$ref": "#/components/parameters/EnforceLimitsParam"
+          },
+          {
+            "$ref": "#/components/parameters/ClientSupportsAdvLoopsParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFlowRevisionReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Nothing changed. The latest revision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowRevision"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The saved revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowRevision"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation errors, a workflow that is not a flow (FLOW_VERSIONING_UNSUPPORTED_VERSION), or a flow id that cannot have versions (FLOW_VERSIONING_UNSUPPORTED_FLOW_ID)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing permission",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Flow template not found, or flow versioning is off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The latest revision is not `parent_revision_id`: `message` is a JSON string with `code` FLOW_REVISION_CONFLICT and `latest_revision`. Or the flow was changed by another request while it was written (FLOW_VERSIONING_WRITE_CONFLICT).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The flow template is too large to store (FLOW_TEMPLATE_TOO_LARGE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listFlowRevisions",
+        "summary": "listFlowRevisions",
+        "description": "List the revisions of a flow, newest first, without their content.\nAnswers 404 while flow versioning is off for the organization.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "schema": {
+              "$ref": "#/components/schemas/FlowTemplateId"
+            },
+            "required": true,
+            "description": "Unique identifier of the flow template."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            },
+            "description": "Number of revisions per page. Not refused when out of range. Above 100 gives 100, any other invalid value gives 25."
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The `next_cursor` of the previous page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of revisions and the pointers of the flow",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowRevisionList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid cursor, a workflow that is not a flow (FLOW_VERSIONING_UNSUPPORTED_VERSION), or a flow id that cannot have versions (FLOW_VERSIONING_UNSUPPORTED_FLOW_ID)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing permission",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Flow template not found, or flow versioning is off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/templates/{flowId}/revisions/{revisionId}": {
+      "get": {
+        "operationId": "getFlowRevision",
+        "summary": "getFlowRevision",
+        "description": "Get one revision of a flow with its content. `base` in place of the id returns the base revision,\nalso after the flow was deleted.\nAnswers 404 while flow versioning is off for the organization.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "schema": {
+              "$ref": "#/components/schemas/FlowTemplateId"
+            },
+            "required": true,
+            "description": "Unique identifier of the flow template."
+          },
+          {
+            "$ref": "#/components/parameters/FlowRevisionIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowRevision"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A workflow that is not a flow (FLOW_VERSIONING_UNSUPPORTED_VERSION), or a flow id that cannot have versions (FLOW_VERSIONING_UNSUPPORTED_FLOW_ID)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing permission",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Revision not found, or flow versioning is off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/flows/templates/{flowId}/publish": {
+      "post": {
+        "operationId": "publishFlowRevision",
+        "summary": "publishFlowRevision",
+        "description": "Make a revision the published flow. Publishing an older revision rolls the flow back to it.\nThe flow takes `enabled` and `keep_task_automations_in_sync` of the revision, and its automations\nfollow `enabled` as on an update.\nAnswers 404 while flow versioning is off for the organization.\n",
+        "tags": [
+          "Flows V2"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "flowId",
+            "schema": {
+              "$ref": "#/components/schemas/FlowTemplateId"
+            },
+            "required": true,
+            "description": "Unique identifier of the flow template."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishFlowRevisionReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The published revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlowRevision"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation errors, a trigger automation that automation-api refuses (`message` starts with \"Trigger automation could not be saved\"), a workflow that is not a flow (FLOW_VERSIONING_UNSUPPORTED_VERSION), or a flow id that cannot have versions (FLOW_VERSIONING_UNSUPPORTED_FLOW_ID)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Missing permission",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Flow template or revision not found, or flow versioning is off",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The published revision is not `expected_published_revision_id`, or the flow was saved while versioning was off and no `expected_published_revision_id` names that save: `message` is a JSON string with `code` FLOW_PUBLISH_CONFLICT and `published_revision_id`. Or another request is writing the flow, or a trigger automation changed during the publish (FLOW_VERSIONING_WRITE_CONFLICT). Nothing was published.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The flow template is too large to store (FLOW_TEMPLATE_TOO_LARGE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The trigger automations could not be written in time. Nothing was published. Some of the trigger automations may be written, publishing again repairs that.",
             "content": {
               "application/json": {
                 "schema": {
@@ -898,8 +1301,18 @@
               }
             }
           },
+          "413": {
+            "description": "The flow template is too large to store (FLOW_TEMPLATE_TOO_LARGE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
+          },
           "500": {
-            "description": "Internal server error",
+            "description": "Internal server error, including a stored template that cannot be read (FLOW_TEMPLATE_UNREADABLE)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1982,6 +2395,16 @@
         "responses": {
           "201": {
             "description": "closing reasons are set for this workflow"
+          },
+          "409": {
+            "description": "The id is a compressed flow template (COMPRESSED_FLOW_TEMPLATE). Its closing reasons are set by updating the flow template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResp"
+                }
+              }
+            }
           }
         }
       }
@@ -2008,6 +2431,25 @@
           "default": false
         },
         "description": "When true, size/count limit violations (max incoming edges per task, max branches, max entity-sync rules, ...) are enforced as 400 errors. Used by the flow-builder UI for interactive authoring. On update, pre-existing violations are tolerated as long as the request does not worsen them. When false or absent (default for API/system callers such as blueprints, configuration hub and snapshots), limit violations are accepted and returned as `limit_warnings`. Structural errors are always enforced regardless of this flag."
+      },
+      "IncludeRevisionParam": {
+        "in": "query",
+        "name": "include_revision",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": false
+        },
+        "description": "When true, the response also has `revision_id`, `published_at` and `published_by`. They are left out while flow versioning is off for the organization, and for a flow that was saved without a publish since."
+      },
+      "FlowRevisionIdParam": {
+        "in": "path",
+        "name": "revisionId",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Id of the revision, or `base` for the base revision of the flow."
       },
       "SkipHealParam": {
         "in": "query",
@@ -2109,6 +2551,9 @@
                 }
               ]
             }
+          },
+          "assignee_sync": {
+            "$ref": "#/components/schemas/AssigneeSync"
           },
           "available_in_ecp": {
             "type": "boolean",
@@ -2299,10 +2744,184 @@
                 "items": {
                   "$ref": "#/components/schemas/ClosingReason"
                 }
+              },
+              "revision_id": {
+                "type": "string",
+                "readOnly": true,
+                "description": "The revision this content was published from. Returned only with `include_revision=true`. Ignored in requests."
+              },
+              "published_at": {
+                "type": "string",
+                "readOnly": true,
+                "description": "ISO timestamp of when the content was published. Returned only with `include_revision=true`. Ignored in requests."
+              },
+              "published_by": {
+                "type": "string",
+                "readOnly": true,
+                "description": "User id of who published it, or `system`. Returned only with `include_revision=true`. Ignored in requests."
               }
             }
           }
         ]
+      },
+      "FlowRevisionMetadata": {
+        "type": "object",
+        "description": "A revision of a flow, without its content.",
+        "required": [
+          "revision_id",
+          "created_at",
+          "created_by",
+          "source",
+          "is_base"
+        ],
+        "properties": {
+          "revision_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "User id, or `system`."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "builder",
+              "api",
+              "blueprint_sync",
+              "system"
+            ],
+            "description": "What saved the revision."
+          },
+          "parent_revision_id": {
+            "type": "string",
+            "description": "The latest revision when this one was saved."
+          },
+          "is_base": {
+            "type": "boolean",
+            "description": "The revision that recorded the flow as it was before it had revisions."
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Set once the revision was published. The time of its last publish."
+          },
+          "published_by": {
+            "type": "string",
+            "description": "User id, or `system`."
+          }
+        }
+      },
+      "FlowRevision": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FlowRevisionMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "flow"
+            ],
+            "properties": {
+              "flow": {
+                "$ref": "#/components/schemas/FlowTemplate"
+              }
+            }
+          }
+        ]
+      },
+      "FlowRevisionList": {
+        "type": "object",
+        "required": [
+          "results",
+          "meta"
+        ],
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowRevisionMetadata"
+            }
+          },
+          "next_cursor": {
+            "type": "string",
+            "description": "Present when there are older revisions."
+          },
+          "meta": {
+            "type": "object",
+            "description": "The revisions the flow points to. Empty for a flow without revisions.",
+            "properties": {
+              "latest_revision_id": {
+                "type": "string"
+              },
+              "published_revision_id": {
+                "type": "string",
+                "description": "Left out while the flow was saved without a publish since."
+              },
+              "previous_published_revision_id": {
+                "type": "string",
+                "description": "The revision that was published before the current one."
+              },
+              "base_revision_id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "CreateFlowRevisionReq": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FlowTemplate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "parent_revision_id": {
+                "type": "string",
+                "description": "The latest revision the client knows. May be left out while the latest revision is the base revision. The save is refused with 409 when another revision is the latest."
+              }
+            }
+          }
+        ]
+      },
+      "PublishFlowRevisionReq": {
+        "type": "object",
+        "required": [
+          "revision_id"
+        ],
+        "properties": {
+          "revision_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "When left out, the revision keeps its name. An unnamed one is named after the time of the publish."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "expected_published_revision_id": {
+            "type": "string",
+            "description": "The revision the client believes is published. The publish is refused with 409 when it is another one."
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Publish also when `expected_published_revision_id` is not the published revision."
+          }
+        }
       },
       "Version": {
         "type": "string",
@@ -2402,7 +3021,7 @@
               },
               "additionalProperties": true
             },
-            "description": "Transient field. Trigger configurations for creating or updating the trigger automation flow. Each item follows the automation API trigger schema. Processed by the backend during create/update and stripped before storage.\n"
+            "description": "Trigger configurations for creating or updating the trigger automation flow. Each item follows the automation API trigger schema. Processed by the backend during create/update. Stored on the trigger, on the flow and in its revisions, while flow versioning is on for the organization, otherwise stripped before storage. Only the `flow` of a flow revision returns it.\n"
           },
           "duplicated_automation_id": {
             "type": "string",
@@ -2505,6 +3124,11 @@
           },
           "enabled": {
             "type": "boolean"
+          },
+          "manual_trigger_entity_schema": {
+            "type": "string",
+            "description": "Only flows that can be started by hand on entities of this schema:\na manual trigger, primary or additional, whose entity_schema is this\nslug (the rule the flows sidebar and the bulk start list flows by).\n",
+            "example": "opportunity"
           },
           "from": {
             "type": "integer"
@@ -2653,6 +3277,28 @@
             "type": "string",
             "description": "Transient field. When present, the backend clones the automation flow referenced by this ID and assigns the new flow_id to the task. Used when duplicating an automation task to give it an independent automation. When the referenced automation is not one the stored flow already uses (always the case on create, e.g. tasks copied from flows merged into a new flow), the clone is born like a new task automation of this flow (see keep_task_automations_in_sync) and without the source's disable_details, blueprint membership (_manifest), protection or run count; a copy within the flow keeps the source's state. Stripped before storage.\n"
           },
+          "action_definition": {
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The action type (e.g. send-email, trigger-workflow)"
+              },
+              "config": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Action-specific configuration"
+              }
+            },
+            "additionalProperties": true,
+            "description": "The task's automation action, in the shape of `action_config`, when the automation `flow_id` points to is one action without a condition, schedule or loop. Set from that automation on every save. In a request, a definition that differs from the stored one is written to the task's automation, which is created from it when the task has none or it no longer exists. One equal to the stored definition is ignored. `action_config` has priority."
+          },
+          "legacy_definition": {
+            "$ref": "#/components/schemas/LegacyAutomationDefinition"
+          },
           "input_context": {
             "$ref": "#/components/schemas/AutomationInputContext"
           },
@@ -2692,6 +3338,44 @@
           }
         }
       },
+      "LegacyAutomationDefinition": {
+        "type": "object",
+        "description": "The task's automation when it is more than one plain action: several actions, or conditions, schedules or loops. Set from the automation `flow_id` points to on every save. Read from a request as described on `action_definition`.",
+        "properties": {
+          "actions": {
+            "type": "array",
+            "description": "The automation's actions (automation API `AnyAction`).",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "conditions": {
+            "type": "array",
+            "description": "The automation's conditions (automation API `ActionCondition`).",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "schedules": {
+            "type": "array",
+            "description": "The automation's schedules (automation API `ActionSchedule`).",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "loops": {
+            "type": "array",
+            "description": "The automation's loops (automation API `AutomationLoop`).",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
       "AutomationInputContext": {
         "type": "object",
         "description": "Optional. Source of the entity fed into this automation task. If omitted, the run's current main context is used.\n",
@@ -2704,9 +3388,10 @@
             "enum": [
               "main_context",
               "task",
-              "trigger"
+              "trigger",
+              "linked_entity"
             ],
-            "description": "`main_context` = the run's current main context (same as omitting `input_context`). It moves when a task promotes its output to main context. `task` = entity produced by an upstream task in the graph. `trigger` with `trigger_id` = that configured trigger's entity. The Flow Builder offers it while the task is in that one trigger's own sub-flow, before it merges with another trigger's path. Without `trigger_id` it is legacy and resolves like `main_context`.\n"
+            "description": "`main_context` = the run's current main context (same as omitting `input_context`). It moves when a task promotes its output to main context. `task` = entity produced by an upstream task in the graph. `trigger` with `trigger_id` = that configured trigger's entity. The Flow Builder offers it while the task is in that one trigger's own sub-flow, before it merges with another trigger's path. Without `trigger_id` it is legacy and resolves like `main_context`. `linked_entity` with `rule_id` and `schema` = an additional entity: the entity a display rule of the flow's Contexts settings finds by relation, a rule the workflow uses (`context_settings.displays[].id` with `attach_to_contexts`), like an `EvaluationSource` with `origin_type: linked_entity`. Resolved from the run's main context when the task runs. It needs exactly one entity: a rule matching none or several leaves the task without an input entity, so it fails; it never falls back to the main context, an entity of another schema.\n"
           },
           "task_id": {
             "type": "string",
@@ -2715,6 +3400,14 @@
           "trigger_id": {
             "type": "string",
             "description": "Only read when source is `trigger`. Pins the input to one specific configured trigger (primary or additional) by its id. When absent, the input resolves like `main_context`.\n"
+          },
+          "rule_id": {
+            "type": "string",
+            "description": "Required when source is `linked_entity`. The id of a display rule of the flow's Contexts settings (`context_settings.displays[].id`) that has `attach_to_contexts`.\n"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Required when source is `linked_entity`. The rule's `entity_schema`.\n"
           },
           "with_relations": {
             "type": "boolean",
@@ -2730,6 +3423,9 @@
                 },
                 {
                   "$ref": "#/components/schemas/AutomationInputExtraTaskRef"
+                },
+                {
+                  "$ref": "#/components/schemas/AutomationInputExtraLinkedEntityRef"
                 }
               ]
             }
@@ -2768,6 +3464,31 @@
           "task_id": {
             "type": "string",
             "description": "The id of the upstream task whose output entities are passed along."
+          }
+        }
+      },
+      "AutomationInputExtraLinkedEntityRef": {
+        "type": "object",
+        "description": "Every entity a display rule of the flow's Contexts settings finds by relation (an additional entity), resolved from the run's main context when the task runs. The rule must be one the workflow uses (`attach_to_contexts`). A rule matching nothing passes nothing.\n",
+        "required": [
+          "source",
+          "rule_id",
+          "schema"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "linked_entity"
+            ]
+          },
+          "rule_id": {
+            "type": "string",
+            "description": "The id of the display rule (`context_settings.displays[].id`)."
+          },
+          "schema": {
+            "type": "string",
+            "description": "The rule's `entity_schema`."
           }
         }
       },
@@ -3200,6 +3921,9 @@
           "start_date_config": {
             "$ref": "#/components/schemas/StartDateConfig"
           },
+          "on_hold_config": {
+            "$ref": "#/components/schemas/OnHoldConfig"
+          },
           "requirements": {
             "type": "array",
             "description": "requirements that need to be fulfilled in order to enable the task while flow instances are running",
@@ -3235,6 +3959,9 @@
                 }
               ]
             }
+          },
+          "assignee_sync": {
+            "$ref": "#/components/schemas/AssigneeSync"
           },
           "ecp": {
             "$ref": "#/components/schemas/ECPDetails"
@@ -3303,6 +4030,9 @@
                 }
               ]
             }
+          },
+          "assignee_sync": {
+            "$ref": "#/components/schemas/AssigneeSync"
           },
           "taxonomies": {
             "type": "array",
@@ -3380,6 +4110,14 @@
         "required": [
           "id",
           "name"
+        ]
+      },
+      "AssigneeSync": {
+        "type": "string",
+        "description": "`fill_empty` (also when absent) only resolves a variable that has no\nvalue yet. `follow_attribute` re-resolves a variable whenever its\nentity attribute changes, and clears it when the attribute is\nemptied or the entity is unshared from every partner. Only the\nvariable's own entries change; other assignees are kept. The server\nnever sets a default.\n",
+        "enum": [
+          "follow_attribute",
+          "fill_empty"
         ]
       },
       "VariableAssignment": {
@@ -3709,6 +4447,83 @@
           "duration",
           "unit",
           "type"
+        ]
+      },
+      "OnHoldConfig": {
+        "description": "What happens when a person puts the running task on hold (AL-3320). `resume_after` is how long after that the task resumes in progress on its own and its assignees are notified; an absent one never resumes it. `reason` is why it is on hold: `disabled` (not asked), `optional` or `required`, and absent is `disabled`, so a task without the config asks for nothing and resumes only by hand, as before. A reason is typed (`text`), picked from `reason_options` (`options`) or either (`options_and_text`); an absent input is `text`. An input that offers options needs at least one while the reason is asked for. Only a manual task, a manual decision and an automation or AI task a person runs may carry it, and never a scheduled manual task. The config is stored as sent.",
+        "type": "object",
+        "properties": {
+          "resume_after": {
+            "$ref": "#/components/schemas/OnHoldResumeAfter"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/OnHoldFieldMode"
+          },
+          "reason_input": {
+            "type": "string",
+            "enum": [
+              "text",
+              "options",
+              "options_and_text"
+            ]
+          },
+          "reason_options": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/OnHoldReasonOption"
+            }
+          }
+        }
+      },
+      "OnHoldResumeAfter": {
+        "type": "object",
+        "description": "How long after a task is put on hold it resumes in progress on its own (AL-3320), counted from the moment it is put on hold. A day is 24 hours and a week 7 days.",
+        "properties": {
+          "duration": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "hours",
+              "days",
+              "weeks"
+            ]
+          }
+        },
+        "required": [
+          "duration",
+          "unit"
+        ]
+      },
+      "OnHoldFieldMode": {
+        "type": "string",
+        "enum": [
+          "disabled",
+          "optional",
+          "required"
+        ]
+      },
+      "OnHoldReasonOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stable id the execution records the picked option under"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "id",
+          "label"
         ]
       },
       "TimeUnit": {

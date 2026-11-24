@@ -375,6 +375,12 @@ declare namespace Components {
                 in_app_notification_setting?: {
                     [name: string]: any;
                 };
+                /**
+                 * Whether new in-app notifications pop up on screen (top-right toasts in the 360 app) in addition to the bell counter. Written by the my-account notification settings UI and honored by the topbar. Absent or null means enabled; only `false` turns the popups off. Only has an effect while the org has the `on-screen-notifications` feature flag.
+                 * example:
+                 * false
+                 */
+                in_app_notification_popups?: boolean | null;
                 properties?: {
                     /**
                      * example:
@@ -557,6 +563,12 @@ declare namespace Components {
              * 123
              */
             parent_production_org_id?: string | null;
+            /**
+             * Whether this is the user's primary organization (the one they signed up with or were moved to).
+             * The primary organization can't be left.
+             *
+             */
+            is_primary_org?: boolean;
             /**
              * example:
              * eu-central-1
@@ -1457,6 +1469,13 @@ declare namespace Components {
                  */
                 source_org_name?: string;
             };
+            /**
+             * `false` creates the invite (user, roles, invite link) without sending an invitation email, e.g. when
+             * the caller accepts the invite on the user's behalf right away. Only internal epilot services
+             * (internal-auth tokens) may set it; other callers get 403.
+             *
+             */
+            send_email?: boolean;
         }
         export interface UserSetting {
             scope: /**
@@ -1783,6 +1802,12 @@ declare namespace Components {
             in_app_notification_setting?: {
                 [name: string]: any;
             };
+            /**
+             * Whether new in-app notifications pop up on screen (top-right toasts in the 360 app) in addition to the bell counter. Written by the my-account notification settings UI and honored by the topbar. Absent or null means enabled; only `false` turns the popups off. Only has an effect while the org has the `on-screen-notifications` feature flag.
+             * example:
+             * false
+             */
+            in_app_notification_popups?: boolean | null;
             properties?: {
                 /**
                  * example:
@@ -2220,6 +2245,26 @@ declare namespace Paths {
             export interface $400 {
             }
             export interface $403 {
+            }
+        }
+    }
+    namespace LeaveOrganization {
+        namespace Parameters {
+            export type OrgId = Components.Schemas.OrganizationId;
+        }
+        export interface PathParameters {
+            org_id: Parameters.OrgId;
+        }
+        namespace Responses {
+            export interface $204 {
+            }
+            export interface $403 {
+            }
+            export interface $404 {
+            }
+            export interface $409 {
+                error?: "cannot_leave_primary_org" | "last_owner";
+                message?: string;
             }
         }
     }
@@ -2666,6 +2711,8 @@ export interface OperationMethods {
    * invitation (same invite link). It is reserved for internal epilot services (internal-auth tokens);
    * any other caller gets 403.
    * 
+   * `send_email: false` (internal epilot services only) creates the invite without sending an email.
+   * 
    */
   'inviteUser'(
     parameters?: Parameters<UnknownParamsObject> | null,
@@ -2951,6 +2998,24 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SwitchOrganization.Responses.$200>
   /**
+   * leaveOrganization - leaveOrganization
+   * 
+   * Leave an organization the calling user is a member of. The user's membership in that organization is
+   * deactivated (status `Deactivated`), so it no longer shows up in the org switcher and can't be logged into.
+   * An admin of the organization can reactivate it.
+   * 
+   * Rules:
+   * - The user's primary organization can't be left (`cannot_leave_primary_org`)
+   * - The last active owner can't leave (`last_owner`), unless the organization is a Preview org or is scheduled
+   *   for deletion. Preview orgs can be left at any time.
+   * 
+   */
+  'leaveOrganization'(
+    parameters?: Parameters<Paths.LeaveOrganization.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.LeaveOrganization.Responses.$204>
+  /**
    * getMe - getMe
    * 
    * Get currently logged in user
@@ -3141,6 +3206,8 @@ export interface PathsDictionary {
      * `invitation_type: preview_org_ready` sends a "Your preview org is ready" email instead of the default
      * invitation (same invite link). It is reserved for internal epilot services (internal-auth tokens);
      * any other caller gets 403.
+     * 
+     * `send_email: false` (internal epilot services only) creates the invite without sending an email.
      * 
      */
     'post'(
@@ -3472,6 +3539,26 @@ export interface PathsDictionary {
       data?: Paths.SwitchOrganization.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SwitchOrganization.Responses.$200>
+  }
+  ['/v2/users/me/organizations/{org_id}/leave']: {
+    /**
+     * leaveOrganization - leaveOrganization
+     * 
+     * Leave an organization the calling user is a member of. The user's membership in that organization is
+     * deactivated (status `Deactivated`), so it no longer shows up in the org switcher and can't be logged into.
+     * An admin of the organization can reactivate it.
+     * 
+     * Rules:
+     * - The user's primary organization can't be left (`cannot_leave_primary_org`)
+     * - The last active owner can't leave (`last_owner`), unless the organization is a Preview org or is scheduled
+     *   for deletion. Preview orgs can be left at any time.
+     * 
+     */
+    'post'(
+      parameters?: Parameters<Paths.LeaveOrganization.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.LeaveOrganization.Responses.$204>
   }
   ['/v1/users/me']: {
     /**

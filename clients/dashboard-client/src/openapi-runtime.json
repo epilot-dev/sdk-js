@@ -67,6 +67,12 @@
         "responses": {}
       }
     },
+    "/v1/dashboard/dashboards/quota": {
+      "get": {
+        "operationId": "getDashboardQuota",
+        "responses": {}
+      }
+    },
     "/v1/dashboard/dashboards/favorites": {
       "get": {
         "operationId": "listFavoriteDashboardIds",
@@ -245,6 +251,13 @@
     }
   },
   "components": {
+    "responses": {
+      "QuotaExceeded": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    },
     "parameters": {
       "Search": {
         "name": "q",

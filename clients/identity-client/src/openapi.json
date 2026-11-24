@@ -21,6 +21,10 @@
     {
       "name": "Launch",
       "description": "Start a partner login from an epilot link (OpenID Connect third-party initiated login)."
+    },
+    {
+      "name": "Sector Identifier",
+      "description": "Managed sector identifier documents (OpenID Connect Registration §5), public."
     }
   ],
   "servers": [
@@ -762,8 +766,16 @@
             "access": "internal"
           }
         ],
+        "security": [
+          {
+            "ServiceAuth": []
+          },
+          {
+            "OperatorAuth": []
+          }
+        ],
         "summary": "getUserSubject",
-        "description": "The pairwise `sub` this client receives for one epilot user, so the partner can bind the person on its\nside **before** the first sign-in (for example a Babelforce agent provisioned through SCIM with\n`externalId = sub`).\n\nDerived exactly as the token endpoint derives it, never stored:\n`sub = key_version + \".\" + base64url(HMAC-SHA256(key[key_version], sector + \"\\n\" + user_id))`, where the\nsector is the client's `sector_identifier_uri` host or, without one, the host of its first redirect URI.\nThe same inputs always give the same value; it changes only when the client's sector or the active key\nversion changes.\n\nRequires an **active** client (a draft client's sector may still change and would invalidate every binding),\nan organization enablement that is not revoked, and the user being an active member of that organization\n(checked live against user-api). Every read is written to the audit trail: the value is a partner-facing\nidentifier.\n",
+        "description": "The pairwise `sub` this client receives for one epilot user, so the partner can bind the person on its\nside **before** the first sign-in (for example a Babelforce agent provisioned through SCIM with\n`externalId = sub`).\n\nDerived exactly as the token endpoint derives it, never stored:\n`sub = key_version + \".\" + base64url(HMAC-SHA256(key[key_version], sector + \"\\n\" + user_id))`, where the\nsector is the client's `sector_identifier_uri` host or, without one, the host of its first redirect URI.\nThe same inputs always give the same value; it changes only when the client's sector or the active key\nversion changes.\n\nRequires an **active** client (a draft client's sector may still change and would invalidate every binding),\nan organization enablement that is not revoked, and the user being an active member of that organization\n(checked live against user-api). Every read is written to the audit trail: the value is a partner-facing\nidentifier.\n\nTwo callers are accepted: an admin-portal operator (`OperatorAuth`, through the API Gateway) and an allowed\nepilot backend (`ServiceAuth`, typically a direct Lambda invoke from phone-integration-api while it\nprovisions a Babelforce agent). This is the only operation that accepts `ServiceAuth`.\n",
         "tags": [
           "Operator Organizations"
         ],
@@ -947,6 +959,46 @@
           }
         }
       }
+    },
+    "/v1/identity/sector-identifier/{client_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ClientIdPath"
+        }
+      ],
+      "get": {
+        "operationId": "getSectorIdentifier",
+        "summary": "getSectorIdentifier",
+        "description": "The client's managed sector identifier document: a JSON array of its registered `redirect_uris`\n(OpenID Connect Registration §5). Public, like every sector identifier document.\n\nRegister it on the client as `sector_identifier_uri` **through the portal origin** that proxies\n`/v1/identity/sector-identifier/*` to this service, i.e. `https://portal.<stage>.epilot.cloud/v1/identity/sector-identifier/{client_id}`.\nThe pairwise `sub` is derived from the sector identifier's host; the portal host is already every\nclient's sector (its first redirect URI is the portal relay), so registering the managed document keeps\nevery existing `sub` while allowing redirect URIs on other hosts, such as a partner's own login page.\nA client whose `sector_identifier_uri` is its own managed document is not fetched at save time: the\ndocument is the registration itself.\n\nRetired or unknown clients answer `404` (through the portal proxy, CloudFront rewrites every origin\n`404` to the portal page, so verify a missing client on the issuer host directly). Query parameters\nare ignored. Never cached.\n",
+        "tags": [
+          "Sector Identifier"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AnyOtherQueryParameters"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The registered redirect URIs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -956,6 +1008,12 @@
         "scheme": "bearer",
         "bearerFormat": "JWT",
         "description": "Internal-auth bearer token minted for an epilot admin-portal user. Customer organization\nbearers are never accepted; the caller must belong to an allowed admin-portal group.\n"
+      },
+      "ServiceAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Internal-auth bearer token minted for an epilot backend's own IAM role (`getToken()` of\n`@epilot/internal-auth`; `getTokenSync()` dummy tokens are refused). identity-api verifies the RS256\nsignature itself against the internal issuer's JWKS, requires the stage's internal issuer, rejects tokens\nminted for a person (`cognitoUser` / `cognitoIdp`), and accepts only `callerIdentity` assumed-role ARNs of\nthe stage account whose role name starts with a configured prefix. Accepted by `getUserSubject` only.\n"
       },
       "EpilotAuth": {
         "type": "http",

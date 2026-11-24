@@ -65,7 +65,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "example": 22
+            "example": "22"
           },
           "created_date": {
             "type": "string"
@@ -101,5 +101,10 @@
         }
       }
     }
-  }
+  },
+  "servers": [
+    {
+      "url": "https://pricing-tier.sls.epilot.io"
+    }
+  ]
 }

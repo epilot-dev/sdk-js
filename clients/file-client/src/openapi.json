@@ -34,6 +34,10 @@
     {
       "name": "File Collections",
       "description": "Organize files into collections (folders) for better management.\n\nCollections can be:\n- **User-scoped**: Personal collections visible only to the creating user\n- **Global**: Shared collections available to all users for a schema\n\nCollections support hierarchical organization with parent-child relationships.\n"
+    },
+    {
+      "name": "Meter Reading Suggestions",
+      "description": "Suggested meter readings read from photos attached to a meter (entities whose schema has the\n`meter_readings` capability). Suggestions are never written automatically; the user confirms them\nand records the outcome with `updateMeterReadingSuggestionStatus`.\n\nOnly available when the `meter-reading-photo-suggestions` feature is enabled for the organization;\notherwise every operation answers 404 with `error_code: feature_disabled`.\n"
     }
   ],
   "x-tagGroups": [
@@ -45,6 +49,7 @@
         "Public Links",
         "Session",
         "File Collections",
+        "Meter Reading Suggestions",
         "Deprecated"
       ]
     },
@@ -1661,6 +1666,227 @@
           },
           "404": {
             "$ref": "#/components/responses/FileAttributeSuggestionErrorResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/files:meterReadingSuggestions": {
+      "get": {
+        "operationId": "listMeterReadingSuggestions",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:view",
+            "resource": "{schema}:{meter_id}"
+          }
+        ],
+        "summary": "listMeterReadingSuggestions",
+        "description": "List the meter reading suggestion jobs of a meter, newest first: one job per photo attached to the meter. Requires `entity:view` on the meter.",
+        "tags": [
+          "Meter Reading Suggestions"
+        ],
+        "parameters": [
+          {
+            "name": "meter_id",
+            "in": "query",
+            "required": true,
+            "description": "The meter entity id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "schema",
+            "in": "query",
+            "required": false,
+            "description": "Schema slug of the meter entity",
+            "schema": {
+              "type": "string",
+              "default": "meter"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Meter reading suggestion jobs of the meter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "results"
+                  ],
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/MeterReadingSuggestionJob"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/MeterReadingSuggestionErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createMeterReadingSuggestionJob",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "{schema}:{meter_id}"
+          },
+          {
+            "action": "entity:view",
+            "resource": "file:{file_id}"
+          }
+        ],
+        "summary": "createMeterReadingSuggestionJob",
+        "description": "Start (or re-run) reading suggestions for one photo of a meter. Resets any previous job of the same meter and file. Requires `entity:edit` on the meter and `entity:view` on the file. The file must be attached to the meter (422 `file_not_attached` otherwise).",
+        "tags": [
+          "Meter Reading Suggestions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMeterReadingSuggestionJobRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Suggestion job accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeterReadingSuggestionJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/MeterReadingSuggestionErrorResponse"
+          },
+          "409": {
+            "$ref": "#/components/responses/ConflictError"
+          },
+          "422": {
+            "$ref": "#/components/responses/MeterReadingSuggestionErrorResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/MeterReadingSuggestionErrorResponse"
+          }
+        }
+      }
+    },
+    "/v1/files:meterReadingSuggestions/{meter_id}/{file_id}/{suggestion_id}": {
+      "patch": {
+        "operationId": "updateMeterReadingSuggestionStatus",
+        "x-epilot-permissions": [
+          {
+            "action": "entity:edit",
+            "resource": "{schema}:{meter_id}"
+          }
+        ],
+        "summary": "updateMeterReadingSuggestionStatus",
+        "description": "Record that a suggestion was accepted or dismissed. Saving the reading itself stays with the caller. Requires `entity:edit` on the meter.",
+        "tags": [
+          "Meter Reading Suggestions"
+        ],
+        "parameters": [
+          {
+            "name": "meter_id",
+            "in": "path",
+            "required": true,
+            "description": "The meter entity id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "description": "The file entity id of the photo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "suggestion_id",
+            "in": "path",
+            "required": true,
+            "description": "The suggestion id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMeterReadingSuggestionStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated suggestion job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeterReadingSuggestionJob"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/ForbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/MeterReadingSuggestionErrorResponse"
           },
           "409": {
             "$ref": "#/components/responses/ConflictError"
@@ -3693,6 +3919,287 @@
           }
         ]
       },
+      "MeterReadingSuggestionError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ErrorObject"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error_code": {
+                "type": "string",
+                "enum": [
+                  "feature_disabled",
+                  "file_not_found",
+                  "not_an_image",
+                  "schema_not_supported",
+                  "file_not_attached",
+                  "job_not_found",
+                  "job_not_completed",
+                  "suggestion_not_found",
+                  "processing_enqueue_failed"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "CreateMeterReadingSuggestionJobRequest": {
+        "type": "object",
+        "required": [
+          "meter_id",
+          "file_id"
+        ],
+        "properties": {
+          "meter_id": {
+            "type": "string",
+            "description": "The meter entity id"
+          },
+          "file_id": {
+            "type": "string",
+            "description": "The file entity id of the photo"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Schema slug of the meter entity",
+            "default": "meter"
+          }
+        }
+      },
+      "UpdateMeterReadingSuggestionStatusRequest": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "dismissed"
+            ]
+          }
+        }
+      },
+      "MeterReadingSuggestion": {
+        "type": "object",
+        "required": [
+          "suggestion_id",
+          "counter_id",
+          "value",
+          "value_raw",
+          "confidence",
+          "verbatim_span",
+          "evidence",
+          "warnings",
+          "status",
+          "decided_at",
+          "decided_by",
+          "last_value",
+          "last_read_at",
+          "suggested_alternative",
+          "photo_attached"
+        ],
+        "properties": {
+          "suggestion_id": {
+            "type": "string",
+            "description": "ULID of the suggestion"
+          },
+          "counter_id": {
+            "type": "string",
+            "description": "The meter counter the reading is for"
+          },
+          "value": {
+            "type": "number",
+            "description": "The suggested reading"
+          },
+          "value_raw": {
+            "type": "string",
+            "description": "The reading as the model returned it"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "verbatim_span": {
+            "type": "string",
+            "description": "The passage of the photo's transcription the reading was taken from. May be empty when the model\nread the value from the photo itself (`photo_attached: true`) and it is not in the transcription.\n"
+          },
+          "evidence": {
+            "type": "string",
+            "description": "Why the model chose this reading"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "below_last_reading",
+                "meter_number_mismatch",
+                "unusually_high",
+                "possible_decimal_shift",
+                "decimal_unverified"
+              ]
+            },
+            "description": "Checks against the counter's last reading. `below_last_reading`: the value is below it;\n`unusually_high`: the value is at least 5 times it; `possible_decimal_shift`: the value looks\nimplausible and exactly one decimal shift of it is plausible (see `suggested_alternative`);\n`meter_number_mismatch`: the meter number on the photo differs from the meter's;\n`decimal_unverified`: there is no last reading to compare with and the value is a whole number of\nat least 6 digits, so the decimal position could not be checked (see `suggested_alternative`).\nNew codes may be added; clients should ignore codes they do not know.\n"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "dismissed"
+            ]
+          },
+          "decided_at": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "decided_by": {
+            "type": "string",
+            "nullable": true
+          },
+          "last_value": {
+            "type": "number",
+            "nullable": true,
+            "description": "The counter's latest reading before the job ran, as sent to the model. Null when the counter has\nno reading or the job was stored before this field existed.\n"
+          },
+          "last_read_at": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "description": "Timestamp of `last_value`. Null when unknown."
+          },
+          "suggested_alternative": {
+            "$ref": "#/components/schemas/MeterReadingSuggestedAlternative"
+          },
+          "photo_attached": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the model saw the photo itself (not only its transcription). Null for jobs stored before\nthis field existed.\n"
+          }
+        }
+      },
+      "MeterReadingSuggestedAlternative": {
+        "type": "object",
+        "nullable": true,
+        "description": "Another reading to offer instead of `value`. `decimal_shift`: a decimal shift of `value` that is\nconsistent with `last_value` (between it and twice it), offered when `value` itself is implausible and\nexactly one shift (×0.01, ×0.1 or ×10) fits. `decimal_unverified`: `value` / 10, offered when there is\nno last reading and `value` is a whole number of at least 6 digits. Null otherwise.\n",
+        "required": [
+          "value",
+          "value_raw",
+          "reason"
+        ],
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "The shifted reading, rounded to 3 decimals"
+          },
+          "value_raw": {
+            "type": "string",
+            "description": "The shifted reading as a string"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "decimal_shift",
+              "decimal_unverified"
+            ]
+          }
+        }
+      },
+      "MeterReadingSuggestionJob": {
+        "type": "object",
+        "required": [
+          "meter_id",
+          "file_id",
+          "schema",
+          "file_name",
+          "status",
+          "error",
+          "read_at",
+          "read_at_source",
+          "is_meter_photo",
+          "meter_number_on_image",
+          "meter_number_mismatch",
+          "suggestions",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "meter_id": {
+            "type": "string"
+          },
+          "file_id": {
+            "type": "string"
+          },
+          "schema": {
+            "type": "string",
+            "description": "Schema slug of the meter entity"
+          },
+          "file_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "read_at": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "description": "When the photo was taken, from its EXIF DateTimeOriginal (or CreateDate). Interpreted as Europe/Berlin time when the photo carries no UTC offset."
+          },
+          "read_at_source": {
+            "type": "string",
+            "enum": [
+              "exif",
+              "none"
+            ]
+          },
+          "is_meter_photo": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "meter_number_on_image": {
+            "type": "string",
+            "nullable": true
+          },
+          "meter_number_mismatch": {
+            "type": "boolean",
+            "description": "The meter number read from the photo differs from the meter's meter number"
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MeterReadingSuggestion"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "FileTextStatus": {
         "type": "string",
         "description": "Availability of the plain-text representation for a file entity.",
@@ -4440,7 +4947,7 @@
       },
       "CreateZipJobPayload": {
         "type": "object",
-        "description": "Request payload to create a ZIP job for bulk file download.\nProvide either an explicit list of `file_entity_ids` (up to 1000) or an\n`entity_query` that resolves to file entities (up to 10000).\n",
+        "description": "Request payload to create a ZIP job for bulk file download.\nProvide either an explicit list of `file_entity_ids` (up to 1000) or an\n`entity_query` that resolves to file entities (up to 20000).\n",
         "properties": {
           "file_entity_ids": {
             "type": "array",
@@ -4963,6 +5470,16 @@
       }
     },
     "responses": {
+      "MeterReadingSuggestionErrorResponse": {
+        "description": "Meter reading suggestion error with a machine readable `error_code`",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MeterReadingSuggestionError"
+            }
+          }
+        }
+      },
       "FileAttributeSuggestionErrorResponse": {
         "description": "Attribute suggestion error with a machine readable `error_code`",
         "content": {

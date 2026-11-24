@@ -161,6 +161,11 @@
         "in": "path",
         "name": "announcement_id",
         "required": true
+      },
+      "StrictOrgIdPathParam": {
+        "in": "path",
+        "name": "org_id",
+        "required": true
       }
     }
   },

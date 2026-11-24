@@ -2529,11 +2529,15 @@ declare namespace Components {
                 message: string;
             }[];
             /**
-             * Products that do not exist or are archived
+             * Offer products that do not exist or are archived. Sources (the current product) may be archived or
+             * missing and are not listed.
+             *
              */
             product_ids?: string[];
             /**
-             * Prices that do not exist or are archived
+             * Offer prices that do not exist or are archived. Sources (the current price) may be archived or
+             * missing and are not listed.
+             *
              */
             price_ids?: string[];
         }
@@ -3310,6 +3314,8 @@ export interface OperationMethods {
    * later step fails, the block is pointed back at the campaign it pointed at before.
    * 
    * A new product recommendation can carry a rule table (`rules`). It is validated before anything is created.
+   * Its offer products and prices must exist and not be archived (otherwise 400 `PRODUCT_OR_PRICE_UNAVAILABLE`);
+   * its sources (the current product and price) may be archived or missing.
    * 
    */
   'setupCampaign'(
@@ -3602,6 +3608,8 @@ export interface PathsDictionary {
      * later step fails, the block is pointed back at the campaign it pointed at before.
      * 
      * A new product recommendation can carry a rule table (`rules`). It is validated before anything is created.
+     * Its offer products and prices must exist and not be archived (otherwise 400 `PRODUCT_OR_PRICE_UNAVAILABLE`);
+     * its sources (the current product and price) may be archived or missing.
      * 
      */
     'post'(

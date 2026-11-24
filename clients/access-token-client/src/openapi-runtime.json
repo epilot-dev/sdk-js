@@ -86,9 +86,262 @@
         "operationId": "getContactIdentificationTokenOIDC",
         "responses": {}
       }
+    },
+    "/v1/access-tokens/agent-auth/.well-known/agent-configuration": {
+      "get": {
+        "operationId": "getAgentConfiguration",
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/.well-known/jwks.json": {
+      "get": {
+        "operationId": "getAgentAuthJwks",
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/capability/list": {
+      "get": {
+        "operationId": "listCapabilities",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query"
+          },
+          {
+            "in": "query",
+            "name": "cursor"
+          },
+          {
+            "in": "query",
+            "name": "limit"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/capability/describe": {
+      "get": {
+        "operationId": "describeCapability",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/agent/register": {
+      "post": {
+        "operationId": "registerAgent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/agent/status": {
+      "get": {
+        "operationId": "getAgentStatus",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "agent_id",
+            "required": true
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/agent/request-capability": {
+      "post": {
+        "operationId": "requestCapability",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/agent/reactivate": {
+      "post": {
+        "operationId": "reactivateAgent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/agent/revoke": {
+      "post": {
+        "operationId": "revokeAgent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/agent/rotate-key": {
+      "post": {
+        "operationId": "rotateAgentKey",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/host/rotate-key": {
+      "post": {
+        "operationId": "rotateHostKey",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/host/revoke": {
+      "post": {
+        "operationId": "revokeHost",
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/capability/execute": {
+      "post": {
+        "operationId": "executeCapability",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/agent/introspect": {
+      "post": {
+        "operationId": "introspectAgent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/approvals/{user_code}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "user_code",
+          "required": true
+        }
+      ],
+      "get": {
+        "operationId": "getAgentApproval",
+        "responses": {}
+      },
+      "post": {
+        "operationId": "decideAgentApproval",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/agents": {
+      "get": {
+        "operationId": "listOrganizationAgents",
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/agents/{agent_id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "agent_id",
+          "required": true
+        }
+      ],
+      "delete": {
+        "operationId": "revokeOrganizationAgent",
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/token-exchange": {
+      "post": {
+        "operationId": "exchangeAgentToken",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/first-party/agents": {
+      "post": {
+        "operationId": "registerFirstPartyAgent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/access-tokens/agent-auth/first-party/preview-agents": {
+      "post": {
+        "operationId": "registerPreviewOrgAgent",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-ivy-org-id",
+            "required": false
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
     }
   },
-  "components": {},
+  "components": {
+    "responses": {
+      "AgentAuthError": {
+        "content": {
+          "application/json": {}
+        }
+      }
+    }
+  },
   "servers": [
     {
       "url": "https://access-token.sls.epilot.io"

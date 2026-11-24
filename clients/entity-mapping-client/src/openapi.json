@@ -963,7 +963,8 @@
           },
           "acknowledged": {
             "type": "array",
-            "description": "Blocking findings the user decided to keep, after the agent explained them: they stop blocking and are listed in `acknowledged` of the response instead. Send only what the user explicitly accepted. Each matches by action id and code, and by the line's target attribute when `target` is set (without it, every finding of that code in the action). At most 200 entries.",
+            "maxItems": 200,
+            "description": "Blocking findings the user decided to keep, after the agent explained them: they stop blocking and are listed in `acknowledged` of the response instead. Send only what the user explicitly accepted. Each matches by action id and code, and by the line's target attribute when `target` is set (without it, every finding of that code in the action).",
             "items": {
               "type": "object",
               "required": [

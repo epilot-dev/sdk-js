@@ -67,7 +67,7 @@ declare namespace Components {
              */
             helper_logic?: string;
             /**
-             * Variable configuration
+             * Variable configuration. `null` when the variable has none (e.g. a custom variable without a table config); reads return `null` for it, so writes accept it too.
              * example:
              * {
              *   "header": null,
@@ -339,7 +339,7 @@ declare namespace Components {
              */
             config?: {
                 [key: string]: any;
-            };
+            } | null;
             /**
              * Handlebar template that used to generate the variable content
              * example:
@@ -516,6 +516,53 @@ declare namespace Components {
              * https://partner.epilot.cloud/activate-account?user_name=htny.pct%2Btet%40gmail.com&confirmation_code=EdXPRW19
              */
             value?: string;
+        }
+        export interface JourneyContextUsagesRequest {
+            /**
+             * Journey whose context parameters are being looked up
+             */
+            journey_id: string;
+            /**
+             * Context parameter names (the `paramKey` of each parameter). At least one is required: an empty list would make every variable report no usage, which the caller renders as "not used anywhere".
+             */
+            param_keys: [
+                string,
+                ...string[]
+            ];
+            /**
+             * Accepted for a uniform adapter request shape; custom variables reference parameters by name only, so this is ignored.
+             */
+            param_ids?: string[];
+        }
+        export interface JourneyContextUsagesResponse {
+            /**
+             * partial when the row cap, the soft deadline, an unreadable variable list or a dynamic journey_id truncated the result
+             */
+            status: "ok" | "partial";
+            /**
+             * Custom variables examined
+             */
+            scanned: number;
+            usages: {
+                kind: "custom-variable-journey-link" | "custom-variable-body";
+                resource: {
+                    type: "custom_variable";
+                    id: string;
+                    name?: string;
+                };
+                location: {
+                    variable_type: string;
+                    /**
+                     * Present on custom-variable-journey-link rows only; absent for a body match.
+                     */
+                    journey_id?: string;
+                };
+                matched_as: {
+                    dialect: "name";
+                    token: string;
+                    at: string;
+                };
+            }[];
         }
         /**
          * 2-letter language code (ISO 639-1)
@@ -830,6 +877,12 @@ declare namespace Components {
                 [key: string]: any;
             };
             /**
+             * Only swap `{{partial.<id>}}` for the partial's current content and leave every other variable
+             * as it is, e.g. to preview a template without an entity. Replace endpoints only.
+             *
+             */
+            partials_only?: boolean;
+            /**
              * The name of email template
              */
             template_name?: string;
@@ -937,6 +990,14 @@ declare namespace Paths {
     namespace GetVariableContext {
         export interface RequestBody {
             parameters?: Components.Schemas.VariableParameters;
+            /**
+             * Send repeated subtrees of the context once. Every later occurrence of an equal subtree is replaced
+             * with a JSON Pointer reference to the first one, e.g. `{ "$ref": "#/meters/0/contract" }`, and
+             * nested copies of the main entity are reduced to `{ _id, _schema, _title }`.
+             * Keys named `$ref` in the data are escaped as `$$ref`.
+             *
+             */
+            use_refs?: boolean;
         }
         namespace Responses {
             export type $200 = Components.Schemas.VariableContext;
@@ -1061,7 +1122,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ReplaceTemplates.Responses.$200>
   /**
-   * replaceTemplatesV2 - Replace variables in templates (V2)
+   * replaceTemplatesV2 - replaceTemplatesV2
    * 
    * Replace variables in handlebars templates with raw value preservation
    * 
@@ -1079,7 +1140,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.ReplaceTemplatesV2.Responses.$200>
   /**
-   * getCustomVariables - Get custom variables
+   * getCustomVariables - getCustomVariables
    * 
    * Get all custom variables of organization
    */
@@ -1089,7 +1150,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCustomVariables.Responses.$200>
   /**
-   * createCustomVariable - Create custom variable
+   * createCustomVariable - createCustomVariable
    * 
    * Create custom variable
    */
@@ -1109,7 +1170,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchCustomVariables.Responses.$200>
   /**
-   * getCustomVariable - Get custom variable
+   * getCustomVariable - getCustomVariable
    * 
    * Get custom variable
    */
@@ -1119,7 +1180,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCustomVariable.Responses.$200>
   /**
-   * updateCustomVariable - Update custom variable
+   * updateCustomVariable - updateCustomVariable
    * 
    * Update custom variable
    */
@@ -1129,7 +1190,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.UpdateCustomVariable.Responses.$200>
   /**
-   * deleteCustomVariable - Delete custom variable
+   * deleteCustomVariable - deleteCustomVariable
    * 
    * Immediately and permanently deletes a custom variable
    */
@@ -1139,7 +1200,7 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteCustomVariable.Responses.$204>
   /**
-   * getBluePrintTableConfig - Get default table config
+   * getBluePrintTableConfig - getBluePrintTableConfig
    * 
    * Get default table config
    */
@@ -1207,7 +1268,7 @@ export interface PathsDictionary {
   }
   ['/v2/template:replace']: {
     /**
-     * replaceTemplatesV2 - Replace variables in templates (V2)
+     * replaceTemplatesV2 - replaceTemplatesV2
      * 
      * Replace variables in handlebars templates with raw value preservation
      * 
@@ -1227,7 +1288,7 @@ export interface PathsDictionary {
   }
   ['/v1/custom-variables']: {
     /**
-     * getCustomVariables - Get custom variables
+     * getCustomVariables - getCustomVariables
      * 
      * Get all custom variables of organization
      */
@@ -1237,7 +1298,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCustomVariables.Responses.$200>
     /**
-     * createCustomVariable - Create custom variable
+     * createCustomVariable - createCustomVariable
      * 
      * Create custom variable
      */
@@ -1261,7 +1322,7 @@ export interface PathsDictionary {
   }
   ['/v1/custom-variables/{id}']: {
     /**
-     * updateCustomVariable - Update custom variable
+     * updateCustomVariable - updateCustomVariable
      * 
      * Update custom variable
      */
@@ -1271,7 +1332,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.UpdateCustomVariable.Responses.$200>
     /**
-     * getCustomVariable - Get custom variable
+     * getCustomVariable - getCustomVariable
      * 
      * Get custom variable
      */
@@ -1281,7 +1342,7 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCustomVariable.Responses.$200>
     /**
-     * deleteCustomVariable - Delete custom variable
+     * deleteCustomVariable - deleteCustomVariable
      * 
      * Immediately and permanently deletes a custom variable
      */
@@ -1293,7 +1354,7 @@ export interface PathsDictionary {
   }
   ['/v1/custom-variables/order-table-blueprint']: {
     /**
-     * getBluePrintTableConfig - Get default table config
+     * getBluePrintTableConfig - getBluePrintTableConfig
      * 
      * Get default table config
      */
@@ -1312,6 +1373,8 @@ export type CategoryResult = Components.Schemas.CategoryResult;
 export type CustomVariable = Components.Schemas.CustomVariable;
 export type CustomVariablesSearchParams = Components.Schemas.CustomVariablesSearchParams;
 export type ExternalCustomVariable = Components.Schemas.ExternalCustomVariable;
+export type JourneyContextUsagesRequest = Components.Schemas.JourneyContextUsagesRequest;
+export type JourneyContextUsagesResponse = Components.Schemas.JourneyContextUsagesResponse;
 export type Language = Components.Schemas.Language;
 export type ReplacementOutput = Components.Schemas.ReplacementOutput;
 export type ReplacementOutputV2 = Components.Schemas.ReplacementOutputV2;

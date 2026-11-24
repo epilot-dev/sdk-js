@@ -694,6 +694,15 @@
           "type": "string"
         },
         "description": "Announcement id"
+      },
+      "StrictOrgIdPathParam": {
+        "in": "path",
+        "name": "org_id",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/OrganizationId"
+        },
+        "description": "Organization id (must match ^[1-9][0-9]*$)"
       }
     },
     "schemas": {

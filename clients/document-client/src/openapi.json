@@ -66,12 +66,40 @@
               }
             }
           },
+          "404": {
+            "description": "Template file not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOutput"
+                }
+              }
+            }
+          },
           "415": {
             "description": "Unsupported media type",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorOutput"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The template cannot be read. Broken variable syntax (e.g. a closing tag that does not\nmatch its opening tag) answers with `error_output.error_code: PARSE_ERROR` and per-tag\n`error_details`; a file that is not a valid Office document answers with `{ status, error }`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "error_output": {
+                      "$ref": "#/components/schemas/ErrorOutput"
+                    }
+                  }
                 }
               }
             }
@@ -448,6 +476,12 @@
       },
       "TemplateValidationResponse": {
         "type": "object",
+        "required": [
+          "valid",
+          "fixed",
+          "issues",
+          "unresolved_errors"
+        ],
         "properties": {
           "valid": {
             "description": "Whether the template compiled cleanly before any repair was attempted",
@@ -476,6 +510,11 @@
           "fixed_document": {
             "description": "The corrected copy, for the user to review and accept. Absent when no repair was\napplied. The original template is left untouched.\n",
             "type": "object",
+            "required": [
+              "s3ref",
+              "filename",
+              "preview_url"
+            ],
             "properties": {
               "s3ref": {
                 "$ref": "#/components/schemas/S3Reference"
@@ -495,6 +534,13 @@
       },
       "TemplateIssue": {
         "type": "object",
+        "required": [
+          "id",
+          "file",
+          "context",
+          "explanation",
+          "fixable"
+        ],
         "description": "A single template syntax problem, and the repair proposed for it",
         "properties": {
           "id": {
@@ -619,8 +665,21 @@
             "type": "string",
             "format": "uuid",
             "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "layout_mode": {
+            "$ref": "#/components/schemas/LayoutMode"
           }
         }
+      },
+      "LayoutMode": {
+        "description": "Layout flow for this generation. Overrides the `docgen_layout_mode` attribute of the template's\nfile entity and the organization default.\n- org_default - no override; use the template's setting, else the organization default\n- legacy - previous layout flow (no reserved-whitespace page removal, HTML page breaks placed by the template engine)\n- improved - improved layout flow (reserved-whitespace page removal and HTML page breaks placed by document-api)\n",
+        "type": "string",
+        "enum": [
+          "org_default",
+          "legacy",
+          "improved"
+        ],
+        "example": "legacy"
       },
       "DocumentMetaRequest": {
         "type": "object",
@@ -712,6 +771,12 @@
               },
               "s3ref": {
                 "$ref": "#/components/schemas/S3Reference"
+              },
+              "file_entity_id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "The `file` entity of the template. When set, its `docgen_layout_mode` attribute selects the\nlayout flow unless `template_settings.layout_mode` overrides it.\n",
+                "example": "123e4567-e89b-12d3-a456-426614174000"
               }
             }
           },
