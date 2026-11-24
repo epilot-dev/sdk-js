@@ -77,6 +77,24 @@
         "responses": {}
       }
     },
+    "/v1/sharing/configurations:list": {
+      "get": {
+        "operationId": "listSharingConfigurations",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/sharing/configurations:search": {
       "post": {
         "operationId": "searchPartnerSharingConfigurations",
@@ -138,6 +156,29 @@
         "responses": {}
       }
     },
+    "/v1/sharing/entities/{entity_id}/events": {
+      "get": {
+        "operationId": "getEntitySharingEvents",
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      }
+    },
     "/v1/sharing/offers/status": {
       "get": {
         "operationId": "getOfferStatus",
@@ -172,12 +213,92 @@
         },
         "responses": {}
       }
+    },
+    "/v1/sharing/rules/{partner_org_id}": {
+      "get": {
+        "operationId": "listSharingRules",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false
+          }
+        ],
+        "responses": {}
+      },
+      "post": {
+        "operationId": "createSharingRule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/v1/sharing/rules/{partner_org_id}/{rule_id}": {
+      "get": {
+        "operationId": "getSharingRule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/RuleIdPath"
+          }
+        ],
+        "responses": {}
+      },
+      "patch": {
+        "operationId": "updateSharingRule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/RuleIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {}
+      },
+      "delete": {
+        "operationId": "deleteSharingRule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PartnerOrgIdPath"
+          },
+          {
+            "$ref": "#/components/parameters/RuleIdPath"
+          }
+        ],
+        "responses": {}
+      }
     }
   },
   "components": {
     "parameters": {
       "PartnerOrgIdPath": {
         "name": "partner_org_id",
+        "in": "path",
+        "required": true
+      },
+      "RuleIdPath": {
+        "name": "rule_id",
         "in": "path",
         "required": true
       }

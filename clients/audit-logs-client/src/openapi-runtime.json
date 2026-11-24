@@ -29,6 +29,11 @@
             "in": "path",
             "name": "logId",
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "visibility",
+            "required": false
           }
         ],
         "responses": {}
