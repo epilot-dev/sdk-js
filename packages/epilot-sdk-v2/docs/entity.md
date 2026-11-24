@@ -185,6 +185,7 @@ const { data } = await entityClient.listSchemas(...)
 - [`NumberAttribute`](#numberattribute)
 - [`TableAttribute`](#tableattribute)
 - [`ConsentAttribute`](#consentattribute)
+- [`ConsentValue`](#consentvalue)
 - [`OrderedListAttribute`](#orderedlistattribute)
 - [`EmailAttribute`](#emailattribute)
 - [`PhoneAttribute`](#phoneattribute)
@@ -9132,8 +9133,27 @@ type ConsentAttribute = {
     }
   }
   type: "consent"
-  topic: string
+  topic?: string
   identifiers?: string[]
+  definition_id?: string
+}
+```
+
+### `ConsentValue`
+
+Value of a consent attribute that belongs to a consent definition (has a `definition_id`).
+
+The stored value. Writers may send shorthand instead of the object: `true` (active), `false` (declined),
+or a status string; `null` or `""` clears it. `definition_id` is always taken from the attribute; `sour
+
+```ts
+type ConsentValue = {
+  status: "active" | "pending" | "declined" | "unknown"
+  definition_id: string
+  source: string
+  source_id?: string
+  identifier?: string
+  updated_at: string // date-time
 }
 ```
 
